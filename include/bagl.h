@@ -41,7 +41,6 @@
 #define BAGL_FILL_CIRCLE_PI2_PI                                                \
     (BAGL_FILL_CIRCLE_7_OCTANT | BAGL_FILL_CIRCLE_8_OCTANT)
 
-
 // --------------------------------------------------------------------------------------
 
 typedef enum bagl_components_type_e_ {

@@ -21,8 +21,9 @@
 #include "link_layer.h"
 #include <list.h>
 
-
-#define HCI_READ_PACKET_SIZE				        128 //71
+#ifndef HCI_READ_PACKET_SIZE
+#define HCI_READ_PACKET_SIZE   128 //71
+#endif // HCI_READ_PACKET_SIZE
 
 
 /*** Data types ***/

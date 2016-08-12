@@ -22,108 +22,108 @@
 /******************************************************************************
  * Function Definitions 
 ******************************************************************************/
+
 void list_init_head (tListNode * listHead)
 {
-	listHead->next = listHead;
-	listHead->prev = listHead;	
+	listHead->next = NULL;
+	//listHead->prev = NULL;
+#ifdef LIST_INVARIANT_CHECK
+        listHead->count = 0;
+#endif // LIST_INVARIANT_CHECK
 }
 
 uint8_t list_is_empty (tListNode * listHead)
 {
-	return ((listHead->next == listHead)? TRUE:FALSE);
+	return ((listHead->next == NULL)? TRUE:FALSE);
 }
+
+#ifdef LIST_INVARIANT_CHECK
+// ensure no invalid node in the list
+void list_check_invariant(tListNode* listHead) {
+        int size=0;
+	tListNode * temp = listHead->next;
+	while (temp != NULL)
+	{
+                size++;
+		temp = temp->next;		
+	}
+	
+	if (size != listHead->count) {
+          for(;;);   
+        }
+}
+
+uint8_t list_is_in(tListNode * listHead, tListNode * node) {
+    
+        tListNode * temp = listHead->next;
+	while (temp != NULL)
+	{
+            if (temp == node) {
+              return 1;
+            }
+            temp = temp->next;
+	}
+	return 0;
+}
+#endif // LIST_INVARIANT_CHECK
 
 void list_insert_head (tListNode * listHead, tListNode * node)
 {
+#ifdef LIST_INVARIANT_CHECK
+        list_check_invariant(listHead);
+        
+        // ensure node not in list already
+        if (list_is_in(listHead, node)) {
+            for(;;);
+        }
+	
+	if (list_watch_addition == node) {
+            for (;;);
+        }
+#endif // LIST_INVARIANT_CHECK
+        
 	node->next = listHead->next;
-	node->prev = listHead;
+	//node->prev = listHead;
 	listHead->next = node;
-	(node->next)->prev = node;
+	//(node->next)->prev = node;
+#ifdef LIST_INVARIANT_CHECK
+        listHead->count++;
+        list_check_invariant(listHead);
+#endif // LIST_INVARIANT_CHECK
 }
 
 
 void list_insert_tail (tListNode * listHead, tListNode * node)
 {
-	node->next = listHead;
-	node->prev = listHead->prev;
-	listHead->prev = node;
-	(node->prev)->next = node;
+    list_insert_head(listHead, node);
 }
 
-
-void list_remove_node (tListNode * node)
-{
-	(node->prev)->next = node->next;
-	(node->next)->prev = node->prev;
-}
 
 
 void list_remove_head (tListNode * listHead, tListNode ** node )
 {
-	/*
-	if (list_is_empty(listHead)) {
-		screen_printf("list is empty\n !!");
-	}
-	*/
 	*node = listHead->next;
-	list_remove_node (listHead->next);
+#ifdef LIST_INVARIANT_CHECK
+        list_check_invariant(listHead);
+        if (listHead->count == 0) {
+            for(;;);
+        }
+        if (*node == NULL) {
+            for(;;);   
+        }
+#endif // LIST_INVARIANT_CHECK        
+        listHead->next = listHead->next->next;
+	//list_remove_node (listHead->next);
 	(*node)->next = NULL;
-	(*node)->prev = NULL;
+	//(*node)->prev = NULL;
+#ifdef LIST_INVARIANT_CHECK
+        listHead->count--;
+        list_check_invariant(listHead);
+#endif // LIST_INVARIANT_CHECK
 }
-
 
 void list_remove_tail (tListNode * listHead, tListNode ** node )
 {
-	/*
-	if (list_is_empty(listHead)) {
-		screen_printf("list is empty\n !!");
-	}
-	*/
-	*node = listHead->prev;
-	list_remove_node (listHead->prev);
-	(*node)->next = NULL;
-	(*node)->prev = NULL;
-}
-
-
-void list_insert_node_after (tListNode * node, tListNode * ref_node)
-{
-	node->next = ref_node->next;
-	node->prev = ref_node;
-	ref_node->next = node;
-	(node->next)->prev = node;
-}
-
-
-void list_insert_node_before (tListNode * node, tListNode * ref_node)
-{
-	node->next = ref_node;
-	node->prev = ref_node->prev;
-	ref_node->prev = node;
-	(node->prev)->next = node;
-}
-
-
-int list_get_size (tListNode * listHead)
-{
-	int size = 0;
-	tListNode * temp = listHead->next;
-	while (temp != listHead)
-	{
-		size++;
-		temp = temp->next;		
-	}
-	return (size);
-}
-
-void list_get_next_node (tListNode * ref_node, tListNode ** node)
-{
-    *node = ref_node->next;
-}
-
-
-void list_get_prev_node (tListNode * ref_node, tListNode ** node)
-{
-    *node = ref_node->prev;
+    list_insert_head(listHead, node);
 }
 

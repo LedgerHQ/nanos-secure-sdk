@@ -81,13 +81,13 @@ void HCI_recv_packet(unsigned char* packet_buffer, unsigned int packet_length) {
   tHciDataPacket * hciReadPacket = NULL;
 
   if (!list_is_empty ((tListNode*)&hciReadPktPool)){
-  
-    /* enqueueing a packet for read */
-    list_remove_head ((tListNode*)&hciReadPktPool, (tListNode **)&hciReadPacket);
-    
-    Osal_MemCpy(hciReadPacket->dataBuff, packet_buffer, MIN(HCI_READ_PACKET_SIZE, packet_length));
-
+      
     if(packet_length > 0) {
+      /* enqueueing a packet for read */
+      list_remove_head ((tListNode*)&hciReadPktPool, (tListNode **)&hciReadPacket);
+      
+      Osal_MemCpy(hciReadPacket->dataBuff, packet_buffer, MIN(HCI_READ_PACKET_SIZE, packet_length));
+    
       hciReadPacket->data_len = packet_length;
       switch(HCI_verify(hciReadPacket)) {
         case 0:
@@ -100,10 +100,6 @@ void HCI_recv_packet(unsigned char* packet_buffer, unsigned int packet_length) {
           list_insert_head((tListNode*)&hciReadPktPool, (tListNode *)hciReadPacket);
           break;
       }
-    }
-    else {
-      // Insert the packet back into the pool.
-      list_insert_head((tListNode*)&hciReadPktPool, (tListNode *)hciReadPacket);
     }
   }
   else{
@@ -221,10 +217,12 @@ int hci_send_req(struct hci_request *r, BOOL async)
     /* Extract packet from HCI event queue. */
     //Disable_SPI_IRQ();
     list_remove_head((tListNode*)&hciReadPktRxQueue, (tListNode **)&hciReadPacket);    
+    list_insert_tail((tListNode*)&hciTempQueue, (tListNode *)hciReadPacket);
     
     hci_hdr = (void *)hciReadPacket->dataBuff;
     if(hci_hdr->type != HCI_EVENT_PKT){
-      list_insert_tail((tListNode*)&hciTempQueue, (tListNode *)hciReadPacket); // See comment below
+      move_list((tListNode*)&hciReadPktPool, (tListNode*)&hciTempQueue);  
+      //list_insert_tail((tListNode*)&hciTempQueue, (tListNode *)hciReadPacket); // See comment below
       //Enable_SPI_IRQ();
       continue;
     }
@@ -233,6 +231,11 @@ int hci_send_req(struct hci_request *r, BOOL async)
     
     ptr = hciReadPacket->dataBuff + (1 + HCI_EVENT_HDR_SIZE);
     len = hciReadPacket->data_len - (1 + HCI_EVENT_HDR_SIZE);
+    
+    /* In the meantime there could be other events from the controller.
+    In this case, insert the packet in a different queue. These packets will be
+    inserted back in the main queue just before exiting from send_req().
+    */
     
     switch (event_pckt->evt) {
       
@@ -284,32 +287,27 @@ int hci_send_req(struct hci_request *r, BOOL async)
       break;
     }
     
-    /* In the meantime there could be other events from the controller.
-    In this case, insert the packet in a different queue. These packets will be
-    inserted back in the main queue just before exiting from send_req().
-    */
-    list_insert_tail((tListNode*)&hciTempQueue, (tListNode *)hciReadPacket);
-    /* Be sure there is at list one packet in the pool to process the expected event. */
-    if(list_is_empty((tListNode*)&hciReadPktPool)){
-      pListNode tmp_node;      
-      list_remove_head((tListNode*)&hciReadPktRxQueue, &tmp_node);
-      list_insert_tail((tListNode*)&hciReadPktPool, tmp_node);      
-    }
+    
+    
     
     //Enable_SPI_IRQ();
     
   }
   
 failed: 
-  move_list((tListNode*)&hciReadPktRxQueue, (tListNode*)&hciTempQueue);  
+  move_list((tListNode*)&hciReadPktPool, (tListNode*)&hciTempQueue);  
   hciAwaitReply = FALSE;
   //Enable_SPI_IRQ();
   return -1;
   
 done:
   // Insert the packet back into the pool.
-  list_insert_head((tListNode*)&hciReadPktPool, (tListNode *)hciReadPacket); 
-  move_list((tListNode*)&hciReadPktRxQueue, (tListNode*)&hciTempQueue);
+  /*
+  if (hciReadPacket) {
+    list_insert_head((tListNode*)&hciReadPktPool, (tListNode *)hciReadPacket); 
+  }
+  */
+  move_list((tListNode*)&hciReadPktPool, (tListNode*)&hciTempQueue);
   hciAwaitReply = FALSE;
   //Enable_SPI_IRQ();
   return 0;

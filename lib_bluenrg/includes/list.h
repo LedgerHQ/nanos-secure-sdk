@@ -17,7 +17,9 @@
 
 typedef struct _tListNode {
 	struct _tListNode * next;
-	struct _tListNode * prev;
+#ifdef LIST_INVARIANT_CHECK
+        unsigned int count;
+#endif // LIST_INVARIANT_CHECK
 }tListNode, *pListNode;
 
 void list_init_head (tListNode * listHead);
@@ -34,6 +36,9 @@ void list_remove_head (tListNode * listHead, tListNode ** node );
 
 void list_remove_tail (tListNode * listHead, tListNode ** node );
 
+/*
+uint8_t list_is_in (tListNode * listHead, tListNode * node);
+
 void list_insert_node_after (tListNode * node, tListNode * ref_node);
 
 void list_insert_node_before (tListNode * node, tListNode * ref_node);
@@ -43,5 +48,6 @@ int list_get_size (tListNode * listHead);
 void list_get_next_node (tListNode * ref_node, tListNode ** node);
 
 void list_get_prev_node (tListNode * ref_node, tListNode ** node);
+*/
 
 #endif /* _LIST_H_ */

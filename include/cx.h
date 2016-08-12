@@ -1436,12 +1436,11 @@ SYSCALL int cx_borromean_verify(
  *
  * @throws INVALID_PARAMETER
  */
-int cx_ecschnorr_sign(cx_ecfp_private_key_t WIDE *pvkey
-                          PLENGTH(scc__cx_ecfp_private_key_scc__pvkey),
-                      int mode, cx_md_t hashID,
-                      unsigned char WIDE *msg PLENGTH(msg_len),
-                      unsigned int msg_len,
-                      unsigned char *sig PLENGTH(1 + 1 + 2 * (1 + 1 + 33)));
+SYSCALL int cx_ecschnorr_sign(
+    cx_ecfp_private_key_t WIDE *pvkey
+        PLENGTH(scc__cx_ecfp_private_key_scc__pvkey),
+    int mode, cx_md_t hashID, unsigned char WIDE *msg PLENGTH(msg_len),
+    unsigned int msg_len, unsigned char *sig PLENGTH(1 + 1 + 2 * (1 + 1 + 33)));
 
 /**
  * Verify a hash message signature according to ECSchnorr specification (BSI TR
@@ -1469,20 +1468,55 @@ int cx_ecschnorr_sign(cx_ecfp_private_key_t WIDE *pvkey
  *
  * @return
  *   1 if signature is verified
- *   0 is signarure is not verified
+ *   0 is signature is not verified
  *
  * @throws INVALID_PARAMETER
  */
-int cx_ecschnorr_verify(cx_ecfp_public_key_t WIDE *pukey
-                            PLENGTH(scc__cx_ecfp_public_key_scc__pukey),
-                        int mode, cx_md_t hashID,
-                        unsigned char WIDE *msg PLENGTH(msg_len),
-                        unsigned int msg_len,
-                        unsigned char WIDE *sig PLENGTH(sig_len),
-                        unsigned int sig_len);
+SYSCALL int cx_ecschnorr_verify(cx_ecfp_public_key_t WIDE *pukey
+                                    PLENGTH(scc__cx_ecfp_public_key_scc__pukey),
+                                int mode, cx_md_t hashID,
+                                unsigned char WIDE *msg PLENGTH(msg_len),
+                                unsigned int msg_len,
+                                unsigned char WIDE *sig PLENGTH(sig_len),
+                                unsigned int sig_len);
 
 /* ============================= EdDSA =================================== */
 //#ifdef CX_EDDSA
+
+/**
+ *  Compress point according to draft-irtf-cfrg-eddsa-05.
+ *
+ * @param [in]     domain
+ * @param [in/out] P
+ */
+SYSCALL void
+cx_edward_compress_point(cx_curve_twisted_edward_t WIDE *domain
+                             PLENGTH(scc__cx_ecfp_domain_scc__domain),
+                         unsigned char *P PLENGTH(65));
+
+/**
+ *  Decompress point according to draft-irtf-cfrg-eddsa-05.
+ *
+ * @param [in]     domain
+ * @param [in/out] P
+ */
+SYSCALL void
+cx_edward_decompress_point(cx_curve_twisted_edward_t WIDE *domain
+                               PLENGTH(scc__cx_ecfp_domain_scc__domain),
+                           unsigned char *P PLENGTH(65));
+
+/**
+ * Retrieve the public key from the private one according to
+ * draft-irtf-cfrg-eddsa-05.
+ *
+ * @param [in]  pvkey
+ * @param [out] pukey
+ */
+SYSCALL void cx_eddsa_get_public_key(
+    cx_ecfp_private_key_t WIDE *pvkey
+        PLENGTH(scc__cx_ecfp_private_key_scc__pvkey),
+    cx_ecfp_public_key_t *pukey PLENGTH(scc__cx_ecfp_public_key_scc__pukey));
+
 /**
  * Sign a hash message according to EdDSA specification.
  *

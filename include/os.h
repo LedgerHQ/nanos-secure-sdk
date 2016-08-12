@@ -36,7 +36,7 @@
 //#define macro_offsetof // already defined in stddef.h
 #define OS_LITTLE_ENDIAN
 #define NATIVE_64BITS
-#define WIDE // const
+#define WIDE // const // don't !!
 #define WIDE_AS_INT unsigned long int
 #define REENTRANT(x) x //
 
@@ -59,6 +59,8 @@ int setjmp(jmp_buf __jmpb);
 #include "stdint.h"
 
 #define UNUSED(x) (void) x
+
+#include "os_apilevel.h"
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -438,6 +440,7 @@ typedef enum bolos_ux_e {
     BOLOS_UX_CONSENT_APP_ADD,
     BOLOS_UX_CONSENT_APP_DEL,
     BOLOS_UX_CONSENT_APP_UPG,
+    BOLOS_UX_CONSENT_ISSUER_KEY,
     BOLOS_UX_CONSENT_FOREIGN_KEY,
     BOLOS_UX_APPEXIT,
     BOLOS_UX_KEYBOARD,
@@ -490,7 +493,7 @@ typedef struct application_s {
 
 #ifdef BOLOS_APP_DERIVE_PATH_SIZE_B
     unsigned int derive_path_length;
-    unsigned int derive_path[BOLOS_APP_DERIVE_PATH_SIZE_B];
+    unsigned char derive_path[BOLOS_APP_DERIVE_PATH_SIZE_B];
 #endif // BOLOS_APP_DERIVE_PATH_SIZE_B
 
 // for fancy display upon the boot display, \0 terminated.
@@ -582,11 +585,11 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 // unprivilegied
 SYSCALL unsigned int os_perso_isonboarded(void);
 
-// derive a seed on the given BIP32 path
-// TODO : permissioned by application path(s), per application
-SYSCALL void os_perso_derive_seed_bip32(
-    unsigned int *path PLENGTH(4 * pathLength), unsigned int pathLength,
-    unsigned char *privateKey PLENGTH(32), unsigned char *chain PLENGTH(32));
+// derive the user top node on the given BIP32 path
+SYSCALL void os_perso_derive_node_bip32(
+    cx_curve_t curve, unsigned int *path PLENGTH(4 * pathLength),
+    unsigned int pathLength, unsigned char *privateKey PLENGTH(32),
+    unsigned char *chain PLENGTH(32));
 
 // endorsement APIs
 SYSCALL unsigned int
@@ -701,6 +704,11 @@ SYSCALL unsigned int os_seph_features(void);
 /* Grab the SEPROXYHAL's version */
 SYSCALL unsigned int os_seph_version(unsigned char *version,
                                      unsigned int maxlength);
+
+/*
+ * Copy the serial number in the given buffer and return its length
+ */
+unsigned int os_get_sn(unsigned char *buffer);
 
 /* ----------------------------------------------------------------------- */
 /* -                         SETTINGS FUNCTIONS                          - */

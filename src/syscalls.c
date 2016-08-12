@@ -879,6 +879,107 @@ int cx_borromean_verify ( cx_ecfp_public_key_t * * pubkeys, unsigned int * rsize
   return (int)ret;
 }
 
+int cx_ecschnorr_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, unsigned char * msg, unsigned int msg_len, unsigned char * sig ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+6];
+  parameters[0] = (unsigned int)SYSCALL_cx_ecschnorr_sign_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)pvkey;
+  parameters[3] = (unsigned int)mode;
+  parameters[4] = (unsigned int)hashID;
+  parameters[5] = (unsigned int)msg;
+  parameters[6] = (unsigned int)msg_len;
+  parameters[7] = (unsigned int)sig;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_cx_ecschnorr_sign_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+int cx_ecschnorr_verify ( cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, unsigned char * msg, unsigned int msg_len, unsigned char * sig, unsigned int sig_len ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+7];
+  parameters[0] = (unsigned int)SYSCALL_cx_ecschnorr_verify_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)pukey;
+  parameters[3] = (unsigned int)mode;
+  parameters[4] = (unsigned int)hashID;
+  parameters[5] = (unsigned int)msg;
+  parameters[6] = (unsigned int)msg_len;
+  parameters[7] = (unsigned int)sig;
+  parameters[8] = (unsigned int)sig_len;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_cx_ecschnorr_verify_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+void cx_edward_compress_point ( cx_curve_twisted_edward_t * domain, unsigned char * P ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)SYSCALL_cx_edward_compress_point_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)domain;
+  parameters[3] = (unsigned int)P;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_cx_edward_compress_point_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
+void cx_edward_decompress_point ( cx_curve_twisted_edward_t * domain, unsigned char * P ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)SYSCALL_cx_edward_decompress_point_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)domain;
+  parameters[3] = (unsigned int)P;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_cx_edward_decompress_point_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
+void cx_eddsa_get_public_key ( cx_ecfp_private_key_t * pvkey, cx_ecfp_public_key_t * pukey ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)SYSCALL_cx_eddsa_get_public_key_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)pvkey;
+  parameters[3] = (unsigned int)pukey;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_cx_eddsa_get_public_key_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
 int cx_eddsa_sign ( cx_ecfp_private_key_t * pvkey, cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * sig ) 
 {
   unsigned int ret;
@@ -1416,21 +1517,22 @@ unsigned int os_perso_isonboarded ( void )
   return (unsigned int)ret;
 }
 
-void os_perso_derive_seed_bip32 ( unsigned int * path, unsigned int pathLength, unsigned char * privateKey, unsigned char * chain ) 
+void os_perso_derive_node_bip32 ( cx_curve_t curve, unsigned int * path, unsigned int pathLength, unsigned char * privateKey, unsigned char * chain ) 
 {
   unsigned int ret;
-  unsigned int parameters [2+4];
-  parameters[0] = (unsigned int)SYSCALL_os_perso_derive_seed_bip32_ID_IN;
+  unsigned int parameters [2+5];
+  parameters[0] = (unsigned int)SYSCALL_os_perso_derive_node_bip32_ID_IN;
   parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
-  parameters[2] = (unsigned int)path;
-  parameters[3] = (unsigned int)pathLength;
-  parameters[4] = (unsigned int)privateKey;
-  parameters[5] = (unsigned int)chain;
+  parameters[2] = (unsigned int)curve;
+  parameters[3] = (unsigned int)path;
+  parameters[4] = (unsigned int)pathLength;
+  parameters[5] = (unsigned int)privateKey;
+  parameters[6] = (unsigned int)chain;
 
                               asm volatile("mov r0, %0"::"r"(parameters));
                               asm volatile("svc #1");
                               asm volatile("mov %0, r0":"=r"(ret));
-                                if (parameters[0] != SYSCALL_os_perso_derive_seed_bip32_ID_OUT)
+                                if (parameters[0] != SYSCALL_os_perso_derive_node_bip32_ID_OUT)
   {
     THROW(EXCEPTION_SECURITY);
   }

@@ -8,3 +8,4 @@
 #define HID_EPOUT_SIZE                0x40
 
 #endif // USBD_HID_IMPL_H
+

@@ -243,244 +243,272 @@ int cx_borromean_verify(cx_ecfp_public_key_t **pubkeys, unsigned int *rsizes,
                         unsigned char *msg, unsigned int msg_len,
                         unsigned char *sig, unsigned int sig_len);
 
-#define SYSCALL_cx_eddsa_sign_ID_IN 0x60002a5dUL
-#define SYSCALL_cx_eddsa_sign_ID_OUT 0x90002a5eUL
+#define SYSCALL_cx_ecschnorr_sign_ID_IN 0x60002a5eUL
+#define SYSCALL_cx_ecschnorr_sign_ID_OUT 0x90002acbUL
+int cx_ecschnorr_sign(cx_ecfp_private_key_t *pvkey, int mode, cx_md_t hashID,
+                      unsigned char *msg, unsigned int msg_len,
+                      unsigned char *sig);
+
+#define SYSCALL_cx_ecschnorr_verify_ID_IN 0x60002bf2UL
+#define SYSCALL_cx_ecschnorr_verify_ID_OUT 0x90002b73UL
+int cx_ecschnorr_verify(cx_ecfp_public_key_t *pukey, int mode, cx_md_t hashID,
+                        unsigned char *msg, unsigned int msg_len,
+                        unsigned char *sig, unsigned int sig_len);
+
+#define SYSCALL_cx_edward_compress_point_ID_IN 0x60002c0bUL
+#define SYSCALL_cx_edward_compress_point_ID_OUT 0x90002cb5UL
+void cx_edward_compress_point(cx_curve_twisted_edward_t *domain,
+                              unsigned char *P);
+
+#define SYSCALL_cx_edward_decompress_point_ID_IN 0x60002daaUL
+#define SYSCALL_cx_edward_decompress_point_ID_OUT 0x90002dd2UL
+void cx_edward_decompress_point(cx_curve_twisted_edward_t *domain,
+                                unsigned char *P);
+
+#define SYSCALL_cx_eddsa_get_public_key_ID_IN 0x60002e6bUL
+#define SYSCALL_cx_eddsa_get_public_key_ID_OUT 0x90002ef0UL
+void cx_eddsa_get_public_key(cx_ecfp_private_key_t *pvkey,
+                             cx_ecfp_public_key_t *pukey);
+
+#define SYSCALL_cx_eddsa_sign_ID_IN 0x60002f5dUL
+#define SYSCALL_cx_eddsa_sign_ID_OUT 0x90002f5eUL
 int cx_eddsa_sign(cx_ecfp_private_key_t *pvkey, cx_ecfp_public_key_t *pukey,
                   int mode, cx_md_t hashID, unsigned char *hash,
                   unsigned int hash_len, unsigned char *sig);
 
-#define SYSCALL_cx_eddsa_verify_ID_IN 0x60002b9dUL
-#define SYSCALL_cx_eddsa_verify_ID_OUT 0x90002bbbUL
+#define SYSCALL_cx_eddsa_verify_ID_IN 0x6000309dUL
+#define SYSCALL_cx_eddsa_verify_ID_OUT 0x900030bbUL
 int cx_eddsa_verify(cx_ecfp_public_key_t *key, int mode, cx_md_t hashID,
                     unsigned char *hash, unsigned int hash_len,
                     unsigned char *sig, unsigned int sig_len);
 
-#define SYSCALL_cx_ecdsa_sign_ID_IN 0x60002c01UL
-#define SYSCALL_cx_ecdsa_sign_ID_OUT 0x90002cf3UL
+#define SYSCALL_cx_ecdsa_sign_ID_IN 0x60003101UL
+#define SYSCALL_cx_ecdsa_sign_ID_OUT 0x900031f3UL
 int cx_ecdsa_sign(cx_ecfp_private_key_t *key, int mode, cx_md_t hashID,
                   unsigned char *hash, unsigned int hash_len,
                   unsigned char *sig);
 
-#define SYSCALL_cx_ecdsa_verify_ID_IN 0x60002d3eUL
-#define SYSCALL_cx_ecdsa_verify_ID_OUT 0x90002d8fUL
+#define SYSCALL_cx_ecdsa_verify_ID_IN 0x6000323eUL
+#define SYSCALL_cx_ecdsa_verify_ID_OUT 0x9000328fUL
 int cx_ecdsa_verify(cx_ecfp_public_key_t *key, int mode, cx_md_t hashID,
                     unsigned char *hash, unsigned int hash_len,
                     unsigned char *sig, unsigned int sig_len);
 
-#define SYSCALL_cx_ecdh_ID_IN 0x60002e16UL
-#define SYSCALL_cx_ecdh_ID_OUT 0x90002e61UL
+#define SYSCALL_cx_ecdh_ID_IN 0x60003316UL
+#define SYSCALL_cx_ecdh_ID_OUT 0x90003361UL
 int cx_ecdh(cx_ecfp_private_key_t *key, int mode, unsigned char *public_point,
             unsigned char *secret);
 
-#define SYSCALL_cx_crc16_ID_IN 0x60002f37UL
-#define SYSCALL_cx_crc16_ID_OUT 0x90002f95UL
+#define SYSCALL_cx_crc16_ID_IN 0x60003437UL
+#define SYSCALL_cx_crc16_ID_OUT 0x90003495UL
 unsigned short cx_crc16(void *buffer, unsigned int len);
 
-#define SYSCALL_cx_crc16_update_ID_IN 0x600030f4UL
-#define SYSCALL_cx_crc16_update_ID_OUT 0x9000307fUL
+#define SYSCALL_cx_crc16_update_ID_IN 0x600035f4UL
+#define SYSCALL_cx_crc16_update_ID_OUT 0x9000357fUL
 unsigned short cx_crc16_update(unsigned short crc, void *buffer,
                                unsigned int len);
 
-#define SYSCALL_cx_math_cmp_ID_IN 0x60003173UL
-#define SYSCALL_cx_math_cmp_ID_OUT 0x9000318aUL
+#define SYSCALL_cx_math_cmp_ID_IN 0x60003673UL
+#define SYSCALL_cx_math_cmp_ID_OUT 0x9000368aUL
 int cx_math_cmp(unsigned char *a, unsigned char *b, unsigned int len);
 
-#define SYSCALL_cx_math_is_zero_ID_IN 0x60003291UL
-#define SYSCALL_cx_math_is_zero_ID_OUT 0x90003223UL
+#define SYSCALL_cx_math_is_zero_ID_IN 0x60003791UL
+#define SYSCALL_cx_math_is_zero_ID_OUT 0x90003723UL
 int cx_math_is_zero(unsigned char *a, unsigned int len);
 
-#define SYSCALL_cx_math_add_ID_IN 0x60003350UL
-#define SYSCALL_cx_math_add_ID_OUT 0x90003368UL
+#define SYSCALL_cx_math_add_ID_IN 0x60003850UL
+#define SYSCALL_cx_math_add_ID_OUT 0x90003868UL
 int cx_math_add(unsigned char *r, unsigned char *a, unsigned char *b,
                 unsigned int len);
 
-#define SYSCALL_cx_math_sub_ID_IN 0x60003437UL
-#define SYSCALL_cx_math_sub_ID_OUT 0x900034f2UL
+#define SYSCALL_cx_math_sub_ID_IN 0x60003937UL
+#define SYSCALL_cx_math_sub_ID_OUT 0x900039f2UL
 int cx_math_sub(unsigned char *r, unsigned char *a, unsigned char *b,
                 unsigned int len);
 
-#define SYSCALL_cx_math_mult_ID_IN 0x600035e1UL
-#define SYSCALL_cx_math_mult_ID_OUT 0x90003567UL
+#define SYSCALL_cx_math_mult_ID_IN 0x60003ae1UL
+#define SYSCALL_cx_math_mult_ID_OUT 0x90003a67UL
 void cx_math_mult(unsigned char *r, unsigned char *a, unsigned char *b,
                   unsigned int len);
 
-#define SYSCALL_cx_math_addm_ID_IN 0x600036ddUL
-#define SYSCALL_cx_math_addm_ID_OUT 0x90003605UL
+#define SYSCALL_cx_math_addm_ID_IN 0x60003bddUL
+#define SYSCALL_cx_math_addm_ID_OUT 0x90003b05UL
 void cx_math_addm(unsigned char *r, unsigned char *a, unsigned char *b,
                   unsigned char *m, unsigned int len);
 
-#define SYSCALL_cx_math_subm_ID_IN 0x60003732UL
-#define SYSCALL_cx_math_subm_ID_OUT 0x90003769UL
+#define SYSCALL_cx_math_subm_ID_IN 0x60003c32UL
+#define SYSCALL_cx_math_subm_ID_OUT 0x90003c69UL
 void cx_math_subm(unsigned char *r, unsigned char *a, unsigned char *b,
                   unsigned char *m, unsigned int len);
 
-#define SYSCALL_cx_math_multm_ID_IN 0x60003824UL
-#define SYSCALL_cx_math_multm_ID_OUT 0x900038c2UL
+#define SYSCALL_cx_math_multm_ID_IN 0x60003d24UL
+#define SYSCALL_cx_math_multm_ID_OUT 0x90003dc2UL
 void cx_math_multm(unsigned char *r, unsigned char *a, unsigned char *b,
                    unsigned char *m, unsigned int len);
 
-#define SYSCALL_cx_math_modm_ID_IN 0x600039b0UL
-#define SYSCALL_cx_math_modm_ID_OUT 0x9000399cUL
+#define SYSCALL_cx_math_modm_ID_IN 0x60003eb0UL
+#define SYSCALL_cx_math_modm_ID_OUT 0x90003e9cUL
 void cx_math_modm(unsigned char *v, unsigned int len_v, unsigned char *m,
                   unsigned int len_m);
 
-#define SYSCALL_cx_math_invprimem_ID_IN 0x60003a5dUL
-#define SYSCALL_cx_math_invprimem_ID_OUT 0x90003a78UL
+#define SYSCALL_cx_math_invprimem_ID_IN 0x60003f5dUL
+#define SYSCALL_cx_math_invprimem_ID_OUT 0x90003f78UL
 void cx_math_invprimem(unsigned char *r, unsigned char *a, unsigned char *m,
                        unsigned int len);
 
-#define SYSCALL_cx_math_invintm_ID_IN 0x60003bebUL
-#define SYSCALL_cx_math_invintm_ID_OUT 0x90003bc1UL
+#define SYSCALL_cx_math_invintm_ID_IN 0x600040ebUL
+#define SYSCALL_cx_math_invintm_ID_OUT 0x900040c1UL
 void cx_math_invintm(unsigned char *r, unsigned long int a, unsigned char *m,
                      unsigned int len);
 
-#define SYSCALL_cx_math_is_prime_ID_IN 0x60003c95UL
-#define SYSCALL_cx_math_is_prime_ID_OUT 0x90003c5eUL
+#define SYSCALL_cx_math_is_prime_ID_IN 0x60004195UL
+#define SYSCALL_cx_math_is_prime_ID_OUT 0x9000415eUL
 int cx_math_is_prime(unsigned char *p, unsigned int len);
 
-#define SYSCALL_cx_math_next_prime_ID_IN 0x60003da4UL
-#define SYSCALL_cx_math_next_prime_ID_OUT 0x90003dcbUL
+#define SYSCALL_cx_math_next_prime_ID_IN 0x600042a4UL
+#define SYSCALL_cx_math_next_prime_ID_OUT 0x900042cbUL
 void cx_math_next_prime(unsigned char *n, unsigned int len);
 
-#define SYSCALL_os_perso_wipe_ID_IN 0x60003e2aUL
-#define SYSCALL_os_perso_wipe_ID_OUT 0x90003e45UL
+#define SYSCALL_os_perso_wipe_ID_IN 0x6000432aUL
+#define SYSCALL_os_perso_wipe_ID_OUT 0x90004345UL
 void os_perso_wipe(void);
 
-#define SYSCALL_os_perso_set_pin_ID_IN 0x60003fccUL
-#define SYSCALL_os_perso_set_pin_ID_OUT 0x90003fdfUL
+#define SYSCALL_os_perso_set_pin_ID_IN 0x600044ccUL
+#define SYSCALL_os_perso_set_pin_ID_OUT 0x900044dfUL
 void os_perso_set_pin(unsigned char *pin, unsigned int length);
 
-#define SYSCALL_os_perso_set_seed_ID_IN 0x60004065UL
-#define SYSCALL_os_perso_set_seed_ID_OUT 0x900040b1UL
+#define SYSCALL_os_perso_set_seed_ID_IN 0x60004565UL
+#define SYSCALL_os_perso_set_seed_ID_OUT 0x900045b1UL
 void os_perso_set_seed(unsigned char *seed, unsigned int length);
 
-#define SYSCALL_os_perso_set_words_ID_IN 0x6000413dUL
-#define SYSCALL_os_perso_set_words_ID_OUT 0x9000418cUL
+#define SYSCALL_os_perso_set_words_ID_IN 0x6000463dUL
+#define SYSCALL_os_perso_set_words_ID_OUT 0x9000468cUL
 void os_perso_set_words(unsigned char *words, unsigned int length);
 
-#define SYSCALL_os_perso_set_devname_ID_IN 0x6000427bUL
-#define SYSCALL_os_perso_set_devname_ID_OUT 0x900042beUL
+#define SYSCALL_os_perso_set_devname_ID_IN 0x6000477bUL
+#define SYSCALL_os_perso_set_devname_ID_OUT 0x900047beUL
 void os_perso_set_devname(unsigned char *devname, unsigned int length);
 
-#define SYSCALL_os_perso_finalize_ID_IN 0x60004380UL
-#define SYSCALL_os_perso_finalize_ID_OUT 0x90004354UL
+#define SYSCALL_os_perso_finalize_ID_IN 0x60004880UL
+#define SYSCALL_os_perso_finalize_ID_OUT 0x90004854UL
 void os_perso_finalize(void);
 
-#define SYSCALL_os_perso_isonboarded_ID_IN 0x6000449aUL
-#define SYSCALL_os_perso_isonboarded_ID_OUT 0x900044d5UL
+#define SYSCALL_os_perso_isonboarded_ID_IN 0x6000499aUL
+#define SYSCALL_os_perso_isonboarded_ID_OUT 0x900049d5UL
 unsigned int os_perso_isonboarded(void);
 
-#define SYSCALL_os_perso_derive_seed_bip32_ID_IN 0x6000456fUL
-#define SYSCALL_os_perso_derive_seed_bip32_ID_OUT 0x9000454bUL
-void os_perso_derive_seed_bip32(unsigned int *path, unsigned int pathLength,
+#define SYSCALL_os_perso_derive_node_bip32_ID_IN 0x60004a2bUL
+#define SYSCALL_os_perso_derive_node_bip32_ID_OUT 0x90004a7fUL
+void os_perso_derive_node_bip32(cx_curve_t curve, unsigned int *path,
+                                unsigned int pathLength,
                                 unsigned char *privateKey,
                                 unsigned char *chain);
 
-#define SYSCALL_os_endorsement_get_code_hash_ID_IN 0x6000460fUL
-#define SYSCALL_os_endorsement_get_code_hash_ID_OUT 0x900046a1UL
+#define SYSCALL_os_endorsement_get_code_hash_ID_IN 0x60004b0fUL
+#define SYSCALL_os_endorsement_get_code_hash_ID_OUT 0x90004ba1UL
 unsigned int os_endorsement_get_code_hash(unsigned char *buffer);
 
-#define SYSCALL_os_endorsement_get_public_key_ID_IN 0x600047f3UL
-#define SYSCALL_os_endorsement_get_public_key_ID_OUT 0x90004799UL
+#define SYSCALL_os_endorsement_get_public_key_ID_IN 0x60004cf3UL
+#define SYSCALL_os_endorsement_get_public_key_ID_OUT 0x90004c99UL
 unsigned int os_endorsement_get_public_key(unsigned char index,
                                            unsigned char *buffer);
 
-#define SYSCALL_os_endorsement_get_public_key_certificate_ID_IN 0x6000484cUL
-#define SYSCALL_os_endorsement_get_public_key_certificate_ID_OUT 0x9000487fUL
+#define SYSCALL_os_endorsement_get_public_key_certificate_ID_IN 0x60004d4cUL
+#define SYSCALL_os_endorsement_get_public_key_certificate_ID_OUT 0x90004d7fUL
 unsigned int os_endorsement_get_public_key_certificate(unsigned char index,
                                                        unsigned char *buffer);
 
-#define SYSCALL_os_endorsement_key1_get_app_secret_ID_IN 0x6000495cUL
-#define SYSCALL_os_endorsement_key1_get_app_secret_ID_OUT 0x90004960UL
+#define SYSCALL_os_endorsement_key1_get_app_secret_ID_IN 0x60004e5cUL
+#define SYSCALL_os_endorsement_key1_get_app_secret_ID_OUT 0x90004e60UL
 unsigned int os_endorsement_key1_get_app_secret(unsigned char *buffer);
 
-#define SYSCALL_os_endorsement_key1_sign_data_ID_IN 0x60004ad8UL
-#define SYSCALL_os_endorsement_key1_sign_data_ID_OUT 0x90004a2bUL
+#define SYSCALL_os_endorsement_key1_sign_data_ID_IN 0x60004fd8UL
+#define SYSCALL_os_endorsement_key1_sign_data_ID_OUT 0x90004f2bUL
 unsigned int os_endorsement_key1_sign_data(unsigned char *src,
                                            unsigned int srcLength,
                                            unsigned char *signature);
 
-#define SYSCALL_os_endorsement_key2_derive_sign_data_ID_IN 0x60004b4aUL
-#define SYSCALL_os_endorsement_key2_derive_sign_data_ID_OUT 0x90004b3eUL
+#define SYSCALL_os_endorsement_key2_derive_sign_data_ID_IN 0x6000504aUL
+#define SYSCALL_os_endorsement_key2_derive_sign_data_ID_OUT 0x9000503eUL
 unsigned int os_endorsement_key2_derive_sign_data(unsigned char *src,
                                                   unsigned int srcLength,
                                                   unsigned char *signature);
 
-#define SYSCALL_os_global_pin_is_validated_ID_IN 0x60004c89UL
-#define SYSCALL_os_global_pin_is_validated_ID_OUT 0x90004c45UL
+#define SYSCALL_os_global_pin_is_validated_ID_IN 0x60005189UL
+#define SYSCALL_os_global_pin_is_validated_ID_OUT 0x90005145UL
 unsigned int os_global_pin_is_validated(void);
 
-#define SYSCALL_os_global_pin_check_ID_IN 0x60004d6fUL
-#define SYSCALL_os_global_pin_check_ID_OUT 0x90004d1eUL
+#define SYSCALL_os_global_pin_check_ID_IN 0x6000526fUL
+#define SYSCALL_os_global_pin_check_ID_OUT 0x9000521eUL
 unsigned int os_global_pin_check(unsigned char *pin_buffer,
                                  unsigned char pin_length);
 
-#define SYSCALL_os_global_pin_invalidate_ID_IN 0x60004ed0UL
-#define SYSCALL_os_global_pin_invalidate_ID_OUT 0x90004efbUL
+#define SYSCALL_os_global_pin_invalidate_ID_IN 0x600053d0UL
+#define SYSCALL_os_global_pin_invalidate_ID_OUT 0x900053fbUL
 void os_global_pin_invalidate(void);
 
-#define SYSCALL_os_global_pin_retries_ID_IN 0x60004f59UL
-#define SYSCALL_os_global_pin_retries_ID_OUT 0x90004f18UL
+#define SYSCALL_os_global_pin_retries_ID_IN 0x60005459UL
+#define SYSCALL_os_global_pin_retries_ID_OUT 0x90005418UL
 unsigned int os_global_pin_retries(void);
 
-#define SYSCALL_os_registry_count_ID_IN 0x60005040UL
-#define SYSCALL_os_registry_count_ID_OUT 0x90005006UL
+#define SYSCALL_os_registry_count_ID_IN 0x60005540UL
+#define SYSCALL_os_registry_count_ID_OUT 0x90005506UL
 unsigned int os_registry_count(void);
 
-#define SYSCALL_os_registry_get_ID_IN 0x60005165UL
-#define SYSCALL_os_registry_get_ID_OUT 0x900051b2UL
+#define SYSCALL_os_registry_get_ID_IN 0x60005665UL
+#define SYSCALL_os_registry_get_ID_OUT 0x900056b2UL
 void os_registry_get(unsigned int index, application_t *out_application_entry);
 
-#define SYSCALL_os_sched_exec_ID_IN 0x60005214UL
-#define SYSCALL_os_sched_exec_ID_OUT 0x9000529fUL
+#define SYSCALL_os_sched_exec_ID_IN 0x60005714UL
+#define SYSCALL_os_sched_exec_ID_OUT 0x9000579fUL
 unsigned int os_sched_exec(unsigned int application_index);
 
-#define SYSCALL_os_sched_exit_ID_IN 0x600053e1UL
-#define SYSCALL_os_sched_exit_ID_OUT 0x9000536fUL
+#define SYSCALL_os_sched_exit_ID_IN 0x600058e1UL
+#define SYSCALL_os_sched_exit_ID_OUT 0x9000586fUL
 void os_sched_exit(unsigned int exit_code);
 
-#define SYSCALL_os_ux_register_ID_IN 0x60005415UL
-#define SYSCALL_os_ux_register_ID_OUT 0x900054b9UL
+#define SYSCALL_os_ux_register_ID_IN 0x60005915UL
+#define SYSCALL_os_ux_register_ID_OUT 0x900059b9UL
 void os_ux_register(bolos_ux_params_t *parameter_ram_pointer);
 
-#define SYSCALL_os_ux_ID_IN 0x60005558UL
-#define SYSCALL_os_ux_ID_OUT 0x9000551fUL
+#define SYSCALL_os_ux_ID_IN 0x60005a58UL
+#define SYSCALL_os_ux_ID_OUT 0x90005a1fUL
 unsigned int os_ux(bolos_ux_params_t *params);
 
-#define SYSCALL_os_flags_ID_IN 0x6000566eUL
-#define SYSCALL_os_flags_ID_OUT 0x9000567fUL
+#define SYSCALL_os_flags_ID_IN 0x60005b6eUL
+#define SYSCALL_os_flags_ID_OUT 0x90005b7fUL
 unsigned int os_flags(void);
 
-#define SYSCALL_os_version_ID_IN 0x600057b8UL
-#define SYSCALL_os_version_ID_OUT 0x900057c4UL
+#define SYSCALL_os_version_ID_IN 0x60005cb8UL
+#define SYSCALL_os_version_ID_OUT 0x90005cc4UL
 unsigned int os_version(unsigned char *version, unsigned int maxlength);
 
-#define SYSCALL_os_seph_features_ID_IN 0x600058d6UL
-#define SYSCALL_os_seph_features_ID_OUT 0x90005844UL
+#define SYSCALL_os_seph_features_ID_IN 0x60005dd6UL
+#define SYSCALL_os_seph_features_ID_OUT 0x90005d44UL
 unsigned int os_seph_features(void);
 
-#define SYSCALL_os_seph_version_ID_IN 0x600059acUL
-#define SYSCALL_os_seph_version_ID_OUT 0x9000595dUL
+#define SYSCALL_os_seph_version_ID_IN 0x60005eacUL
+#define SYSCALL_os_seph_version_ID_OUT 0x90005e5dUL
 unsigned int os_seph_version(unsigned char *version, unsigned int maxlength);
 
-#define SYSCALL_os_setting_get_ID_IN 0x60005a97UL
-#define SYSCALL_os_setting_get_ID_OUT 0x90005a03UL
+#define SYSCALL_os_setting_get_ID_IN 0x60005f97UL
+#define SYSCALL_os_setting_get_ID_OUT 0x90005f03UL
 unsigned int os_setting_get(unsigned int setting_id);
 
-#define SYSCALL_os_setting_set_ID_IN 0x60005b67UL
-#define SYSCALL_os_setting_set_ID_OUT 0x90005b8dUL
+#define SYSCALL_os_setting_set_ID_IN 0x60006067UL
+#define SYSCALL_os_setting_set_ID_OUT 0x9000608dUL
 void os_setting_set(unsigned int setting_id, unsigned int value);
 
-#define SYSCALL_io_seproxyhal_spi_send_ID_IN 0x60005c1cUL
-#define SYSCALL_io_seproxyhal_spi_send_ID_OUT 0x90005cf3UL
+#define SYSCALL_io_seproxyhal_spi_send_ID_IN 0x6000611cUL
+#define SYSCALL_io_seproxyhal_spi_send_ID_OUT 0x900061f3UL
 void io_seproxyhal_spi_send(const unsigned char *buffer, unsigned short length);
 
-#define SYSCALL_io_seproxyhal_spi_is_status_sent_ID_IN 0x60005dcfUL
-#define SYSCALL_io_seproxyhal_spi_is_status_sent_ID_OUT 0x90005d7fUL
+#define SYSCALL_io_seproxyhal_spi_is_status_sent_ID_IN 0x600062cfUL
+#define SYSCALL_io_seproxyhal_spi_is_status_sent_ID_OUT 0x9000627fUL
 unsigned int io_seproxyhal_spi_is_status_sent(void);
 
-#define SYSCALL_io_seproxyhal_spi_recv_ID_IN 0x60005ed1UL
-#define SYSCALL_io_seproxyhal_spi_recv_ID_OUT 0x90005e2bUL
+#define SYSCALL_io_seproxyhal_spi_recv_ID_IN 0x600063d1UL
+#define SYSCALL_io_seproxyhal_spi_recv_ID_OUT 0x9000632bUL
 unsigned short io_seproxyhal_spi_recv(unsigned char *buffer,
                                       unsigned short maxlength,
                                       unsigned int flags);
