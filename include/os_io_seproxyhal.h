@@ -241,22 +241,22 @@ extern ux_state_t ux;
     ux.elements_current = 1;                                                   \
     ux.button_push_handler = elements_array##_button;                          \
     ux.elements_preprocessor = preprocessor;                                   \
-    if (!ux.elements_preprocessor ||                                           \
-        ux.elements_preprocessor(&elements_array[0])) {                        \
+    if (ux.elements && (!ux.elements_preprocessor ||                           \
+                        ux.elements_preprocessor(&elements_array[0]))) {       \
         io_seproxyhal_display(&elements_array[0]);                             \
     }
 
 #define UX_REDISPLAY()                                                         \
     ux.elements_current = 1;                                                   \
-    if (!ux.elements_preprocessor ||                                           \
-        ux.elements_preprocessor(&ux.elements[0])) {                           \
+    if (ux.elements && (!ux.elements_preprocessor ||                           \
+                        ux.elements_preprocessor(&ux.elements[0]))) {          \
         io_seproxyhal_display(&ux.elements[0]);                                \
     }
 
 #define UX_DISPLAYED() (ux.elements_current >= ux.elements_count)
 
 #define UX_DISPLAY_PROCESSED_EVENT()                                           \
-    while (ux.elements_current < ux.elements_count) {                          \
+    while (ux.elements && ux.elements_current < ux.elements_count) {           \
         if (!ux.elements_preprocessor ||                                       \
             ux.elements_preprocessor(&ux.elements[ux.elements_current])) {     \
             io_seproxyhal_display(&ux.elements[ux.elements_current++]);        \
@@ -278,6 +278,19 @@ extern ux_state_t ux;
                         seph_packet[3]);
 
 void io_seproxyhal_setup_ticker(unsigned int interval_ms);
+
+void io_seproxyhal_request_mcu_status(void);
+
+/**
+ * Helper function to order the MCU to display the given bitmap with the given
+ * color index, a table of size: (1<<bit_per_pixel) with little endian encoded
+ * colors.
+ */
+void io_seproxyhal_display_bitmap(unsigned int x, unsigned int y,
+                                  unsigned int w, unsigned int h,
+                                  unsigned int *color_index,
+                                  unsigned int bit_per_pixel,
+                                  unsigned char *bitmap);
 
 #endif // OS_IO_SEPROXYHAL
 

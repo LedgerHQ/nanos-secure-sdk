@@ -381,6 +381,38 @@ void io_seproxyhal_display_default(bagl_element_t * element) {
   }
 }
 
+void io_seproxyhal_display_bitmap(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int* color_index, unsigned int bit_per_pixel, unsigned char* bitmap) {
+  // component type = ICON
+  // component icon id = 0
+  // => bitmap transmitted
+  bagl_component_t c;
+  os_memset(&c, 0, sizeof(c));
+  c.type = BAGL_ICON;
+  c.x = x;
+  c.y = y;
+  c.width = w;
+  c.height = h;
+  // done by memset // c.icon_id = 0;
+
+  // color index size
+  h = ((1<<bit_per_pixel)*sizeof(unsigned int)); 
+  // bitmap size
+  w = ((w*c.height*bit_per_pixel)/8)+((w*c.height*bit_per_pixel)%8?1:0);
+  unsigned short length = sizeof(bagl_component_t)
+                          +1 /* bpp */
+                          +h /* color index */
+                          +w; /* image bitmap */
+  G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SCREEN_DISPLAY_STATUS;
+  G_io_seproxyhal_spi_buffer[1] = length>>8;
+  G_io_seproxyhal_spi_buffer[2] = length;
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
+  io_seproxyhal_spi_send(&c, sizeof(bagl_component_t));
+  G_io_seproxyhal_spi_buffer[0] = bit_per_pixel;
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 1);
+  io_seproxyhal_spi_send(color_index, h);
+  io_seproxyhal_spi_send(bitmap, w);
+}
+
 unsigned int bagl_label_roundtrip_duration_ms(const bagl_element_t* e, unsigned int average_char_width) {
   // not a scrollable label
   if (e == NULL || (e->component.type != BAGL_LABEL && e->component.type != BAGL_LABELINE)) {

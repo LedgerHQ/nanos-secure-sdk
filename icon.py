@@ -22,8 +22,14 @@ import sys
 import os
 import math
 
-if (len(sys.argv) < 4):
-	print sys.argv[0] + ": <Wmax> <Hmax> <imagefile> [hexbitmaponly]"
+if (len(sys.argv) == 2):
+	if not os.path.exists(sys.argv[1]):
+		print sys.argv[0] + ": [<Wmax>] [<Hmax>] <imagefile> [hexbitmaponly]"
+		print "Error: " + sys.argv[1] + " does not exists !"
+		sys.exit(-1)
+
+elif (len(sys.argv) < 4):
+	print sys.argv[0] + ": [<Wmax>] [<Hmax>] <imagefile> [hexbitmaponly]"
 	sys.exit(-1)
 
 hexbitmaponly = False
@@ -31,15 +37,22 @@ if (len(sys.argv) == 5):
 	if (sys.argv[4] == "hexbitmaponly"):
 		hexbitmaponly = True
 
-widthmax = int(sys.argv[1])
-heightmax = int(sys.argv[2])
-im = Image.open(sys.argv[3]);
+if (len(sys.argv) != 2):
+	widthmax = int(sys.argv[1])
+	heightmax = int(sys.argv[2])
+	filename = sys.argv[3]; 
+else:
+	widthmax = 4096
+	heightmax = 4096
+	filename = sys.argv[1];
+
+im = Image.open(filename);
 im.load()
 width, height = im.size
 colors = {}
 palette = im.getpalette()
 
-bname = os.path.splitext(os.path.basename(sys.argv[3]))[0]
+bname = os.path.splitext(os.path.basename(filename))[0]
 
 if width>widthmax:
 	width = widthmax
@@ -68,20 +81,24 @@ if (math.pow(2, math.log(maxcolor+1, 2)) != maxcolor+1):
 # enforce if lower
 #maxcolor=15
 
+bits_per_pixel = int(math.log(maxcolor+1, 2))
+
 # display color array
 
 if not hexbitmaponly:
-	sys.stdout.write("""
-	unsigned int const C_""" + bname + """_colors[] = {
-	""");
+	sys.stdout.write("""#define GLYPH_""" + bname + """_WIDTH """ + str(width) + """
+""")
+	sys.stdout.write("""#define GLYPH_""" + bname + """_HEIGHT """ + str(height) + """
+""")
+	sys.stdout.write("""#define GLYPH_""" + bname + """_BPP """ + str(bits_per_pixel) + """
+""")
+	sys.stdout.write("""unsigned int const C_""" + bname + """_colors[] = {
+""");
 	# color index encoding
 	for i in range(maxcolor+1):
 		sys.stdout.write("  0x00" + hexbyte(palette[i*3]) + hexbyte(palette[i*3+1]) + hexbyte(palette[i*3+2]) + ", \n")
-	sys.stdout.write("""
-	};
-
-	unsigned char const C_""" + bname + """_bitmap[] = {
-	  """);
+	sys.stdout.write("""};
+unsigned char const C_""" + bname + """_bitmap[] = {\n  """);
 else:
 	# write BPP
 	sys.stdout.write(hexbyte(int(math.log(maxcolor+1, 2))))
@@ -92,7 +109,6 @@ else:
 
 current_byte = 0
 current_bit = 0
-bits_per_pixel = int(math.log(maxcolor+1, 2))
 byte_count = 0;
 
 #packed, row preferred
@@ -134,9 +150,8 @@ if (current_bit > 0):
 
 if not hexbitmaponly:
 	# origin 0,0 is left top for blue, instead of left bottom for all image encodings
-	sys.stdout.write("""
-	};
+	sys.stdout.write("""};
 
 	  { """+str(width)+""", """+str(height)+""", """+str(int(math.log(maxcolor+1, 2)))+""", C_"""+bname+"""_colors, C_"""+bname+"""_bitmap},
 
-	""")
+""")
