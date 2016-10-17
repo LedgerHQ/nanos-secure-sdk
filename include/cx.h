@@ -603,35 +603,38 @@ SYSCALL int cx_hmac_sha256(unsigned char WIDE *key PLENGTH(key_len),
                            unsigned char WIDE *in PLENGTH(len),
                            unsigned int len, unsigned char *out PLENGTH(32));
 
-//#ifdef CX_PBKDF2
 /* ======================================================================= */
 /*                                  PKDF2                                  */
 /* ======================================================================= */
 
 /**
+ * Compute pbkdf2 bytes sequence as specified by RFC 2898.
+ * The undelying hash function is SHA512
+ *
  * @param [in]  password
- *    password
+ *    The hmac key
  * @param [in]  passwordlen
- *    password len
+ *    The hmac key bytes length
  * @param [in]  salt
- *    salt
+ *    The initial salt.
+ *    The last four bytes muste be zero and are modified and internally used
+ *    by the function.
  * @param [in]  saltlen
- *    salt value
+ *    The salt key bytes length, last four zero bytes included.
  * @param [in]  iterations
- *    iteration
+ *    Per block iteration.
  * @param [in]  out
- *    where to put result
+ *    Where to put result.
  * @param [in] outLength
- *    how many...
+ *    How many bytes to generate.
  *
  */
-SYSCALL void cx_pbkdf2_sha512(unsigned char *password PLENGTH(passwordlen),
+SYSCALL void cx_pbkdf2_sha512(unsigned char WIDE *password PLENGTH(passwordlen),
                               unsigned short passwordlen,
                               unsigned char *salt PLENGTH(saltlen),
                               unsigned short saltlen, unsigned int iterations,
                               unsigned char *out PLENGTH(outLength),
                               unsigned int outLength);
-//#endif // CX_PBKDF2
 
 /* ####################################################################### */
 /*                               CIPHER/SIGNATURE                          */
@@ -883,7 +886,7 @@ typedef struct cx_rsa_3072_private_key_s cx_rsa_3072_private_key_t;
 /* 4096 bits */
 struct cx_rsa_4096_public_key_s {
     unsigned int size;
-    unsigned char e[512];
+    unsigned char e[4];
     unsigned char n[512];
 };
 struct cx_rsa_4096_private_key_s {
@@ -1139,10 +1142,17 @@ SYSCALL int cx_rsa_decrypt(cx_rsa_private_key_t WIDE *key
 
 enum cx_curve_e {
     CX_CURVE_NONE,
-    CX_CURVE_256K1,
-    CX_CURVE_256R1,
-    CX_CURVE_192K1,
-    CX_CURVE_192R1,
+    /* SecP group */
+    CX_CURVE_SECP256K1,
+    CX_CURVE_256K1 = CX_CURVE_SECP256K1,
+    CX_CURVE_SECP256R1,
+    CX_CURVE_256R1 = CX_CURVE_SECP256R1,
+    /*  BrainPool */
+    CX_CURVE_BrainPoolP256R1,
+    CX_CURVE_BrainPoolP256T1,
+    /* NIST */
+    CX_CURVE_NISTP256 = CX_CURVE_SECP256R1,
+
     CX_CURVE_Ed25519,
 };
 typedef enum cx_curve_e cx_curve_t;
@@ -1866,9 +1876,11 @@ SYSCALL void cx_math_multm(unsigned char *r PLENGTH(len),
  * @param len   byte length of r, a, b, m
  *
  */
-void cx_math_powm(unsigned char *r PLENGTH(len), unsigned char *a PLENGTH(len),
-                  unsigned char WIDE *e PLENGTH(len_e), unsigned int len_e,
-                  unsigned char WIDE *m PLENGTH(len), unsigned int len);
+SYSCALL void cx_math_powm(unsigned char *r PLENGTH(len),
+                          unsigned char *a PLENGTH(len),
+                          unsigned char WIDE *e PLENGTH(len_e),
+                          unsigned int len_e,
+                          unsigned char WIDE *m PLENGTH(len), unsigned int len);
 
 /**
  * Reduce in place (left zero padded) the given value: v = v mod m

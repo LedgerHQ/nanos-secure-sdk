@@ -109,7 +109,7 @@ SECTIONS
   /****************************************************************/
 
   /* remove the debugging information from the standard libraries */
-  DISCARD (NOLOAD) :
+  DEBUG (NOLOAD) :
   {
     libc.a ( * )
     libm.a ( * )

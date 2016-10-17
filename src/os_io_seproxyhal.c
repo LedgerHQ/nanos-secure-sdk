@@ -66,6 +66,15 @@ void os_io_seproxyhal_general_status_processing(void) {
 }
 */
 
+
+void io_seproxyhal_request_mcu_status(void) {
+  // send the general status
+  G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_REQUEST_STATUS;
+  G_io_seproxyhal_spi_buffer[1] = 0;
+  G_io_seproxyhal_spi_buffer[2] = 0;
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
+}
+
 //#define WAIT_MS(x) { volatile unsigned int i = 0xAA*x; while (i--); }
 
 #ifdef HAVE_IO_USB
@@ -226,6 +235,8 @@ const char debug_apdus[] = {
 #endif // DEBUG_APDU
 
 void io_seproxyhal_init(void) {
+  // Enforce OS compatibility
+  check_api_level(CX_COMPAT_APILEVEL);
   G_io_apdu_state = APDU_IDLE;
   G_io_apdu_offset = 0;
   G_io_apdu_length = 0;

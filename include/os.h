@@ -124,7 +124,10 @@ unsigned int pic(unsigned int linked_address);
 // must be set on one application in the registry which is used
 #define APPLICATION_FLAG_BOLOS_UX 0x8
 
-#define APPLICATION_FLAG_SEED_RAW 0x10
+// application is allowed to use the raw master seed, if not set, at least a
+// level of derivation is required.
+#define APPLICATION_FLAG_DERIVE_MASTER 0x10
+
 #define APPLICATION_FLAG_SHARED_NVRAM 0x20
 #define APPLICATION_FLAG_GLOBAL_PIN 0x40
 
@@ -218,6 +221,9 @@ void os_xor(void *dst, void WIDE *src1, void WIDE *src2, unsigned short length);
 
 // patch point, address used to dispatch, no index
 REENTRANT(void patch(void));
+
+// check API level
+SYSCALL void check_api_level(unsigned int apiLevel);
 
 // reset the chip
 SYSCALL REENTRANT(void reset(void));
@@ -435,6 +441,7 @@ typedef enum bolos_ux_e {
     BOLOS_UX_LOADER, // display loader screen or advance it
 
     BOLOS_UX_VALIDATE_PIN,
+    BOLOS_UX_CHANGE_ALTERNATE_PIN,
     BOLOS_UX_WIPED_DEVICE,
     BOLOS_UX_CONSENT_UPGRADE,
     BOLOS_UX_CONSENT_APP_ADD,
@@ -442,6 +449,8 @@ typedef enum bolos_ux_e {
     BOLOS_UX_CONSENT_APP_UPG,
     BOLOS_UX_CONSENT_ISSUER_KEY,
     BOLOS_UX_CONSENT_FOREIGN_KEY,
+    BOLOS_UX_CONSENT_GET_DEVICE_NAME,
+    BOLOS_UX_CONSENT_SET_DEVICE_NAME,
     BOLOS_UX_APPEXIT,
     BOLOS_UX_KEYBOARD,
 
@@ -574,6 +583,10 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_pin(
     unsigned char *pin PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_seed(
     unsigned char *seed PLENGTH(length), unsigned int length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_alternate_pin(
+    unsigned char *pin PLENGTH(pinLength), unsigned int pinLength);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_alternate_seed(
+    unsigned char *seed PLENGTH(seedLength), unsigned int seedLength);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(
     unsigned char *words PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_devname(
@@ -584,6 +597,11 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 // NBA : could also be checked by applications running in unsecure mode - thus
 // unprivilegied
 SYSCALL unsigned int os_perso_isonboarded(void);
+// NBA : also unprivileged, minor privacy risk as it is set voluntarily by the
+// user
+SYSCALL unsigned int
+os_perso_get_devname(unsigned char *devname PLENGTH(length),
+                     unsigned int length);
 
 // derive the user top node on the given BIP32 path
 SYSCALL void os_perso_derive_node_bip32(
@@ -717,6 +735,7 @@ typedef enum os_setting_e {
     OS_SETTING_BRIGHTNESS,
     OS_SETTING_INVERT,
     OS_SETTING_ROTATION,
+    OS_SETTING_SHUFFLE_PIN,
 
     OS_SETTING_LAST, //
 } os_setting_t;

@@ -32,6 +32,7 @@
  *
  */
 
+#include "os.h"
 #include "clock.h"
 #include "gp_timer.h"
 

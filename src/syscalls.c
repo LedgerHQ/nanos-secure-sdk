@@ -19,6 +19,23 @@
 #include "os.h"
 #include "syscalls.h"
 
+void check_api_level ( unsigned int apiLevel ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+1];
+  parameters[0] = (unsigned int)SYSCALL_check_api_level_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)apiLevel;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_check_api_level_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
 void reset ( void ) 
 {
   unsigned int ret;
@@ -1299,6 +1316,28 @@ void cx_math_multm ( unsigned char * r, unsigned char * a, unsigned char * b, un
   }
 }
 
+void cx_math_powm ( unsigned char * r, unsigned char * a, unsigned char * e, unsigned int len_e, unsigned char * m, unsigned int len ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+6];
+  parameters[0] = (unsigned int)SYSCALL_cx_math_powm_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)r;
+  parameters[3] = (unsigned int)a;
+  parameters[4] = (unsigned int)e;
+  parameters[5] = (unsigned int)len_e;
+  parameters[6] = (unsigned int)m;
+  parameters[7] = (unsigned int)len;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_cx_math_powm_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
 void cx_math_modm ( unsigned char * v, unsigned int len_v, unsigned char * m, unsigned int len_m ) 
 {
   unsigned int ret;
@@ -1448,6 +1487,42 @@ void os_perso_set_seed ( unsigned char * seed, unsigned int length )
   }
 }
 
+void os_perso_set_alternate_pin ( unsigned char * pin, unsigned int pinLength ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)SYSCALL_os_perso_set_alternate_pin_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)pin;
+  parameters[3] = (unsigned int)pinLength;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_os_perso_set_alternate_pin_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
+void os_perso_set_alternate_seed ( unsigned char * seed, unsigned int seedLength ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)SYSCALL_os_perso_set_alternate_seed_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)seed;
+  parameters[3] = (unsigned int)seedLength;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_os_perso_set_alternate_seed_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
 void os_perso_set_words ( unsigned char * words, unsigned int length ) 
 {
   unsigned int ret;
@@ -1511,6 +1586,25 @@ unsigned int os_perso_isonboarded ( void )
                               asm volatile("svc #1");
                               asm volatile("mov %0, r0":"=r"(ret));
                                 if (parameters[0] != SYSCALL_os_perso_isonboarded_ID_OUT)
+  {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (unsigned int)ret;
+}
+
+unsigned int os_perso_get_devname ( unsigned char * devname, unsigned int length ) 
+{
+  unsigned int ret;
+  unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)SYSCALL_os_perso_get_devname_ID_IN;
+  parameters[1] = (unsigned int)G_try_last_open_context->jmp_buf;
+  parameters[2] = (unsigned int)devname;
+  parameters[3] = (unsigned int)length;
+
+                              asm volatile("mov r0, %0"::"r"(parameters));
+                              asm volatile("svc #1");
+                              asm volatile("mov %0, r0":"=r"(ret));
+                                if (parameters[0] != SYSCALL_os_perso_get_devname_ID_OUT)
   {
     THROW(EXCEPTION_SECURITY);
   }
