@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -193,13 +193,13 @@ SYSCALL unsigned char *cx_rng(unsigned char *buffer PLENGTH(len),
 enum cx_md_e {
     CX_NONE,
     CX_RIPEMD160, // 20 bytes
-    CX_SHA224, // 28 bytes
-    CX_SHA256, // 32 bytes
-    CX_SHA384, // 48 bytes
-    CX_SHA512, // 64 bytes
-    CX_KECCAK, // 28,32,48,64 bytes
-    CX_SHA3, // 28,32,48,64 bytes
-    CX_SHA3_XOF, // any bytes
+    CX_SHA224,    // 28 bytes
+    CX_SHA256,    // 32 bytes
+    CX_SHA384,    // 48 bytes
+    CX_SHA512,    // 64 bytes
+    CX_KECCAK,    // 28,32,48,64 bytes
+    CX_SHA3,      // 28,32,48,64 bytes
+    CX_SHA3_XOF,  // any bytes
 };
 typedef enum cx_md_e cx_md_t;
 
@@ -1175,7 +1175,7 @@ typedef struct cx_curve_weierstrass_s {
     CX_CURVE_HEADER;
     unsigned char WIDE *a; // Weierstrass a coef
     unsigned char WIDE *b; // Weierstrass b coef
-    int h; // Weierstrass cofactor
+    int h;                 // Weierstrass cofactor
 } cx_curve_weierstrass_t;
 
 /*
@@ -1183,9 +1183,9 @@ typedef struct cx_curve_weierstrass_s {
  */
 typedef struct cx_curve_twisted_edward_t {
     CX_CURVE_HEADER;
-    unsigned char WIDE *a; // T Edward a coef
-    unsigned char WIDE *d; // T Edward d coef
-    unsigned char WIDE *I; // Square root of -1
+    unsigned char WIDE *a;  // T Edward a coef
+    unsigned char WIDE *d;  // T Edward d coef
+    unsigned char WIDE *I;  // Square root of -1
     unsigned char WIDE *Q3; //(q+3)/8
 } cx_curve_twisted_edward_t;
 

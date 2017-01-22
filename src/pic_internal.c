@@ -15,19 +15,16 @@
 *  limitations under the License.
 ********************************************************************************/
 
-// gloomy fake definition to avoid problem with O3 and llvm with ignored return value in the caller
-unsigned int pic_internal(unsigned int link_address);
+unsigned int pic_internal(unsigned int link_address) __attribute__((naked));
+unsigned int pic_internal(unsigned int link_address) 
+{
+  // compute the delta offset between LinkMemAddr & ExecMemAddr
+  __asm volatile ("mov r2, pc\n");          // r2 = 0x109004
+  __asm volatile ("ldr r1, =pic_internal\n");        // r1 = 0xC0D00001
+  __asm volatile ("adds r1, r1, #3\n");     // r1 = 0xC0D00004
+  __asm volatile ("subs r1, r1, r2\n");     // r1 = 0xC0BF7000 (delta between load and exec address)
 
-// only apply PIC conversion if link_address is in linked code (over 0xC0D00000 in our example)
-// this way, PIC call are armless if the address is not meant to be converted
-extern unsigned int _nvram;
-extern unsigned int _envram;
-unsigned int pic(unsigned int link_address) {
-//  screen_printf(" %08X", link_address);
-	if (link_address >= ((unsigned int)&_nvram) && link_address < ((unsigned int)&_envram)) {
-		link_address = pic_internal(link_address);
-//    screen_printf(" -> %08X\n", link_address);
-  }
-	return link_address;
+  // adjust value of the given parameter
+  __asm volatile ("subs r0, r0, r1\n");     // r0 = 0xC0D0C244 => r0 = 0x115244
+  __asm volatile ("bx lr\n");
 }
-

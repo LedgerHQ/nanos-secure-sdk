@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -246,7 +246,7 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
 }
 #endif // HAVE_USB_APDU
 
-REENTRANT(void os_memmove(void * dst, const void WIDE * src, unsigned short length)) {
+REENTRANT(void os_memmove(void * dst, const void WIDE * src, unsigned int length)) {
 #define DSTCHAR ((unsigned char *)dst)
 #define SRCCHAR ((unsigned char WIDE *)src)
   if (dst > src) {
@@ -264,7 +264,7 @@ REENTRANT(void os_memmove(void * dst, const void WIDE * src, unsigned short leng
 #undef DSTCHAR
 }
 
-void os_memset(void * dst, unsigned char c, unsigned short length) {
+void os_memset(void * dst, unsigned char c, unsigned int length) {
 #define DSTCHAR ((unsigned char *)dst)
   while(length--) {
     DSTCHAR[length] = c;
@@ -272,7 +272,7 @@ void os_memset(void * dst, unsigned char c, unsigned short length) {
 #undef DSTCHAR
 }
 
-char os_memcmp(const void WIDE * buf1, const void WIDE * buf2, unsigned short length) {
+char os_memcmp(const void WIDE * buf1, const void WIDE * buf2, unsigned int length) {
 #define BUF1 ((unsigned char const WIDE *)buf1)
 #define BUF2 ((unsigned char const WIDE *)buf2)
   while(length--) {
@@ -286,7 +286,7 @@ char os_memcmp(const void WIDE * buf1, const void WIDE * buf2, unsigned short le
 
 }
 
-void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned short length) {
+void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned int length) {
 #define SRC1 ((unsigned char const WIDE *)src1)
 #define SRC2 ((unsigned char const WIDE *)src2)
 #define DST ((unsigned char *)dst)

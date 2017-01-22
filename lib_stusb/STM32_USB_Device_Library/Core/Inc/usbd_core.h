@@ -81,6 +81,9 @@
   * @{
   */ 
 #define USBD_SOF          USBD_LL_SOF
+
+// the USB device
+extern USBD_HandleTypeDef USBD_Device;
 /**
   * @}
   */ 

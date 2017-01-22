@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -24,14 +24,23 @@
 
 #include "seproxyhal_protocol.h"
 
+// helper macro to swap values, without intermediate value
+#define SWAP(a, b)                                                             \
+    {                                                                          \
+        a ^= b;                                                                \
+        b ^= a;                                                                \
+        a ^= b;                                                                \
+    }
+
 #ifdef HAVE_BAGL
 #include "bagl.h"
 
 typedef struct bagl_element_e bagl_element_t;
 
-// callback returns 0 when element must not be redrawn (with a changing color or
-// what so ever)
-typedef unsigned int (*bagl_element_callback_t)(const bagl_element_t *element);
+// callback returns NULL when element must not be redrawn (with a changing color
+// or what so ever)
+typedef const bagl_element_t *(*bagl_element_callback_t)(
+    const bagl_element_t *element);
 
 // a graphic element is an element with defined text and actions depending on
 // user touches
@@ -47,6 +56,7 @@ struct bagl_element_e {
     bagl_element_callback_t over;
 };
 
+extern bagl_element_t *volatile G_bagl_last_touched_not_released_component;
 // touch management helper function (callback the call with the element for the
 // given position, taking into account touch release)
 void io_seproxyhal_touch(const bagl_element_t *elements,
@@ -134,6 +144,8 @@ void os_io_seproxyhal_general_status_processing(void);
 
 void io_usb_send_apdu_data(unsigned char *buffer, unsigned short length);
 
+void io_usb_ccid_reply(unsigned char *buffer, unsigned short length);
+
 typedef enum {
     APDU_IDLE,
     APDU_BLE,
@@ -143,6 +155,7 @@ typedef enum {
     APDU_NFC_M24SR_FIRST,
     APDU_NFC_M24SR_RAPDU,
     APDU_USB_HID,
+    APDU_USB_CCID,
 } io_apdu_state_e;
 
 extern volatile io_apdu_state_e G_io_apdu_state; // by default
@@ -230,53 +243,172 @@ typedef struct ux_state_s {
     bagl_element_callback_t
         elements_preprocessor; // called before an element is displayed
     button_push_callback_t button_push_handler;
+    unsigned int callback_interval_ms;
+    bolos_ux_params_t params;
 } ux_state_t;
 extern ux_state_t ux;
 
+/**
+ * Initialize the user experience structure
+ */
 #define UX_INIT() os_memset(&ux, 0, sizeof(ux));
 
-#define UX_DISPLAY(elements_array, preprocessor)                               \
-    ux.elements = elements_array;                                              \
-    ux.elements_count = sizeof(elements_array) / sizeof(elements_array[0]);    \
-    ux.elements_current = 1;                                                   \
-    ux.button_push_handler = elements_array##_button;                          \
-    ux.elements_preprocessor = preprocessor;                                   \
-    if (ux.elements && (!ux.elements_preprocessor ||                           \
-                        ux.elements_preprocessor(&elements_array[0]))) {       \
-        io_seproxyhal_display(&elements_array[0]);                             \
-    }
+/**
+ * Setup the status bar foreground and background colors.
+ */
+#define UX_SET_STATUS_BAR_COLOR(fg, bg)                                        \
+    ux.params.ux_id = BOLOS_UX_STATUS_BAR;                                     \
+    ux.params.len = 0;                                                         \
+    ux.params.u.status_bar.fgcolor = fg;                                       \
+    ux.params.u.status_bar.bgcolor = bg;                                       \
+    os_ux(&ux.params);
 
-#define UX_REDISPLAY()                                                         \
-    ux.elements_current = 1;                                                   \
-    if (ux.elements && (!ux.elements_preprocessor ||                           \
-                        ux.elements_preprocessor(&ux.elements[0]))) {          \
-        io_seproxyhal_display(&ux.elements[0]);                                \
-    }
-
-#define UX_DISPLAYED() (ux.elements_current >= ux.elements_count)
-
-#define UX_DISPLAY_PROCESSED_EVENT()                                           \
-    while (ux.elements && ux.elements_current < ux.elements_count) {           \
+/**
+ * Request displaying the next element in the UX structure.
+ * Take into account if a seproxyhal status has already been issued.
+ * Take into account if the next element is allowed/denied for display by the
+ * registered preprocessor
+ */
+#define UX_DISPLAY_NEXT_ELEMENT()                                              \
+    while (ux.elements && ux.elements_current < ux.elements_count &&           \
+           !io_seproxyhal_spi_is_status_sent()) {                              \
+        const bagl_element_t *element = &ux.elements[ux.elements_current];     \
         if (!ux.elements_preprocessor ||                                       \
-            ux.elements_preprocessor(&ux.elements[ux.elements_current])) {     \
-            io_seproxyhal_display(&ux.elements[ux.elements_current++]);        \
+            (element = ux.elements_preprocessor(element))) {                   \
+            if ((unsigned int)element ==                                       \
+                1) { /*backward compat with coding to avoid smashing           \
+                        everything*/                                           \
+                element = &ux.elements[ux.elements_current];                   \
+            }                                                                  \
+            io_seproxyhal_display(element);                                    \
+            ux.elements_current++;                                             \
             break;                                                             \
         }                                                                      \
         ux.elements_current++;                                                 \
     }
 
-#define UX_BUTTON_PUSH_EVENT(seph_packet)                                      \
-    if (ux.button_push_handler) {                                              \
-        io_seproxyhal_button_push(ux.button_push_handler,                      \
-                                  seph_packet[3] >> 1);                        \
+/**
+ * Request a wake up of the device (backlight, pin lock screen, ...) to display
+ * a new interface to the user
+ */
+#define UX_WAKE_UP() ux.params.len = BOLOS_UX_OK
+
+/**
+ * Force redisplay of the screen from the given index in the screen's element
+ * array
+ */
+#define UX_REDISPLAY_IDX(index)                                                \
+    io_seproxyhal_init_ux();                                                   \
+    ux.elements_current = index;                                               \
+    UX_WAKE_UP();                                                              \
+    /* REDRAW is redisplay already */                                          \
+    if (ux.params.len != BOLOS_UX_IGNORE &&                                    \
+        ux.params.len != BOLOS_UX_CONTINUE) {                                  \
+        UX_DISPLAY_NEXT_ELEMENT();                                             \
     }
 
-#define UX_FINGER_EVENT(seph_packet)                                           \
-    io_seproxyhal_touch(ux.elements, ux.elements_count,                        \
-                        (seph_packet[4] << 8) | (seph_packet[5] & 0xFF),       \
-                        (seph_packet[6] << 8) | (seph_packet[7] & 0xFF),       \
-                        seph_packet[3]);
+/**
+ * Redisplay all elements of the screen
+ */
+#define UX_REDISPLAY() UX_REDISPLAY_IDX(0)
 
+#define UX_DISPLAY(elements_array, preprocessor)                               \
+    ux.elements = elements_array;                                              \
+    ux.elements_count = sizeof(elements_array) / sizeof(elements_array[0]);    \
+    ux.button_push_handler = elements_array##_button;                          \
+    ux.elements_preprocessor = preprocessor;                                   \
+    UX_REDISPLAY();
+
+/**
+ * Request a screen redisplay after the given milliseconds interval has passed.
+ * Interval is not repeated, it's a single shot callback. must be reenabled (the
+ * JS way).
+ */
+#define UX_CALLBACK_SET_INTERVAL(ms) ux.callback_interval_ms = ms;
+
+/**
+ * internal bolos ux event processing with callback in case event is to be
+ * processed by the application
+ */
+
+#define UX_FORWARD_EVENT(callback, ignoring_app_if_ux_busy) callback
+/**
+ * Process display processed event (by the os_ux or by the application code)
+ */
+#define UX_DISPLAYED_EVENT(displayed_callback)                                 \
+    UX_FORWARD_EVENT(                                                          \
+        {                                                                      \
+            UX_DISPLAY_NEXT_ELEMENT();                                         \
+            /* all items have been displayed */                                \
+            if (ux.elements_current >= ux.elements_count &&                    \
+                !io_seproxyhal_spi_is_status_sent()) {                         \
+                displayed_callback                                             \
+            }                                                                  \
+        },                                                                     \
+        1)
+
+/**
+ * Deprecated version to be removed
+ */
+#define UX_DISPLAYED() (ux.elements_current >= ux.elements_count)
+
+/**
+ * Process button push events. Application's button event handler is called only
+ * if the ux app does not deny it (modal frame displayed).
+ */
+#define UX_BUTTON_PUSH_EVENT(seph_packet)                                      \
+    UX_FORWARD_EVENT(                                                          \
+        {                                                                      \
+            if (ux.button_push_handler) {                                      \
+                io_seproxyhal_button_push(ux.button_push_handler,              \
+                                          seph_packet[3] >> 1);                \
+            }                                                                  \
+        },                                                                     \
+        1);
+
+/**
+ * Process finger events. Application's finger event handler is called only if
+ * the ux app does not deny it (modal frame displayed).
+ */
+#define UX_FINGER_EVENT(seph_packet)                                           \
+    UX_FORWARD_EVENT(                                                          \
+        {                                                                      \
+            io_seproxyhal_touch_element_callback(                              \
+                ux.elements, ux.elements_count,                                \
+                (seph_packet[4] << 8) | (seph_packet[5] & 0xFF),               \
+                (seph_packet[6] << 8) | (seph_packet[7] & 0xFF),               \
+                seph_packet[3], ux.elements_preprocessor);                     \
+        },                                                                     \
+        1);
+
+/**
+ * forward the ticker_event to the os ux handler. Ticker event callback is
+ * always called whatever the return code of the ux app.
+ * Ticker event interval is assumed to be 100 ms.
+ */
+#define UX_TICKER_EVENT(seph_packet, callback)                                 \
+    UX_FORWARD_EVENT(                                                          \
+        {                                                                      \
+            if (ux.callback_interval_ms) {                                     \
+                ux.callback_interval_ms -= MIN(ux.callback_interval_ms, 100);  \
+                if (!ux.callback_interval_ms) {                                \
+                    callback                                                   \
+                }                                                              \
+            }                                                                  \
+        },                                                                     \
+        0);
+
+/**
+ * Forward the event, ignoring the UX return code, the event must therefore be
+ * either not processed or processed with extreme care by the application
+ * afterwards
+ */
+#define UX_DEFAULT_EVENT() UX_FORWARD_EVENT({}, 0);
+
+/**
+ * Setup the TICKER_EVENT interval. Application shall not use this entry point
+ * as it's the main ticking source. Use the ::UX_SET_INTERVAL_MS instead.
+ */
 void io_seproxyhal_setup_ticker(unsigned int interval_ms);
 
 void io_seproxyhal_request_mcu_status(void);
@@ -286,11 +418,36 @@ void io_seproxyhal_request_mcu_status(void);
  * color index, a table of size: (1<<bit_per_pixel) with little endian encoded
  * colors.
  */
-void io_seproxyhal_display_bitmap(unsigned int x, unsigned int y,
-                                  unsigned int w, unsigned int h,
+void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h,
                                   unsigned int *color_index,
                                   unsigned int bit_per_pixel,
                                   unsigned char *bitmap);
+
+void io_seproxyhal_power_off(void);
+
+void io_seproxyhal_se_reset(void);
+
+void io_seproxyhal_disable_io(void);
+
+void io_seproxyhal_backlight(unsigned int flags,
+                             unsigned int backlight_percentage);
+
+/**
+ * helper structure to help handling icons
+ */
+typedef struct bagl_icon_details_s {
+    // bit per pixel
+    unsigned int bpp;
+    const unsigned int *colors;
+    const unsigned char *bitmap;
+} bagl_icon_details_t;
+
+/**
+ * Helper function to send the given bitmap splitting into multiple DISPLAY_RAW
+ * packet as the bitmap is not meant to fit in a single SEPROXYHAL packet.
+ */
+void io_seproxyhal_display_icon(bagl_component_t *icon_component,
+                                bagl_icon_details_t *icon_details);
 
 #endif // OS_IO_SEPROXYHAL
 

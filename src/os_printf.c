@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -775,7 +775,7 @@ again:
                 //
                 case '.':
                 {
-                  // ensure next char is '*' and next one is 's'
+                  // ensure next char is '*' and next one is 's'/'h'/'H'
                   if (format[0] == '*' && (format[1] == 's' || format[1] == 'H' || format[1] == 'h')) {
                     
                     // skip '*' char
@@ -852,7 +852,7 @@ again:
                         
                           // padd ulStrlen white space
                           ulStrlen = MIN(ulStrlen, str_size);
-                          os_memset(str, " ", ulStrlen);
+                          os_memset(str, ' ', ulStrlen);
                           str+= ulStrlen;
                           str_size -= ulStrlen;
                           if (str_size == 0) {
@@ -891,11 +891,11 @@ again:
                           switch(ulCap) {
                             case 0:
                                 str[0] = g_pcHex[nibble1];
-                                str[1] = g_pcHex[nibble1];
+                                str[1] = g_pcHex[nibble2];
                                 break;
                             case 1:
                                 str[0] = g_pcHex_cap[nibble1];
-                                str[1] = g_pcHex_cap[nibble1];
+                                str[1] = g_pcHex_cap[nibble2];
                               break;
                           }
                           str+= 2;
@@ -916,7 +916,7 @@ s_pad:
                     {
                         ulCount -= ulIdx;
                         ulCount = MIN(ulCount, str_size);
-                        os_memset(str, " ", ulCount);
+                        os_memset(str, ' ', ulCount);
                         str+= ulCount;
                         str_size -= ulCount;
                         if (str_size == 0) {
@@ -1094,7 +1094,7 @@ convert:
                     //
                     // Simply write a single %.
                     //
-                    str[0] = "%";
+                    str[0] = '%';
                     str++;
                     str_size --;
                     if (str_size == 0) {

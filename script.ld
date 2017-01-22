@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ MEMORY
 }
 
 PAGE_SIZE  = 256;
-STACK_SIZE = 1500;
+STACK_SIZE = 1024;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
 
 SECTIONS
@@ -45,6 +45,7 @@ SECTIONS
   {
     /* provide start code symbol, shall be zero */
     _text = .;
+    _nvram = .;
 
     PROVIDE(_setjmp = setjmp); /*thanks clang*/
 
@@ -53,8 +54,8 @@ SECTIONS
     
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
     *(.text*)
-    *(.rodata.[A-MO-Za-z_]*) /*.data.rel.ro* not here to detect invalid PIC usage */
-    *(.rodata.N[A-MO-Za-z]*)
+    *(.rodata.[^N]*) /*.data.rel.ro* not here to detect invalid PIC usage */
+    *(.rodata.N[^_]*)
 
     . = ALIGN(4);
     
@@ -65,6 +66,9 @@ SECTIONS
     
     /* NVM data (ex-filesystem) */
     *(.bss.N_* .rodata.N_*)
+
+    . = ALIGN(PAGE_SIZE);
+    _envram = .;
     
   } > FLASH = 0x00
 

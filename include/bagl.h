@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Non secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@
     (BAGL_FILL_CIRCLE_5_OCTANT | BAGL_FILL_CIRCLE_6_OCTANT)
 #define BAGL_FILL_CIRCLE_PI2_PI                                                \
     (BAGL_FILL_CIRCLE_7_OCTANT | BAGL_FILL_CIRCLE_8_OCTANT)
+
 
 // --------------------------------------------------------------------------------------
 

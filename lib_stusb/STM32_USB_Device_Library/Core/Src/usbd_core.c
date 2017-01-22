@@ -39,48 +39,8 @@
 * @{
 */ 
 
-/** @defgroup USBD_CORE_Private_TypesDefinitions
-* @{
-*/ 
-/**
-* @}
-*/ 
+USBD_HandleTypeDef USBD_Device;
 
-
-/** @defgroup USBD_CORE_Private_Defines
-* @{
-*/ 
-
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBD_CORE_Private_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-
-
-/** @defgroup USBD_CORE_Private_FunctionPrototypes
-* @{
-*/ 
-
-/**
-* @}
-*/ 
-
-/** @defgroup USBD_CORE_Private_Variables
-* @{
-*/ 
-
-/**
-* @}
-*/ 
 
 /** @defgroup USBD_CORE_Private_Functions
 * @{
@@ -266,7 +226,6 @@ USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx
 */
 USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef *pdev, uint8_t *psetup)
 {
-
   USBD_ParseSetupRequest(&pdev->request, psetup);
   
   pdev->ep0_state = USBD_EP0_SETUP;
@@ -357,6 +316,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
       if(pep->rem_length > pep->maxpacket)
       {
         pep->rem_length -=  pep->maxpacket;
+        pdev->pData += pep->maxpacket;
        
         /* Prepare endpoint for premature end of transfer */
         /*
@@ -366,7 +326,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
         */
         
         USBD_CtlContinueSendData (pdev, 
-                                  pdata, 
+                                  pdev->pData, 
                                   pep->rem_length);
         
       }
@@ -461,8 +421,9 @@ USBD_StatusTypeDef USBD_LL_SetSpeed(USBD_HandleTypeDef  *pdev, USBD_SpeedTypeDef
 
 USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef  *pdev)
 {
-  pdev->dev_old_state =  pdev->dev_state;
-  pdev->dev_state  = USBD_STATE_SUSPENDED;
+  // Ignored, gently
+  //pdev->dev_old_state =  pdev->dev_state;
+  //pdev->dev_state  = USBD_STATE_SUSPENDED;
   return USBD_OK;
 }
 
@@ -475,7 +436,8 @@ USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef  *pdev)
 
 USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef  *pdev)
 {
-  pdev->dev_state = pdev->dev_old_state;  
+  // Ignored, gently
+  //pdev->dev_state = pdev->dev_old_state;  
   return USBD_OK;
 }
 

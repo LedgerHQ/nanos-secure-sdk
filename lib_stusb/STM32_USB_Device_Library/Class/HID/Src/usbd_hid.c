@@ -90,7 +90,7 @@ uint8_t  USBD_HID_Setup (USBD_HandleTypeDef *pdev,
       
     case HID_REQ_SET_PROTOCOL:
       //hhid->Protocol = (uint8_t)(req->wValue);
-      USBD_CtlSendStatus(pdev);
+      //USBD_CtlSendStatus(pdev);
       break;
       
     case HID_REQ_GET_PROTOCOL:
@@ -103,7 +103,7 @@ uint8_t  USBD_HID_Setup (USBD_HandleTypeDef *pdev,
       
     case HID_REQ_SET_IDLE:
       //hhid->IdleState = (uint8_t)(req->wValue >> 8);
-      USBD_CtlSendStatus(pdev);
+      //USBD_CtlSendStatus(pdev);
       break;
       
     case HID_REQ_GET_IDLE:
@@ -124,11 +124,13 @@ uint8_t  USBD_HID_Setup (USBD_HandleTypeDef *pdev,
     switch (req->bRequest)
     {
     case USB_REQ_GET_DESCRIPTOR: 
+      // 0x22
       if( req->wValue >> 8 == HID_REPORT_DESC)
       {
         pbuf =  USBD_HID_GetReportDescriptor_impl(&len);
         len = MIN(len , req->wLength);
       }
+      // 0x21
       else if( req->wValue >> 8 == HID_DESCRIPTOR_TYPE)
       {
         pbuf = USBD_HID_GetHidDescriptor_impl(&len);
@@ -170,7 +172,7 @@ uint8_t  USBD_HID_Setup (USBD_HandleTypeDef *pdev,
   * @param  cfgidx: Configuration index
   * @retval status
   */
-static uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev, 
+uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev, 
                                uint8_t cfgidx)
 {
   UNUSED(cfgidx);
@@ -207,7 +209,7 @@ static uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev,
   * @param  cfgidx: Configuration index
   * @retval status
   */
-static uint8_t  USBD_HID_DeInit (USBD_HandleTypeDef *pdev, 
+uint8_t  USBD_HID_DeInit (USBD_HandleTypeDef *pdev, 
                                  uint8_t cfgidx)
 {
   UNUSED(cfgidx);
@@ -221,24 +223,6 @@ static uint8_t  USBD_HID_DeInit (USBD_HandleTypeDef *pdev,
   
   return USBD_OK;
 }
-
-const USBD_ClassTypeDef const USBD_HID = 
-{
-  USBD_HID_Init,
-  USBD_HID_DeInit,
-  USBD_HID_Setup,
-  NULL, /*EP0_TxSent*/  
-  NULL, /*EP0_RxReady*/ /* STATUS STAGE IN */
-  NULL, /*DataIn*/
-  USBD_HID_DataOut_impl, /*DataOut*/
-  NULL, /*SOF */
-  NULL,
-  NULL,      
-  USBD_HID_GetCfgDesc_impl,
-  USBD_HID_GetCfgDesc_impl, 
-  USBD_HID_GetCfgDesc_impl,
-  USBD_HID_GetDeviceQualifierDesc_impl,
-};
 
 /**
   * @}

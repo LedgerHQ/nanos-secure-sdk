@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 
 #ifndef OS_H
 #define OS_H
+
+#include "bolos_target.h"
 
 /**
  * Quality development guidelines:
@@ -54,11 +56,11 @@ void longjmp(jmp_buf __jmpb, int __retval);
 int setjmp(jmp_buf __jmpb);
 
 #define __MPU_PRESENT 1 // THANKS ST FOR YOUR HARDWORK
-#include <core_sc000.h>
 #include "stddef.h"
 #include "stdint.h"
+#include <core_sc000.h>
 
-#define UNUSED(x) (void) x
+#define UNUSED(x) (void)x
 
 #include "os_apilevel.h"
 
@@ -209,15 +211,15 @@ void os_boot();
      ((unsigned long int)(u32) << 24))
 
 REENTRANT(void os_memmove(void *dst, const void WIDE *src,
-                          unsigned short length));
+                          unsigned int length));
 #define os_memcpy os_memmove
 
-void os_memset(void *dst, unsigned char c, unsigned short length);
+void os_memset(void *dst, unsigned char c, unsigned int length);
 
 char os_memcmp(const void WIDE *buf1, const void WIDE *buf2,
-               unsigned short length);
+               unsigned int length);
 
-void os_xor(void *dst, void WIDE *src1, void WIDE *src2, unsigned short length);
+void os_xor(void *dst, void WIDE *src1, void WIDE *src2, unsigned int length);
 
 // patch point, address used to dispatch, no index
 REENTRANT(void patch(void));
@@ -247,6 +249,7 @@ typedef enum {
     IO_APDU_MEDIA_USB_HID = 1,
     IO_APDU_MEDIA_BLE,
     IO_APDU_MEDIA_NFC,
+    IO_APDU_MEDIA_USB_CCID,
 } io_apdu_media_t;
 
 extern volatile io_apdu_media_t G_io_apdu_media;
@@ -384,6 +387,7 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
 #define EXCEPTION_IO_OVERFLOW 13
 #define EXCEPTION_IO_HEADER 14
 #define EXCEPTION_IO_STATE 15
+#define EXCEPTION_IO_RESET 16
 
 // -----------------------------------------------------------------------
 // - BASIC MATHS
@@ -393,9 +397,12 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
     ((((hi3)&0xFF) << 24) | (((hi2)&0xFF) << 16) | (((lo1)&0xFF) << 8) |       \
      ((lo0)&0xFF))
 #define U2BE(buf, off) ((((buf)[off] & 0xFF) << 8) | ((buf)[off + 1] & 0xFF))
+#define U2LE(buf, off) ((((buf)[off + 1] & 0xFF) << 8) | ((buf)[off] & 0xFF))
 #define U4BE(buf, off) ((U2BE(buf, off) << 16) | (U2BE(buf, off + 2) & 0xFFFF))
+#define U4LE(buf, off) ((U2LE(buf, off + 2) << 16) | (U2LE(buf, off) & 0xFFFF))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define IS_POW2(x) (((x) & ((x)-1)) == 0)
 
 #ifdef macro_offsetof
 #define offsetof(type, field) ((unsigned int)&(((type *)NULL)->field))
@@ -466,6 +473,14 @@ typedef enum bolos_ux_e {
 #define BOLOS_UX_OK 0xB0105011
 #define BOLOS_UX_CANCEL 0xB0105022
 #define BOLOS_UX_ERROR 0xB0105033
+
+/* Value returned by os_ux to notify the application that the processed event
+ * must be discarded and not processed by the application. Generally due to
+ * handling of power management/dim/locking */
+#define BOLOS_UX_IGNORE 0xB0105044
+// a modal has destroyed the display, app needs to redraw its screen
+#define BOLOS_UX_REDRAW 0xB0105055
+// ux has not finished processing yet (not a final status)
 #define BOLOS_UX_CONTINUE 0
 
 /* ----------------------------------------------------------------------- */

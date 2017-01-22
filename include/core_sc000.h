@@ -116,9 +116,9 @@ extern "C" {
 #endif
 #endif
 
-#include <stdint.h>       /* standard types definitions                      */
-#include <core_cmInstr.h> /* Core Instruction Access                         */
 #include <core_cmFunc.h>  /* Core Function Access                            */
+#include <core_cmInstr.h> /* Core Instruction Access                         */
+#include <stdint.h>       /* standard types definitions                      */
 
 #endif /* __CORE_SC000_H_GENERIC */
 

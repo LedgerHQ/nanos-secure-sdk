@@ -78,8 +78,6 @@ HID_StateTypeDef;
   * @}
   */ 
 
-extern const USBD_ClassTypeDef const USBD_HID;
-
 /** @defgroup USBD_CORE_Exported_Macros
   * @{
   */ 
@@ -96,6 +94,12 @@ extern const USBD_ClassTypeDef const USBD_HID;
 uint8_t  USBD_HID_Setup (USBD_HandleTypeDef *pdev, 
                                 USBD_SetupReqTypedef *req);
 
+
+uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev, 
+                               uint8_t cfgidx);
+
+uint8_t  USBD_HID_DeInit (USBD_HandleTypeDef *pdev, 
+                                 uint8_t cfgidx);
 /**
   * @}
   */ 

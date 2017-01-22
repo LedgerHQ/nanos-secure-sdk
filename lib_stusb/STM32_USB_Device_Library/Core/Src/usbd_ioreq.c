@@ -101,8 +101,10 @@ USBD_StatusTypeDef  USBD_CtlSendData (USBD_HandleTypeDef  *pdev,
   pdev->ep0_state          = USBD_EP0_DATA_IN;                                      
   pdev->ep_in[0].total_length = len;
   pdev->ep_in[0].rem_length   = len;
+  // store the continuation data if needed
+  pdev->pData = pbuf;
  /* Start the transfer */
-  USBD_LL_Transmit (pdev, 0x00, pbuf, len);  
+  USBD_LL_Transmit (pdev, 0x00, pbuf, MIN(len, pdev->ep_in[0].maxpacket));  
   
   return USBD_OK;
 }
@@ -120,8 +122,7 @@ USBD_StatusTypeDef  USBD_CtlContinueSendData (USBD_HandleTypeDef  *pdev,
                                        uint16_t len)
 {
  /* Start the next transfer */
-  USBD_LL_Transmit (pdev, 0x00, pbuf, len);   
-  
+  USBD_LL_Transmit (pdev, 0x00, pbuf, MIN(len, pdev->ep_in[0].maxpacket));   
   return USBD_OK;
 }
 
