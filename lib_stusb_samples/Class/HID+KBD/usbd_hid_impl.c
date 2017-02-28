@@ -115,19 +115,23 @@
 #define USBD_VID                      0x2C97
 #if TARGET_ID == 0x31000002 // blue
 #define USBD_PID                      0x0000
-static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
-  4*2+2,
+const uint8_t const USBD_PRODUCT_FS_STRING[] = {
+  8*2+2,
   USB_DESC_TYPE_STRING,
   'B', 0,
   'l', 0,
   'u', 0,
   'e', 0,
+  ' ', 0,
+  'K', 0,
+  'B', 0,
+  'D', 0,
 };
 
 #elif TARGET_ID == 0x31100002 // nano s
 #define USBD_PID                      0x0001
-static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
-  6*2+2,
+const uint8_t const USBD_PRODUCT_FS_STRING[] = {
+  10*2+2,
   USB_DESC_TYPE_STRING,
   'N', 0,
   'a', 0,
@@ -135,11 +139,15 @@ static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'o', 0,
   ' ', 0,
   'S', 0,
+  ' ', 0,
+  'K', 0,
+  'B', 0,
+  'D', 0,
 };
 #elif TARGET_ID == 0x31200002 // aramis
 #define USBD_PID                      0x0002
-static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
-  6*2+2,
+const uint8_t const USBD_PRODUCT_FS_STRING[] = {
+  10*2+2,
   USB_DESC_TYPE_STRING,
   'A', 0,
   'r', 0,
@@ -147,6 +155,10 @@ static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'm', 0,
   'i', 0,
   's', 0,
+  ' ', 0,
+  'K', 0,
+  'B', 0,
+  'D', 0,
 };
 #else
 #error unknown TARGET_ID
@@ -185,9 +197,42 @@ static const uint8_t const USBD_MANUFACTURER_STRING[] = {
 #define USBD_INTERFACE_FS_STRING USBD_PRODUCT_FS_STRING
 #define USBD_CONFIGURATION_FS_STRING USBD_PRODUCT_FS_STRING
 
+const uint8_t const HID_ReportDesc_kbd[] = {
+  0x05, 0x01,
+  0x09, 0x06,
+  0xA1, 0x01,
+  0x05, 0x07,
+  0x19, 0xE0,
+  0x29, 0xE7,
+  0x15, 0x00,
+  0x25, 0x01,
+  0x75, 0x01,
+  0x95, 0x08,
+  0x81, 0x02,
+  0x95, 0x01,
+  0x75, 0x08,
+  0x81, 0x01,
+  0x95, 0x05,
+  0x75, 0x01,
+  0x05, 0x08,
+  0x19, 0x01,
+  0x29, 0x05,
+  0x91, 0x02,
+  0x95, 0x01,
+  0x75, 0x03,
+  0x91, 0x01,
+  0x95, 0x06,
+  0x75, 0x08,
+  0x15, 0x00,
+  0x25, 0x65,
+  0x05, 0x07,
+  0x19, 0x00,
+  0x29, 0x65,
+  0x81, 0x00,
+  0xC0
+};
 
-
-static const uint8_t const HID_ReportDesc[] = {
+const uint8_t const HID_ReportDesc[] = {
   0x06, 0xA0, 0xFF,       // Usage page (vendor defined)
   0x09, 0x01,     // Usage ID (vendor defined)
   0xA1, 0x01,     // Collection (application)
@@ -215,29 +260,66 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
 {
   0x09, /* bLength: Configuration Descriptor size */
   USB_DESC_TYPE_CONFIGURATION, /* bDescriptorType: Configuration */
-  0x29,
-  /* wTotalLength: Bytes returned */
+  0x49, /* wTotalLength: Bytes returned */
   0x00,
-  0x01,         /*bNumInterfaces: 1 interface*/
+  0x02,         /*bNumInterfaces */
   0x01,         /*bConfigurationValue: Configuration value*/
-  USBD_IDX_PRODUCT_STR,         /*iConfiguration: Index of string descriptor describing
-  the configuration*/
+  USBD_IDX_PRODUCT_STR, /*iConfiguration: Index of string descriptor describing the configuration*/
   0xC0,         /*bmAttributes: bus powered */
   0x32,         /*MaxPower 100 mA: this current is used for detecting Vbus*/
-  
-  /************** Descriptor of CUSTOM HID interface ****************/
-  /* 09 */
+
+  /************** Descriptor of KBD HID interface ****************/
   0x09,         /*bLength: Interface Descriptor size*/
   USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
   0x00,         /*bInterfaceNumber: Number of Interface*/
   0x00,         /*bAlternateSetting: Alternate setting*/
   0x02,         /*bNumEndpoints*/
   0x03,         /*bInterfaceClass: HID*/
+  0x01,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
+  0x01,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
+  USBD_IDX_PRODUCT_STR,            /*iInterface: Index of string descriptor*/
+
+  /******************** Descriptor of HID *************************/
+  0x09,         /*bLength: HID Descriptor size*/
+  HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
+  0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
+  0x01,
+  0x21,         /*bCountryCode: Hardware target country*/ // 0x21: US, 0x08: FR, 0x0D: ISO Intl
+  0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
+  0x22,         /*bDescriptorType*/
+  sizeof(HID_ReportDesc_kbd),/*wItemLength: Total length of Report descriptor*/
+  0x00,
+  /******************** Descriptor of Custom HID endpoints ********************/
+  0x07,          /*bLength: Endpoint Descriptor size*/
+  USB_DESC_TYPE_ENDPOINT, /*bDescriptorType:*/
+  0x81,     /*bEndpointAddress: Endpoint Address (IN)*/
+  0x03,          /*bmAttributes: Interrupt endpoint*/
+  8, /*wMaxPacketSize: */
+  0x00,
+  0x01,          /*bInterval: Polling Interval */
+
+  0x07,          /* bLength: Endpoint Descriptor size */
+  USB_DESC_TYPE_ENDPOINT, /* bDescriptorType: */
+  0x01,  /*bEndpointAddress: Endpoint Address (OUT)*/
+  0x03, /* bmAttributes: Interrupt endpoint */
+  8,  /* wMaxPacketSize: */
+  0x00,
+  0x01, /* bInterval: Polling Interval */
+
+
+  
+  /************** Descriptor of KBD HID interface ****************/
+  0x09,         /*bLength: Interface Descriptor size*/
+  USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
+  0x01,         /*bInterfaceNumber: Number of Interface*/
+  0x00,         /*bAlternateSetting: Alternate setting*/
+  0x02,         /*bNumEndpoints*/
+  0x03,         /*bInterfaceClass: HID*/
   0x00,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
   0x00,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
   USBD_IDX_PRODUCT_STR,            /*iInterface: Index of string descriptor*/
+
   /******************** Descriptor of HID *************************/
-  /* 18 */
   0x09,         /*bLength: HID Descriptor size*/
   HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
   0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
@@ -247,8 +329,8 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
   0x22,         /*bDescriptorType*/
   sizeof(HID_ReportDesc),/*wItemLength: Total length of Report descriptor*/
   0x00,
+
   /******************** Descriptor of Custom HID endpoints ********************/
-  /* 27 */
   0x07,          /*bLength: Endpoint Descriptor size*/
   USB_DESC_TYPE_ENDPOINT, /*bDescriptorType:*/
   HID_EPIN_ADDR,     /*bEndpointAddress: Endpoint Address (IN)*/
@@ -256,7 +338,6 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
   HID_EPIN_SIZE, /*wMaxPacketSize: 2 Byte max */
   0x00,
   0x01,          /*bInterval: Polling Interval (20 ms)*/
-  /* 34 */
   
   0x07,          /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT, /* bDescriptorType: */
@@ -265,12 +346,26 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
   HID_EPOUT_SIZE,  /* wMaxPacketSize: 2 Bytes max  */
   0x00,
   0x01, /* bInterval: Polling Interval (20 ms) */
-  /* 41 */
+
 } ;
 
+/* USB HID device Configuration Descriptor */
+__ALIGN_BEGIN const uint8_t const USBD_HID_Desc_kbd[] __ALIGN_END =
+{
+  /******************** Descriptor of HID *************************/
+  0x09,         /*bLength: HID Descriptor size*/
+  HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
+  0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
+  0x01,
+  0x21,         /*bCountryCode: Hardware target country*/ // 0x21: US, 0x08: FR, 0x0D: ISO Intl
+  0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
+  0x22,         /*bDescriptorType*/
+  sizeof(HID_ReportDesc_kbd),/*wItemLength: Total length of Report descriptor*/
+  0x00,
+};
 
 /* USB HID device Configuration Descriptor */
-static __ALIGN_BEGIN const uint8_t const USBD_HID_Desc[] __ALIGN_END =
+__ALIGN_BEGIN const uint8_t const USBD_HID_Desc[] __ALIGN_END =
 {
   /* 18 */
   0x09,         /*bLength: HID Descriptor size*/
@@ -318,7 +413,7 @@ static const uint8_t const USBD_DeviceDesc[]= {
   USBD_IDX_MFC_STR,           /* Index of manufacturer string */
   USBD_IDX_PRODUCT_STR,       /* Index of product string */
   USBD_IDX_SERIAL_STR,        /* Index of serial number string */
-  USBD_MAX_NUM_CONFIGURATION  /* bNumConfigurations */
+  1                           /* bNumConfigurations */
 }; /* USB_DeviceDescriptor */
 
 
@@ -438,14 +533,47 @@ static uint8_t  *USBD_GetCfgDesc_impl (uint16_t *length)
   return (uint8_t*)USBD_CfgDesc;
 }
 
+
 uint8_t* USBD_HID_GetHidDescriptor_impl(uint16_t* len) {
-  *len = sizeof(USBD_HID_Desc);
-  return (uint8_t*)USBD_HID_Desc; 
+  switch (USBD_Device.request.wIndex&0xFF) {
+    case 0:
+      *len = sizeof(USBD_HID_Desc_kbd);
+      return (uint8_t*)USBD_HID_Desc_kbd; 
+    case 1:
+      *len = sizeof(USBD_HID_Desc);
+      return (uint8_t*)USBD_HID_Desc; 
+  }
+  *len = 0;
+  return 0;
 }
 
 uint8_t* USBD_HID_GetReportDescriptor_impl(uint16_t* len) {
-  *len = sizeof(HID_ReportDesc);
-  return (uint8_t*)HID_ReportDesc;
+  switch (USBD_Device.request.wIndex&0xFF) {
+  case 0:
+
+    // very dirty work due to lack of callback when USB_HID_Init is called
+    USBD_LL_OpenEP(&USBD_Device,
+                   0x81,
+                   USBD_EP_TYPE_INTR,
+                   8);
+    
+    USBD_LL_OpenEP(&USBD_Device,
+                   0x01,
+                   USBD_EP_TYPE_INTR,
+                   8);
+
+          /* Prepare Out endpoint to receive 1st packet */ 
+    USBD_LL_PrepareReceive(&USBD_Device, 0x01, 8);
+
+
+    *len = sizeof(HID_ReportDesc_kbd);
+    return (uint8_t*)HID_ReportDesc_kbd;
+  case 1:
+    *len = sizeof(HID_ReportDesc);
+    return (uint8_t*)HID_ReportDesc;
+  }
+  *len = 0;
+  return 0;
 }
 
 /**
@@ -467,21 +595,22 @@ extern volatile unsigned short G_io_apdu_length;
 uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev, 
                               uint8_t epnum, uint8_t* buffer)
 {
-  UNUSED(epnum);
+  // only the data hid endpoint will receive data
+  if (epnum == 2) {
+    // prepare receiving the next chunk (masked time)
+    USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , HID_EPOUT_SIZE);
+      
+    // add to the hid transport
+    switch(io_usb_hid_receive(io_usb_send_apdu_data, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR))) {
+      default:
+        break;
 
-  // prepare receiving the next chunk (masked time)
-  USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , HID_EPOUT_SIZE);
-    
-  // add to the hid transport
-  switch(io_usb_hid_receive(io_usb_send_apdu_data, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR))) {
-    default:
-      break;
-
-    case IO_USB_APDU_RECEIVED:
-      G_io_apdu_media = IO_APDU_MEDIA_USB_HID; // for application code
-      G_io_apdu_state = APDU_USB_HID; // for next call to io_exchange
-      G_io_apdu_length = G_io_usb_hid_total_length;
-      break;
+      case IO_USB_APDU_RECEIVED:
+        G_io_apdu_media = IO_APDU_MEDIA_USB_HID; // for application code
+        G_io_apdu_state = APDU_USB_HID; // for next call to io_exchange
+        G_io_apdu_length = G_io_usb_hid_total_length;
+        break;
+    }
   }
 
   return USBD_OK;
@@ -492,7 +621,7 @@ uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
   */ 
 
 // note: how core lib usb calls the hid class
-static const USBD_DescriptorsTypeDef const HID_Desc = {
+const USBD_DescriptorsTypeDef const HID_Desc = {
   USBD_DeviceDescriptor,
   USBD_LangIDStrDescriptor, 
   USBD_ManufacturerStrDescriptor,

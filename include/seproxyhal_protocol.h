@@ -84,9 +84,11 @@
 #define SEPROXYHAL_TAG_STATUS_EVENT_FLAG_BLE_ON 0x00000004
 #define SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED 0x00000008
 
+#define SEPROXYHAL_TAG_CAPDU_EVENT 0x16 // raw command apdu transport
+
+#define SEPROXYHAL_TAG_I2C_EVENT 0x17 // <rfubyte> <rawdata>
+
 // COMMANDS
-// #define SEPROXYHAL_TAG_MCU_BOOTLOADER              0x31 // DISABLED FOR
-// SECURITY REASON
 #define SEPROXYHAL_TAG_UNSEC_CHUNK_READ 0x32
 #define SEPROXYHAL_TAG_SET_SCREEN_CONFIG                                       \
     0x3E // <flags(1byte):pwron(128)|rotation(0:0,90:2,180:4,270:6)|invert(1)>
@@ -100,16 +102,17 @@
 #define SEPROXYHAL_TAG_BLE_RADIO_POWER 0x44
 #define SEPROXYHAL_TAG_NFC_RADIO_POWER 0x45
 #define SEPROXYHAL_TAG_SE_POWER_OFF 0x46
-#define SEPROXYHAL_TAG_SCREEN_POWER 0x47
+//#define SEPROXYHAL_TAG_SCREEN_POWER                0x47
 #define SEPROXYHAL_TAG_BLE_NOTIFY_INDICATE 0x48
 #define SEPROXYHAL_TAG_BATTERY_CHARGE 0x49 // <>
-#define SEPROXYHAL_TAG_SCREEN_DISPLAY 0x4A // wait for display_event after sent
+//#define SEPROXYHAL_TAG_SCREEN_DISPLAY              0x4A // wait for
+//display_event after sent
 #define SEPROXYHAL_TAG_DEVICE_OFF 0x4B
 #define SEPROXYHAL_TAG_MORE_TIME 0x4C
 #define SEPROXYHAL_TAG_M24SR_C_APDU 0x4D
 #define SEPROXYHAL_TAG_SET_TICKER_INTERVAL 0x4E
 #define SEPROXYHAL_TAG_USB_CONFIG                                              \
-    0x4F // <connect/disconnect> <nbendpoints> [<epaddr>
+    0x4F // <connect/disconnect> [<epaddr>
          // <eptype:control/interrupt/bulk/isochrone/disabled> <epmps>]
 #define SEPROXYHAL_TAG_USB_CONFIG_CONNECT 0x01
 #define SEPROXYHAL_TAG_USB_CONFIG_DISCONNECT 0x02
@@ -132,6 +135,10 @@
 #define SEPROXYHAL_TAG_REQUEST_STATUS                                          \
     0x52 // no args, request power levels of all peripherals and current
          // charging state or not if a battery is present.
+#define SEPROXYHAL_TAG_RAPDU 0x53 // raw response apdu transport
+#define SEPROXYHAL_TAG_I2C_XFER                                                \
+    0x54 // <flags:b0=Start,b1=Stop,b2=Moreexpected> <address+R/w>
+         // <write:rawdata,read=length(1B)>
 
 // STATUS
 #define SEPROXYHAL_TAG_STATUS_MASK 0x60
@@ -155,5 +162,14 @@
 #define SEPROXYHAL_TAG_SCREEN_ANIMATION_STATUS_VERTICAL_SPLIT_SLIDE            \
     0x00 // param[0:1](BE) = split Y coordinate, param[2:3](BE) = animation
          // duration in ms
+
+#if TARGET_ID != 0x31100002 // not present on Nano S
+#define SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS                               \
+    0x69 // <start:0|next:1> [start? <x> <y> <w> <h> <bitperpixel>
+         // <color_count*4 bytes (LE encoding)>] <icon bitmap (row scan, packed,
+         // LE)>
+#define SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_START 0x00
+#define SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_CONT 0x01
+#endif
 
 #endif

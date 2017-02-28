@@ -70,10 +70,19 @@ void io_seproxyhal_touch_element_callback(
 void io_seproxyhal_touch_callback(const bagl_element_t *element,
                                   unsigned char event);
 
+#ifndef BUTTON_FAST_THRESHOLD_CS
+#define BUTTON_FAST_THRESHOLD_CS 8 // x100MS
+#endif                             // BUTTON_FAST_THRESHOLD_CS
+#ifndef BUTTON_FAST_ACTION_CS
+#define BUTTON_FAST_ACTION_CS 3 // x100MS
+#endif                          // BUTTON_FAST_ACTION_CS
+
 typedef unsigned int (*button_push_callback_t)(
     unsigned int button_mask, unsigned int button_mask_counter);
 #define BUTTON_LEFT 1
 #define BUTTON_RIGHT 2
+// flag set when fast threshold is reached and above
+#define BUTTON_EVT_FAST 0x40000000UL
 #define BUTTON_EVT_RELEASED 0x80000000UL
 void io_seproxyhal_button_push(button_push_callback_t button_push_callback,
                                unsigned int new_button_mask);
@@ -85,6 +94,9 @@ void io_seproxyhal_display(const bagl_element_t *element);
 // larger than screen
 unsigned int bagl_label_roundtrip_duration_ms(const bagl_element_t *e,
                                               unsigned int average_char_width);
+unsigned int
+bagl_label_roundtrip_duration_ms_buf(const bagl_element_t *e, const char *str,
+                                     unsigned int average_char_width);
 
 // default version to be called by ::io_seproxyhal_display if nothing to be done
 // by the application
@@ -118,6 +130,10 @@ void io_seproxyhal_init(void);
 // only reinit ux related globals
 void io_seproxyhal_init_ux(void);
 
+// only init button handling related variables (not to be done when switching
+// screen to avoid the release triggering unwanted behavior)
+void io_seproxyhal_init_button(void);
+
 // delegate function for generic io_exchange
 unsigned short io_exchange_al(unsigned char channel_and_flags,
                               unsigned short tx_len);
@@ -142,7 +158,13 @@ void io_seproxyhal_general_status(void);
 // reply a MORE COMMANDS status for the proxyhal to wait for more data later
 void os_io_seproxyhal_general_status_processing(void);
 
+// legacy function to send over EP 0x82
 void io_usb_send_apdu_data(unsigned char *buffer, unsigned short length);
+
+// trigger a transfer over an usb endpoint and waits for it to occur if timeout
+// is != 0
+void io_usb_send_ep(unsigned int ep, unsigned char *buffer,
+                    unsigned short length, unsigned int timeout);
 
 void io_usb_ccid_reply(unsigned char *buffer, unsigned short length);
 
@@ -291,7 +313,10 @@ extern ux_state_t ux;
  * Request a wake up of the device (backlight, pin lock screen, ...) to display
  * a new interface to the user
  */
-#define UX_WAKE_UP() ux.params.len = BOLOS_UX_OK
+#define UX_WAKE_UP()                                                           \
+    ux.params.ux_id = BOLOS_UX_WAKE_UP;                                        \
+    ux.params.len = 0;                                                         \
+    ux.params.len = os_ux(&ux.params);
 
 /**
  * Force redisplay of the screen from the given index in the screen's element
@@ -300,7 +325,6 @@ extern ux_state_t ux;
 #define UX_REDISPLAY_IDX(index)                                                \
     io_seproxyhal_init_ux();                                                   \
     ux.elements_current = index;                                               \
-    UX_WAKE_UP();                                                              \
     /* REDRAW is redisplay already */                                          \
     if (ux.params.len != BOLOS_UX_IGNORE &&                                    \
         ux.params.len != BOLOS_UX_CONTINUE) {                                  \
@@ -317,6 +341,7 @@ extern ux_state_t ux;
     ux.elements_count = sizeof(elements_array) / sizeof(elements_array[0]);    \
     ux.button_push_handler = elements_array##_button;                          \
     ux.elements_preprocessor = preprocessor;                                   \
+    UX_WAKE_UP();                                                              \
     UX_REDISPLAY();
 
 /**
@@ -330,8 +355,19 @@ extern ux_state_t ux;
  * internal bolos ux event processing with callback in case event is to be
  * processed by the application
  */
+#define UX_FORWARD_EVENT(callback, ignoring_app_if_ux_busy)                    \
+    ux.params.ux_id = BOLOS_UX_EVENT;                                          \
+    ux.params.len = 0;                                                         \
+    ux.params.len = os_ux(&ux.params);                                         \
+    if (ux.params.len == BOLOS_UX_REDRAW) {                                    \
+        UX_WAKE_UP();                                                          \
+        UX_REDISPLAY();                                                        \
+    } else if (!ignoring_app_if_ux_busy ||                                     \
+               (ux.params.len != BOLOS_UX_IGNORE &&                            \
+                ux.params.len != BOLOS_UX_CONTINUE)) {                         \
+        callback                                                               \
+    }
 
-#define UX_FORWARD_EVENT(callback, ignoring_app_if_ux_busy) callback
 /**
  * Process display processed event (by the os_ux or by the application code)
  */
@@ -389,6 +425,8 @@ extern ux_state_t ux;
 #define UX_TICKER_EVENT(seph_packet, callback)                                 \
     UX_FORWARD_EVENT(                                                          \
         {                                                                      \
+            unsigned int UX_ALLOWED = (ux.params.len != BOLOS_UX_IGNORE &&     \
+                                       ux.params.len != BOLOS_UX_CONTINUE);    \
             if (ux.callback_interval_ms) {                                     \
                 ux.callback_interval_ms -= MIN(ux.callback_interval_ms, 100);  \
                 if (!ux.callback_interval_ms) {                                \
@@ -415,8 +453,9 @@ void io_seproxyhal_request_mcu_status(void);
 
 /**
  * Helper function to order the MCU to display the given bitmap with the given
- * color index, a table of size: (1<<bit_per_pixel) with little endian encoded
- * colors.
+* color index, a table of size: (1<<bit_per_pixel) with little endian encoded
+* colors.
+* Deprecated
  */
 void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h,
                                   unsigned int *color_index,
@@ -436,6 +475,8 @@ void io_seproxyhal_backlight(unsigned int flags,
  * helper structure to help handling icons
  */
 typedef struct bagl_icon_details_s {
+    unsigned int width;
+    unsigned int height;
     // bit per pixel
     unsigned int bpp;
     const unsigned int *colors;
@@ -448,6 +489,109 @@ typedef struct bagl_icon_details_s {
  */
 void io_seproxyhal_display_icon(bagl_component_t *icon_component,
                                 bagl_icon_details_t *icon_details);
+
+// a menu callback is called with a given userid provided within the menu entry
+// to allow for fast switch of the action to be taken
+typedef void (*ux_menu_callback_t)(unsigned int userid);
+
+typedef struct ux_menu_entry_s ux_menu_entry_t;
+
+/**
+ * Menu entry descriptor.
+ */
+struct ux_menu_entry_s {
+    // other menu shown when validated
+    const ux_menu_entry_t *menu;
+    // callback called when entered (not executed when a menu entry is present)
+    ux_menu_callback_t callback;
+    // user identifier to allow for indirection in a separated table and
+    // mutualise even more menu handling, passed to the given callback is any
+    unsigned int userid;
+    const bagl_icon_details_t *icon;
+    const char *line1;
+    const char *line2;
+    char text_x;
+    char icon_x;
+};
+
+#define UX_MENU_END                                                            \
+    { NULL, NULL, 0, NULL, NULL, NULL, 0, 0 }
+
+typedef const bagl_element_t *(*ux_menu_preprocessor_t)(
+    const ux_menu_entry_t *, bagl_element_t *element);
+typedef struct ux_menu_state_s {
+    const ux_menu_entry_t *menu_entries;
+    unsigned int menu_entries_count;
+    unsigned int current_entry;
+    ux_menu_preprocessor_t menu_entry_preprocessor;
+    // temporary menu element for entry layout adjustments
+    bagl_element_t tmp_element;
+} ux_menu_state_t;
+extern ux_menu_state_t ux_menu;
+
+#define UX_MENU_INIT() os_memset(&ux_menu, 0, sizeof(ux_menu));
+
+#define UX_MENU_DISPLAY(current_entry, menu_entries, menu_entry_preprocessor)  \
+    ux_menu_display(current_entry, menu_entries, menu_entry_preprocessor);
+
+// if current_entry == -1UL, then don't change the current entry
+#define UX_MENU_UNCHANGED_ENTRY (-1UL)
+void ux_menu_display(unsigned int current_entry,
+                     const ux_menu_entry_t *menu_entries,
+                     ux_menu_preprocessor_t menu_entry_preprocessor);
+const bagl_element_t *
+ux_menu_element_preprocessor(const bagl_element_t *element);
+unsigned int ux_menu_elements_button(unsigned int button_mask,
+                                     unsigned int button_mask_counter);
+
+// a menu callback is called with a given userid provided within the menu entry
+// to allow for fast switch of the action to be taken
+typedef void (*ux_turner_callback_t)(void);
+
+typedef struct ux_turner_step_s {
+    const bagl_icon_details_t *icon;
+    unsigned short fontid1;
+    const char *line1;
+    unsigned short fontid2;
+    const char *line2;
+    char text_x;
+    char icon_x;
+    unsigned int next_step_ms;
+} ux_turner_step_t;
+
+typedef struct ux_turner_state_s {
+    const ux_turner_step_t *steps;
+    unsigned int steps_count;
+    unsigned int current_step;
+    // temporary menu element for entry layout adjustments
+    bagl_element_t tmp_element;
+    button_push_callback_t button_callback;
+    unsigned int elapsed_ms;
+} ux_turner_state_t;
+extern ux_turner_state_t ux_turner;
+
+#define UX_TURNER_INIT() os_memset(&ux_turner, 0, sizeof(ux_turner));
+
+#define UX_TURNER_DISPLAY(current_step, steps, steps_count,                    \
+                          button_push_callback)                                \
+    ux_turner_display(current_step, steps, steps_count, button_push_callback);
+
+// if current_entry == -1UL, then don't change the current entry
+#define UX_TURNER_UNCHANGED_ENTRY (-1UL)
+void ux_turner_display(unsigned int current_step, const ux_turner_step_t *steps,
+                       unsigned int steps_count,
+                       button_push_callback_t button_callback);
+// function to be called to advance to the next turner step when the programmed
+// delay is expired
+void ux_turner_ticker(unsigned int elpased_ms);
+
+// avoid typing the size each time
+#define SPRINTF(strbuf, ...) snprintf(strbuf, sizeof(strbuf), __VA_ARGS__)
+
+#define ARRAYLEN(array) (sizeof(array) / sizeof(array[0]))
+#define INARRAY(elementptr, array)                                             \
+    ((unsigned int)elementptr >= (unsigned int)array &&                        \
+     (unsigned int)elementptr < ((unsigned int)array) + sizeof(array))
 
 #endif // OS_IO_SEPROXYHAL
 

@@ -18,7 +18,7 @@
 #ifndef OS_APILEVEL_H
 #define OS_APILEVEL_H
 
-#define CX_APILEVEL 6
-#define CX_COMPAT_APILEVEL 6
+#define CX_APILEVEL 7
+#define CX_COMPAT_APILEVEL 7
 
 #endif // OS_APILEVEL_H

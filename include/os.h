@@ -56,9 +56,9 @@ void longjmp(jmp_buf __jmpb, int __retval);
 int setjmp(jmp_buf __jmpb);
 
 #define __MPU_PRESENT 1 // THANKS ST FOR YOUR HARDWORK
+#include <core_sc000.h>
 #include "stddef.h"
 #include "stdint.h"
-#include <core_sc000.h>
 
 #define UNUSED(x) (void)x
 
@@ -147,10 +147,18 @@ unsigned int pic(unsigned int linked_address);
 #define APPLICATION_FLAG_AUTOBOOT 0x100
 
 /**
+ * Application is allowed to change the settings
+ */
+#define APPLICATION_FLAG_BOLOS_SETTINGS 0x200
+
+#define APPLICATION_FLAG_CUSTOM_CA 0x400
+
+/**
  * Application is disabled (during its upgrade or whatever)
  */
 
-#define APPLICATION_FLAG_DISABLED 0x8000
+//#define APPLICATION_FLAG_DISABLED         0x8000
+#define APPLICATION_FLAG_ENABLED 0x8000
 
 #define APPLICATION_FLAG_NEG_MASK 0xFFFF0000UL
 
@@ -186,6 +194,8 @@ struct try_context_s {
 extern unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
 extern try_context_t *G_try_last_open_context;
+
+#define CUSTOMCA_MAXLEN 64
 
 /* ----------------------------------------------------------------------- */
 /* -                            ENTRY POINT                              - */
@@ -359,7 +369,19 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
 // -----------------------------------------------------------------------
 // - EXCEPTION THROW
 // -----------------------------------------------------------------------
+/*
+#ifndef BOLOS_RELEASE
+
+void os_longjmp(jmp_buf b, unsigned int exception);
+#define THROW_L(L, x)                                                   \
+  os_longjmp(G_try_last_open_context->jmp_buf, x)
+
+#else
+*/
 #define THROW_L(L, x) longjmp(G_try_last_open_context->jmp_buf, x)
+/*
+#endif // BOLOS_RELEASE
+*/
 
 // Default macros when nesting is not used.
 #define THROW(x) THROW_L(EX, x)
@@ -430,6 +452,9 @@ typedef enum bolos_ux_e {
         0, // tag to be processed by the UX from the serial line
 
     BOLOS_UX_EVENT, // tag to be processed by the UX from the serial line
+    BOLOS_UX_KEYBOARD,
+    BOLOS_UX_WAKE_UP,
+    BOLOS_UX_STATUS_BAR,
 
     BOLOS_UX_BOOT, // will never be presented to loaded UX app, this is for
                    // failsafe UX only
@@ -442,32 +467,25 @@ typedef enum bolos_ux_e {
     BOLOS_UX_DASHBOARD,
     BOLOS_UX_PROCESSING,
 
-    // cleanup screen displayed by the previous ux, useful for
-    BOLOS_UX_BLANK_PREVIOUS,
-
     BOLOS_UX_LOADER, // display loader screen or advance it
 
     BOLOS_UX_VALIDATE_PIN,
-    BOLOS_UX_CHANGE_ALTERNATE_PIN,
-    BOLOS_UX_WIPED_DEVICE,
     BOLOS_UX_CONSENT_UPGRADE,
     BOLOS_UX_CONSENT_APP_ADD,
     BOLOS_UX_CONSENT_APP_DEL,
     BOLOS_UX_CONSENT_APP_UPG,
     BOLOS_UX_CONSENT_ISSUER_KEY,
+    BOLOS_UX_CONSENT_CUSTOMCA_KEY,
     BOLOS_UX_CONSENT_FOREIGN_KEY,
     BOLOS_UX_CONSENT_GET_DEVICE_NAME,
     BOLOS_UX_CONSENT_SET_DEVICE_NAME,
-    BOLOS_UX_APPEXIT,
-    BOLOS_UX_KEYBOARD,
+    BOLOS_UX_CONSENT_RESET_CUSTOMCA_KEY,
+    BOLOS_UX_CONSENT_SETUP_CUSTOMCA_KEY,
+    BOLOS_UX_APP_ACTIVITY, // special code when application is processing data
+                           // but not displaying UI. It prevent going poweroff,
+                           // while not avoiding screen locking
+    BOLOS_UX_CONSENT_NOT_INTERACTIVE_ONBOARD,
 
-    BOLOS_UX_SETTINGS,
-    /*
-    BOLOS_UX_INPUT_TEXT , // how to pass param (title?text?icon?)
-    BOLOS_UX_INPUT_VALUE ,
-    BOLOS_UX_INPUT_YESNO ,
-    BOLOS_UX_INPUT_CONFIRMCANCEL ,
-    */
 } bolos_ux_t;
 
 #define BOLOS_UX_OK 0xB0105011
@@ -491,9 +509,6 @@ typedef void (*appmain_t)(void);
 
 // application slot description
 typedef struct application_s {
-    // application crc over the application structure
-    unsigned short crc;
-
     // nvram start address for this application (to check overlap when loading,
     // and mpu lock)
     unsigned char *nvram_begin;
@@ -524,6 +539,9 @@ typedef struct application_s {
 #define APPLICATION_NAME_MAXLEN 32
     unsigned char name[APPLICATION_NAME_MAXLEN + 1];
 
+#define APPLICATION_VERSION_MAXLEN 32
+    unsigned char version[APPLICATION_VERSION_MAXLEN + 1];
+
     // SHA256 reserved space for the bootloader to store the application's code
     // hash.
     unsigned char hash[32];
@@ -533,6 +551,10 @@ typedef struct application_s {
     // <BitPerPixel(1byte)> <COLORTABLE((1<<bpp))*4b BE)> <bitmap>
     unsigned char icon[BOLOS_APP_ICON_SIZE_B];
 #endif // BOLOS_APP_ICON_SIZE_B
+#ifdef BOLOS_APP_ICON_OFF_AND_SIZE
+    unsigned int icon_offset;
+    unsigned short icon_length;
+#endif // BOLOS_APP_ICON_OFF_AND_SIZE
 
 } application_t;
 
@@ -547,6 +569,7 @@ typedef struct bolos_ux_params_s {
     union {
         struct {
             unsigned int currently_onboarded;
+            unsigned char hash[32];
         } boot_unsafe;
 
         struct {
@@ -554,10 +577,12 @@ typedef struct bolos_ux_params_s {
         } appexitb;
 
         struct {
+            unsigned int app_idx;
             application_t appentry;
         } appdel;
 
         struct {
+            unsigned int app_idx;
             application_t appentry;
         } appadd;
 
@@ -572,12 +597,45 @@ typedef struct bolos_ux_params_s {
         } ux_not_signed;
 
         struct {
+            unsigned char name[CUSTOMCA_MAXLEN + 1];
+            cx_ecfp_public_key_t public;
+        } customca_key;
+
+        struct {
             cx_ecfp_public_key_t host_pubkey;
         } foreign_key;
 
         struct {
+            unsigned char name[CUSTOMCA_MAXLEN + 1];
+            cx_ecfp_public_key_t public;
+        } reset_customca;
+
+        struct {
+            unsigned char name[CUSTOMCA_MAXLEN + 1];
+            cx_ecfp_public_key_t public;
+        } setup_customca;
+
+        struct {
             unsigned int keycode;
+#define BOLOS_UX_MODE_UPPERCASE 0
+#define BOLOS_UX_MODE_LOWERCASE 1
+#define BOLOS_UX_MODE_SYMBOLS 2
+#define BOLOS_UX_MODE_COUNT 3 // number of keyboard modes
+            unsigned int mode;
         } keyboard;
+
+        struct {
+            unsigned int cancellable;
+        } validate_pin;
+
+        struct {
+            unsigned int keycode;
+        } pin_keyboard;
+
+        struct {
+            unsigned int fgcolor;
+            unsigned int bgcolor;
+        } status_bar;
 
         struct {
             unsigned int x;
@@ -586,22 +644,52 @@ typedef struct bolos_ux_params_s {
             unsigned int height;
         } loader;
 
+        struct {
+            unsigned int id;
+        } onboard;
+
     } u;
 
 } bolos_ux_params_t;
 
 // any application can wipe the global pin, global seed, user's keys
 SYSCALL void os_perso_wipe(void);
-/* set_pin can update the pin if the current is validated (tearing leads to
- * wipe) */
+// erase seed, settings AND applications
+SYSCALL void os_perso_erase_all(void);
+
+/* set_pin can update the pin if the perso is onboarded (tearing leads to perso
+ * wipe though) */
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_pin(
-    unsigned char *pin PLENGTH(length), unsigned int length);
+    unsigned int identity, unsigned char *pin PLENGTH(length),
+    unsigned int length);
+// set the currently unlocked identity pin. (change pin feature)
+SYSCALL
+    PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_current_identity_pin(
+        unsigned char *pin PLENGTH(length), unsigned int length);
+
+#define BOLOS_UX_ONBOARDING_ALGORITHM_BIP39 1
+#define BOLOS_UX_ONBOARDING_ALGORITHM_ELECTRUM 2
+
+/**
+ * Set the persisted seed if none yet, else override the volatile seed (in RAM)
+ */
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_seed(
+    unsigned int identity, unsigned int algorithm,
     unsigned char *seed PLENGTH(length), unsigned int length);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_alternate_pin(
-    unsigned char *pin PLENGTH(pinLength), unsigned int pinLength);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_alternate_seed(
-    unsigned char *seed PLENGTH(seedLength), unsigned int seedLength);
+
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_set_seed(
+    unsigned char identity, const char *prefix PLENGTH(prefix_length),
+    unsigned int prefix_length,
+    const char *passphrase PLENGTH(passphrase_length),
+    unsigned int passphrase_length, const char *words PLENGTH(words_length),
+    unsigned int words_length);
+
+// SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void
+// os_perso_set_alternate_pin(unsigned char* pin PLENGTH(pinLength), unsigned
+// int pinLength);
+// SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void
+// os_perso_set_alternate_seed(unsigned char* seed PLENGTH(seedLength), unsigned
+// int seedLength);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(
     unsigned char *words PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_devname(
@@ -649,7 +737,11 @@ SYSCALL unsigned int os_endorsement_key2_derive_sign_data(
 #define DEFAULT_PIN_RETRIES 3
 SYSCALL PERMISSION(
     APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_is_validated(void);
-// return 1 if validated
+/**
+ * Validating the pin also setup the identity linked with this pin (normal or
+ * alternate)
+ * @return 1 if pin validated
+ */
 SYSCALL
     PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_check(
         unsigned char *pin_buffer PLENGTH(pin_length),
@@ -666,10 +758,6 @@ SYSCALL
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_registry_get(
     unsigned int index,
     application_t *out_application_entry PLENGTH(sizeof(application_t)));
-
-// called by bolos initializer before entering bolos ux the first time
-void os_sched_init(void);
-void bolos_main(void);
 
 // execute the given application index in the registry, this function kills the
 // current task
@@ -731,11 +819,12 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
 //#define OS_FLAG_CUSTOM_UX       4
 /* Enable application to retrieve OS current running options */
 SYSCALL unsigned int os_flags(void);
-SYSCALL unsigned int os_version(unsigned char *version, unsigned int maxlength);
+SYSCALL unsigned int os_version(unsigned char *version PLENGTH(maxlength),
+                                unsigned int maxlength);
 /* Grab the SEPROXYHAL's feature set */
 SYSCALL unsigned int os_seph_features(void);
 /* Grab the SEPROXYHAL's version */
-SYSCALL unsigned int os_seph_version(unsigned char *version,
+SYSCALL unsigned int os_seph_version(unsigned char *version PLENGTH(maxlength),
                                      unsigned int maxlength);
 
 /*
@@ -751,11 +840,15 @@ typedef enum os_setting_e {
     OS_SETTING_INVERT,
     OS_SETTING_ROTATION,
     OS_SETTING_SHUFFLE_PIN,
+    OS_SETTING_AUTO_LOCK_DELAY,
+    OS_SETTING_POWER_OFF_DELAY,
 
     OS_SETTING_LAST, //
 } os_setting_t;
-SYSCALL unsigned int os_setting_get(unsigned int setting_id);
-SYSCALL void os_setting_set(unsigned int setting_id, unsigned int value);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_SETTINGS) unsigned int os_setting_get(
+    unsigned int setting_id);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_SETTINGS) void os_setting_set(
+    unsigned int setting_id, unsigned int value);
 
 /* ----------------------------------------------------------------------- */
 /* -                          DEBUG FUNCTIONS                           - */
@@ -765,8 +858,37 @@ void screen_printf(const char *format, ...);
 // emit a single byte
 void screen_printc(unsigned char const c);
 
+// redefined if string.h not included
+int snprintf(char *str, size_t str_size, const char *format, ...);
+
 // syscall test
 // SYSCALL void dummy_1(unsigned int* p PLENGTH(2+len+15+ len + 16 +
 // sizeof(io_send_t) + 1 ), unsigned int len);
+
+typedef struct meminfo_s {
+    unsigned int free_nvram_size;
+    unsigned int appMemory;
+    unsigned int systemSize;
+    unsigned int slots;
+} meminfo_t;
+
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_get_memory_info(
+    meminfo_t *meminfo);
+
+#ifdef BOLOS_APP_ICON_OFF_AND_SIZE
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned int os_registry_get_icon(
+    unsigned int appidx, unsigned int offset,
+    unsigned char *buffer PLENGTH(maxlength), unsigned int maxlength);
+#endif // BOLOS_APP_ICON_OFF_AND_SIZE
+
+/* ----------------------------------------------------------------------- */
+/* -                         CUSTOM CERTIFICATE AUTHORITY                - */
+/* ----------------------------------------------------------------------- */
+
+// Verify the signature is issued from the custom certificate authority
+SYSCALL unsigned int
+os_customca_verify(unsigned char *hash PLENGTH(32),
+                   unsigned char *sign PLENGTH(sign_length),
+                   unsigned int sign_length);
 
 #endif // OS_H

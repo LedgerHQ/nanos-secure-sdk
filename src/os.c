@@ -302,3 +302,13 @@ void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned int length) {
     THROW(EXCEPTION);
   }
 }
+
+#ifndef BOLOS_RELEASE
+void os_longjmp(jmp_buf b, unsigned int exception) {
+  unsigned int lr;
+  __asm volatile ("mov     %0, lr":"=r"(lr));
+  PRINTF("%c%07X",0xEE, lr);
+  PRINTF("%d", exception);
+  longjmp(b, exception);
+}
+#endif // BOLOS_RELEASE

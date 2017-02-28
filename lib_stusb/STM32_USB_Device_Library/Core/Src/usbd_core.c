@@ -306,6 +306,7 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum
 USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, uint8_t *pdata)
 {
   USBD_EndpointTypeDef    *pep;
+  UNUSED(pdata);
     
   if(epnum == 0) 
   {
@@ -421,6 +422,7 @@ USBD_StatusTypeDef USBD_LL_SetSpeed(USBD_HandleTypeDef  *pdev, USBD_SpeedTypeDef
 
 USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef  *pdev)
 {
+  UNUSED(pdev);
   // Ignored, gently
   //pdev->dev_old_state =  pdev->dev_state;
   //pdev->dev_state  = USBD_STATE_SUSPENDED;
@@ -436,6 +438,7 @@ USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef  *pdev)
 
 USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef  *pdev)
 {
+  UNUSED(pdev);
   // Ignored, gently
   //pdev->dev_state = pdev->dev_old_state;  
   return USBD_OK;

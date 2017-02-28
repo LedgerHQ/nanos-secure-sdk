@@ -41,7 +41,6 @@
 #define BAGL_FILL_CIRCLE_PI2_PI                                                \
     (BAGL_FILL_CIRCLE_7_OCTANT | BAGL_FILL_CIRCLE_8_OCTANT)
 
-
 // --------------------------------------------------------------------------------------
 
 typedef enum bagl_components_type_e_ {
@@ -101,6 +100,7 @@ typedef struct {
 // --------------------------------------------------------------------------------------
 
 typedef struct {
+    unsigned int icon_id;
     unsigned int width;
     unsigned int height;
     unsigned int bits_per_pixel;
@@ -122,6 +122,9 @@ typedef struct {
 } bagl_font_character_t;
 
 typedef struct {
+    unsigned int
+        font_id;       // to allow for sparse font embedding with a linear enum
+    unsigned char bpp; // for antialiased fonts
     unsigned char char_height;
     unsigned char baseline_height;
     unsigned char char_kerning; // specific to the font
@@ -131,30 +134,45 @@ typedef struct {
     unsigned char const *bitmap; // single bitmap for all chars of a font
 } bagl_font_t;
 
+extern const bagl_font_t *const C_bagl_fonts[];
+extern const unsigned int C_bagl_fonts_count;
+
 #define BAGL_ENCODING_LATIN1 0
 
-// must correspond to the order in C_bagl_fonts
+#define BAGL_FONT_OPEN_SANS_LIGHT_14px BAGL_FONT_OPEN_SANS_REGULAR_11_14PX
 typedef enum {
-    BAGL_FONT_LUCIDA_CONSOLE_8,
-    BAGL_FONT_OPEN_SANS_BOLD_13px,
-    BAGL_FONT_OPEN_SANS_BOLD_21px,
-    BAGL_FONT_OPEN_SANS_LIGHT_13px,
-    BAGL_FONT_OPEN_SANS_LIGHT_14px,
-    BAGL_FONT_OPEN_SANS_LIGHT_21px,
-    BAGL_FONT_OPEN_SANS_SEMIBOLD_18px,
-    BAGL_FONT_COMIC_SANS_MS_20px,
-    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px, // validated on nano s
-    BAGL_FONT_OPEN_SANS_LIGHT_16px,     // validated on nano s
-    BAGL_FONT_OPEN_SANS_REGULAR_11px,   // validated on nano s
-
+    BAGL_FONT_LUCIDA_CONSOLE_8PX,
+    BAGL_FONT_OPEN_SANS_LIGHT_16_22PX,
+    BAGL_FONT_OPEN_SANS_REGULAR_8_11PX,
+    BAGL_FONT_OPEN_SANS_REGULAR_10_13PX,
+    BAGL_FONT_OPEN_SANS_REGULAR_11_14PX,
+    BAGL_FONT_OPEN_SANS_REGULAR_13_18PX,
+    BAGL_FONT_OPEN_SANS_REGULAR_22_30PX,
+    BAGL_FONT_OPEN_SANS_SEMIBOLD_8_11PX,
+    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px = 8, // validated on nano s
+    BAGL_FONT_OPEN_SANS_LIGHT_16px = 9,     // validated on nano s
+    BAGL_FONT_OPEN_SANS_REGULAR_11px = 10,  // validated on nano s
+    BAGL_FONT_OPEN_SANS_SEMIBOLD_10_13PX,
+    BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX,
+    BAGL_FONT_OPEN_SANS_SEMIBOLD_13_18PX,
+    BAGL_FONT_SYMBOLS_0,
+    BAGL_FONT_SYMBOLS_1,
     BAGL_FONT_LAST // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE
                    // CHECKS
 } bagl_font_id_e;
 
+#define BAGL_FONT_SYMBOLS_0_CLEAR "\x80"
+#define BAGL_FONT_SYMBOLS_0_DOT "\x81"
+#define BAGL_FONT_SYMBOLS_0_LEFT "\x82"
+#define BAGL_FONT_SYMBOLS_0_LIGHTNING "\x83"
+#define BAGL_FONT_SYMBOLS_0_MINIRIGHT "\x84"
+#define BAGL_FONT_SYMBOLS_0_DASHBOARD "\x85"
+#define BAGL_FONT_SYMBOLS_0_SETTINGS "\x86"
+#define BAGL_FONT_SYMBOLS_1_CARET "\xA0"
+
 // --------------------------------------------------------------------------------------
 
 // Glyphs definitions
-// must correspond to the order in the C_glyph_array
 enum bagl_glyph_e {
     BAGL_GLYPH_NOGLYPH = 0,
     BAGL_GLYPH_LOGO_LEDGER_100,
@@ -186,19 +204,41 @@ enum bagl_glyph_e {
     BAGL_GLYPH_ICON_EYE_BADGE,
     BAGL_GLYPH_ICON_PEOPLE_BADGE,
     BAGL_GLYPH_ICON_LOCK_BADGE,
+    BAGL_GLYPH_ICON_BLUE_CABLE,
+    BAGL_GLYPH_TEXT_WELCOME,
+    BAGL_GLYPH_LOGO_LEDGER_BOOT,
+    BAGL_GLYPH_BATT_LEFT,
+    BAGL_GLYPH_BATT_RIGHT,
+    BAGL_GLYPH_ICON_LIGHTNING,
+    BAGL_GLYPH_ICON_PLUG,
+    BAGL_GLYPH_BADGE_DOWNLOAD_BLUE,
+    BAGL_GLYPH_BADGE_WARNING_BLUE,
+    BAGL_GLYPH_ICON_LOADER_BLUE,
+    BAGL_GLYPH_BADGE_CHECKMARK_BLUE,
+    BAGL_GLYPH_BADGE_WRENCH_BLUE,
+    BAGL_GLYPH_BADGE_ERROR_BLUE,
+    BAGL_GLYPH_BADGE_POWER_BLUE,
+    BAGL_GLYPH_BADGE_CRITICAL_BLUE,
+    BAGL_GLYPH_BADGE_ASSISTANCE_BLUE,
+    BAGL_GLYPH_BADGE_LOCK_BLUE,
+    BAGL_GLYPH_ICON_CHECKMARK_BLUE,
+    BAGL_GLYPH_APP_FIRMWARE_BLUE,
+    BAGL_GLYPH_BADGE_BLUE,
+    BAGL_GLYPH_ICON_BRIGHTNESS_LOW_BLUE,
+    BAGL_GLYPH_ICON_BRIGHTNESS_HIGH_BLUE,
 };
 
 // --------------------------------------------------------------------------------------
 // return y<<16+x after string have been printed
 int bagl_draw_string(unsigned short font_id, unsigned int color1,
                      unsigned int color0, int x, int y, unsigned int width,
-                     unsigned int height, void *text, unsigned int text_length,
-                     unsigned char text_encoding);
+                     unsigned int height, const void *text,
+                     unsigned int text_length, unsigned char text_encoding);
 void bagl_draw_bg(unsigned int color);
-void bagl_draw_with_context(bagl_component_t *component, void *text,
+void bagl_draw_with_context(const bagl_component_t *component, const void *text,
                             unsigned short text_length,
                             unsigned char text_encoding);
-void bagl_draw(bagl_component_t *component);
+void bagl_draw(const bagl_component_t *const component);
 // void bagl_undraw_all(void);
 // void bagl_undraw_id(unsigned short id);
 // void bagl_user_input(unsigned short x, unsigned short y, unsigned char
@@ -229,17 +269,23 @@ void bagl_animate(bagl_animated_t *anim, unsigned int timestamp_ms,
                   unsigned int interval_ms);
 
 // --------------------------------------------------------------------------------------
-void bagl_hal_draw_bitmap_within_rect(
-    int x, int y, unsigned int width, unsigned int height,
-    unsigned int color_count, unsigned int *colors, unsigned int bit_per_pixel,
-    unsigned char *bitmap2, unsigned int bitmap_length_bits);
+// start drawing a bitmap in the given area
+void bagl_hal_draw_bitmap_within_rect(int x, int y, unsigned int width,
+                                      unsigned int height,
+                                      unsigned int color_count,
+                                      const unsigned int *colors,
+                                      unsigned int bit_per_pixel,
+                                      const unsigned char *bitmap,
+                                      unsigned int bitmap_length_bits);
+// continue drawing the bitmap in the previously setup area, take care to use
+// the same bpp
 void bagl_hal_draw_bitmap_continue(unsigned int bit_per_pixel,
-                                   unsigned char *bitmap,
+                                   const unsigned char *bitmap,
                                    unsigned int bitmap_length_bits);
 
 void bagl_hal_draw_rect(unsigned int color, int x, int y, unsigned int width,
                         unsigned int height);
-void bagl_action(bagl_component_t *component, unsigned char event_kind);
+void bagl_action(const bagl_component_t *component, unsigned char event_kind);
 
 // --------------------------------------------------------------------------------------
 // internal exposed for smoother coding of printf functions

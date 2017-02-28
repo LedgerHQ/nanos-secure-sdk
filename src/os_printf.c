@@ -29,6 +29,7 @@ static const char const g_pcHex_cap[] = {
 
 #ifdef HAVE_PRINTF
 
+#ifndef BOLOS_RELEASE
 void screen_prints(const char* str, unsigned int charcount) {
   while(charcount--) {
     screen_printc(*str++);
@@ -566,6 +567,7 @@ error:
     //
     va_end(vaArgP);
 }
+#endif // BOLOS_RELEASE
  
 #endif // HAVE_PRINTF
 
