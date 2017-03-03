@@ -523,7 +523,8 @@ void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h, 
   c.width = w;
   c.height = h;
   // done by memset // c.icon_id = 0;
-
+  d.width = w;
+  d.height = h;
   d.bpp = bit_per_pixel;
   d.colors = color_index;
   d.bitmap = bitmap;
