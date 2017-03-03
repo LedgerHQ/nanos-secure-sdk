@@ -176,10 +176,11 @@ static const uint8_t const USBD_LangIDDesc[]=
 
 static const uint8_t const USB_SERIAL_STRING[] =
 {
-  3*2+2,      
+  4*2+2,      
   USB_DESC_TYPE_STRING,
   '0', 0,
-  '.', 0,
+  '0', 0,
+  '0', 0,
   '1', 0,
 };
 
