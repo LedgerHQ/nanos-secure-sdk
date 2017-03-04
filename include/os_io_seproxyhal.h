@@ -519,11 +519,13 @@ struct ux_menu_entry_s {
 
 typedef const bagl_element_t *(*ux_menu_preprocessor_t)(
     const ux_menu_entry_t *, bagl_element_t *element);
+typedef const ux_menu_entry_t *(*ux_menu_iterator_t)(unsigned int entry_idx);
 typedef struct ux_menu_state_s {
     const ux_menu_entry_t *menu_entries;
     unsigned int menu_entries_count;
     unsigned int current_entry;
     ux_menu_preprocessor_t menu_entry_preprocessor;
+    ux_menu_iterator_t menu_iterator;
     // temporary menu element for entry layout adjustments
     bagl_element_t tmp_element;
 } ux_menu_state_t;

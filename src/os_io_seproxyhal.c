@@ -1427,9 +1427,28 @@ const bagl_element_t ux_menu_elements[] = {
 
 };
 
+const ux_menu_entry_t* ux_menu_get_entry (unsigned int entry_idx) {
+  if (ux_menu.menu_iterator) {
+    return ux_menu.menu_iterator(entry_idx);
+  } 
+  return &ux_menu.menu_entries[entry_idx];
+} 
+
 const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element) {
   //todo avoid center alignment when text_x or icon_x AND text_x are not 0
   os_memmove(&ux_menu.tmp_element, element, sizeof(bagl_element_t));
+
+  // ask the current entry first, to setup other entries
+  const ux_menu_entry_t* current_entry = ux_menu_get_entry(ux_menu.current_entry);
+
+  const ux_menu_entry_t* previous_entry = NULL;
+  if (ux_menu.current_entry) {
+    previous_entry = ux_menu_get_entry(ux_menu.current_entry-1);
+  }
+  const ux_menu_entry_t* next_entry = NULL;
+  if (ux_menu.current_entry < ux_menu.menu_entries_count-1) {
+    next_entry = ux_menu_get_entry(ux_menu.current_entry+1);
+  }
 
   switch(element->component.userid) {
     case 0x81:
@@ -1444,66 +1463,65 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
       break;
     // previous setting name
     case 0x41:
-      if (ux_menu.menu_entries[ux_menu.current_entry].line2 != NULL 
-        || ux_menu.menu_entries[ux_menu.current_entry].icon != NULL
+      if (current_entry->line2 != NULL 
+        || current_entry->icon != NULL
         || ux_menu.current_entry == 0
         || ux_menu.menu_entries_count == 1 
-        || ux_menu.menu_entries[ux_menu.current_entry-1].icon != NULL
-        || ux_menu.menu_entries[ux_menu.current_entry-1].line2 != NULL) {
+        || previous_entry->icon != NULL
+        || previous_entry->line2 != NULL) {
         return 0;
       }
-      ux_menu.tmp_element.text = ux_menu.menu_entries[ux_menu.current_entry-1].line1;
+      ux_menu.tmp_element.text = previous_entry->line1;
       break;
     // next setting name
     case 0x42:
-      if (ux_menu.menu_entries[ux_menu.current_entry].line2 != NULL 
-        || ux_menu.menu_entries[ux_menu.current_entry].icon != NULL
+      if (current_entry->line2 != NULL 
+        || current_entry->icon != NULL
         || ux_menu.current_entry == ux_menu.menu_entries_count-1
         || ux_menu.menu_entries_count == 1
-        || ux_menu.menu_entries[ux_menu.current_entry+1].icon != NULL) {
+        || next_entry->icon != NULL) {
         return NULL;
       }
-      ux_menu.tmp_element.text = ux_menu.menu_entries[ux_menu.current_entry+1].line1;
+      ux_menu.tmp_element.text = next_entry->line1;
       break;
     case 0x10:
-      if (ux_menu.menu_entries[ux_menu.current_entry].icon == NULL) {
+      if (current_entry->icon == NULL) {
         return NULL;
       }
-      ux_menu.tmp_element.text = (const char*)ux_menu.menu_entries[ux_menu.current_entry].icon;
-      if (ux_menu.menu_entries[ux_menu.current_entry].icon_x) {
-        ux_menu.tmp_element.component.x = ux_menu.menu_entries[ux_menu.current_entry].icon_x;
+      ux_menu.tmp_element.text = (const char*)current_entry->icon;
+      if (current_entry->icon_x) {
+        ux_menu.tmp_element.component.x = current_entry->icon_x;
       }
       break;
     case 0x20:
-      if (ux_menu.menu_entries[ux_menu.current_entry].line2 != NULL) {
+      if (current_entry->line2 != NULL) {
         return NULL;
       }
-      ux_menu.tmp_element.text = ux_menu.menu_entries[ux_menu.current_entry].line1;
+      ux_menu.tmp_element.text = current_entry->line1;
       goto adjust_text_x;
     case 0x21:
-      if (ux_menu.menu_entries[ux_menu.current_entry].line2 == NULL) {
+      if (current_entry->line2 == NULL) {
         return NULL;
       }
-      ux_menu.tmp_element.text = ux_menu.menu_entries[ux_menu.current_entry].line1;
+      ux_menu.tmp_element.text = current_entry->line1;
       goto adjust_text_x;
     case 0x22:
-      if (ux_menu.menu_entries[ux_menu.current_entry].line2 == NULL) {
+      if (current_entry->line2 == NULL) {
         return NULL;
       }
-      ux_menu.tmp_element.text = ux_menu.menu_entries[ux_menu.current_entry].line2;
+      ux_menu.tmp_element.text = current_entry->line2;
     adjust_text_x:
-      if (ux_menu.menu_entries[ux_menu.current_entry].text_x) {
-        ux_menu.tmp_element.component.x = ux_menu.menu_entries[ux_menu.current_entry].text_x;
+      if (current_entry->text_x) {
+        ux_menu.tmp_element.component.x = current_entry->text_x;
         // discard the 'center' flag
         ux_menu.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_EXTRABOLD_11px;
       }
       break;
   }
-
   // ensure prepro agrees to the element to be displayed
   if (ux_menu.menu_entry_preprocessor) {
     // menu is denied by the menu entry preprocessor
-    return ux_menu.menu_entry_preprocessor(&ux_menu.menu_entries[ux_menu.current_entry], &ux_menu.tmp_element);
+    return ux_menu.menu_entry_preprocessor(current_entry, &ux_menu.tmp_element);
   }
 
   return &ux_menu.tmp_element;
@@ -1511,18 +1529,21 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
 
 unsigned int ux_menu_elements_button (unsigned int button_mask, unsigned int button_mask_counter) {
   UNUSED(button_mask_counter);
+
+  const ux_menu_entry_t* current_entry = ux_menu_get_entry(ux_menu.current_entry);
+
   switch (button_mask) {
     // enter menu or exit menu
     case BUTTON_EVT_RELEASED|BUTTON_LEFT|BUTTON_RIGHT:
       // menu is priority 1
-      if (ux_menu.menu_entries[ux_menu.current_entry].menu) {
+      if (current_entry->menu) {
         // use userid as the pointer to current entry in the parent menu
-        UX_MENU_DISPLAY(ux_menu.menu_entries[ux_menu.current_entry].userid, (const ux_menu_entry_t*)PIC(ux_menu.menu_entries[ux_menu.current_entry].menu), ux_menu.menu_entry_preprocessor);
+        UX_MENU_DISPLAY(current_entry->userid, (const ux_menu_entry_t*)PIC(current_entry->menu), ux_menu.menu_entry_preprocessor);
         return 0;
       }
       // else callback
-      else if (ux_menu.menu_entries[ux_menu.current_entry].callback) {
-        ((ux_menu_callback_t)PIC(ux_menu.menu_entries[ux_menu.current_entry].callback))(ux_menu.menu_entries[ux_menu.current_entry].userid);
+      else if (current_entry->callback) {
+        ((ux_menu_callback_t)PIC(current_entry->callback))(current_entry->userid);
         return 0;
       }
       break;
@@ -1563,11 +1584,13 @@ void ux_menu_display(unsigned int current_entry,
   ux_menu.menu_entries_count = 0;
 
   // count entries
-  for(;;) {
-    if (os_memcmp(&menu_entries[ux_menu.menu_entries_count], &UX_MENU_END_ENTRY, sizeof(ux_menu_entry_t)) == 0) {
-      break;
+  if (menu_entries) {
+    for(;;) {
+      if (os_memcmp(&menu_entries[ux_menu.menu_entries_count], &UX_MENU_END_ENTRY, sizeof(ux_menu_entry_t)) == 0) {
+        break;
+      }
+      ux_menu.menu_entries_count++;
     }
-    ux_menu.menu_entries_count++;
   }
 
   if (current_entry != UX_MENU_UNCHANGED_ENTRY) {
@@ -1578,6 +1601,7 @@ void ux_menu_display(unsigned int current_entry,
   }
   ux_menu.menu_entries = menu_entries;
   ux_menu.menu_entry_preprocessor = menu_entry_preprocessor;
+  ux_menu.menu_iterator = NULL;
 
 #ifdef HAVE_BOLOS_UX
   screen_state_init(0);
