@@ -146,6 +146,11 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void) {
 void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short length, unsigned int timeout) {
   unsigned int rx_len;
 
+  // don't spoil the timeout :)
+  if (timeout) {
+    timeout++;
+  }
+
   // won't send if overflowing seproxyhal buffer format
   if (length > 255) {
     return;
@@ -176,8 +181,11 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
         || G_io_seproxyhal_spi_buffer[3] != (ep|0x80)
         || G_io_seproxyhal_spi_buffer[4] != SEPROXYHAL_TAG_USB_EP_XFER_IN
         || G_io_seproxyhal_spi_buffer[5] != length) {
-        // usb reset ?
-        io_seproxyhal_handle_usb_event();
+        
+        // handle loss of communication with the host
+        if (timeout && timeout--==1) {
+          THROW(EXCEPTION_IO_RESET);
+        }
 
         // link disconnected ?
         if(G_io_seproxyhal_spi_buffer[0] == SEPROXYHAL_TAG_STATUS_EVENT) {
@@ -185,15 +193,11 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
            THROW(EXCEPTION_IO_RESET);
           }
         }
-
-        if (!io_event(CHANNEL_SPI)) {
-          LOG("missing NOTIFY_INDICATE event, %02X received\n", G_io_seproxyhal_spi_buffer[0]);
-        }
-
-        // handle loss of communication with the host
-        if (! timeout--) {
-          THROW(EXCEPTION_IO_RESET);
-        }
+        
+        // usb reset ?
+        //io_seproxyhal_handle_usb_event();
+        // also process other transfer requests if any (useful for HID keyboard while playing with CAPS lock key, side effect on LED status)
+        io_seproxyhal_handle_event();
 
         // no general status ack, io_event is responsible for it
         continue;
@@ -206,7 +210,7 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
 }
 
 void io_usb_send_apdu_data(unsigned char* buffer, unsigned short length) {
-  // wait for 20 events before hanging up and timeout
+  // wait for 20 events before hanging up and timeout (~2 seconds of timeout)
   io_usb_send_ep(0x82, buffer, length, 20);
 }
 
@@ -897,176 +901,6 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
             BLE_protocol_send(G_io_apdu_buffer, tx_len);
             goto break_send;
 #endif // HAVE_BLE_APDU
-
-
-
-#ifdef HAVE_M24SR_NFC
-          case APDU_NFC_M24SR:
-            // split in apdu to write into the M24SR and wait M24SR rapdu response.
-            // select the NDEF file
-            // issue an APDU to read the first block content (containing the total apdu length) (read as much as possible)
-            G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-            G_io_seproxyhal_spi_buffer[1] = 0;
-            G_io_seproxyhal_spi_buffer[2] = 7;
-            // Forge NDEF Select command
-            G_io_seproxyhal_spi_buffer[3] = 0x00;
-            G_io_seproxyhal_spi_buffer[4] = 0xA4;
-            G_io_seproxyhal_spi_buffer[5] = 0x00;
-            G_io_seproxyhal_spi_buffer[6] = 0x0C;
-            G_io_seproxyhal_spi_buffer[7] = 0x02;
-            G_io_seproxyhal_spi_buffer[8] = 0x00;
-            G_io_seproxyhal_spi_buffer[9] = 0x01;
-
-            // wait for a NFC_RESPONSE
-            G_io_apdu_state = APDU_NFC_M24SR_SELECT;
-            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 10);
-            break;
-
-          case APDU_NFC_M24SR_SELECT:
-            // wait for select reply 
-            rx_len = io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-            if (rx_len-3 != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])) {
-              LOG("invalid TLV format\n");
-              goto invalid_apdu_packet;
-            }
-            // expect M24SR RAPDU with 0x90 0x00
-            if (G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_M24SR_RESPONSE_APDU_EVENT) {
-              if (!io_event(CHANNEL_SPI)) {
-                LOG("invalid SELECT reply\n");
-                //goto invalid_apdu_packet;
-              }
-
-              // close the event if not done previously (by a display or whatever)
-              if (!io_seproxyhal_spi_is_status_sent()) {
-                  io_seproxyhal_general_status();
-              }
-              continue;
-            }
-            if (G_io_seproxyhal_spi_buffer[1] != 0 || G_io_seproxyhal_spi_buffer[2] != 2 || G_io_seproxyhal_spi_buffer[3] != 0x90 || G_io_seproxyhal_spi_buffer[4] != 0x00) {
-              LOG("invalid SELECT reply\n");
-              goto invalid_apdu_packet;
-            }
-
-            G_io_apdu_length = tx_len;
-            G_io_apdu_offset = 0;
-
-            tx_len = MIN(0xF6-2, G_io_apdu_length);
-
-            // forge the first update binary, putting 0x00 0x00 into the RAPDU NDEF file length
-            G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-            G_io_seproxyhal_spi_buffer[1] = 0;
-            G_io_seproxyhal_spi_buffer[2] = tx_len + 5 /*update binary header*/ + 2 /* NDEF file length*/;
-            // Forge NDEF Select command
-            G_io_seproxyhal_spi_buffer[3] = 0x00;
-            G_io_seproxyhal_spi_buffer[4] = 0xD6;
-            G_io_seproxyhal_spi_buffer[5] = 0x00;
-            G_io_seproxyhal_spi_buffer[6] = 0x00;
-            G_io_seproxyhal_spi_buffer[7] = tx_len+2 /*NDEF file length*/;
-            G_io_seproxyhal_spi_buffer[8] = 0x00;
-            G_io_seproxyhal_spi_buffer[9] = 0x00;
-            os_memmove(G_io_seproxyhal_spi_buffer+10, G_io_apdu_buffer+G_io_apdu_offset, tx_len);
-            G_io_apdu_offset = tx_len;
-
-            // wait for a NFC_RESPONSE
-            G_io_apdu_state = APDU_NFC_M24SR_RAPDU;
-            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, G_io_seproxyhal_spi_buffer[2]+3);
-            break;
-
-
-          case APDU_NFC_M24SR_RAPDU:
-            // wait for update binary reply 
-            rx_len = io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-            if (rx_len-3 != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])) {
-              LOG("invalid TLV format\n");
-              goto invalid_apdu_packet;
-            }
-            // expect M24SR RAPDU with 0x90 0x00
-            if (G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_M24SR_RESPONSE_APDU_EVENT) {
-              if (!io_event(CHANNEL_SPI)) {
-                LOG("invalid UPDATE BINARY reply\n");
-                //goto invalid_apdu_packet;
-              }
-
-              // close the event if not done previously (by a display or whatever)
-              if (!io_seproxyhal_spi_is_status_sent()) {
-                  io_seproxyhal_general_status();
-              }
-              continue;
-            } 
-            if (G_io_seproxyhal_spi_buffer[1] != 0 || G_io_seproxyhal_spi_buffer[2] != 2 || G_io_seproxyhal_spi_buffer[3] != 0x90 || G_io_seproxyhal_spi_buffer[4] != 0x00) {
-              LOG("invalid UPDATE BINARY reply\n");
-              goto invalid_apdu_packet;
-            }
-
-            if (G_io_apdu_length == G_io_apdu_offset) {
-              // update ndef length
-              G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-              G_io_seproxyhal_spi_buffer[1] = 0;
-              G_io_seproxyhal_spi_buffer[2] = 7 /*update binary header*/;
-              // Forge NDEF Select command
-              G_io_seproxyhal_spi_buffer[3] = 0x00;
-              G_io_seproxyhal_spi_buffer[4] = 0xD6;
-              G_io_seproxyhal_spi_buffer[5] = 0x00;
-              G_io_seproxyhal_spi_buffer[6] = 0x00;
-              G_io_seproxyhal_spi_buffer[7] = 2;
-              G_io_seproxyhal_spi_buffer[8] = G_io_apdu_length>>8;
-              G_io_seproxyhal_spi_buffer[9] = G_io_apdu_length;
-
-              G_io_apdu_state = APDU_NFC_M24SR_FIRST;
-              io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, G_io_seproxyhal_spi_buffer[2]+3);
-            }
-            else {
-              // update a part of the apdu
-              tx_len = MIN(0xF6, G_io_apdu_length-G_io_apdu_offset);
-
-              // forge the first update binary, putting 0x00 0x00 into the RAPDU NDEF file length
-              G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-              G_io_seproxyhal_spi_buffer[1] = 0;
-              G_io_seproxyhal_spi_buffer[2] = tx_len + 5 /*update binary header*/;
-              // Forge NDEF Select command
-              G_io_seproxyhal_spi_buffer[3] = 0x00;
-              G_io_seproxyhal_spi_buffer[4] = 0xD6;
-              G_io_seproxyhal_spi_buffer[5] = (G_io_apdu_offset + 2 /*NDEF file length*/)>>8;
-              G_io_seproxyhal_spi_buffer[6] = (G_io_apdu_offset + 2 /*NDEF file length*/);
-              G_io_seproxyhal_spi_buffer[7] = tx_len;
-              os_memmove(G_io_seproxyhal_spi_buffer+8, G_io_apdu_buffer+G_io_apdu_offset, tx_len);
-              G_io_apdu_offset += tx_len;
-
-              // wait for a NFC_RESPONSE
-              io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, G_io_seproxyhal_spi_buffer[2]+3);
-            }
-            break;
-
-          // update the NDEF length after all the content of the RAPDU has been written
-          case APDU_NFC_M24SR_FIRST:
-            // wait for last update binary reply 
-            rx_len = io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-            if (rx_len-3 != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])) {
-              LOG("invalid TLV format\n");
-              goto invalid_apdu_packet;
-            }
-            // expect M24SR RAPDU with 0x90 0x00
-            if (G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_M24SR_RESPONSE_APDU_EVENT) {
-              if (!io_event(CHANNEL_SPI)) {
-                LOG("invalid NDEF file length UPDATE BINARY reply\n");
-                //goto invalid_apdu_packet;
-              }
-
-              // close the event if not done previously (by a display or whatever)
-              if (!io_seproxyhal_spi_is_status_sent()) {
-                  io_seproxyhal_general_status();
-              }
-              continue;
-            }
-            if (G_io_seproxyhal_spi_buffer[1] != 0 || G_io_seproxyhal_spi_buffer[2] != 2 || G_io_seproxyhal_spi_buffer[3] != 0x90 || G_io_seproxyhal_spi_buffer[4] != 0x00) {
-              LOG("invalid NDEF file length UPDATE BINARY reply\n");
-              goto invalid_apdu_packet;
-            }
-            goto break_send;
-#endif // HAVE_M24SR_NFC
         }
         continue;
 
@@ -1110,12 +944,12 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
     }
 
     // ensure ready to receive an event (after an apdu processing with asynch flag, it may occur if the channel is not correctly managed)
-    if (!io_seproxyhal_spi_is_status_sent()) {
-      io_seproxyhal_general_status();
-    }
 
     // until a new whole CAPDU is received
     for (;;) {
+      if (!io_seproxyhal_spi_is_status_sent()) {
+        io_seproxyhal_general_status();
+      }
 
       // wait until a SPI packet is available
       // NOTE: on ST31, dual wait ISO & RF (ISO instead of SPI)
@@ -1131,7 +965,12 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
         G_io_apdu_seq = 0;
 
       send_last_command:
-        io_seproxyhal_general_status();
+        continue;
+      }
+
+      // if an apdu is already ongoing, then discard packet as a new packet
+      if (G_io_apdu_media != IO_APDU_MEDIA_NONE) {
+        io_seproxyhal_handle_event();
         continue;
       }
 
@@ -1172,15 +1011,7 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
 
           // an apdu has been received, ack with mode commands (the reply at least)
           if (G_io_apdu_length > 0) {
-            /* we keep the hand, no need to inform (this disrupt the spi_is_status_sent check)
-            // acknowledge the write request (general status OK) and more command to follow (processing of the apdu)
-            G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_GENERAL_STATUS;
-            G_io_seproxyhal_spi_buffer[1] = 0;
-            G_io_seproxyhal_spi_buffer[2] = 2;
-            G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_GENERAL_STATUS_MORE_COMMAND>>8;
-            G_io_seproxyhal_spi_buffer[4] = SEPROXYHAL_TAG_GENERAL_STATUS_MORE_COMMAND;
-            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 5);
-            */
+            // invalid return when reentered and an apdu is already under processing
             return G_io_apdu_length;
           }
           else {
@@ -1189,142 +1020,10 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
           break;
 #endif // HAVE_IO_USB
 
-
-#ifdef HAVE_M24SR_NFC
-        // event triggered upon write of the 
-        case SEPROXYHAL_TAG_M24SR_GPO_CHANGE_EVENT:
-          // ensure ready to process a NFC APDU (or accept GPO change during a NFC session)
-          if (G_io_apdu_state < APDU_NFC_M24SR && G_io_apdu_state != APDU_IDLE) {
-            LOG("invalid state for NFC over M24SR\n");
-            //THROW(INVALID_STATE);
-            goto invalid_apdu_packet;
-          }
-
-          // only process when the GPO notifies of a valid NDEF length being available
-          if (G_io_apdu_state == APDU_IDLE && G_io_seproxyhal_spi_buffer[3] == 1) {
-            // issue an APDU to read the first block content (containing the total apdu length) (read as much as possible)
-            G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-            G_io_seproxyhal_spi_buffer[1] = 0;
-            G_io_seproxyhal_spi_buffer[2] = 7;
-            // Forge NDEF Select command
-            G_io_seproxyhal_spi_buffer[3] = 0x00;
-            G_io_seproxyhal_spi_buffer[4] = 0xA4;
-            G_io_seproxyhal_spi_buffer[5] = 0x00;
-            G_io_seproxyhal_spi_buffer[6] = 0x0C;
-            G_io_seproxyhal_spi_buffer[7] = 0x02;
-            G_io_seproxyhal_spi_buffer[8] = 0x00;
-            G_io_seproxyhal_spi_buffer[9] = 0x01;
-
-            // wait for a NFC_RESPONSE
-            G_io_apdu_state = APDU_NFC_M24SR_SELECT;
-            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 10);
-          }
-          else {
-            // NDEF message rewritten while being updated ?? => error ?
-            LOG("unexpected GPO change\n");
-            unsigned char processed = io_event(CHANNEL_SPI);
-            // close the event if not done previously (by a display or whatever)
-            if (!io_seproxyhal_spi_is_status_sent()) {
-                io_seproxyhal_general_status();
-            }
-
-            if (!processed) {
-              goto invalid_apdu_packet;
-            }
-          }
-
-          break;
-        case SEPROXYHAL_TAG_M24SR_RESPONSE_APDU_EVENT:
-          // ensure ready to process a NFC APDU (shall have been started with GPO_CHANGE)
-          switch(G_io_apdu_state) {
-            case APDU_NFC_M24SR_SELECT:
-              // expect 0x90 0x00
-              if (G_io_seproxyhal_spi_buffer[1] != 0 || G_io_seproxyhal_spi_buffer[2] != 2 || G_io_seproxyhal_spi_buffer[3] != 0x90 || G_io_seproxyhal_spi_buffer[4] != 0x00) {
-                LOG("invalid NFC SELECT reply\n");
-                goto invalid_apdu_packet;
-              }
-
-              // read first part of the NDEF file, maximize throughput but to read only the total length
-
-              // issue an APDU to read the first block content (containing the total apdu length) (read as much as possible)
-              G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-              G_io_seproxyhal_spi_buffer[1] = 0;
-              G_io_seproxyhal_spi_buffer[2] = 5;
-              // Forge NDEF Select command
-              G_io_seproxyhal_spi_buffer[3] = 0x00;
-              G_io_seproxyhal_spi_buffer[4] = 0xB0;
-              G_io_seproxyhal_spi_buffer[5] = 0x00;
-              G_io_seproxyhal_spi_buffer[6] = 0x00;
-              G_io_seproxyhal_spi_buffer[7] = M24SR_CHUNK_LENGTH;
-
-              // wait for a NFC_RESPONSE
-              G_io_apdu_state = APDU_NFC_M24SR_FIRST;
-              io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 8);
-              break;
-            case APDU_NFC_M24SR_FIRST:
-              // ensure read has ended with a positive status
-              if (G_io_seproxyhal_spi_buffer[rx_len-2] != 0x90 || G_io_seproxyhal_spi_buffer[rx_len-1] != 0x00) {
-                LOG("invalid READBINARY reply\n");
-                goto invalid_apdu_packet;
-              }
-
-              G_io_apdu_length = U2(G_io_seproxyhal_spi_buffer[3], G_io_seproxyhal_spi_buffer[4]);
-              rx_len = MIN(G_io_apdu_length, rx_len -3 /*TagLen*/ -2 /*SW*/ -2 /*total apdu length (NDEF length)*/);
-
-              // copy the first part of the apdu
-              os_memmove(G_io_apdu_buffer, G_io_seproxyhal_spi_buffer+3 /*TagLen*/ +2 /*NDEF length*/, rx_len);
-              G_io_apdu_offset = rx_len;
-
-              G_io_apdu_state = APDU_NFC_M24SR;
-              goto m24sr_continue_read_apdu;
-
-            case APDU_NFC_M24SR:
-              // ensure read has ended with a positive status
-              if (G_io_seproxyhal_spi_buffer[rx_len-2] != 0x90 || G_io_seproxyhal_spi_buffer[rx_len-1] != 0x00) {
-                LOG("invalid READBINARY reply (2)\n");
-                goto invalid_apdu_packet;
-              }
-
-              rx_len = MIN(G_io_apdu_length-G_io_apdu_offset, rx_len -3 /*TagLen*/ -2 /*SW*/);
-
-              // copy the first part of the apdu
-              os_memmove(G_io_apdu_buffer+G_io_apdu_offset, G_io_seproxyhal_spi_buffer+3 /*TagLen*/, rx_len);
-              G_io_apdu_offset += rx_len;
-
-            m24sr_continue_read_apdu:
-              // check if need more data to complete the CAPDU content
-              if (G_io_apdu_length == G_io_apdu_offset) {
-                // acknowledge the M24SR RAPDU EVENT (general status OK) and more command to follow (processing of the apdu)
-                G_io_apdu_media = IO_APDU_MEDIA_NFC;
-                return G_io_apdu_length;
-              }
-              else {
-                // fetch more data from the M24SR memory
-                G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_M24SR_C_APDU;
-                G_io_seproxyhal_spi_buffer[1] = 0;
-                G_io_seproxyhal_spi_buffer[2] = 5;
-                // Forge NDEF Select command
-                G_io_seproxyhal_spi_buffer[3] = 0x00;
-                G_io_seproxyhal_spi_buffer[4] = 0xB0;
-                G_io_seproxyhal_spi_buffer[5] = (G_io_apdu_offset +2 /*NDEF length*/)>>8;
-                G_io_seproxyhal_spi_buffer[6] = (G_io_apdu_offset +2 /*NDEF length*/);
-                G_io_seproxyhal_spi_buffer[7] = MIN(M24SR_CHUNK_LENGTH,G_io_apdu_length-G_io_apdu_offset);
-                io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 8);
-              }
-              break;
-            default:
-              LOG("invalid state for M24SR RAPDU EVENT\n");
-              goto invalid_apdu_packet;
-          }
-          break;
-#endif // HAVE_M24SR_NFC
         default:
           // tell the application that a non-apdu packet has been received
           io_event(CHANNEL_SPI);
-          if (!io_seproxyhal_spi_is_status_sent()) {
-            io_seproxyhal_general_status();
-          }
-          break;
+          continue;
 
       }
     }
@@ -1342,13 +1041,14 @@ unsigned int os_ux_blocking(bolos_ux_params_t* params) {
   while(ret == BOLOS_UX_IGNORE 
      || ret == BOLOS_UX_CONTINUE) {
 
-    // send general status before receiving next event
-    if (!io_seproxyhal_spi_is_status_sent()) {
-      io_seproxyhal_general_status();
-    }
 
     // process events
     for (;;) {
+      // send general status before receiving next event
+      if (!io_seproxyhal_spi_is_status_sent()) {
+        io_seproxyhal_general_status();
+      }
+
       /*unsigned int rx_len = */io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
 
       switch (G_io_seproxyhal_spi_buffer[0]) {
@@ -1363,10 +1063,6 @@ unsigned int os_ux_blocking(bolos_ux_params_t* params) {
         default:
           // if malformed, then a stall is likely to occur
           if (io_seproxyhal_handle_event()) {
-            // avoid twice if error
-            if (!io_seproxyhal_spi_is_status_sent()) {
-              io_seproxyhal_general_status();
-            }
             continue;
           }
           break;

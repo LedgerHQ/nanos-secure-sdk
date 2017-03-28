@@ -250,7 +250,7 @@ uint8_t  PC_to_RDR_XfrBlock(void)
 
     error = SC_XferBlock(&Ccid_bulk_data.abData[0], 
                      reqlen, 
-                     expectedLength); 
+                     &expectedLength); 
 
    if (error != SLOT_NO_ERROR)
   {

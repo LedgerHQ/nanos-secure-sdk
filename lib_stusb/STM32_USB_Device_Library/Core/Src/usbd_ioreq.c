@@ -208,18 +208,6 @@ USBD_StatusTypeDef  USBD_CtlReceiveStatus (USBD_HandleTypeDef  *pdev)
 
 
 /**
-* @brief  USBD_GetRxCount
-*         returns the received data length
-* @param  pdev: device instance
-* @param  ep_addr: endpoint address
-* @retval Rx Data blengthh
-*/
-uint16_t  USBD_GetRxCount (USBD_HandleTypeDef  *pdev , uint8_t ep_addr)
-{
-  return USBD_LL_GetRxDataSize(pdev, ep_addr);
-}
-
-/**
   * @}
   */ 
 
