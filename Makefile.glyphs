@@ -26,11 +26,11 @@ GLYPH_FILES := $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 GLYPH_DESTC := $(GLYPH_SRC_DIR)/glyphs.c
 GLYPH_DESTH := $(GLYPH_SRC_DIR)/glyphs.h
 $(GLYPH_DESTH): $(GLYPH_FILES) $(BOLOS_SDK)/icon.py
-	$(call log,echo [GLYPH] Compiling...)
-	$(call log,-mkdir -p $(GLYPH_SRC_DIR))
-	$(call log,-rm $(GLYPH_DESTC) $(GLYPH_DESTH) 2>/dev/null)
-	$(call log,touch $(GLYPH_DESTH) $(GLYPH_DESTC))
-	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then for gif in $(GLYPH_FILES) ; do python $(BOLOS_SDK)/icon.py $$gif glyphcheader ; done > $(GLYPH_DESTH) ; fi)
-	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then for gif in $(GLYPH_FILES) ; do python $(BOLOS_SDK)/icon.py $$gif glyphcfile ; done > $(GLYPH_DESTC) ; fi)
+	$(shell echo [GLYPH] Compiling...)
+	$(shell -mkdir -p $(GLYPH_SRC_DIR))
+	$(shell -rm $(GLYPH_DESTC) $(GLYPH_DESTH) 2>/dev/null)
+	$(shell touch $(GLYPH_DESTH) $(GLYPH_DESTC))
+	$(shell if [ ! -z "$(GLYPH_FILES)" ] ; then for gif in $(GLYPH_FILES) ; do python $(BOLOS_SDK)/icon.py $$gif glyphcheader ; done > $(GLYPH_DESTH) ; fi)
+	$(shell if [ ! -z "$(GLYPH_FILES)" ] ; then for gif in $(GLYPH_FILES) ; do python $(BOLOS_SDK)/icon.py $$gif glyphcfile ; done > $(GLYPH_DESTC) ; fi)
 #add dependency for generation
 $(GLYPH_DESTC): $(GLYPH_DESTH)
