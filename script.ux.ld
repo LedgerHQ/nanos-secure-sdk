@@ -68,7 +68,10 @@ SECTIONS
     *(.bss.N_* .rodata.N_*)
 
     . = ALIGN(PAGE_SIZE);
+    _install_parameters = .;
+    PROVIDE(N_install_parameters = .);
     _envram = .;
+    _nvram_data_size = _envram - _nvram_data;
     
   } > FLASH = 0x00
 
@@ -101,6 +104,10 @@ SECTIONS
     /**
      * Reserve stack size
      */
+    . = ALIGN(4);
+    app_stack_canary = .;
+    PROVIDE(app_stack_canary = .);
+    . += 4;
     _stack = .;
     . = _stack + STACK_SIZE;
     PROVIDE( _stack_size = STACK_SIZE );

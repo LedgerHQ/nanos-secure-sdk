@@ -96,6 +96,15 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev);
 USBD_StatusTypeDef USBD_Start  (USBD_HandleTypeDef *pdev);
 USBD_StatusTypeDef USBD_Stop   (USBD_HandleTypeDef *pdev);
 USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass);
+/**
+  * @brief  USBD_RegisterClassForInterface 
+  *         Link class driver to Device Core.
+  * @param  interfaceidx: The interface index (starting 0) for which the class is registered
+  * @param  pDevice : Device Handle
+  * @param  pclass: Class handle
+  * @retval USBD Status
+  */
+USBD_StatusTypeDef USBD_RegisterClassForInterface(uint8_t interfaceidx, USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass);
 
 USBD_StatusTypeDef USBD_RunTestMode (USBD_HandleTypeDef  *pdev); 
 USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx);

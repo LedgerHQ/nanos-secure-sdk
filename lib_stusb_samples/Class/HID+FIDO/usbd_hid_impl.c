@@ -113,7 +113,7 @@
 #define USBD_LANGID_STRING            0x409
 
 #define USBD_VID                      0x2C97
-#if TARGET_ID == 0x31000002 // blue
+#if defined(TARGET_BLUE) // blue
 #define USBD_PID                      0x0000
 static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   8*2+2,
@@ -124,7 +124,7 @@ static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'e', 0,
 };
 
-#elif TARGET_ID == 0x31100002 // nano s
+#elif defined(TARGET_NANOS) // nano s
 #define USBD_PID                      0x0001
 static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   10*2+2,
@@ -136,7 +136,7 @@ static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   ' ', 0,
   'S', 0,
 };
-#elif TARGET_ID == 0x31200002 // aramis
+#elif defined(TARGET_ARAMIS) // aramis
 #define USBD_PID                      0x0002
 static const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   10*2+2,
@@ -569,6 +569,18 @@ uint8_t* USBD_HID_GetReportDescriptor_impl(uint16_t* len) {
   */
 extern volatile unsigned short G_io_apdu_length;
 
+uint8_t  USBD_HID_DataIn_impl (USBD_HandleTypeDef *pdev, 
+                              uint8_t epnum, uint8_t* buffer)
+{
+  // only the data hid endpoint will receive data
+  switch (epnum) {
+  // FIDO endpoint
+  case 1:
+    u2f_transport_sent(&G_io_u2f, U2F_MEDIA_USB);
+    break;
+  } 
+}
+
 uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev, 
                               uint8_t epnum, uint8_t* buffer)
 {
@@ -596,12 +608,8 @@ uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
     break;
   // FIDO endpoint
   case 1:
-    if (fidoActivated) {
       USBD_LL_PrepareReceive(pdev, 0x01 , HID_EPOUT_SIZE);
-#ifdef HAVE_U2F    
-      u2f_transport_handle(&u2fService, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR), U2F_MEDIA_USB);
-#endif    
-    }
+      u2f_transport_received(&G_io_u2f, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR), U2F_MEDIA_USB);
     break;
   }
 
@@ -632,7 +640,7 @@ static const USBD_ClassTypeDef const USBD_HID =
   USBD_HID_Setup,
   NULL, /*EP0_TxSent*/  
   NULL, /*EP0_RxReady*/ /* STATUS STAGE IN */
-  NULL, /*DataIn*/
+  USBD_HID_DataIn_impl, /*DataIn*/
   USBD_HID_DataOut_impl, /*DataOut*/
   NULL, /*SOF */
   NULL,
@@ -652,7 +660,8 @@ void USB_power(unsigned char enabled) {
     USBD_Init(&USBD_Device, (USBD_DescriptorsTypeDef*)&HID_Desc, 0);
     
     /* Register the HID class */
-    USBD_RegisterClass(&USBD_Device, (USBD_ClassTypeDef*)&USBD_HID);
+    USBD_RegisterClassForInterface(0, &USBD_Device, (USBD_ClassTypeDef*)&USBD_HID);
+    USBD_RegisterClassForInterface(1, &USBD_Device, (USBD_ClassTypeDef*)&USBD_HID);
 
     /* Start Device Process */
     USBD_Start(&USBD_Device);

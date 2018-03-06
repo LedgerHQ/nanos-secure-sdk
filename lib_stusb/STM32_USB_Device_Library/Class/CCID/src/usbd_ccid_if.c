@@ -26,25 +26,20 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
+#include "os.h"
 #include "usbd_ccid_if.h"
 
 #ifdef HAVE_USB_CLASS_CCID
+
+#if CCID_BULK_EPIN_SIZE > USB_SEGMENT_SIZE
+  #error configuration error, the USB MAX SEGMENT SIZE does not support the CCID endpoint (CCID_BULK_EPIN_SIZE vs USB_SEGMENT_SIZE)
+#endif
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t Ccid_BulkState;
-uint8_t UsbIntMessageBuffer[INTR_MAX_PACKET_SIZE];  /* data buffer*/
-__IO uint8_t PrevXferComplete_IntrIn;
-usb_ccid_param_t usb_ccid_param;
-
-uint8_t* pUsbMessageBuffer;
-static uint32_t UsbMessageLength;
-Ccid_SlotStatus_t Ccid_SlotStatus;
-Protocol0_DataStructure_t Protocol0_DataStructure;
-
-Ccid_bulk_data_t Ccid_bulk_data;
+usb_class_ccid_t G_io_ccid;
 
 /* Private function prototypes -----------------------------------------------*/
 static void CCID_Response_SendData (USBD_HandleTypeDef  *pdev, 
@@ -59,24 +54,21 @@ static void CCID_Response_SendData (USBD_HandleTypeDef  *pdev,
   */
 void CCID_Init (USBD_HandleTypeDef  *pdev)
 {
-  memset(&Ccid_BulkState, 0, sizeof(Ccid_BulkState));
-  memset(&UsbIntMessageBuffer, 0, sizeof(UsbIntMessageBuffer));
-  memset(&PrevXferComplete_IntrIn, 0, sizeof(PrevXferComplete_IntrIn));
-  memset(&usb_ccid_param, 0, sizeof(usb_ccid_param));
-  memset(&pUsbMessageBuffer, 0, sizeof(pUsbMessageBuffer));
-  memset(&UsbMessageLength, 0, sizeof(UsbMessageLength));
-  memset(&Ccid_SlotStatus, 0, sizeof(Ccid_SlotStatus));
-  memset(&Protocol0_DataStructure, 0, sizeof(Protocol0_DataStructure));
-  memset(&Ccid_bulk_data, 0, sizeof(Ccid_bulk_data));
+  memset(&G_io_ccid, 0, sizeof(G_io_ccid));
 
   /* CCID Related Initialization */
+#ifdef HAVE_CCID_INTERRUPT
   CCID_SetIntrTransferStatus(1);  /* Transfer Complete Status */
+#endif // HAVE_CCID_INTERRUPT
   CCID_UpdSlotChange(1);
   SC_InitParams();  
 
   /* Prepare Out endpoint to receive 1st packet */ 
-  Ccid_BulkState = CCID_STATE_IDLE;
+  G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
   USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
+
+  // send the smartcard as inserted state at boot time
+  io_usb_ccid_set_card_inserted(1);
 }
 
 /**
@@ -88,7 +80,7 @@ void CCID_Init (USBD_HandleTypeDef  *pdev)
 void CCID_DeInit (USBD_HandleTypeDef  *pdev)
 {
    UNUSED(pdev);
-   Ccid_BulkState = CCID_STATE_IDLE;
+   G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
 }
 
 /**
@@ -106,43 +98,50 @@ void CCID_BulkMessage_In (USBD_HandleTypeDef  *pdev,
     
     /*************** Handle Bulk Transfer IN data completion  *****************/
     
-    switch (Ccid_BulkState)
+    switch (G_io_ccid.Ccid_BulkState)
     {
     case CCID_STATE_SEND_RESP: {
-      unsigned int remLen = UsbMessageLength;
+      unsigned int remLen = G_io_ccid.UsbMessageLength;
 
       // advance with acknowledged sent chunk
-      pUsbMessageBuffer += MIN(CCID_BULK_EPIN_SIZE, UsbMessageLength);
-      UsbMessageLength -= MIN(CCID_BULK_EPIN_SIZE, UsbMessageLength);
+      if (G_io_ccid.pUsbMessageBuffer == &G_io_ccid.bulk_header) {
+        // first part of the bulk in sent.
+        // advance in the data buffer to transmit. (mixed source leap)
+        G_io_ccid.pUsbMessageBuffer = G_io_ccid_data_buffer+MIN(CCID_BULK_EPIN_SIZE, G_io_ccid.UsbMessageLength)-CCID_HEADER_SIZE;
+      }
+      else {
+        G_io_ccid.pUsbMessageBuffer += MIN(CCID_BULK_EPIN_SIZE, G_io_ccid.UsbMessageLength);
+      }
+      G_io_ccid.UsbMessageLength -= MIN(CCID_BULK_EPIN_SIZE, G_io_ccid.UsbMessageLength);
 
       // if remaining length is > EPIN_SIZE: send a filled bulk packet
-      if (UsbMessageLength >= CCID_BULK_EPIN_SIZE) {
-        CCID_Response_SendData(pdev, pUsbMessageBuffer, 
+      if (G_io_ccid.UsbMessageLength >= CCID_BULK_EPIN_SIZE) {
+        CCID_Response_SendData(pdev, G_io_ccid.pUsbMessageBuffer, 
                                       // use the header declared size packet must be well formed
                                       CCID_BULK_EPIN_SIZE);
       }
 
       // if remaining length is 0; send an empty packet and prepare to receive a new command
-      else if (UsbMessageLength == 0 && remLen == CCID_BULK_EPIN_SIZE) {
-        CCID_Response_SendData(pdev, pUsbMessageBuffer, 
+      else if (G_io_ccid.UsbMessageLength == 0 && remLen == CCID_BULK_EPIN_SIZE) {
+        CCID_Response_SendData(pdev, G_io_ccid.pUsbMessageBuffer, 
                                       // use the header declared size packet must be well formed
                                       0);
         goto last_xfer; // won't wait ack to avoid missing a command
       }
       // else if no more data, then last packet sent, go back to idle (done on transfer ack)
-      else if (UsbMessageLength == 0) { // robustness only
+      else if (G_io_ccid.UsbMessageLength == 0) { // robustness only
       last_xfer:
-        Ccid_BulkState = CCID_STATE_IDLE;
+        G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
         
         /* Prepare EP to Receive First Cmd */
-        USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
+        // not timeout compliant // USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
       }
 
       // if remaining length is < EPIN_SIZE: send packet and prepare to receive a new command
-      else if (UsbMessageLength < CCID_BULK_EPIN_SIZE) {
-        CCID_Response_SendData(pdev, pUsbMessageBuffer, 
+      else if (G_io_ccid.UsbMessageLength < CCID_BULK_EPIN_SIZE) {
+        CCID_Response_SendData(pdev, G_io_ccid.pUsbMessageBuffer, 
                                       // use the header declared size packet must be well formed
-                                      UsbMessageLength);
+                                      G_io_ccid.UsbMessageLength);
         goto last_xfer; // won't wait ack to avoid missing a command
       }
 
@@ -153,10 +152,34 @@ void CCID_BulkMessage_In (USBD_HandleTypeDef  *pdev,
       break;
     }
   }
+#ifdef HAVE_CCID_INTERRUPT
   else if (epnum == (CCID_INTR_IN_EP & 0x7F))
   {
     /* Filter the epnum by masking with 0x7f (mask of IN Direction)  */
     CCID_SetIntrTransferStatus(1);  /* Transfer Complete Status */
+  }
+#endif // HAVE_CCID_INTERRUPT
+}
+
+void CCID_Send_Reply(USBD_HandleTypeDef  *pdev) {
+  /********** Decide for all commands ***************/ 
+  if (G_io_ccid.Ccid_BulkState == CCID_STATE_SEND_RESP)
+  {
+    G_io_ccid.UsbMessageLength = G_io_ccid.bulk_header.bulkin.dwLength+CCID_HEADER_SIZE;   /* Store for future use */
+      
+    /* Expected Data Length Packet Received */
+    G_io_ccid.pUsbMessageBuffer = (uint8_t*) &G_io_ccid.bulk_header;
+
+    // send bulk header and first pat of the message at once
+    os_memmove(G_io_usb_ep_buffer, &G_io_ccid.bulk_header, CCID_HEADER_SIZE);
+    if (G_io_ccid.UsbMessageLength>CCID_HEADER_SIZE) {
+      // copy start of data if bigger size than a header
+      os_memmove(G_io_usb_ep_buffer+CCID_HEADER_SIZE, G_io_ccid_data_buffer, MIN(CCID_BULK_EPIN_SIZE, G_io_ccid.UsbMessageLength)-CCID_HEADER_SIZE);
+    }
+    // send the first mixed source chunk
+    CCID_Response_SendData(pdev, G_io_usb_ep_buffer, 
+                                  // use the header declared size packet must be well formed
+                                  MIN(CCID_BULK_EPIN_SIZE, G_io_ccid.UsbMessageLength));
   }
 }
 
@@ -170,123 +193,113 @@ void CCID_BulkMessage_In (USBD_HandleTypeDef  *pdev,
 void CCID_BulkMessage_Out (USBD_HandleTypeDef  *pdev, 
                            uint8_t epnum, uint8_t* buffer, uint16_t dataLen)
 {
-   
-  switch (Ccid_BulkState)
-  {
-  case CCID_STATE_IDLE:
-    if (dataLen == 0x00)
-    { /* Zero Length Packet Received */
-      Ccid_BulkState = CCID_STATE_IDLE;
-    }
-    else  if (dataLen >= CCID_MESSAGE_HEADER_SIZE)
+  if (epnum == (CCID_BULK_OUT_EP & 0x7F)) {
+    switch (G_io_ccid.Ccid_BulkState)
     {
-      UsbMessageLength = dataLen;   /* Store for future use */
-      
-      /* Expected Data Length Packet Received */
-      pUsbMessageBuffer = (uint8_t*) &Ccid_bulk_data;
-      
-      /* Fill CCID_BulkOut Data Buffer from USB Buffer */
-      memmove(pUsbMessageBuffer, buffer, dataLen); 
-      
-      /*
-      Refer : 6 CCID Messages
-      The response messages always contain the exact same slot number, 
-      and sequence number fields from the header that was contained in 
-      the Bulk-OUT command message.
-      */
-      Ccid_bulk_data.header.bulkin.bSlot = Ccid_bulk_data.header.bulkout.bSlot; 
-      Ccid_bulk_data.header.bulkin.bSeq = Ccid_bulk_data.header.bulkout.bSeq;
-      
-      if (dataLen < CCID_BULK_EPOUT_SIZE)
-      {/* Short message, less than the EP Out Size, execute the command,
-        if parameter like dwLength is too big, the appropriate command will 
-        give an error */
-        CCID_CmdDecode(pdev);  
+
+      // after a timeout, could be in almost any state :) therefore, clean it and process the newly received command
+    default:
+      G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
+      // no break is intentional
+
+    case CCID_STATE_IDLE:
+      // prepare to receive another packet later on (to avoid troubles with timeout due to other hid command timeouting the ccid endpoint reply)
+      USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
+
+      if (dataLen == 0x00)
+      { /* Zero Length Packet Received, end of transfer */
+        G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
       }
-      else
-      { /* Long message, receive additional data with command */
-        /* (u8dataLen == CCID_BULK_EPOUT_SIZE) */
+      else  if (dataLen >= CCID_HEADER_SIZE)
+      {
+        G_io_ccid.UsbMessageLength = dataLen;   /* Store for future use */
         
-        if (Ccid_bulk_data.header.bulkout.dwLength > ABDATA_SIZE)
+        /* Expected Data Length Packet Received */
+        // endianness is little :) useful for our ARM convention
+        G_io_ccid.pUsbMessageBuffer = (uint8_t*) &G_io_ccid.bulk_header;
+        
+        // copy the ccid bulk header only
+        os_memmove(G_io_ccid.pUsbMessageBuffer, buffer, CCID_HEADER_SIZE); 
+        // copy remaining part in the data buffer (split from the ccid to allow for overlaying with another ressource buffer)
+        if (dataLen>CCID_HEADER_SIZE) {
+          os_memmove(G_io_ccid_data_buffer, buffer+CCID_HEADER_SIZE, dataLen-CCID_HEADER_SIZE);
+          // we're now receiving in the data buffer (all subsequent calls)
+          G_io_ccid.pUsbMessageBuffer = G_io_ccid_data_buffer;
+        }
+        
+        if (G_io_ccid.bulk_header.bulkout.dwLength > IO_CCID_DATA_BUFFER_SIZE)
         { /* Check if length of data to be sent by host is > buffer size */
           
           /* Too long data received.... Error ! */
-          Ccid_BulkState = CCID_STATE_UNCORRECT_LENGTH;
+          G_io_ccid.Ccid_BulkState = CCID_STATE_UNCORRECT_LENGTH;
         }
+        else
+        // everything received in the first packet
+        if (G_io_ccid.UsbMessageLength == (G_io_ccid.bulk_header.bulkout.dwLength + CCID_HEADER_SIZE)) {
+          /* Short message, less than the EP Out Size, execute the command,
+          if parameter like dwLength is too big, the appropriate command will 
+          give an error */
+          CCID_CmdDecode(pdev);  
+        }
+        else
+        { /* Long message, receive additional data with command */
+          G_io_ccid.Ccid_BulkState = CCID_STATE_RECEIVE_DATA;
+          G_io_ccid.pUsbMessageBuffer += dataLen-CCID_HEADER_SIZE;  /* Point to new offset */      
+        }
+      }
+      break;
+      
+    case CCID_STATE_RECEIVE_DATA:
+
+      USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
+      
+      G_io_ccid.UsbMessageLength += dataLen;
+      
+      if (dataLen < CCID_BULK_EPOUT_SIZE)
+      {/* Short message, less than the EP Out Size, execute the command,
+          if parameter like dwLength is too big, the appropriate command will 
+          give an error */
         
-        else 
-        { /* Expect more data on OUT EP */
-          Ccid_BulkState = CCID_STATE_RECEIVE_DATA;
-          pUsbMessageBuffer += dataLen;  /* Point to new offset */      
+        /* Full command is received, process the Command */
+        os_memmove(G_io_ccid.pUsbMessageBuffer, buffer, dataLen); 
+        CCID_CmdDecode(pdev); 
+      }
+      else //if (dataLen == CCID_BULK_EPOUT_SIZE)
+      {  
+        if (G_io_ccid.UsbMessageLength < (G_io_ccid.bulk_header.bulkout.dwLength + CCID_HEADER_SIZE))
+        {
+          os_memmove(G_io_ccid.pUsbMessageBuffer, buffer, dataLen); 
+          G_io_ccid.pUsbMessageBuffer += dataLen; 
+          /* Increment the pointer to receive more data */
           
           /* Prepare EP to Receive next Cmd */
-          USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
-          
-        } /* if (dataLen == CCID_BULK_EPOUT_SIZE) ends */
-      } /*  if (dataLen >= CCID_BULK_EPOUT_SIZE) ends */
-    } /* if (dataLen >= CCID_MESSAGE_HEADER_SIZE) ends */
-    break;
-    
-  case CCID_STATE_RECEIVE_DATA:
-    
-    UsbMessageLength += dataLen;
-    
-    if (dataLen < CCID_BULK_EPOUT_SIZE)
-    {/* Short message, less than the EP Out Size, execute the command,
-        if parameter like dwLength is too big, the appropriate command will 
-        give an error */
+          // not timeout compliant // USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
+        }
+        else if (G_io_ccid.UsbMessageLength == (G_io_ccid.bulk_header.bulkout.dwLength + CCID_HEADER_SIZE))
+        { 
+          /* Full command is received, process the Command */
+          os_memmove(G_io_ccid.pUsbMessageBuffer, buffer, dataLen); 
+          CCID_CmdDecode(pdev);
+        }
+        else
+        {
+          /* Too long data received.... Error ! */
+          G_io_ccid.Ccid_BulkState = CCID_STATE_UNCORRECT_LENGTH;
+        }
+      }
       
-      /* Full command is received, process the Command */
-      memmove(pUsbMessageBuffer, buffer, dataLen); 
-      CCID_CmdDecode(pdev); 
-    }
-    else if (dataLen == CCID_BULK_EPOUT_SIZE)
-    {  
-      if (UsbMessageLength < (Ccid_bulk_data.header.bulkout.dwLength + CCID_CMD_HEADER_SIZE))
-      {
-        memmove(pUsbMessageBuffer, buffer, dataLen); 
-        pUsbMessageBuffer += dataLen; 
-        /* Increment the pointer to receive more data */
-        
-        /* Prepare EP to Receive next Cmd */
-        USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
-      }
-      else if (UsbMessageLength == (Ccid_bulk_data.header.bulkout.dwLength + CCID_CMD_HEADER_SIZE))
-      { 
-        /* Full command is received, process the Command */
-        memmove(pUsbMessageBuffer, buffer, dataLen); 
-        CCID_CmdDecode(pdev);
-      }
-      else
-      {
-        /* Too long data received.... Error ! */
-        Ccid_BulkState = CCID_STATE_UNCORRECT_LENGTH;
-      }
-    }
+      break;
     
-    break;
-  
-  case CCID_STATE_UNCORRECT_LENGTH:
-    Ccid_BulkState = CCID_STATE_IDLE;
-    break;
-  
-  default:
-    break;
-  }
-}
+    /*
+    case CCID_STATE_UNCORRECT_LENGTH:
+      G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
+      break;
+    
+    default:
 
-void CCID_Send_Reply(USBD_HandleTypeDef  *pdev) {
-  /********** Decide for all commands ***************/ 
-  if (Ccid_BulkState == CCID_STATE_SEND_RESP)
-  {
-    UsbMessageLength = Ccid_bulk_data.header.bulkin.dwLength+CCID_MESSAGE_HEADER_SIZE;   /* Store for future use */
-      
-    /* Expected Data Length Packet Received */
-    pUsbMessageBuffer = (uint8_t*) &Ccid_bulk_data;
-
-    CCID_Response_SendData(pdev, pUsbMessageBuffer, 
-                                  // use the header declared size packet must be well formed
-                                  MIN(CCID_BULK_EPIN_SIZE, UsbMessageLength));
+      break;
+    */
+    }
   }
 }
 
@@ -300,7 +313,7 @@ void CCID_CmdDecode(USBD_HandleTypeDef  *pdev)
 {
   uint8_t errorCode;
   
-  switch (Ccid_bulk_data.header.bulkout.bMessageType)
+  switch (G_io_ccid.bulk_header.bulkout.bMessageType)
   {
   case PC_TO_RDR_ICCPOWERON:
     errorCode = PC_to_RDR_IccPowerOn();
@@ -356,7 +369,7 @@ void CCID_CmdDecode(USBD_HandleTypeDef  *pdev)
     break;
   case PC_TO_RDR_SECURE:
     errorCode = PC_TO_RDR_Secure();
-    RDR_to_PC_DataBlock(errorCode);
+    // asynchronous // RDR_to_PC_DataBlock(errorCode);
     break;
   default:
     RDR_to_PC_SlotStatus(SLOTERROR_CMD_NOT_SUPPORTED);
@@ -376,7 +389,7 @@ void CCID_CmdDecode(USBD_HandleTypeDef  *pdev)
 void Transfer_Data_Request(void)
 {
    /**********  Update Global Variables ***************/
-   Ccid_BulkState = CCID_STATE_SEND_RESP;    
+   G_io_ccid.Ccid_BulkState = CCID_STATE_SEND_RESP;    
 }   
   
   
@@ -392,6 +405,7 @@ static void  CCID_Response_SendData(USBD_HandleTypeDef  *pdev,
                               uint8_t* buf, 
                               uint16_t len)
 {  
+    UNUSED(pdev);
     // don't ask the MCU to perform bulk split, we could quickly get into a buffer overflow
     if (len > CCID_BULK_EPIN_SIZE) {
       THROW(EXCEPTION_IO_OVERFLOW);
@@ -407,6 +421,7 @@ static void  CCID_Response_SendData(USBD_HandleTypeDef  *pdev,
     io_seproxyhal_spi_send(buf, len);
 }
 
+#ifdef HAVE_CCID_INTERRUPT
 /**
   * @brief  CCID_IntMessage
   *         Send the Interrupt-IN data to the host
@@ -415,11 +430,14 @@ static void  CCID_Response_SendData(USBD_HandleTypeDef  *pdev,
   */
 void CCID_IntMessage(USBD_HandleTypeDef  *pdev)
 {
+  UNUSED(pdev);
   /* Check if there us change in Smartcard Slot status */  
   if ( CCID_IsSlotStatusChange() && CCID_IsIntrTransferComplete() )
   {
+#ifdef HAVE_CCID_INTERRUPT
     /* Check Slot Status is changed. Card is Removed/ Fitted  */
     RDR_to_PC_NotifySlotChange();
+#endif // HAVE_CCID_INTERRUPT
     
     CCID_SetIntrTransferStatus(0);  /* Reset the Status */
     CCID_UpdSlotChange(0);    /* Reset the Status of Slot Change */
@@ -431,7 +449,7 @@ void CCID_IntMessage(USBD_HandleTypeDef  *pdev)
     G_io_seproxyhal_spi_buffer[4] = SEPROXYHAL_TAG_USB_EP_PREPARE_DIR_IN;
     G_io_seproxyhal_spi_buffer[5] = 2;
     io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 6);
-    io_seproxyhal_spi_send(UsbIntMessageBuffer, 2);
+    io_seproxyhal_spi_send(G_io_ccid.UsbIntMessageBuffer, 2);
   }
 }  
 
@@ -443,7 +461,7 @@ void CCID_IntMessage(USBD_HandleTypeDef  *pdev)
   */
 uint8_t CCID_IsIntrTransferComplete (void)
 {
-  return PrevXferComplete_IntrIn;
+  return G_io_ccid.PrevXferComplete_IntrIn;
 }
 
 /**
@@ -454,8 +472,9 @@ uint8_t CCID_IsIntrTransferComplete (void)
   */
 void CCID_SetIntrTransferStatus (uint8_t xfer_Status)
 {
-  PrevXferComplete_IntrIn = xfer_Status;
+  G_io_ccid.PrevXferComplete_IntrIn = xfer_Status;
 }
+#endif // HAVE_CCID_INTERRUPT
 
 
 
@@ -463,12 +482,7 @@ void CCID_SetIntrTransferStatus (uint8_t xfer_Status)
 
 
 uint8_t SC_Detect(void) {
-  return 1;
-}
-
-void SC_Poweroff(void) {
-  // nothing to do
-
+  return G_io_ccid.ccid_card_inserted;
 }
 
 void SC_InitParams (void) {
@@ -476,44 +490,85 @@ void SC_InitParams (void) {
 }
 
 uint8_t SC_SetParams (Protocol0_DataStructure_t* pt0) {
+  UNUSED(pt0);
   return SLOT_NO_ERROR;
 }
 
-uint8_t SC_ExecuteEscape (uint8_t* escapePtr, uint32_t escapeLen, 
-                          uint8_t* responseBuff,
-                          uint16_t* responseLen) {
-  io_seproxyhal_se_reset();
-}
+
 uint8_t SC_SetClock (uint8_t bClockCommand) {
+  UNUSED(bClockCommand);
   return SLOT_NO_ERROR;
 }
+
 uint8_t SC_Request_GetClockFrequencies(uint8_t* pbuf, uint16_t* len);
 uint8_t SC_Request_GetDataRates(uint8_t* pbuf, uint16_t* len);
 uint8_t SC_T0Apdu(uint8_t bmChanges, uint8_t bClassGetResponse, 
                   uint8_t bClassEnvelope) {
+  UNUSED(bmChanges);
+  UNUSED(bClassGetResponse);
+  UNUSED(bClassEnvelope);
   return SLOTERROR_CMD_NOT_SUPPORTED;
 }
 uint8_t SC_Mechanical(uint8_t bFunction) {
+  UNUSED(bFunction);
   return SLOTERROR_CMD_NOT_SUPPORTED;
 }
 uint8_t SC_SetDataRateAndClockFrequency(uint32_t dwClockFrequency, 
                                         uint32_t dwDataRate) {
+  UNUSED(dwClockFrequency);
+  UNUSED(dwDataRate);
   return SLOT_NO_ERROR;
 }
 uint8_t SC_Secure(uint32_t dwLength, uint8_t bBWI, uint16_t wLevelParameter, 
                     uint8_t* pbuf, uint32_t* returnLen )  {
-  return SLOTERROR_CMD_NOT_SUPPORTED;
+  UNUSED(bBWI);
+  UNUSED(wLevelParameter);
+  UNUSED(returnLen);
+  // return SLOTERROR_CMD_NOT_SUPPORTED;
+  uint16_t ret_len,off;
+  switch(pbuf[0]) {
+    case 0: // verify pin
+      ret_len = dwLength - 15;
+      os_memmove(G_io_apdu_buffer, pbuf+15, dwLength-15);
+      break;
+    case 1: // modify pin
+      switch(pbuf[11]) {
+      case 3:
+        off = 20;
+        break;
+      case 2:
+      case 1:
+        off = 19;
+        break;
+      // 0 and 4-0xFF
+      default:
+        off = 18; 
+        break;
+      }
+      ret_len = dwLength-off;
+      // provide with the complete apdu
+      os_memmove(G_io_apdu_buffer, pbuf+off, dwLength-off);
+      break;
+    default: // unsupported
+      G_io_ccid.bulk_header.bulkin.dwLength = 0;
+      RDR_to_PC_DataBlock(SLOTERROR_CMD_NOT_SUPPORTED);
+      CCID_Send_Reply(&USBD_Device);
+      return SLOTERROR_CMD_NOT_SUPPORTED;
+  }
+  return SC_XferBlock(G_io_apdu_buffer, ret_len, &ret_len);
 }
 
 // prepare the apdu to be processed by the application
 uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen, uint16_t* expectedLen) {
+  UNUSED(expectedLen);
+
   // check for overflow
   if (blockLen > IO_APDU_BUFFER_SIZE) {
     return SLOTERROR_BAD_LENTGH;
   }
   
-  // copy received apdu
-  memmove(G_io_apdu_buffer, ptrBlock, blockLen);
+  // copy received apdu // if G_io_ccid_data_buffer is the buffer apdu, then the memmove will do nothing
+  os_memmove(G_io_apdu_buffer, ptrBlock, blockLen);
   G_io_apdu_length = blockLen;
   G_io_apdu_media = IO_APDU_MEDIA_USB_CCID; // for application code
   G_io_apdu_state = APDU_USB_CCID; // for next call to io_exchange
@@ -523,12 +578,12 @@ uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen, uint16_t* expectedLe
 
 void io_usb_ccid_reply(unsigned char* buffer, unsigned short length) {
   // avoid memory overflow
-  if (length > sizeof(Ccid_bulk_data.abData)) {
+  if (length > IO_CCID_DATA_BUFFER_SIZE) {
     THROW(EXCEPTION_IO_OVERFLOW);
   }
   // copy the responde apdu
-  memmove(Ccid_bulk_data.abData, buffer, length);
-  Ccid_bulk_data.header.bulkin.dwLength = length;
+  os_memmove(G_io_ccid_data_buffer, buffer, length);
+  G_io_ccid.bulk_header.bulkin.dwLength = length;
   // forge reply
   RDR_to_PC_DataBlock(SLOT_NO_ERROR);
 
@@ -537,9 +592,12 @@ void io_usb_ccid_reply(unsigned char* buffer, unsigned short length) {
 }
 
 // ask for power on
-void io_usb_ccid_poweron(void) {
+void io_usb_ccid_set_card_inserted(unsigned int inserted) {
+  G_io_ccid.ccid_card_inserted = inserted;
   CCID_UpdSlotChange(1);
+#ifdef HAVE_CCID_INTERRUPT
   CCID_IntMessage(&USBD_Device);
+#endif // HAVE_CCID_INTERRUPT
 }
 
 

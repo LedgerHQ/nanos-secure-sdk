@@ -180,13 +180,13 @@ uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev,
   /* Open EP IN */
   USBD_LL_OpenEP(pdev,
                  HID_EPIN_ADDR,
-                 USBD_EP_TYPE_BULK,
+                 USBD_EP_TYPE_INTR,
                  HID_EPIN_SIZE);
   
   /* Open EP OUT */
   USBD_LL_OpenEP(pdev,
                  HID_EPOUT_ADDR,
-                 USBD_EP_TYPE_BULK,
+                 USBD_EP_TYPE_INTR,
                  HID_EPOUT_SIZE);
 
         /* Prepare Out endpoint to receive 1st packet */ 

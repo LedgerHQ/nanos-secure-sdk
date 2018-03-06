@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017 Ledger
+*   (c) 2016, 2017, 2018 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -21,19 +21,12 @@
 // apdu buffer must hold a complete apdu to avoid troubles
 unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
-// allocate the exception inner context
-try_context_t * G_try_last_open_context;
-
 
 void os_boot(void) {
   // TODO patch entry point when romming (f)
-
-  // at startup no exception context in use
-  G_try_last_open_context = NULL;
 }
 
 #ifdef HAVE_USB_APDU
-unsigned char G_io_hid_chunk[IO_HID_EP_LENGTH];
 
 /**
  *  Ledger Protocol 
@@ -66,22 +59,23 @@ unsigned char G_io_hid_chunk[IO_HID_EP_LENGTH];
  */
 
 volatile unsigned int   G_io_usb_hid_total_length;
+volatile unsigned int   G_io_usb_hid_channel;
 volatile unsigned int   G_io_usb_hid_remaining_length;
 volatile unsigned int   G_io_usb_hid_sequence_number;
 volatile unsigned char* G_io_usb_hid_current_buffer;
 
 io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char* buffer, unsigned short l) {
   // avoid over/under flows
-  if (buffer != G_io_hid_chunk) {
-    os_memset(G_io_hid_chunk, 0, sizeof(G_io_hid_chunk));
-    os_memmove(G_io_hid_chunk, buffer, MIN(l, sizeof(G_io_hid_chunk)));
+  if (buffer != G_io_usb_ep_buffer) {
+    os_memset(G_io_usb_ep_buffer, 0, sizeof(G_io_usb_ep_buffer));
+    os_memmove(G_io_usb_ep_buffer, buffer, MIN(l, sizeof(G_io_usb_ep_buffer)));
   }
 
   // process the chunk content
-  switch(G_io_hid_chunk[2]) {
+  switch(G_io_usb_ep_buffer[2]) {
   case 0x05:
     // ensure sequence idx is 0 for the first chunk ! 
-    if (G_io_hid_chunk[3] != (G_io_usb_hid_sequence_number>>8) || G_io_hid_chunk[4] != (G_io_usb_hid_sequence_number&0xFF)) {
+    if (U2BE(G_io_usb_ep_buffer, 3) != G_io_usb_hid_sequence_number) {
       // ignore packet
       goto apdu_reset;
     }
@@ -92,7 +86,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
     if (G_io_usb_hid_sequence_number == 0) {
       /// This is the apdu first chunk
       // total apdu size to receive
-      G_io_usb_hid_total_length = (G_io_hid_chunk[5]<<8)+(G_io_hid_chunk[6]&0xFF);
+      G_io_usb_hid_total_length = U2BE(G_io_usb_ep_buffer, 5); //(G_io_usb_ep_buffer[5]<<8)+(G_io_usb_ep_buffer[6]&0xFF);
       // check for invalid length encoding (more data in chunk that announced in the total apdu)
       if (G_io_usb_hid_total_length > sizeof(G_io_apdu_buffer)) {
         goto apdu_reset;
@@ -103,11 +97,14 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
       G_io_usb_hid_remaining_length = G_io_usb_hid_total_length;
       G_io_usb_hid_current_buffer = G_io_apdu_buffer;
 
+      // retain the channel id to use for the reply
+      G_io_usb_hid_channel = U2BE(G_io_usb_ep_buffer, 0);
+
       if (l > G_io_usb_hid_remaining_length) {
         l = G_io_usb_hid_remaining_length;
       }
       // copy data
-      os_memmove((void*)G_io_usb_hid_current_buffer, G_io_hid_chunk+7, l);
+      os_memmove((void*)G_io_usb_hid_current_buffer, G_io_usb_ep_buffer+7, l);
     }
     else {
       // check for invalid length encoding (more data in chunk that announced in the total apdu)
@@ -117,7 +114,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
 
       /// This is a following chunk
       // append content
-      os_memmove((void*)G_io_usb_hid_current_buffer, G_io_hid_chunk+5, l);
+      os_memmove((void*)G_io_usb_hid_current_buffer, G_io_usb_ep_buffer+5, l);
     }
     // factorize (f)
     G_io_usb_hid_current_buffer += l;
@@ -127,24 +124,24 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
 
   case 0x00: // get version ID
     // do not reset the current apdu reception if any
-    os_memset(G_io_hid_chunk+3, 0, 4); // PROTOCOL VERSION is 0
+    os_memset(G_io_usb_ep_buffer+3, 0, 4); // PROTOCOL VERSION is 0
     // send the response
-    sndfct(G_io_hid_chunk, IO_HID_EP_LENGTH);
+    sndfct(G_io_usb_ep_buffer, IO_HID_EP_LENGTH);
     // await for the next chunk
     goto apdu_reset;
 
   case 0x01: // ALLOCATE CHANNEL
     // do not reset the current apdu reception if any
-    cx_rng(G_io_hid_chunk+3, 4);
+    cx_rng(G_io_usb_ep_buffer+3, 4);
     // send the response
-    sndfct(G_io_hid_chunk, IO_HID_EP_LENGTH);
+    sndfct(G_io_usb_ep_buffer, IO_HID_EP_LENGTH);
     // await for the next chunk
     goto apdu_reset;
 
   case 0x02: // ECHO|PING
     // do not reset the current apdu reception if any
     // send the response
-    sndfct(G_io_hid_chunk, IO_HID_EP_LENGTH);
+    sndfct(G_io_usb_ep_buffer, IO_HID_EP_LENGTH);
     // await for the next chunk
     goto apdu_reset;
   }
@@ -183,25 +180,27 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
   while(sndlength) {
 
     // fill the chunk
-    os_memset(G_io_hid_chunk+2, 0, IO_HID_EP_LENGTH-2);
+    os_memset(G_io_usb_ep_buffer, 0, IO_HID_EP_LENGTH-2);
 
     // keep the channel identifier
-    G_io_hid_chunk[2] = 0x05;
-    G_io_hid_chunk[3] = G_io_usb_hid_sequence_number>>8;
-    G_io_hid_chunk[4] = G_io_usb_hid_sequence_number;
+    G_io_usb_ep_buffer[0] = (G_io_usb_hid_channel>>8)&0xFF;
+    G_io_usb_ep_buffer[1] = G_io_usb_hid_channel&0xFF;
+    G_io_usb_ep_buffer[2] = 0x05;
+    G_io_usb_ep_buffer[3] = G_io_usb_hid_sequence_number>>8;
+    G_io_usb_ep_buffer[4] = G_io_usb_hid_sequence_number;
 
     if (G_io_usb_hid_sequence_number == 0) {
       l = ((sndlength>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : sndlength);
-      G_io_hid_chunk[5] = sndlength>>8;
-      G_io_hid_chunk[6] = sndlength;
-      os_memmove(G_io_hid_chunk+7, (const void*)G_io_usb_hid_current_buffer, l);
+      G_io_usb_ep_buffer[5] = sndlength>>8;
+      G_io_usb_ep_buffer[6] = sndlength;
+      os_memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
       sndlength -= l;
       l += 7;
     }
     else {
       l = ((sndlength>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : sndlength);
-      os_memmove(G_io_hid_chunk+5, (const void*)G_io_usb_hid_current_buffer, l);
+      os_memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
       sndlength -= l;
       l += 5;
@@ -210,7 +209,7 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
     G_io_usb_hid_sequence_number++;
     // send the chunk
     // always pad :)
-    sndfct(G_io_hid_chunk, sizeof(G_io_hid_chunk));
+    sndfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
   }
 
   // prepare for next apdu
@@ -227,14 +226,14 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
   // receive the next command
   for(;;) {
     // receive a hid chunk
-    l = rcvfct(G_io_hid_chunk, sizeof(G_io_hid_chunk));
+    l = rcvfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
     // check for wrongly sized tlvs
-    if (l > sizeof(G_io_hid_chunk)) {
+    if (l > sizeof(G_io_usb_ep_buffer)) {
       continue;
     }
 
     // call the chunk reception
-    switch(io_usb_hid_receive(sndfct, G_io_hid_chunk, l)) {
+    switch(io_usb_hid_receive(sndfct, G_io_usb_ep_buffer, l)) {
       default:
         continue;
 
@@ -294,8 +293,8 @@ void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned int length) {
   // don't || to ensure all condition are evaluated
   while(!(!length && !l)) {
     length--;
-    l--;
     DST[length] = SRC1[length] ^ SRC2[length];
+    l--;
   }
   // WHAT ??? glitch detected ?
   if (l!=length) {
@@ -303,12 +302,53 @@ void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned int length) {
   }
 }
 
-#ifndef BOLOS_RELEASE
-void os_longjmp(jmp_buf b, unsigned int exception) {
-  unsigned int lr;
-  __asm volatile ("mov     %0, lr":"=r"(lr));
-  PRINTF("%c%07X",0xEE, lr);
-  PRINTF("%d", exception);
-  longjmp(b, exception);
+char os_secure_memcmp(void WIDE* src1, void WIDE* src2, unsigned int length) {
+#define SRC1 ((unsigned char const WIDE *)src1)
+#define SRC2 ((unsigned char const WIDE *)src2)
+  unsigned short l = length;
+  unsigned char xoracc=0;
+  // don't || to ensure all condition are evaluated
+  while(!(!length && !l)) {
+    length--;
+    xoracc |= SRC1[length] ^ SRC2[length];
+    l--;
+  }
+  // WHAT ??? glitch detected ?
+  if (l!=length) {
+    THROW(EXCEPTION);
+  }
+  return xoracc;
 }
-#endif // BOLOS_RELEASE
+
+try_context_t* try_context_get(void) {
+  try_context_t* current_ctx;
+  __asm volatile ("mov %0, r9":"=r"(current_ctx));
+  return current_ctx;
+}
+
+try_context_t* try_context_get_previous(void) {
+  try_context_t* current_ctx;
+  __asm volatile ("mov %0, r9":"=r"(current_ctx));
+
+  // first context reached ?
+  if (current_ctx == NULL) {
+    // DESIGN NOTE: if not done, then upon END_TRY a wrong context address may be use (if address 
+    // à is readable in the arch, and therefore lead to faulty rethrow or worse)
+    return NULL;
+  }
+
+  // return r9 content saved on the current context. It links to the previous context.
+  // r4 r5 r6 r7 r8 r9 r10 r11 sp lr
+  //                ^ platform register
+  return (try_context_t*) current_ctx->jmp_buf[5];
+}
+
+void try_context_set(try_context_t* ctx) {
+  __asm volatile ("mov r9, %0"::"r"(ctx));
+}
+
+#ifndef HAVE_BOLOS
+void os_longjmp(unsigned int exception) {
+  longjmp(try_context_get()->jmp_buf, exception);
+}
+#endif // HAVE_BOLOS

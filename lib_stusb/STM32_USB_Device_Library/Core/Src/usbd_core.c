@@ -92,8 +92,11 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev)
   pdev->dev_state  = USBD_STATE_DEFAULT;
   
   /* Free Class Resources */
-  if(pdev->pClass != NULL) {
-    ((DeInit_t)PIC(pdev->pClass->DeInit))(pdev, pdev->dev_config);  
+  uint8_t intf;
+  for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+    if(pdev->interfacesClass[intf].pClass != NULL) {
+      ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, pdev->dev_config);  
+    }
   }
   
     /* Stop the low level driver  */
@@ -105,6 +108,9 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev)
   return USBD_OK;
 }
 
+USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass) {
+  return USBD_RegisterClassForInterface(0, pdev, pclass);
+}
 
 /**
   * @brief  USBD_RegisterClass 
@@ -113,13 +119,15 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev)
   * @param  pclass: Class handle
   * @retval USBD Status
   */
-USBD_StatusTypeDef  USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass)
+USBD_StatusTypeDef USBD_RegisterClassForInterface(uint8_t interfaceidx, USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass)
 {
   USBD_StatusTypeDef   status = USBD_OK;
   if(pclass != 0)
   {
-    /* link the class to the USB Device handle */
-    pdev->pClass = pclass;
+    if (interfaceidx < USBD_MAX_NUM_INTERFACES) {
+      /* link the class to the USB Device handle */
+      pdev->interfacesClass[interfaceidx].pClass = pclass;
+    }
     status = USBD_OK;
   }
   else
@@ -155,8 +163,11 @@ USBD_StatusTypeDef  USBD_Start  (USBD_HandleTypeDef *pdev)
 USBD_StatusTypeDef  USBD_Stop   (USBD_HandleTypeDef *pdev)
 {
   /* Free Class Resources */
-  if(pdev->pClass != NULL) {
-    ((DeInit_t)PIC(pdev->pClass->DeInit))(pdev, pdev->dev_config);  
+  uint8_t intf;
+  for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+    if(pdev->interfacesClass[intf].pClass != NULL) {
+      ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, pdev->dev_config);  
+    }
   }
 
   /* Stop the low level driver  */
@@ -188,17 +199,15 @@ USBD_StatusTypeDef  USBD_RunTestMode (USBD_HandleTypeDef  *pdev)
 
 USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx)
 {
-  USBD_StatusTypeDef   ret = USBD_FAIL;
-  
-  if(pdev->pClass != NULL)
-  {
-    /* Set configuration  and Start the Class*/
-    if(((Init_t)PIC(pdev->pClass->Init))(pdev, cfgidx) == 0)
-    {
-      ret = USBD_OK;
+  /* Set configuration  and Start the Class*/
+  uint8_t intf;
+  for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+    if(pdev->interfacesClass[intf].pClass != NULL) {
+      ((Init_t)PIC(pdev->interfacesClass[intf].pClass->Init))(pdev, cfgidx);
     }
   }
-  return ret; 
+
+  return USBD_OK; 
 }
 
 /**
@@ -211,8 +220,11 @@ USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx
 USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx)
 {
   /* Clear configuration  and De-initialize the Class process*/
-  if(pdev->pClass != NULL) {
-    ((DeInit_t)PIC(pdev->pClass->DeInit))(pdev, cfgidx);  
+  uint8_t intf;
+  for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+    if(pdev->interfacesClass[intf].pClass != NULL) {
+      ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, cfgidx);  
+    }
   }
   return USBD_OK;
 }
@@ -279,19 +291,28 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum
       }
       else
       {
-        if((pdev->pClass->EP0_RxReady != NULL)&&
-           (pdev->dev_state == USBD_STATE_CONFIGURED))
-        {
-          ((EP0_RxReady_t)PIC(pdev->pClass->EP0_RxReady))(pdev); 
+        uint8_t intf;
+        for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+          if(pdev->interfacesClass[intf].pClass != NULL &&  (pdev->interfacesClass[intf].pClass->EP0_RxReady != NULL)&&
+             (pdev->dev_state == USBD_STATE_CONFIGURED))
+          {
+            ((EP0_RxReady_t)PIC(pdev->interfacesClass[intf].pClass->EP0_RxReady))(pdev); 
+          }
         }
         USBD_CtlSendStatus(pdev);
       }
     }
   }
-  else if((pdev->pClass->DataOut != NULL)&&
-          (pdev->dev_state == USBD_STATE_CONFIGURED))
-  {
-    ((DataOut_t)PIC(pdev->pClass->DataOut))(pdev, epnum, pdata); 
+  else {
+
+    uint8_t intf;
+    for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+      if( pdev->interfacesClass[intf].pClass != NULL &&  (pdev->interfacesClass[intf].pClass->DataOut != NULL)&&
+         (pdev->dev_state == USBD_STATE_CONFIGURED))
+      {
+        ((DataOut_t)PIC(pdev->interfacesClass[intf].pClass->DataOut))(pdev, epnum, pdata); 
+      }
+    }
   }  
   return USBD_OK;
 }
@@ -351,11 +372,14 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
         }
         else
         {
-          if(pdev->pClass != NULL && (pdev->pClass->EP0_TxSent != NULL) &&
-             (pdev->dev_state == USBD_STATE_CONFIGURED))
-          {
-            ((EP0_TxSent_t)PIC(pdev->pClass->EP0_TxSent))(pdev); 
-          }          
+          uint8_t intf;
+          for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+            if(pdev->interfacesClass[intf].pClass != NULL && (pdev->interfacesClass[intf].pClass->EP0_TxSent != NULL)&&
+               (pdev->dev_state == USBD_STATE_CONFIGURED))
+            {
+              ((EP0_RxReady_t)PIC(pdev->interfacesClass[intf].pClass->EP0_TxSent))(pdev); 
+            }
+          }
           USBD_CtlReceiveStatus(pdev);
         }
       }
@@ -366,11 +390,16 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
       pdev->dev_test_mode = 0;
     }
   }
-  else if(pdev->pClass != NULL && (pdev->pClass->DataIn != NULL)&& 
-          (pdev->dev_state == USBD_STATE_CONFIGURED))
-  {
-    ((DataIn_t)PIC(pdev->pClass->DataIn))(pdev, epnum); 
-  }  
+  else {
+    uint8_t intf;
+    for (intf = 0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+      if( pdev->interfacesClass[intf].pClass != NULL && (pdev->interfacesClass[intf].pClass->DataIn != NULL)&&
+         (pdev->dev_state == USBD_STATE_CONFIGURED))
+      {
+        ((DataIn_t)PIC(pdev->interfacesClass[intf].pClass->DataIn))(pdev, epnum); 
+      }
+    }
+  }
   return USBD_OK;
 }
 
@@ -389,11 +418,14 @@ USBD_StatusTypeDef USBD_LL_Reset(USBD_HandleTypeDef  *pdev)
   pdev->ep_in[0].maxpacket = USB_MAX_EP0_SIZE;
   /* Upon Reset call user call back */
   pdev->dev_state = USBD_STATE_DEFAULT;
-  
-  if (pdev->pClass) {
-    ((DeInit_t)PIC(pdev->pClass->DeInit))(pdev, pdev->dev_config);  
-  }
  
+  uint8_t intf;
+  for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+    if( pdev->interfacesClass[intf].pClass != NULL)
+    {
+      ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, pdev->dev_config); 
+    }
+  }
   
   return USBD_OK;
 }
@@ -455,9 +487,12 @@ USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef  *pdev)
 {
   if(pdev->dev_state == USBD_STATE_CONFIGURED)
   {
-    if(pdev->pClass->SOF != NULL)
-    {
-      ((SOF_t)PIC(pdev->pClass->SOF))(pdev);
+    uint8_t intf;
+    for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
+      if( pdev->interfacesClass[intf].pClass != NULL && pdev->interfacesClass[intf].pClass->SOF != NULL)
+      {
+        ((SOF_t)PIC(pdev->interfacesClass[intf].pClass->SOF))(pdev); 
+      }
     }
   }
   return USBD_OK;

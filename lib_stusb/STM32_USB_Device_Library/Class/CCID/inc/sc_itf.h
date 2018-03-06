@@ -36,19 +36,7 @@
 
 #include "usbd_ccid_cmd.h"
 
-/* Exported constants --------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
-typedef struct
-{
-  uint8_t voltage;  /* Voltage for the Card Already Selected */
-  uint8_t USART_GuardTime;
-  uint8_t SC_A2R_FiDi;
-  uint8_t SC_hostFiDi;
-  uint8_t USART_DefaultGuardTime;
-  uint32_t USART_BaudRate;
-} SC_Param_t;
 
-extern SC_Param_t SC_Param;
 /* Exported macro ------------------------------------------------------------*/
 #define MAX_EXTRA_GUARD_TIME (0xFF - DEFAULT_EXTRA_GUARDTIME)
 

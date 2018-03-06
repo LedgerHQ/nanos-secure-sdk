@@ -184,7 +184,7 @@ try:
 	i = 0
 	palette_remapping = {}
 	new_palette = []
-	for lum, values in opalette.iteritems(): 
+	for lum, values in opalette.items(): 
 		# old index to new index
 		for v in values:
 			palette_remapping[v[0]] = i

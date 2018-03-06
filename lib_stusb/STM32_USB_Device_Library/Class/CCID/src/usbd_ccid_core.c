@@ -75,13 +75,15 @@ uint8_t  USBD_CCID_Init (USBD_HandleTypeDef  *pdev,
               CCID_BULK_OUT_EP,
               USBD_EP_TYPE_BULK,
               CCID_BULK_EPOUT_SIZE);
- 
+
+#ifdef HAVE_CCID_INTERRUPT
     /* Open INTR EP IN */
   USBD_LL_OpenEP(pdev,
               CCID_INTR_IN_EP,
               USBD_EP_TYPE_INTR,
               CCID_INTR_EPIN_SIZE);
-  
+#endif // HAVE_CCID_INTERRUPT
+
   /* Init the CCID  layer */
   CCID_Init(pdev); 
   
@@ -102,7 +104,9 @@ uint8_t  USBD_CCID_DeInit (USBD_HandleTypeDef  *pdev,
   /* Close CCID EPs */
   USBD_LL_CloseEP (pdev , CCID_BULK_IN_EP);
   USBD_LL_CloseEP (pdev , CCID_BULK_OUT_EP);
+#ifdef HAVE_CCID_INTERRUPT
   USBD_LL_CloseEP (pdev , CCID_INTR_IN_EP);
+#endif // HAVE_CCID_INTERRUPT  
     
   /* Un Init the CCID layer */
   CCID_DeInit(pdev);   
@@ -120,7 +124,6 @@ uint8_t  USBD_CCID_Setup (USBD_HandleTypeDef  *pdev, USBD_SetupReqTypedef *req)
 {
   uint8_t slot_nb;
   uint8_t seq_nb;
-  uint16_t len;
   
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {

@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017 Ledger
+*   (c) 2016, 2017, 2018 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -20,6 +20,25 @@
 
 #include "bolos_target.h"
 
+// -----------------------------------------------------------------------
+// - BASIC MATHS
+// -----------------------------------------------------------------------
+#define U2(hi, lo) ((((hi)&0xFF) << 8) | ((lo)&0xFF))
+#define U4(hi3, hi2, lo1, lo0)                                                 \
+    ((((hi3)&0xFF) << 24) | (((hi2)&0xFF) << 16) | (((lo1)&0xFF) << 8) |       \
+     ((lo0)&0xFF))
+#define U2BE(buf, off) ((((buf)[off] & 0xFF) << 8) | ((buf)[off + 1] & 0xFF))
+#define U2LE(buf, off) ((((buf)[off + 1] & 0xFF) << 8) | ((buf)[off] & 0xFF))
+#define U4BE(buf, off) ((U2BE(buf, off) << 16) | (U2BE(buf, off + 2) & 0xFFFF))
+#define U4LE(buf, off) ((U2LE(buf, off + 2) << 16) | (U2LE(buf, off) & 0xFFFF))
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define IS_POW2(x) (((x) & ((x)-1)) == 0)
+
+#ifdef macro_offsetof
+#define offsetof(type, field) ((unsigned int)&(((type *)NULL)->field))
+#endif
+
 /**
  * Quality development guidelines:
  * - NO header defined per arch and included in common if needed per arch,
@@ -33,18 +52,36 @@
  * - extensive use of * and arch specific C modifier
  */
 
+// error type definition
+typedef unsigned short exception_t;
+
 // Arch definitions
 
 //#define macro_offsetof // already defined in stddef.h
 #define OS_LITTLE_ENDIAN
 #define NATIVE_64BITS
+
 #define WIDE // const // don't !!
 #define WIDE_AS_INT unsigned long int
 #define REENTRANT(x) x //
 
 //#include <setjmp.h>
-// GCC/LLVM declare way too big mjp context, reduce them to what is used on CM0+
-typedef int jmp_buf[10];
+// GCC/LLVM declare way too big jmp context, reduce them to what is used on CM0+
+typedef struct try_context_s try_context_t;
+
+typedef unsigned int jmp_buf[10];
+
+struct try_context_s {
+    // jmp context to backup (in increasing order address: r4, r5, r6, r7, r8,
+    // r9, r10, r11, SP, setjmpcallPC)
+    jmp_buf jmp_buf;
+
+    // link to the previous jmp_buf context
+    // in r9 // try_context_t* previous;
+
+    // current exception
+    exception_t ex;
+};
 
 // borrowed from setjmp.h
 
@@ -55,8 +92,6 @@ void longjmp(jmp_buf __jmpb, int __retval);
 #endif
 int setjmp(jmp_buf __jmpb);
 
-#define __MPU_PRESENT 1 // THANKS ST FOR YOUR HARDWORK
-#include <core_sc000.h>
 #include "stddef.h"
 #include "stdint.h"
 
@@ -92,6 +127,11 @@ unsigned int pic(unsigned int linked_address);
 #define TASKSWITCH
 #endif
 
+#ifndef LIBCALL
+// #define LIBCALL libcall
+#define LIBCALL
+#endif
+
 #ifndef SHARED
 // #define SHARED shared
 #define SHARED
@@ -104,6 +144,14 @@ unsigned int pic(unsigned int linked_address);
 #ifndef PLENGTH
 #define PLENGTH(len)
 #endif
+
+#ifndef CXPORT
+#define CXPORT(name)
+#endif
+
+/* ----------------------------------------------------------------------- */
+/* -                            APPLICATION PRIVILEGES                   - */
+/* ----------------------------------------------------------------------- */
 
 /**
  * Application has been loaded using a secure channel opened using the
@@ -154,6 +202,21 @@ unsigned int pic(unsigned int linked_address);
 #define APPLICATION_FLAG_CUSTOM_CA 0x400
 
 /**
+ * The application main can be called in two ways:
+ *  - with first arg (stored in r0) set to 0: The application is called from the
+ * dashboard
+ *  - with first arg (stored in r0) set to != 0 (ram address likely): The
+ * application is used as a library from another app.
+ */
+#define APPLICATION_FLAG_LIBRARY 0x800
+
+/**
+ * The application won't be shown on the dashboard (somewhat reasonable for pure
+ * library)
+ */
+#define APPLICATION_FLAG_NO_RUN 0x1000
+
+/**
  * Application is disabled (during its upgrade or whatever)
  */
 
@@ -163,37 +226,35 @@ unsigned int pic(unsigned int linked_address);
 #define APPLICATION_FLAG_NEG_MASK 0xFFFF0000UL
 
 /* ----------------------------------------------------------------------- */
-/* -                            TYPES                                    - */
+/* -                            SYSCALL CRYPTO EXPORT                    - */
 /* ----------------------------------------------------------------------- */
 
-// error type definition
-typedef unsigned short exception_t;
+#define CXPORT_ED_DES 0x0001UL
+#define CXPORT_ED_AES 0x0002UL
+#define CXPORT_ED_RSA 0x0004UL
 
-// convenience declaration
-typedef struct try_context_s try_context_t;
-
-// structure to reduce the code size generated for the close try (on stm7)
-struct try_context_s {
-    // current exception context
-    jmp_buf jmp_buf;
-
-    // previous exception contexts (if null, then will fail the same way as
-    // before, segv, therefore don't mind chaining)
-    try_context_t *previous;
-
-    // current exception if any
-    exception_t ex;
-};
+/* ----------------------------------------------------------------------- */
+/* -                            TYPES                                    - */
+/* ----------------------------------------------------------------------- */
 
 /* ----------------------------------------------------------------------- */
 /* -                            GLOBALS                                  - */
 /* ----------------------------------------------------------------------- */
 
 // the global apdu buffer
-#define IO_APDU_BUFFER_SIZE (5 + 255)
-extern unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
+#ifdef HAVE_IO_U2F
+#define IMPL_IO_APDU_BUFFER_SIZE (3 + 32 + 32 + 15 + 255)
+#else
+#define IMPL_IO_APDU_BUFFER_SIZE (5 + 255)
+#endif
 
-extern try_context_t *G_try_last_open_context;
+#ifdef CUSTOM_IO_APDU_BUFFER_SIZE
+#define IO_APDU_BUFFER_SIZE                                                    \
+    MAX(IMPL_IO_APDU_BUFFER_SIZE, CUSTOM_IO_APDU_BUFFER_SIZE)
+#else
+#define IO_APDU_BUFFER_SIZE IMPL_IO_APDU_BUFFER_SIZE
+#endif
+extern unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
 #define CUSTOMCA_MAXLEN 64
 
@@ -231,6 +292,9 @@ char os_memcmp(const void WIDE *buf1, const void WIDE *buf2,
 
 void os_xor(void *dst, void WIDE *src1, void WIDE *src2, unsigned int length);
 
+// Secure memory comparison
+char os_secure_memcmp(void WIDE *src1, void WIDE *src2, unsigned int length);
+
 // patch point, address used to dispatch, no index
 REENTRANT(void patch(void));
 
@@ -260,9 +324,29 @@ typedef enum {
     IO_APDU_MEDIA_BLE,
     IO_APDU_MEDIA_NFC,
     IO_APDU_MEDIA_USB_CCID,
+    IO_APDU_MEDIA_RAW,
+    IO_APDU_MEDIA_U2F,
 } io_apdu_media_t;
 
 extern volatile io_apdu_media_t G_io_apdu_media;
+
+extern unsigned int usb_ep_xfer_len[7];
+
+#ifndef USB_SEGMENT_SIZE
+#ifdef IO_HID_EP_LENGTH
+#define USB_SEGMENT_SIZE IO_HID_EP_LENGTH
+#else
+#error IO_HID_EP_LENGTH and USB_SEGMENT_SIZE not defined
+#endif
+#endif
+#ifndef BLE_SEGMENT_SIZE
+#define BLE_SEGMENT_SIZE USB_SEGMENT_SIZE
+#endif
+
+// common usb endpoint buffer
+extern unsigned char
+    G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
+
 /**
  * Return 1 when the event has been processed, 0 else
  */
@@ -275,7 +359,6 @@ unsigned char io_event(unsigned char channel);
  * value is passed as argument for next call, acting as a timeout context.
  */
 unsigned short io_timeout(unsigned short last_timeout);
-
 // write in persistent memory, to make things easy keep a layout of the memory
 // in a structure and update fields upon needs
 // NOTE: accept copy from far memory to another far memory.
@@ -283,6 +366,10 @@ unsigned short io_timeout(unsigned short last_timeout);
 SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
                        void WIDE *src_adr PLENGTH(src_len),
                        unsigned int src_len);
+
+// program a page with the content of the nvm_page_buffer
+// HAL for the high level NVM management functions
+void nvm_write_page(unsigned char WIDE *page_adr);
 
 /* ----------------------------------------------------------------------- */
 /* -                            EXCEPTIONS                               - */
@@ -303,13 +390,19 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
 // -----------------------------------------------------------------------
 // - TRY
 // -----------------------------------------------------------------------
+try_context_t *try_context_get(void);
+try_context_t *try_context_get_previous(void);
+void try_context_set(try_context_t *context);
 #define TRY_L(L)                                                               \
-    __try                                                                      \
-        ##L.previous = G_try_last_open_context;                                \
+    /*__try ## L.previous = try_context_get();*/                               \
     __try                                                                      \
         ##L.ex = setjmp(__try##L.jmp_buf);                                     \
-    G_try_last_open_context = &__try##L;                                       \
-    if (__try##L.ex == 0) {
+    if (__try##L.ex == 0) {                                                    \
+        __try                                                                  \
+            ##L.ex =                                                           \
+                1; /* need to perform the previous ctx restore on finally */   \
+        try_context_set(&__try##L);
+
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH
 // -----------------------------------------------------------------------
@@ -317,7 +410,9 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
     goto CPP_CONCAT(__FINALLY, L);                                             \
     }                                                                          \
     else if (__try##L.ex == x) {                                               \
-        G_try_last_open_context = __try##L.previous;
+        __try                                                                  \
+            ##L.ex = 0;                                                        \
+/*try_context_set(__try ## L.previous);*/
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH OTHER
@@ -330,7 +425,7 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
         e = __try##L.ex;                                                       \
         __try                                                                  \
             ##L.ex = 0;                                                        \
-        G_try_last_open_context = __try##L.previous;
+/*try_context_set(__try ## L.previous);*/
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH ALL
@@ -341,7 +436,7 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
     else {                                                                     \
         __try                                                                  \
             ##L.ex = 0;                                                        \
-        G_try_last_open_context = __try##L.previous;
+/*try_context_set(__try ## L.previous);*/
 
 // -----------------------------------------------------------------------
 // - FINALLY
@@ -349,39 +444,32 @@ SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
 #define FINALLY_L(L)                                                           \
     goto CPP_CONCAT(__FINALLY, L);                                             \
     }                                                                          \
-    CPP_CONCAT(__FINALLY, L) : G_try_last_open_context = __try##L.previous;
+    CPP_CONCAT(__FINALLY, L) : if (__try##L.ex) {                              \
+        try_context_set(try_context_get_previous());                           \
+    }
 
 // -----------------------------------------------------------------------
 // - END TRY
 // -----------------------------------------------------------------------
 #define END_TRY_L(L)                                                           \
-    if (__try##L.ex != 0) {                                                    \
-        THROW_L(L, __try##L.ex);                                               \
-    }                                                                          \
+    /*if (__try ## L.ex != 0) { THROW_L(L, __try ## L.ex); }*/                 \
     }
 
 // -----------------------------------------------------------------------
 // - CLOSE TRY
 // -----------------------------------------------------------------------
-#define CLOSE_TRY_L(L)                                                         \
-    G_try_last_open_context = G_try_last_open_context->previous
+/**
+ * Forced finally like clause.
+ */
+#define CLOSE_TRY_L(L) try_context_set(try_context_get_previous())
 
 // -----------------------------------------------------------------------
 // - EXCEPTION THROW
 // -----------------------------------------------------------------------
-/*
-#ifndef BOLOS_RELEASE
 
-void os_longjmp(jmp_buf b, unsigned int exception);
-#define THROW_L(L, x)                                                   \
-  os_longjmp(G_try_last_open_context->jmp_buf, x)
-
-#else
-*/
-#define THROW_L(L, x) longjmp(G_try_last_open_context->jmp_buf, x)
-/*
-#endif // BOLOS_RELEASE
-*/
+// longjmp is marked as no return to avoid too much generated code
+void os_longjmp(unsigned int exception) __attribute__((noreturn));
+#define THROW_L(L, x) os_longjmp(x)
 
 // Default macros when nesting is not used.
 #define THROW(x) THROW_L(EX, x)
@@ -410,25 +498,8 @@ void os_longjmp(jmp_buf b, unsigned int exception);
 #define EXCEPTION_IO_HEADER 14
 #define EXCEPTION_IO_STATE 15
 #define EXCEPTION_IO_RESET 16
-
-// -----------------------------------------------------------------------
-// - BASIC MATHS
-// -----------------------------------------------------------------------
-#define U2(hi, lo) ((((hi)&0xFF) << 8) | ((lo)&0xFF))
-#define U4(hi3, hi2, lo1, lo0)                                                 \
-    ((((hi3)&0xFF) << 24) | (((hi2)&0xFF) << 16) | (((lo1)&0xFF) << 8) |       \
-     ((lo0)&0xFF))
-#define U2BE(buf, off) ((((buf)[off] & 0xFF) << 8) | ((buf)[off + 1] & 0xFF))
-#define U2LE(buf, off) ((((buf)[off + 1] & 0xFF) << 8) | ((buf)[off] & 0xFF))
-#define U4BE(buf, off) ((U2BE(buf, off) << 16) | (U2BE(buf, off + 2) & 0xFFFF))
-#define U4LE(buf, off) ((U2LE(buf, off + 2) << 16) | (U2LE(buf, off) & 0xFFFF))
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define IS_POW2(x) (((x) & ((x)-1)) == 0)
-
-#ifdef macro_offsetof
-#define offsetof(type, field) ((unsigned int)&(((type *)NULL)->field))
-#endif
+#define EXCEPTION_CXPORT 17
+#define EXCEPTION_SYSTEM 18
 
 /* ----------------------------------------------------------------------- */
 /* -                          CRYPTO FUNCTIONS                           - */
@@ -453,13 +524,13 @@ typedef enum bolos_ux_e {
 
     BOLOS_UX_EVENT, // tag to be processed by the UX from the serial line
     BOLOS_UX_KEYBOARD,
-    BOLOS_UX_WAKE_UP,
+    BOLOS_UX_WAKE_UP, // the application/os asks for the screen to be waked up
+                      // (asking pin if the lock period has been exceeded)
     BOLOS_UX_STATUS_BAR,
 
     BOLOS_UX_BOOT, // will never be presented to loaded UX app, this is for
                    // failsafe UX only
     BOLOS_UX_BOOT_NOT_PERSONALIZED,
-    BOLOS_UX_BOOT_RECOVERY,
     BOLOS_UX_BOOT_ONBOARDING,
     BOLOS_UX_BOOT_UNSAFE_WIPE,
     BOLOS_UX_BOOT_UX_NOT_SIGNED,
@@ -485,6 +556,12 @@ typedef enum bolos_ux_e {
                            // but not displaying UI. It prevent going poweroff,
                            // while not avoiding screen locking
     BOLOS_UX_CONSENT_NOT_INTERACTIVE_ONBOARD,
+    BOLOS_UX_PREPARE_RUN_APP, // called before the os runs an application, the
+                              // os ux must be cleared and not display anything
+                              // on upcoming display processed events
+
+    BOLOS_UX_MCU_UPGRADE_REQUIRED,
+    BOLOS_UX_CONSENT_RUN_APP,
 
 } bolos_ux_t;
 
@@ -507,6 +584,23 @@ typedef enum bolos_ux_e {
 
 typedef void (*appmain_t)(void);
 
+#define BOLOS_TAG_APPNAME 0x01
+#define BOLOS_TAG_APPVERSION 0x02
+#define BOLOS_TAG_ICON 0x03
+#define BOLOS_TAG_DERIVEPATH 0x04
+#define BOLOS_TAG_DATA_SIZE                                                    \
+    0x05 // meta tag to retrieve the size of the data section for the
+         // application
+// Library Dependencies are a tuple of 2 LV, the lib appname and the lib version
+// (only exact for now). When lib version is not specified, it is not check,
+// only name is asserted
+// The DEPENDENCY tag may have several occurences, one for each dependency (by
+// name). Malformed (multiple dep to the same lib with different version is is
+// not ORed but ANDed, and then considered bogus)
+#define BOLOS_TAG_DEPENDENCY 0x06
+// first autorised tag value for user data
+#define BOLOS_TAG_USER_TAG 0x20
+
 // application slot description
 typedef struct application_s {
     // nvram start address for this application (to check overlap when loading,
@@ -523,38 +617,24 @@ typedef struct application_s {
     // special flags for this application
     unsigned int flags;
 
-    // the timeout before autobooting this application, meaningless when flags
-    // has not the ::APPLICATION_AUTOBOOT value.
-    unsigned int autoboot_timeout;
+    // Memory organization: [ code (RX) |alignpage| data (RW) |alignpage|
+    // install params (R) ]
 
-    // icon appearance order in the dashboard, not used so far
-    unsigned int dashboard_order;
+    // length of the code section of the application (RX)
+    unsigned int code_length;
 
-#ifdef BOLOS_APP_DERIVE_PATH_SIZE_B
-    unsigned int derive_path_length;
-    unsigned char derive_path[BOLOS_APP_DERIVE_PATH_SIZE_B];
-#endif // BOLOS_APP_DERIVE_PATH_SIZE_B
+    // NOTE: code_length+params_length must be a multiple of PAGE_SIZE
+    // Length of the DATA section of the application. (RW)
+    unsigned int data_length;
 
-// for fancy display upon the boot display, \0 terminated.
-#define APPLICATION_NAME_MAXLEN 32
-    unsigned char name[APPLICATION_NAME_MAXLEN + 1];
+    // NOTE: code_length+params_length must be a multiple of PAGE_SIZE
+    // length of the parameters sections of the application (R)
+    unsigned int params_length;
 
-#define APPLICATION_VERSION_MAXLEN 32
-    unsigned char version[APPLICATION_VERSION_MAXLEN + 1];
-
-    // SHA256 reserved space for the bootloader to store the application's code
-    // hash.
-    unsigned char hash[32];
-
-#ifdef BOLOS_APP_ICON_SIZE_B
-    unsigned int icon_length; // <total color table + bitmap size>
-    // <BitPerPixel(1byte)> <COLORTABLE((1<<bpp))*4b BE)> <bitmap>
-    unsigned char icon[BOLOS_APP_ICON_SIZE_B];
-#endif // BOLOS_APP_ICON_SIZE_B
-#ifdef BOLOS_APP_ICON_OFF_AND_SIZE
-    unsigned int icon_offset;
-    unsigned short icon_length;
-#endif // BOLOS_APP_ICON_OFF_AND_SIZE
+    // Intermediate hash of the application's loaded code and data segments
+    unsigned char sha256_code_data[32];
+    // Hash of the application's loaded code, data and instantiation parameters
+    unsigned char sha256_full[32];
 
 } application_t;
 
@@ -589,12 +669,18 @@ typedef struct bolos_ux_params_s {
         // pass the whole load application to that the os version and hash are
         // available
         struct {
+            unsigned int app_idx;
             application_t upgrade;
         } upgrade;
 
         struct {
             application_t ux_app;
         } ux_not_signed;
+
+        struct {
+            unsigned int app_idx;
+            application_t app;
+        } run_app;
 
         struct {
             unsigned char name[CUSTOMCA_MAXLEN + 1];
@@ -622,6 +708,9 @@ typedef struct bolos_ux_params_s {
 #define BOLOS_UX_MODE_SYMBOLS 2
 #define BOLOS_UX_MODE_COUNT 3 // number of keyboard modes
             unsigned int mode;
+// + 1 EOS (0)
+#define BOLOS_UX_KEYBOARD_TEXT_BUFFER_SIZE 32
+            unsigned char entered_text[BOLOS_UX_KEYBOARD_TEXT_BUFFER_SIZE + 1];
         } keyboard;
 
         struct {
@@ -653,7 +742,7 @@ typedef struct bolos_ux_params_s {
 } bolos_ux_params_t;
 
 // any application can wipe the global pin, global seed, user's keys
-SYSCALL void os_perso_wipe(void);
+// disabled for security reasons // SYSCALL void           os_perso_wipe(void);
 // erase seed, settings AND applications
 SYSCALL void os_perso_erase_all(void);
 
@@ -691,24 +780,17 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_set_seed(
 // os_perso_set_alternate_seed(unsigned char* seed PLENGTH(seedLength), unsigned
 // int seedLength);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(
-    unsigned char *words PLENGTH(length), unsigned int length);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_devname(
-    unsigned char *devname PLENGTH(length), unsigned int length);
+    const unsigned char *words PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 
 // checked in the ux flow to avoid asking the pin for example
 // NBA : could also be checked by applications running in unsecure mode - thus
 // unprivilegied
 SYSCALL unsigned int os_perso_isonboarded(void);
-// NBA : also unprivileged, minor privacy risk as it is set voluntarily by the
-// user
-SYSCALL unsigned int
-os_perso_get_devname(unsigned char *devname PLENGTH(length),
-                     unsigned int length);
 
 // derive the user top node on the given BIP32 path
 SYSCALL void os_perso_derive_node_bip32(
-    cx_curve_t curve, unsigned int *path PLENGTH(4 * pathLength),
+    cx_curve_t curve, const unsigned int *path PLENGTH(4 * pathLength),
     unsigned int pathLength, unsigned char *privateKey PLENGTH(32),
     unsigned char *chain PLENGTH(32));
 
@@ -787,6 +869,19 @@ os_ux(bolos_ux_params_t *params PLENGTH(sizeof(bolos_ux_params_t)));
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
 
 /* ----------------------------------------------------------------------- */
+/* -                            LIB FUNCTIONS                            - */
+/* ----------------------------------------------------------------------- */
+/**
+ * Library call function.
+ * call_parameters[0] = library name string pointer (const)
+ * call_parameters[1] = library call identifier (0 = init, ...)
+ * call_parameters[2+] = called function parameters
+ */
+SYSCALL unsigned int os_lib_call(unsigned int *call_parameters);
+SYSCALL void os_lib_end(unsigned int returnvalue);
+SYSCALL void os_lib_throw(unsigned int exception);
+
+/* ----------------------------------------------------------------------- */
 /* -                            IO FUNCTIONS                             - */
 /* ----------------------------------------------------------------------- */
 typedef REENTRANT(void (*io_send_t)(unsigned char *buffer,
@@ -843,12 +938,33 @@ typedef enum os_setting_e {
     OS_SETTING_AUTO_LOCK_DELAY,
     OS_SETTING_POWER_OFF_DELAY,
 
-    OS_SETTING_LAST, //
+    // before that value, all settings are only making use of the length value
+    // with a null buffer to be set, and are returned through the return value
+    // with a maxlength = 0 in the get.
+    OS_SETTING_LAST_INT,
+
+    // screen saver string to display
+    OS_SETTING_SAVER_STRING = OS_SETTING_LAST_INT,
+    OS_SETTING_DEVICENAME,
+
+    OS_SETTING_LAST,
 } os_setting_t;
+
+/**
+ * Retrieve the value of a setting in a user specified buffer, with a max
+ * length, and return the effective returned length.
+ */
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_SETTINGS) unsigned int os_setting_get(
-    unsigned int setting_id);
+    unsigned int setting_id, unsigned char *value PLENGTH(maxlen),
+    unsigned int maxlen);
+
+/**
+ * Define a setting's value from a user buffer and its length. In case of error,
+ * a throw is executed.
+ */
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_SETTINGS) void os_setting_set(
-    unsigned int setting_id, unsigned int value);
+    unsigned int setting_id, unsigned char *value PLENGTH(length),
+    unsigned int length);
 
 /* ----------------------------------------------------------------------- */
 /* -                          DEBUG FUNCTIONS                           - */
@@ -875,11 +991,39 @@ typedef struct meminfo_s {
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_get_memory_info(
     meminfo_t *meminfo);
 
-#ifdef BOLOS_APP_ICON_OFF_AND_SIZE
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned int os_registry_get_icon(
-    unsigned int appidx, unsigned int offset,
-    unsigned char *buffer PLENGTH(maxlength), unsigned int maxlength);
-#endif // BOLOS_APP_ICON_OFF_AND_SIZE
+// arbitraty max size for application names.
+#define BOLOS_APPNAME_MAX_SIZE_B 32
+
+// read from the application's install parameter TLV (if present), else 0 is
+// returned (no exception thrown).
+// takes into account the currently loaded application
+#define OS_REGISTRY_GET_TAG_OFFSET_COMPARE_WITH_BUFFER (0x80000000UL)
+#define OS_REGISTRY_GET_TAG_OFFSET_GET_LENGTH (0x40000000UL)
+
+/**
+ * @param appidx The application entry index in the registry (raw, not filtering
+ * ux or whatever). If the entry index correspond to the application being
+ * installed then RAM structure content is used instead of the NVRAM registry.
+ * @param tlvoffset The offset within the install parameters memory area, in
+ * bytes. Useful if tag is present multiple times. Can be null. The tlv offset
+ * is the offset of the tag in the install parameters area when a tag is
+ * matched. This way long tag can be read in multiple time without the need to
+ * play with the tlvoffset. Add +1 to skip to the next one when seraching for
+ * multiple tag occurences.
+ * @param tag The tag to be searched for
+ * @param value_offset The offset within the value for this occurence of the
+ * tag. The OS_REGISTRY_GET_TAG_OFFSET_COMPARE_WITH_BUFFER or
+ * OS_REGISTRY_GET_TAG_OFFSET_GET_LENGTH can be ORed to perform meta operation
+ * on the TLV occurence.
+ * @param buffer The user buffer for comparison or to retrieve the value of the
+ * tag at the given offset.
+ * @param maxlength Size of the buffer to be compared OR to be retrieved
+ * (trimmed depending the TLV effective length).
+ */
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned int os_registry_get_tag(
+    unsigned int appidx, unsigned int *tlvoffset, unsigned int tag,
+    unsigned int value_offset, void *buffer PLENGTH(maxlength),
+    unsigned int maxlength);
 
 /* ----------------------------------------------------------------------- */
 /* -                         CUSTOM CERTIFICATE AUTHORITY                - */
@@ -890,5 +1034,58 @@ SYSCALL unsigned int
 os_customca_verify(unsigned char *hash PLENGTH(32),
                    unsigned char *sign PLENGTH(sign_length),
                    unsigned int sign_length);
+
+/* ----------------------------------------------------------------------- */
+/* -                         PRECISE WATCHDOG                            - */
+/* ----------------------------------------------------------------------- */
+
+typedef enum {
+    /* Watchdog consumption lead to no action being taken, overflowed value is
+       accounted and can be retrieved by the application */
+    OS_WATCHDOG_NOACTION = 0,
+    /* Request a platform reset when the watchdog set value is completely
+       consumed */
+    OS_WATCHDOG_RESET = 1,
+    /* Request a wipe of the user data when the watchdog times out */
+    OS_WATCHDOG_WIPE = 2,
+} os_watchdog_behavior_t;
+
+/**
+ * This function arm a low level watchdog, when the value is consumed, and
+ * depending on the requested behavior,
+ * an action can be taken.
+ * @throw INVALID_PARAMETER when the useconds value overflows the possible
+ * value.
+ */
+void os_watchdog_arm(unsigned int useconds, os_watchdog_behavior_t behavior);
+
+/**
+ * This function returns the number of useconds to be still consumed by the
+ * watchdog (when > 0), or the overflowed useconds after the watchdog has timed
+ * out (when < 0)
+ */
+int os_watchdog_value(void);
+
+/**
+ * Stop background watchdog and avoid its action if any is set.
+ */
+void os_watchdog_stop(void);
+
+/* ----------------------------------------------------------------------- */
+/* -                         MEMORY PROTECTION UNIT                      - */
+/* ----------------------------------------------------------------------- */
+
+/**
+ * Enable/disable the seed container FLASH region memory protection for
+ * read/write operations
+ * @return the previous state of protection before applying the new value
+ */
+unsigned int os_mpu_protect_flash(unsigned int prot_enabled);
+/**
+ * Enable/disable the os private RAM region memory protection for read/write
+ * operations
+ * @return the previous state of protection before applying the new value
+ */
+unsigned int os_mpu_protect_ram(unsigned int prot_enabled);
 
 #endif // OS_H

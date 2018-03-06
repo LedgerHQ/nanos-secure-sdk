@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017 Ledger
+*   (c) 2016, 2017, 2018 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -29,6 +29,12 @@
 #include "bolos_ux.h"
 #endif
 
+#ifdef HAVE_IO_U2F
+#include "u2f_processing.h"
+#include "u2f_transport.h"
+#endif
+
+
 
 #ifdef DEBUG
 #define LOG printf
@@ -43,6 +49,24 @@ volatile unsigned short G_io_apdu_seq;
 volatile io_apdu_media_t G_io_apdu_media;
 volatile unsigned int G_button_mask;
 volatile unsigned int G_button_same_mask_counter;
+volatile unsigned int G_io_timeout;
+volatile unsigned int G_io_timeout_limit;
+
+// usb endpoint buffer
+unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
+
+#ifndef IO_RAPDU_TRANSMIT_TIMEOUT_MS 
+#define IO_RAPDU_TRANSMIT_TIMEOUT_MS 2000UL
+#endif // IO_RAPDU_TRANSMIT_TIMEOUT_MS
+
+void io_set_timeout(unsigned int timeout_ms) {
+  // reset the next timeout
+  G_io_timeout_limit = timeout_ms;
+  // adjust current timeout, if activated
+  if (G_io_timeout) {
+    G_io_timeout = timeout_ms;
+  }
+}
 
 void io_seproxyhal_general_status(void) {
   // avoid troubles
@@ -58,19 +82,6 @@ void io_seproxyhal_general_status(void) {
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 5);
 }
 
-/* it's a status, but it shall be a command instead to avoid perturbating the simple seproxyhal bus logic
-void os_io_seproxyhal_general_status_processing(void) {
-  // send the general status
-  G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_GENERAL_STATUS;
-  G_io_seproxyhal_spi_buffer[1] = 0;
-  G_io_seproxyhal_spi_buffer[2] = 2;
-  G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_GENERAL_STATUS_MORE_COMMAND>>8;
-  G_io_seproxyhal_spi_buffer[4] = SEPROXYHAL_TAG_GENERAL_STATUS_MORE_COMMAND;
-  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 5);
-}
-*/
-
-
 void io_seproxyhal_request_mcu_status(void) {
   // send the general status
   G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_REQUEST_STATUS;
@@ -78,8 +89,6 @@ void io_seproxyhal_request_mcu_status(void) {
   G_io_seproxyhal_spi_buffer[2] = 0;
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
 }
-
-//#define WAIT_MS(x) { volatile unsigned int i = 0xAA*x; while (i--); }
 
 #ifdef HAVE_IO_USB
 #ifdef HAVE_L4_USBLIB
@@ -91,10 +100,10 @@ extern USBD_HandleTypeDef USBD_Device;
 void io_seproxyhal_handle_usb_event(void) {
   switch(G_io_seproxyhal_spi_buffer[3]) {
     case SEPROXYHAL_TAG_USB_EVENT_RESET:
-      // ongoing APDU detected, throw a reset
       USBD_LL_SetSpeed(&USBD_Device, USBD_SPEED_FULL);  
       USBD_LL_Reset(&USBD_Device);
-      if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID) {
+      // ongoing APDU detected, throw a reset, even if not the media. to avoid potential troubles.
+      if (G_io_apdu_media != IO_APDU_MEDIA_NONE) {
         THROW(EXCEPTION_IO_RESET);
       }
       break;
@@ -116,15 +125,18 @@ uint16_t io_seproxyhal_get_ep_rx_size(uint8_t epnum) {
 
 void io_seproxyhal_handle_usb_ep_xfer_event(void) {
   switch(G_io_seproxyhal_spi_buffer[4]) {
+    /* This event is received when a new SETUP token had been received on a control endpoint */
     case SEPROXYHAL_TAG_USB_EP_XFER_SETUP:
       // assume length of setup packet, and that it is on endpoint 0
       USBD_LL_SetupStage(&USBD_Device, &G_io_seproxyhal_spi_buffer[6]);
       break;
 
+    /* This event is received after the prepare data packet has been flushed to the usb host */
     case SEPROXYHAL_TAG_USB_EP_XFER_IN:
       USBD_LL_DataInStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
       break;
 
+    /* This event is received when a new DATA token is received on an endpoint */
     case SEPROXYHAL_TAG_USB_EP_XFER_OUT:
       // saved just in case it is needed ...
       G_io_usb_ep_xfer_len[G_io_seproxyhal_spi_buffer[3]&0x7F] = G_io_seproxyhal_spi_buffer[5];
@@ -143,6 +155,7 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void) {
 
 #endif // HAVE_L4_USBLIB
 
+// TODO, refactor this using the USB DataIn event like for the U2F tunnel
 void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short length, unsigned int timeout) {
   unsigned int rx_len;
 
@@ -182,10 +195,15 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
         || G_io_seproxyhal_spi_buffer[4] != SEPROXYHAL_TAG_USB_EP_XFER_IN
         || G_io_seproxyhal_spi_buffer[5] != length) {
         
+        /*
         // handle loss of communication with the host
-        if (timeout && timeout--==1) {
+        // only use ticker event to decrement the timeout, this avoid finger/button/display events to intervene and disrupt the timeout accounting
+        if (G_io_seproxyhal_spi_buffer[0] == SEPROXYHAL_TAG_TICKER_EVENT 
+          && timeout 
+          && timeout--==1) {
           THROW(EXCEPTION_IO_RESET);
         }
+        */
 
         // link disconnected ?
         if(G_io_seproxyhal_spi_buffer[0] == SEPROXYHAL_TAG_STATUS_EVENT) {
@@ -197,6 +215,7 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
         // usb reset ?
         //io_seproxyhal_handle_usb_event();
         // also process other transfer requests if any (useful for HID keyboard while playing with CAPS lock key, side effect on LED status)
+        // also handle IO timeout in a centralized and configurable way
         io_seproxyhal_handle_event();
 
         // no general status ack, io_event is responsible for it
@@ -246,6 +265,18 @@ void io_seproxyhal_handle_bluenrg_event(void) {
 }
 #endif
 
+
+void io_seproxyhal_handle_capdu_event(void) {
+  if(G_io_apdu_state == APDU_IDLE) 
+  {
+    G_io_apdu_media = IO_APDU_MEDIA_RAW; // for application code
+    G_io_apdu_state = APDU_RAW; // for next call to io_exchange
+    G_io_apdu_length = U2BE(G_io_seproxyhal_spi_buffer, 1);
+    // copy apdu to apdu buffer
+    os_memmove(G_io_apdu_buffer, G_io_seproxyhal_spi_buffer+3, G_io_apdu_length);
+  }
+}
+
 unsigned int io_seproxyhal_handle_event(void) {
   unsigned int rx_len = U2BE(G_io_seproxyhal_spi_buffer, 1);
 
@@ -273,7 +304,22 @@ unsigned int io_seproxyhal_handle_event(void) {
       return 1;
   #endif // HAVE_BLE
 
+    case SEPROXYHAL_TAG_CAPDU_EVENT:
+      io_seproxyhal_handle_capdu_event();
+      return 1;
+
       // ask the user if not processed here
+    case SEPROXYHAL_TAG_TICKER_EVENT:
+      // process ticker events to timeout the IO transfers, and forward to the user io_event function too
+      if(G_io_timeout) {
+        G_io_timeout-=MIN(G_io_timeout, 100);
+        #warning TODO use real ticker event interval here instead of the x100ms multiplier
+        if (!G_io_timeout) {
+          // timeout !
+          G_io_apdu_state = APDU_IDLE;
+          THROW(EXCEPTION_IO_RESET);
+        }
+      }
     default:
       return io_event(CHANNEL_SPI);
   }
@@ -287,19 +333,30 @@ bagl_element_t* volatile G_bagl_last_touched_not_released_component;
 #ifdef DEBUG_APDU
 volatile unsigned int debug_apdus_offset;
 const char debug_apdus[] = {
-  9, 0xe0, 0x22, 0x00, 0x00, 0x04, 0x31, 0x32, 0x33, 0x34,
+  5, 0xE0, 0x40, 0x00, 0x00, 0x00,
+  //9, 0xe0, 0x22, 0x00, 0x00, 0x04, 0x31, 0x32, 0x33, 0x34,
 };
 #endif // DEBUG_APDU
+
+#ifdef HAVE_BOLOS_APP_STACK_CANARY
+#define APP_STACK_CANARY_MAGIC 0xDEAD0031
+extern unsigned int app_stack_canary;
+#endif // HAVE_BOLOS_APP_STACK_CANARY
 
 void io_seproxyhal_init(void) {
   // Enforce OS compatibility
   check_api_level(CX_COMPAT_APILEVEL);
+
+#ifdef HAVE_BOLOS_APP_STACK_CANARY
+  app_stack_canary = APP_STACK_CANARY_MAGIC;
+#endif // HAVE_BOLOS_APP_STACK_CANARY  
 
   G_io_apdu_state = APDU_IDLE;
   G_io_apdu_offset = 0;
   G_io_apdu_length = 0;
   G_io_apdu_seq = 0;
   G_io_apdu_media = IO_APDU_MEDIA_NONE;
+  G_io_timeout_limit = NO_TIMEOUT;
 
   #ifdef DEBUG_APDU
   debug_apdus_offset = 0;
@@ -555,18 +612,9 @@ void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h, 
   */
 }
 
-void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_details_t* icon_details) {
-  bagl_component_t icon_component_mod;
-  // ensure not being out of bounds in the icon component agianst the declared icon real size
-  os_memmove(&icon_component_mod, icon_component, sizeof(bagl_component_t));
-  icon_component_mod.width = icon_details->width;
-  icon_component_mod.height = icon_details->height;
-  icon_component = &icon_component_mod;
-
 #ifdef SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
+unsigned int io_seproxyhal_display_icon_header_and_colors(bagl_component_t* icon_component, bagl_icon_details_t* icon_details, unsigned int* icon_len) {
   unsigned int len;
-  unsigned int icon_len;
-  unsigned int icon_off=0;
 
   struct display_raw_s {
     struct {
@@ -604,11 +652,11 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
   raw.bpp = icon_details->bpp;
 
 
-  icon_len = raw.w.val*raw.h.val*raw.bpp/8 + (((raw.w.val*raw.h.val*raw.bpp)%8)?1:0);
+  *icon_len = raw.w.val*raw.h.val*raw.bpp/8 + (((raw.w.val*raw.h.val*raw.bpp)%8)?1:0);
 
   // optional, don't send too much on a single packet for MCU to receive it. when stream mode will be on, this will be useless
   // min of remaining space in the packet vs. total icon size + color index size
-  len = MIN(sizeof(G_io_seproxyhal_spi_buffer) - sizeof(raw), icon_len + (1<<raw.bpp)*4);
+  len = MIN(sizeof(G_io_seproxyhal_spi_buffer) - sizeof(raw), *icon_len + (1<<raw.bpp)*4);
 
   // sizeof packet
   raw.header.seph.len[0] = (len + sizeof(raw) - sizeof(raw.header.seph)) >> 8;
@@ -622,7 +670,27 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
 
   io_seproxyhal_spi_send(&raw, sizeof(raw));
   io_seproxyhal_spi_send(PIC(icon_details->colors), (1<<raw.bpp)*4);
-  len -= (1<<raw.bpp)*4;
+  len -= (1<<raw.bpp)*4;  
+
+  // remaining length of bitmap bits to be displayed
+  return len;
+}
+#endif // SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
+
+void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_details_t* icon_details) {
+  bagl_component_t icon_component_mod;
+  // ensure not being out of bounds in the icon component agianst the declared icon real size
+  os_memmove(&icon_component_mod, icon_component, sizeof(bagl_component_t));
+  icon_component_mod.width = icon_details->width;
+  icon_component_mod.height = icon_details->height;
+  icon_component = &icon_component_mod;
+
+#ifdef SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
+  unsigned int len;
+  unsigned int icon_len;
+  unsigned int icon_off=0;
+
+  len = io_seproxyhal_display_icon_header_and_colors(icon_component, icon_details, &icon_len);
   io_seproxyhal_spi_send(PIC(icon_details->bitmap), len);
   // advance in the bitmap to be transmitted
   icon_len -= len;
@@ -633,12 +701,13 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
     // wait displayed event
     io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
     
-    raw.header.type = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_CONT;
-    
-    len = MIN((sizeof(G_io_seproxyhal_spi_buffer) - sizeof(raw.header)), icon_len);
-    raw.header.seph.len[0] = (len+1)>>8;
-    raw.header.seph.len[1] = (len+1);
-    io_seproxyhal_spi_send(&raw.header, sizeof(raw.header));
+    G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS;
+    G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_CONT;
+
+    len = MIN((sizeof(G_io_seproxyhal_spi_buffer) - 4), icon_len);
+    G_io_seproxyhal_spi_buffer[1] = (len+1)>>8;
+    G_io_seproxyhal_spi_buffer[2] = (len+1);
+    io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
     io_seproxyhal_spi_send(PIC(icon_details->bitmap)+icon_off, len);
 
     icon_len -= len;
@@ -669,9 +738,14 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
 #endif // !SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
 }
 
-void io_seproxyhal_display_default(bagl_element_t * element) {
+void io_seproxyhal_display_default(const bagl_element_t * element) {
   // process automagically address from rom and from ram
   unsigned int type = (element->component.type & ~(BAGL_FLAG_TOUCHABLE));
+
+  // avoid sending another status :), fixes a lot of bugs in the end
+  if (io_seproxyhal_spi_is_status_sent()) {
+    return;
+  }
 
   if (type != BAGL_NONE) {
     if (element->text != NULL) {
@@ -686,8 +760,8 @@ void io_seproxyhal_display_default(bagl_element_t * element) {
         G_io_seproxyhal_spi_buffer[1] = length>>8;
         G_io_seproxyhal_spi_buffer[2] = length;
         io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
-        io_seproxyhal_spi_send((const void*)&element->component, sizeof(bagl_component_t));
-        io_seproxyhal_spi_send((const void*)text_adr, length-sizeof(bagl_component_t));
+        io_seproxyhal_spi_send((unsigned char*)&element->component, sizeof(bagl_component_t));
+        io_seproxyhal_spi_send((unsigned char*)text_adr, length-sizeof(bagl_component_t));
       }
     }
     else {
@@ -696,7 +770,7 @@ void io_seproxyhal_display_default(bagl_element_t * element) {
       G_io_seproxyhal_spi_buffer[1] = length>>8;
       G_io_seproxyhal_spi_buffer[2] = length;
       io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
-      io_seproxyhal_spi_send((const void*)&element->component, sizeof(bagl_component_t));
+      io_seproxyhal_spi_send((unsigned char*)&element->component, sizeof(bagl_component_t));
     }
   }
 }
@@ -745,6 +819,7 @@ void io_seproxyhal_power_off(void) {
   G_io_seproxyhal_spi_buffer[1] = 0;
   G_io_seproxyhal_spi_buffer[2] = 0;
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
+  for(;;);
 }
 
 void io_seproxyhal_se_reset(void) {
@@ -752,6 +827,7 @@ void io_seproxyhal_se_reset(void) {
   G_io_seproxyhal_spi_buffer[1] = 0;
   G_io_seproxyhal_spi_buffer[2] = 0;
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
+  for(;;);
 }
 
 void io_seproxyhal_disable_io(void) {
@@ -841,8 +917,19 @@ void io_seproxyhal_button_push(button_push_callback_t button_callback, unsigned 
 
 #endif // HAVE_BAGL
 
+#ifdef HAVE_IO_U2F
+u2f_service_t G_io_u2f;
+#endif // HAVE_IO_U2F
+
 unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
   unsigned short rx_len;
+
+#ifdef HAVE_BOLOS_APP_STACK_CANARY
+  // behavior upon detected stack overflow is to reset the SE
+  if (app_stack_canary != APP_STACK_CANARY_MAGIC) {
+    io_seproxyhal_se_reset();
+  }
+#endif // HAVE_BOLOS_APP_STACK_CANARY
 
 #ifdef DEBUG_APDU
   if ((channel&~(IO_FLAGS)) == CHANNEL_APDU) {
@@ -870,6 +957,8 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
     // TODO work up the spi state machine over the HAL proxy until an APDU is available
 
     if (tx_len && !(channel&IO_ASYNCH_REPLY)) {
+      // prepare response timeout
+      G_io_timeout = IO_RAPDU_TRANSMIT_TIMEOUT_MS;
 
       // until the whole RAPDU is transmitted, send chunks using the current mode for communication
       for (;;) {
@@ -884,6 +973,19 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
             THROW(INVALID_STATE);
             break;
 
+          case APDU_RAW:
+            if (tx_len > sizeof(G_io_apdu_buffer)) {
+              THROW(INVALID_PARAMETER);
+            }
+            // reply the RAW APDU over SEPROXYHAL protocol
+            G_io_seproxyhal_spi_buffer[0]  = SEPROXYHAL_TAG_RAPDU;
+            G_io_seproxyhal_spi_buffer[1]  = (tx_len)>>8;
+            G_io_seproxyhal_spi_buffer[2]  = (tx_len);
+            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
+            io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
+            // finished, no chunking
+            goto break_send;
+
 #ifdef HAVE_USB_APDU
           case APDU_USB_HID:
             // only send, don't perform synchronous reception of the next command (will be done later by the seproxyhal packet processing)
@@ -896,11 +998,34 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
 #endif // HAVE_USB_CLASS_CCID
 #endif // HAVE_USB_APDU
 
-#ifdef HAVE_BLE_APDU
+#ifdef HAVE_BLE_APDU // versus U2F BLE
           case APDU_BLE:
             BLE_protocol_send(G_io_apdu_buffer, tx_len);
             goto break_send;
 #endif // HAVE_BLE_APDU
+
+
+#ifdef HAVE_IO_U2F
+          // case to handle U2F channels. u2f apdu to be dispatched in the upper layers
+          case APDU_U2F:
+            // prepare reply, the remaining segments will be pumped during USB/BLE events handling while waiting for the next APDU
+
+            // user presence + counter + rapdu + sw must fit the apdu buffer
+            if (1+ 4+ tx_len +2 > sizeof(G_io_apdu_buffer)) {
+              THROW(INVALID_PARAMETER);
+            }
+
+            // u2F tunnel needs the status words to be included in the signature response BLOB, do it now.
+            // always return 9000 in the signature to avoid error @ transport level in u2f layers. 
+            G_io_apdu_buffer[tx_len] = 0x90; //G_io_apdu_buffer[tx_len-2];
+            G_io_apdu_buffer[tx_len+1] = 0x00; //G_io_apdu_buffer[tx_len-1];
+            tx_len += 2;
+            os_memmove(G_io_apdu_buffer+5, G_io_apdu_buffer, tx_len);
+            // zeroize user presence and counter
+            os_memset(G_io_apdu_buffer, 0, 5);
+            u2f_message_reply(&G_io_u2f, U2F_CMD_MSG, G_io_apdu_buffer, tx_len+5);
+            goto break_send;
+#endif // HAVE_IO_U2F
         }
         continue;
 
@@ -977,6 +1102,16 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
       // depending on received TAG
       switch(G_io_seproxyhal_spi_buffer[0]) {
 
+        case SEPROXYHAL_TAG_CAPDU_EVENT:
+          io_seproxyhal_handle_capdu_event();
+          if (G_io_apdu_length > 0) {
+            G_io_timeout = G_io_timeout_limit;
+            return G_io_apdu_length;
+          }
+          // discard gently, and wait for another event. but this is VERY ODD
+          goto send_last_command;
+          break;
+
 #ifdef HAVE_BLE
         case SEPROXYHAL_TAG_BLUENRG_RECV_EVENT:
           // process the packet
@@ -984,6 +1119,7 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
 
           // if the ble apdu state has advanced
           if (G_io_apdu_length) {
+            G_io_timeout = G_io_timeout_limit;
             G_io_apdu_media = IO_APDU_MEDIA_BLE; // for application code
             G_io_apdu_state = APDU_BLE; // for next call to io_exchange
             return G_io_apdu_length;
@@ -1010,7 +1146,9 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
           io_seproxyhal_handle_usb_ep_xfer_event();
 
           // an apdu has been received, ack with mode commands (the reply at least)
+          // exit flow for apdu_ccid/apdu_u2f/apdu_hid
           if (G_io_apdu_length > 0) {
+            G_io_timeout = G_io_timeout_limit;
             // invalid return when reentered and an apdu is already under processing
             return G_io_apdu_length;
           }
@@ -1036,11 +1174,11 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
 
 unsigned int os_ux_blocking(bolos_ux_params_t* params) {
   unsigned int ret;
+  
   // until a real status is returned
   ret = os_ux(params);
   while(ret == BOLOS_UX_IGNORE 
      || ret == BOLOS_UX_CONTINUE) {
-
 
     // process events
     for (;;) {
@@ -1459,7 +1597,11 @@ void ux_turner_display(unsigned int current_step,
 #endif
 }
 
+void ux_check_status_default(unsigned int status) {
+  // nothing to be done here by default.
+  UNUSED(status);
+}
 
-
+void ux_check_status(unsigned int status) __attribute__ ((weak, alias ("ux_check_status_default")));
 
 #endif // OS_IO_SEPROXYHAL

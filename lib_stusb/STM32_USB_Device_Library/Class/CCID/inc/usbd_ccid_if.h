@@ -36,9 +36,8 @@
 
 /* Exported defines ----------------------------------------------------------*/
 /* Bulk-only Command Block Wrapper */
-#define ABDATA_SIZE 261
-#define CCID_CMD_HEADER_SIZE 10
-#define CCID_RESPONSE_HEADER_SIZE 10
+//#define ABDATA_SIZE 261
+#define CCID_HEADER_SIZE 10
 
 
 #define CCID_INT_BUFF_SIZ 2
@@ -105,38 +104,34 @@
 
 /* Exported types ------------------------------------------------------------*/
 #pragma pack(1)
+typedef union ccid_bulk_header_u {
+  #pragma pack(1)
+  struct {
+    uint8_t bMessageType; /* Offset = 0*/
+    uint32_t dwLength;    /* Offset = 1, The length field (dwLength) is the length  
+                            of the message not including the 10-byte header.*/
+    uint8_t bSlot;        /* Offset = 5*/
+    uint8_t bSeq;         /* Offset = 6*/
+    uint8_t bSpecific_0;  /* Offset = 7*/
+    uint8_t bSpecific_1;  /* Offset = 8*/
+    uint8_t bSpecific_2;  /* Offset = 9*/
+  } bulkout;
+  #pragma pack(1)
+  struct {
+    uint8_t bMessageType;   /* Offset = 0  Same as Bulk OUT*/
+    uint32_t dwLength;      /* Offset = 1  Same as Bulk OUT*/
+    uint8_t bSlot;          /* Offset = 5, Same as Bulk-OUT message */ 
+    uint8_t bSeq;           /* Offset = 6, Same as Bulk-OUT message */
+    uint8_t bStatus;        /* Offset = 7, Slot status as defined in ยง 6.2.6*/
+    uint8_t bError;         /* Offset = 8, Slot error  as defined in ยง 6.2.6*/
+    uint8_t bSpecific;      /* Offset = 9*/
+  } bulkin;
+} ccid_bulk_header_t;
+
+#pragma pack(1)
 typedef struct 
 { 
-  #pragma pack(1)
-  union {
-    #pragma pack(1)
-    struct {
-      uint8_t bMessageType; /* Offset = 0*/
-      uint32_t dwLength;    /* Offset = 1, The length field (dwLength) is the length  
-                              of the message not including the 10-byte header.*/
-      uint8_t bSlot;        /* Offset = 5*/
-      uint8_t bSeq;         /* Offset = 6*/
-      uint8_t bSpecific_0;  /* Offset = 7*/
-      uint8_t bSpecific_1;  /* Offset = 8*/
-      uint8_t bSpecific_2;  /* Offset = 9*/
-    } bulkout;
-    #pragma pack(1)
-    struct {
-      uint8_t bMessageType;   /* Offset = 0*/
-      uint32_t dwLength;      /* Offset = 1*/
-      uint8_t bSlot;          /* Offset = 5, Same as Bulk-OUT message */
-      uint8_t bSeq;           /* Offset = 6, Same as Bulk-OUT message */
-      uint8_t bStatus;        /* Offset = 7, Slot status as defined in ง 6.2.6*/
-      uint8_t bError;         /* Offset = 8, Slot error  as defined in ง 6.2.6*/
-      uint8_t bSpecific;      /* Offset = 9*/
-    } bulkin;
-  } header;
-  uint8_t abData [ABDATA_SIZE]; /* Offset = 10, For reference, the absolute 
-                           maximum block size for a TPDU T=0 block is 260 bytes 
-                           (5 bytes command; 255 bytes data), 
-                           or for a TPDU T=1 block is 259 bytes, 
-                           or for a short APDU T=1 block is 261 bytes, 
-                           or for an extended APDU T=1 block is 65544 bytes.*/
+  ccid_bulk_header_t header;
 } Ccid_bulk_data_t; 
 #pragma pack()
 
@@ -169,15 +164,41 @@ typedef struct _Protocol0_DataStructure_t
 } Protocol0_DataStructure_t;
 #pragma pack()
 
+/* Exported constants --------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+typedef struct
+{
+  uint8_t voltage;  /* Voltage for the Card Already Selected */
+  uint8_t USART_GuardTime;
+  uint8_t SC_A2R_FiDi;
+  uint8_t SC_hostFiDi;
+  uint8_t USART_DefaultGuardTime;
+  uint32_t USART_BaudRate;
+} SC_Param_t;
+
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_ccid_core.h"
 
-extern usb_ccid_param_t usb_ccid_param;
-extern Ccid_bulk_data_t Ccid_bulk_data; /* Buffer for the Out Data */
-extern Ccid_SlotStatus_t Ccid_SlotStatus;
-extern uint8_t UsbIntMessageBuffer[];
 
-extern Protocol0_DataStructure_t Protocol0_DataStructure;
+typedef struct usb_class_ccid_s {
+  uint8_t Ccid_BulkState;
+  uint8_t ccid_card_inserted;
+  #ifdef HAVE_CCID_INTERRUPT
+  uint8_t UsbIntMessageBuffer[INTR_MAX_PACKET_SIZE];  /* data buffer*/
+  __IO uint8_t PrevXferComplete_IntrIn;
+  #endif // HAVE_CCID_INTERRUPT
+  usb_ccid_param_t usb_ccid_param;
+
+  uint8_t* pUsbMessageBuffer;
+  uint32_t UsbMessageLength;
+  Ccid_SlotStatus_t Ccid_SlotStatus;
+  Protocol0_DataStructure_t Protocol0_DataStructure;
+  //Ccid_bulk_data_t Ccid_bulk_data;
+  ccid_bulk_header_t bulk_header;
+
+  SC_Param_t SC_Param;
+} usb_class_ccid_t;
+extern usb_class_ccid_t G_io_ccid;
 
 /* Exported macros -----------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
@@ -199,6 +220,8 @@ uint8_t CCID_IsIntrTransferComplete(void);
 void CCID_SetIntrTransferStatus (uint8_t );
 void Transfer_Data_Request(void);
 void Set_CSW (uint8_t CSW_Status, uint8_t Send_Permission);
+
+void io_usb_ccid_set_card_inserted(unsigned int inserted);
 
 #endif // HAVE_USB_CLASS_CCID
 

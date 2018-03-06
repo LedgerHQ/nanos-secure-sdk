@@ -687,6 +687,116 @@ typedef struct {
     @{
  */
 
+/* Interrupt Priorities are WORD accessible only under ARMv6M */
+/* The following MACROS handle generation of the register offset and byte masks
+ */
+#define _BIT_SHIFT(IRQn) ((((uint32_t)(IRQn)) & 0x03) * 8)
+#define _SHP_IDX(IRQn) (((((uint32_t)(IRQn)&0x0F) - 8) >> 2))
+#define _IP_IDX(IRQn) (((uint32_t)(IRQn) >> 2))
+
+/** \brief  Enable External Interrupt
+
+    The function enables a device-specific interrupt in the NVIC interrupt
+   controller.
+
+    \param [in]      IRQn  External interrupt number. Value cannot be negative.
+ */
+__STATIC_INLINE void NVIC_EnableIRQ(IRQn_Type IRQn) {
+    NVIC->ISER[0] = (1 << ((uint32_t)(IRQn)&0x1F));
+}
+
+/** \brief  Disable External Interrupt
+
+    The function disables a device-specific interrupt in the NVIC interrupt
+   controller.
+
+    \param [in]      IRQn  External interrupt number. Value cannot be negative.
+ */
+__STATIC_INLINE void NVIC_DisableIRQ(IRQn_Type IRQn) {
+    NVIC->ICER[0] = (1 << ((uint32_t)(IRQn)&0x1F));
+}
+
+/** \brief  Get Pending Interrupt
+
+    The function reads the pending register in the NVIC and returns the pending
+   bit
+    for the specified interrupt.
+
+    \param [in]      IRQn  Interrupt number.
+
+    \return             0  Interrupt status is not pending.
+    \return             1  Interrupt status is pending.
+ */
+__STATIC_INLINE uint32_t NVIC_GetPendingIRQ(IRQn_Type IRQn) {
+    return (
+        (uint32_t)((NVIC->ISPR[0] & (1 << ((uint32_t)(IRQn)&0x1F))) ? 1 : 0));
+}
+
+/** \brief  Set Pending Interrupt
+
+    The function sets the pending bit of an external interrupt.
+
+    \param [in]      IRQn  Interrupt number. Value cannot be negative.
+ */
+__STATIC_INLINE void NVIC_SetPendingIRQ(IRQn_Type IRQn) {
+    NVIC->ISPR[0] = (1 << ((uint32_t)(IRQn)&0x1F));
+}
+
+/** \brief  Clear Pending Interrupt
+
+    The function clears the pending bit of an external interrupt.
+
+    \param [in]      IRQn  External interrupt number. Value cannot be negative.
+ */
+__STATIC_INLINE void NVIC_ClearPendingIRQ(IRQn_Type IRQn) {
+    NVIC->ICPR[0] =
+        (1 << ((uint32_t)(IRQn)&0x1F)); /* Clear pending interrupt */
+}
+
+/** \brief  Set Interrupt Priority
+
+    The function sets the priority of an interrupt.
+
+    \note The priority cannot be set for every core interrupt.
+
+    \param [in]      IRQn  Interrupt number.
+    \param [in]  priority  Priority to set.
+ */
+__STATIC_INLINE void NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority) {
+    if (IRQn < 0) {
+        SCB->SHP[_SHP_IDX(IRQn)] =
+            (SCB->SHP[_SHP_IDX(IRQn)] & ~(0xFF << _BIT_SHIFT(IRQn))) |
+            (((priority << (8 - __NVIC_PRIO_BITS)) & 0xFF) << _BIT_SHIFT(IRQn));
+    } else {
+        NVIC->IP[_IP_IDX(IRQn)] =
+            (NVIC->IP[_IP_IDX(IRQn)] & ~(0xFF << _BIT_SHIFT(IRQn))) |
+            (((priority << (8 - __NVIC_PRIO_BITS)) & 0xFF) << _BIT_SHIFT(IRQn));
+    }
+}
+
+/** \brief  Get Interrupt Priority
+
+    The function reads the priority of an interrupt. The interrupt
+    number can be positive to specify an external (device specific)
+    interrupt, or negative to specify an internal (core) interrupt.
+
+
+    \param [in]   IRQn  Interrupt number.
+    \return             Interrupt Priority. Value is aligned automatically to
+   the implemented
+                        priority bits of the microcontroller.
+ */
+__STATIC_INLINE uint32_t NVIC_GetPriority(IRQn_Type IRQn) {
+    if (IRQn < 0) {
+        return ((uint32_t)((SCB->SHP[_SHP_IDX(IRQn)] >> _BIT_SHIFT(IRQn)) >>
+                           (8 - __NVIC_PRIO_BITS)));
+    } /* get priority for SC000 system interrupts */
+    else {
+        return ((uint32_t)((NVIC->IP[_IP_IDX(IRQn)] >> _BIT_SHIFT(IRQn)) >>
+                           (8 - __NVIC_PRIO_BITS)));
+    } /* get priority for device specific interrupts  */
+}
+
 /** \brief  System Reset
 
     The function initiates a system reset request to reset the MCU.

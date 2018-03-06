@@ -113,7 +113,7 @@
 #define USBD_LANGID_STRING            0x409
 
 #define USBD_VID                      0x2C97
-#if TARGET_ID == 0x31000002 // blue
+#if defined(TARGET_BLUE) // blue
 #define USBD_PID                      0x0000
 const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   8*2+2,
@@ -128,7 +128,7 @@ const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'D', 0,
 };
 
-#elif TARGET_ID == 0x31100002 // nano s
+#elif defined(TARGET_NANOS) // nano s
 #define USBD_PID                      0x0001
 const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   10*2+2,
@@ -144,7 +144,7 @@ const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'B', 0,
   'D', 0,
 };
-#elif TARGET_ID == 0x31200002 // aramis
+#elif defined(TARGET_ARAMIS) // aramis
 #define USBD_PID                      0x0002
 const uint8_t const USBD_PRODUCT_FS_STRING[] = {
   10*2+2,

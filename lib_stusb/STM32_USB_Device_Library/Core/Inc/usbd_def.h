@@ -270,8 +270,10 @@ typedef struct _USBD_HandleTypeDef
 
   USBD_SetupReqTypedef    request;
   USBD_DescriptorsTypeDef *pDesc;
-  USBD_ClassTypeDef       *pClass;
-  void                    *pClassData;  
+  struct {
+    USBD_ClassTypeDef       *pClass;
+    void                    *pClassData;  
+  }                       interfacesClass [USBD_MAX_NUM_INTERFACES];
   void                    *pUserData;    
   void                    *pData;    
 } USBD_HandleTypeDef;
