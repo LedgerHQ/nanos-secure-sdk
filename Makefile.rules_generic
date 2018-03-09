@@ -55,7 +55,7 @@ obj/%.o: %.s
 	@echo "[AS]   $@"
 	$(call log,$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@))
 
-bin/app.elf: $(OBJECT_FILES) $(BOLOS_SDK)/script.ld
+bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	@echo "[LINK] $@"
 	$(call log,$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@))
 	$(call log,$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex)

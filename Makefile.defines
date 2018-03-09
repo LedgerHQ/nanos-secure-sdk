@@ -27,6 +27,10 @@ endif
 COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize `cat debug/app.map |grep _nvram_data_size | tr -s ' ' | cut -f2 -d' '` `ICONHEX=\`python $(BOLOS_SDK)/icon.py $(ICONNAME) hexbitmaponly 2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
 COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
 
+ifndef SCRIPT_LD
+    SCRIPT_LD:=$(BOLOS_SDK)/script.ld
+endif
+
 ### platform definitions
 DEFINES += ST31 gcc __IO=volatile
 
@@ -54,4 +58,4 @@ LDFLAGS  += -Wall
 LDFLAGS  += -mcpu=cortex-m0 -mthumb 
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program -nostartfiles 
 LDFLAGS  += -mno-unaligned-access
-LDFLAGS  += -T$(BOLOS_SDK)/script.ld  -Wl,--gc-sections -Wl,-Map,debug/app.map,--cref
+LDFLAGS  += -T$(SCRIPT_LD)  -Wl,--gc-sections -Wl,-Map,debug/app.map,--cref
