@@ -526,36 +526,40 @@ uint8_t SC_Secure(uint32_t dwLength, uint8_t bBWI, uint16_t wLevelParameter,
   UNUSED(returnLen);
   // return SLOTERROR_CMD_NOT_SUPPORTED;
   uint16_t ret_len,off;
-  switch(pbuf[0]) {
-    case 0: // verify pin
-      ret_len = dwLength - 15;
-      os_memmove(G_io_apdu_buffer, pbuf+15, dwLength-15);
+  switch(pbuf[0]) 
+  {
+  case 0: // verify pin
+    off = 15;
+    //ret_len = dwLength - 15;
+    ret_len = 5;
+    break;
+  case 1: // modify pin
+    switch(pbuf[11]) 
+    {
+    case 3:
+      off = 20;
       break;
-    case 1: // modify pin
-      switch(pbuf[11]) {
-      case 3:
-        off = 20;
-        break;
-      case 2:
-      case 1:
-        off = 19;
-        break;
-      // 0 and 4-0xFF
-      default:
-        off = 18; 
-        break;
-      }
-      ret_len = dwLength-off;
-      // provide with the complete apdu
-      os_memmove(G_io_apdu_buffer, pbuf+off, dwLength-off);
+    case 2:
+    case 1:
+      off = 19;
       break;
-    default: // unsupported
-      G_io_ccid.bulk_header.bulkin.dwLength = 0;
-      RDR_to_PC_DataBlock(SLOTERROR_CMD_NOT_SUPPORTED);
-      CCID_Send_Reply(&USBD_Device);
-      return SLOTERROR_CMD_NOT_SUPPORTED;
+    // 0 and 4-0xFF
+    default:
+      off = 18; 
+      break;
+    }
+    //ret_len = dwLength - off;
+    ret_len = 5;
+    break;
+  default: // unsupported
+    G_io_ccid.bulk_header.bulkin.dwLength = 0;
+    RDR_to_PC_DataBlock(SLOTERROR_CMD_NOT_SUPPORTED);
+    CCID_Send_Reply(&USBD_Device);
+    return SLOTERROR_CMD_NOT_SUPPORTED;
   }
-  return SC_XferBlock(G_io_apdu_buffer, ret_len, &ret_len);
+  pbuf += off;
+  pbuf[0] = 0xEF; 
+  return SC_XferBlock(pbuf, ret_len, &ret_len);
 }
 
 // prepare the apdu to be processed by the application
