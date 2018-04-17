@@ -25,6 +25,7 @@
 /*                                    OPTIONS                              */
 /* ####################################################################### */
 
+
 /* ####################################################################### */
 /*                                  CHIP/LIB3rd                            */
 /* ####################################################################### */
@@ -231,12 +232,12 @@ SYSCALL unsigned char *cx_rng(unsigned char *buffer PLENGTH(len),
  * @return length of returned V
  */
 SYSCALL int
-cx_rng_rfc6979(unsigned char *rnd PLENGTH(scc__cx_hash_size_id__hashID),
-               unsigned int hashID,
-               unsigned char *h1 PLENGTH(scc__cx_hash_size_id__hashID),
-               unsigned char *x PLENGTH(x_len), unsigned int x_len,
-               unsigned char *q PLENGTH(q_len), unsigned int q_len,
-               unsigned char *V PLENGTH(V_len), unsigned int V_len);
+cx_rng_rfc6979(unsigned char *rnd PLENGTH(rnd_len), unsigned int rnd_len,
+               unsigned int hashID, const unsigned char *h1 PLENGTH(h1_len),
+               unsigned int h1_len, const unsigned char *x PLENGTH(x_len),
+               unsigned int x_len, const unsigned char *q PLENGTH(q_len),
+               unsigned int q_len, unsigned char *V PLENGTH(V_len),
+               unsigned int V_len);
 
 /** @} */
 
@@ -275,17 +276,6 @@ enum cx_md_e {
 /** Convenience type. See #cx_md_e. */
 typedef enum cx_md_e cx_md_t;
 
-/** RIPEMD160 message digest size */
-#define CX_RIPEMD160_SIZE 20
-/** SHA224 message digest size */
-#define CX_SHA224_SIZE 28
-/** SHA256 message digest size */
-#define CX_SHA256_SIZE 32
-/** SHA384 message digest size */
-#define CX_SHA384_SIZE 48
-/** SHA512 message digest size */
-#define CX_SHA512_SIZE 64
-
 /**
  * @internal
  * Maximum size of message for any digest. The size is given in block,
@@ -305,6 +295,48 @@ struct cx_hash_header_s {
 typedef struct cx_hash_header_s cx_hash_t;
 
 /**
+ * Add more data to hash.
+ *
+ * @param  [in/out] hash
+ *   Univers Continuation Blob.
+ *   The hash context pointer shall point to  either a cx_ripemd160_t, either a
+ * cx_sha256_t  or cx_sha512_t .
+ *   The hash context shall be inited with 'cx_xxx_init'
+ *   The hash context shall be in RAM
+ *   The function should be called with a nice cast.
+ *
+ * @note: 'out' length is implicit, no check is done
+ *
+ * @param  [in] mode
+ *   Supported flags: CX_LAST
+ *   If CX_LAST is set,
+ *     - hash can be found in cx_ripemd160|sha1|sha256|sha512_t.acc field
+ *     - if  out is provided, hash is copied in out
+ *     - context is NOT automatically re-inited.
+ *
+ * @param  [in] in
+ *   Input data to add to current hash
+ *
+ * @param  [in] len
+ *   Length of input to data.
+ *
+ * @param [out] out
+ *   Either:
+ *     - NULL (ignored) if CX_LAST is NOT set
+ *     - produced hash  if CX_LAST is set
+ *
+ */
+SYSCALL int cx_hash(cx_hash_t *hash PLENGTH(scc__cx_scc_struct_size_hash__hash),
+                    int mode, const unsigned char WIDE *in PLENGTH(len),
+                    unsigned int len, unsigned char *out PLENGTH(out_len),
+                    unsigned int out_len);
+
+/* ------------------------------ RIPEMD160 ------------------------------ */
+
+/** RIPEMD160 message digest size */
+#define CX_RIPEMD160_SIZE 20
+
+/**
  * RIPEMD160 context
  */
 struct cx_ripemd160_s {
@@ -313,7 +345,7 @@ struct cx_ripemd160_s {
     /** @internal
      * pending partial block length
      */
-    int blen;
+    unsigned int blen;
     /** @internal
      * pending partial block
      */
@@ -326,6 +358,28 @@ struct cx_ripemd160_s {
 };
 /** Convenience type. See #cx_ripemd160_s. */
 typedef struct cx_ripemd160_s cx_ripemd160_t;
+
+/**
+ * Init a ripmd160 context.
+ *
+ * @param [out] hash the context to init.
+ *    The context shall be in RAM
+ *
+ * @return algorithm identifier
+ */
+SYSCALL int
+cx_ripemd160_init(cx_ripemd160_t *hash PLENGTH(sizeof(cx_ripemd160_t)));
+
+/* --------------------------------- SHA2 -------------------------------- */
+
+/** SHA224 message digest size */
+#define CX_SHA224_SIZE 28
+/** SHA256 message digest size */
+#define CX_SHA256_SIZE 32
+/** SHA384 message digest size */
+#define CX_SHA384_SIZE 48
+/** SHA512 message digest size */
+#define CX_SHA512_SIZE 64
 
 /**
  * SHA224 and SHA256 context
@@ -360,38 +414,6 @@ struct cx_sha512_s {
 typedef struct cx_sha512_s cx_sha512_t;
 
 /**
- * KECCAK, SHA3 and SHA3-XOF context
- */
-struct cx_sha3_s {
-    /** @copydoc cx_ripemd160_s::header */
-    struct cx_hash_header_s header;
-
-    /** @internal output digest size*/
-    unsigned int output_size;
-    /** @internal input block size*/
-    unsigned char block_size;
-    /** @internal @copydoc cx_ripemd160_s::blen */
-    unsigned int blen;
-    /** @internal @copydoc cx_ripemd160_s::block */
-    unsigned char block[200];
-    /** @copydoc cx_ripemd160_s::acc */
-    uint64bits_t acc[25];
-};
-/** Convenience type. See #cx_sha3_s. */
-typedef struct cx_sha3_s cx_sha3_t;
-
-/**
- * Init a ripmd160 context.
- *
- * @param [out] hash the context to init.
- *    The context shall be in RAM
- *
- * @return algorithm identifier
- */
-SYSCALL int
-cx_ripemd160_init(cx_ripemd160_t *hash PLENGTH(sizeof(cx_ripemd160_t)));
-
-/**
  * Init a sha256 context.
  *
  * @param [out] hash the context to init.
@@ -410,6 +432,24 @@ SYSCALL int cx_sha224_init(cx_sha256_t *hash PLENGTH(sizeof(cx_sha256_t)));
  * @return algorithm identifier
  */
 SYSCALL int cx_sha256_init(cx_sha256_t *hash PLENGTH(sizeof(cx_sha256_t)));
+
+/**
+ * One shot sha256 digest
+ *
+ * @param  [in] in
+ *   Input data to compute the hash
+ *
+ * @param  [in] len
+ *   Length of input to data.
+ *
+ * @param [out] out
+ *   'out' length is implicit
+ *
+ */
+SYSCALL int cx_hash_sha256(const unsigned char WIDE *in PLENGTH(len),
+                           unsigned int len,
+                           unsigned char *out PLENGTH(out_len),
+                           unsigned int out_len);
 
 /**
  * Init a sha512 context.
@@ -432,6 +472,47 @@ SYSCALL int cx_sha384_init(cx_sha512_t *hash PLENGTH(sizeof(cx_sha512_t)));
 SYSCALL int cx_sha512_init(cx_sha512_t *hash PLENGTH(sizeof(cx_sha512_t)));
 
 /**
+ * One shot sha512 digest
+ *
+ * @param  [in] in
+ *   Input data to compute the hash
+ *
+ * @param  [in] len
+ *   Length of input to data.
+ *
+ * @param [out] out
+ *   'out' length is implicit
+ *
+ */
+SYSCALL int cx_hash_sha512(const unsigned char WIDE *in PLENGTH(len),
+                           unsigned int len,
+                           unsigned char *out PLENGTH(out_len),
+                           unsigned int out_len);
+
+/* ----------------------------- SHA3/KECCAK ----------------------------- */
+
+/**
+ * KECCAK, SHA3 and SHA3-XOF context
+ */
+struct cx_sha3_s {
+    /** @copydoc cx_ripemd160_s::header */
+    struct cx_hash_header_s header;
+
+    /** @internal output digest size*/
+    unsigned int output_size;
+    /** @internal input block size*/
+    unsigned int block_size;
+    /** @internal @copydoc cx_ripemd160_s::blen */
+    unsigned int blen;
+    /** @internal @copydoc cx_ripemd160_s::block */
+    unsigned char block[200];
+    /** @copydoc cx_ripemd160_s::acc */
+    uint64bits_t acc[25];
+};
+/** Convenience type. See #cx_sha3_s. */
+typedef struct cx_sha3_s cx_sha3_t;
+
+/**
  * Init a sha3 context.
  *
  * SHA3 family as specified in FIPS 202.
@@ -445,7 +526,8 @@ SYSCALL int cx_sha512_init(cx_sha512_t *hash PLENGTH(sizeof(cx_sha512_t)));
  *
  * @return algorithm identifier
  */
-SYSCALL int cx_sha3_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)), int size);
+SYSCALL int cx_sha3_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)),
+                         unsigned int size);
 
 /**
  * Init a sha3 context.
@@ -462,7 +544,7 @@ SYSCALL int cx_sha3_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)), int size);
  * @return algorithm identifier
  */
 SYSCALL int cx_keccak_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)),
-                           int size);
+                           unsigned int size);
 
 /**
  * Init a sha3-XOF context.
@@ -480,75 +562,6 @@ SYSCALL int cx_keccak_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)),
  */
 SYSCALL int cx_sha3_xof_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)),
                              unsigned int size, unsigned int out_length);
-
-/**
- * Add more data to hash.
- *
- * @param  [in/out] hash
- *   Univers Continuation Blob.
- *   The hash context pointer shall point to  either a cx_ripemd160_t, either a
- * cx_sha256_t  or cx_sha512_t .
- *   The hash context shall be inited with 'cx_xxx_init'
- *   The hash context shall be in RAM
- *   The function should be called with a nice cast.
- *
- * @note: 'out' length is implicit, no check is done
- *
- * @param  [in] mode
- *   Supported flags: CX_LAST
- *   If CX_LAST is set,
- *     - hash can be found in cx_ripemd160|sha1|sha256|sha512_t.acc field
- *     - if  out is provided, hash is copied in out
- *     - context is NOT automatically re-inited.
- *
- * @param  [in] in
- *   Input data to add to current hash
- *
- * @param  [in] len
- *   Length of input to data.
- *
- * @param [out] out
- *   Either:
- *     - NULL (ignored) if CX_LAST is NOT set
- *     - produced hash  if CX_LAST is set
- *
- */
-SYSCALL int cx_hash(cx_hash_t *hash PLENGTH(scc__cx_hash_ctx_size__hash),
-                    int mode, unsigned char WIDE *in PLENGTH(len),
-                    unsigned int len,
-                    unsigned char *out PLENGTH(scc__cx_hash_size__hash));
-
-/**
- * One shot sha256 digest
- *
- * @param  [in] in
- *   Input data to compute the hash
- *
- * @param  [in] len
- *   Length of input to data.
- *
- * @param [out] out
- *   'out' length is implicit
- *
- */
-SYSCALL int cx_hash_sha256(unsigned char WIDE *in PLENGTH(len),
-                           unsigned int len, unsigned char *out PLENGTH(32));
-
-/**
- * One shot sha512 digest
- *
- * @param  [in] in
- *   Input data to compute the hash
- *
- * @param  [in] len
- *   Length of input to data.
- *
- * @param [out] out
- *   'out' length is implicit
- *
- */
-SYSCALL int cx_hash_sha512(unsigned char WIDE *in PLENGTH(len),
-                           unsigned int len, unsigned char *out PLENGTH(64));
 
 /** @} */
 
@@ -627,7 +640,7 @@ typedef struct cx_hash_header_s cx_hmac_t;
  */
 SYSCALL int cx_hmac_ripemd160_init(
     cx_hmac_ripemd160_t *hmac PLENGTH(sizeof(cx_hmac_ripemd160_t)),
-    unsigned char WIDE *key PLENGTH(key_len), unsigned int key_len);
+    const unsigned char WIDE *key PLENGTH(key_len), unsigned int key_len);
 
 /**
  * Init a hmac sha256 context.
@@ -648,7 +661,7 @@ SYSCALL int cx_hmac_ripemd160_init(
  */
 SYSCALL int
 cx_hmac_sha256_init(cx_hmac_sha256_t *hmac PLENGTH(sizeof(cx_hmac_sha256_t)),
-                    unsigned char WIDE *key PLENGTH(key_len),
+                    const unsigned char WIDE *key PLENGTH(key_len),
                     unsigned int key_len);
 
 /**
@@ -670,7 +683,7 @@ cx_hmac_sha256_init(cx_hmac_sha256_t *hmac PLENGTH(sizeof(cx_hmac_sha256_t)),
  */
 SYSCALL int
 cx_hmac_sha512_init(cx_hmac_sha512_t *hmac PLENGTH(sizeof(cx_hmac_sha512_t)),
-                    unsigned char WIDE *key PLENGTH(key_len),
+                    const unsigned char WIDE *key PLENGTH(key_len),
                     unsigned int key_len);
 
 /**
@@ -703,10 +716,10 @@ cx_hmac_sha512_init(cx_hmac_sha512_t *hmac PLENGTH(sizeof(cx_hmac_sha512_t)),
  *   'out' length is implicit, no check is done
  *
  */
-SYSCALL int cx_hmac(cx_hmac_t *hmac PLENGTH(scc__cx_hmac_ctx_size__hmac),
-                    int mode, unsigned char WIDE *in PLENGTH(len),
-                    unsigned int len,
-                    unsigned char *mac PLENGTH(scc__cx_hmac_size__hmac));
+SYSCALL int cx_hmac(cx_hmac_t *hmac PLENGTH(scc__cx_scc_struct_size_hmac__hmac),
+                    int mode, const unsigned char WIDE *in PLENGTH(len),
+                    unsigned int len, unsigned char *mac PLENGTH(mac_len),
+                    unsigned int mac_len);
 /**
  * One shot hmac sha512 digest
  *
@@ -726,10 +739,12 @@ SYSCALL int cx_hmac(cx_hmac_t *hmac PLENGTH(scc__cx_hmac_ctx_size__hmac),
  *   'out' length is implicit
  *
  */
-SYSCALL int cx_hmac_sha512(unsigned char WIDE *key PLENGTH(key_len),
+SYSCALL int cx_hmac_sha512(const unsigned char WIDE *key PLENGTH(key_len),
                            unsigned int key_len,
-                           unsigned char WIDE *in PLENGTH(len),
-                           unsigned int len, unsigned char *out PLENGTH(64));
+                           const unsigned char WIDE *in PLENGTH(len),
+                           unsigned int len,
+                           unsigned char *mac PLENGTH(mac_len),
+                           unsigned int mac_len);
 
 /**
  * One shot hmac sha256 digest
@@ -750,10 +765,12 @@ SYSCALL int cx_hmac_sha512(unsigned char WIDE *key PLENGTH(key_len),
  *   'out' length is implicit
  *
  */
-SYSCALL int cx_hmac_sha256(unsigned char WIDE *key PLENGTH(key_len),
+SYSCALL int cx_hmac_sha256(const unsigned char WIDE *key PLENGTH(key_len),
                            unsigned int key_len,
-                           unsigned char WIDE *in PLENGTH(len),
-                           unsigned int len, unsigned char *out PLENGTH(32));
+                           const unsigned char WIDE *in PLENGTH(len),
+                           unsigned int len,
+                           unsigned char *mac PLENGTH(mac_len),
+                           unsigned int mac_len);
 
 /** @} */
 
@@ -786,12 +803,12 @@ SYSCALL int cx_hmac_sha256(unsigned char WIDE *key PLENGTH(key_len),
  *    How many bytes to generate.
  *
  */
-SYSCALL void cx_pbkdf2_sha512(unsigned char WIDE *password PLENGTH(passwordlen),
-                              unsigned short passwordlen,
-                              unsigned char *salt PLENGTH(saltlen),
-                              unsigned short saltlen, unsigned int iterations,
-                              unsigned char *out PLENGTH(outLength),
-                              unsigned int outLength);
+SYSCALL void
+cx_pbkdf2_sha512(const unsigned char WIDE *password PLENGTH(passwordlen),
+                 unsigned short passwordlen,
+                 unsigned char *salt PLENGTH(saltlen), unsigned short saltlen,
+                 unsigned int iterations, unsigned char *out PLENGTH(outLength),
+                 unsigned int outLength);
 
 /** @} */
 
@@ -847,7 +864,7 @@ typedef struct cx_des_key_s cx_des_key_t;
  * @param key
  *   ready to use key to init
  */
-SYSCALL int cx_des_init_key(unsigned char WIDE *rawkey PLENGTH(key_len),
+SYSCALL int cx_des_init_key(const unsigned char WIDE *rawkey PLENGTH(key_len),
                             unsigned int key_len,
                             cx_des_key_t *key PLENGTH(sizeof(cx_des_key_t)));
 
@@ -898,17 +915,18 @@ SYSCALL int cx_des_init_key(unsigned char WIDE *rawkey PLENGTH(key_len),
  */
 
 SYSCALL CXPORT(CXPORT_ED_DES) int cx_des_iv(
-    cx_des_key_t WIDE *key PLENGTH(sizeof(cx_des_key_t)), int mode,
-    unsigned char WIDE *iv PLENGTH(8), unsigned char WIDE *in PLENGTH(len),
-    unsigned int len, unsigned char *out PLENGTH(len + 8));
+    const cx_des_key_t WIDE *key PLENGTH(sizeof(cx_des_key_t)), int mode,
+    const unsigned char WIDE *iv PLENGTH(iv_len), unsigned int iv_len,
+    const unsigned char WIDE *in PLENGTH(in_len), unsigned int in_len,
+    unsigned char *out PLENGTH(out_len), unsigned int out_len);
 
 /**
  *  Same as cx_des_iv with initial IV assumed to be heigt zeros.
  */
 SYSCALL CXPORT(CXPORT_ED_DES) int cx_des(
-    cx_des_key_t WIDE *key PLENGTH(sizeof(cx_des_key_t)), int mode,
-    unsigned char WIDE *in PLENGTH(len), unsigned int len,
-    unsigned char *out PLENGTH(len + 8));
+    const cx_des_key_t WIDE *key PLENGTH(sizeof(cx_des_key_t)), int mode,
+    const unsigned char WIDE *in PLENGTH(in_len), unsigned int in_len,
+    unsigned char *out PLENGTH(out_len), unsigned int out_len);
 
 /** @} */ // CX_des
 
@@ -955,7 +973,7 @@ typedef struct cx_aes_key_s cx_aes_key_t;
  * @param key
  *   ready to use key to init
  */
-SYSCALL int cx_aes_init_key(unsigned char WIDE *rawkey PLENGTH(key_len),
+SYSCALL int cx_aes_init_key(const unsigned char WIDE *rawkey PLENGTH(key_len),
                             unsigned int key_len,
                             cx_aes_key_t *key PLENGTH(sizeof(cx_aes_key_t)));
 
@@ -1002,17 +1020,18 @@ SYSCALL int cx_aes_init_key(unsigned char WIDE *rawkey PLENGTH(key_len),
  * @throws INVALID_PARAMETER
  */
 SYSCALL CXPORT(CXPORT_ED_AES) int cx_aes_iv(
-    cx_aes_key_t WIDE *key PLENGTH(sizeof(cx_aes_key_t)), int mode,
-    unsigned char WIDE *iv PLENGTH(16), unsigned char WIDE *in PLENGTH(len),
-    unsigned int len, unsigned char *out PLENGTH(len + 15));
+    const cx_aes_key_t WIDE *key PLENGTH(sizeof(cx_aes_key_t)), int mode,
+    const unsigned char WIDE *iv PLENGTH(iv_len), unsigned int iv_len,
+    const unsigned char WIDE *in PLENGTH(in_len), unsigned int in_len,
+    unsigned char *out PLENGTH(out_len), unsigned int out_len);
 
 /**
  *  Same as cx_aes_iv with initial IV assumed to be sixteen zeros.
  */
 SYSCALL CXPORT(CXPORT_ED_AES) int cx_aes(
-    cx_aes_key_t WIDE *key PLENGTH(sizeof(cx_aes_key_t)), int mode,
-    unsigned char WIDE *in PLENGTH(len), unsigned int len,
-    unsigned char *out PLENGTH(len + 16));
+    const cx_aes_key_t WIDE *key PLENGTH(sizeof(cx_aes_key_t)), int mode,
+    const unsigned char WIDE *in PLENGTH(in_len), unsigned int in_len,
+    unsigned char *out PLENGTH(out_len), unsigned int out_len);
 /** @} */ // cx_aes
 
 /** @} */ // cx_sym
@@ -1170,8 +1189,10 @@ typedef struct cx_rsa_4096_private_key_s cx_rsa_4096_private_key_t;
  * @throws INVALID_PARAMETER
  */
 SYSCALL int cx_rsa_init_public_key(
-    unsigned char WIDE *exponent PLENGTH(4),
-    unsigned char WIDE *modulus PLENGTH(modulus_len), unsigned int modulus_len,
+    const unsigned char WIDE *exponent PLENGTH(exponent_len),
+    unsigned int exponent_len,
+    const unsigned char WIDE *modulus PLENGTH(modulus_len),
+    unsigned int modulus_len,
     cx_rsa_public_key_t *key PLENGTH(sizeof(cx_rsa_public_key_t) +
                                      modulus_len));
 
@@ -1199,8 +1220,10 @@ SYSCALL int cx_rsa_init_public_key(
  * @throws INVALID_PARAMETER
  */
 SYSCALL int cx_rsa_init_private_key(
-    unsigned char WIDE *exponent PLENGTH(modulus_len),
-    unsigned char WIDE *modulus PLENGTH(modulus_len), unsigned int modulus_len,
+    const unsigned char WIDE *exponent PLENGTH(exponent_len),
+    unsigned int exponent_len,
+    const unsigned char WIDE *modulus PLENGTH(modulus_len),
+    unsigned int modulus_len,
     cx_rsa_private_key_t *key PLENGTH(sizeof(cx_rsa_private_key_t) +
                                       2 * modulus_len));
 
@@ -1241,8 +1264,8 @@ SYSCALL int cx_rsa_generate_pair(
                                             modulus_len),
     cx_rsa_private_key_t *private_key PLENGTH(sizeof(cx_rsa_private_key_t) +
                                               2 * modulus_len),
-    unsigned long int pub_exponent,
-    unsigned char *externalPQ PLENGTH(modulus_len));
+    const unsigned char *pub_exponent, unsigned int exponent_len,
+    const unsigned char *externalPQ PLENGTH(modulus_len));
 
 /**
  * Sign a hash message signature according to RSA specification.
@@ -1283,10 +1306,10 @@ SYSCALL int cx_rsa_generate_pair(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_rsa_sign(cx_rsa_private_key_t WIDE *key
-                            PLENGTH(scc__cx_rsa_private_key_ctx_size__key),
+SYSCALL int cx_rsa_sign(const cx_rsa_private_key_t WIDE *key
+                            PLENGTH(scc__cx_scc_struct_size_rsa_privkey__key),
                         int mode, cx_md_t hashID,
-                        unsigned char WIDE *hash PLENGTH(hash_len),
+                        const unsigned char WIDE *hash PLENGTH(hash_len),
                         unsigned int hash_len,
                         unsigned char WIDE *sig PLENGTH(sig_len),
                         unsigned int sig_len);
@@ -1326,11 +1349,13 @@ SYSCALL int cx_rsa_sign(cx_rsa_private_key_t WIDE *key
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_rsa_verify(
-    cx_rsa_public_key_t WIDE *key PLENGTH(scc__cx_rsa_public_key_ctx_size__key),
-    int mode, cx_md_t hashID, unsigned char WIDE *hash PLENGTH(hash_len),
-    unsigned int hash_len, unsigned char WIDE *sig PLENGTH(sig_len),
-    unsigned int sig_len);
+SYSCALL int cx_rsa_verify(const cx_rsa_public_key_t WIDE *key
+                              PLENGTH(scc__cx_scc_struct_size_rsa_pubkey__key),
+                          int mode, cx_md_t hashID,
+                          const unsigned char WIDE *hash PLENGTH(hash_len),
+                          unsigned int hash_len,
+                          const unsigned char WIDE *sig PLENGTH(sig_len),
+                          unsigned int sig_len);
 
 /**
  * Encrypt a message according to RSA specification.
@@ -1367,8 +1392,9 @@ SYSCALL int cx_rsa_verify(
  * @throws INVALID_PARAMETER
  */
 SYSCALL CXPORT(CXPORT_ED_RSA) int cx_rsa_encrypt(
-    cx_rsa_public_key_t WIDE *key PLENGTH(scc__cx_rsa_public_key_ctx_size__key),
-    int mode, cx_md_t hashID, unsigned char WIDE *mesg PLENGTH(mesg_len),
+    const cx_rsa_public_key_t WIDE *key
+        PLENGTH(scc__cx_scc_struct_size_rsa_pubkey__key),
+    int mode, cx_md_t hashID, const unsigned char WIDE *mesg PLENGTH(mesg_len),
     unsigned int mesg_len, unsigned char WIDE *enc PLENGTH(enc_len),
     unsigned int enc_len);
 
@@ -1407,9 +1433,9 @@ SYSCALL CXPORT(CXPORT_ED_RSA) int cx_rsa_encrypt(
  * @throws INVALID_PARAMETER
  */
 SYSCALL CXPORT(CXPORT_ED_RSA) int cx_rsa_decrypt(
-    cx_rsa_private_key_t WIDE *key
-        PLENGTH(scc__cx_rsa_private_key_ctx_size__key),
-    int mode, cx_md_t hashID, unsigned char WIDE *mesg PLENGTH(mesg_len),
+    const cx_rsa_private_key_t WIDE *key
+        PLENGTH(scc__cx_scc_struct_size_rsa_privkey__key),
+    int mode, cx_md_t hashID, const unsigned char WIDE *mesg PLENGTH(mesg_len),
     unsigned int mesg_len, unsigned char WIDE *dec PLENGTH(dec_len),
     unsigned int dec_len);
 
@@ -1510,7 +1536,7 @@ typedef enum cx_curve_e cx_curve_t;
 
 #define CX_CURVE_HEADER                                                        \
     /** Curve Identifier. See #cx_curve_e */                                   \
-    cx_curve_t id;                                                             \
+    cx_curve_t curve;                                                          \
     /** Curve size in bits */                                                  \
     unsigned int bit_size;                                                     \
     /** component lenth in bytes */                                            \
@@ -1600,7 +1626,7 @@ struct cx_ecfp_public_key_s {
     /** Public key length in bytes */
     unsigned int W_len;
     /** Public key value starting at offset 0 */
-    unsigned char W[];
+    unsigned char W[1];
 };
 /** Private Elliptic Curve key */
 struct cx_ecfp_private_key_s {
@@ -1741,7 +1767,7 @@ typedef struct cx_ecfp_640_private_key_s cx_ecfp_640_private_key_t;
  * @param [in] domain
  *   The curve domain parameters to work with.
  *
- * @param [in]  public_point
+ * @param [in]  P
  *   The point to test  encoded as: 04 x y
  *
  * @return
@@ -1751,10 +1777,9 @@ typedef struct cx_ecfp_640_private_key_s cx_ecfp_640_private_key_t;
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int
-cx_ecfp_is_valid_point(cx_curve_t curve,
-                       unsigned char WIDE *point
-                           PLENGTH(scc__cx_ecfp_curve_point_scc__curve_point));
+SYSCALL int cx_ecfp_is_valid_point(cx_curve_t curve,
+                                   const unsigned char WIDE *P PLENGTH(P_len),
+                                   unsigned int P_len);
 
 /**
  * Verify that a given point is really on the specified curve and its order
@@ -1773,9 +1798,10 @@ cx_ecfp_is_valid_point(cx_curve_t curve,
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecfp_is_cryptographic_point(
-    cx_curve_t curve, unsigned char WIDE *point
-                          PLENGTH(scc__cx_ecfp_curve_point_scc__curve_point));
+SYSCALL int
+cx_ecfp_is_cryptographic_point(cx_curve_t curve,
+                               const unsigned char WIDE *P PLENGTH(P_len),
+                               unsigned int P_len);
 
 /**
  * Add two affine point
@@ -1808,10 +1834,10 @@ SYSCALL int cx_ecfp_is_cryptographic_point(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecfp_add_point(
-    cx_curve_t curve,
-    unsigned char *R PLENGTH(scc__cx_ecfp_curve_point3_scc__curve_R_P_Q),
-    unsigned char WIDE *P, unsigned char WIDE *Q);
+SYSCALL int cx_ecfp_add_point(cx_curve_t curve, unsigned char *R PLENGTH(X_len),
+                              const unsigned char WIDE *P PLENGTH(X_len),
+                              const unsigned char WIDE *Q PLENGTH(X_len),
+                              unsigned int X_len);
 
 /**
  * Multiply an affine point
@@ -1842,10 +1868,11 @@ SYSCALL int cx_ecfp_add_point(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecfp_scalar_mult(
-    cx_curve_t curve,
-    unsigned char *P PLENGTH(scc__cx_ecfp_curve_point_scc__curve_P),
-    unsigned char WIDE *k PLENGTH(k_len), unsigned int k_len);
+SYSCALL int cx_ecfp_scalar_mult(cx_curve_t curve,
+                                unsigned char *P PLENGTH(P_len),
+                                unsigned int P_len,
+                                const unsigned char WIDE *k PLENGTH(k_len),
+                                unsigned int k_len);
 
 /**
  * Initialize a public ECFP Key.
@@ -1883,9 +1910,10 @@ SYSCALL int cx_ecfp_scalar_mult(
  */
 
 SYSCALL int cx_ecfp_init_public_key(
-    cx_curve_t curve, unsigned char WIDE *rawkey PLENGTH(key_len),
+    cx_curve_t curve, const unsigned char WIDE *rawkey PLENGTH(key_len),
     unsigned int key_len,
-    cx_ecfp_public_key_t *key PLENGTH(scc__cx_ecfp_curve_pukey_scc__curve_key));
+    cx_ecfp_public_key_t *key
+        PLENGTH(scc__cx_scc_struct_size_ecfp_pubkey_from_curve__curve));
 
 /**
  * Initialize a private ECFP Key.
@@ -1916,9 +1944,10 @@ SYSCALL int cx_ecfp_init_public_key(
  * @throws INVALID_PARAMETER
  */
 SYSCALL int cx_ecfp_init_private_key(
-    cx_curve_t curve, unsigned char WIDE *rawkey PLENGTH(key_len),
-    unsigned int key_len, cx_ecfp_private_key_t *pvkey PLENGTH(
-                              scc__cx_ecfp_curve_pvkey_scc__curve_pvkey));
+    cx_curve_t curve, const unsigned char WIDE *rawkey PLENGTH(key_len),
+    unsigned int key_len,
+    cx_ecfp_private_key_t *pvkey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_privkey_from_curve__curve));
 
 /**
  * Generate a ecfp key pair.
@@ -1946,13 +1975,13 @@ SYSCALL int cx_ecfp_init_private_key(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int
-cx_ecfp_generate_pair(cx_curve_t curve,
-                      cx_ecfp_public_key_t *pubkey
-                          PLENGTH(scc__cx_ecfp_curve_pukey_scc__curve_pubkey),
-                      cx_ecfp_private_key_t *privkey
-                          PLENGTH(scc__cx_ecfp_curve_pvkey_scc__curve_privkey),
-                      int keepprivate);
+SYSCALL int cx_ecfp_generate_pair(
+    cx_curve_t curve,
+    cx_ecfp_public_key_t *pubkey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_pubkey_from_curve__curve),
+    cx_ecfp_private_key_t *privkey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_privkey_from_curve__curve),
+    int keepprivate);
 
 /**
  * Generate a ecfp key pair
@@ -1982,13 +2011,13 @@ cx_ecfp_generate_pair(cx_curve_t curve,
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int
-cx_ecfp_generate_pair2(cx_curve_t curve,
-                       cx_ecfp_public_key_t *pubkey
-                           PLENGTH(scc__cx_ecfp_curve_pukey_scc__curve_pubkey),
-                       cx_ecfp_private_key_t *privkey
-                           PLENGTH(scc__cx_ecfp_curve_pvkey_scc__curve_privkey),
-                       int keepprivate, cx_md_t hashID);
+SYSCALL int cx_ecfp_generate_pair2(
+    cx_curve_t curve,
+    cx_ecfp_public_key_t *pubkey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_pubkey_from_curve__curve),
+    cx_ecfp_private_key_t *privkey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_privkey_from_curve__curve),
+    int keepprivate, cx_md_t hashID);
 
 /* ============================ ECSchnorr ================================== */
 /**
@@ -2023,12 +2052,14 @@ cx_ecfp_generate_pair2(cx_curve_t curve,
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecschnorr_sign(
-    cx_ecfp_private_key_t WIDE *pvkey PLENGTH(scc__cx_ecfp_pvkey_scc__pvkey),
-    int mode, cx_md_t hashID, unsigned char WIDE *msg PLENGTH(msg_len),
-    unsigned int msg_len,
-    unsigned char *sig PLENGTH(scc__cx_ecfp_signature_length_scc__pvkey),
-    unsigned int *info);
+SYSCALL int cx_ecschnorr_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
+                                  scc__cx_scc_struct_size_ecfp_privkey__pvkey),
+                              int mode, cx_md_t hashID,
+                              const unsigned char WIDE *msg PLENGTH(msg_len),
+                              unsigned int msg_len,
+                              unsigned char *sig PLENGTH(sig_len),
+                              unsigned int sig_len,
+                              unsigned int *info PLENGTH(sizeof(unsigned int)));
 
 /**
  * Verify a hash message signature according to ECSchnorr specification (BSI TR
@@ -2060,11 +2091,13 @@ SYSCALL int cx_ecschnorr_sign(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecschnorr_verify(
-    cx_ecfp_public_key_t WIDE *pukey PLENGTH(scc__cx_ecfp_pukey_scc__pukey),
-    int mode, cx_md_t hashID, unsigned char WIDE *msg PLENGTH(msg_len),
-    unsigned int msg_len, unsigned char WIDE *sig PLENGTH(sig_len),
-    unsigned int sig_len);
+SYSCALL int cx_ecschnorr_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
+                                    scc__cx_scc_struct_size_ecfp_pubkey__pukey),
+                                int mode, cx_md_t hashID,
+                                const unsigned char WIDE *msg PLENGTH(msg_len),
+                                unsigned int msg_len,
+                                const unsigned char WIDE *sig PLENGTH(sig_len),
+                                unsigned int sig_len);
 
 /* ============================= EdDSA =================================== */
 
@@ -2074,9 +2107,9 @@ SYSCALL int cx_ecschnorr_verify(
  * @param [in]     domain
  * @param [in,out] P
  */
-SYSCALL void cx_edward_compress_point(
-    cx_curve_t curve,
-    unsigned char *P PLENGTH(scc__cx_ecfp_curve_point_scc__curve_P));
+SYSCALL void cx_edward_compress_point(cx_curve_t curve,
+                                      unsigned char *P PLENGTH(P_len),
+                                      unsigned int P_len);
 
 /**
  *  Decompress point according to draft-irtf-cfrg-eddsa-05.
@@ -2084,9 +2117,9 @@ SYSCALL void cx_edward_compress_point(
  * @param [in]     domain
  * @param [in,out] P
  */
-SYSCALL void cx_edward_decompress_point(
-    cx_curve_t curve,
-    unsigned char *P PLENGTH(scc__cx_ecfp_curve_point_scc__curve_P));
+SYSCALL void cx_edward_decompress_point(cx_curve_t curve,
+                                        unsigned char *P PLENGTH(P_len),
+                                        unsigned int P_len);
 
 /**
  *  Retrieve (a,h) = (Kr, Kl), such (Kr, Kl) = Hash(pv_key) as specified in
@@ -2100,7 +2133,7 @@ SYSCALL void cx_edward_decompress_point(
  * supported.
  *
  * @param [out] pu_key
- *   A public ecfp key container for retrieving public key A.
+ *   A public null-inited ecfp key container for retrieving public key A.
  *
  * @param [out] a
  *   private scalar such A = a.B
@@ -2114,10 +2147,12 @@ SYSCALL void cx_edward_decompress_point(
  *
  */
 SYSCALL void cx_eddsa_get_public_key(
-    cx_ecfp_private_key_t WIDE *pvkey PLENGTH(scc__cx_ecfp_pvkey_scc__pvkey),
-    cx_md_t hashID,
-    cx_ecfp_public_key_t *pukey PLENGTH(scc__cx_ecfp_pukey_scc__pukey),
-    unsigned char *a PLENGTH(64), unsigned char *h PLENGTH(64));
+    const cx_ecfp_private_key_t WIDE *pvkey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_privkey__pvkey),
+    cx_md_t hashID, cx_ecfp_public_key_t *pukey PLENGTH(
+                        scc__cx_scc_struct_size_ecfp_pubkey_from_pvkey__pvkey),
+    unsigned char *a PLENGTH(a_len), unsigned int a_len,
+    unsigned char *h PLENGTH(h_len), unsigned int h_len);
 
 /**
  * Sign a hash message according to EdDSA specification RFC8032.
@@ -2160,13 +2195,15 @@ SYSCALL void cx_eddsa_get_public_key(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_eddsa_sign(
-    cx_ecfp_private_key_t WIDE *pvkey PLENGTH(scc__cx_ecfp_pvkey_scc__pvkey),
-    int mode, cx_md_t hashID, unsigned char WIDE *hash PLENGTH(hash_len),
-    unsigned int hash_len, unsigned char WIDE *ctx PLENGTH(ctx_len),
-    unsigned int ctx_len,
-    unsigned char *sig PLENGTH(scc__cx_ecfp_signature_length_scc__pvkey),
-    unsigned int *info);
+SYSCALL int cx_eddsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
+                              scc__cx_scc_struct_size_ecfp_privkey__pvkey),
+                          int mode, cx_md_t hashID,
+                          const unsigned char WIDE *hash PLENGTH(hash_len),
+                          unsigned int hash_len,
+                          const unsigned char WIDE *ctx PLENGTH(ctx_len),
+                          unsigned int ctx_len,
+                          unsigned char *sig PLENGTH(sig_len),
+                          unsigned int sig_len, unsigned int *info);
 
 /**
  * Verify a hash message signature according to EDDSA specification RFC8032.
@@ -2209,12 +2246,15 @@ SYSCALL int cx_eddsa_sign(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_eddsa_verify(
-    cx_ecfp_public_key_t WIDE *key PLENGTH(scc__cx_ecfp_pukey_scc__key),
-    int mode, cx_md_t hashID, unsigned char WIDE *hash PLENGTH(hash_len),
-    unsigned int hash_len, unsigned char WIDE *ctx PLENGTH(ctx_len),
-    unsigned int ctx_len, unsigned char WIDE *sig PLENGTH(sig_len),
-    unsigned int sig_len);
+SYSCALL int cx_eddsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
+                                scc__cx_scc_struct_size_ecfp_pubkey__pukey),
+                            int mode, cx_md_t hashID,
+                            const unsigned char WIDE *hash PLENGTH(hash_len),
+                            unsigned int hash_len,
+                            const unsigned char WIDE *ctx PLENGTH(ctx_len),
+                            unsigned int ctx_len,
+                            const unsigned char WIDE *sig PLENGTH(sig_len),
+                            unsigned int sig_len);
 
 /* ============================= ECDSA =================================== */
 
@@ -2258,12 +2298,14 @@ SYSCALL int cx_eddsa_verify(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecdsa_sign(
-    cx_ecfp_private_key_t WIDE *pvkey PLENGTH(scc__cx_ecfp_pvkey_scc__pvkey),
-    int mode, cx_md_t hashID, unsigned char WIDE *hash PLENGTH(hash_len),
-    unsigned int hash_len,
-    unsigned char *sig PLENGTH(scc__cx_ecfp_signature_length_scc__pvkey),
-    unsigned int *info);
+SYSCALL int cx_ecdsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
+                              scc__cx_scc_struct_size_ecfp_privkey__pvkey),
+                          int mode, cx_md_t hashID,
+                          const unsigned char WIDE *hash PLENGTH(hash_len),
+                          unsigned int hash_len,
+                          unsigned char *sig PLENGTH(sig_len),
+                          unsigned int sig_len,
+                          unsigned int *info PLENGTH(sizeof(unsigned int)));
 
 /**
  * Verify a hash message signature according to ECDSA specification.
@@ -2296,11 +2338,14 @@ SYSCALL int cx_ecdsa_sign(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecdsa_verify(
-    cx_ecfp_public_key_t WIDE *key PLENGTH(scc__cx_ecfp_pukey_scc__key),
-    int mode, cx_md_t hashID, unsigned char WIDE *hash PLENGTH(hash_len),
-    unsigned int hash_len, unsigned char WIDE *sig PLENGTH(sig_len),
-    unsigned int sig_len);
+SYSCALL int cx_ecdsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
+                                scc__cx_scc_struct_size_ecfp_pubkey__pukey),
+                            int mode, cx_md_t hashID,
+                            const unsigned char WIDE *hash PLENGTH(hash_len),
+                            unsigned int hash_len,
+                            const unsigned char WIDE *sig PLENGTH(sig_len),
+                            unsigned int sig_len);
+
 
 /* ======================================================================= */
 /*                                    ECC-KA                               */
@@ -2333,9 +2378,12 @@ SYSCALL int cx_ecdsa_verify(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecdh(cx_ecfp_private_key_t WIDE *key
-                        PLENGTH(scc__cx_ecfp_pvkey_point2_scc__key_P_secret),
-                    int mode, unsigned char WIDE *P, unsigned char *secret);
+SYSCALL int cx_ecdh(const cx_ecfp_private_key_t WIDE *pvkey
+                        PLENGTH(scc__cx_scc_struct_size_ecfp_privkey__pvkey),
+                    int mode, const unsigned char WIDE *P PLENGTH(P_len),
+                    unsigned int P_len,
+                    unsigned char *secret PLENGTH(secret_len),
+                    unsigned int secret_len);
 
 /** @} */ //*cx_ecc */
 
@@ -2361,14 +2409,14 @@ SYSCALL int cx_ecdh(cx_ecfp_private_key_t WIDE *key
  * @return current crc value
  *
  */
-SYSCALL unsigned short cx_crc16(void WIDE *buffer PLENGTH(len),
+SYSCALL unsigned short cx_crc16(const void WIDE *buffer PLENGTH(len),
                                 unsigned int len);
 
 #define CX_CRC16_INIT 0xFFFF
 
 /** Accumulate more data to crc */
 SYSCALL unsigned short cx_crc16_update(unsigned short crc,
-                                       void WIDE *buffer PLENGTH(len),
+                                       const void WIDE *buffer PLENGTH(len),
                                        unsigned int len);
 
 /** @} */
@@ -2390,8 +2438,9 @@ SYSCALL unsigned short cx_crc16_update(unsigned short crc,
  *
  * @return 0 if a==b,  negative value if a<b, positive value if a>b
  */
-SYSCALL int cx_math_cmp(unsigned char WIDE *a PLENGTH(len),
-                        unsigned char WIDE *b PLENGTH(len), unsigned int len);
+SYSCALL int cx_math_cmp(const unsigned char WIDE *a PLENGTH(len),
+                        const unsigned char WIDE *b PLENGTH(len),
+                        unsigned int len);
 
 /**
  * Compare to unsigned long big-endian integer to zero
@@ -2401,7 +2450,7 @@ SYSCALL int cx_math_cmp(unsigned char WIDE *a PLENGTH(len),
  *
  * @return 1 if a==0,  0 else
  */
-SYSCALL int cx_math_is_zero(unsigned char WIDE *a PLENGTH(len),
+SYSCALL int cx_math_is_zero(const unsigned char WIDE *a PLENGTH(len),
                             unsigned int len);
 
 /**
@@ -2416,8 +2465,9 @@ SYSCALL int cx_math_is_zero(unsigned char WIDE *a PLENGTH(len),
  * @return carry
  */
 SYSCALL int cx_math_add(unsigned char *r PLENGTH(len),
-                        unsigned char WIDE *a PLENGTH(len),
-                        unsigned char WIDE *b PLENGTH(len), unsigned int len);
+                        const unsigned char WIDE *a PLENGTH(len),
+                        const unsigned char WIDE *b PLENGTH(len),
+                        unsigned int len);
 
 /**
  * Subtraction of two big integer: r = a-b
@@ -2431,8 +2481,9 @@ SYSCALL int cx_math_add(unsigned char *r PLENGTH(len),
  * @return borrow
  */
 SYSCALL int cx_math_sub(unsigned char *r PLENGTH(len),
-                        unsigned char WIDE *a PLENGTH(len),
-                        unsigned char WIDE *b PLENGTH(len), unsigned int len);
+                        const unsigned char WIDE *a PLENGTH(len),
+                        const unsigned char WIDE *b PLENGTH(len),
+                        unsigned int len);
 
 /**
  * Subtraction of two big integer: r = a-b
@@ -2444,8 +2495,9 @@ SYSCALL int cx_math_sub(unsigned char *r PLENGTH(len),
  *
  */
 SYSCALL void cx_math_mult(unsigned char *r PLENGTH(2 * len),
-                          unsigned char WIDE *a PLENGTH(len),
-                          unsigned char WIDE *b PLENGTH(len), unsigned int len);
+                          const unsigned char WIDE *a PLENGTH(len),
+                          const unsigned char WIDE *b PLENGTH(len),
+                          unsigned int len);
 
 /**
  * Modular addition of two big integer: r = a+b mod m
@@ -2458,9 +2510,10 @@ SYSCALL void cx_math_mult(unsigned char *r PLENGTH(2 * len),
  *
  */
 SYSCALL void cx_math_addm(unsigned char *r PLENGTH(len),
-                          unsigned char WIDE *a PLENGTH(len),
-                          unsigned char WIDE *b PLENGTH(len),
-                          unsigned char WIDE *m PLENGTH(len), unsigned int len);
+                          const unsigned char WIDE *a PLENGTH(len),
+                          const unsigned char WIDE *b PLENGTH(len),
+                          const unsigned char WIDE *m PLENGTH(len),
+                          unsigned int len);
 /**
  * Modular subtraction of tow big integer: r = a-b mod m
  *
@@ -2472,9 +2525,10 @@ SYSCALL void cx_math_addm(unsigned char *r PLENGTH(len),
  *
  */
 SYSCALL void cx_math_subm(unsigned char *r PLENGTH(len),
-                          unsigned char WIDE *a PLENGTH(len),
-                          unsigned char WIDE *b PLENGTH(len),
-                          unsigned char WIDE *m PLENGTH(len), unsigned int len);
+                          const unsigned char WIDE *a PLENGTH(len),
+                          const unsigned char WIDE *b PLENGTH(len),
+                          const unsigned char WIDE *m PLENGTH(len),
+                          unsigned int len);
 /**
  * Modular multiplication of tow big integer: r = a*b mod m
  *
@@ -2486,9 +2540,9 @@ SYSCALL void cx_math_subm(unsigned char *r PLENGTH(len),
  *
  */
 SYSCALL void cx_math_multm(unsigned char *r PLENGTH(len),
-                           unsigned char WIDE *a PLENGTH(len),
-                           unsigned char WIDE *b PLENGTH(len),
-                           unsigned char WIDE *m PLENGTH(len),
+                           const unsigned char WIDE *a PLENGTH(len),
+                           const unsigned char WIDE *b PLENGTH(len),
+                           const unsigned char WIDE *m PLENGTH(len),
                            unsigned int len);
 
 /**
@@ -2502,11 +2556,10 @@ SYSCALL void cx_math_multm(unsigned char *r PLENGTH(len),
  * @param len   byte length of r, a, b, m
  *
  */
-SYSCALL void cx_math_powm(unsigned char *r PLENGTH(len),
-                          unsigned char *a PLENGTH(len),
-                          unsigned char WIDE *e PLENGTH(len_e),
-                          unsigned int len_e,
-                          unsigned char WIDE *m PLENGTH(len), unsigned int len);
+SYSCALL void
+cx_math_powm(unsigned char *r PLENGTH(len), const unsigned char *a PLENGTH(len),
+             const unsigned char WIDE *e PLENGTH(len_e), unsigned int len_e,
+             const unsigned char WIDE *m PLENGTH(len), unsigned int len);
 
 /**
  * Reduce in place (left zero padded) the given value: v = v mod m
@@ -2518,7 +2571,7 @@ SYSCALL void cx_math_powm(unsigned char *r PLENGTH(len),
  *
  */
 SYSCALL void cx_math_modm(unsigned char *v PLENGTH(len_v), unsigned int len_v,
-                          unsigned char WIDE *m PLENGTH(len_m),
+                          const unsigned char WIDE *m PLENGTH(len_m),
                           unsigned int len_m);
 
 /**
@@ -2531,8 +2584,8 @@ SYSCALL void cx_math_modm(unsigned char *v PLENGTH(len_v), unsigned int len_v,
  *
  */
 SYSCALL void cx_math_invprimem(unsigned char *r PLENGTH(len),
-                               unsigned char *a PLENGTH(len),
-                               unsigned char WIDE *m PLENGTH(len),
+                               const unsigned char *a PLENGTH(len),
+                               const unsigned char WIDE *m PLENGTH(len),
                                unsigned int len);
 
 /**
@@ -2545,7 +2598,7 @@ SYSCALL void cx_math_invprimem(unsigned char *r PLENGTH(len),
  *
  */
 SYSCALL void cx_math_invintm(unsigned char *r PLENGTH(len), unsigned long int a,
-                             unsigned char WIDE *m PLENGTH(len),
+                             const unsigned char WIDE *m PLENGTH(len),
                              unsigned int len);
 
 /**
@@ -2554,7 +2607,8 @@ SYSCALL void cx_math_invintm(unsigned char *r PLENGTH(len), unsigned long int a,
  * @param p     value to test
  * @param len   length p
  */
-SYSCALL int cx_math_is_prime(unsigned char *p PLENGTH(len), unsigned int len);
+SYSCALL int cx_math_is_prime(const unsigned char *p PLENGTH(len),
+                             unsigned int len);
 
 /**
  * Find in place the next prime number follwing n
@@ -2576,4 +2630,6 @@ SYSCALL void cx_math_next_prime(unsigned char *n PLENGTH(len),
  */
 int cx_selftest(void);
 
+
 #endif // CX_H
+#include "cx_compliance_141.h"

@@ -330,18 +330,6 @@ extern ux_state_t ux;
     ux.params.len = os_ux(&ux.params);                                         \
     ux_check_status(ux.params.len);
 
-#if 0
-/** 
- * Macro that request for an extension of the power off delay (not preventing the autolock feature).
- * Care shall be taken when called after a repetitive event. It is advised to call this after a 
- * successfull io exchange.
- */
-#define IO_APP_ACTIVITY()                                                      \
-    ux.params.ux_id = BOLOS_UX_APP_ACTIVITY;                                   \
-    ux.params.len = 0;                                                         \
-    ux.params.len = os_ux(&ux.params);                                         \
-    ux_check_status(ux.params.len);
-#endif
 
 /**
  * Force redisplay of the screen from the given index in the screen's element
@@ -359,15 +347,14 @@ extern ux_state_t ux;
 /**
  * Redisplay all elements of the screen
  */
-#define UX_REDISPLAY()                                                         \
-    UX_WAKE_UP();                                                              \
-    UX_REDISPLAY_IDX(0)
+#define UX_REDISPLAY() UX_REDISPLAY_IDX(0)
 
 #define UX_DISPLAY(elements_array, preprocessor)                               \
     ux.elements = elements_array;                                              \
     ux.elements_count = sizeof(elements_array) / sizeof(elements_array[0]);    \
     ux.button_push_handler = elements_array##_button;                          \
     ux.elements_preprocessor = preprocessor;                                   \
+    UX_WAKE_UP();                                                              \
     UX_REDISPLAY();
 
 /**

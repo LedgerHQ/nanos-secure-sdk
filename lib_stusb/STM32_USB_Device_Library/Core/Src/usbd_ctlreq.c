@@ -109,6 +109,9 @@ uint8_t USBD_GetLen(uint8_t *buf);
   * @{
   */ 
 
+unsigned int usbd_is_valid_intf(USBD_HandleTypeDef *pdev , unsigned int intf) {
+  return intf < USBD_MAX_NUM_INTERFACES && pdev->interfacesClass[intf].pClass != NULL;
+}
 
 /**
 * @brief  USBD_StdDevReq
@@ -176,7 +179,7 @@ USBD_StatusTypeDef  USBD_StdItfReq (USBD_HandleTypeDef *pdev , USBD_SetupReqType
   {
   case USBD_STATE_CONFIGURED:
     
-    if (LOBYTE(req->wIndex) < USBD_MAX_NUM_INTERFACES) 
+    if (usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) 
     {
       ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);
       
@@ -214,7 +217,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
   ep_addr  = LOBYTE(req->wIndex);   
   
   /* Check if it is a class request */
-  if ((req->bmRequest & 0x60) == 0x20)
+  if ((req->bmRequest & 0x60) == 0x20 && usbd_is_valid_intf(pdev, LOBYTE(req->wIndex)))
   {
     ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);
     
@@ -244,9 +247,10 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
           
         }
       }
-      ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
+      if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
+        ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
+      }
       USBD_CtlSendStatus(pdev);
-      
       break;
       
     default:                         
@@ -272,7 +276,9 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
         if ((ep_addr & 0x7F) != 0x00) 
         {        
           USBD_LL_ClearStallEP(pdev , ep_addr);
-          ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);
+          if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
+            ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);
+          }
         }
         USBD_CtlSendStatus(pdev);
       }
@@ -348,15 +354,17 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     break;
     
   case USB_DESC_TYPE_CONFIGURATION:     
-    if(pdev->dev_speed == USBD_SPEED_HIGH )   
-    {
-      pbuf   = (uint8_t *)((GetHSConfigDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetHSConfigDescriptor))(&len);
-      //pbuf[1] = USB_DESC_TYPE_CONFIGURATION; CONST BUFFER KTHX
-    }
-    else
-    {
-      pbuf   = (uint8_t *)((GetFSConfigDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetFSConfigDescriptor))(&len);
-      //pbuf[1] = USB_DESC_TYPE_CONFIGURATION; CONST BUFFER KTHX
+    if(pdev->interfacesClass[0].pClass != NULL) {
+      if(pdev->dev_speed == USBD_SPEED_HIGH )   
+      {
+        pbuf   = (uint8_t *)((GetHSConfigDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetHSConfigDescriptor))(&len);
+        //pbuf[1] = USB_DESC_TYPE_CONFIGURATION; CONST BUFFER KTHX
+      }
+      else
+      {
+        pbuf   = (uint8_t *)((GetFSConfigDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetFSConfigDescriptor))(&len);
+        //pbuf[1] = USB_DESC_TYPE_CONFIGURATION; CONST BUFFER KTHX
+      }
     }
     break;
     
@@ -389,7 +397,9 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
       
     default:
 #if (USBD_SUPPORT_USER_STRING == 1)
-      pbuf = ((GetUsrStrDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetUsrStrDescriptor))(pdev, (req->wValue) , &len);
+      if(pdev->interfacesClass[0].pClass != NULL) {
+        pbuf = ((GetUsrStrDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetUsrStrDescriptor))(pdev, (req->wValue) , &len);
+      }
       break;
 #else      
        USBD_CtlError(pdev , req);
@@ -399,7 +409,7 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     break;
   case USB_DESC_TYPE_DEVICE_QUALIFIER:                   
 
-    if(pdev->dev_speed == USBD_SPEED_HIGH  )   
+    if(pdev->dev_speed == USBD_SPEED_HIGH && pdev->interfacesClass[0].pClass != NULL )   
     {
       pbuf   = (uint8_t *)((GetDeviceQualifierDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetDeviceQualifierDescriptor))(&len);
       break;
@@ -411,7 +421,7 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     } 
 
   case USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION:
-    if(pdev->dev_speed == USBD_SPEED_HIGH  )   
+    if(pdev->dev_speed == USBD_SPEED_HIGH && pdev->interfacesClass[0].pClass != NULL)   
     {
       pbuf   = (uint8_t *)((GetOtherSpeedConfigDescriptor_t)PIC(pdev->interfacesClass[0].pClass->GetOtherSpeedConfigDescriptor))(&len);
       // pbuf[1] = USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION; CONST BUFFER KTHX
@@ -647,7 +657,9 @@ void USBD_SetFeature(USBD_HandleTypeDef *pdev ,
   if (req->wValue == USB_FEATURE_REMOTE_WAKEUP)
   {
     pdev->dev_remote_wakeup = 1;  
-    ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
+    if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
+      ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
+    }
     USBD_CtlSendStatus(pdev);
   }
 
@@ -671,7 +683,9 @@ void USBD_ClrFeature(USBD_HandleTypeDef *pdev ,
     if (req->wValue == USB_FEATURE_REMOTE_WAKEUP) 
     {
       pdev->dev_remote_wakeup = 0; 
-      ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
+      if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
+        ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
+      }
       USBD_CtlSendStatus(pdev);
     }
     break;
@@ -707,13 +721,16 @@ void USBD_ParseSetupRequest(USBD_SetupReqTypedef *req, uint8_t *pdata)
 * @param  req: usb request
 * @retval None
 */
-
-void USBD_CtlError( USBD_HandleTypeDef *pdev ,
-                            USBD_SetupReqTypedef *req)
+void USBD_CtlStall( USBD_HandleTypeDef *pdev)
 {
-  UNUSED(req);
   USBD_LL_StallEP(pdev , 0x80);
   USBD_LL_StallEP(pdev , 0);
+}
+
+__weak void USBD_CtlError( USBD_HandleTypeDef *pdev ,
+                            USBD_SetupReqTypedef *req)
+{
+  USBD_CtlStall(pdev);
 }
 
 

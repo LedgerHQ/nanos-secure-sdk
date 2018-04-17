@@ -97,6 +97,7 @@ int setjmp(jmp_buf __jmpb);
 
 #define UNUSED(x) (void)x
 
+
 #include "os_apilevel.h"
 
 #ifndef NULL
@@ -387,20 +388,18 @@ void nvm_write_page(unsigned char WIDE *page_adr);
     {                                                                          \
         try_context_t __try##L;
 
-// -----------------------------------------------------------------------
-// - TRY
-// -----------------------------------------------------------------------
 try_context_t *try_context_get(void);
 try_context_t *try_context_get_previous(void);
 void try_context_set(try_context_t *context);
+
+// -----------------------------------------------------------------------
+// - TRY
+// -----------------------------------------------------------------------
 #define TRY_L(L)                                                               \
-    /*__try ## L.previous = try_context_get();*/                               \
+    /* previous exception context chain is saved within the setjmp r9 save */  \
     __try                                                                      \
         ##L.ex = setjmp(__try##L.jmp_buf);                                     \
     if (__try##L.ex == 0) {                                                    \
-        __try                                                                  \
-            ##L.ex =                                                           \
-                1; /* need to perform the previous ctx restore on finally */   \
         try_context_set(&__try##L);
 
 // -----------------------------------------------------------------------
@@ -411,8 +410,7 @@ void try_context_set(try_context_t *context);
     }                                                                          \
     else if (__try##L.ex == x) {                                               \
         __try                                                                  \
-            ##L.ex = 0;                                                        \
-/*try_context_set(__try ## L.previous);*/
+            ##L.ex = 0;
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH OTHER
@@ -424,8 +422,7 @@ void try_context_set(try_context_t *context);
         exception_t e;                                                         \
         e = __try##L.ex;                                                       \
         __try                                                                  \
-            ##L.ex = 0;                                                        \
-/*try_context_set(__try ## L.previous);*/
+            ##L.ex = 0;
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH ALL
@@ -435,8 +432,7 @@ void try_context_set(try_context_t *context);
     }                                                                          \
     else {                                                                     \
         __try                                                                  \
-            ##L.ex = 0;                                                        \
-/*try_context_set(__try ## L.previous);*/
+            ##L.ex = 0;
 
 // -----------------------------------------------------------------------
 // - FINALLY
@@ -444,7 +440,10 @@ void try_context_set(try_context_t *context);
 #define FINALLY_L(L)                                                           \
     goto CPP_CONCAT(__FINALLY, L);                                             \
     }                                                                          \
-    CPP_CONCAT(__FINALLY, L) : if (__try##L.ex) {                              \
+    CPP_CONCAT(__FINALLY, L)                                                   \
+        : /* has TRY clause ended without nested throw ? */                    \
+          if (try_context_get() == &__try##L) {                                \
+        /* restore previous context manually (as a throw would have) */        \
         try_context_set(try_context_get_previous());                           \
     }
 
@@ -452,7 +451,11 @@ void try_context_set(try_context_t *context);
 // - END TRY
 // -----------------------------------------------------------------------
 #define END_TRY_L(L)                                                           \
-    /*if (__try ## L.ex != 0) { THROW_L(L, __try ## L.ex); }*/                 \
+    /* nested throw not consumed ? (by CATCH* clause) */                       \
+    if (__try##L.ex != 0) {                                                    \
+        /* rethrow */                                                          \
+        THROW_L(L, __try##L.ex);                                               \
+    }                                                                          \
     }
 
 // -----------------------------------------------------------------------
@@ -788,11 +791,21 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 // unprivilegied
 SYSCALL unsigned int os_perso_isonboarded(void);
 
-// derive the user top node on the given BIP32 path
+
+// derive the seed for the requested BIP32 path
 SYSCALL void os_perso_derive_node_bip32(
     cx_curve_t curve, const unsigned int *path PLENGTH(4 * pathLength),
     unsigned int pathLength, unsigned char *privateKey PLENGTH(32),
     unsigned char *chain PLENGTH(32));
+// derive the seed for the requested BIP32 path, with the custom provided
+// seed_key for the sha512 hmac ("Bitcoin Seed", "Nist256p1 Seed", "ed25519
+// seed", ...)
+SYSCALL void os_perso_derive_node_bip32_seed_key(
+    cx_curve_t curve, const unsigned int *path PLENGTH(4 * pathLength),
+    unsigned int pathLength, unsigned char *privateKey PLENGTH(32),
+    unsigned char *chain PLENGTH(32),
+    unsigned char *seed_key PLENGTH(seed_key_length),
+    unsigned int seed_key_length);
 
 // endorsement APIs
 SYSCALL unsigned int
@@ -934,7 +947,9 @@ typedef enum os_setting_e {
     OS_SETTING_BRIGHTNESS,
     OS_SETTING_INVERT,
     OS_SETTING_ROTATION,
-    OS_SETTING_SHUFFLE_PIN,
+#ifdef HAVE_BOLOS_NOT_SHUFFLED_PIN
+    OS_SETTING_NOSHUFFLE_PIN,
+#endif // HAVE_BOLOS_NOT_SHUFFLED_PIN
     OS_SETTING_AUTO_LOCK_DELAY,
     OS_SETTING_POWER_OFF_DELAY,
 

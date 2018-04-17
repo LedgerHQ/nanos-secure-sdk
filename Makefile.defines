@@ -27,10 +27,6 @@ endif
 COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize `cat debug/app.map |grep _nvram_data_size | tr -s ' ' | cut -f2 -d' '` `ICONHEX=\`python $(BOLOS_SDK)/icon.py $(ICONNAME) hexbitmaponly 2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
 COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
 
-ifndef SCRIPT_LD
-    SCRIPT_LD:=$(BOLOS_SDK)/script.ld
-endif
-
 ### platform definitions
 DEFINES += ST31 gcc __IO=volatile
 
@@ -58,4 +54,21 @@ LDFLAGS  += -Wall
 LDFLAGS  += -mcpu=cortex-m0 -mthumb 
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program -nostartfiles 
 LDFLAGS  += -mno-unaligned-access
+ifndef SCRIPT_LD
+  SCRIPT_LD:=$(BOLOS_SDK)/script.ld
+endif
 LDFLAGS  += -T$(SCRIPT_LD)  -Wl,--gc-sections -Wl,-Map,debug/app.map,--cref
+
+ifneq ($(BOLOS_ENV),)
+$(info BOLOS_ENV=$(BOLOS_ENV))
+CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
+GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
+else
+$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
+endif
+ifeq ($(CLANGPATH),)
+$(info CLANGPATH is not set: clang will be used from PATH)
+endif
+ifeq ($(GCCPATH),)
+$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
+endif

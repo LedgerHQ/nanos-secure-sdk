@@ -24,6 +24,9 @@ unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
 void os_boot(void) {
   // TODO patch entry point when romming (f)
+
+  // set the default try context to nothing
+  try_context_set(NULL);
 }
 
 #ifdef HAVE_USB_APDU

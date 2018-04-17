@@ -904,10 +904,17 @@ void io_seproxyhal_button_push(button_push_callback_t button_callback, unsigned 
       if ((button_same_mask_counter%BUTTON_FAST_ACTION_CS) == 0) {
         button_mask |= BUTTON_EVT_FAST;
       }
+
+      /*
       // fast bit when releasing and threshold has been exceeded
       if ((button_mask & BUTTON_EVT_RELEASED)) {
         button_mask |= BUTTON_EVT_FAST;
       }
+      */
+
+      // discard the release event after a fastskip has been detected, to avoid strange at release behavior
+      // and also to enable user to cancel an operation by starting triggering the fast skip
+      button_mask &= ~BUTTON_EVT_RELEASED;
     }
 
     // indicate if button have been released
@@ -1603,5 +1610,30 @@ void ux_check_status_default(unsigned int status) {
 }
 
 void ux_check_status(unsigned int status) __attribute__ ((weak, alias ("ux_check_status_default")));
+
+const bagl_element_t const clear_element = {{BAGL_RECTANGLE, 0, 0, 0, 128, 32, 0, 0, 0, 0x000000, 0x000000, 0 , 0},NULL,0,0,0,NULL,NULL,NULL};
+const bagl_element_t const printf_element = {{BAGL_LABELINE, 0, 0, 26, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER |BAGL_FONT_ALIGNMENT_MIDDLE , 0},"Default printf",0,0,0,NULL,NULL,NULL};
+
+void debug_wait_displayed(void) {
+  // wait up the display processed
+  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+  io_seproxyhal_general_status();
+  // wait next event (probably a ticker, if not, too bad... this is debug !!)
+  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);  
+}
+
+void debug_printf(void* buffer) {
+  io_seproxyhal_display_default(&clear_element);
+  debug_wait_displayed();
+  os_memmove(&ux_menu.tmp_element, &printf_element, sizeof(bagl_element_t));
+  ux_menu.tmp_element.text = buffer;
+  io_seproxyhal_display_default(&ux_menu.tmp_element);
+  debug_wait_displayed();
+}
+#ifdef HAVE_DEBUG
+#define L(x) debug_printf(x)
+#else // HAVE_DEBUG
+#define L(x)
+#endif // HAVE_DEBUG
 
 #endif // OS_IO_SEPROXYHAL

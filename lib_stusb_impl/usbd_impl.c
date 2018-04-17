@@ -115,12 +115,6 @@
   * @{
   */ 
 
-#define HID_EPIN_ADDR                 0x82
-#define HID_EPIN_SIZE                 0x40
-
-#define HID_EPOUT_ADDR                0x02
-#define HID_EPOUT_SIZE                0x40
-
 #define USBD_LANGID_STRING            0x409
 
 #ifdef HAVE_VID_PID_PROBER
@@ -322,7 +316,7 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
 #ifdef HAVE_IO_U2F
   /* HID FIDO ################################################################################################ */
 
-  /************** Descriptor of KBD HID interface ****************/
+  /************** Descriptor of HID FIDO interface ****************/
   0x09,         /*bLength: Interface Descriptor size*/
   USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
   U2F_INTF,         /*bInterfaceNumber: Number of Interface*/

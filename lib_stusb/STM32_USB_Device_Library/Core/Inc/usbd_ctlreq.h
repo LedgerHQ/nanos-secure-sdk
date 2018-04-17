@@ -86,7 +86,11 @@ USBD_StatusTypeDef  USBD_StdItfReq (USBD_HandleTypeDef  *pdev, USBD_SetupReqType
 USBD_StatusTypeDef  USBD_StdEPReq  (USBD_HandleTypeDef  *pdev, USBD_SetupReqTypedef  *req);
 
 
+unsigned int usbd_is_valid_intf(USBD_HandleTypeDef *pdev , unsigned int intf);
+
+// weak version to be overloaded
 void USBD_CtlError  (USBD_HandleTypeDef  *pdev, USBD_SetupReqTypedef *req);
+void USBD_CtlStall( USBD_HandleTypeDef *pdev);
 
 void USBD_ParseSetupRequest (USBD_SetupReqTypedef *req, uint8_t *pdata);
 

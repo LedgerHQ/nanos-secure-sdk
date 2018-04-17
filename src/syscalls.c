@@ -16,6 +16,7 @@
 ********************************************************************************/
 
   /* MACHINE GENERATED: DO NOT MODIFY */
+  #define SYSCALL_STUB
   #include "os.h"
   #include "syscalls.h"
 
@@ -96,23 +97,44 @@ unsigned char * cx_rng ( unsigned char * buffer, unsigned int len )
   return (unsigned char *)ret;
 }
 
-int cx_rng_rfc6979 ( unsigned char * rnd, unsigned int hashID, unsigned char * h1, unsigned char * x, unsigned int x_len, unsigned char * q, unsigned int q_len, unsigned char * V, unsigned int V_len ) 
+int cx_rng_rfc6979 ( unsigned char * rnd, unsigned int rnd_len, unsigned int hashID, const unsigned char * h1, unsigned int h1_len, const unsigned char * x, unsigned int x_len, const unsigned char * q, unsigned int q_len, unsigned char * V, unsigned int V_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+9];
+  unsigned int parameters [0+11];
   parameters[0] = (unsigned int)rnd;
-  parameters[1] = (unsigned int)hashID;
-  parameters[2] = (unsigned int)h1;
-  parameters[3] = (unsigned int)x;
-  parameters[4] = (unsigned int)x_len;
-  parameters[5] = (unsigned int)q;
-  parameters[6] = (unsigned int)q_len;
-  parameters[7] = (unsigned int)V;
-  parameters[8] = (unsigned int)V_len;
+  parameters[1] = (unsigned int)rnd_len;
+  parameters[2] = (unsigned int)hashID;
+  parameters[3] = (unsigned int)h1;
+  parameters[4] = (unsigned int)h1_len;
+  parameters[5] = (unsigned int)x;
+  parameters[6] = (unsigned int)x_len;
+  parameters[7] = (unsigned int)q;
+  parameters[8] = (unsigned int)q_len;
+  parameters[9] = (unsigned int)V;
+  parameters[10] = (unsigned int)V_len;
   retid = SVC_Call(SYSCALL_cx_rng_rfc6979_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_rng_rfc6979_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+int cx_hash ( cx_hash_t * hash, int mode, const unsigned char * in, unsigned int len, unsigned char * out, unsigned int out_len ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+6];
+  parameters[0] = (unsigned int)hash;
+  parameters[1] = (unsigned int)mode;
+  parameters[2] = (unsigned int)in;
+  parameters[3] = (unsigned int)len;
+  parameters[4] = (unsigned int)out;
+  parameters[5] = (unsigned int)out_len;
+  retid = SVC_Call(SYSCALL_cx_hash_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_cx_hash_ID_OUT) {
     THROW(EXCEPTION_SECURITY);
   }
   return (int)ret;
@@ -160,6 +182,23 @@ int cx_sha256_init ( cx_sha256_t * hash )
   return (int)ret;
 }
 
+int cx_hash_sha256 ( const unsigned char * in, unsigned int len, unsigned char * out, unsigned int out_len ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+4];
+  parameters[0] = (unsigned int)in;
+  parameters[1] = (unsigned int)len;
+  parameters[2] = (unsigned int)out;
+  parameters[3] = (unsigned int)out_len;
+  retid = SVC_Call(SYSCALL_cx_hash_sha256_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_cx_hash_sha256_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
 int cx_sha384_init ( cx_sha512_t * hash ) 
 {
   unsigned int ret;
@@ -188,7 +227,24 @@ int cx_sha512_init ( cx_sha512_t * hash )
   return (int)ret;
 }
 
-int cx_sha3_init ( cx_sha3_t * hash, int size ) 
+int cx_hash_sha512 ( const unsigned char * in, unsigned int len, unsigned char * out, unsigned int out_len ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+4];
+  parameters[0] = (unsigned int)in;
+  parameters[1] = (unsigned int)len;
+  parameters[2] = (unsigned int)out;
+  parameters[3] = (unsigned int)out_len;
+  retid = SVC_Call(SYSCALL_cx_hash_sha512_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_cx_hash_sha512_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+int cx_sha3_init ( cx_sha3_t * hash, unsigned int size ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -203,7 +259,7 @@ int cx_sha3_init ( cx_sha3_t * hash, int size )
   return (int)ret;
 }
 
-int cx_keccak_init ( cx_sha3_t * hash, int size ) 
+int cx_keccak_init ( cx_sha3_t * hash, unsigned int size ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -234,57 +290,7 @@ int cx_sha3_xof_init ( cx_sha3_t * hash, unsigned int size, unsigned int out_len
   return (int)ret;
 }
 
-int cx_hash ( cx_hash_t * hash, int mode, unsigned char * in, unsigned int len, unsigned char * out ) 
-{
-  unsigned int ret;
-  unsigned int retid;
-  unsigned int parameters [0+5];
-  parameters[0] = (unsigned int)hash;
-  parameters[1] = (unsigned int)mode;
-  parameters[2] = (unsigned int)in;
-  parameters[3] = (unsigned int)len;
-  parameters[4] = (unsigned int)out;
-  retid = SVC_Call(SYSCALL_cx_hash_ID_IN, parameters);
-  asm volatile("str r1, %0":"=m"(ret)::"r1");
-  if (retid != SYSCALL_cx_hash_ID_OUT) {
-    THROW(EXCEPTION_SECURITY);
-  }
-  return (int)ret;
-}
-
-int cx_hash_sha256 ( unsigned char * in, unsigned int len, unsigned char * out ) 
-{
-  unsigned int ret;
-  unsigned int retid;
-  unsigned int parameters [0+3];
-  parameters[0] = (unsigned int)in;
-  parameters[1] = (unsigned int)len;
-  parameters[2] = (unsigned int)out;
-  retid = SVC_Call(SYSCALL_cx_hash_sha256_ID_IN, parameters);
-  asm volatile("str r1, %0":"=m"(ret)::"r1");
-  if (retid != SYSCALL_cx_hash_sha256_ID_OUT) {
-    THROW(EXCEPTION_SECURITY);
-  }
-  return (int)ret;
-}
-
-int cx_hash_sha512 ( unsigned char * in, unsigned int len, unsigned char * out ) 
-{
-  unsigned int ret;
-  unsigned int retid;
-  unsigned int parameters [0+3];
-  parameters[0] = (unsigned int)in;
-  parameters[1] = (unsigned int)len;
-  parameters[2] = (unsigned int)out;
-  retid = SVC_Call(SYSCALL_cx_hash_sha512_ID_IN, parameters);
-  asm volatile("str r1, %0":"=m"(ret)::"r1");
-  if (retid != SYSCALL_cx_hash_sha512_ID_OUT) {
-    THROW(EXCEPTION_SECURITY);
-  }
-  return (int)ret;
-}
-
-int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, unsigned char * key, unsigned int key_len ) 
+int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const unsigned char * key, unsigned int key_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -300,7 +306,7 @@ int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, unsigned char * key, un
   return (int)ret;
 }
 
-int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, unsigned char * key, unsigned int key_len ) 
+int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, const unsigned char * key, unsigned int key_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -316,7 +322,7 @@ int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, unsigned char * key, unsigned
   return (int)ret;
 }
 
-int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, unsigned char * key, unsigned int key_len ) 
+int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, const unsigned char * key, unsigned int key_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -332,16 +338,17 @@ int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, unsigned char * key, unsigned
   return (int)ret;
 }
 
-int cx_hmac ( cx_hmac_t * hmac, int mode, unsigned char * in, unsigned int len, unsigned char * mac ) 
+int cx_hmac ( cx_hmac_t * hmac, int mode, const unsigned char * in, unsigned int len, unsigned char * mac, unsigned int mac_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+6];
   parameters[0] = (unsigned int)hmac;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)in;
   parameters[3] = (unsigned int)len;
   parameters[4] = (unsigned int)mac;
+  parameters[5] = (unsigned int)mac_len;
   retid = SVC_Call(SYSCALL_cx_hmac_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_hmac_ID_OUT) {
@@ -350,16 +357,17 @@ int cx_hmac ( cx_hmac_t * hmac, int mode, unsigned char * in, unsigned int len, 
   return (int)ret;
 }
 
-int cx_hmac_sha512 ( unsigned char * key, unsigned int key_len, unsigned char * in, unsigned int len, unsigned char * out ) 
+int cx_hmac_sha512 ( const unsigned char * key, unsigned int key_len, const unsigned char * in, unsigned int len, unsigned char * mac, unsigned int mac_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+6];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)key_len;
   parameters[2] = (unsigned int)in;
   parameters[3] = (unsigned int)len;
-  parameters[4] = (unsigned int)out;
+  parameters[4] = (unsigned int)mac;
+  parameters[5] = (unsigned int)mac_len;
   retid = SVC_Call(SYSCALL_cx_hmac_sha512_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_hmac_sha512_ID_OUT) {
@@ -368,16 +376,17 @@ int cx_hmac_sha512 ( unsigned char * key, unsigned int key_len, unsigned char * 
   return (int)ret;
 }
 
-int cx_hmac_sha256 ( unsigned char * key, unsigned int key_len, unsigned char * in, unsigned int len, unsigned char * out ) 
+int cx_hmac_sha256 ( const unsigned char * key, unsigned int key_len, const unsigned char * in, unsigned int len, unsigned char * mac, unsigned int mac_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+6];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)key_len;
   parameters[2] = (unsigned int)in;
   parameters[3] = (unsigned int)len;
-  parameters[4] = (unsigned int)out;
+  parameters[4] = (unsigned int)mac;
+  parameters[5] = (unsigned int)mac_len;
   retid = SVC_Call(SYSCALL_cx_hmac_sha256_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_hmac_sha256_ID_OUT) {
@@ -386,7 +395,7 @@ int cx_hmac_sha256 ( unsigned char * key, unsigned int key_len, unsigned char * 
   return (int)ret;
 }
 
-void cx_pbkdf2_sha512 ( unsigned char * password, unsigned short passwordlen, unsigned char * salt, unsigned short saltlen, unsigned int iterations, unsigned char * out, unsigned int outLength ) 
+void cx_pbkdf2_sha512 ( const unsigned char * password, unsigned short passwordlen, unsigned char * salt, unsigned short saltlen, unsigned int iterations, unsigned char * out, unsigned int outLength ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -405,7 +414,7 @@ void cx_pbkdf2_sha512 ( unsigned char * password, unsigned short passwordlen, un
   }
 }
 
-int cx_des_init_key ( unsigned char * rawkey, unsigned int key_len, cx_des_key_t * key ) 
+int cx_des_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_des_key_t * key ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -421,17 +430,19 @@ int cx_des_init_key ( unsigned char * rawkey, unsigned int key_len, cx_des_key_t
   return (int)ret;
 }
 
-int cx_des_iv ( cx_des_key_t * key, int mode, unsigned char * iv, unsigned char * in, unsigned int len, unsigned char * out ) 
+int cx_des_iv ( const cx_des_key_t * key, int mode, const unsigned char * iv, unsigned int iv_len, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+6];
+  unsigned int parameters [0+8];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)iv;
-  parameters[3] = (unsigned int)in;
-  parameters[4] = (unsigned int)len;
-  parameters[5] = (unsigned int)out;
+  parameters[3] = (unsigned int)iv_len;
+  parameters[4] = (unsigned int)in;
+  parameters[5] = (unsigned int)in_len;
+  parameters[6] = (unsigned int)out;
+  parameters[7] = (unsigned int)out_len;
   retid = SVC_Call(SYSCALL_cx_des_iv_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_des_iv_ID_OUT) {
@@ -440,16 +451,17 @@ int cx_des_iv ( cx_des_key_t * key, int mode, unsigned char * iv, unsigned char 
   return (int)ret;
 }
 
-int cx_des ( cx_des_key_t * key, int mode, unsigned char * in, unsigned int len, unsigned char * out ) 
+int cx_des ( const cx_des_key_t * key, int mode, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+6];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)in;
-  parameters[3] = (unsigned int)len;
+  parameters[3] = (unsigned int)in_len;
   parameters[4] = (unsigned int)out;
+  parameters[5] = (unsigned int)out_len;
   retid = SVC_Call(SYSCALL_cx_des_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_des_ID_OUT) {
@@ -458,7 +470,7 @@ int cx_des ( cx_des_key_t * key, int mode, unsigned char * in, unsigned int len,
   return (int)ret;
 }
 
-int cx_aes_init_key ( unsigned char * rawkey, unsigned int key_len, cx_aes_key_t * key ) 
+int cx_aes_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_aes_key_t * key ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -474,17 +486,19 @@ int cx_aes_init_key ( unsigned char * rawkey, unsigned int key_len, cx_aes_key_t
   return (int)ret;
 }
 
-int cx_aes_iv ( cx_aes_key_t * key, int mode, unsigned char * iv, unsigned char * in, unsigned int len, unsigned char * out ) 
+int cx_aes_iv ( const cx_aes_key_t * key, int mode, const unsigned char * iv, unsigned int iv_len, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+6];
+  unsigned int parameters [0+8];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)iv;
-  parameters[3] = (unsigned int)in;
-  parameters[4] = (unsigned int)len;
-  parameters[5] = (unsigned int)out;
+  parameters[3] = (unsigned int)iv_len;
+  parameters[4] = (unsigned int)in;
+  parameters[5] = (unsigned int)in_len;
+  parameters[6] = (unsigned int)out;
+  parameters[7] = (unsigned int)out_len;
   retid = SVC_Call(SYSCALL_cx_aes_iv_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_aes_iv_ID_OUT) {
@@ -493,16 +507,17 @@ int cx_aes_iv ( cx_aes_key_t * key, int mode, unsigned char * iv, unsigned char 
   return (int)ret;
 }
 
-int cx_aes ( cx_aes_key_t * key, int mode, unsigned char * in, unsigned int len, unsigned char * out ) 
+int cx_aes ( const cx_aes_key_t * key, int mode, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+6];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)in;
-  parameters[3] = (unsigned int)len;
+  parameters[3] = (unsigned int)in_len;
   parameters[4] = (unsigned int)out;
+  parameters[5] = (unsigned int)out_len;
   retid = SVC_Call(SYSCALL_cx_aes_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_aes_ID_OUT) {
@@ -511,15 +526,16 @@ int cx_aes ( cx_aes_key_t * key, int mode, unsigned char * in, unsigned int len,
   return (int)ret;
 }
 
-int cx_rsa_init_public_key ( unsigned char * exponent, unsigned char * modulus, unsigned int modulus_len, cx_rsa_public_key_t * key ) 
+int cx_rsa_init_public_key ( const unsigned char * exponent, unsigned int exponent_len, const unsigned char * modulus, unsigned int modulus_len, cx_rsa_public_key_t * key ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+4];
+  unsigned int parameters [0+5];
   parameters[0] = (unsigned int)exponent;
-  parameters[1] = (unsigned int)modulus;
-  parameters[2] = (unsigned int)modulus_len;
-  parameters[3] = (unsigned int)key;
+  parameters[1] = (unsigned int)exponent_len;
+  parameters[2] = (unsigned int)modulus;
+  parameters[3] = (unsigned int)modulus_len;
+  parameters[4] = (unsigned int)key;
   retid = SVC_Call(SYSCALL_cx_rsa_init_public_key_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_rsa_init_public_key_ID_OUT) {
@@ -528,15 +544,16 @@ int cx_rsa_init_public_key ( unsigned char * exponent, unsigned char * modulus, 
   return (int)ret;
 }
 
-int cx_rsa_init_private_key ( unsigned char * exponent, unsigned char * modulus, unsigned int modulus_len, cx_rsa_private_key_t * key ) 
+int cx_rsa_init_private_key ( const unsigned char * exponent, unsigned int exponent_len, const unsigned char * modulus, unsigned int modulus_len, cx_rsa_private_key_t * key ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+4];
+  unsigned int parameters [0+5];
   parameters[0] = (unsigned int)exponent;
-  parameters[1] = (unsigned int)modulus;
-  parameters[2] = (unsigned int)modulus_len;
-  parameters[3] = (unsigned int)key;
+  parameters[1] = (unsigned int)exponent_len;
+  parameters[2] = (unsigned int)modulus;
+  parameters[3] = (unsigned int)modulus_len;
+  parameters[4] = (unsigned int)key;
   retid = SVC_Call(SYSCALL_cx_rsa_init_private_key_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_rsa_init_private_key_ID_OUT) {
@@ -545,16 +562,17 @@ int cx_rsa_init_private_key ( unsigned char * exponent, unsigned char * modulus,
   return (int)ret;
 }
 
-int cx_rsa_generate_pair ( unsigned int modulus_len, cx_rsa_public_key_t * public_key, cx_rsa_private_key_t * private_key, unsigned long int pub_exponent, unsigned char * externalPQ ) 
+int cx_rsa_generate_pair ( unsigned int modulus_len, cx_rsa_public_key_t * public_key, cx_rsa_private_key_t * private_key, const unsigned char * pub_exponent, unsigned int exponent_len, const unsigned char * externalPQ ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+6];
   parameters[0] = (unsigned int)modulus_len;
   parameters[1] = (unsigned int)public_key;
   parameters[2] = (unsigned int)private_key;
   parameters[3] = (unsigned int)pub_exponent;
-  parameters[4] = (unsigned int)externalPQ;
+  parameters[4] = (unsigned int)exponent_len;
+  parameters[5] = (unsigned int)externalPQ;
   retid = SVC_Call(SYSCALL_cx_rsa_generate_pair_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_rsa_generate_pair_ID_OUT) {
@@ -563,7 +581,7 @@ int cx_rsa_generate_pair ( unsigned int modulus_len, cx_rsa_public_key_t * publi
   return (int)ret;
 }
 
-int cx_rsa_sign ( cx_rsa_private_key_t * key, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len ) 
+int cx_rsa_sign ( const cx_rsa_private_key_t * key, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -583,7 +601,7 @@ int cx_rsa_sign ( cx_rsa_private_key_t * key, int mode, cx_md_t hashID, unsigned
   return (int)ret;
 }
 
-int cx_rsa_verify ( cx_rsa_public_key_t * key, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len ) 
+int cx_rsa_verify ( const cx_rsa_public_key_t * key, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * sig, unsigned int sig_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -603,7 +621,7 @@ int cx_rsa_verify ( cx_rsa_public_key_t * key, int mode, cx_md_t hashID, unsigne
   return (int)ret;
 }
 
-int cx_rsa_encrypt ( cx_rsa_public_key_t * key, int mode, cx_md_t hashID, unsigned char * mesg, unsigned int mesg_len, unsigned char * enc, unsigned int enc_len ) 
+int cx_rsa_encrypt ( const cx_rsa_public_key_t * key, int mode, cx_md_t hashID, const unsigned char * mesg, unsigned int mesg_len, unsigned char * enc, unsigned int enc_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -623,7 +641,7 @@ int cx_rsa_encrypt ( cx_rsa_public_key_t * key, int mode, cx_md_t hashID, unsign
   return (int)ret;
 }
 
-int cx_rsa_decrypt ( cx_rsa_private_key_t * key, int mode, cx_md_t hashID, unsigned char * mesg, unsigned int mesg_len, unsigned char * dec, unsigned int dec_len ) 
+int cx_rsa_decrypt ( const cx_rsa_private_key_t * key, int mode, cx_md_t hashID, const unsigned char * mesg, unsigned int mesg_len, unsigned char * dec, unsigned int dec_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -643,13 +661,14 @@ int cx_rsa_decrypt ( cx_rsa_private_key_t * key, int mode, cx_md_t hashID, unsig
   return (int)ret;
 }
 
-int cx_ecfp_is_valid_point ( cx_curve_t curve, unsigned char * point ) 
+int cx_ecfp_is_valid_point ( cx_curve_t curve, const unsigned char * P, unsigned int P_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+2];
+  unsigned int parameters [0+3];
   parameters[0] = (unsigned int)curve;
-  parameters[1] = (unsigned int)point;
+  parameters[1] = (unsigned int)P;
+  parameters[2] = (unsigned int)P_len;
   retid = SVC_Call(SYSCALL_cx_ecfp_is_valid_point_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecfp_is_valid_point_ID_OUT) {
@@ -658,13 +677,14 @@ int cx_ecfp_is_valid_point ( cx_curve_t curve, unsigned char * point )
   return (int)ret;
 }
 
-int cx_ecfp_is_cryptographic_point ( cx_curve_t curve, unsigned char * point ) 
+int cx_ecfp_is_cryptographic_point ( cx_curve_t curve, const unsigned char * P, unsigned int P_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+2];
+  unsigned int parameters [0+3];
   parameters[0] = (unsigned int)curve;
-  parameters[1] = (unsigned int)point;
+  parameters[1] = (unsigned int)P;
+  parameters[2] = (unsigned int)P_len;
   retid = SVC_Call(SYSCALL_cx_ecfp_is_cryptographic_point_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecfp_is_cryptographic_point_ID_OUT) {
@@ -673,15 +693,16 @@ int cx_ecfp_is_cryptographic_point ( cx_curve_t curve, unsigned char * point )
   return (int)ret;
 }
 
-int cx_ecfp_add_point ( cx_curve_t curve, unsigned char * R, unsigned char * P, unsigned char * Q ) 
+int cx_ecfp_add_point ( cx_curve_t curve, unsigned char * R, const unsigned char * P, const unsigned char * Q, unsigned int X_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+4];
+  unsigned int parameters [0+5];
   parameters[0] = (unsigned int)curve;
   parameters[1] = (unsigned int)R;
   parameters[2] = (unsigned int)P;
   parameters[3] = (unsigned int)Q;
+  parameters[4] = (unsigned int)X_len;
   retid = SVC_Call(SYSCALL_cx_ecfp_add_point_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecfp_add_point_ID_OUT) {
@@ -690,15 +711,16 @@ int cx_ecfp_add_point ( cx_curve_t curve, unsigned char * R, unsigned char * P, 
   return (int)ret;
 }
 
-int cx_ecfp_scalar_mult ( cx_curve_t curve, unsigned char * P, unsigned char * k, unsigned int k_len ) 
+int cx_ecfp_scalar_mult ( cx_curve_t curve, unsigned char * P, unsigned int P_len, const unsigned char * k, unsigned int k_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+4];
+  unsigned int parameters [0+5];
   parameters[0] = (unsigned int)curve;
   parameters[1] = (unsigned int)P;
-  parameters[2] = (unsigned int)k;
-  parameters[3] = (unsigned int)k_len;
+  parameters[2] = (unsigned int)P_len;
+  parameters[3] = (unsigned int)k;
+  parameters[4] = (unsigned int)k_len;
   retid = SVC_Call(SYSCALL_cx_ecfp_scalar_mult_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecfp_scalar_mult_ID_OUT) {
@@ -707,7 +729,7 @@ int cx_ecfp_scalar_mult ( cx_curve_t curve, unsigned char * P, unsigned char * k
   return (int)ret;
 }
 
-int cx_ecfp_init_public_key ( cx_curve_t curve, unsigned char * rawkey, unsigned int key_len, cx_ecfp_public_key_t * key ) 
+int cx_ecfp_init_public_key ( cx_curve_t curve, const unsigned char * rawkey, unsigned int key_len, cx_ecfp_public_key_t * key ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -724,7 +746,7 @@ int cx_ecfp_init_public_key ( cx_curve_t curve, unsigned char * rawkey, unsigned
   return (int)ret;
 }
 
-int cx_ecfp_init_private_key ( cx_curve_t curve, unsigned char * rawkey, unsigned int key_len, cx_ecfp_private_key_t * pvkey ) 
+int cx_ecfp_init_private_key ( cx_curve_t curve, const unsigned char * rawkey, unsigned int key_len, cx_ecfp_private_key_t * pvkey ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -776,18 +798,19 @@ int cx_ecfp_generate_pair2 ( cx_curve_t curve, cx_ecfp_public_key_t * pubkey, cx
   return (int)ret;
 }
 
-int cx_ecschnorr_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, unsigned char * msg, unsigned int msg_len, unsigned char * sig, unsigned int * info ) 
+int cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * msg, unsigned int msg_len, unsigned char * sig, unsigned int sig_len, unsigned int * info ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+7];
+  unsigned int parameters [0+8];
   parameters[0] = (unsigned int)pvkey;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)hashID;
   parameters[3] = (unsigned int)msg;
   parameters[4] = (unsigned int)msg_len;
   parameters[5] = (unsigned int)sig;
-  parameters[6] = (unsigned int)info;
+  parameters[6] = (unsigned int)sig_len;
+  parameters[7] = (unsigned int)info;
   retid = SVC_Call(SYSCALL_cx_ecschnorr_sign_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecschnorr_sign_ID_OUT) {
@@ -796,7 +819,7 @@ int cx_ecschnorr_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID,
   return (int)ret;
 }
 
-int cx_ecschnorr_verify ( cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, unsigned char * msg, unsigned int msg_len, unsigned char * sig, unsigned int sig_len ) 
+int cx_ecschnorr_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * msg, unsigned int msg_len, const unsigned char * sig, unsigned int sig_len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -816,13 +839,14 @@ int cx_ecschnorr_verify ( cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID
   return (int)ret;
 }
 
-void cx_edward_compress_point ( cx_curve_t curve, unsigned char * P ) 
+void cx_edward_compress_point ( cx_curve_t curve, unsigned char * P, unsigned int P_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+2];
+  unsigned int parameters [0+3];
   parameters[0] = (unsigned int)curve;
   parameters[1] = (unsigned int)P;
+  parameters[2] = (unsigned int)P_len;
   retid = SVC_Call(SYSCALL_cx_edward_compress_point_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_edward_compress_point_ID_OUT) {
@@ -830,13 +854,14 @@ void cx_edward_compress_point ( cx_curve_t curve, unsigned char * P )
   }
 }
 
-void cx_edward_decompress_point ( cx_curve_t curve, unsigned char * P ) 
+void cx_edward_decompress_point ( cx_curve_t curve, unsigned char * P, unsigned int P_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+2];
+  unsigned int parameters [0+3];
   parameters[0] = (unsigned int)curve;
   parameters[1] = (unsigned int)P;
+  parameters[2] = (unsigned int)P_len;
   retid = SVC_Call(SYSCALL_cx_edward_decompress_point_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_edward_decompress_point_ID_OUT) {
@@ -844,16 +869,18 @@ void cx_edward_decompress_point ( cx_curve_t curve, unsigned char * P )
   }
 }
 
-void cx_eddsa_get_public_key ( cx_ecfp_private_key_t * pvkey, cx_md_t hashID, cx_ecfp_public_key_t * pukey, unsigned char * a, unsigned char * h ) 
+void cx_eddsa_get_public_key ( const cx_ecfp_private_key_t * pvkey, cx_md_t hashID, cx_ecfp_public_key_t * pukey, unsigned char * a, unsigned int a_len, unsigned char * h, unsigned int h_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+5];
+  unsigned int parameters [0+7];
   parameters[0] = (unsigned int)pvkey;
   parameters[1] = (unsigned int)hashID;
   parameters[2] = (unsigned int)pukey;
   parameters[3] = (unsigned int)a;
-  parameters[4] = (unsigned int)h;
+  parameters[4] = (unsigned int)a_len;
+  parameters[5] = (unsigned int)h;
+  parameters[6] = (unsigned int)h_len;
   retid = SVC_Call(SYSCALL_cx_eddsa_get_public_key_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_eddsa_get_public_key_ID_OUT) {
@@ -861,11 +888,11 @@ void cx_eddsa_get_public_key ( cx_ecfp_private_key_t * pvkey, cx_md_t hashID, cx
   }
 }
 
-int cx_eddsa_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * ctx, unsigned int ctx_len, unsigned char * sig, unsigned int * info ) 
+int cx_eddsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, unsigned char * sig, unsigned int sig_len, unsigned int * info ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+9];
+  unsigned int parameters [0+10];
   parameters[0] = (unsigned int)pvkey;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)hashID;
@@ -874,7 +901,8 @@ int cx_eddsa_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, uns
   parameters[5] = (unsigned int)ctx;
   parameters[6] = (unsigned int)ctx_len;
   parameters[7] = (unsigned int)sig;
-  parameters[8] = (unsigned int)info;
+  parameters[8] = (unsigned int)sig_len;
+  parameters[9] = (unsigned int)info;
   retid = SVC_Call(SYSCALL_cx_eddsa_sign_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_eddsa_sign_ID_OUT) {
@@ -883,12 +911,12 @@ int cx_eddsa_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, uns
   return (int)ret;
 }
 
-int cx_eddsa_verify ( cx_ecfp_public_key_t * key, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * ctx, unsigned int ctx_len, unsigned char * sig, unsigned int sig_len ) 
+int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, const unsigned char * sig, unsigned int sig_len ) 
 {
   unsigned int ret;
   unsigned int retid;
   unsigned int parameters [0+9];
-  parameters[0] = (unsigned int)key;
+  parameters[0] = (unsigned int)pukey;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)hashID;
   parameters[3] = (unsigned int)hash;
@@ -905,18 +933,19 @@ int cx_eddsa_verify ( cx_ecfp_public_key_t * key, int mode, cx_md_t hashID, unsi
   return (int)ret;
 }
 
-int cx_ecdsa_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int * info ) 
+int cx_ecdsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len, unsigned int * info ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+7];
+  unsigned int parameters [0+8];
   parameters[0] = (unsigned int)pvkey;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)hashID;
   parameters[3] = (unsigned int)hash;
   parameters[4] = (unsigned int)hash_len;
   parameters[5] = (unsigned int)sig;
-  parameters[6] = (unsigned int)info;
+  parameters[6] = (unsigned int)sig_len;
+  parameters[7] = (unsigned int)info;
   retid = SVC_Call(SYSCALL_cx_ecdsa_sign_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecdsa_sign_ID_OUT) {
@@ -925,12 +954,12 @@ int cx_ecdsa_sign ( cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, uns
   return (int)ret;
 }
 
-int cx_ecdsa_verify ( cx_ecfp_public_key_t * key, int mode, cx_md_t hashID, unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len ) 
+int cx_ecdsa_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * sig, unsigned int sig_len ) 
 {
   unsigned int ret;
   unsigned int retid;
   unsigned int parameters [0+7];
-  parameters[0] = (unsigned int)key;
+  parameters[0] = (unsigned int)pukey;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)hashID;
   parameters[3] = (unsigned int)hash;
@@ -945,15 +974,17 @@ int cx_ecdsa_verify ( cx_ecfp_public_key_t * key, int mode, cx_md_t hashID, unsi
   return (int)ret;
 }
 
-int cx_ecdh ( cx_ecfp_private_key_t * key, int mode, unsigned char * P, unsigned char * secret ) 
+int cx_ecdh ( const cx_ecfp_private_key_t * pvkey, int mode, const unsigned char * P, unsigned int P_len, unsigned char * secret, unsigned int secret_len ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+4];
-  parameters[0] = (unsigned int)key;
+  unsigned int parameters [0+6];
+  parameters[0] = (unsigned int)pvkey;
   parameters[1] = (unsigned int)mode;
   parameters[2] = (unsigned int)P;
-  parameters[3] = (unsigned int)secret;
+  parameters[3] = (unsigned int)P_len;
+  parameters[4] = (unsigned int)secret;
+  parameters[5] = (unsigned int)secret_len;
   retid = SVC_Call(SYSCALL_cx_ecdh_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_ecdh_ID_OUT) {
@@ -962,7 +993,7 @@ int cx_ecdh ( cx_ecfp_private_key_t * key, int mode, unsigned char * P, unsigned
   return (int)ret;
 }
 
-unsigned short cx_crc16 ( void * buffer, unsigned int len ) 
+unsigned short cx_crc16 ( const void * buffer, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -977,7 +1008,7 @@ unsigned short cx_crc16 ( void * buffer, unsigned int len )
   return (unsigned short)ret;
 }
 
-unsigned short cx_crc16_update ( unsigned short crc, void * buffer, unsigned int len ) 
+unsigned short cx_crc16_update ( unsigned short crc, const void * buffer, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -993,7 +1024,7 @@ unsigned short cx_crc16_update ( unsigned short crc, void * buffer, unsigned int
   return (unsigned short)ret;
 }
 
-int cx_math_cmp ( unsigned char * a, unsigned char * b, unsigned int len ) 
+int cx_math_cmp ( const unsigned char * a, const unsigned char * b, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1009,7 +1040,7 @@ int cx_math_cmp ( unsigned char * a, unsigned char * b, unsigned int len )
   return (int)ret;
 }
 
-int cx_math_is_zero ( unsigned char * a, unsigned int len ) 
+int cx_math_is_zero ( const unsigned char * a, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1024,7 +1055,7 @@ int cx_math_is_zero ( unsigned char * a, unsigned int len )
   return (int)ret;
 }
 
-int cx_math_add ( unsigned char * r, unsigned char * a, unsigned char * b, unsigned int len ) 
+int cx_math_add ( unsigned char * r, const unsigned char * a, const unsigned char * b, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1041,7 +1072,7 @@ int cx_math_add ( unsigned char * r, unsigned char * a, unsigned char * b, unsig
   return (int)ret;
 }
 
-int cx_math_sub ( unsigned char * r, unsigned char * a, unsigned char * b, unsigned int len ) 
+int cx_math_sub ( unsigned char * r, const unsigned char * a, const unsigned char * b, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1058,7 +1089,7 @@ int cx_math_sub ( unsigned char * r, unsigned char * a, unsigned char * b, unsig
   return (int)ret;
 }
 
-void cx_math_mult ( unsigned char * r, unsigned char * a, unsigned char * b, unsigned int len ) 
+void cx_math_mult ( unsigned char * r, const unsigned char * a, const unsigned char * b, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1074,7 +1105,7 @@ void cx_math_mult ( unsigned char * r, unsigned char * a, unsigned char * b, uns
   }
 }
 
-void cx_math_addm ( unsigned char * r, unsigned char * a, unsigned char * b, unsigned char * m, unsigned int len ) 
+void cx_math_addm ( unsigned char * r, const unsigned char * a, const unsigned char * b, const unsigned char * m, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1091,7 +1122,7 @@ void cx_math_addm ( unsigned char * r, unsigned char * a, unsigned char * b, uns
   }
 }
 
-void cx_math_subm ( unsigned char * r, unsigned char * a, unsigned char * b, unsigned char * m, unsigned int len ) 
+void cx_math_subm ( unsigned char * r, const unsigned char * a, const unsigned char * b, const unsigned char * m, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1108,7 +1139,7 @@ void cx_math_subm ( unsigned char * r, unsigned char * a, unsigned char * b, uns
   }
 }
 
-void cx_math_multm ( unsigned char * r, unsigned char * a, unsigned char * b, unsigned char * m, unsigned int len ) 
+void cx_math_multm ( unsigned char * r, const unsigned char * a, const unsigned char * b, const unsigned char * m, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1125,7 +1156,7 @@ void cx_math_multm ( unsigned char * r, unsigned char * a, unsigned char * b, un
   }
 }
 
-void cx_math_powm ( unsigned char * r, unsigned char * a, unsigned char * e, unsigned int len_e, unsigned char * m, unsigned int len ) 
+void cx_math_powm ( unsigned char * r, const unsigned char * a, const unsigned char * e, unsigned int len_e, const unsigned char * m, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1143,7 +1174,7 @@ void cx_math_powm ( unsigned char * r, unsigned char * a, unsigned char * e, uns
   }
 }
 
-void cx_math_modm ( unsigned char * v, unsigned int len_v, unsigned char * m, unsigned int len_m ) 
+void cx_math_modm ( unsigned char * v, unsigned int len_v, const unsigned char * m, unsigned int len_m ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1159,7 +1190,7 @@ void cx_math_modm ( unsigned char * v, unsigned int len_v, unsigned char * m, un
   }
 }
 
-void cx_math_invprimem ( unsigned char * r, unsigned char * a, unsigned char * m, unsigned int len ) 
+void cx_math_invprimem ( unsigned char * r, const unsigned char * a, const unsigned char * m, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1175,7 +1206,7 @@ void cx_math_invprimem ( unsigned char * r, unsigned char * a, unsigned char * m
   }
 }
 
-void cx_math_invintm ( unsigned char * r, unsigned long int a, unsigned char * m, unsigned int len ) 
+void cx_math_invintm ( unsigned char * r, unsigned long int a, const unsigned char * m, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1191,7 +1222,7 @@ void cx_math_invintm ( unsigned char * r, unsigned long int a, unsigned char * m
   }
 }
 
-int cx_math_is_prime ( unsigned char * p, unsigned int len ) 
+int cx_math_is_prime ( const unsigned char * p, unsigned int len ) 
 {
   unsigned int ret;
   unsigned int retid;
@@ -1348,6 +1379,25 @@ void os_perso_derive_node_bip32 ( cx_curve_t curve, const unsigned int * path, u
   retid = SVC_Call(SYSCALL_os_perso_derive_node_bip32_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_os_perso_derive_node_bip32_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+}
+
+void os_perso_derive_node_bip32_seed_key ( cx_curve_t curve, const unsigned int * path, unsigned int pathLength, unsigned char * privateKey, unsigned char * chain, unsigned char * seed_key, unsigned int seed_key_length ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+7];
+  parameters[0] = (unsigned int)curve;
+  parameters[1] = (unsigned int)path;
+  parameters[2] = (unsigned int)pathLength;
+  parameters[3] = (unsigned int)privateKey;
+  parameters[4] = (unsigned int)chain;
+  parameters[5] = (unsigned int)seed_key;
+  parameters[6] = (unsigned int)seed_key_length;
+  retid = SVC_Call(SYSCALL_os_perso_derive_node_bip32_seed_key_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_os_perso_derive_node_bip32_seed_key_ID_OUT) {
     THROW(EXCEPTION_SECURITY);
   }
 }

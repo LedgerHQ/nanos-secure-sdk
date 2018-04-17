@@ -165,7 +165,7 @@ USBD_StatusTypeDef  USBD_Stop   (USBD_HandleTypeDef *pdev)
   /* Free Class Resources */
   uint8_t intf;
   for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-    if(pdev->interfacesClass[intf].pClass != NULL) {
+    if(usbd_is_valid_intf(pdev, intf)) {
       ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, pdev->dev_config);  
     }
   }
@@ -202,7 +202,7 @@ USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx
   /* Set configuration  and Start the Class*/
   uint8_t intf;
   for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-    if(pdev->interfacesClass[intf].pClass != NULL) {
+    if(usbd_is_valid_intf(pdev, intf)) {
       ((Init_t)PIC(pdev->interfacesClass[intf].pClass->Init))(pdev, cfgidx);
     }
   }
@@ -222,7 +222,7 @@ USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef  *pdev, uint8_t cfgidx
   /* Clear configuration  and De-initialize the Class process*/
   uint8_t intf;
   for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-    if(pdev->interfacesClass[intf].pClass != NULL) {
+    if(usbd_is_valid_intf(pdev, intf)) {
       ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, cfgidx);  
     }
   }
@@ -293,7 +293,7 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum
       {
         uint8_t intf;
         for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-          if(pdev->interfacesClass[intf].pClass != NULL &&  (pdev->interfacesClass[intf].pClass->EP0_RxReady != NULL)&&
+          if(usbd_is_valid_intf(pdev, intf) &&  (pdev->interfacesClass[intf].pClass->EP0_RxReady != NULL)&&
              (pdev->dev_state == USBD_STATE_CONFIGURED))
           {
             ((EP0_RxReady_t)PIC(pdev->interfacesClass[intf].pClass->EP0_RxReady))(pdev); 
@@ -307,7 +307,7 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum
 
     uint8_t intf;
     for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-      if( pdev->interfacesClass[intf].pClass != NULL &&  (pdev->interfacesClass[intf].pClass->DataOut != NULL)&&
+      if( usbd_is_valid_intf(pdev, intf) &&  (pdev->interfacesClass[intf].pClass->DataOut != NULL)&&
          (pdev->dev_state == USBD_STATE_CONFIGURED))
       {
         ((DataOut_t)PIC(pdev->interfacesClass[intf].pClass->DataOut))(pdev, epnum, pdata); 
@@ -374,7 +374,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
         {
           uint8_t intf;
           for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-            if(pdev->interfacesClass[intf].pClass != NULL && (pdev->interfacesClass[intf].pClass->EP0_TxSent != NULL)&&
+            if(usbd_is_valid_intf(pdev, intf) && (pdev->interfacesClass[intf].pClass->EP0_TxSent != NULL)&&
                (pdev->dev_state == USBD_STATE_CONFIGURED))
             {
               ((EP0_RxReady_t)PIC(pdev->interfacesClass[intf].pClass->EP0_TxSent))(pdev); 
@@ -393,7 +393,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
   else {
     uint8_t intf;
     for (intf = 0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-      if( pdev->interfacesClass[intf].pClass != NULL && (pdev->interfacesClass[intf].pClass->DataIn != NULL)&&
+      if( usbd_is_valid_intf(pdev, intf) && (pdev->interfacesClass[intf].pClass->DataIn != NULL)&&
          (pdev->dev_state == USBD_STATE_CONFIGURED))
       {
         ((DataIn_t)PIC(pdev->interfacesClass[intf].pClass->DataIn))(pdev, epnum); 
@@ -421,7 +421,7 @@ USBD_StatusTypeDef USBD_LL_Reset(USBD_HandleTypeDef  *pdev)
  
   uint8_t intf;
   for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-    if( pdev->interfacesClass[intf].pClass != NULL)
+    if( usbd_is_valid_intf(pdev, intf))
     {
       ((DeInit_t)PIC(pdev->interfacesClass[intf].pClass->DeInit))(pdev, pdev->dev_config); 
     }
@@ -489,7 +489,7 @@ USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef  *pdev)
   {
     uint8_t intf;
     for (intf =0; intf < USBD_MAX_NUM_INTERFACES; intf++) {
-      if( pdev->interfacesClass[intf].pClass != NULL && pdev->interfacesClass[intf].pClass->SOF != NULL)
+      if( usbd_is_valid_intf(pdev, intf) && pdev->interfacesClass[intf].pClass->SOF != NULL)
       {
         ((SOF_t)PIC(pdev->interfacesClass[intf].pClass->SOF))(pdev); 
       }
