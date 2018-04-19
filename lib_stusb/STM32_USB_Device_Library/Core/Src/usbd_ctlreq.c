@@ -335,13 +335,12 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
 * @param  req: usb request
 * @retval status
 */
-void USBD_GetDescriptor(USBD_HandleTypeDef *pdev , 
-                               USBD_SetupReqTypedef *req)
+void USBD_GetDescriptor(USBD_HandleTypeDef *pdev,
+                        USBD_SetupReqTypedef *req)
 {
-  uint16_t len;
+  uint16_t len = 0;
   uint8_t *pbuf;
-  
-    
+
   switch (req->wValue >> 8)
   { 
 #if (USBD_LPM_ENABLED == 1)
