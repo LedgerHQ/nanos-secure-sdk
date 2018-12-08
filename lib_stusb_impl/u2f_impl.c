@@ -87,7 +87,6 @@ void u2f_apdu_enroll(u2f_service_t *service, uint8_t p1, uint8_t p2,
 
 void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
                      uint8_t *buffer, uint16_t length) {
-    UNUSED(p1);
     UNUSED(p2);
     uint8_t keyHandleLength;
     uint8_t i;
@@ -117,6 +116,14 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_BAD_KEY_HANDLE,
                   sizeof(SW_BAD_KEY_HANDLE));
+        return;
+    }
+
+    // Confirm immediately if it's just a validation call
+    if (p1 == P1_SIGN_CHECK_ONLY) {
+        u2f_message_reply(service, U2F_CMD_MSG,
+                  (uint8_t *)SW_PROOF_OF_PRESENCE_REQUIRED,
+                  sizeof(SW_PROOF_OF_PRESENCE_REQUIRED));
         return;
     }
 
