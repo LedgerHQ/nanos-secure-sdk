@@ -58,7 +58,7 @@ typedef unsigned long long uint64bits_t;
 #endif
 
 /**
- * Some function take logical or of various flags. The follwing flags are
+ * Some function take logical or of various flags. The following flags are
  * globally defined:
  * @rststar
  *
@@ -221,6 +221,7 @@ SYSCALL unsigned char *cx_rng(unsigned char *buffer PLENGTH(len),
  * @param [inout] rnd       generated random value,
  * @param [in]    hashID    hash to used. Only SHA256 and SH512 are supported
  * @param [in]    h1        initial hash (first call) or NULL
+ * @param [in]    h1_len    initial hash length
  * @param [in]    x         secret or NULL
  * @param [in]    x_len     secret length
  * @param [in]    q         maximum random value, i.e rnd < q
@@ -233,11 +234,11 @@ SYSCALL unsigned char *cx_rng(unsigned char *buffer PLENGTH(len),
  */
 SYSCALL int
 cx_rng_rfc6979(unsigned char *rnd PLENGTH(rnd_len), unsigned int rnd_len,
-               unsigned int hashID, const unsigned char *h1 PLENGTH(h1_len),
-               unsigned int h1_len, const unsigned char *x PLENGTH(x_len),
-               unsigned int x_len, const unsigned char *q PLENGTH(q_len),
-               unsigned int q_len, unsigned char *V PLENGTH(V_len),
-               unsigned int V_len);
+               unsigned int hashID,
+               const unsigned char *h1 PLENGTH(h1_len), unsigned int h1_len,
+               const unsigned char *x PLENGTH(x_len), unsigned int x_len,
+               const unsigned char *q PLENGTH(q_len), unsigned int q_len,
+               unsigned char *V PLENGTH(V_len), unsigned int V_len);
 
 /** @} */
 
@@ -301,11 +302,9 @@ typedef struct cx_hash_header_s cx_hash_t;
  *   Univers Continuation Blob.
  *   The hash context pointer shall point to  either a cx_ripemd160_t, either a
  * cx_sha256_t  or cx_sha512_t .
- *   The hash context shall be inited with 'cx_xxx_init'
+ *   The hash context shall be initialized with 'cx_xxx_init'
  *   The hash context shall be in RAM
  *   The function should be called with a nice cast.
- *
- * @note: 'out' length is implicit, no check is done
  *
  * @param  [in] mode
  *   Supported flags: CX_LAST
@@ -318,18 +317,21 @@ typedef struct cx_hash_header_s cx_hash_t;
  *   Input data to add to current hash
  *
  * @param  [in] len
- *   Length of input to data.
+ *   Length of input data.
  *
  * @param [out] out
  *   Either:
  *     - NULL (ignored) if CX_LAST is NOT set
  *     - produced hash  if CX_LAST is set
  *
+ * @param  [in] out_len
+ *   Length of output data.
+ *
  */
 SYSCALL int cx_hash(cx_hash_t *hash PLENGTH(scc__cx_scc_struct_size_hash__hash),
-                    int mode, const unsigned char WIDE *in PLENGTH(len),
-                    unsigned int len, unsigned char *out PLENGTH(out_len),
-                    unsigned int out_len);
+                    int mode,
+                    const unsigned char WIDE *in PLENGTH(len), unsigned int len,
+                    unsigned char *out PLENGTH(out_len), unsigned int out_len);
 
 /* ------------------------------ RIPEMD160 ------------------------------ */
 
@@ -445,11 +447,11 @@ SYSCALL int cx_sha256_init(cx_sha256_t *hash PLENGTH(sizeof(cx_sha256_t)));
  * @param [out] out
  *   'out' length is implicit
  *
+ * @param  [in] out_len
+ *   Length of output data.
  */
-SYSCALL int cx_hash_sha256(const unsigned char WIDE *in PLENGTH(len),
-                           unsigned int len,
-                           unsigned char *out PLENGTH(out_len),
-                           unsigned int out_len);
+SYSCALL int cx_hash_sha256(const unsigned char WIDE *in PLENGTH(len), unsigned int len,
+                           unsigned char *out PLENGTH(out_len), unsigned int out_len);
 
 /**
  * Init a sha512 context.
@@ -483,11 +485,12 @@ SYSCALL int cx_sha512_init(cx_sha512_t *hash PLENGTH(sizeof(cx_sha512_t)));
  * @param [out] out
  *   'out' length is implicit
  *
+ * @param  [in] out_len
+ *   Length of output data.
+ *
  */
-SYSCALL int cx_hash_sha512(const unsigned char WIDE *in PLENGTH(len),
-                           unsigned int len,
-                           unsigned char *out PLENGTH(out_len),
-                           unsigned int out_len);
+SYSCALL int cx_hash_sha512(const unsigned char WIDE *in PLENGTH(len), unsigned int len,
+                           unsigned char *out PLENGTH(out_len), unsigned int out_len);
 
 /* ----------------------------- SHA3/KECCAK ----------------------------- */
 
@@ -622,9 +625,9 @@ typedef struct cx_hmac_sha512_s cx_hmac_sha512_t;
 typedef struct cx_hash_header_s cx_hmac_t;
 
 /**
- * Init a hmac sha512 context.
+ * Init a hmac ripemd160 context.
  *
- * @param  [out] hash        the context to init.
+ * @param  [out] hmac        the context to init.
  *    The context shall be in RAM
  *
  * @param  [in] key         hmac key value
@@ -645,7 +648,7 @@ SYSCALL int cx_hmac_ripemd160_init(
 /**
  * Init a hmac sha256 context.
  *
- * @param [out] hash        the context to init.
+ * @param [out] hmac        the context to init.
  *    The context shall be in RAM
  *
  * @param [in] key         hmac key value
@@ -667,7 +670,7 @@ cx_hmac_sha256_init(cx_hmac_sha256_t *hmac PLENGTH(sizeof(cx_hmac_sha256_t)),
 /**
  * Init a hmac sha512 context.
  *
- * @param [out] hash        the context to init.
+ * @param [out] hmac        the context to init.
  *    The context shall be in RAM
  *
  * @param [in] key         hmac key value
@@ -715,6 +718,9 @@ cx_hmac_sha512_init(cx_hmac_sha512_t *hmac PLENGTH(sizeof(cx_hmac_sha512_t)),
  *     - produced hmac  if CX_LAST is set
  *   'out' length is implicit, no check is done
  *
+ * @param [in] mac_len
+ *   Length of mac data.
+ *
  */
 SYSCALL int cx_hmac(cx_hmac_t *hmac PLENGTH(scc__cx_scc_struct_size_hmac__hmac),
                     int mode, const unsigned char WIDE *in PLENGTH(len),
@@ -737,6 +743,9 @@ SYSCALL int cx_hmac(cx_hmac_t *hmac PLENGTH(scc__cx_scc_struct_size_hmac__hmac),
  *
  * @param [out] out
  *   'out' length is implicit
+ *
+ * @param  [in] mac_len
+ *   Length of mac data.
  *
  */
 SYSCALL int cx_hmac_sha512(const unsigned char WIDE *key PLENGTH(key_len),
@@ -763,6 +772,9 @@ SYSCALL int cx_hmac_sha512(const unsigned char WIDE *key PLENGTH(key_len),
  *
  * @param [out] out
  *   'out' length is implicit
+ *
+ * @param  [in] mac_len
+ *   Length of mac data.
  *
  */
 SYSCALL int cx_hmac_sha256(const unsigned char WIDE *key PLENGTH(key_len),
@@ -2246,8 +2258,7 @@ SYSCALL int cx_eddsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_eddsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
-                                scc__cx_scc_struct_size_ecfp_pubkey__pukey),
+SYSCALL int cx_eddsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(scc__cx_scc_struct_size_ecfp_pubkey__pukey),
                             int mode, cx_md_t hashID,
                             const unsigned char WIDE *hash PLENGTH(hash_len),
                             unsigned int hash_len,
@@ -2290,6 +2301,9 @@ SYSCALL int cx_eddsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
  * @param [out] sig
  *   ECDSA signature encoded as TLV:  30 L 02 Lr r 02 Ls s
  *
+ * @param [in] sig_len
+ *   Length of signature array.
+ *
  * @param [out] info
  *   Set CX_ECCINFO_PARITY_ODD if Y is odd when computing k.G
  *
@@ -2298,8 +2312,7 @@ SYSCALL int cx_eddsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
  *
  * @throws INVALID_PARAMETER
  */
-SYSCALL int cx_ecdsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
-                              scc__cx_scc_struct_size_ecfp_privkey__pvkey),
+SYSCALL int cx_ecdsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(scc__cx_scc_struct_size_ecfp_privkey__pvkey),
                           int mode, cx_md_t hashID,
                           const unsigned char WIDE *hash PLENGTH(hash_len),
                           unsigned int hash_len,
