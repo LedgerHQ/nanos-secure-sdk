@@ -25,6 +25,7 @@
 #include "u2f_io.h"
 
 #include "os.h"
+#include "os_io_seproxyhal.h"
 
 #define U2F_MASK_COMMAND 0x80
 #define U2F_COMMAND_HEADER_SIZE 3
@@ -116,10 +117,11 @@ void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
         service->transportPacketIndex++;
         u2f_io_send(G_io_usb_ep_buffer, dataSize, media);
     }
-    // the first call is meant to setup the first part for sending.
-    // cannot be considered as the msg sent event.
+    // last part sent
     else if (service->transportOffset == service->transportLength) {
         u2f_transport_reset(service);
+        // we sent the whole response (even if we haven't yet received the ack for the last sent usb in packet)
+        G_io_apdu_state = APDU_IDLE;
     }
 }
 

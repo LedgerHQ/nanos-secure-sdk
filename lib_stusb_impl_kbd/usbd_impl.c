@@ -68,6 +68,8 @@
 #include "usbd_ccid_core.h"
 #endif // HAVE_USB_CLASS_CCID
 
+#define HAVE_USB_HIDKBD
+
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
@@ -114,6 +116,12 @@
 /** @defgroup USBD_HID_Private_Variables
   * @{
   */ 
+
+#define HID_EPIN_ADDR                 0x82
+#define HID_EPIN_SIZE                 0x40
+
+#define HID_EPOUT_ADDR                0x02
+#define HID_EPOUT_SIZE                0x40
 
 #define USBD_LANGID_STRING            0x409
 
@@ -195,6 +203,42 @@ static const uint8_t const USBD_MANUFACTURER_STRING[] = {
 #define USBD_INTERFACE_FS_STRING USBD_PRODUCT_FS_STRING
 #define USBD_CONFIGURATION_FS_STRING USBD_PRODUCT_FS_STRING
 
+const uint8_t const HID_ReportDesc_kbd[] = {
+  0x05, 0x01,
+  0x09, 0x06,
+  0xA1, 0x01,
+  0x05, 0x07,
+  0x19, 0xE0,
+  0x29, 0xE7,
+  0x15, 0x00,
+  0x25, 0x01,
+  0x75, 0x01,
+  0x95, 0x08,
+  0x81, 0x02,
+  0x95, 0x01,
+  0x75, 0x08,
+  0x81, 0x01,
+  0x95, 0x05,
+  0x75, 0x01,
+  0x05, 0x08,
+  0x19, 0x01,
+  0x29, 0x05,
+  0x91, 0x02,
+  0x95, 0x01,
+  0x75, 0x03,
+  0x91, 0x01,
+  0x95, 0x06,
+  0x75, 0x08,
+  0x15, 0x00,
+  0x25, 0x65,
+  0x05, 0x07,
+  0x19, 0x00,
+  0x29, 0x65,
+  0x81, 0x00,
+  0xC0
+};
+
+
 static const uint8_t const HID_ReportDesc[] = {
   0x06, 0xA0, 0xFF,       // Usage page (vendor defined)
   0x09, 0x01,     // Usage ID (vendor defined)
@@ -258,26 +302,59 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
 #ifdef HAVE_USB_CLASS_CCID
    +0x9+0x36+0x7+0x7
 #endif // HAVE_USB_CLASS_CCID
-#ifdef HAVE_WEBUSB
-   +0x9+0x7+0x7
-#endif // HAVE_WEBUSB
    ),
-  1
-#ifdef HAVE_IO_U2F
-  +1
-#endif // HAVE_IO_U2F
+  1+1
 #ifdef HAVE_USB_CLASS_CCID
   +1
 #endif // HAVE_USB_CLASS_CCID
-#ifdef HAVE_WEBUSB
-  +1
-#endif // HAVE_WEBUSB
   ,         /*bNumInterfaces */
   0x01,         /*bConfigurationValue: Configuration value*/
   USBD_IDX_PRODUCT_STR, /*iConfiguration: Index of string descriptor describing the configuration*/
   0xC0,         /*bmAttributes: bus powered */
   0x32,         /*MaxPower 100 mA: this current is used for detecting Vbus*/
 
+#ifdef HAVE_USB_HIDKBD
+  /* HIDKBD ################################################################################################ */
+
+  /************** Descriptor of KBD HID interface ****************/
+  0x09,         /*bLength: Interface Descriptor size*/
+  USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
+  0x00,         /*bInterfaceNumber: Number of Interface*/
+  0x00,         /*bAlternateSetting: Alternate setting*/
+  0x02,         /*bNumEndpoints*/
+  0x03,         /*bInterfaceClass: HID*/
+  0x01,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
+  0x01,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
+  USBD_IDX_PRODUCT_STR,            /*iInterface: Index of string descriptor*/
+
+  /******************** Descriptor of HID *************************/
+  0x09,         /*bLength: HID Descriptor size*/
+  HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
+  0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
+  0x01,
+  0x21,         /*bCountryCode: Hardware target country*/ // 0x21: US, 0x08: FR, 0x0D: ISO Intl
+  0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
+  0x22,         /*bDescriptorType*/
+  sizeof(HID_ReportDesc_kbd),/*wItemLength: Total length of Report descriptor*/
+  0x00,
+  /******************** Descriptor of Custom HID endpoints ********************/
+  0x07,          /*bLength: Endpoint Descriptor size*/
+  USB_DESC_TYPE_ENDPOINT, /*bDescriptorType:*/
+  HID_EPIN_ADDR,     /*bEndpointAddress: Endpoint Address (IN)*/
+  0x03,          /*bmAttributes: Interrupt endpoint*/
+  8, /*wMaxPacketSize: */
+  0x00,
+  0x01,          /*bInterval: Polling Interval */
+
+  0x07,          /* bLength: Endpoint Descriptor size */
+  USB_DESC_TYPE_ENDPOINT, /* bDescriptorType: */
+  HID_EPOUT_ADDR,  /*bEndpointAddress: Endpoint Address (OUT)*/
+  0x03, /* bmAttributes: Interrupt endpoint */
+  8,  /* wMaxPacketSize: */
+  0x00,
+  0x01, /* bInterval: Polling Interval */
+
+#else
   /* HIDGEN ################################################################################################ */
   
   /************** Descriptor of KBD HID interface ****************/
@@ -318,11 +395,12 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
   HID_EPOUT_SIZE,  /* wMaxPacketSize: 2 Bytes max  */
   0x00,
   0x01, /* bInterval: Polling Interval (20 ms) */
+#endif // HAVE_USB_HIDKBD
 
 #ifdef HAVE_IO_U2F
   /* HID FIDO ################################################################################################ */
 
-  /************** Descriptor of HID FIDO interface ****************/
+  /************** Descriptor of KBD HID interface ****************/
   0x09,         /*bLength: Interface Descriptor size*/
   USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
   U2F_INTF,         /*bInterfaceNumber: Number of Interface*/
@@ -459,38 +537,6 @@ static __ALIGN_BEGIN const uint8_t const USBD_CfgDesc[] __ALIGN_END =
   HIBYTE(CCID_BULK_EPOUT_SIZE),
   0x00,   /*Polling interval in milliseconds*/
 #endif // HAVE_USB_CLASS_CCID
-
-#ifdef HAVE_WEBUSB
-  /* WEBUSB ################################################################################################ */
-
-  /************** Descriptor of WEBUSB interface ****************/
-  0x09,         /*bLength: Interface Descriptor size*/
-  USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
-  WEBUSB_INTF,         /*bInterfaceNumber: Number of Interface*/
-  0x00,         /*bAlternateSetting: Alternate setting*/
-  0x02,         /*bNumEndpoints*/
-  0xFF,         /*bInterfaceClass: WINUSB*/
-  0xFF,         /*bInterfaceSubClass : WINUSB*/
-  0xFF,         /*nInterfaceProtocol : WINUSB*/
-  USBD_IDX_PRODUCT_STR,            /*iInterface: Index of string descriptor*/
-
-  /******************** Descriptor of endpoints ********************/
-  0x07,          /*bLength: Endpoint Descriptor size*/
-  USB_DESC_TYPE_ENDPOINT, /*bDescriptorType:*/
-  WEBUSB_EPIN_ADDR,     /*bEndpointAddress: Endpoint Address (IN)*/
-  0x03,          /*bmAttributes: Interrupt endpoint*/
-  WEBUSB_EPIN_SIZE, /*wMaxPacketSize: */
-  0x00,
-  0x01,          /*bInterval: Polling Interval */
-
-  0x07,          /* bLength: Endpoint Descriptor size */
-  USB_DESC_TYPE_ENDPOINT, /* bDescriptorType: */
-  WEBUSB_EPOUT_ADDR,  /*bEndpointAddress: Endpoint Address (OUT)*/
-  0x03, /* bmAttributes: Interrupt endpoint */
-  WEBUSB_EPOUT_SIZE,  /* wMaxPacketSize: */
-  0x00,
-  0x01,/* bInterval: Polling Interval */
-#endif // HAVE_WEBUSB
 } ;
 
 #ifdef HAVE_IO_U2F
@@ -510,6 +556,22 @@ __ALIGN_BEGIN const uint8_t const USBD_HID_Desc_fido[] __ALIGN_END =
 };
 #endif // HAVE_IO_U2F
 
+#ifdef HAVE_USB_HIDKBD
+/* USB HID device Configuration Descriptor */
+__ALIGN_BEGIN const uint8_t const USBD_HID_Desc_kbd[] __ALIGN_END =
+{
+  /******************** Descriptor of HID *************************/
+  0x09,         /*bLength: HID Descriptor size*/
+  HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
+  0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
+  0x01,
+  0x21,         /*bCountryCode: Hardware target country*/ // 0x21: US, 0x08: FR, 0x0D: ISO Intl
+  0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
+  0x22,         /*bDescriptorType*/
+  sizeof(HID_ReportDesc_kbd),/*wItemLength: Total length of Report descriptor*/
+  0x00,
+};
+#else 
 /* USB HID device Configuration Descriptor */
 __ALIGN_BEGIN const uint8_t const USBD_HID_Desc[] __ALIGN_END =
 {
@@ -524,6 +586,7 @@ __ALIGN_BEGIN const uint8_t const USBD_HID_Desc[] __ALIGN_END =
   sizeof(HID_ReportDesc),/*wItemLength: Total length of Report descriptor*/
   0x00,
 };
+#endif // HAVE_USB_HIDKBD
 
 /* USB Standard Device Descriptor */
 static __ALIGN_BEGIN const uint8_t const USBD_DeviceQualifierDesc[] __ALIGN_END =
@@ -686,9 +749,15 @@ uint8_t* USBD_HID_GetHidDescriptor_impl(uint16_t* len) {
       *len = sizeof(USBD_HID_Desc_fido);
       return (uint8_t*)USBD_HID_Desc_fido; 
 #endif // HAVE_IO_U2F
+#ifdef HAVE_USB_HIDKBD
+    case HID_INTF:
+      *len = sizeof(USBD_HID_Desc_kbd);
+      return (uint8_t*)USBD_HID_Desc_kbd; 
+#else
     case HID_INTF:
       *len = sizeof(USBD_HID_Desc);
       return (uint8_t*)USBD_HID_Desc; 
+#endif // HAVE_USB_HIDKBD
   }
   *len = 0;
   return 0;
@@ -717,9 +786,15 @@ uint8_t* USBD_HID_GetReportDescriptor_impl(uint16_t* len) {
     *len = sizeof(HID_ReportDesc_fido);
     return (uint8_t*)HID_ReportDesc_fido;
 #endif // HAVE_IO_U2F
+#ifdef HAVE_USB_HIDKBD
+  case HID_INTF:
+    *len = sizeof(HID_ReportDesc_kbd);
+    return (uint8_t*)HID_ReportDesc_kbd;
+#else
   case HID_INTF:
     *len = sizeof(HID_ReportDesc);
     return (uint8_t*)HID_ReportDesc;
+#endif // HAVE_USB_HIDKBD
   }
   *len = 0;
   return 0;
@@ -742,37 +817,6 @@ uint8_t* USBD_HID_GetReportDescriptor_impl(uint16_t* len) {
 extern volatile unsigned short G_io_apdu_length;
 
 #ifdef HAVE_IO_U2F
-
-/**
-  * @brief  USBD_HID_Init
-  *         Initialize the HID interface
-  * @param  pdev: device instance
-  * @param  cfgidx: Configuration index
-  * @retval status
-  */
-uint8_t  USBD_U2F_Init (USBD_HandleTypeDef *pdev, 
-                               uint8_t cfgidx)
-{
-  UNUSED(cfgidx);
-
-  /* Open EP IN */
-  USBD_LL_OpenEP(pdev,
-                 U2F_EPIN_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 U2F_EPIN_SIZE);
-  
-  /* Open EP OUT */
-  USBD_LL_OpenEP(pdev,
-                 U2F_EPOUT_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 U2F_EPOUT_SIZE);
-
-        /* Prepare Out endpoint to receive 1st packet */ 
-  USBD_LL_PrepareReceive(pdev, U2F_EPOUT_ADDR, U2F_EPOUT_SIZE);
-
-  return USBD_OK;
-}
-
 uint8_t  USBD_U2F_DataIn_impl (USBD_HandleTypeDef *pdev, 
                               uint8_t epnum)
 {
@@ -803,20 +847,6 @@ uint8_t  USBD_U2F_DataOut_impl (USBD_HandleTypeDef *pdev,
 }
 #endif // HAVE_IO_U2F
 
-uint8_t  USBD_HID_DataIn_impl (USBD_HandleTypeDef *pdev, 
-                              uint8_t epnum)
-{
-  UNUSED(pdev);
-  switch (epnum) {
-    // HID gen endpoint
-    case (HID_EPIN_ADDR&0x7F):
-      io_usb_hid_sent(io_usb_send_apdu_data);
-      break;
-  }
-
-  return USBD_OK;
-}
-
 uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev, 
                               uint8_t epnum, uint8_t* buffer)
 {
@@ -828,6 +858,7 @@ uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
     // prepare receiving the next chunk (masked time)
     USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , HID_EPOUT_SIZE);
 
+#ifndef HAVE_USB_HIDKBD
     // avoid troubles when an apdu has not been replied yet
     if (G_io_apdu_media == IO_APDU_MEDIA_NONE) {      
       // add to the hid transport
@@ -842,96 +873,12 @@ uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
           break;
       }
     }
+#endif // HAVE_USB_HIDKBD
     break;
   }
 
   return USBD_OK;
 }
-
-#ifdef HAVE_WEBUSB
-
-uint8_t  USBD_WEBUSB_Init (USBD_HandleTypeDef *pdev, 
-                               uint8_t cfgidx)
-{
-  UNUSED(cfgidx);
-
-  /* Open EP IN */
-  USBD_LL_OpenEP(pdev,
-                 WEBUSB_EPIN_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 WEBUSB_EPIN_SIZE);
-  
-  /* Open EP OUT */
-  USBD_LL_OpenEP(pdev,
-                 WEBUSB_EPOUT_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 WEBUSB_EPOUT_SIZE);
-
-        /* Prepare Out endpoint to receive 1st packet */ 
-  USBD_LL_PrepareReceive(pdev, WEBUSB_EPOUT_ADDR, WEBUSB_EPOUT_SIZE);
-
-  return USBD_OK;
-}
-
-uint8_t  USBD_WEBUSB_DeInit (USBD_HandleTypeDef *pdev, 
-                                 uint8_t cfgidx) {
-  UNUSED(pdev);
-  UNUSED(cfgidx);
-  return USBD_OK;
-}
-
-uint8_t  USBD_WEBUSB_Setup (USBD_HandleTypeDef *pdev, 
-                                USBD_SetupReqTypedef *req)
-{
-  UNUSED(pdev);
-  UNUSED(req);
-  return USBD_OK;
-}
-
-uint8_t  USBD_WEBUSB_DataIn (USBD_HandleTypeDef *pdev, 
-                              uint8_t epnum)
-{
-  UNUSED(pdev);
-  switch (epnum) {
-    // HID gen endpoint
-    case (WEBUSB_EPIN_ADDR&0x7F):
-      io_usb_hid_sent(io_usb_send_apdu_data_ep0x83);
-      break;
-  }
-  return USBD_OK;
-}
-
-uint8_t USBD_WEBUSB_DataOut (USBD_HandleTypeDef *pdev, 
-                              uint8_t epnum, uint8_t* buffer)
-{
-  // only the data hid endpoint will receive data
-  switch (epnum) {
-
-  // HID gen endpoint
-  case (WEBUSB_EPOUT_ADDR&0x7F):
-    // prepare receiving the next chunk (masked time)
-    USBD_LL_PrepareReceive(pdev, WEBUSB_EPOUT_ADDR, WEBUSB_EPOUT_SIZE);
-
-    // avoid troubles when an apdu has not been replied yet
-    if (G_io_apdu_media == IO_APDU_MEDIA_NONE) {      
-      // add to the hid transport
-      switch(io_usb_hid_receive(io_usb_send_apdu_data_ep0x83, buffer, io_seproxyhal_get_ep_rx_size(WEBUSB_EPOUT_ADDR))) {
-        default:
-          break;
-
-        case IO_USB_APDU_RECEIVED:
-          G_io_apdu_media = IO_APDU_MEDIA_USB_WEBUSB; // for application code
-          G_io_apdu_state = APDU_USB_WEBUSB; // for next call to io_exchange
-          G_io_apdu_length = G_io_usb_hid_total_length;
-          break;
-      }
-    }
-    break;
-  }
-
-  return USBD_OK;
-}
-#endif // HAVE_WEBUSB
 
 /** @defgroup USBD_HID_Private_Functions
   * @{
@@ -952,7 +899,7 @@ const USBD_DescriptorsTypeDef const HID_Desc = {
 #ifdef HAVE_IO_U2F
 static const USBD_ClassTypeDef const USBD_U2F = 
 {
-  USBD_U2F_Init,
+  USBD_HID_Init,
   USBD_HID_DeInit,
   USBD_HID_Setup,
   NULL, /*EP0_TxSent*/  
@@ -976,7 +923,7 @@ static const USBD_ClassTypeDef const USBD_HID =
   USBD_HID_Setup,
   NULL, /*EP0_TxSent*/  
   NULL, /*EP0_RxReady*/ /* STATUS STAGE IN */
-  USBD_HID_DataIn_impl, /*DataIn*/
+  NULL, /*DataIn*/
   USBD_HID_DataOut_impl, /*DataOut*/
   NULL, /*SOF */
   NULL,
@@ -986,102 +933,6 @@ static const USBD_ClassTypeDef const USBD_HID =
   USBD_GetCfgDesc_impl,
   USBD_GetDeviceQualifierDesc_impl,
 };
-
-#ifdef HAVE_WEBUSB
-
-// arbitrary vendor choosen
-#define WEBUSB_VENDOR_CODE 0x1E
-
-// from https://wicg.github.io/webusb/#webusb-platform-capability-descriptor
-// see also this (for endianness explanation)
-// https://github.com/WICG/webusb/issues/115#issuecomment-352206549
-#define WEBUSB_UUID 0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65
-
-#define WEBUSB_REQ_GET_URL             0x02
-
-#define WEBUSB_DT_DESCRIPTOR_SET_HEADER 0
-#define WEBUSB_DT_CONFIGURATION_SUBSET_HEADER 1
-#define WEBUSB_DT_FUNCTION_SUBSET_HEADER 2
-#define WEBUSB_DT_URL 3
-
-#define WEBUSB_URL_SCHEME_HTTP 0
-#define WEBUSB_URL_SCHEME_HTTPS 1
-#define WEBUSB_URL_SCHEME_CUSTOM 255
-
-unsigned char const C_webusb_url_descriptor[] = {
-  // bLength
-  3 + WEBUSB_URL_SIZE_B,
-  // bDescriptorType
-  WEBUSB_DT_URL,
-  // bScheme
-  WEBUSB_URL_SCHEME_HTTPS,
-  // URL
-  WEBUSB_URL
-};
-
-/* USB 3.1 Descriptor Types - Table 9-6 */
-#define USB_DT_BOS            15
-#define USB_DT_DEVICE_CAPABILITY    16
-
-#define USB_DT_BOS_SIZE 5
-
-/* USB Device Capability Types - USB 3.1 Table 9-14 */
-#define USB_DC_PLATFORM         5
-
-unsigned char const C_usb_bos[] = {
-  USB_DT_BOS_SIZE, // bLength (5)
-  USB_DT_BOS, // bDescriptorType
-  (5+8+16), // wTotalLength
-  (5+8+16)>>8, 
-  1, //bNumberDeviceCapabilities
-
-  // capability descriptor
-  8+16, // bLength
-  USB_DT_DEVICE_CAPABILITY, // bDescriptorType
-  USB_DC_PLATFORM, // bDevCapability
-  0, // bReserved
-  WEBUSB_UUID, // UUID[16]
-  0x00, // bcdVersion
-  0x01, 
-  WEBUSB_VENDOR_CODE, // bVencordCode
-  1 // iLanding
-};
-
-// upon unsupported request, check for webusb request
-void USBD_CtlError( USBD_HandleTypeDef *pdev , USBD_SetupReqTypedef *req) {
-  if ((req->bmRequest & 0x80) && req->bRequest == WEBUSB_VENDOR_CODE && req->wIndex == WEBUSB_REQ_GET_URL
-    // HTTPS url
-    && req->wValue == 1) {
-    // return the URL descriptor
-    USBD_CtlSendData (pdev, (unsigned char*)C_webusb_url_descriptor, sizeof(C_webusb_url_descriptor));
-  }
-  else if ((req->bmRequest & 0x80) && req->bRequest == USB_REQ_GET_DESCRIPTOR && (req->wValue>>8) == USB_DT_BOS) {
-    USBD_CtlSendData(pdev, (unsigned char*)C_usb_bos, sizeof(C_usb_bos));
-  }
-  else {
-    USBD_CtlStall(pdev);
-  }
-}
-
-static const USBD_ClassTypeDef USBD_WEBUSB = 
-{
-  USBD_WEBUSB_Init,
-  USBD_WEBUSB_DeInit,
-  USBD_WEBUSB_Setup,
-  NULL, /*EP0_TxSent*/  
-  NULL, /*EP0_RxReady*/
-  USBD_WEBUSB_DataIn,
-  USBD_WEBUSB_DataOut,
-  NULL, /*SOF */      
-  NULL, /*ISOIn*/
-  NULL, /*ISOOut*/
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetDeviceQualifierDesc_impl,
-};
-
-#endif // HAVE_WEBUSB
 
 #ifdef HAVE_USB_CLASS_CCID
 static const USBD_ClassTypeDef USBD_CCID = 
@@ -1101,7 +952,6 @@ static const USBD_ClassTypeDef USBD_CCID =
   USBD_GetCfgDesc_impl,
   USBD_GetDeviceQualifierDesc_impl,
 };
-
 
 uint8_t SC_AnswerToReset (uint8_t voltage, uint8_t* atr_buffer) {
   UNUSED(voltage);
@@ -1146,10 +996,6 @@ void USB_power(unsigned char enabled) {
     USBD_RegisterClassForInterface(CCID_INTF, &USBD_Device, (USBD_ClassTypeDef*)&USBD_CCID);
 #endif // HAVE_USB_CLASS_CCID
 
-#ifdef HAVE_WEBUSB
-    USBD_RegisterClassForInterface(WEBUSB_INTF, &USBD_Device, (USBD_ClassTypeDef*)&USBD_WEBUSB);
-    USBD_LL_PrepareReceive(&USBD_Device, WEBUSB_EPOUT_ADDR , WEBUSB_EPOUT_SIZE);
-#endif // HAVE_WEBUSB
 
     /* Start Device Process */
     USBD_Start(&USBD_Device);

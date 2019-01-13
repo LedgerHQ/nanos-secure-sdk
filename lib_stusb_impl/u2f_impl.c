@@ -106,8 +106,30 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
         return;
     }
 
+
     // Unwrap magic
     keyHandleLength = buffer[U2F_HANDLE_SIGN_HEADER_SIZE-1];
+    
+    // reply to the "get magic" question of the host
+    if (keyHandleLength == 5) {
+        // GET U2F PROXY PARAMETERS
+        // this apdu is not subject to proxy magic masking
+        // APDU is F1 D0 00 00 00 to get the magic proxy
+        // RAPDU: <>
+        if (os_memcmp(buffer+U2F_HANDLE_SIGN_HEADER_SIZE, "\xF1\xD0\x00\x00\x00", 5) == 0 ) {
+            // U2F_PROXY_MAGIC is given as a 0 terminated string
+            G_io_apdu_buffer[0] = sizeof(U2F_PROXY_MAGIC)-1;
+            os_memmove(G_io_apdu_buffer+1, U2F_PROXY_MAGIC, sizeof(U2F_PROXY_MAGIC)-1);
+            os_memmove(G_io_apdu_buffer+1+sizeof(U2F_PROXY_MAGIC)-1, "\x90\x00\x90\x00", 4);
+            u2f_message_reply(service, U2F_CMD_MSG,
+                              (uint8_t *)G_io_apdu_buffer,
+                              G_io_apdu_buffer[0]+1+2+2);
+            // processing finished. don't go further in the u2f msg processing
+            return;
+        }
+    }
+    
+
     for (i = 0; i < keyHandleLength; i++) {
         buffer[U2F_HANDLE_SIGN_HEADER_SIZE + i] ^= U2F_PROXY_MAGIC[i % (sizeof(U2F_PROXY_MAGIC)-1)];
     }
@@ -125,7 +147,7 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
                   (uint8_t *)SW_PROOF_OF_PRESENCE_REQUIRED,
                   sizeof(SW_PROOF_OF_PRESENCE_REQUIRED));
         return;
-    }
+    }    
 
     // make the apdu available to higher layers
     os_memmove(G_io_apdu_buffer, buffer + U2F_HANDLE_SIGN_HEADER_SIZE, keyHandleLength);

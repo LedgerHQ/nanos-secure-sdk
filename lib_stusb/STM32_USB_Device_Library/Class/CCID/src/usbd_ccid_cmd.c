@@ -703,9 +703,10 @@ uint8_t  PC_TO_RDR_Secure(void)
                                   CHK_PARAM_CARD_PRESENT |\
                                   CHK_PARAM_ABORT );
   
-  if (error != 0) 
+  if (error != 0) {
     G_io_ccid.bulk_header.bulkin.dwLength = 0;
     return error;
+  }
   
   bBWI = G_io_ccid.bulk_header.bulkout.bSpecific_0;
   wLevelParameter = (G_io_ccid.bulk_header.bulkout.bSpecific_1 + ((uint16_t)G_io_ccid.bulk_header.bulkout.bSpecific_2<<8));

@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -34,6 +34,15 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define IS_POW2(x) (((x) & ((x)-1)) == 0)
+#define UPPER_ALIGN(adr, align, type)                                          \
+    (type)((type)((type)(adr) +                                                \
+                  (type)((type)((type)MAX((type)(align), (type)1UL)) -         \
+                         (type)1UL)) &                                         \
+           (type)(~(type)((type)((type)MAX(((type)align), (type)1UL)) -        \
+                          (type)1UL)))
+#define LOWER_ALIGN(adr, align, type)                                          \
+    ((type)(adr) & (type)((type) ~(type)(                                      \
+                       ((type)MAX((type)(align), (type)1UL)) - (type)1UL)))
 
 #ifdef macro_offsetof
 #define offsetof(type, field) ((unsigned int)&(((type *)NULL)->field))
@@ -60,6 +69,7 @@ typedef unsigned short exception_t;
 //#define macro_offsetof // already defined in stddef.h
 #define OS_LITTLE_ENDIAN
 #define NATIVE_64BITS
+#define NVM_ERASED_WORD_VALUE 0xFFFFFFFFUL
 
 #define WIDE // const // don't !!
 #define WIDE_AS_INT unsigned long int
@@ -97,7 +107,6 @@ int setjmp(jmp_buf __jmpb);
 
 #define UNUSED(x) (void)x
 
-
 #include "os_apilevel.h"
 
 #ifndef NULL
@@ -110,9 +119,8 @@ int setjmp(jmp_buf __jmpb);
 
 // Placement Independence Code reference
 // function that align the deferenced value in a rom struct to use it depending
-// on the execution address
-// can be used even if code is executing at the same place where it had been
-// linked
+// on the execution address can be used even if code is executing at the same
+// place where it had been linked
 #ifndef PIC
 #define PIC(x) pic((unsigned int)x)
 unsigned int pic(unsigned int linked_address);
@@ -156,8 +164,7 @@ unsigned int pic(unsigned int linked_address);
 
 /**
  * Application has been loaded using a secure channel opened using the
- * bootloader's issuer
- * public key. This application is ledger legit.
+ * bootloader's issuer public key. This application is ledger legit.
  */
 #define APPLICATION_FLAG_ISSUER 0x1
 
@@ -183,15 +190,13 @@ unsigned int pic(unsigned int linked_address);
 #define APPLICATION_FLAG_GLOBAL_PIN 0x40
 
 // This flag means the application is meant to be debugged and allows for dump
-// or core ARM register in
-// case of a fault detection
+// or core ARM register in case of a fault detection
 #define APPLICATION_FLAG_DEBUG 0x80
 
 /**
  * Mark this application as defaultly booting along with the bootloader (no
- * application menu displayed)
- * Only one application can have this at a time. It is managed by the bootloader
- * interface.
+ * application menu displayed) Only one application can have this at a time. It
+ * is managed by the bootloader interface.
  */
 #define APPLICATION_FLAG_AUTOBOOT 0x100
 
@@ -315,7 +320,7 @@ SYSCALL REENTRANT(void reset(void));
 #define IO_RETURN_AFTER_TX 0x20
 #define IO_ASYNCH_REPLY                                                        \
     0x10 // avoid apdu state reset if tx_len == 0 when we're expected to reply
-#define IO_FLAGS 0xF0
+#define IO_FLAGS 0xF8
 unsigned short io_exchange(unsigned char channel_and_flags,
                            unsigned short tx_len);
 
@@ -325,6 +330,7 @@ typedef enum {
     IO_APDU_MEDIA_BLE,
     IO_APDU_MEDIA_NFC,
     IO_APDU_MEDIA_USB_CCID,
+    IO_APDU_MEDIA_USB_WEBUSB,
     IO_APDU_MEDIA_RAW,
     IO_APDU_MEDIA_U2F,
 } io_apdu_media_t;
@@ -361,8 +367,11 @@ unsigned char io_event(unsigned char channel);
  */
 unsigned short io_timeout(unsigned short last_timeout);
 // write in persistent memory, to make things easy keep a layout of the memory
-// in a structure and update fields upon needs
-// NOTE: accept copy from far memory to another far memory.
+// in a structure and update fields upon needs The function throws exception
+// when the requesting application buffer being written in its declared data
+// segment. The later is declared during the application slot allocation (using
+// --dataSize parameter in the python scripts) NOTE: accept copy from far memory
+// to another far memory.
 // @param src_adr NULL to fill with 00's
 SYSCALL void nvm_write(void WIDE *dst_adr PLENGTH(src_len),
                        void WIDE *src_adr PLENGTH(src_len),
@@ -443,7 +452,8 @@ void try_context_set(try_context_t *context);
     CPP_CONCAT(__FINALLY, L)                                                   \
         : /* has TRY clause ended without nested throw ? */                    \
           if (try_context_get() == &__try##L) {                                \
-        /* restore previous context manually (as a throw would have) */        \
+        /* restore previous context manually (as a throw would have when       \
+         * caught) */                                                          \
         try_context_set(try_context_get_previous());                           \
     }
 
@@ -503,6 +513,7 @@ void os_longjmp(unsigned int exception) __attribute__((noreturn));
 #define EXCEPTION_IO_RESET 16
 #define EXCEPTION_CXPORT 17
 #define EXCEPTION_SYSTEM 18
+#define NOT_ENOUGH_SPACE 19
 
 /* ----------------------------------------------------------------------- */
 /* -                          CRYPTO FUNCTIONS                           - */
@@ -565,6 +576,8 @@ typedef enum bolos_ux_e {
 
     BOLOS_UX_MCU_UPGRADE_REQUIRED,
     BOLOS_UX_CONSENT_RUN_APP,
+    BOLOS_UX_SECURITY_BOOT_DELAY,
+    BOLOS_UX_CONSENT_GENUINENESS,
 
 } bolos_ux_t;
 
@@ -596,10 +609,9 @@ typedef void (*appmain_t)(void);
          // application
 // Library Dependencies are a tuple of 2 LV, the lib appname and the lib version
 // (only exact for now). When lib version is not specified, it is not check,
-// only name is asserted
-// The DEPENDENCY tag may have several occurences, one for each dependency (by
-// name). Malformed (multiple dep to the same lib with different version is is
-// not ORed but ANDed, and then considered bogus)
+// only name is asserted The DEPENDENCY tag may have several occurences, one for
+// each dependency (by name). Malformed (multiple dep to the same lib with
+// different version is is not ORed but ANDed, and then considered bogus)
 #define BOLOS_TAG_DEPENDENCY 0x06
 // first autorised tag value for user data
 #define BOLOS_TAG_USER_TAG 0x20
@@ -711,7 +723,7 @@ typedef struct bolos_ux_params_s {
 #define BOLOS_UX_MODE_SYMBOLS 2
 #define BOLOS_UX_MODE_COUNT 3 // number of keyboard modes
             unsigned int mode;
-// + 1 EOS (0)
+            // + 1 EOS (0)
 #define BOLOS_UX_KEYBOARD_TEXT_BUFFER_SIZE 32
             unsigned char entered_text[BOLOS_UX_KEYBOARD_TEXT_BUFFER_SIZE + 1];
         } keyboard;
@@ -739,6 +751,10 @@ typedef struct bolos_ux_params_s {
         struct {
             unsigned int id;
         } onboard;
+
+        struct {
+            unsigned int percent;
+        } boot_delay;
 
     } u;
 
@@ -777,9 +793,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_set_seed(
     unsigned int words_length);
 
 // SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void
-// os_perso_set_alternate_pin(unsigned char* pin PLENGTH(pinLength), unsigned
-// int pinLength);
-// SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void
+// os_perso_set_alternate_pin(unsigned char* pin PLENGTH(pinLength), unsigned int
+// pinLength); SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void
 // os_perso_set_alternate_seed(unsigned char* seed PLENGTH(seedLength), unsigned
 // int seedLength);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(
@@ -789,20 +804,27 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 // checked in the ux flow to avoid asking the pin for example
 // NBA : could also be checked by applications running in unsecure mode - thus
 // unprivilegied
+// @return BOLOS_UX_OK when perso is onboarded.
 SYSCALL unsigned int os_perso_isonboarded(void);
-
 
 // derive the seed for the requested BIP32 path
 SYSCALL void os_perso_derive_node_bip32(
-    cx_curve_t curve, const unsigned int *path PLENGTH(4 * pathLength),
-    unsigned int pathLength, unsigned char *privateKey PLENGTH(32),
+    cx_curve_t curve,
+    const unsigned int *path PLENGTH(4 * (pathLength & 0x0FFFFFFF)),
+    unsigned int pathLength,
+    unsigned char *privateKey PLENGTH(scc__cx_scc_derive_key_size__curve),
     unsigned char *chain PLENGTH(32));
+
+#define HDW_NORMAL 0
+#define HDW_ED25519_SLIP10 1
 // derive the seed for the requested BIP32 path, with the custom provided
 // seed_key for the sha512 hmac ("Bitcoin Seed", "Nist256p1 Seed", "ed25519
 // seed", ...)
 SYSCALL void os_perso_derive_node_bip32_seed_key(
-    cx_curve_t curve, const unsigned int *path PLENGTH(4 * pathLength),
-    unsigned int pathLength, unsigned char *privateKey PLENGTH(32),
+    unsigned int mode, cx_curve_t curve,
+    const unsigned int *path PLENGTH(4 * (pathLength & 0x0FFFFFFF)),
+    unsigned int pathLength,
+    unsigned char *privateKey PLENGTH(scc__cx_scc_derive_key_size2__mode_curve),
     unsigned char *chain PLENGTH(32),
     unsigned char *seed_key PLENGTH(seed_key_length),
     unsigned int seed_key_length);
@@ -830,12 +852,14 @@ SYSCALL unsigned int os_endorsement_key2_derive_sign_data(
 
 // Global PIN
 #define DEFAULT_PIN_RETRIES 3
-SYSCALL PERMISSION(
-    APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_is_validated(void);
+/*
+ * @return BOLOS_UX_OK if pin validated
+ */
+SYSCALL unsigned int os_global_pin_is_validated(void);
 /**
  * Validating the pin also setup the identity linked with this pin (normal or
  * alternate)
- * @return 1 if pin validated
+ * @return BOLOS_UX_OK if pin validated
  */
 SYSCALL
     PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_check(
@@ -869,9 +893,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_ux_register(
 
 // return !0 when ux scenario has ended, else 0
 // while not ended, all display/touch/ticker and other events are to be
-// processed by the ux. only io is not processed.
-// when returning !0 the application must send a general status (or continue its
-// command flow)
+// processed by the ux. only io is not processed. when returning !0 the
+// application must send a general status (or continue its command flow)
 TASKSWITCH unsigned int
 os_ux(bolos_ux_params_t *params PLENGTH(sizeof(bolos_ux_params_t)));
 
@@ -880,6 +903,24 @@ os_ux(bolos_ux_params_t *params PLENGTH(sizeof(bolos_ux_params_t)));
 // when returning the application must send a general status (or continue its
 // command flow)
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
+
+#ifdef HAVE_BOLOS_WITH_VIRGIN_ATTESTATION
+/**
+ * Syscall that performs virgin attestation challenge signing.
+ * Please note that to avoid device tracking, the syscall must only be called if
+ * the user is aware. Therefore the BOLOS_UX_CONSENT_GENUINENESS can be used to
+ * ask him that. His reply is only cleared upon device powercycle. \return
+ * length of the response response : <L1V:virgin_attestation_pubkey>
+ * <L1V:virgin_attestation_certificate>
+ * <L1V:ecdsa_sign(key=virgin_attestation_privkey(256 bits),
+ * data=sha256(sha256(challenge)+sha256(requesting_application))>
+ */
+SYSCALL unsigned int os_attestation_virgin_process(
+    unsigned char *out_buffer PLENGTH(out_maxlength),
+    unsigned int out_maxlength,
+    unsigned char *challenge PLENGTH(challenge_length),
+    unsigned int challenge_length);
+#endif // HAVE_BOLOS_WITH_VIRGIN_ATTESTATION
 
 /* ----------------------------------------------------------------------- */
 /* -                            LIB FUNCTIONS                            - */
@@ -890,7 +931,8 @@ unsigned int os_ux_blocking(bolos_ux_params_t *params);
  * call_parameters[1] = library call identifier (0 = init, ...)
  * call_parameters[2+] = called function parameters
  */
-SYSCALL unsigned int os_lib_call(unsigned int *call_parameters);
+SYSCALL unsigned int
+os_lib_call(unsigned int *call_parameters PLENGTH(3 * sizeof(unsigned int)));
 SYSCALL void os_lib_end(unsigned int returnvalue);
 SYSCALL void os_lib_throw(unsigned int exception);
 
@@ -913,17 +955,33 @@ extern volatile unsigned int G_io_usb_hid_total_length;
 
 void io_usb_hid_init(void);
 
+/**
+ * Receive next HID transport packet, returns IO_USB_APDU_RECEIVED when a
+ * complete APDU has been received in the G_io_apdu_buffer To be called
+ * typically upon USB OUT event
+ */
 io_usb_hid_receive_status_t
 io_usb_hid_receive(io_send_t sndfct, unsigned char *buffer, unsigned short l);
 
-unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
-                                   io_recv_t rcvfct, unsigned char flags);
+/**
+ * Mark the last chunk transmitted as sent.
+ * To be called typically upon USB IN ACK event
+ */
+void io_usb_hid_sent(io_send_t sndfct);
+
+/**
+ * Request transmission of an APDU from the G_io_apdu_buffer using the HID
+ * transport protocol
+ */
+void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength);
 
 /* ----------------------------------------------------------------------- */
 /* -                            ID FUNCTIONS                             - */
 /* ----------------------------------------------------------------------- */
 #define OS_FLAG_RECOVERY 1
 #define OS_FLAG_SIGNED_MCU_CODE 2
+#define OS_FLAG_ONBOARDED 4
+#define OS_FLAG_PIN_VALIDATED 128
 //#define OS_FLAG_CUSTOM_UX       4
 /* Enable application to retrieve OS current running options */
 SYSCALL unsigned int os_flags(void);
@@ -1004,14 +1062,14 @@ typedef struct meminfo_s {
 } meminfo_t;
 
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_get_memory_info(
-    meminfo_t *meminfo);
+    meminfo_t *meminfo PLENGTH(sizeof(meminfo_t)));
 
 // arbitraty max size for application names.
 #define BOLOS_APPNAME_MAX_SIZE_B 32
 
 // read from the application's install parameter TLV (if present), else 0 is
-// returned (no exception thrown).
-// takes into account the currently loaded application
+// returned (no exception thrown). takes into account the currently loaded
+// application
 #define OS_REGISTRY_GET_TAG_OFFSET_COMPARE_WITH_BUFFER (0x80000000UL)
 #define OS_REGISTRY_GET_TAG_OFFSET_GET_LENGTH (0x40000000UL)
 
@@ -1040,6 +1098,17 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned int os_registry_get_tag(
     unsigned int value_offset, void *buffer PLENGTH(maxlength),
     unsigned int maxlength);
 
+// Copy the currently running application tag from its install parameters to the
+// given user buffer. Only APPNAME/APPVERSION/DERIVEPATH/ICON tags are
+// retrievable to avoid install parameters private information. Warning: this
+// function returns tag content of the application lastly scheduled to run, not
+// the tag content of the currently executed piece of code (libraries subcalls)
+SYSCALL unsigned int
+os_registry_get_current_app_tag(unsigned int tag,
+                                unsigned char *buffer PLENGTH(maxlen),
+                                unsigned int maxlen);
+
+#ifndef HAVE_BOLOS_NO_CUSTOMCA
 /* ----------------------------------------------------------------------- */
 /* -                         CUSTOM CERTIFICATE AUTHORITY                - */
 /* ----------------------------------------------------------------------- */
@@ -1049,10 +1118,46 @@ SYSCALL unsigned int
 os_customca_verify(unsigned char *hash PLENGTH(32),
                    unsigned char *sign PLENGTH(sign_length),
                    unsigned int sign_length);
+#endif // HAVE_BOLOS_NO_CUSTOMCA
 
 /* ----------------------------------------------------------------------- */
 /* -                         PRECISE WATCHDOG                            - */
 /* ----------------------------------------------------------------------- */
+
+#ifndef BOLOS_SECURITY_BOOT_DELAY_H
+#ifdef BOLOS_RELEASE
+// Boot delay before wiping the fault detection counter
+#define BOLOS_SECURITY_BOOT_DELAY_H 5
+#else // BOLOS_RELEASE
+#define BOLOS_SECURITY_BOOT_DELAY_H 1 - (60 * 60 * 100) + 15 * 100
+#endif // BOLOS_RELEASE
+#endif // BOLOS_SECURITY_BOOT_DELAY_H
+#ifndef BOLOS_SECURITY_ONBOARD_DELAY_S
+#ifdef BOLOS_RELEASE
+// Minimal time for an onboard
+#define BOLOS_SECURITY_ONBOARD_DELAY_S (2 * 60)
+#else // BOLOS_RELEASE
+// small overhead in dev
+#define BOLOS_SECURITY_ONBOARD_DELAY_S 5
+#endif // BOLOS_RELEASE
+#endif // BOLOS_SECURITY_ONBOARD_DELAY_S
+
+#ifndef BOLOS_SECURITY_ATTESTATION_DELAY_S
+// Mininal time interval in between two use of the device's private key (SCP
+// opening and endorsement)
+#define BOLOS_SECURITY_ATTESTATION_DELAY_S 15
+#endif // BOLOS_SECURITY_ATTESTATION_DELAY_S
+
+#define SAFE_DESYNCH()                                                         \
+    {                                                                          \
+        volatile int a, b;                                                     \
+        volatile unsigned int i = (cx_rng_u8() + 1) * 30;                      \
+        a = b = 1;                                                             \
+        while (i--) {                                                          \
+            a = 1 + (b << (a / 2));                                            \
+            b = cx_rng_u8();                                                   \
+        };                                                                     \
+    }
 
 typedef enum {
     /* Watchdog consumption lead to no action being taken, overflowed value is
@@ -1067,8 +1172,7 @@ typedef enum {
 
 /**
  * This function arm a low level watchdog, when the value is consumed, and
- * depending on the requested behavior,
- * an action can be taken.
+ * depending on the requested behavior, an action can be taken.
  * @throw INVALID_PARAMETER when the useconds value overflows the possible
  * value.
  */
@@ -1086,21 +1190,39 @@ int os_watchdog_value(void);
  */
 void os_watchdog_stop(void);
 
+#ifdef HAVE_TINY_COROUTINE
+
 /* ----------------------------------------------------------------------- */
-/* -                         MEMORY PROTECTION UNIT                      - */
+/* -                            CO ROUTINES                              - */
 /* ----------------------------------------------------------------------- */
 
 /**
- * Enable/disable the seed container FLASH region memory protection for
- * read/write operations
- * @return the previous state of protection before applying the new value
+ * Coroutine entry function. Called when the task is run first
  */
-unsigned int os_mpu_protect_flash(unsigned int prot_enabled);
-/**
- * Enable/disable the os private RAM region memory protection for read/write
- * operations
- * @return the previous state of protection before applying the new value
- */
-unsigned int os_mpu_protect_ram(unsigned int prot_enabled);
+typedef void (*tcr_entry_function_t)(void);
+
+void tcr_init(void);
+
+#define TCR_FLAG_PRIORITY_MAX 0x0
+#define TCR_FLAG_PRIORITY_MIN 0xF
+void tcr_add(unsigned int priority, unsigned int stack_ptr,
+             unsigned int stack_size, tcr_entry_function_t coroutine_entry);
+void tcr_harakiri(void);
+void tcr_yield(void);
+void tcr_start(void);
+
+#endif // HAVE_TINY_COROUTINE
+
+/* ----------------------------------------------------------------------- */
+/*   -                            HELPERS                                - */
+/* ----------------------------------------------------------------------- */
+
+#define OS_PARSE_BERTLV_OFFSET_COMPARE_WITH_BUFFER 0x80000000UL
+#define OS_PARSE_BERTLV_OFFSET_GET_LENGTH 0x40000000UL
+
+unsigned int os_parse_bertlv(unsigned char *mem, unsigned int mem_len,
+                             unsigned int *tlv_instance_offset,
+                             unsigned int tag, unsigned int offset,
+                             void **buffer, unsigned int maxlength);
 
 #endif // OS_H

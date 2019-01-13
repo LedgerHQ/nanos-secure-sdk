@@ -1,6 +1,6 @@
 #*******************************************************************************
 #   Ledger SDK
-#   (c) 2017 Ledger
+#   (c) 2017, 2018, 2019 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ log = $(if $(strip $(VERBOSE)),$1,@$1)
 
 CFLAGS   += -gdwarf-2  -gstrict-dwarf
 CFLAGS   += -O3 -Os 
+CFLAGS   += -I/usr/include
 CFLAGS   += -fomit-frame-pointer
 CFLAGS   += -mcpu=cortex-m0 -mthumb 
 CFLAGS   += -fno-common -mtune=cortex-m0 -mlittle-endian 
@@ -49,6 +50,7 @@ AFLAGS += -ggdb2 -O3 -Os -mcpu=cortex-m0 -fno-common -mtune=cortex-m0
 
 LDFLAGS  += -gdwarf-2  -gstrict-dwarf 
 LDFLAGS  += -O3 -Os
+LDFLAGS  += -I/usr/include
 LDFLAGS  += -fomit-frame-pointer
 LDFLAGS  += -Wall 
 LDFLAGS  += -mcpu=cortex-m0 -mthumb 

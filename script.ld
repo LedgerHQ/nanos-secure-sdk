@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Secure firmware
-*   (c) 2016, 2017 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ MEMORY
 }
 
 PAGE_SIZE  = 64;
-STACK_SIZE = 768;
+STACK_SIZE = 512;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
 
 SECTIONS
@@ -111,9 +111,11 @@ SECTIONS
     app_stack_canary = .;
     PROVIDE(app_stack_canary = .);
     . += 4;
-    _stack = .;
-    . = _stack + STACK_SIZE;
-    PROVIDE( _stack_size = STACK_SIZE );
+    _stack_validation = .;
+    . = _stack_validation + STACK_SIZE;
+    _stack = ABSOLUTE(END_STACK) - STACK_SIZE;
+    PROVIDE( _stack = ABSOLUTE(END_STACK) - STACK_SIZE);
+    _estack = ABSOLUTE(END_STACK);
     PROVIDE( _estack = ABSOLUTE(END_STACK) );
 
   } > SRAM = 0x00

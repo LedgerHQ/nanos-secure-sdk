@@ -1,19 +1,19 @@
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2016, 2017, 2018, 2019 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #ifndef CX_H
 #define CX_H
@@ -24,7 +24,6 @@
 /* ####################################################################### */
 /*                                    OPTIONS                              */
 /* ####################################################################### */
-
 
 /* ####################################################################### */
 /*                                  CHIP/LIB3rd                            */
@@ -57,54 +56,54 @@ typedef struct uint64_s uint64bits_t;
 typedef unsigned long long uint64bits_t;
 #endif
 
+
 /**
- * Some function take logical or of various flags. The follwing flags are
- * globally defined:
+ * Some function take logical or of various flags. The follwing flags are globally defined:
  * @rststar
  *
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  | bit pos    |  H constant                |   meanings |
+ *  | bit pos    |  H constant                |   meanings                                                       |
  *  +============+============================+==================================================================+
- *  |  0         | - CX_LAST                  | last block |
+ *  |  0         | - CX_LAST                  | last block                                                       |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  2:1       | - CX_ENCRYPT               | |
- *  |            | - CX_DECRYPT               | |
- *  |            | - CX_SIGN                  | |
- *  |            | - CX_VERIFY                | |
+ *  |  2:1       | - CX_ENCRYPT               |                                                                  |
+ *  |            | - CX_DECRYPT               |                                                                  |
+ *  |            | - CX_SIGN                  |                                                                  |
+ *  |            | - CX_VERIFY                |                                                                  |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  5:3       | - CX_PAD_NONE              | |
- *  |            | - CX_PAD_ISO9797M1         | |
- *  |            | - CX_PAD_ISO9797M2         | |
- *  |            | - CX_PAD_PKCS1_1o5         | |
- *  |            | - CX_PAD_PKCS1_PSS         | |
- *  |            | - CX_PAD_PKCS1_OAEP        | |
+ *  |  5:3       | - CX_PAD_NONE              |                                                                  |
+ *  |            | - CX_PAD_ISO9797M1         |                                                                  |
+ *  |            | - CX_PAD_ISO9797M2         |                                                                  |
+ *  |            | - CX_PAD_PKCS1_1o5         |                                                                  |
+ *  |            | - CX_PAD_PKCS1_PSS         |                                                                  |
+ *  |            | - CX_PAD_PKCS1_OAEP        |                                                                  |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  8:6       | - CX_CHAIN_ECB             | |
- *  |            | - CX_CHAIN_CBC             | |
- *  |  -DES      | - CX_CHAIN_CTR             | |
- *  |  -AES      | - CX_CHAIN_CFB             | |
- *  |            | - CX_CHAIN_OFB             | |
+ *  |  8:6       | - CX_CHAIN_ECB             |                                                                  |
+ *  |            | - CX_CHAIN_CBC             |                                                                  |
+ *  |  -DES      | - CX_CHAIN_CTR             |                                                                  |
+ *  |  -AES      | - CX_CHAIN_CFB             |                                                                  |
+ *  |            | - CX_CHAIN_OFB             |                                                                  |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  8:6       | - CX_NO_CANONICAL          | do not perform canonical sig |
- *  |            |                            | |
- *  | -ECDSA     |                            | |
- *  | -EDDSA     |                            | |
- *  | -ECSCHNORR |                            | |
+ *  |  8:6       | - CX_NO_CANONICAL          | do not perform canonical sig                                                                 |
+ *  |            |                            |                                                                  |
+ *  | -ECDSA     |                            |                                                                  |
+ *  | -EDDSA     |                            |                                                                  |
+ *  | -ECSCHNORR |                            |                                                                  |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  11:9      | - CX_RND_TRNG              | |
- *  |            | - CX_RND_PRNG              | |
- *  |            | - CX_RND_RFC6979           | |
- *  |            | - CX_RND_PROVIDED          | |
+ *  |  11:9      | - CX_RND_TRNG              |                                                                  |
+ *  |            | - CX_RND_PRNG              |                                                                  |
+ *  |            | - CX_RND_RFC6979           |                                                                  |
+ *  |            | - CX_RND_PROVIDED          |                                                                  |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  14:12     | - CX_ECDH_POINT            | share full point |
- *  |            | - CX_ECDH_X                | share only x coordinate |
- *  |            | - CX_ECSCHNORR_BSI03111    | |
- *  |            | - CX_ECSCHNORR_ISO14888_XY | |
- *  |            | - CX_ECSCHNORR_ISO14888_X  | |
- *  |            |  -CX_ECSCHNORR_LIBSECP     | |
+ *  |  14:12     | - CX_ECDH_POINT            | share full point                                                 |
+ *  |            | - CX_ECDH_X                | share only x coordinate                                          |
+ *  |            | - CX_ECSCHNORR_BSI03111    |                                                                  |
+ *  |            | - CX_ECSCHNORR_ISO14888_XY |                                                                  |
+ *  |            | - CX_ECSCHNORR_ISO14888_X  |                                                                  |
+ *  |            |  -CX_ECSCHNORR_LIBSECP     |                                                                  |
+ *  |            |  -CX_ECSCHNORR_Z           | Zilliqa scheme                                                   |
  *  +------------+----------------------------+------------------------------------------------------------------+
- *  |  15        | CX_NO_REINIT               | do not reinitialize context on
- * CX_LAST when supported            |
+ *  |  15        | CX_NO_REINIT               | do not reinitialize context on CX_LAST when supported            |
  *  +------------+----------------------------+------------------------------------------------------------------+
  *
  * @endrststar
@@ -176,7 +175,7 @@ typedef unsigned long long uint64bits_t;
 #define CX_ECSCHNORR_ISO14888_X (4 << 12)
 #define CX_ECSCHNORR_BSI03111 (5 << 12)
 #define CX_ECSCHNORR_LIBSECP (6 << 12)
-
+#define CX_ECSCHNORR_Z (7 << 12)
 /*
  * Bit 15
  */
@@ -212,8 +211,7 @@ SYSCALL unsigned char *cx_rng(unsigned char *buffer PLENGTH(len),
  * Generate determnist random number according to RFC6979.
  *
  * If x is not NULL, this is the first call. The function fill rnd with
- * canditate and V
- * with initial chaining value.
+ * canditate and V with initial chaining value.
  *
  * If x is NULL, this is subsequent call. rnd and V shall contain previous
  * returned values.
@@ -272,6 +270,10 @@ enum cx_md_e {
     CX_SHA3, // 28,32,48,64 bytes
     /** SHA3-XOF  Digest */
     CX_SHA3_XOF, // any bytes
+    /** */
+    CX_GROESTL,
+    /** */
+    CX_BLAKE2B,
 };
 /** Convenience type. See #cx_md_e. */
 typedef enum cx_md_e cx_md_t;
@@ -300,10 +302,9 @@ typedef struct cx_hash_header_s cx_hash_t;
  * @param  [in/out] hash
  *   Univers Continuation Blob.
  *   The hash context pointer shall point to  either a cx_ripemd160_t, either a
- * cx_sha256_t  or cx_sha512_t .
- *   The hash context shall be inited with 'cx_xxx_init'
- *   The hash context shall be in RAM
- *   The function should be called with a nice cast.
+ * cx_sha256_t  or cx_sha512_t . The hash context shall be inited with
+ * 'cx_xxx_init' The hash context shall be in RAM The function should be called
+ * with a nice cast.
  *
  * @note: 'out' length is implicit, no check is done
  *
@@ -563,6 +564,103 @@ SYSCALL int cx_keccak_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)),
 SYSCALL int cx_sha3_xof_init(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)),
                              unsigned int size, unsigned int out_length);
 
+/* ------------------------------- GROESTL ------------------------------- */
+
+#define ROWS 8
+#define COLS1024 16
+#define SIZE1024 (ROWS * COLS1024)
+typedef unsigned char BitSequence;
+/**  @Private */
+struct hashState_s {
+    uint8_t chaining[ROWS][COLS1024]; /* the actual state */
+    uint64_t block_counter;           /* block counter */
+    unsigned int hashbitlen;          /* output length */
+    BitSequence buffer[SIZE1024];     /* block buffer */
+    unsigned int buf_ptr;             /* buffer pointer */
+    unsigned int bits_in_last_byte;   /* number of bits in incomplete byte */
+    unsigned int columns;             /* number of columns in state */
+    unsigned int rounds;              /* number of rounds in P and Q */
+    unsigned int statesize;           /* size of state (ROWS*columns) */
+};
+typedef struct hashState_s hashState;
+
+struct cx_groestl_s {
+    /** @copydoc cx_ripemd160_s::header */
+    struct cx_hash_header_s header;
+    /** @internal output digest size*/
+    unsigned int output_size;
+
+    struct hashState_s ctx;
+};
+/** Convenience type. See #cx_groestl512_s. */
+typedef struct cx_groestl_s cx_groestl_t;
+
+/**
+ * Init a groestl224 context.
+ *
+ * @param [out] hash the context to init.
+ *    The context shall be in RAM
+ *
+ * @return algorithm identifier
+ */
+SYSCALL int cx_groestl_init(cx_groestl_t *hash PLENGTH(sizeof(cx_groestl_t)),
+                            unsigned int size);
+
+/* ------------------------------- BLAKE2B ------------------------------- */
+
+enum blake2b_constant {
+    BLAKE2B_BLOCKBYTES = 128,
+    BLAKE2B_OUTBYTES = 64,
+    BLAKE2B_KEYBYTES = 64,
+    BLAKE2B_SALTBYTES = 16,
+    BLAKE2B_PERSONALBYTES = 16
+};
+
+/**  @private */
+struct blake2b_state__ {
+    uint64_t h[8];
+    uint64_t t[2];
+    uint64_t f[2];
+    uint8_t buf[BLAKE2B_BLOCKBYTES];
+    size_t buflen;
+    size_t outlen;
+    uint8_t last_node;
+};
+typedef struct blake2b_state__ blake2b_state;
+
+struct cx_blake2b_s {
+    /** @copydoc cx_ripemd160_s::header */
+    struct cx_hash_header_s header;
+    /** @internal output digest size*/
+    unsigned int output_size;
+    struct blake2b_state__ ctx;
+};
+/** Convenience type. See #cx_blake2b_s. */
+typedef struct cx_blake2b_s cx_blake2b_t;
+
+/**
+ * Init a blake2b context.
+ *
+ * Blake2b as specified at https://blake2.net.
+ *
+ * @param [out] hash  the context to init.
+ *    The context shall be in RAM
+ *
+ * @param [in] size   output blake2b size, in BITS.
+ *
+ *
+ * @return algorithm identifier
+ */
+SYSCALL int cx_blake2b_init(cx_blake2b_t *hash PLENGTH(sizeof(cx_blake2b_t)),
+                            unsigned int out_len);
+
+SYSCALL int cx_blake2b_init2(cx_blake2b_t *hash PLENGTH(sizeof(cx_blake2b_t)),
+                             unsigned int out_len,
+                             unsigned char *salt PLENGTH(salt_len),
+                             unsigned int salt_len,
+                             unsigned char *perso PLENGTH(perso_len),
+                             unsigned int perso_len);
+
 /** @} */
 
 /* ======================================================================= */
@@ -629,8 +727,7 @@ typedef struct cx_hash_header_s cx_hmac_t;
  *
  * @param  [in] key         hmac key value
  *    Passing a NULL pointeur, will reinit the context with the previously set
- * key.
- *    If no key has already been set, passing NULL will lead into an undefined
+ * key. If no key has already been set, passing NULL will lead into an undefined
  * behavior.
  *
  * @param  [in] key_len     hmac key length
@@ -650,8 +747,7 @@ SYSCALL int cx_hmac_ripemd160_init(
  *
  * @param [in] key         hmac key value
  *    Passing a NULL pointeur, will reinit the context with the previously set
- * key.
- *    If no key has already been set, passing NULL will lead into an undefined
+ * key. If no key has already been set, passing NULL will lead into an undefined
  * behavior.
  *
  * @param [in] key_len     hmac key length
@@ -672,8 +768,7 @@ cx_hmac_sha256_init(cx_hmac_sha256_t *hmac PLENGTH(sizeof(cx_hmac_sha256_t)),
  *
  * @param [in] key         hmac key value
  *    Passing a NULL pointeur, will reinit the context with the previously set
- * key.
- *    If no key has already been set, passing NULL will lead into an undefined
+ * key. If no key has already been set, passing NULL will lead into an undefined
  * behavior.
  *
  * @param [in] key_len     hmac key length
@@ -690,16 +785,14 @@ cx_hmac_sha512_init(cx_hmac_sha512_t *hmac PLENGTH(sizeof(cx_hmac_sha512_t)),
  * @param [in,out] hmac
  *   Univers Continuation Blob.
  *   The hmac context pointer shall point to  either a cx_ripemd160_t, either a
- * cx_sha256_t  or cx_sha512_t .
- *   The hmac context shall be inited with 'cx_xxx_init'
- *   The hmac context shall be in RAM
- *   The function should be called with a nice cast.
+ * cx_sha256_t  or cx_sha512_t . The hmac context shall be inited with
+ * 'cx_xxx_init' The hmac context shall be in RAM The function should be called
+ * with a nice cast.
  *
  * @param [in] mode
  *   Crypto mode flags. See Above.
  *   If CX_LAST is set and CX_NO_REINIT is not set, context is automatically
- * re-inited.
- *   Supported flags:
+ * re-inited. Supported flags:
  *     - CX_LAST
  *     - CX_NO_REINIT
  *
@@ -832,11 +925,9 @@ cx_pbkdf2_sha512(const unsigned char WIDE *password PLENGTH(passwordlen),
 
 /** DES key container.
  *  Such container should be initialize with cx_des_init_key to ensure future
- * API
- *  compatibility. Indeed, in next API level, the key store format may changed
- * at all.
- *  Only 8 bytes (simple DES) and 16 bytes (triple DES with 2 keys) are
- * supported.
+ * API compatibility. Indeed, in next API level, the key store format may
+ * changed at all. Only 8 bytes (simple DES) and 16 bytes (triple DES with 2
+ * keys) are supported.
  */
 struct cx_des_key_s {
     /** key size */
@@ -942,10 +1033,8 @@ SYSCALL CXPORT(CXPORT_ED_DES) int cx_des(
 
 /** DES key container.
  *  Such container should be initialize with cx_des_init_key to ensure future
- * API
- *  compatibility. Indeed, in next API level, the key store format may changed
- * at all.
- *  Only 16 bytes key (AES128) are supported .
+ * API compatibility. Indeed, in next API level, the key store format may
+ * changed at all. Only 16 bytes key (AES128) are supported .
  */
 struct cx_aes_key_s {
     /** key size */
@@ -1241,16 +1330,14 @@ SYSCALL int cx_rsa_init_private_key(
  *
  * @param [in] pub_exponent
  *   Public exponent. ZERO means default value: 0x010001 (65337). The public
- * exponent shall be lesser than 0x0FFFFFFF.
- *   No verification is done on the public exponent value except its range. An
- * invalid value may throw an error or
- *   provide unuseable key pair.
+ * exponent shall be lesser than 0x0FFFFFFF. No verification is done on the
+ * public exponent value except its range. An invalid value may throw an error
+ * or provide unuseable key pair.
  *
  * @param [in] externalPQ
  *   If set to non NULL, it is assumed it contains primes  P and Q. They shall
- * be modulus_len/2 bytes length
- *   and store in big endian order. P =  externalPQ[0:modulus_len/2-1], Q =
- * externalPQ[modulus_len/2 : modulus_len-1]
+ * be modulus_len/2 bytes length and store in big endian order. P =
+ * externalPQ[0:modulus_len/2-1], Q = externalPQ[modulus_len/2 : modulus_len-1]
  *   There is no verification on provided P and Q,  Invalid values may throw an
  * error or provide unuseable key pair.
  *
@@ -1920,8 +2007,7 @@ SYSCALL int cx_ecfp_init_public_key(
  * Once initialized, the key may be  stored in non-volatile memory
  * and reused 'as-is' for any ECDSA/EC25519 processing
  * Passing NULL as raw key initializes the key without value. The key may be
- * used
- * as parameter for cx_ecfp_generate_pair.
+ * used as parameter for cx_ecfp_generate_pair.
  *
  * @param [in] curve
  *   The curve domain parameters to work with.
@@ -1968,8 +2054,7 @@ SYSCALL int cx_ecfp_init_private_key(
  *     - else a new private key is generated.
  *
  * @param [in] keepprivate if set to non zero, keep the private key value if
- * set.
- *             Else generate a new random one
+ * set. Else generate a new random one
  *
  * @return zero
  *
@@ -2001,8 +2086,7 @@ SYSCALL int cx_ecfp_generate_pair(
  *     - else a new private key is generated.
  *
  * @param [in] keepprivate if set to non zero, keep the private key value if
- * set.
- *             Else generate a new random one
+ * set. Else generate a new random one
  *
  *  @param [in] hashID Hash to use for eddsa (SHA512, SHA3 and KECCAK are
  * supported)
@@ -2044,7 +2128,7 @@ SYSCALL int cx_ecfp_generate_pair2(
  * @param [out] sig
  *   ECSchnorr signature encoded as TLV:  30 L 02 Lr r 02 Ls s
  *
-* @param [out] info
+ * @param [out] info
  *   Set to zero
  *
  * @return
@@ -2149,8 +2233,9 @@ SYSCALL void cx_edward_decompress_point(cx_curve_t curve,
 SYSCALL void cx_eddsa_get_public_key(
     const cx_ecfp_private_key_t WIDE *pvkey
         PLENGTH(scc__cx_scc_struct_size_ecfp_privkey__pvkey),
-    cx_md_t hashID, cx_ecfp_public_key_t *pukey PLENGTH(
-                        scc__cx_scc_struct_size_ecfp_pubkey_from_pvkey__pvkey),
+    cx_md_t hashID,
+    cx_ecfp_public_key_t *pukey
+        PLENGTH(scc__cx_scc_struct_size_ecfp_pubkey_from_pvkey__pvkey),
     unsigned char *a PLENGTH(a_len), unsigned int a_len,
     unsigned char *h PLENGTH(h_len), unsigned int h_len);
 
@@ -2160,7 +2245,7 @@ SYSCALL void cx_eddsa_get_public_key(
  * @param [in] pv_key
  *   A private ecfp key fully inited with 'cx_ecfp_init_private_key'.
  *
-  *
+ *
  * @param [in] mode
  *   Crypto mode flags. See above.
  *   Supported flags:
@@ -2218,7 +2303,7 @@ SYSCALL int cx_eddsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
  *
  * @param [in] hashID
  *  Hash identifier used to compute the input data.  SHA512, SHA3 and Keccak are
-* supported.
+ * supported.
  *
  * @param [in] hash
  *   Signed input data to verify the signature.
@@ -2228,7 +2313,7 @@ SYSCALL int cx_eddsa_sign(const cx_ecfp_private_key_t WIDE *pvkey PLENGTH(
  * @param [in] hash_len
  *   Length of input to data.
  *
-* @param [in] ctx
+ * @param [in] ctx
  *   UNUSED, SHALL BE NULL
  *
  * @param [in] ctx_len
@@ -2345,7 +2430,6 @@ SYSCALL int cx_ecdsa_verify(const cx_ecfp_public_key_t WIDE *pukey PLENGTH(
                             unsigned int hash_len,
                             const unsigned char WIDE *sig PLENGTH(sig_len),
                             unsigned int sig_len);
-
 
 /* ======================================================================= */
 /*                                    ECC-KA                               */
@@ -2629,7 +2713,6 @@ SYSCALL void cx_math_next_prime(unsigned char *n PLENGTH(len),
  *  @private
  */
 int cx_selftest(void);
-
 
 #endif // CX_H
 #include "cx_compliance_141.h"

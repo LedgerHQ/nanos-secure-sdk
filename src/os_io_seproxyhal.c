@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -43,14 +43,10 @@
 #endif
 
 volatile io_apdu_state_e G_io_apdu_state; // by default
-volatile unsigned short G_io_apdu_offset; // total length already received
 volatile unsigned short G_io_apdu_length; // total length to be received
-volatile unsigned short G_io_apdu_seq;
 volatile io_apdu_media_t G_io_apdu_media;
 volatile unsigned int G_button_mask;
 volatile unsigned int G_button_same_mask_counter;
-volatile unsigned int G_io_timeout;
-volatile unsigned int G_io_timeout_limit;
 
 // usb endpoint buffer
 unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
@@ -58,15 +54,6 @@ unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
 #ifndef IO_RAPDU_TRANSMIT_TIMEOUT_MS 
 #define IO_RAPDU_TRANSMIT_TIMEOUT_MS 2000UL
 #endif // IO_RAPDU_TRANSMIT_TIMEOUT_MS
-
-void io_set_timeout(unsigned int timeout_ms) {
-  // reset the next timeout
-  G_io_timeout_limit = timeout_ms;
-  // adjust current timeout, if activated
-  if (G_io_timeout) {
-    G_io_timeout = timeout_ms;
-  }
-}
 
 void io_seproxyhal_general_status(void) {
   // avoid troubles
@@ -92,7 +79,10 @@ void io_seproxyhal_request_mcu_status(void) {
 
 #ifdef HAVE_IO_USB
 #ifdef HAVE_L4_USBLIB
-static volatile unsigned char G_io_usb_ep_xfer_len[IO_USB_MAX_ENDPOINTS];
+static unsigned char G_io_usb_ep_xfer_len[IO_USB_MAX_ENDPOINTS];
+struct {
+  unsigned short timeout; // up to 64k milliseconds (6 sec)
+} G_io_usb_ep_timeouts[IO_USB_MAX_ENDPOINTS];
 #include "usbd_def.h"
 #include "usbd_core.h"
 extern USBD_HandleTypeDef USBD_Device;
@@ -106,6 +96,8 @@ void io_seproxyhal_handle_usb_event(void) {
       if (G_io_apdu_media != IO_APDU_MEDIA_NONE) {
         THROW(EXCEPTION_IO_RESET);
       }
+      os_memset(G_io_usb_ep_xfer_len, 0, sizeof(G_io_usb_ep_xfer_len));
+      os_memset(G_io_usb_ep_timeouts, 0, sizeof(G_io_usb_ep_timeouts));
       break;
     case SEPROXYHAL_TAG_USB_EVENT_SOF:
       USBD_LL_SOF(&USBD_Device);
@@ -133,14 +125,22 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void) {
 
     /* This event is received after the prepare data packet has been flushed to the usb host */
     case SEPROXYHAL_TAG_USB_EP_XFER_IN:
-      USBD_LL_DataInStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
+      if ((G_io_seproxyhal_spi_buffer[3]&0x7F) < IO_USB_MAX_ENDPOINTS) {
+        // discard ep timeout as we received the sent packet confirmation
+        G_io_usb_ep_timeouts[G_io_seproxyhal_spi_buffer[3]&0x7F].timeout = 0;
+        // propagate sending ack of the data
+        USBD_LL_DataInStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
+      }
       break;
 
     /* This event is received when a new DATA token is received on an endpoint */
     case SEPROXYHAL_TAG_USB_EP_XFER_OUT:
-      // saved just in case it is needed ...
-      G_io_usb_ep_xfer_len[G_io_seproxyhal_spi_buffer[3]&0x7F] = G_io_seproxyhal_spi_buffer[5];
-      USBD_LL_DataOutStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
+      if ((G_io_seproxyhal_spi_buffer[3]&0x7F) < IO_USB_MAX_ENDPOINTS) {
+        // saved just in case it is needed ...
+        G_io_usb_ep_xfer_len[G_io_seproxyhal_spi_buffer[3]&0x7F] = G_io_seproxyhal_spi_buffer[5];
+        // prepare reception
+        USBD_LL_DataOutStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
+      }
       break;
   }
 }
@@ -156,9 +156,10 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void) {
 #endif // HAVE_L4_USBLIB
 
 // TODO, refactor this using the USB DataIn event like for the U2F tunnel
+// TODO add a blocking parameter, for HID KBD sending, or use a USB busy flag per channel to know if 
+// the transfer has been processed or not. and move on to the next transfer on the same endpoint
 void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short length, unsigned int timeout) {
-  unsigned int rx_len;
-
+  
   // don't spoil the timeout :)
   if (timeout) {
     timeout++;
@@ -177,61 +178,22 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
   G_io_seproxyhal_spi_buffer[5] = length;
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 6);
   io_seproxyhal_spi_send(buffer, length);
+  // setup timeout of the endpoint
+  G_io_usb_ep_timeouts[ep&0x7F].timeout = IO_RAPDU_TRANSMIT_TIMEOUT_MS;
 
-  // if timeout is requested
-  if(timeout) {
-    for (;;) {
-      if (!io_seproxyhal_spi_is_status_sent()) {
-        io_seproxyhal_general_status();
-      }
-
-      rx_len = io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-      // wait for ack of the seproxyhal
-      // discard if not an acknowledgment
-      if (G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_USB_EP_XFER_EVENT
-        || rx_len != 6 
-        || G_io_seproxyhal_spi_buffer[3] != (ep|0x80)
-        || G_io_seproxyhal_spi_buffer[4] != SEPROXYHAL_TAG_USB_EP_XFER_IN
-        || G_io_seproxyhal_spi_buffer[5] != length) {
-        
-        /*
-        // handle loss of communication with the host
-        // only use ticker event to decrement the timeout, this avoid finger/button/display events to intervene and disrupt the timeout accounting
-        if (G_io_seproxyhal_spi_buffer[0] == SEPROXYHAL_TAG_TICKER_EVENT 
-          && timeout 
-          && timeout--==1) {
-          THROW(EXCEPTION_IO_RESET);
-        }
-        */
-
-        // link disconnected ?
-        if(G_io_seproxyhal_spi_buffer[0] == SEPROXYHAL_TAG_STATUS_EVENT) {
-          if (!(U4BE(G_io_seproxyhal_spi_buffer, 3) & SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
-           THROW(EXCEPTION_IO_RESET);
-          }
-        }
-        
-        // usb reset ?
-        //io_seproxyhal_handle_usb_event();
-        // also process other transfer requests if any (useful for HID keyboard while playing with CAPS lock key, side effect on LED status)
-        // also handle IO timeout in a centralized and configurable way
-        io_seproxyhal_handle_event();
-
-        // no general status ack, io_event is responsible for it
-        continue;
-      }
-
-      // chunk sending succeeded
-      break;
-    }
-  }
 }
 
 void io_usb_send_apdu_data(unsigned char* buffer, unsigned short length) {
   // wait for 20 events before hanging up and timeout (~2 seconds of timeout)
   io_usb_send_ep(0x82, buffer, length, 20);
 }
+
+#ifdef HAVE_WEBUSB
+void io_usb_send_apdu_data_ep0x83(unsigned char* buffer, unsigned short length) {
+  // wait for 20 events before hanging up and timeout (~2 seconds of timeout)
+  io_usb_send_ep(0x83, buffer, length, 20);
+}
+#endif // HAVE_WEBUSB
 
 #endif // HAVE_IO_USB
 
@@ -271,7 +233,7 @@ void io_seproxyhal_handle_capdu_event(void) {
   {
     G_io_apdu_media = IO_APDU_MEDIA_RAW; // for application code
     G_io_apdu_state = APDU_RAW; // for next call to io_exchange
-    G_io_apdu_length = U2BE(G_io_seproxyhal_spi_buffer, 1);
+    G_io_apdu_length = MIN(U2BE(G_io_seproxyhal_spi_buffer, 1), sizeof(G_io_apdu_buffer)); 
     // copy apdu to apdu buffer
     os_memmove(G_io_apdu_buffer, G_io_seproxyhal_spi_buffer+3, G_io_apdu_length);
   }
@@ -283,14 +245,14 @@ unsigned int io_seproxyhal_handle_event(void) {
   switch(G_io_seproxyhal_spi_buffer[0]) {
   #ifdef HAVE_IO_USB
     case SEPROXYHAL_TAG_USB_EVENT:
-      if (rx_len != 3+1) {
+      if (rx_len != 1) {
         return 0;
       }
       io_seproxyhal_handle_usb_event();
       return 1;
 
     case SEPROXYHAL_TAG_USB_EP_XFER_EVENT:
-      if (rx_len < 3+3) {
+      if (rx_len < 3) {
         // error !
         return 0;
       }
@@ -301,6 +263,10 @@ unsigned int io_seproxyhal_handle_event(void) {
   #ifdef HAVE_BLE
     case SEPROXYHAL_TAG_BLUENRG_RECV_EVENT:
       io_seproxyhal_handle_bluenrg_event();
+      if (G_io_apdu_state == APDU_IDLE && G_io_apdu_length) {
+        G_io_apdu_media = IO_APDU_MEDIA_BLE; // for application code
+        G_io_apdu_state = APDU_BLE; // for next call to io_exchange
+      }
       return 1;
   #endif // HAVE_BLE
 
@@ -311,19 +277,26 @@ unsigned int io_seproxyhal_handle_event(void) {
       // ask the user if not processed here
     case SEPROXYHAL_TAG_TICKER_EVENT:
       // process ticker events to timeout the IO transfers, and forward to the user io_event function too
-      if(G_io_timeout) {
-        G_io_timeout-=MIN(G_io_timeout, 100);
-        #warning TODO use real ticker event interval here instead of the x100ms multiplier
-        if (!G_io_timeout) {
-          // timeout !
-          G_io_apdu_state = APDU_IDLE;
-          THROW(EXCEPTION_IO_RESET);
+#ifdef HAVE_IO_USB
+      {
+        unsigned int i = IO_USB_MAX_ENDPOINTS;
+        while(i--) {
+          if (G_io_usb_ep_timeouts[i].timeout) {
+            G_io_usb_ep_timeouts[i].timeout-=MIN(G_io_usb_ep_timeouts[i].timeout, 100);
+            if (!G_io_usb_ep_timeouts[i].timeout) {
+              // timeout !
+              G_io_apdu_state = APDU_IDLE;
+              THROW(EXCEPTION_IO_RESET);
+            }
+          }
         }
       }
+#endif // HAVE_IO_USB
+      // no break is intentional
     default:
       return io_event(CHANNEL_SPI);
   }
-  // defaulty return as not processed
+  // defaultly return as not processed
   return 0;
 }
 
@@ -352,11 +325,8 @@ void io_seproxyhal_init(void) {
 #endif // HAVE_BOLOS_APP_STACK_CANARY  
 
   G_io_apdu_state = APDU_IDLE;
-  G_io_apdu_offset = 0;
   G_io_apdu_length = 0;
-  G_io_apdu_seq = 0;
   G_io_apdu_media = IO_APDU_MEDIA_NONE;
-  G_io_timeout_limit = NO_TIMEOUT;
 
   #ifdef DEBUG_APDU
   debug_apdus_offset = 0;
@@ -374,7 +344,6 @@ void io_seproxyhal_init(void) {
 void io_seproxyhal_init_ux(void) {
   // initialize the touch part
   G_bagl_last_touched_not_released_component = NULL;
-
 }
 
 void io_seproxyhal_init_button(void) {
@@ -428,12 +397,6 @@ unsigned int io_seproxyhal_touch_over(const bagl_element_t* element, bagl_elemen
   }
 
   // over function might have triggered a draw of its own during a display callback
-  os_memmove(&e, (void*)element, sizeof(bagl_element_t));
-  e.component.fgcolor = element->overfgcolor;
-  e.component.bgcolor = element->overbgcolor;
-
-  //element = &e; // for INARRAY checks, it disturbs a bit. avoid it
-
   if (before_display) {
     el = before_display(element);
     element = &e;
@@ -446,12 +409,12 @@ unsigned int io_seproxyhal_touch_over(const bagl_element_t* element, bagl_elemen
     }
   }
 
-  //else 
-  {
-    element = &e;
-  }
+  // swap colors
+  os_memmove(&e, (void*)element, sizeof(bagl_element_t));
+  e.component.fgcolor = element->overfgcolor;
+  e.component.bgcolor = element->overbgcolor;
 
-  io_seproxyhal_display(element);
+  io_seproxyhal_display(&e);
   return 1;
 }
 
@@ -752,7 +715,7 @@ void io_seproxyhal_display_default(const bagl_element_t * element) {
       unsigned int text_adr = PIC((unsigned int)element->text);
       // consider an icon details descriptor is pointed by the context
       if (type == BAGL_ICON && element->component.icon_id == 0) {
-        io_seproxyhal_display_icon(&element->component, (bagl_icon_details_t*)text_adr);
+        io_seproxyhal_display_icon((bagl_component_t*)&element->component, (bagl_icon_details_t*)text_adr);
       }
       else {
         unsigned short length = sizeof(bagl_component_t)+strlen((const char*)text_adr);
@@ -928,6 +891,32 @@ void io_seproxyhal_button_push(button_push_callback_t button_callback, unsigned 
 u2f_service_t G_io_u2f;
 #endif // HAVE_IO_U2F
 
+unsigned int os_io_seproxyhal_get_app_name_and_version(void) __attribute__((weak));
+unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
+  unsigned int tx_len, len;
+  // build the get app name and version reply
+  tx_len = 0;
+  G_io_apdu_buffer[tx_len++] = 1; // format ID
+
+  // append app name
+  len = os_registry_get_current_app_tag(BOLOS_TAG_APPNAME, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len);
+  G_io_apdu_buffer[tx_len++] = len;
+  tx_len += len;
+  // append app version
+  len = os_registry_get_current_app_tag(BOLOS_TAG_APPVERSION, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len);
+  G_io_apdu_buffer[tx_len++] = len;
+  tx_len += len;
+  // return OS flags to notify of platform's global state (pin lock etc)
+  G_io_apdu_buffer[tx_len++] = 1; // flags length
+  G_io_apdu_buffer[tx_len++] = os_flags();
+
+  // status words
+  G_io_apdu_buffer[tx_len++] = 0x90;
+  G_io_apdu_buffer[tx_len++] = 0x00;
+  return tx_len;
+}
+
+
 unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
   unsigned short rx_len;
 
@@ -959,14 +948,12 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
   after_debug:
 #endif // DEBUG_APDU
 
+reply_apdu:
   switch(channel&~(IO_FLAGS)) {
   case CHANNEL_APDU:
     // TODO work up the spi state machine over the HAL proxy until an APDU is available
 
     if (tx_len && !(channel&IO_ASYNCH_REPLY)) {
-      // prepare response timeout
-      G_io_timeout = IO_RAPDU_TRANSMIT_TIMEOUT_MS;
-
       // until the whole RAPDU is transmitted, send chunks using the current mode for communication
       for (;;) {
         switch(G_io_apdu_state) {
@@ -990,19 +977,27 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
             G_io_seproxyhal_spi_buffer[2]  = (tx_len);
             io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
             io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
+
+            // isngle packet reply, mark immediate idle
+            G_io_apdu_state = APDU_IDLE;
             // finished, no chunking
             goto break_send;
 
 #ifdef HAVE_USB_APDU
           case APDU_USB_HID:
             // only send, don't perform synchronous reception of the next command (will be done later by the seproxyhal packet processing)
-            io_usb_hid_exchange(io_usb_send_apdu_data, tx_len, NULL, IO_RETURN_AFTER_TX);
+            io_usb_hid_send(io_usb_send_apdu_data, tx_len);
             goto break_send;
 #ifdef HAVE_USB_CLASS_CCID
           case APDU_USB_CCID:
             io_usb_ccid_reply(G_io_apdu_buffer, tx_len);
             goto break_send;
 #endif // HAVE_USB_CLASS_CCID
+#ifdef HAVE_WEBUSB
+          case APDU_USB_WEBUSB:
+            io_usb_hid_send(io_usb_send_apdu_data_ep0x83, tx_len);
+            goto break_send;
+#endif // HAVE_WEBUSB
 #endif // HAVE_USB_APDU
 
 #ifdef HAVE_BLE_APDU // versus U2F BLE
@@ -1018,7 +1013,7 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
             // prepare reply, the remaining segments will be pumped during USB/BLE events handling while waiting for the next APDU
 
             // user presence + counter + rapdu + sw must fit the apdu buffer
-            if (1+ 4+ tx_len +2 > sizeof(G_io_apdu_buffer)) {
+            if (1U+ 4U+ tx_len +2U > sizeof(G_io_apdu_buffer)) {
               THROW(INVALID_PARAMETER);
             }
 
@@ -1037,12 +1032,24 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
         continue;
 
       break_send:
+
+        // wait end of reply transmission
+        while (G_io_apdu_state != APDU_IDLE) {
+#ifdef HAVE_TINY_COROUTINE
+          tcr_yield();
+#else // HAVE_TINY_COROUTINE
+          io_seproxyhal_general_status();
+          io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+          // if packet is not well formed, then too bad ...
+          io_seproxyhal_handle_event();
+#endif // HAVE_TINY_COROUTINE
+        }
+
         // reset apdu state
         G_io_apdu_state = APDU_IDLE;
-        G_io_apdu_offset = 0;
-        G_io_apdu_length = 0;
-        G_io_apdu_seq = 0;
         G_io_apdu_media = IO_APDU_MEDIA_NONE;
+
+        G_io_apdu_length = 0;
 
         // continue sending commands, don't issue status yet
         if (channel & IO_RETURN_AFTER_TX) {
@@ -1055,10 +1062,12 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
 
       // perform reset after io exchange
       if (channel & IO_RESET_AFTER_REPLIED) {
-        reset();
+        os_sched_exit(1);
+        //reset();
       }
     }
 
+#ifndef HAVE_TINY_COROUTINE
     if (!(channel&IO_ASYNCH_REPLY)) {
       
       // already received the data of the apdu when received the whole apdu
@@ -1069,107 +1078,95 @@ unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
 
       // reply has ended, proceed to next apdu reception (reset status only after asynch reply)
       G_io_apdu_state = APDU_IDLE;
-      G_io_apdu_offset = 0;
-      G_io_apdu_length = 0;
-      G_io_apdu_seq = 0;
       G_io_apdu_media = IO_APDU_MEDIA_NONE;
     }
+#endif // HAVE_TINY_COROUTINE
+
+    // reset the received apdu length
+    G_io_apdu_length = 0;
 
     // ensure ready to receive an event (after an apdu processing with asynch flag, it may occur if the channel is not correctly managed)
 
     // until a new whole CAPDU is received
     for (;;) {
+
+#ifdef HAVE_TINY_COROUTINE
+      // give back hand to the seph task which interprets all incoming events first
+      tcr_yield();
+#else // HAVE_TINY_COROUTINE
+
       if (!io_seproxyhal_spi_is_status_sent()) {
         io_seproxyhal_general_status();
       }
-
       // wait until a SPI packet is available
       // NOTE: on ST31, dual wait ISO & RF (ISO instead of SPI)
       rx_len = io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
 
       // can't process split TLV, continue
-      if (rx_len-3 != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])) {
+      if (rx_len < 3 && rx_len-3 != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])) {
         LOG("invalid TLV format\n");
-      invalid_apdu_packet:
         G_io_apdu_state = APDU_IDLE;
-        G_io_apdu_offset = 0;
         G_io_apdu_length = 0;
-        G_io_apdu_seq = 0;
-
-      send_last_command:
         continue;
       }
 
-      // if an apdu is already ongoing, then discard packet as a new packet
-      if (G_io_apdu_media != IO_APDU_MEDIA_NONE) {
         io_seproxyhal_handle_event();
-        continue;
-      }
+#endif // HAVE_TINY_COROUTINE
 
-      // depending on received TAG
-      switch(G_io_seproxyhal_spi_buffer[0]) {
+      // an apdu has been received asynchroneously, return it
+      if (G_io_apdu_state != APDU_IDLE && G_io_apdu_length > 0) {
+        // handle reserved apdus
+        // get name and version
+        if (os_memcmp(G_io_apdu_buffer, "\xB0\x01\x00\x00", 4) == 0) {
+          tx_len = os_io_seproxyhal_get_app_name_and_version();
+          // disable 'return after tx' and 'asynch reply' flags
+          channel &= ~IO_FLAGS;
+          goto reply_apdu; 
+        }
+        // exit app after replied
+        else if (os_memcmp(G_io_apdu_buffer, "\xB0\xA7\x00\x00", 4) == 0) {
+          tx_len = 0;
+          G_io_apdu_buffer[tx_len++] = 0x90;
+          G_io_apdu_buffer[tx_len++] = 0x00;
+          // exit app after replied
+          channel |= IO_RESET_AFTER_REPLIED;
+          goto reply_apdu; 
+        }
+#ifdef HAVE_BOLOS_WITH_VIRGIN_ATTESTATION
+        // app and platform attestation
+        // host: <8:challenge>
+        // device: if no answer given since powercycle, ask user consent
+        // device: if positive user consent, <L1V:attest2pubkey> <L1V:attest2keycert> <L1V:ecdsa_sign(key=attst2privkey, data=hash(hash(challenge)+hash(requestingapplication))> sw=9000
+        // device: if negative user consent, sw=6985
+        else if (os_memcmp(G_io_apdu_buffer, "\xB0\x02\x00\x00\x08", 5) == 0) {
 
-        case SEPROXYHAL_TAG_CAPDU_EVENT:
-          io_seproxyhal_handle_capdu_event();
-          if (G_io_apdu_length > 0) {
-            G_io_timeout = G_io_timeout_limit;
-            return G_io_apdu_length;
-          }
-          // discard gently, and wait for another event. but this is VERY ODD
-          goto send_last_command;
-          break;
-
-#ifdef HAVE_BLE
-        case SEPROXYHAL_TAG_BLUENRG_RECV_EVENT:
-          // process the packet
-          io_seproxyhal_handle_bluenrg_event();
-
-          // if the ble apdu state has advanced
-          if (G_io_apdu_length) {
-            G_io_timeout = G_io_timeout_limit;
-            G_io_apdu_media = IO_APDU_MEDIA_BLE; // for application code
-            G_io_apdu_state = APDU_BLE; // for next call to io_exchange
-            return G_io_apdu_length;
-          } 
-          goto send_last_command;
-#endif // HAVE_BLE
-
-#ifdef HAVE_IO_USB
-        case SEPROXYHAL_TAG_USB_EVENT:
-          if (rx_len != 3+1) {
-            // invalid length, not processable
-            goto invalid_apdu_packet;
-          }
-          io_seproxyhal_handle_usb_event();
-
-          // no state change, we're not dealing with an apdu yet
-          goto send_last_command;
-
-        case SEPROXYHAL_TAG_USB_EP_XFER_EVENT:
-          if (rx_len < 3+3) {
-            // error !
-            return 0;
-          }
-          io_seproxyhal_handle_usb_ep_xfer_event();
-
-          // an apdu has been received, ack with mode commands (the reply at least)
-          // exit flow for apdu_ccid/apdu_u2f/apdu_hid
-          if (G_io_apdu_length > 0) {
-            G_io_timeout = G_io_timeout_limit;
-            // invalid return when reentered and an apdu is already under processing
-            return G_io_apdu_length;
+          tx_len = 0;
+#ifdef HAVE_BOLOS_UX
+          G_bolos_ux_context.parameters.ux_id = BOLOS_UX_CONSENT_GENUINENESS;
+          G_bolos_ux_context.parameters.len = 0;
+          if (os_ux_blocking(&G_bolos_ux_context.parameters) == BOLOS_UX_OK) 
+#else // HAVE_BOLOS_UX
+          // allow or not the user to check genuineness ? answer is to be retained the whole powercycle (store it in the UX to make it short)
+          ux.params.ux_id = BOLOS_UX_CONSENT_GENUINENESS;
+          ux.params.len = 0;
+          if (os_ux_blocking(&ux.params) == BOLOS_UX_OK) 
+#endif // HAVE_BOLOS_UX
+          {
+            tx_len = os_attestation_virgin_process(G_io_apdu_buffer, sizeof(G_io_apdu_buffer)-2, G_io_apdu_buffer+5, G_io_apdu_buffer[4]);
+            G_io_apdu_buffer[tx_len++] = 0x90;
+            G_io_apdu_buffer[tx_len++] = 0x00;
           }
           else {
-            goto send_last_command;
+            // denied by user
+            G_io_apdu_buffer[tx_len++] = 0x69;
+            G_io_apdu_buffer[tx_len++] = 0x85;
           }
-          break;
-#endif // HAVE_IO_USB
-
-        default:
-          // tell the application that a non-apdu packet has been received
-          io_event(CHANNEL_SPI);
-          continue;
-
+          // disable 'return after tx' and 'asynch reply' flags
+          channel &= ~IO_FLAGS;
+          goto reply_apdu; 
+        }
+#endif // HAVE_BOLOS_WITH_VIRGIN_ATTESTATION
+        return G_io_apdu_length;
       }
     }
     break;
@@ -1615,9 +1612,11 @@ const bagl_element_t const clear_element = {{BAGL_RECTANGLE, 0, 0, 0, 128, 32, 0
 const bagl_element_t const printf_element = {{BAGL_LABELINE, 0, 0, 26, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER |BAGL_FONT_ALIGNMENT_MIDDLE , 0},"Default printf",0,0,0,NULL,NULL,NULL};
 
 void debug_wait_displayed(void) {
+#ifndef TARGET_BLUE
   // wait up the display processed
   io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
   io_seproxyhal_general_status();
+#endif // TARGET_BLUE
   // wait next event (probably a ticker, if not, too bad... this is debug !!)
   io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);  
 }

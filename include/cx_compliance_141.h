@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -170,4 +170,3 @@ int cx_ecdh_X(const cx_ecfp_private_key_t WIDE *key, int mode,
 #endif // CX_COMPLIANCE_141
 
 #endif // CX_COMPLIANCE_141_H
-

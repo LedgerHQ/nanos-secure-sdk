@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #ifndef OS_APILEVEL_H
 #define OS_APILEVEL_H
 
-#define CX_APILEVEL 8
-#define CX_COMPAT_APILEVEL 8
+#define CX_APILEVEL 9
+#define CX_COMPAT_APILEVEL 9
 
 #endif // OS_APILEVEL_H

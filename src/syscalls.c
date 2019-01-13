@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -285,6 +285,55 @@ int cx_sha3_xof_init ( cx_sha3_t * hash, unsigned int size, unsigned int out_len
   retid = SVC_Call(SYSCALL_cx_sha3_xof_init_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_cx_sha3_xof_init_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+int cx_groestl_init ( cx_groestl_t * hash, unsigned int size ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+2];
+  parameters[0] = (unsigned int)hash;
+  parameters[1] = (unsigned int)size;
+  retid = SVC_Call(SYSCALL_cx_groestl_init_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_cx_groestl_init_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+2];
+  parameters[0] = (unsigned int)hash;
+  parameters[1] = (unsigned int)out_len;
+  retid = SVC_Call(SYSCALL_cx_blake2b_init_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_cx_blake2b_init_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (int)ret;
+}
+
+int cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+6];
+  parameters[0] = (unsigned int)hash;
+  parameters[1] = (unsigned int)out_len;
+  parameters[2] = (unsigned int)salt;
+  parameters[3] = (unsigned int)salt_len;
+  parameters[4] = (unsigned int)perso;
+  parameters[5] = (unsigned int)perso_len;
+  retid = SVC_Call(SYSCALL_cx_blake2b_init2_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_cx_blake2b_init2_ID_OUT) {
     THROW(EXCEPTION_SECURITY);
   }
   return (int)ret;
@@ -1383,18 +1432,19 @@ void os_perso_derive_node_bip32 ( cx_curve_t curve, const unsigned int * path, u
   }
 }
 
-void os_perso_derive_node_bip32_seed_key ( cx_curve_t curve, const unsigned int * path, unsigned int pathLength, unsigned char * privateKey, unsigned char * chain, unsigned char * seed_key, unsigned int seed_key_length ) 
+void os_perso_derive_node_bip32_seed_key ( unsigned int mode, cx_curve_t curve, const unsigned int * path, unsigned int pathLength, unsigned char * privateKey, unsigned char * chain, unsigned char * seed_key, unsigned int seed_key_length ) 
 {
   unsigned int ret;
   unsigned int retid;
-  unsigned int parameters [0+7];
-  parameters[0] = (unsigned int)curve;
-  parameters[1] = (unsigned int)path;
-  parameters[2] = (unsigned int)pathLength;
-  parameters[3] = (unsigned int)privateKey;
-  parameters[4] = (unsigned int)chain;
-  parameters[5] = (unsigned int)seed_key;
-  parameters[6] = (unsigned int)seed_key_length;
+  unsigned int parameters [0+8];
+  parameters[0] = (unsigned int)mode;
+  parameters[1] = (unsigned int)curve;
+  parameters[2] = (unsigned int)path;
+  parameters[3] = (unsigned int)pathLength;
+  parameters[4] = (unsigned int)privateKey;
+  parameters[5] = (unsigned int)chain;
+  parameters[6] = (unsigned int)seed_key;
+  parameters[7] = (unsigned int)seed_key_length;
   retid = SVC_Call(SYSCALL_os_perso_derive_node_bip32_seed_key_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_os_perso_derive_node_bip32_seed_key_ID_OUT) {
@@ -1780,6 +1830,22 @@ unsigned int os_registry_get_tag ( unsigned int appidx, unsigned int * tlvoffset
   retid = SVC_Call(SYSCALL_os_registry_get_tag_ID_IN, parameters);
   asm volatile("str r1, %0":"=m"(ret)::"r1");
   if (retid != SYSCALL_os_registry_get_tag_ID_OUT) {
+    THROW(EXCEPTION_SECURITY);
+  }
+  return (unsigned int)ret;
+}
+
+unsigned int os_registry_get_current_app_tag ( unsigned int tag, unsigned char * buffer, unsigned int maxlen ) 
+{
+  unsigned int ret;
+  unsigned int retid;
+  unsigned int parameters [0+3];
+  parameters[0] = (unsigned int)tag;
+  parameters[1] = (unsigned int)buffer;
+  parameters[2] = (unsigned int)maxlen;
+  retid = SVC_Call(SYSCALL_os_registry_get_current_app_tag_ID_IN, parameters);
+  asm volatile("str r1, %0":"=m"(ret)::"r1");
+  if (retid != SYSCALL_os_registry_get_current_app_tag_ID_OUT) {
     THROW(EXCEPTION_SECURITY);
   }
   return (unsigned int)ret;

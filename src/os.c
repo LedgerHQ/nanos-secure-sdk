@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@
 #include "os.h"
 #include <string.h>
 
+#include "os_io_seproxyhal.h"
+
 // apdu buffer must hold a complete apdu to avoid troubles
 unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
 
 void os_boot(void) {
   // TODO patch entry point when romming (f)
-
   // set the default try context to nothing
   try_context_set(NULL);
 }
@@ -78,7 +79,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
   switch(G_io_usb_ep_buffer[2]) {
   case 0x05:
     // ensure sequence idx is 0 for the first chunk ! 
-    if (U2BE(G_io_usb_ep_buffer, 3) != G_io_usb_hid_sequence_number) {
+    if ((unsigned int)U2BE(G_io_usb_ep_buffer, 3) != (unsigned int)G_io_usb_hid_sequence_number) {
       // ignore packet
       goto apdu_reset;
     }
@@ -170,18 +171,14 @@ void io_usb_hid_init(void) {
   //G_io_usb_hid_current_buffer = G_io_apdu_buffer; // not really needed
 }
 
-unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
-                                   io_recv_t rcvfct,
-                                   unsigned char flags) {
-  unsigned char l;
+/**
+ * sent the next io_usb_hid transport chunk (rx on the host, tx on the device)
+ */
+void io_usb_hid_sent(io_send_t sndfct) {
+  unsigned int l;
 
-  // perform send
-  if (sndlength) {
-    G_io_usb_hid_sequence_number = 0; 
-    G_io_usb_hid_current_buffer = G_io_apdu_buffer;
-  }
-  while(sndlength) {
-
+  // only prepare next chunk if some data to be sent remain
+  if (G_io_usb_hid_remaining_length) {
     // fill the chunk
     os_memset(G_io_usb_ep_buffer, 0, IO_HID_EP_LENGTH-2);
 
@@ -193,19 +190,19 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
     G_io_usb_ep_buffer[4] = G_io_usb_hid_sequence_number;
 
     if (G_io_usb_hid_sequence_number == 0) {
-      l = ((sndlength>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : sndlength);
-      G_io_usb_ep_buffer[5] = sndlength>>8;
-      G_io_usb_ep_buffer[6] = sndlength;
+      l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : G_io_usb_hid_remaining_length);
+      G_io_usb_ep_buffer[5] = G_io_usb_hid_remaining_length>>8;
+      G_io_usb_ep_buffer[6] = G_io_usb_hid_remaining_length;
       os_memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
-      sndlength -= l;
+      G_io_usb_hid_remaining_length -= l;
       l += 7;
     }
     else {
-      l = ((sndlength>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : sndlength);
+      l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : G_io_usb_hid_remaining_length);
       os_memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
-      sndlength -= l;
+      G_io_usb_hid_remaining_length -= l;
       l += 5;
     }
     // prepare next chunk numbering
@@ -214,38 +211,27 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
     // always pad :)
     sndfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
   }
+  // cleanup when everything has been sent (ack for the last sent usb in packet)
+  else {
+    G_io_usb_hid_sequence_number = 0; 
+    G_io_usb_hid_current_buffer = NULL;
 
-  // prepare for next apdu
-  io_usb_hid_init();
-
-  if (flags & IO_RESET_AFTER_REPLIED) {
-    reset();
-  }
-
-  if (flags & IO_RETURN_AFTER_TX ) {
-    return 0;
-  }
-
-  // receive the next command
-  for(;;) {
-    // receive a hid chunk
-    l = rcvfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
-    // check for wrongly sized tlvs
-    if (l > sizeof(G_io_usb_ep_buffer)) {
-      continue;
-    }
-
-    // call the chunk reception
-    switch(io_usb_hid_receive(sndfct, G_io_usb_ep_buffer, l)) {
-      default:
-        continue;
-
-      case IO_USB_APDU_RECEIVED:
-
-        return G_io_usb_hid_total_length;
-    }
+    // we sent the whole response
+    G_io_apdu_state = APDU_IDLE;
   }
 }
+
+void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength) {
+  // perform send
+  if (sndlength) {
+    G_io_usb_hid_sequence_number = 0; 
+    G_io_usb_hid_current_buffer = G_io_apdu_buffer;
+    G_io_usb_hid_remaining_length = sndlength;
+    G_io_usb_hid_total_length = sndlength;
+    io_usb_hid_sent(sndfct);
+  }
+}
+
 #endif // HAVE_USB_APDU
 
 REENTRANT(void os_memmove(void * dst, const void WIDE * src, unsigned int length)) {
@@ -355,3 +341,127 @@ void os_longjmp(unsigned int exception) {
   longjmp(try_context_get()->jmp_buf, exception);
 }
 #endif // HAVE_BOLOS
+
+// BER encoded
+// <tag> <length> <value>
+// tag: 1 byte only
+// length: 1 byte if little than 0x80, else 1 byte of length encoding (0x8Y, with Y the number of following bytes the length is encoded on) and then Y bytes of BE encoded total length
+// value: no encoding, raw data
+unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len, 
+                             unsigned int * tlvoffset, unsigned int tag, unsigned int offset, void** buffer, unsigned int maxlength) {
+  unsigned int ret, tlvoffset_in;
+  unsigned int check_equals_buffer = offset & OS_PARSE_BERTLV_OFFSET_COMPARE_WITH_BUFFER;
+  unsigned int get_address = offset & OS_PARSE_BERTLV_OFFSET_GET_LENGTH;
+  offset &= ~(OS_PARSE_BERTLV_OFFSET_COMPARE_WITH_BUFFER|OS_PARSE_BERTLV_OFFSET_GET_LENGTH);
+
+  // nothing to be read
+  if (mem_len == 0 || buffer == NULL || (!get_address && *buffer == NULL)) {
+    return 0;
+  }
+
+  // the tlv start address
+  unsigned char* tlv = (unsigned char*) mem;
+  unsigned int remlen = mem_len;
+  ret = 0;
+
+  // account for a shift in the tlv list before parsing
+  tlvoffset_in = 0;
+  if (tlvoffset) {
+    tlvoffset_in = *tlvoffset;
+  }
+
+  // parse tlv until some tag to parse
+  while(remlen>=2) {
+    // tag matches
+    unsigned int tlvtag = *tlv++;
+    remlen--;
+    if (remlen == 0) {
+      goto retret; 
+    }
+    unsigned int tlvlen = *tlv++;
+    remlen--;
+    if (remlen == 0) {
+      goto retret; 
+    }
+    if (tlvlen >= 0x80) {
+      // invalid encoding
+      if (tlvlen == 0x80) {
+        goto retret; 
+      }
+      unsigned int tlvlenlen_ = tlvlen & 0x7F;
+      tlvlen = 0;
+      while(tlvlenlen_--) {
+        // BE encoded
+        tlvlen = (tlvlen << 8) | ((*tlv++)&0xFF);
+        remlen--;
+        if (remlen == 0) {
+          goto retret; 
+        }
+      }
+    }
+    // check if tag matches
+    if (tlvtag == (tag&0xFF)) {
+      if (tlvoffset) {
+        unsigned int o = (unsigned int) tlv - (unsigned int)mem;
+        // compute the current position in the tlv bytes
+        *tlvoffset = o;
+
+        // skip the tag if the requested tlvoffset has not been matched yet.
+        if (tlvoffset_in>o) {
+          goto next_tlv;
+        }
+      }
+      // avoid OOB
+      if (offset > tlvlen || offset > remlen) {
+        goto retret; 
+      }
+
+      // check maxlength is respected for equality
+      if (check_equals_buffer && (tlvlen-offset) != maxlength) {
+        // buffer to check the complete given length
+        goto retret; 
+      }
+
+      maxlength = MIN(maxlength, MIN(tlvlen-offset, remlen));
+      // robustness check to avoid memory dumping, only allowing data space dumps
+      if (
+        offset > mem_len
+        || maxlength > mem_len
+        || offset+maxlength > mem_len
+        // don't rely only on provided app bounds to avoid address forgery
+        || (unsigned int)tlv < (unsigned int)mem 
+        || (unsigned int)tlv+offset < (unsigned int)mem 
+        || (unsigned int)tlv+offset+maxlength < (unsigned int)mem 
+        || (unsigned int)tlv > (unsigned int)mem+mem_len
+        || (unsigned int)tlv+offset > (unsigned int)mem+mem_len
+        || (unsigned int)tlv+offset+maxlength > (unsigned int)mem+mem_len) {
+        goto retret; 
+      }
+
+      // retrieve the tlv's data content at the requested offset, and return the total data length
+      if (get_address) {
+        *buffer = tlv+offset;
+        // return the tlv's total length from requested offset
+        ret = MIN(tlvlen-offset, remlen);
+        goto retret;
+      }
+
+      if (!check_equals_buffer) {
+        os_memmove(*buffer, tlv+offset, maxlength);
+      }
+      else {
+        ret = os_secure_memcmp(*buffer, tlv+offset, maxlength) == 0;
+        goto retret; 
+      }
+      ret = maxlength;
+      goto retret;
+    }
+  next_tlv:
+    // skip to next tlv
+    tlv += tlvlen;
+    remlen-=MIN(remlen, tlvlen);
+  }
+retret:
+  return ret;
+}
+

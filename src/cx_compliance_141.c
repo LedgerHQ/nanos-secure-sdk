@@ -60,7 +60,12 @@ int cx_hash_X(cx_hash_t *hash ,
     case CX_SHA3_XOF:
         hsz =   ((cx_sha3_t*)hash)->output_size;
         break;
-    
+    case CX_GROESTL:
+        hsz =   ((cx_groestl_t*)hash)->output_size;
+        break;  
+    case CX_BLAKE2B:
+        hsz =   ((cx_blake2b_t*)hash)->output_size;
+        break;
     default:
         THROW(INVALID_PARAMETER);
         return 0;
@@ -107,17 +112,17 @@ int cx_hmac_sha512_X(unsigned char WIDE *key, unsigned int key_len, unsigned cha
 
 
 int cx_des_iv_X(cx_des_key_t WIDE *key,  int mode,unsigned char  WIDE *iv ,unsigned char  WIDE *in,unsigned int len,unsigned char *out) {
-    return cx_des_iv(key, mode, iv, 8, in, len, out, ((len+7)&3)+8);
+    return cx_des_iv(key, mode, iv, 8, in, len, out, UPPER_ALIGN(len+7, 8, unsigned int));
 }
 int cx_des_X(cx_des_key_t WIDE *key , int mode, unsigned char  WIDE *in ,unsigned int len,  unsigned char *out){
-    return cx_des(key, mode, in, len, out, ((len+7)&3)+8);
+    return cx_des(key, mode, in, len, out, UPPER_ALIGN(len+7, 8, unsigned int));
 }
 
 int cx_aes_iv_X(cx_aes_key_t WIDE *key,  int mode,unsigned char  WIDE *iv ,unsigned char  WIDE *in,unsigned int len,unsigned char *out){
-    return cx_aes_iv(key, mode, iv, 16, in, len, out, ((len+16)&7)+16);
+    return cx_aes_iv(key, mode, iv, 16, in, len, out, UPPER_ALIGN(len+15, 16, unsigned int));
 }
 int cx_aes_X(cx_aes_key_t WIDE *key , int mode, unsigned char  WIDE *in ,unsigned int len,  unsigned char *out) {
-    return cx_aes(key, mode, in, len, out, ((len+16)&7)+16);
+    return cx_aes(key, mode, in, len, out, UPPER_ALIGN(len+15, 16, unsigned int));
 }
 
 

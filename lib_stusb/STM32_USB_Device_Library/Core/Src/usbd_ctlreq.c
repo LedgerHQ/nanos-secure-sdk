@@ -252,7 +252,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
       }
       USBD_CtlSendStatus(pdev);
       break;
-      
+        
     default:                         
       USBD_CtlError(pdev , req);
       break;    
@@ -339,7 +339,7 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
                                USBD_SetupReqTypedef *req)
 {
   uint16_t len;
-  uint8_t *pbuf;
+  uint8_t *pbuf = NULL;
   
     
   switch (req->wValue >> 8)
@@ -730,6 +730,7 @@ void USBD_CtlStall( USBD_HandleTypeDef *pdev)
 __weak void USBD_CtlError( USBD_HandleTypeDef *pdev ,
                             USBD_SetupReqTypedef *req)
 {
+  UNUSED(req);
   USBD_CtlStall(pdev);
 }
 

@@ -1,7 +1,7 @@
 """
 *******************************************************************************
 *   Ledger - Non secure firmware 
-*   (c) 2016, 2017, 2018 Ledger 
+*   (c) 2016, 2017, 2018, 2019 Ledger 
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ if 1:
   /**
    * Library entry point. 
    */
-  void main(int parameters_int) {
+  void libmain(int parameters_int) {
     unsigned int ret=0;
     unsigned int retid=0;
 
@@ -364,10 +364,13 @@ index = 1
 protect_stubs = ""
 defined_calls = []
 calls = libcalls
+
+
 for node in calls:
-    if not node.name in defined_calls:
+    func_name = node.name
+    if not func_name in defined_calls:
       if 1:
-        print "LIBCALL " + str(node.name) + " " + str(node.funcspec)
+        print "LIBCALL " + str(func_name) + " " + str(node.funcspec)
 
   
       # syscall byte dependent of the function prototype (deterministic build)
@@ -381,11 +384,10 @@ for node in calls:
       params = func_parameters(node)
       returntype = func_return_type(node)
 
-
       ################## DEF
       if 1:
-        const_id_in  = "LIBCALL_" + libname + "_" + node.name + "_ID_IN"
-        const_id_out = "LIBCALL_" + libname + "_" + node.name + "_ID_OUT"
+        const_id_in  = "LIBCALL_" + libname + "_" + func_name + "_ID_IN"
+        const_id_out = "LIBCALL_" + libname + "_" + func_name + "_ID_OUT"
       defs_file.write("#define %s  0x%xUL\n"%(const_id_in,id_in))
       defs_file.write("#define %s  0x%xUL\n"%(const_id_out,id_out))
       
@@ -438,7 +440,7 @@ for node in calls:
           cxports.append(funcspec[len("cxport(__"):-1])
 
       # forge call with arguments (and prepare args check code as well)
-      call = node.name
+      call = func_name
 
       call += "("
       i = 0
@@ -451,9 +453,6 @@ for node in calls:
 
       call += ')'
 
-      # only store the return id for calls that are meant not to return (taskswitch returns in the stub directly)
-      if (node in taskswitchs):
-        dispatcher_file.write("            stack_ptr[0] = "+const_id_out+";\n")
 
       if returntype != "void":
           dispatcher_file.write("            ret = (unsigned int)"+call+";\n")
@@ -468,7 +467,7 @@ for node in calls:
 
       index+=1
 
-    defined_calls.append(node.name)
+    defined_calls.append(func_name)
 
 if 1:
   defs_file.write("#endif // LIBCALL_DEFS_H\n")
