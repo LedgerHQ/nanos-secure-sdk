@@ -154,6 +154,10 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
     G_io_apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
     G_io_apdu_state = APDU_U2F;
 
+    // prepare for asynch reply
+    u2f_message_set_autoreply_wait_user_presence(service, true);
+    
+
     // don't reset the u2f processing command state, as we still await for the io_exchange caller to make the response call
     /*
     app_dispatch();

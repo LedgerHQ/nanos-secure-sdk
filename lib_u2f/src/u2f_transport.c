@@ -30,8 +30,8 @@
 #define U2F_MASK_COMMAND 0x80
 #define U2F_COMMAND_HEADER_SIZE 3
 
-static const uint8_t const BROADCAST_CHANNEL[] = {0xff, 0xff, 0xff, 0xff};
-static const uint8_t const FORBIDDEN_CHANNEL[] = {0x00, 0x00, 0x00, 0x00};
+static const uint8_t BROADCAST_CHANNEL[] = {0xff, 0xff, 0xff, 0xff};
+static const uint8_t FORBIDDEN_CHANNEL[] = {0x00, 0x00, 0x00, 0x00};
 
 #warning TODO take into account the INIT during SEGMENTED message correctly (avoid erasing the first part of the apdu buffer when doing so)
 
@@ -41,6 +41,11 @@ void u2f_transport_reset(u2f_service_t* service) {
     service->transportOffset = 0;
     service->transportMedia = 0;
     service->transportPacketIndex = 0;
+    service->fakeChannelTransportState = U2F_IDLE;
+    service->fakeChannelTransportOffset = 0;
+    service->fakeChannelTransportPacketIndex = 0;    
+    service->sending = false;
+    service->waitAsynchronousResponse = U2F_WAIT_ASYNCH_IDLE;
     // reset the receive buffer to allow for a new message to be received again (in case transmission of a CODE buffer the previous reply)
     service->transportBuffer = service->transportReceiveBuffer;
 }
@@ -77,10 +82,18 @@ static void u2f_transport_error(u2f_service_t *service, char errorCode) {
  * And a new message can be scheduled.
  */
 void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
+
+    // previous mark packet as sent
+    if (service->sending) {
+        service->sending = false;
+        return;
+    }
+
     // if idle (possibly after an error), then only await for a transmission 
     if (service->transportState != U2F_SENDING_RESPONSE 
         && service->transportState != U2F_SENDING_ERROR) {
         // absorb the error, transport is erroneous but that won't hurt in the end.
+        // also absorb the fake channel user presence check reply ack
         //THROW(INVALID_STATE);
         return;
     }
@@ -125,6 +138,85 @@ void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
     }
 }
 
+void u2f_transport_send_usb_user_presence_required(u2f_service_t *service) {
+    uint16_t offset = 0;
+    service->sending = true;
+    os_memmove(G_io_usb_ep_buffer, service->channel, 4);
+    offset += 4;
+    G_io_usb_ep_buffer[offset++] = U2F_CMD_MSG;
+    G_io_usb_ep_buffer[offset++] = 0;
+    G_io_usb_ep_buffer[offset++] = 2;
+    G_io_usb_ep_buffer[offset++] = 0x69;
+    G_io_usb_ep_buffer[offset++] = 0x85;
+    u2f_io_send(G_io_usb_ep_buffer, offset, U2F_MEDIA_USB);
+}
+
+void u2f_transport_send_wink(u2f_service_t *service) {
+    uint16_t offset = 0;
+    service->sending = true;
+    os_memmove(G_io_usb_ep_buffer, service->channel, 4);
+    offset += 4;
+    G_io_usb_ep_buffer[offset++] = U2F_CMD_WINK;
+    G_io_usb_ep_buffer[offset++] = 0;
+    G_io_usb_ep_buffer[offset++] = 0;
+    u2f_io_send(G_io_usb_ep_buffer, offset, U2F_MEDIA_USB);
+}
+
+bool u2f_transport_receive_fakeChannel(u2f_service_t *service, uint8_t *buffer, uint16_t size) {
+    if (service->fakeChannelTransportState == U2F_INTERNAL_ERROR) {
+        return false;
+    }
+    if (memcmp(service->channel, buffer, 4) != 0) {
+        goto error;
+    }
+    if (service->fakeChannelTransportOffset == 0) {        
+        uint16_t commandLength =
+            (buffer[4 + 1] << 8) | (buffer[4 + 2]) + U2F_COMMAND_HEADER_SIZE;
+        // Some buggy implementations can send a WINK here, reply it gently
+        if (buffer[4] == U2F_CMD_WINK) {
+            u2f_transport_send_wink(service);
+            return true;
+        }
+
+        if (commandLength != service->transportLength) {
+            goto error;
+        }
+        if (buffer[4] != U2F_CMD_MSG) {
+            goto error;
+        }
+        service->fakeChannelTransportOffset = MIN(size - 4, service->transportLength);
+        service->fakeChannelTransportPacketIndex = 0;
+        service->fakeChannelCrc = cx_crc16_update(0, buffer + 4, service->fakeChannelTransportOffset);
+    }
+    else {
+        if (buffer[4] != service->fakeChannelTransportPacketIndex) {
+            goto error;
+        }
+        uint16_t xfer_len = MIN(size - 5, service->transportLength - service->fakeChannelTransportOffset);
+        service->fakeChannelTransportPacketIndex++;
+        service->fakeChannelTransportOffset += xfer_len;
+        service->fakeChannelCrc = cx_crc16_update(service->fakeChannelCrc, buffer + 5, xfer_len);   
+    }
+    if (service->fakeChannelTransportOffset >= service->transportLength) {
+        if (service->fakeChannelCrc != service->commandCrc) {
+            goto error;
+        }
+        service->fakeChannelTransportState = U2F_FAKE_RECEIVED;
+        service->fakeChannelTransportOffset = 0;
+        // reply immediately when the asynch response is not yet ready
+        if (service->waitAsynchronousResponse == U2F_WAIT_ASYNCH_ON) {
+            u2f_transport_send_usb_user_presence_required(service);
+            // response sent
+            service->fakeChannelTransportState = U2F_IDLE;
+        }
+    }
+    return true;
+error:
+    service->fakeChannelTransportState = U2F_INTERNAL_ERROR;
+    return false;    
+}
+
+
 /** 
  * Function that process every message received on a media.
  * Performs message concatenation when message is splitted.
@@ -134,11 +226,18 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
     uint16_t channelHeader = (media == U2F_MEDIA_USB ? 4 : 0);
     uint16_t xfer_len;
     service->media = media;
-    // If busy, answer immediately, avoid reentry
-    if ((service->transportState == U2F_PROCESSING_COMMAND) ||
-        (service->transportState == U2F_SENDING_RESPONSE)) {
+
+    // Handle a busy channel and avoid reentry
+    if (service->transportState == U2F_SENDING_RESPONSE) {
         u2f_transport_error(service, ERROR_CHANNEL_BUSY);
         goto error;
+    }
+    if (service->waitAsynchronousResponse != U2F_WAIT_ASYNCH_IDLE) {
+        if (!u2f_transport_receive_fakeChannel(service, buffer, size)) {
+            u2f_transport_error(service, ERROR_CHANNEL_BUSY);
+            goto error;
+        }
+        return;
     }
     
     // SENDING_ERROR is accepted, and triggers a reset => means the host hasn't consumed the error.
@@ -249,6 +348,9 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         {
             xfer_len = MIN(size - (channelHeader), U2F_COMMAND_HEADER_SIZE+commandLength);
             os_memmove(service->transportBuffer, buffer + channelHeader, xfer_len);
+            if (media == U2F_MEDIA_USB) {
+                service->commandCrc = cx_crc16_update(0, service->transportBuffer, xfer_len);
+            }
             service->transportOffset = xfer_len;
             service->transportLength = U2F_COMMAND_HEADER_SIZE+commandLength;
             service->transportMedia = media;
@@ -257,8 +359,6 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
             os_memmove(service->transportChannel, service->channel, 4);
         }
     } else {
-
-
         // Continuation
         if (size < (channelHeader + 2)) {
             // Message to short, abort
@@ -296,6 +396,9 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         }
         xfer_len = MIN(size - (channelHeader + 1), service->transportLength - service->transportOffset);
         os_memmove(service->transportBuffer + service->transportOffset, buffer + channelHeader + 1, xfer_len);
+        if (media == U2F_MEDIA_USB) {
+            service->commandCrc = cx_crc16_update(service->commandCrc, service->transportBuffer + service->transportOffset, xfer_len);
+        }        
         service->transportOffset += xfer_len;
         service->transportPacketIndex++;
     }
@@ -328,15 +431,49 @@ bool u2f_is_channel_forbidden(uint8_t *channel) {
     return (os_memcmp(channel, FORBIDDEN_CHANNEL, 4) == 0);
 }
 
+/**
+ * Auto reply hodl until the real reply is prepared and sent
+ */
+void u2f_message_set_autoreply_wait_user_presence(u2f_service_t* service, bool enabled) {
+
+    if (enabled) {
+        // start replying placeholder until user presence validated
+        if (service->waitAsynchronousResponse == U2F_WAIT_ASYNCH_IDLE) {
+            service->waitAsynchronousResponse = U2F_WAIT_ASYNCH_ON;
+            u2f_transport_send_usb_user_presence_required(service);
+        }
+    }
+    // don't set to REPLY_READY when it has not been enabled beforehand
+    else if (service->waitAsynchronousResponse == U2F_WAIT_ASYNCH_ON) {
+        service->waitAsynchronousResponse = U2F_WAIT_ASYNCH_REPLY_READY;
+    }
+}
+
+bool u2f_message_repliable(u2f_service_t* service) {
+    // no more asynch replies
+    // finished receiving the command
+    // and not sending a user presence required status
+    return service->waitAsynchronousResponse == U2F_WAIT_ASYNCH_IDLE
+        || (service->waitAsynchronousResponse != U2F_WAIT_ASYNCH_ON 
+            && service->fakeChannelTransportState == U2F_FAKE_RECEIVED 
+            && service->sending == false)
+        ;
+}
+
 void u2f_message_reply(u2f_service_t *service, uint8_t cmd, uint8_t *buffer, uint16_t len) {
-    service->transportState = U2F_SENDING_RESPONSE;
-    service->transportPacketIndex = 0;
-    service->transportBuffer = buffer;
-    service->transportOffset = 0;
-    service->transportLength = len;
-    service->sendCmd = cmd;
-    // pump the first message
-    u2f_transport_sent(service, service->transportMedia);
+
+    // if U2F is not ready to reply, then gently avoid replying
+    if (u2f_message_repliable(service)) 
+    {
+        service->transportState = U2F_SENDING_RESPONSE;
+        service->transportPacketIndex = 0;
+        service->transportBuffer = buffer;
+        service->transportOffset = 0;
+        service->transportLength = len;
+        service->sendCmd = cmd;
+        // pump the first message
+        u2f_transport_sent(service, service->transportMedia);
+    }
 }
 
 

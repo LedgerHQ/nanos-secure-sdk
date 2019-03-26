@@ -1012,6 +1012,17 @@ reply_apdu:
           case APDU_U2F:
             // prepare reply, the remaining segments will be pumped during USB/BLE events handling while waiting for the next APDU
 
+            // the reply has been prepared by the application, stop sending anti timeouts
+            u2f_message_set_autoreply_wait_user_presence(&G_io_u2f, false);
+
+            // continue processing currently received command until completely received.
+            while(!u2f_message_repliable(&G_io_u2f)) {
+              io_seproxyhal_general_status();
+              io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+              // if packet is not well formed, then too bad ...
+              io_seproxyhal_handle_event();
+            }          
+
             // user presence + counter + rapdu + sw must fit the apdu buffer
             if (1U+ 4U+ tx_len +2U > sizeof(G_io_apdu_buffer)) {
               THROW(INVALID_PARAMETER);
