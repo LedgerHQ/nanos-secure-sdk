@@ -45,30 +45,20 @@
 #define P1_SIGN_CHECK_ONLY 0x07
 #define P1_SIGN_SIGN 0x03
 
-#define U2F_ENROLL_RESERVED 0x05
 #define SIGN_USER_PRESENCE_MASK 0x01
 
-#define MAX_SEQ_TIMEOUT_MS 500
-#define MAX_KEEPALIVE_TIMEOUT_MS 500
-
-static const uint8_t SW_SUCCESS[] = {0x90, 0x00};
 static const uint8_t SW_BUSY[] = {0x90, 0x01};
 static const uint8_t SW_PROOF_OF_PRESENCE_REQUIRED[] = {0x69, 0x85};
 static const uint8_t SW_BAD_KEY_HANDLE[] = {0x6A, 0x80};
-static const uint8_t SW_INVALID_P1P2[] = {0x6B, 0x00};
-
-static const uint8_t U2F_VERSION[] = {'U', '2', 'F', '_', 'V', '2', 0x90, 0x00};
-static const uint8_t DUMMY_ZERO[] = {0x00};
 
 static const uint8_t SW_UNKNOWN_INSTRUCTION[] = {0x6d, 0x00};
 static const uint8_t SW_UNKNOWN_CLASS[] = {0x6e, 0x00};
 static const uint8_t SW_WRONG_LENGTH[] = {0x67, 0x00};
 static const uint8_t SW_INTERNAL[] = {0x6F, 0x00};
 
-static const uint8_t NOTIFY_USER_PRESENCE_NEEDED[] = {
-    KEEPALIVE_REASON_TUP_NEEDED};
+#ifdef U2F_PROXY_MAGIC
 
-static const uint8_t DUMMY_USER_PRESENCE[] = {SIGN_USER_PRESENCE_MASK};
+static const uint8_t U2F_VERSION[] = {'U', '2', 'F', '_', 'V', '2', 0x90, 0x00};
 
 // take into account max header (u2f usb)
 static const uint8_t INFO[] = {1 /*info format 1*/, (char)(IO_APDU_BUFFER_SIZE - U2F_HANDLE_SIGN_HEADER_SIZE - 3 - 4), 0x90, 0x00};
@@ -154,6 +144,10 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
     G_io_apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
     G_io_apdu_state = APDU_U2F;
 
+    // prepare for asynch reply
+    u2f_message_set_autoreply_wait_user_presence(service, true);
+    
+
     // don't reset the u2f processing command state, as we still await for the io_exchange caller to make the response call
     /*
     app_dispatch();
@@ -182,6 +176,8 @@ void u2f_apdu_get_info(u2f_service_t *service, uint8_t p1, uint8_t p2,
     UNUSED(length);
     u2f_message_reply(service, U2F_CMD_MSG, (uint8_t *)INFO, sizeof(INFO));
 }
+
+#endif
 
 void u2f_handle_cmd_init(u2f_service_t *service, uint8_t *buffer,
                          uint16_t length, uint8_t *channelInit) {
@@ -243,6 +239,16 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
         return;
     }
 
+#ifndef U2F_PROXY_MAGIC
+
+    // No proxy mode, just pass the APDU as it is to the upper layer
+    os_memmove(G_io_apdu_buffer, buffer, length);
+    G_io_apdu_length = length;
+    G_io_apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
+    G_io_apdu_state = APDU_U2F;
+
+#else
+
     if (cla != FIDO_CLA) {
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_UNKNOWN_CLASS,
@@ -275,6 +281,8 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
                  sizeof(SW_UNKNOWN_INSTRUCTION));
         return;
     }
+
+#endif    
 }
 
 void u2f_message_complete(u2f_service_t *service) {

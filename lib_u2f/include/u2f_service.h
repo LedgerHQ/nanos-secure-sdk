@@ -39,6 +39,8 @@ typedef enum {
     U2F_PROCESSING_COMMAND,
     U2F_SENDING_RESPONSE,
     U2F_SENDING_ERROR,
+    U2F_INTERNAL_ERROR,
+    U2F_FAKE_RECEIVED    
 } u2f_transport_state_t;
 
 typedef enum {
@@ -48,8 +50,15 @@ typedef enum {
     U2F_MEDIA_BLE
 } u2f_transport_media_t;
 
+typedef enum {
+    U2F_WAIT_ASYNCH_IDLE,
+    U2F_WAIT_ASYNCH_ON,
+    U2F_WAIT_ASYNCH_REPLY_READY,
+} u2f_wait_asynch_state_t;
+
 typedef struct u2f_service_t {
     // Internal
+    uint32_t next_channel;
 
     uint8_t channel[4];
     u2f_transport_media_t media;
@@ -66,6 +75,19 @@ typedef struct u2f_service_t {
     uint8_t *transportBuffer;
     u2f_transport_state_t transportState;
     u2f_transport_media_t transportMedia;
+
+    // handle fake channel state to simulate a USB keepalive
+    uint16_t fakeChannelTransportOffset;
+    uint8_t fakeChannelTransportPacketIndex;
+    u2f_transport_state_t fakeChannelTransportState;
+    uint16_t commandCrc;
+    uint16_t fakeChannelCrc;
+
+    // mark that an asynchronous response is available
+    uint8_t waitAsynchronousResponse;
+
+    //uint16_t responseLength;
+    bool sending;    
 
     u2fTimer_t timeoutFunction;
     uint32_t timerInterval;
