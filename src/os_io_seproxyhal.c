@@ -1023,6 +1023,8 @@ reply_apdu:
               io_seproxyhal_handle_event();
             }          
 
+#ifdef U2F_PROXY_MAGIC
+
             // user presence + counter + rapdu + sw must fit the apdu buffer
             if (1U+ 4U+ tx_len +2U > sizeof(G_io_apdu_buffer)) {
               THROW(INVALID_PARAMETER);
@@ -1037,6 +1039,12 @@ reply_apdu:
             // zeroize user presence and counter
             os_memset(G_io_apdu_buffer, 0, 5);
             u2f_message_reply(&G_io_u2f, U2F_CMD_MSG, G_io_apdu_buffer, tx_len+5);
+
+#else
+            u2f_message_reply(&G_io_u2f, U2F_CMD_MSG, G_io_apdu_buffer, tx_len);
+
+#endif            
+
             goto break_send;
 #endif // HAVE_IO_U2F
         }
