@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018 Ledger
+*   (c) 2016, 2017, 2018, 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -109,8 +109,8 @@ SYSCALL void io_seproxyhal_spi_send(const unsigned char *buffer PLENGTH(length),
                                     unsigned short length);
 
 // return 1 if the previous seproxyhal exchange has been terminated with a
-// status (packet which starts with 011x xxxx)
-// else 0, which means the exchange needs to be closed.
+// status (packet which starts with 011x xxxx) else 0, which means the exchange
+// needs to be closed.
 SYSCALL unsigned int io_seproxyhal_spi_is_status_sent(void);
 
 // not to be called by application (application is triggered using io_event
@@ -138,6 +138,10 @@ void io_seproxyhal_init_button(void);
 unsigned short io_exchange_al(unsigned char channel_and_flags,
                               unsigned short tx_len);
 
+// Allow application to overload how the io_exchange function automatically
+// replies to get app name and version
+unsigned int os_io_seproxyhal_get_app_name_and_version(void);
+
 // for delegation of Native NFC / USB
 unsigned char io_event(unsigned char channel);
 
@@ -160,6 +164,7 @@ void os_io_seproxyhal_general_status_processing(void);
 
 // legacy function to send over EP 0x82
 void io_usb_send_apdu_data(unsigned char *buffer, unsigned short length);
+void io_usb_send_apdu_data_ep0x83(unsigned char *buffer, unsigned short length);
 
 // trigger a transfer over an usb endpoint and waits for it to occur if timeout
 // is != 0
@@ -187,6 +192,7 @@ typedef enum {
     APDU_USB_CCID,
     APDU_U2F,
     APDU_RAW,
+    APDU_USB_WEBUSB,
 } io_apdu_state_e;
 
 extern volatile io_apdu_state_e G_io_apdu_state; // by default
@@ -275,6 +281,9 @@ typedef struct ux_state_s {
     bagl_element_callback_t
         elements_preprocessor; // called before an element is displayed
     button_push_callback_t button_push_handler;
+#ifdef HAVE_TINY_COROUTINE
+    unsigned int return_value; // value replied by an asynch user consent
+#endif                         // HAVE_TINY_COROUTINE
     unsigned int callback_interval_ms;
     bolos_ux_params_t params;
 } ux_state_t;
@@ -293,7 +302,7 @@ extern ux_state_t ux;
     ux.params.len = 0;                                                         \
     ux.params.u.status_bar.fgcolor = fg;                                       \
     ux.params.u.status_bar.bgcolor = bg;                                       \
-    os_ux(&ux.params);
+    os_ux_blocking(&ux.params);
 
 /**
  * Request displaying the next element in the UX structure.
@@ -307,9 +316,8 @@ extern ux_state_t ux;
         const bagl_element_t *element = &ux.elements[ux.elements_current];     \
         if (!ux.elements_preprocessor ||                                       \
             (element = ux.elements_preprocessor(element))) {                   \
-            if ((unsigned int)element ==                                       \
-                1) { /*backward compat with coding to avoid smashing           \
-                        everything*/                                           \
+            if ((unsigned int)element == 1) { /*backward compat with coding to \
+                                                 avoid smashing everything*/   \
                 element = &ux.elements[ux.elements_current];                   \
             }                                                                  \
             io_seproxyhal_display(element);                                    \
@@ -319,10 +327,9 @@ extern ux_state_t ux;
 
 /**
  * Request a wake up of the device (backlight, pin lock screen, ...) to display
- * a new interface to the user.
- * Wake up prevent both autolock and power off features. Therefore, security
- * wise, this function shall only
- * be called to request direct user interaction.
+ * a new interface to the user. Wake up prevent both autolock and power off
+ * features. Therefore, security wise, this function shall only be called to
+ * request direct user interaction.
  */
 #define UX_WAKE_UP()                                                           \
     ux.params.ux_id = BOLOS_UX_WAKE_UP;                                        \
@@ -335,14 +342,27 @@ extern ux_state_t ux;
  * Force redisplay of the screen from the given index in the screen's element
  * array
  */
+#ifndef HAVE_TINY_COROUTINE
 #define UX_REDISPLAY_IDX(index)                                                \
     io_seproxyhal_init_ux();                                                   \
+    io_seproxyhal_init_button(); /*ensure to avoid release of a button from a  \
+                                    nother screen to mess up with the          \
+                                    redisplayed screen */                      \
     ux.elements_current = index;                                               \
-    /* REDRAW is redisplay already */                                          \
+    /* REDRAW is redisplay already, use os_ux retrun value to check */         \
     if (ux.params.len != BOLOS_UX_IGNORE &&                                    \
         ux.params.len != BOLOS_UX_CONTINUE) {                                  \
         UX_DISPLAY_NEXT_ELEMENT();                                             \
     }
+#else // HAVE_TINY_COROUTINE
+#define UX_REDISPLAY_IDX(index)                                                \
+    io_seproxyhal_init_ux();                                                   \
+    io_seproxyhal_init_button();                                               \
+    if (ux.params.len != BOLOS_UX_IGNORE &&                                    \
+        ux.params.len != BOLOS_UX_CONTINUE) {                                  \
+        ux.elements_current = index;                                           \
+    }
+#endif // HAVE_TINY_COROUTINE
 
 /**
  * Redisplay all elements of the screen
@@ -401,6 +421,19 @@ extern ux_state_t ux;
 #define UX_DISPLAYED() (ux.elements_current >= ux.elements_count)
 
 /**
+ * Macro to process sequentially display a screen. The call finished when the UX
+ * is completely displayed.
+ */
+#define UX_WAIT_DISPLAYED()                                                    \
+    do {                                                                       \
+        UX_DISPLAY_NEXT_ELEMENT();                                             \
+        io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer,                     \
+                               sizeof(G_io_seproxyhal_spi_buffer), 0);         \
+        io_seproxyhal_handle_event();                                          \
+        /* all items have been displayed */                                    \
+    } while (!UX_DISPLAYED());
+
+/**
  * Process button push events. Application's button event handler is called only
  * if the ux app does not deny it (modal frame displayed).
  */
@@ -433,8 +466,8 @@ extern ux_state_t ux;
 
 /**
  * forward the ticker_event to the os ux handler. Ticker event callback is
- * always called whatever the return code of the ux app.
- * Ticker event interval is assumed to be 100 ms.
+ * always called whatever the return code of the ux app. Ticker event interval
+ * is assumed to be 100 ms.
  */
 #define UX_TICKER_EVENT(seph_packet, callback)                                 \
     UX_FORWARD_EVENT(                                                          \
@@ -487,9 +520,8 @@ void io_seproxyhal_request_mcu_status(void);
 
 /**
  * Helper function to order the MCU to display the given bitmap with the given
-* color index, a table of size: (1<<bit_per_pixel) with little endian encoded
-* colors.
-* Deprecated
+ * color index, a table of size: (1<<bit_per_pixel) with little endian encoded
+ * colors. Deprecated
  */
 void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h,
                                   unsigned int *color_index,

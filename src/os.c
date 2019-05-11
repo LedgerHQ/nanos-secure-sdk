@@ -16,6 +16,7 @@
 ********************************************************************************/
 
 #include "os.h"
+#include "os_io_seproxyhal.h"
 #include <string.h>
 
 // apdu buffer must hold a complete apdu to avoid troubles
@@ -78,7 +79,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
   switch(G_io_usb_ep_buffer[2]) {
   case 0x05:
     // ensure sequence idx is 0 for the first chunk ! 
-    if (U2BE(G_io_usb_ep_buffer, 3) != G_io_usb_hid_sequence_number) {
+    if ((unsigned int)U2BE(G_io_usb_ep_buffer, 3) != (unsigned int)G_io_usb_hid_sequence_number) {
       // ignore packet
       goto apdu_reset;
     }
@@ -170,18 +171,14 @@ void io_usb_hid_init(void) {
   //G_io_usb_hid_current_buffer = G_io_apdu_buffer; // not really needed
 }
 
-unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
-                                   io_recv_t rcvfct,
-                                   unsigned char flags) {
-  unsigned char l;
+/**
+ * sent the next io_usb_hid transport chunk (rx on the host, tx on the device)
+ */
+void io_usb_hid_sent(io_send_t sndfct) {
+  unsigned int l;
 
-  // perform send
-  if (sndlength) {
-    G_io_usb_hid_sequence_number = 0; 
-    G_io_usb_hid_current_buffer = G_io_apdu_buffer;
-  }
-  while(sndlength) {
-
+  // only prepare next chunk if some data to be sent remain
+  if (G_io_usb_hid_remaining_length) {
     // fill the chunk
     os_memset(G_io_usb_ep_buffer, 0, IO_HID_EP_LENGTH-2);
 
@@ -193,19 +190,19 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
     G_io_usb_ep_buffer[4] = G_io_usb_hid_sequence_number;
 
     if (G_io_usb_hid_sequence_number == 0) {
-      l = ((sndlength>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : sndlength);
-      G_io_usb_ep_buffer[5] = sndlength>>8;
-      G_io_usb_ep_buffer[6] = sndlength;
+      l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : G_io_usb_hid_remaining_length);
+      G_io_usb_ep_buffer[5] = G_io_usb_hid_remaining_length>>8;
+      G_io_usb_ep_buffer[6] = G_io_usb_hid_remaining_length;
       os_memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
-      sndlength -= l;
+      G_io_usb_hid_remaining_length -= l;
       l += 7;
     }
     else {
-      l = ((sndlength>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : sndlength);
+      l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : G_io_usb_hid_remaining_length);
       os_memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
-      sndlength -= l;
+      G_io_usb_hid_remaining_length -= l;
       l += 5;
     }
     // prepare next chunk numbering
@@ -214,38 +211,28 @@ unsigned short io_usb_hid_exchange(io_send_t sndfct, unsigned short sndlength,
     // always pad :)
     sndfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
   }
+  // cleanup when everything has been sent (ack for the last sent usb in packet)
+  else {
+    G_io_usb_hid_sequence_number = 0; 
+    G_io_usb_hid_current_buffer = NULL;
 
-  // prepare for next apdu
-  io_usb_hid_init();
-
-  if (flags & IO_RESET_AFTER_REPLIED) {
-    reset();
-  }
-
-  if (flags & IO_RETURN_AFTER_TX ) {
-    return 0;
-  }
-
-  // receive the next command
-  for(;;) {
-    // receive a hid chunk
-    l = rcvfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
-    // check for wrongly sized tlvs
-    if (l > sizeof(G_io_usb_ep_buffer)) {
-      continue;
-    }
-
-    // call the chunk reception
-    switch(io_usb_hid_receive(sndfct, G_io_usb_ep_buffer, l)) {
-      default:
-        continue;
-
-      case IO_USB_APDU_RECEIVED:
-
-        return G_io_usb_hid_total_length;
-    }
+    // we sent the whole response
+    G_io_apdu_state = APDU_IDLE;
   }
 }
+
+void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength) {
+  // perform send
+  if (sndlength) {
+    G_io_usb_hid_sequence_number = 0; 
+    G_io_usb_hid_current_buffer = G_io_apdu_buffer;
+    G_io_usb_hid_remaining_length = sndlength;
+    G_io_usb_hid_total_length = sndlength;
+    io_usb_hid_sent(sndfct);
+  }
+}
+
+
 #endif // HAVE_USB_APDU
 
 REENTRANT(void os_memmove(void * dst, const void WIDE * src, unsigned int length)) {

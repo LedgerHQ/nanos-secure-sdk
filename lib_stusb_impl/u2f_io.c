@@ -53,4 +53,3 @@ void u2f_io_send(uint8_t *buffer, uint16_t length, u2f_transport_media_t media) 
 }
 
 #endif // HAVE_U2F
-

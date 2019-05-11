@@ -20,4 +20,3 @@
 
 
 #endif // USBD_CCID_IMPL_H
-

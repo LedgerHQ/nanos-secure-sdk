@@ -325,6 +325,7 @@ typedef enum {
     IO_APDU_MEDIA_BLE,
     IO_APDU_MEDIA_NFC,
     IO_APDU_MEDIA_USB_CCID,
+    IO_APDU_MEDIA_USB_WEBUSB,
     IO_APDU_MEDIA_RAW,
     IO_APDU_MEDIA_U2F,
 } io_apdu_media_t;
