@@ -566,7 +566,11 @@ static __ALIGN_BEGIN uint8_t const USBD_DeviceQualifierDesc[] __ALIGN_END =
 static uint8_t const USBD_DeviceDesc[]= {
   0x12,                       /* bLength */
   USB_DESC_TYPE_DEVICE,       /* bDescriptorType */
+#ifdef HAVE_WEBUSB
   0x10,                       /* bcdUSB */
+#else
+  0x00,
+#endif
   0x02,
   0x00,                       /* bDeviceClass */
   0x00,                       /* bDeviceSubClass */
