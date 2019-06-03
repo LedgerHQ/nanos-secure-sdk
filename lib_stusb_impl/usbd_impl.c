@@ -44,6 +44,9 @@
   *
   ******************************************************************************
   */ 
+
+#define HAVE_LEGACY_PID
+
 #include "os.h"
 //#include "os_io_usb.h"
 
@@ -135,7 +138,11 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
 };
 
 #elif defined(TARGET_NANOS)
+#ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x1000
+#else
+#define USBD_PID                      0x0001
+#endif
 static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   6*2+2,
   USB_DESC_TYPE_STRING,
@@ -147,7 +154,11 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'S', 0,
 };
 #elif defined(TARGET_ARAMIS)
+#ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x2000
+#else
+#define USBD_PID                      0x0002
+#endif
 static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   6*2+2,
   USB_DESC_TYPE_STRING,
@@ -159,7 +170,11 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   's', 0,
 };
 #elif defined(TARGET_HW2)
+#ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x3000
+#else
+#define USBD_PID                      0x0003
+#endif
 static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   3*2+2,
   USB_DESC_TYPE_STRING,
@@ -168,7 +183,11 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   '2', 0,
 };
 #elif defined(TARGET_NANOX)
+#ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x4000
+#else
+#define USBD_PID                      0x0004
+#endif
 static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   6*2+2,
   USB_DESC_TYPE_STRING,
@@ -578,7 +597,7 @@ static uint8_t const USBD_DeviceDesc[]= {
   USB_MAX_EP0_SIZE,           /* bMaxPacketSize */
   LOBYTE(USBD_VID),           /* idVendor */
   HIBYTE(USBD_VID),           /* idVendor */
-#ifdef HAVE_VID_PID_PROBER  
+#if defined(HAVE_VID_PID_PROBER) || defined(HAVE_LEGACY_PID)
   LOBYTE(USBD_PID),           /* idProduct */
 #else
   LOBYTE(USBD_PID | 0x01
