@@ -38,16 +38,16 @@ try:
 	if (len(sys.argv) == 2):
 		filename = sys.argv[1];
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + sys.argv[1] + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + sys.argv[1] + " does not exists !\n")
 			sys.exit(2)
 	# 3: python imagefile forcedBPP
 	# 3: python imagefile hexbitmaponly
 	elif (len(sys.argv) == 3):
 		filename = sys.argv[1];
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 		if (sys.argv[2] == "hexbitmaponly"):
 			hexbitmaponly = True
@@ -64,11 +64,11 @@ try:
 		if not os.path.exists(filename):
 			filename = sys.argv[3];
 			if not os.path.exists(filename):
-				sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-				sys.sterr.write("Error: " + filename + " does not exists !\n")
+				sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+				sys.stderr.write("Error: " + filename + " does not exists !\n")
 				sys.exit(2)
 			widthmax = int(sys.argv[1])
-			heightmax = int(sys.argv[2])		
+			heightmax = int(sys.argv[2])
 		else:
 			forcedBPP = int(sys.argv[2])
 			if (sys.argv[3] == "hexbitmaponly"):
@@ -78,18 +78,18 @@ try:
 			elif (sys.argv[2] == "glyphcheader"):
 				glyphcheader = True
 			else:
-				sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+				sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
 				sys.exit(2)
 	# 5: python max max imagefile forcedBPP
 	# 5: python max max imagefile hexbitmaponly
 	elif (len(sys.argv) == 5):
 		filename = sys.argv[3];
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 		widthmax = int(sys.argv[1])
-		heightmax = int(sys.argv[2])		
+		heightmax = int(sys.argv[2])
 
 		if (sys.argv[4] == "hexbitmaponly"):
 			hexbitmaponly = True
@@ -104,11 +104,11 @@ try:
 	elif (len(sys.argv) == 6):
 		filename = sys.argv[3]
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 		widthmax = int(sys.argv[1])
-		heightmax = int(sys.argv[2])		
+		heightmax = int(sys.argv[2])
 		forcedBPP = int(sys.argv[4])
 		if (sys.argv[5] == "hexbitmaponly"):
 			hexbitmaponly = True
@@ -117,12 +117,12 @@ try:
 		elif (sys.argv[2] == "glyphcheader"):
 			glyphcheader = True
 		else:
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 	else:
-		sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-		sys.sterr.write("Error: " + sys.argv[1] + " does not exists !\n")
+		sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+		sys.stderr.write("Error: " + sys.argv[1] + " does not exists !\n")
 		sys.exit(2)
 
 
@@ -152,7 +152,7 @@ try:
 				maxcolor = color_index
 
 	if (maxcolor+1 > 16):
-		sys.sterr.write("toomuch colors\n")
+		sys.stderr.write("too many colors\n")
 		sys.exit(3)
 
 
@@ -184,7 +184,7 @@ try:
 	i = 0
 	palette_remapping = {}
 	new_palette = []
-	for lum, values in opalette.items(): 
+	for lum, values in opalette.items():
 		# old index to new index
 		for v in values:
 			palette_remapping[v[0]] = i
@@ -220,7 +220,7 @@ try:
 """)
 		if glyphcheader:
 			sys.stdout.write("""extern
-""")		
+""")
 		sys.stdout.write("""unsigned int const C_""" + bname + """_colors[]
 """);
 		if glyphcheader:
@@ -236,7 +236,7 @@ try:
 			sys.stdout.write("""};
 """)
 		if glyphcheader:
-			sys.stdout.write("""extern""")	
+			sys.stdout.write("""extern""")
 		sys.stdout.write("""	
 unsigned char const C_""" + bname + """_bitmap[]""");
 		if glyphcheader:
@@ -284,13 +284,13 @@ unsigned char const C_""" + bname + """_bitmap[]""");
 						sys.stdout.write("0x" + hexbyte(current_byte) + ", ")
 						byte_count+=1
 						if (byte_count >= 16):
-							byte_count = 0;
+							byte_count = 0
 							sys.stdout.write("\n  ")
 					else:
 						sys.stdout.write(hexbyte(current_byte))
 					current_bit = 0
 					current_byte = 0
-				
+
 		# print last byte if any
 		if (current_bit > 0):
 			if not hexbitmaponly:
@@ -316,13 +316,13 @@ unsigned char const C_""" + bname + """_bitmap[]""");
 		else:
 			sys.stdout.write("""#ifdef OS_IO_SEPROXYHAL
 #include \"os_io_seproxyhal.h\"
-""")	
+""")
 			if glyphcheader:
 						sys.stdout.write("""extern
-""")	
+""")
 			sys.stdout.write("""const bagl_icon_details_t C_""" + bname)
 
-			if glyphcheader: 
+			if glyphcheader:
 				sys.stdout.write(""";
 """)
 				sys.stdout.write("""#endif // GLYPH_""" + bname + """_BPP
