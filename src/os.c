@@ -166,6 +166,7 @@ apdu_reset:
 
 void io_usb_hid_init(void) {
   G_io_usb_hid_sequence_number = 0; 
+  G_io_usb_hid_current_buffer = NULL; // 
   //G_io_usb_hid_remaining_length = 0; // not really needed
   //G_io_usb_hid_total_length = 0; // not really needed
   //G_io_usb_hid_current_buffer = G_io_apdu_buffer; // not really needed
@@ -177,47 +178,50 @@ void io_usb_hid_init(void) {
 void io_usb_hid_sent(io_send_t sndfct) {
   unsigned int l;
 
-  // only prepare next chunk if some data to be sent remain
-  if (G_io_usb_hid_remaining_length) {
-    // fill the chunk
-    os_memset(G_io_usb_ep_buffer, 0, IO_HID_EP_LENGTH-2);
+  // don't proceed the hid_sent (maybe an artefact) when NO data scheduled to be sent.
+  if (G_io_usb_hid_current_buffer) {
 
-    // keep the channel identifier
-    G_io_usb_ep_buffer[0] = (G_io_usb_hid_channel>>8)&0xFF;
-    G_io_usb_ep_buffer[1] = G_io_usb_hid_channel&0xFF;
-    G_io_usb_ep_buffer[2] = 0x05;
-    G_io_usb_ep_buffer[3] = G_io_usb_hid_sequence_number>>8;
-    G_io_usb_ep_buffer[4] = G_io_usb_hid_sequence_number;
+    // only prepare next chunk if some data to be sent remain
+    if (G_io_usb_hid_remaining_length) {
+      // fill the chunk
+      os_memset(G_io_usb_ep_buffer, 0, IO_HID_EP_LENGTH-2);
 
-    if (G_io_usb_hid_sequence_number == 0) {
-      l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : G_io_usb_hid_remaining_length);
-      G_io_usb_ep_buffer[5] = G_io_usb_hid_remaining_length>>8;
-      G_io_usb_ep_buffer[6] = G_io_usb_hid_remaining_length;
-      os_memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
-      G_io_usb_hid_current_buffer += l;
-      G_io_usb_hid_remaining_length -= l;
-      l += 7;
+      // keep the channel identifier
+      G_io_usb_ep_buffer[0] = (G_io_usb_hid_channel>>8)&0xFF;
+      G_io_usb_ep_buffer[1] = G_io_usb_hid_channel&0xFF;
+      G_io_usb_ep_buffer[2] = 0x05;
+      G_io_usb_ep_buffer[3] = G_io_usb_hid_sequence_number>>8;
+      G_io_usb_ep_buffer[4] = G_io_usb_hid_sequence_number;
+
+      if (G_io_usb_hid_sequence_number == 0) {
+        l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : G_io_usb_hid_remaining_length);
+        G_io_usb_ep_buffer[5] = G_io_usb_hid_remaining_length>>8;
+        G_io_usb_ep_buffer[6] = G_io_usb_hid_remaining_length;
+        os_memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
+        G_io_usb_hid_current_buffer += l;
+        G_io_usb_hid_remaining_length -= l;
+        l += 7;
+      }
+      else {
+        l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : G_io_usb_hid_remaining_length);
+        os_memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
+        G_io_usb_hid_current_buffer += l;
+        G_io_usb_hid_remaining_length -= l;
+        l += 5;
+      }
+      // prepare next chunk numbering
+      G_io_usb_hid_sequence_number++;
+      // send the chunk
+      // always pad :)
+      sndfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
     }
+    // cleanup when everything has been sent (ack for the last sent usb in packet)
     else {
-      l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : G_io_usb_hid_remaining_length);
-      os_memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
-      G_io_usb_hid_current_buffer += l;
-      G_io_usb_hid_remaining_length -= l;
-      l += 5;
-    }
-    // prepare next chunk numbering
-    G_io_usb_hid_sequence_number++;
-    // send the chunk
-    // always pad :)
-    sndfct(G_io_usb_ep_buffer, sizeof(G_io_usb_ep_buffer));
-  }
-  // cleanup when everything has been sent (ack for the last sent usb in packet)
-  else {
-    G_io_usb_hid_sequence_number = 0; 
-    G_io_usb_hid_current_buffer = NULL;
+      io_usb_hid_init();
 
-    // we sent the whole response
-    G_io_apdu_state = APDU_IDLE;
+      // we sent the whole response
+      G_io_apdu_state = APDU_IDLE;
+    }
   }
 }
 

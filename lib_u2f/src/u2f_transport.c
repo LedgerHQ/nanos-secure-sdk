@@ -22,6 +22,7 @@
 #include <string.h>
 #include "u2f_service.h"
 #include "u2f_transport.h"
+#include "u2f_processing.h"
 #include "u2f_io.h"
 
 #include "os.h"
@@ -83,11 +84,15 @@ static void u2f_transport_error(u2f_service_t *service, char errorCode) {
  */
 void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
 
+    // don't process when replying to anti timeout requests
+    if (!u2f_message_repliable(service)) {
     // previous mark packet as sent
-    if (service->sending) {
         service->sending = false;
         return;
     }
+
+    // previous mark packet as sent
+    service->sending = false;
 
     // if idle (possibly after an error), then only await for a transmission 
     if (service->transportState != U2F_SENDING_RESPONSE 
@@ -170,8 +175,7 @@ bool u2f_transport_receive_fakeChannel(u2f_service_t *service, uint8_t *buffer, 
         goto error;
     }
     if (service->fakeChannelTransportOffset == 0) {        
-        uint16_t commandLength =
-            (buffer[4 + 1] << 8) | (buffer[4 + 2]) + U2F_COMMAND_HEADER_SIZE;
+        uint16_t commandLength = U2BE(buffer, 4+1) + U2F_COMMAND_HEADER_SIZE;
         // Some buggy implementations can send a WINK here, reply it gently
         if (buffer[4] == U2F_CMD_WINK) {
             u2f_transport_send_wink(service);
@@ -304,8 +308,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
             goto error;
         }
         // Check the length
-        uint16_t commandLength =
-            (buffer[channelHeader + 1] << 8) | (buffer[channelHeader + 2]);
+        uint16_t commandLength = U2BE(buffer, channelHeader + 1);
         if (commandLength > (service->transportReceiveBufferLength - 3)) {
             // Overflow in message size, abort
             u2f_transport_error(service, ERROR_INVALID_LEN);

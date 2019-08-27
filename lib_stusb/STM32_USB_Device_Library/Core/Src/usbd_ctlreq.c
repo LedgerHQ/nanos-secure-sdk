@@ -232,20 +232,20 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
     switch (pdev->dev_state) 
     {
     case USBD_STATE_ADDRESSED:          
-      if ((ep_addr != 0x00) && (ep_addr != 0x80)) 
-      {
-        USBD_LL_StallEP(pdev , ep_addr);
-      }
+      // if ((ep_addr != 0x00) && (ep_addr != 0x80)) 
+      // {
+      //   USBD_LL_StallEP(pdev , ep_addr);
+      // }
       break;	
       
     case USBD_STATE_CONFIGURED:   
       if (req->wValue == USB_FEATURE_EP_HALT)
       {
-        if ((ep_addr != 0x00) && (ep_addr != 0x80)) 
-        { 
-          USBD_LL_StallEP(pdev , ep_addr);
+        // if ((ep_addr != 0x00) && (ep_addr != 0x80)) 
+        // { 
+        //   USBD_LL_StallEP(pdev , ep_addr);
           
-        }
+        // }
       }
       if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
         ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);   
@@ -266,7 +266,8 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
     case USBD_STATE_ADDRESSED:          
       if ((ep_addr != 0x00) && (ep_addr != 0x80)) 
       {
-        USBD_LL_StallEP(pdev , ep_addr);
+        // with old MCUs, the clear stall retrig VALID for TX endpoint and resend the previously sent response 
+        // USBD_LL_StallEP(pdev , ep_addr);
       }
       break;	
       
@@ -275,7 +276,8 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
       {
         if ((ep_addr & 0x7F) != 0x00) 
         {        
-          USBD_LL_ClearStallEP(pdev , ep_addr);
+          // with old MCUs, the clear stall retrig VALID for TX endpoint and resend the previously sent response 
+          // USBD_LL_ClearStallEP(pdev , ep_addr);
           if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
             ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);
           }
@@ -294,10 +296,10 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
     switch (pdev->dev_state) 
     {
     case USBD_STATE_ADDRESSED:          
-      if ((ep_addr & 0x7F) != 0x00) 
-      {
-        USBD_LL_StallEP(pdev , ep_addr);
-      }
+      // if ((ep_addr & 0x7F) != 0x00) 
+      // {
+      //   USBD_LL_StallEP(pdev , ep_addr);
+      // }
       break;	
       
     case USBD_STATE_CONFIGURED:

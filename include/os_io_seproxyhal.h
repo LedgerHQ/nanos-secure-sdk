@@ -676,6 +676,12 @@ void ux_turner_ticker(unsigned int elpased_ms);
  */
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
 
+/**
+ * Function to ensure a I/O channel is not timeouting waiting for operations
+ * after a long time without SEPH packet exchanges
+ */
+void io_seproxyhal_io_heartbeat(void);
+
 #endif // OS_IO_SEPROXYHAL
 
 #endif // OS_IO_SEPROXYHAL_H

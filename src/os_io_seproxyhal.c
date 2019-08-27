@@ -47,6 +47,7 @@ volatile unsigned short G_io_apdu_length; // total length to be received
 volatile io_apdu_media_t G_io_apdu_media;
 volatile unsigned int G_button_mask;
 volatile unsigned int G_button_same_mask_counter;
+volatile unsigned int G_io_ms;
 
 // usb endpoint buffer
 unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
@@ -277,6 +278,7 @@ unsigned int io_seproxyhal_handle_event(void) {
       // ask the user if not processed here
     case SEPROXYHAL_TAG_TICKER_EVENT:
       // process ticker events to timeout the IO transfers, and forward to the user io_event function too
+      G_io_ms += 100; // value is by default, don't change the ticker configuration
 #ifdef HAVE_IO_USB
       {
         unsigned int i = IO_USB_MAX_ENDPOINTS;
@@ -327,6 +329,8 @@ void io_seproxyhal_init(void) {
   G_io_apdu_state = APDU_IDLE;
   G_io_apdu_length = 0;
   G_io_apdu_media = IO_APDU_MEDIA_NONE;
+
+  G_io_ms = 0;
 
   #ifdef DEBUG_APDU
   debug_apdus_offset = 0;
@@ -919,6 +923,7 @@ unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
 
 unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
   unsigned short rx_len;
+  unsigned int timeout_ms = G_io_ms + IO_RAPDU_TRANSMIT_TIMEOUT_MS;
 
 #ifdef HAVE_BOLOS_APP_STACK_CANARY
   // behavior upon detected stack overflow is to reset the SE
@@ -1017,12 +1022,18 @@ reply_apdu:
 
             // continue processing currently received command until completely received.
             while(!u2f_message_repliable(&G_io_u2f)) {
-              io_seproxyhal_general_status();
-              io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-              // if packet is not well formed, then too bad ...
-              io_seproxyhal_handle_event();
-            }          
 
+              io_seproxyhal_general_status();
+              do {
+              io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+                // check for reply timeout
+                if (G_io_ms >= timeout_ms) {
+                  THROW(EXCEPTION_IO_RESET);
+                }
+                // avoid a general status to be replied
+                io_seproxyhal_handle_event();
+              } while (io_seproxyhal_spi_is_status_sent());
+            }          
 #ifdef U2F_PROXY_MAGIC
 
             // user presence + counter + rapdu + sw must fit the apdu buffer
@@ -1058,9 +1069,16 @@ reply_apdu:
           tcr_yield();
 #else // HAVE_TINY_COROUTINE
           io_seproxyhal_general_status();
-          io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-          // if packet is not well formed, then too bad ...
-          io_seproxyhal_handle_event();
+          do {
+            io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+            // check for reply timeout (when asynch reply (over hid or u2f for example))
+            // this case shall be covered by usb_ep_timeout but is not, investigate that
+            if (G_io_ms >= timeout_ms) {
+              THROW(EXCEPTION_IO_RESET);
+            }
+            // avoid a general status to be replied
+            io_seproxyhal_handle_event();
+          } while (io_seproxyhal_spi_is_status_sent());
 #endif // HAVE_TINY_COROUTINE
         }
 
@@ -1654,4 +1672,15 @@ void debug_printf(void* buffer) {
 #define L(x)
 #endif // HAVE_DEBUG
 
+
+void io_seproxyhal_io_heartbeat(void) {
+  io_seproxyhal_general_status();
+  do {
+    io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+    // avoid a general status to be replied
+    if(G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_TICKER_EVENT) {
+      io_seproxyhal_handle_event();
+    }
+  } while (io_seproxyhal_spi_is_status_sent());
+}
 #endif // OS_IO_SEPROXYHAL
