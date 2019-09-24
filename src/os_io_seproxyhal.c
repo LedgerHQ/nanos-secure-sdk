@@ -923,7 +923,7 @@ unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
 
 unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
   unsigned short rx_len;
-  unsigned int timeout_ms = G_io_ms + IO_RAPDU_TRANSMIT_TIMEOUT_MS;
+  unsigned int timeout_ms;
 
 #ifdef HAVE_BOLOS_APP_STACK_CANARY
   // behavior upon detected stack overflow is to reset the SE
@@ -959,6 +959,8 @@ reply_apdu:
     // TODO work up the spi state machine over the HAL proxy until an APDU is available
 
     if (tx_len && !(channel&IO_ASYNCH_REPLY)) {
+      timeout_ms = G_io_ms + IO_RAPDU_TRANSMIT_TIMEOUT_MS;
+
       // until the whole RAPDU is transmitted, send chunks using the current mode for communication
       for (;;) {
         switch(G_io_apdu_state) {
