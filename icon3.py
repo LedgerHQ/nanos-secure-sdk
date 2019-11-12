@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 """
-*******************************************************************************
-*   Ledger - Non secure firmware
-*   (c) 2016, 2017 Ledger
+
+/*******************************************************************************
+*   Ledger Nano S - Secure firmware
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -11,12 +12,12 @@
 *
 *      http://www.apache.org/licenses/LICENSE-2.0
 *
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-********************************************************************************
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 """
 
 import argparse
@@ -80,21 +81,27 @@ def main():
     parser.add_argument('--hexbitmaponly', action='store_true')
     parser.add_argument('--glyphcheader', action='store_true')
     parser.add_argument('--glyphcfile', action='store_true')
+    parser.add_argument('--errors', action='store_true')
+    parser.add_argument('--factorize', action='store_true')
     args = parser.parse_args()
 
     exitcode = 0
     for file in args.image_file:
         if not os.path.exists(file):
             sys.stderr.write("Error: {} does not exist!".format(file) + "\n")
-            exitcode=-1
+            if args.errors:
+                exitcode=-1
             continue
 
+    colors_array = {}
+    processed_image_names = []
     for file in args.image_file:
         try:
             im = Image.open(file)
             if im.mode is not 'P':
                 sys.stderr.write("Error: input file {} must have indexed colors".format(file) + "\n")
-                exitcode=-1
+                if args.errors:
+                    exitcode=-1
                 continue
 
             im.load()
@@ -104,11 +111,16 @@ def main():
             height = min(height, args.max_height)
 
             image_name = os.path.splitext(os.path.basename(file))[0]
+            # if image name has already been done, then don't do it twice
+            if image_name in processed_image_names:
+                continue;
+            processed_image_names.append(image_name)
 
             num_colors = len(im.getcolors())
             if num_colors > MAX_COLORS:
                 sys.stderr.write("Error: input file {} has too many colors".format(file) + "\n")
-                exitcode=-1
+                if args.errors:
+                    exitcode=-1
                 continue
 
             # Round number of colors to a power of 2
@@ -134,11 +146,13 @@ def main():
             i = 0
             new_indices = {}
             new_palette = []
+            color_array_serialized=""
             for lum, values in opalette.items():
                 # Old index to new index
                 for v in values:
                     new_indices[v[0]] = i
                     new_palette.append(v[1])
+                    color_array_serialized += hex(v[1])
                     i += 1
 
             if args.hexbitmaponly:
@@ -167,6 +181,10 @@ def main():
                     print("extern unsigned int const C_{0}_colors[];".format(image_name))
                 else:
                     print("unsigned int const C_{0}_colors[] = {{".format(image_name))
+                    # add the color palette as reference for factorized mode
+                    if not color_array_serialized in colors_array:
+                        colors_array[color_array_serialized] = image_name
+
                     # Color index encoding
                     for i in range(num_colors):
                         # Endian less value
@@ -193,18 +211,26 @@ def main():
         #endif // GLYPH_{0}_BPP
         #endif // OS_IO_SEPROXYHAL""".format(image_name))
             elif args.glyphcfile:
+                color_ref = image_name;
+                if args.factorize:
+                    if color_array_serialized in colors_array:
+                        color_ref = colors_array[color_array_serialized]
                 print("""#ifdef OS_IO_SEPROXYHAL
         #include \"os_io_seproxyhal.h\"
-        const bagl_icon_details_t C_{0} = {{ GLYPH_{0}_WIDTH, GLYPH_{0}_HEIGHT, {1}, C_{0}_colors, C_{0}_bitmap }};
-        #endif // OS_IO_SEPROXYHAL""".format(image_name, int(math.log(num_colors, 2))))
+        const bagl_icon_details_t C_{0} = {{ GLYPH_{0}_WIDTH, GLYPH_{0}_HEIGHT, {1}, C_{2}_colors, C_{0}_bitmap }};
+        #endif // OS_IO_SEPROXYHAL""".format(image_name, int(math.log(num_colors, 2)), color_ref))
             else:
                 # Origin 0,0 is left top for blue, instead of left bottom for all image encodings
                 print("{{ {0:d}, {1:d}, {2:d}, C_{3}_colors, C_{3}_bitmap }},".format(
                     width, height, int(math.log(num_colors, 2)), image_name))
         except:
             sys.stderr.write("Exception while processing {}\n".format(file))
-            traceback.print_tb()
-            exitcode=-1
+            try:
+                traceback.print_tb()
+            except:
+                pass
+            if args.errors:
+                exitcode=-1
     if (exitcode != 0):
         sys.exit(exitcode)
 

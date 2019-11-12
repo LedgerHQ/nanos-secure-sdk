@@ -1,9 +1,7 @@
-#ifdef HAVE_IO_U2F
 
-/*
-*******************************************************************************
-*   Portable FIDO U2F implementation
-*   (c) 2016 Ledger
+/*******************************************************************************
+*   Ledger Nano S - Secure firmware
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -11,12 +9,14 @@
 *
 *      http://www.apache.org/licenses/LICENSE-2.0
 *
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *  See the License for the specific language governing permissions and
-*   limitations under the License.
+*  limitations under the License.
 ********************************************************************************/
+
+#ifdef HAVE_IO_U2F
 
 #include <stdint.h>
 #include <string.h>
@@ -82,7 +82,7 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
     uint8_t i;
 
     // can't process the apdu if another one is already scheduled in
-    if (G_io_apdu_state != APDU_IDLE) {
+    if (G_io_app.apdu_state != APDU_IDLE) {
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_BUSY,
                   sizeof(SW_BUSY));
@@ -95,7 +95,7 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
                   sizeof(SW_WRONG_LENGTH));
         return;
     }
-    
+
     // Confirm immediately if it's just a validation call
     if (p1 == P1_SIGN_CHECK_ONLY) {
         u2f_message_reply(service, U2F_CMD_MSG,
@@ -140,13 +140,12 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
 
     // make the apdu available to higher layers
     os_memmove(G_io_apdu_buffer, buffer + U2F_HANDLE_SIGN_HEADER_SIZE, keyHandleLength);
-    G_io_apdu_length = keyHandleLength;
-    G_io_apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
-    G_io_apdu_state = APDU_U2F;
+    G_io_app.apdu_length = keyHandleLength;
+    G_io_app.apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
+    G_io_app.apdu_state = APDU_U2F;
 
     // prepare for asynch reply
     u2f_message_set_autoreply_wait_user_presence(service, true);
-    
 
     // don't reset the u2f processing command state, as we still await for the io_exchange caller to make the response call
     /*
@@ -177,7 +176,7 @@ void u2f_apdu_get_info(u2f_service_t *service, uint8_t p1, uint8_t p2,
     u2f_message_reply(service, U2F_CMD_MSG, (uint8_t *)INFO, sizeof(INFO));
 }
 
-#endif
+#endif // U2F_PROXY_MAGIC
 
 void u2f_handle_cmd_init(u2f_service_t *service, uint8_t *buffer,
                          uint16_t length, uint8_t *channelInit) {
@@ -185,7 +184,8 @@ void u2f_handle_cmd_init(u2f_service_t *service, uint8_t *buffer,
     uint8_t channel[4];
     (void)length;
     if (u2f_is_channel_broadcast(channelInit)) {
-        cx_rng(channel, 4);
+        // cx_rng(channel, 4); // not available within the IO task
+        U4BE_ENCODE(channel, 0, ++service->next_channel);
     } else {
         os_memmove(channel, channelInit, 4);
     }
@@ -243,11 +243,11 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
 
     // No proxy mode, just pass the APDU as it is to the upper layer
     os_memmove(G_io_apdu_buffer, buffer, length);
-    G_io_apdu_length = length;
-    G_io_apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
-    G_io_apdu_state = APDU_U2F;
+    G_io_app.apdu_length = length;
+    G_io_app.apdu_media = IO_APDU_MEDIA_U2F; // the effective transport is managed by the U2F layer
+    G_io_app.apdu_state = APDU_U2F;
 
-#else
+#else // U2F_PROXY_MAGIC
 
     if (cla != FIDO_CLA) {
         u2f_message_reply(service, U2F_CMD_MSG,
@@ -282,7 +282,7 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
         return;
     }
 
-#endif    
+#endif // U2F_PROXY_MAGIC
 }
 
 void u2f_message_complete(u2f_service_t *service) {

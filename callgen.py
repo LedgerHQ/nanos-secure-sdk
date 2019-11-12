@@ -1,22 +1,3 @@
-"""
-*******************************************************************************
-*   Ledger - Non secure firmware 
-*   (c) 2016, 2017, 2018, 2019 Ledger 
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-********************************************************************************
-"""
-
 import sys
 
 # This is not required if you've installed pycparser into
@@ -33,6 +14,7 @@ import os
 import string
 import getopt
 import binascii
+import argparse
 
 def _explain_type(decl):
     """ Recursively explains a type decl node
@@ -65,7 +47,7 @@ def _explain_type(decl):
 
     elif typ == c_ast.FuncDecl:
         if decl.args:
-            print decl.args.params
+            print(decl.args.params)
             params = [_explain_type(param) for param in decl.args.params]
             try:
               if params:
@@ -113,23 +95,58 @@ def func_prototype(node, suffix=''):
     return returntype + ' ' + funcname + ' ( ' + args + ' ) '
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--libname", help="The name of the lib when generated")
+parser.add_argument("--stub", help="The output file for generated stubs")
+parser.add_argument("--defs", help="The output file for generated definitions (IDs and such)")
+parser.add_argument("--disp", help="The output file for generated dispatcher")
+parser.add_argument("-D", help="Additional argument to subcpp parsing", action='append')
+parser.add_argument("-I", help="Additional argument to subcpp parsing", action='append')
+parser.add_argument("--idsref", help="Filename to read and write the calls ID attributions (format is one funcname:id per line")
+parser.add_argument('files', nargs='*')
+parser.add_argument("--antifa", help="Enhance anti FA on the syscall barrier", action="store_true")
 
+args = parser.parse_args()
 
-optlist, files = getopt.gnu_getopt(sys.argv[1:], 'I:D:', ['libname='])
 cpp_args = []
-libname = None
-for (o,v) in optlist:
-  if 0:
-    pass
-  # grab only dirs of given header files, and map them to the gcc call
-  elif o == '--libname':
-    libname = v
-  else:
-    cpp_args.append("%s%s" % (o,v))
+mode_syscalls = args.syscalls
+libname = args.libname
+if args.D:
+  for d in args.D:
+    cpp_args.append("-D"+d)
+if args.I:
+  for i in args.I:
+    cpp_args.append("-I"+i)
 
+if libname is None:
+  raise BaseException("Library name (application name when loading the library) is missing")
 taskswitchs = []
 shareds = []
 libcalls = []
+ids = {}
+
+# first call has number 1 :), unless an ids ref file is provided
+call_id = 1
+ids = {}
+if args.idsref:
+  idsref_file = None
+  try:
+    idsref_file = open(args.idsref,'r+')
+  except:
+    print("WARNING: callgen ID reference file '{}' is not existing".format(args.idsref))
+    pass
+  # if the file was opened (don't ignore invalid format, just file not existing)
+  if idsref_file:
+    for line in idsref_file:
+      funcprotohash, id = line.split(':')
+      id = int(id, 0);
+      ids[funcprotohash] = id
+      if call_id < id:
+        call_id = id
+    idsref_file.close()
+
+    #use the next one available
+    call_id += 1
 
 class FuncVisitor(c_ast.NodeVisitor):
   def visit_Decl(self, node):
@@ -140,9 +157,10 @@ class FuncVisitor(c_ast.NodeVisitor):
 
 # ensure syscall/shared decl are kept by cpp
 cpp_args.append("-DPERMISSION(x)=permission(__ ## x)")
+cpp_args.append("-DCXPORT(x)=cxport(__ ## x)")
+cpp_args.append("-DTASKLEVEL(x)=tasklevel(__ ## x)")
 cpp_args.append("-DPLENGTH=plength")
 cpp_args.append("-DLIBCALL=libcall")
-cpp_args.append("-DCXPORT(x)=cxport(__ ## x)")
 # ensure on x86 processing of __attribute__ whatever is not problematic
 cpp_args.append("-D__attribute__(...)=")
 cpp_args.append("-D__extension__=")
@@ -154,7 +172,7 @@ cpp_args.append("-D__builtin_offsetof(x,y)=0")
 #cpp_args.append("-Dsizeof(x)=0")
 
 # parse every files provided
-for filename in files[3:]:
+  print("Parsing: " + filename)
   ast = parse_file(filename, use_cpp=True, cpp_args=cpp_args)
   v = FuncVisitor()
   v.visit(ast)
@@ -166,13 +184,12 @@ generate a .c for syscall stubs (to be compiled in the userland)
 generate a .c containing the syscalls dispatcher toward syscalled os functions (kernelmode)
 """
 
-defs_file = open(files[0],'w+')
-stub_file = open(files[1],'w+')
-dispatcher_file = open(files[2],'w+')
-
-print (".h defs: " + files[0])
-print (".c stub: " + files[1])
-print (".c disp: " + files[2])
+defs_file = open(args.defs, 'w+')
+stub_file = open(args.stub,'w+')
+dispatcher_file = open(args.disp,'w+')
+print (".h defs: " + args.defs)
+print (".c stub: " + args.stub)
+print (".c disp: " + args.disp)
 
 if 1:
   defs_file.write("""
@@ -228,8 +245,11 @@ if 1:
 """)
   # parameters[0] == libname
   # parameters[1] == libcall_id
-  # parameters[2...] == call parameters ...
+  # parameters[2...] == call parameters ... // at least the return value
+  # parameters[1] = return id
+  # parameters[2] = return value
   OFFSET_FIRST_PARAM_STUB = 2
+  OFFSET_FIRST_PARAM_ALLOC = 3
   OFFSET_FIRST_PARAM_DISPATCH = 1
 
 
@@ -355,32 +375,51 @@ class ExprVisitor(c_ast.NodeVisitor):
 
 
     def generic_visit(self, node):
-        print "Unsupported PLENGTH expression at " + str(node.coord) + ", parsing class: " + str(node.__class__.__name__)
+        print("Unsupported PLENGTH expression at " + str(node.coord) + ", parsing class: " + str(node.__class__.__name__))
         raise Error
 
-# first call has number 1 :)
-index = 1
 
 protect_stubs = ""
 defined_calls = []
 calls = libcalls
 
+dispatcher_file_cases = ""
+parameter_array_max_len=OFFSET_FIRST_PARAM_ALLOC
 
 for node in calls:
     func_name = node.name
     if not func_name in defined_calls:
       if 1:
-        print "LIBCALL " + str(func_name) + " " + str(node.funcspec)
+        print("LIBCALL " + str(func_name) + " " + str(node.funcspec))
 
   
       # syscall byte dependent of the function prototype (deterministic build)
       func = func_prototype(node);
-      func_hash = hashlib.sha256(func).hexdigest()
+      funcinline = func_prototype(node, "_inline");
+
+      # id lookup or attribution
+      # hash the function name and prototype
+      func_hash = hashlib.sha256(func.encode('utf-8')).hexdigest()
+      
+      if func_hash in ids:
+        thiscallid = ids[func_hash]
+      else:
+        thiscallid = call_id
+
+      idin_base = (int(func_hash[:2], 16)&0xFF) | (thiscallid<<8)
+      idout_base = (int(func_hash[2:4], 16)&0xFF) | (thiscallid<<8)
+
+      if not func_hash in ids:
+        # store for persistence if required
+        ids[func_hash] = call_id
+        # prepare next allocation if required
+        call_id += 1
+
       if 1:
-        id_in = (int(func_hash[:2], 16)&0xFF) | (index<<8) | 0x70000000
-        id_out = (int(func_hash[2:4], 16)&0xFF) | (index<<8) | 0xA0000000
+        id_in = idin_base | 0x70000000
+        id_out = idout_base | 0xA0000000
       #node.show(attrnames=True,nodenames=True)
-      #print func;
+      #print(func)
       params = func_parameters(node)
       returntype = func_return_type(node)
 
@@ -395,49 +434,57 @@ for node in calls:
       #defs_file.write(func + ";\n\n")
 
       ################## STUB
-
-      stub_file.write(func + "\n")
-      stub_file.write("{\n")
-      stub_file.write("  unsigned int ret;\n")
+      stub=func + "\n"
+      stub_no_ipsr=func + "\n"
+      stubinline=funcinline + "\n"
+      s="{\n"
+      sparams=""
       # when the function has some parameters
       if params[0][0] != "void":
-          stub_file.write("  unsigned int parameters ["+str(OFFSET_FIRST_PARAM_STUB)+"+"+str(len(params))+"];\n")
+          sparams+="  volatile unsigned int parameters ["+str(OFFSET_FIRST_PARAM_ALLOC)+"+"+str(len(params))+"];\n"
+          if OFFSET_FIRST_PARAM_ALLOC+len(params) > parameter_array_max_len:
+            parameter_array_max_len = OFFSET_FIRST_PARAM_ALLOC+len(params)
       else:
-          stub_file.write("  unsigned int parameters ["+str(OFFSET_FIRST_PARAM_STUB)+"];\n")
-
+          sparams+="  volatile unsigned int parameters ["+str(OFFSET_FIRST_PARAM_ALLOC)+"];\n"
+      
       if 1:
-        stub_file.write("  parameters[0] = (unsigned int)\""+libname+"\";\n")
-        stub_file.write("  parameters[1] = (unsigned int)"+const_id_in+";\n")
+        sparams+="  parameters[0] = (unsigned int)\""+libname+"\";\n"
+        sparams+="  parameters[1] = (unsigned int)"+const_id_in+";\n"
       #temporary place to store the try context address
       i = OFFSET_FIRST_PARAM_STUB
+      callargs=""
+      j=0
+      if returntype != "void" and ((params[0][0] == "void") or (len(params) < 2)):
+          sparams += "#ifdef __clang_analyzer__\n"
+          sparams += "  parameters[1] = 0;\n"
+          sparams += "#endif\n"
       if params[0][0] != "void":
           # hope params is ordered
           for param in params:
-              stub_file.write("  parameters["+str(i)+"] = (unsigned int)"+str(param[1])+";\n")
+              sparams+="  parameters["+str(i)+"] = (unsigned int)"+str(param[1])+";\n"
+              callargs += param[1]
+              j+=1
+              if (j != len(params)):
+                callargs += ", "
               i+=1
       if 1:
-        stub_file.write("""  ret = os_lib_call(parameters);\n""")
-        stub_file.write("  if (parameters[1] != "+const_id_out+") {\n")
-      stub_file.write("    THROW(EXCEPTION_SECURITY);\n")
-      stub_file.write("  }\n")
+        stub+=s+"  os_lib_call(parameters);\n"
+        if (args.antifa):
+          stub+="  if (parameters[1] != "+const_id_out+") {\n"
+          stub+="    THROW(EXCEPTION_SECURITY);\n"
+          stub+="  }\n"
+        if returntype != "void":
+            stub+="  return ("+returntype+")parameters[2];\n"
+        stub+="}\n\n"
 
-      if returntype != "void":
-          stub_file.write("  return ("+returntype+")ret;\n")
-
-      stub_file.write("}\n\n")
+      if 1:
+        stub_file.write(stub)
 
       ################## DISPATCH
       # generate the dispatcher case
-      dispatcher_file.write("          case "+const_id_in+":\n")
+      if 1:
+        dispatcher_case = "          case (("+const_id_in+">>8)&0xFFFFFUL):\n"
 
-      # check application flags are set
-      flags = []
-      cxports = []
-      for funcspec in node.funcspec:
-        if (funcspec.find("permission") == 0):
-          flags.append(funcspec[len("permission(__"):-1])
-        if (funcspec.find("cxport") == 0):
-          cxports.append(funcspec[len("cxport(__"):-1])
 
       # forge call with arguments (and prepare args check code as well)
       call = func_name
@@ -446,33 +493,31 @@ for node in calls:
       i = 0
       if params[0][0] != "void":
           for param in params:
-              call += "("+param[0]+") parameters["+str(i+OFFSET_FIRST_PARAM_DISPATCH)+"]"
+              if 1:
+                call += "("+param[0]+") parameters["+str(i+OFFSET_FIRST_PARAM_DISPATCH)+"]"
               i+=1
               if (i < len(params)):
                   call += ", "
-
       call += ')'
 
 
       if returntype != "void":
-          dispatcher_file.write("            ret = (unsigned int)"+call+";\n")
+          dispatcher_case+="            ret = (unsigned int)"+call+";\n"
       else:
-          dispatcher_file.write("            "+call+";\n")
+          dispatcher_case+="            "+call+";\n"
+      if (args.antifa):
+        dispatcher_case+="            retid = "+const_id_out+";\n"
+      dispatcher_case+="            break;\n"
 
-      # for non taskswitch, set ret id AFTER the call
-      if not (node in taskswitchs):
-        dispatcher_file.write("            retid = "+const_id_out+";\n")
-
-      dispatcher_file.write("            break;\n")
-
-      index+=1
+      if 1:
+        dispatcher_file_cases += dispatcher_case
 
     defined_calls.append(func_name)
 
 if 1:
   defs_file.write("#endif // LIBCALL_DEFS_H\n")
 
-  dispatcher_file.write("""
+  dispatcher_file.write(dispatcher_file_cases+"""
           default:
             // unknown libcall throws
             PRINTF("Unknown libcall identifier: 0x%08X\\n", parameters[0]);
@@ -484,9 +529,12 @@ if 1:
         libcall_exit();
 
         // set the return identifier for end to end path validation, to avoid jumps
+        // NOTE: the kernel shift the parameters array of 1 as it consumed the library name
+        // return id
         parameters[0] = retid; 
         // return the call value
-        os_lib_end(ret);
+        parameters[1] = ret; 
+        os_lib_end();
       }
       CATCH_OTHER(e) {
         libcall_exit();
@@ -510,6 +558,15 @@ if 1:
 
 """)
 
+# rewrite ids if changed
+if args.idsref:
+  idsref_file = open(args.idsref, "w+")
+  idsref_file.truncate()
+  for funcprotohash in ids:
+    idsref_file.write(funcprotohash+":"+hex(ids[funcprotohash])+"\n")
+  idsref_file.flush();
+  idsref_file.close()
+
 # flush and close files
 defs_file.flush();
 stub_file.flush();
@@ -518,4 +575,3 @@ dispatcher_file.flush();
 defs_file.close();
 stub_file.close();
 dispatcher_file.close();
-

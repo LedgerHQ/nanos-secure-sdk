@@ -137,7 +137,7 @@ void CCID_BulkMessage_In (USBD_HandleTypeDef  *pdev,
         // not timeout compliant // USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
 
         // mark transfer as completed
-        G_io_apdu_state = APDU_IDLE;
+        G_io_app.apdu_state = APDU_IDLE;
       }
 
       // if remaining length is < EPIN_SIZE: send packet and prepare to receive a new command
@@ -572,9 +572,9 @@ uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen, uint16_t* expectedLe
   
   // copy received apdu // if G_io_ccid_data_buffer is the buffer apdu, then the memmove will do nothing
   os_memmove(G_io_apdu_buffer, ptrBlock, blockLen);
-  G_io_apdu_length = blockLen;
-  G_io_apdu_media = IO_APDU_MEDIA_USB_CCID; // for application code
-  G_io_apdu_state = APDU_USB_CCID; // for next call to io_exchange
+  G_io_app.apdu_length = blockLen;
+  G_io_app.apdu_media = IO_APDU_MEDIA_USB_CCID;  // for application code
+  G_io_app.apdu_state = APDU_USB_CCID; // for next call to io_exchange
 
   return SLOT_NO_ERROR;
 }

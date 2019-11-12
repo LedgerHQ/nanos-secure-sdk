@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Secure firmware
-*   (c) 2016, 2017, 2018, 2019 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -71,10 +71,10 @@ SECTIONS
     *(.bss.N_* .rodata.N_*)
 
     . = ALIGN(PAGE_SIZE);
+    _envram_data = .;
+
     _install_parameters = .;
-    PROVIDE(N_install_parameters = .);
     _envram = .;
-    _nvram_data_size = _envram - _nvram_data;
     
   } > FLASH = 0x00
 

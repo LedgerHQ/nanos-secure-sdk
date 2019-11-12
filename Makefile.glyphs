@@ -1,6 +1,6 @@
 #*******************************************************************************
 #   Ledger SDK
-#   (c) 2017, 2018, 2019 Ledger
+#   (c) 2017 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -22,14 +22,17 @@ ifeq ($(BOLOS_SDK),)
 $(error BOLOS_SDK not set)
 endif
 
-GLYPH_FILES := $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
+GLYPH_FILES += $(foreach gp,$(GLYPH_PATH),$(addprefix $(gp)/,$(sort $(notdir $(shell find $(gp))))))
+GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_ux/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_ux/glyphs/))))
 GLYPH_DESTC := $(GLYPH_SRC_DIR)/glyphs.c
 GLYPH_DESTH := $(GLYPH_SRC_DIR)/glyphs.h
-$(GLYPH_DESTH): $(GLYPH_FILES) $(BOLOS_SDK)/icon.py
+ICON_SCRIPT := $(BOLOS_SDK)/icon3.py
+$(GLYPH_DESTH): $(GLYPH_FILES) $(ICON_SCRIPT)
 	$(call log,echo [GLYPH] Compiling...)
 	$(call log,-mkdir -p $(GLYPH_SRC_DIR))
 	$(call log,rm $(GLYPH_DESTC) $(GLYPH_DESTH) 2>/dev/null ; touch $(GLYPH_DESTH) $(GLYPH_DESTC))
-	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then for gif in $(GLYPH_FILES) ; do python $(BOLOS_SDK)/icon.py $$gif glyphcheader ; done > $(GLYPH_DESTH) ; fi)
-	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then for gif in $(GLYPH_FILES) ; do python $(BOLOS_SDK)/icon.py $$gif glyphcfile ; done > $(GLYPH_DESTC) ; fi)
+	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then python3 $(ICON_SCRIPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH) ; fi)
+	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES) > $(GLYPH_DESTC) ; fi)
 #add dependency for generation
 $(GLYPH_DESTC): $(GLYPH_DESTH)

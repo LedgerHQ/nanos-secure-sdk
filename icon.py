@@ -1,7 +1,8 @@
 """
-*******************************************************************************
-*   Ledger - Non secure firmware 
-*   (c) 2016, 2017, 2018, 2019 Ledger 
+
+/*******************************************************************************
+*   Ledger Nano S - Secure firmware
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -9,12 +10,12 @@
 *
 *      http://www.apache.org/licenses/LICENSE-2.0
 *
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*   See the License for the specific language governing permissions and
-*   limitations under the License.
-********************************************************************************
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 """
 
 from PIL import Image
@@ -38,16 +39,16 @@ try:
 	if (len(sys.argv) == 2):
 		filename = sys.argv[1];
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + sys.argv[1] + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + sys.argv[1] + " does not exists !\n")
 			sys.exit(2)
 	# 3: python imagefile forcedBPP
 	# 3: python imagefile hexbitmaponly
 	elif (len(sys.argv) == 3):
 		filename = sys.argv[1];
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 		if (sys.argv[2] == "hexbitmaponly"):
 			hexbitmaponly = True
@@ -64,8 +65,8 @@ try:
 		if not os.path.exists(filename):
 			filename = sys.argv[3];
 			if not os.path.exists(filename):
-				sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-				sys.sterr.write("Error: " + filename + " does not exists !\n")
+				sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+				sys.stderr.write("Error: " + filename + " does not exists !\n")
 				sys.exit(2)
 			widthmax = int(sys.argv[1])
 			heightmax = int(sys.argv[2])		
@@ -78,15 +79,15 @@ try:
 			elif (sys.argv[2] == "glyphcheader"):
 				glyphcheader = True
 			else:
-				sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+				sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
 				sys.exit(2)
 	# 5: python max max imagefile forcedBPP
 	# 5: python max max imagefile hexbitmaponly
 	elif (len(sys.argv) == 5):
 		filename = sys.argv[3];
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 		widthmax = int(sys.argv[1])
 		heightmax = int(sys.argv[2])		
@@ -104,8 +105,8 @@ try:
 	elif (len(sys.argv) == 6):
 		filename = sys.argv[3]
 		if not os.path.exists(filename):
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 		widthmax = int(sys.argv[1])
 		heightmax = int(sys.argv[2])		
@@ -117,12 +118,12 @@ try:
 		elif (sys.argv[2] == "glyphcheader"):
 			glyphcheader = True
 		else:
-			sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-			sys.sterr.write("Error: " + filename + " does not exists !\n")
+			sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+			sys.stderr.write("Error: " + filename + " does not exists !\n")
 			sys.exit(2)
 	else:
-		sys.sterr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
-		sys.sterr.write("Error: " + sys.argv[1] + " does not exists !\n")
+		sys.stderr.write(sys.argv[0] + ": [<Wmax> <Hmax>] <imagefile> [<forcedBPP>] [hexbitmaponly|glyphcfile|glyphcheader]\n")
+		sys.stderr.write("Error: " + sys.argv[1] + " does not exists !\n")
 		sys.exit(2)
 
 
@@ -152,7 +153,7 @@ try:
 				maxcolor = color_index
 
 	if (maxcolor+1 > 16):
-		sys.sterr.write("toomuch colors\n")
+		sys.stderr.write("Error: " + filename + " has too many colors\n")
 		sys.exit(3)
 
 
@@ -329,7 +330,7 @@ unsigned char const C_""" + bname + """_bitmap[]""");
 """)
 			else:
 				sys.stdout.write(" = { GLYPH_" + bname + "_WIDTH, GLYPH_" + bname + "_HEIGHT, " + str(bits_per_pixel) + ", C_" + bname + "_colors, C_" + bname + """_bitmap };
-""");
+""")
 			sys.stdout.write("""#endif // OS_IO_SEPROXYHAL
 """)
 except:

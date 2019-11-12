@@ -42,10 +42,14 @@
 #include <string.h>
 #include <stdint.h>
 
+#ifndef _BITS_STDINT_INTN_H
 typedef signed char int8_t;
+typedef signed short int16_t;
+#endif
+#ifndef _BITS_STDINT_UINTN_H
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
-typedef signed short int16_t;
+#endif
 
 /** @addtogroup USBD_OTG_DRIVER
   * @{

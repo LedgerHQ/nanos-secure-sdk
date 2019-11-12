@@ -260,7 +260,7 @@ class Constant(Node):
         return tuple(nodelist)
 
     def __repr__(self):
-        print str(self.coord) + " " + str(self.value)
+        print(str(self.coord) + " " + str(self.value))
         return str(self.type)
 
     attr_names = ('type','value',)

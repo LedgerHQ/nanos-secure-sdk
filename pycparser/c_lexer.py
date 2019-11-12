@@ -112,8 +112,9 @@ class CLexer(object):
         '__ASM',
 
         # special syscall, libcall and shared interface
-        'SYSCALL', 'TASKSWITCH', 'SHARED', 'LIBCALL', 
-        
+        'SYSCALL', 'TASKSWITCH', 'SHARED', 'LIBCALL', 'SUDOCALL',
+        # function flag to allow subset of syscall for certain tasks
+        'TASKLEVEL',
         # application flag keywords
         'PERMISSION', 'CXPORT', 
         # auto check of parameters bounds into syscall functions

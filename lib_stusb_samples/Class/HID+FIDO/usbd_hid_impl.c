@@ -654,6 +654,10 @@ static const USBD_ClassTypeDef const USBD_HID =
 void USB_power(unsigned char enabled) {
   os_memset(&USBD_Device, 0, sizeof(USBD_Device));
 
+  // init timeouts and other global fields
+  os_memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
+  os_memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
+
   if (enabled) {
     os_memset(&USBD_Device, 0, sizeof(USBD_Device));
     /* Init Device Library */

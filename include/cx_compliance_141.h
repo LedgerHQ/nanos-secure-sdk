@@ -1,6 +1,7 @@
+
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018, 2019 Ledger
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -108,7 +109,7 @@ int cx_ecdh_X(const cx_ecfp_private_key_t WIDE *key, int mode,
               const unsigned char WIDE *P, unsigned char *secret);
 
 #define cx_rng_rfc6979(rnd, hashID, h1, x, x_len, q, q_len, V, V_len)          \
-    cx_rng_rfc6979_X(rnd, hashID, h1, x, x_len, q, q_len, V, V_len)
+  cx_rng_rfc6979_X(rnd, hashID, h1, x, x_len, q, q_len, V, V_len)
 
 #define cx_hash(hash, mode, in, len, out) cx_hash_X(hash, mode, in, len, out)
 
@@ -117,52 +118,51 @@ int cx_ecdh_X(const cx_ecfp_private_key_t WIDE *key, int mode,
 
 #define cx_hmac(hmac, mode, in, len, mac) cx_hmac_X(hmac, mode, in, len, mac)
 #define cx_hmac_sha256(key, klen, in, len, out)                                \
-    cx_hmac_sha256_X(key, klen, in, len, out)
+  cx_hmac_sha256_X(key, klen, in, len, out)
 #define cx_hmac_sha512(key, klen, in, len, out)                                \
-    cx_hmac_sha512_X(key, klen, in, len, out)
+  cx_hmac_sha512_X(key, klen, in, len, out)
 
 #define cx_des_iv(key, mode, iv, in, len, out)                                 \
-    cx_des_iv_X(key, mode, iv, in, len, out)
+  cx_des_iv_X(key, mode, iv, in, len, out)
 #define cx_des(key, mode, in, len, out) cx_des_X(key, mode, in, len, out)
 
 #define cx_aes_iv(key, mode, iv, in, len, out)                                 \
-    cx_aes_iv_X(key, mode, iv, in, len, out)
+  cx_aes_iv_X(key, mode, iv, in, len, out)
 #define cx_aes(key, mode, in, len, out) cx_aes_X(key, mode, in, len, out)
 
 #define cx_rsa_init_public_key(exponent, modulus, modulus_len, key)            \
-    cx_rsa_init_public_key_X(exponent, modulus, modulus_len, key)
+  cx_rsa_init_public_key_X(exponent, modulus, modulus_len, key)
 #define cx_rsa_init_private_key(exponent, modulus, modulus_len, key)           \
-    cx_rsa_init_private_key_X(exponent, modulus, modulus_len, key)
+  cx_rsa_init_private_key_X(exponent, modulus, modulus_len, key)
 #define cx_rsa_generate_pair(modulus_len, public_key, private_key,             \
                              pub_exponent, externalPQ)                         \
-    cx_rsa_generate_pair_X(modulus_len, public_key, private_key, pub_exponent, \
-                           externalPQ)
+  cx_rsa_generate_pair_X(modulus_len, public_key, private_key, pub_exponent,   \
+                         externalPQ)
 
 #define cx_ecfp_is_valid_point(curve, point)                                   \
-    cx_ecfp_is_valid_point_X(curve, point)
+  cx_ecfp_is_valid_point_X(curve, point)
 #define cx_ecfp_is_cryptographic_point(curve, point)                           \
-    cx_ecfp_is_cryptographic_point_X(curve, point)
+  cx_ecfp_is_cryptographic_point_X(curve, point)
 
 #define cx_ecfp_add_point(curve, R, P, Q) cx_ecfp_add_point_X(curve, R, P, Q)
 #define cx_ecfp_scalar_mult(curve, P, k, k_len)                                \
-    cx_ecfp_scalar_mult_X(curve, P, k, k_len)
+  cx_ecfp_scalar_mult_X(curve, P, k, k_len)
 
 #define cx_ecschnorr_sign(pvkey, mode, hashID, msg, msg_len, sig, info)        \
-    cx_ecschnorr_sign_X(pvkey, mode, hashID, msg, msg_len, sig, info)
+  cx_ecschnorr_sign_X(pvkey, mode, hashID, msg, msg_len, sig, info)
 
 #define cx_edward_decompress_point(curve, P)                                   \
-    cx_edward_decompress_point_X(curve, P)
+  cx_edward_decompress_point_X(curve, P)
 #define cx_edward_compress_point(curve, P) cx_edward_compress_point_X(curve, P)
 
 #define cx_eddsa_get_public_key(pvkey, hashID, pukey, a, h)                    \
-    cx_eddsa_get_public_key_X(pvkey, hashID, pukey, a, h)
+  cx_eddsa_get_public_key_X(pvkey, hashID, pukey, a, h)
 #define cx_eddsa_sign(pvkey, mode, hashID, hash, hash_len, ctx, ctx_len, sig,  \
                       info)                                                    \
-    cx_eddsa_sign_X(pvkey, mode, hashID, hash, hash_len, ctx, ctx_len, sig,    \
-                    info)
+  cx_eddsa_sign_X(pvkey, mode, hashID, hash, hash_len, ctx, ctx_len, sig, info)
 
 #define cx_ecdsa_sign(pvkey, mode, hashID, hash, hash_len, sig, info)          \
-    cx_ecdsa_sign_X(pvkey, mode, hashID, hash, hash_len, sig, info)
+  cx_ecdsa_sign_X(pvkey, mode, hashID, hash, hash_len, sig, info)
 
 #define cx_ecdh(key, mode, P, secret) cx_ecdh_X(key, mode, P, secret)
 

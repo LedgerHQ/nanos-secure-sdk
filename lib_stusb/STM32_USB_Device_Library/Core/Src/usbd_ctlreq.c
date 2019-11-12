@@ -338,7 +338,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
 void USBD_GetDescriptor(USBD_HandleTypeDef *pdev , 
                                USBD_SetupReqTypedef *req)
 {
-  uint16_t len;
+  uint16_t len = 0;
   uint8_t *pbuf = NULL;
   
     
@@ -346,7 +346,12 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
   { 
 #if (USBD_LPM_ENABLED == 1)
   case USB_DESC_TYPE_BOS:
-    pbuf = ((GetBOSDescriptor_t)PIC(pdev->pDesc->GetBOSDescriptor))(pdev->dev_speed, &len);
+    if(pdev->pDesc->GetBOSDescriptor != NULL) {
+      pbuf = ((GetBOSDescriptor_t)PIC(pdev->pDesc->GetBOSDescriptor))(pdev->dev_speed, &len);
+    }
+    else {
+      goto default_error;
+    }
     break;
 #endif    
   case USB_DESC_TYPE_DEVICE:
@@ -402,8 +407,7 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
       }
       break;
 #else      
-       USBD_CtlError(pdev , req);
-      return;
+      goto default_error;
 #endif   
     }
     break;
@@ -416,8 +420,7 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     }
     else
     {
-      USBD_CtlError(pdev , req);
-      return;
+      goto default_error;
     } 
 
   case USB_DESC_TYPE_OTHER_SPEED_CONFIGURATION:
@@ -429,11 +432,11 @@ void USBD_GetDescriptor(USBD_HandleTypeDef *pdev ,
     }
     else
     {
-      USBD_CtlError(pdev , req);
-      return;
+      goto default_error;
     }
 
   default: 
+  default_error:
      USBD_CtlError(pdev , req);
     return;
   }
