@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018, 2019 Ledger
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -15,19 +15,23 @@
 *  limitations under the License.
 ********************************************************************************/
 
+#ifdef TARGET_NANOX
+#define HAVE_SEPROXYHAL_MCU
+#define HAVE_MCU_PROTECT
+#endif // TARGET_NANOX
 #include "os.h"
+#include "os_io_usb.h"
+#include "string.h"
 
 #ifdef OS_IO_SEPROXYHAL
 
 #include "os_io_seproxyhal.h"
 
-#ifdef HAVE_BLE
+#ifdef HAVE_BLUENRG
 #include "hci.h"
-#endif // HAVE_BLE
+#endif // HAVE_BLUENRG
 
-#ifdef HAVE_BOLOS_UX
-#include "bolos_ux.h"
-#endif
+#include "ux.h"
 
 #ifdef HAVE_IO_U2F
 #include "u2f_processing.h"
@@ -35,6 +39,9 @@
 #endif
 
 
+#ifndef VERSION
+#define VERSION "dummy"
+#endif // VERSION
 
 #ifdef DEBUG
 #define LOG printf
@@ -42,15 +49,32 @@
 #define LOG(...)
 #endif
 
-volatile io_apdu_state_e G_io_apdu_state; // by default
-volatile unsigned short G_io_apdu_length; // total length to be received
-volatile io_apdu_media_t G_io_apdu_media;
-volatile unsigned int G_button_mask;
-volatile unsigned int G_button_same_mask_counter;
+#ifdef HAVE_IO_USB
+#ifdef HAVE_L4_USBLIB
+#include "usbd_def.h"
+#include "usbd_core.h"
+extern USBD_HandleTypeDef USBD_Device;
+#endif
+#endif
+
+void io_seproxyhal_handle_ble_event(void);
+
+unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
+
+io_seph_app_t G_io_app;
 
 // usb endpoint buffer
 unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
 
+// discriminated from io to allow for different memory placement
+typedef struct ux_seph_s {
+  unsigned int button_mask;
+  unsigned int button_same_mask_counter;
+#ifdef TARGET_BLUE
+  bagl_element_t* last_touched_not_released_component;
+#endif // TARGET_BLUE
+} ux_seph_os_and_app_t;
+ux_seph_os_and_app_t G_ux_os;
 #ifndef IO_RAPDU_TRANSMIT_TIMEOUT_MS 
 #define IO_RAPDU_TRANSMIT_TIMEOUT_MS 2000UL
 #endif // IO_RAPDU_TRANSMIT_TIMEOUT_MS
@@ -79,13 +103,6 @@ void io_seproxyhal_request_mcu_status(void) {
 
 #ifdef HAVE_IO_USB
 #ifdef HAVE_L4_USBLIB
-static unsigned char G_io_usb_ep_xfer_len[IO_USB_MAX_ENDPOINTS];
-struct {
-  unsigned short timeout; // up to 64k milliseconds (6 sec)
-} G_io_usb_ep_timeouts[IO_USB_MAX_ENDPOINTS];
-#include "usbd_def.h"
-#include "usbd_core.h"
-extern USBD_HandleTypeDef USBD_Device;
 
 void io_seproxyhal_handle_usb_event(void) {
   switch(G_io_seproxyhal_spi_buffer[3]) {
@@ -93,11 +110,11 @@ void io_seproxyhal_handle_usb_event(void) {
       USBD_LL_SetSpeed(&USBD_Device, USBD_SPEED_FULL);  
       USBD_LL_Reset(&USBD_Device);
       // ongoing APDU detected, throw a reset, even if not the media. to avoid potential troubles.
-      if (G_io_apdu_media != IO_APDU_MEDIA_NONE) {
+      if (G_io_app.apdu_media != IO_APDU_MEDIA_NONE) {
         THROW(EXCEPTION_IO_RESET);
       }
-      os_memset(G_io_usb_ep_xfer_len, 0, sizeof(G_io_usb_ep_xfer_len));
-      os_memset(G_io_usb_ep_timeouts, 0, sizeof(G_io_usb_ep_timeouts));
+      os_memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
+      os_memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
       break;
     case SEPROXYHAL_TAG_USB_EVENT_SOF:
       USBD_LL_SOF(&USBD_Device);
@@ -112,7 +129,10 @@ void io_seproxyhal_handle_usb_event(void) {
 }
 
 uint16_t io_seproxyhal_get_ep_rx_size(uint8_t epnum) {
-  return G_io_usb_ep_xfer_len[epnum&0x7F];
+  if ((epnum & 0x7F) < IO_USB_MAX_ENDPOINTS) {
+    return G_io_app.usb_ep_xfer_len[epnum&0x7F];
+  }
+  return 0;
 }
 
 void io_seproxyhal_handle_usb_ep_xfer_event(void) {
@@ -127,7 +147,7 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void) {
     case SEPROXYHAL_TAG_USB_EP_XFER_IN:
       if ((G_io_seproxyhal_spi_buffer[3]&0x7F) < IO_USB_MAX_ENDPOINTS) {
         // discard ep timeout as we received the sent packet confirmation
-        G_io_usb_ep_timeouts[G_io_seproxyhal_spi_buffer[3]&0x7F].timeout = 0;
+        G_io_app.usb_ep_timeouts[G_io_seproxyhal_spi_buffer[3]&0x7F].timeout = 0;
         // propagate sending ack of the data
         USBD_LL_DataInStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
       }
@@ -137,7 +157,7 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void) {
     case SEPROXYHAL_TAG_USB_EP_XFER_OUT:
       if ((G_io_seproxyhal_spi_buffer[3]&0x7F) < IO_USB_MAX_ENDPOINTS) {
         // saved just in case it is needed ...
-        G_io_usb_ep_xfer_len[G_io_seproxyhal_spi_buffer[3]&0x7F] = G_io_seproxyhal_spi_buffer[5];
+        G_io_app.usb_ep_xfer_len[G_io_seproxyhal_spi_buffer[3]&0x7F] = G_io_seproxyhal_spi_buffer[5];
         // prepare reception
         USBD_LL_DataOutStage(&USBD_Device, G_io_seproxyhal_spi_buffer[3]&0x7F, &G_io_seproxyhal_spi_buffer[6]);
       }
@@ -179,7 +199,7 @@ void io_usb_send_ep(unsigned int ep, unsigned char* buffer, unsigned short lengt
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 6);
   io_seproxyhal_spi_send(buffer, length);
   // setup timeout of the endpoint
-  G_io_usb_ep_timeouts[ep&0x7F].timeout = IO_RAPDU_TRANSMIT_TIMEOUT_MS;
+  G_io_app.usb_ep_timeouts[ep&0x7F].timeout = IO_RAPDU_TRANSMIT_TIMEOUT_MS;
 
 }
 
@@ -197,23 +217,14 @@ void io_usb_send_apdu_data_ep0x83(unsigned char* buffer, unsigned short length) 
 
 #endif // HAVE_IO_USB
 
-#ifdef HAVE_BLE
+#ifdef HAVE_BLUENRG
 void io_seproxyhal_handle_bluenrg_event(void) {
   BEGIN_TRY {
     TRY {
       // handle the incoming packet       
-      HCI_recv_packet(G_io_seproxyhal_spi_buffer+3, U2BE(G_io_seproxyhal_spi_buffer, 1));
+      HCI_recv_packet(G_io_seproxyhal_spi_buffer+3, MIN(U2BE(G_io_seproxyhal_spi_buffer, 1), sizeof(G_io_seproxyhal_spi_buffer)-3));
       
     }
-    /*
-    CATCH(EXCEPTION_IO_RESET) {
-      // rethrow that one
-      THROW(EXCEPTION_IO_RESET);
-    }
-    CATCH_ALL {
-      // ignore
-    }
-    */
     FINALLY {
 
     }
@@ -221,21 +232,23 @@ void io_seproxyhal_handle_bluenrg_event(void) {
   END_TRY;
 }
 
-#else
+#else // HAVE_BLUENRG
 void io_seproxyhal_handle_bluenrg_event(void) {
 
 }
-#endif
+#endif // HAVE_BLUENRG
 
 
 void io_seproxyhal_handle_capdu_event(void) {
-  if(G_io_apdu_state == APDU_IDLE) 
-  {
-    G_io_apdu_media = IO_APDU_MEDIA_RAW; // for application code
-    G_io_apdu_state = APDU_RAW; // for next call to io_exchange
-    G_io_apdu_length = MIN(U2BE(G_io_seproxyhal_spi_buffer, 1), sizeof(G_io_apdu_buffer)); 
+  if (G_io_app.apdu_state == APDU_IDLE) {
+    size_t max = MIN(sizeof(G_io_apdu_buffer)-3, sizeof(G_io_seproxyhal_spi_buffer)-3);
+    size_t size = U2BE(G_io_seproxyhal_spi_buffer, 1);
+
+    G_io_app.apdu_media = IO_APDU_MEDIA_RAW; // for application code
+    G_io_app.apdu_state = APDU_RAW; // for next call to io_exchange
+    G_io_app.apdu_length = MIN(size, max);
     // copy apdu to apdu buffer
-    os_memmove(G_io_apdu_buffer, G_io_seproxyhal_spi_buffer+3, G_io_apdu_length);
+    os_memmove(G_io_apdu_buffer, G_io_seproxyhal_spi_buffer+3, G_io_app.apdu_length);
   }
 }
 
@@ -261,11 +274,19 @@ unsigned int io_seproxyhal_handle_event(void) {
   #endif // HAVE_IO_USB
 
   #ifdef HAVE_BLE
+  #ifdef HAVE_BLUENRG
     case SEPROXYHAL_TAG_BLUENRG_RECV_EVENT:
       io_seproxyhal_handle_bluenrg_event();
-      if (G_io_apdu_state == APDU_IDLE && G_io_apdu_length) {
-        G_io_apdu_media = IO_APDU_MEDIA_BLE; // for application code
-        G_io_apdu_state = APDU_BLE; // for next call to io_exchange
+      goto check_ble_apdu;
+  #endif // HAVE_BLUENRG
+    case SEPROXYHAL_TAG_BLE_RECV_EVENT:
+      io_seproxyhal_handle_ble_event();
+  #ifdef HAVE_BLUENRG
+    check_ble_apdu:
+  #endif // HAVE_BLUENRG
+      if (G_io_app.apdu_state == APDU_IDLE && G_io_app.apdu_length) {
+        G_io_app.apdu_media = IO_APDU_MEDIA_BLE; // for application code
+        G_io_app.apdu_state = APDU_BLE; // for next call to io_exchange
       }
       return 1;
   #endif // HAVE_BLE
@@ -277,21 +298,35 @@ unsigned int io_seproxyhal_handle_event(void) {
       // ask the user if not processed here
     case SEPROXYHAL_TAG_TICKER_EVENT:
       // process ticker events to timeout the IO transfers, and forward to the user io_event function too
+      G_io_app.ms += 100; // value is by default, don't change the ticker configuration
 #ifdef HAVE_IO_USB
       {
         unsigned int i = IO_USB_MAX_ENDPOINTS;
         while(i--) {
-          if (G_io_usb_ep_timeouts[i].timeout) {
-            G_io_usb_ep_timeouts[i].timeout-=MIN(G_io_usb_ep_timeouts[i].timeout, 100);
-            if (!G_io_usb_ep_timeouts[i].timeout) {
+          if (G_io_app.usb_ep_timeouts[i].timeout) {
+            G_io_app.usb_ep_timeouts[i].timeout-=MIN(G_io_app.usb_ep_timeouts[i].timeout, 100);
+            if (!G_io_app.usb_ep_timeouts[i].timeout) {
               // timeout !
-              G_io_apdu_state = APDU_IDLE;
+              G_io_app.apdu_state = APDU_IDLE;
               THROW(EXCEPTION_IO_RESET);
             }
           }
         }
+        __attribute__((fallthrough));
       }
 #endif // HAVE_IO_USB
+#ifdef HAVE_BLE_APDU
+      {
+        if (G_io_app.ble_xfer_timeout) {
+          G_io_app.ble_xfer_timeout -= MIN(G_io_app.ble_xfer_timeout, 100);
+          if (!G_io_app.ble_xfer_timeout) {
+            G_io_app.apdu_state = APDU_IDLE;
+            THROW(EXCEPTION_IO_RESET);
+          }
+        }
+        __attribute__((fallthrough));
+      }
+#endif // HAVE_BLE_APDU
       // no break is intentional
     default:
       return io_event(CHANNEL_SPI);
@@ -300,7 +335,6 @@ unsigned int io_seproxyhal_handle_event(void) {
   return 0;
 }
 
-bagl_element_t* volatile G_bagl_last_touched_not_released_component;
 
 //#define DEBUG_APDU
 #ifdef DEBUG_APDU
@@ -317,16 +351,38 @@ extern unsigned int app_stack_canary;
 #endif // HAVE_BOLOS_APP_STACK_CANARY
 
 void io_seproxyhal_init(void) {
+#ifndef HAVE_BOLOS
   // Enforce OS compatibility
   check_api_level(CX_COMPAT_APILEVEL);
 
+#ifdef HAVE_MCU_PROTECT
+  // engage RDP2 on MCU
+  unsigned char c[4];
+  c[0] = SEPROXYHAL_TAG_MCU;
+  c[1] = 0;
+  c[2] = 1;
+  c[3] = SEPROXYHAL_TAG_MCU_TYPE_PROTECT;
+  io_seproxyhal_spi_send(c, 4);
+#endif // HAVE_MCU_PROTECT
+#endif // HAVE_BOLOS
 #ifdef HAVE_BOLOS_APP_STACK_CANARY
   app_stack_canary = APP_STACK_CANARY_MAGIC;
 #endif // HAVE_BOLOS_APP_STACK_CANARY  
 
-  G_io_apdu_state = APDU_IDLE;
-  G_io_apdu_length = 0;
-  G_io_apdu_media = IO_APDU_MEDIA_NONE;
+  // wipe the io structure before it's used
+#ifdef TARGET_NANOX
+  unsigned int plane = G_io_app.plane_mode;
+#endif // TARGET_NANOX
+  os_memset(&G_io_app, 0, sizeof(G_io_app));
+#ifdef TARGET_NANOX
+  G_io_app.plane_mode = plane;
+#endif // TARGET_NANOX
+
+  G_io_app.apdu_state = APDU_IDLE;
+  G_io_app.apdu_length = 0;
+  G_io_app.apdu_media = IO_APDU_MEDIA_NONE;
+
+  G_io_app.ms = 0;
 
   #ifdef DEBUG_APDU
   debug_apdus_offset = 0;
@@ -342,18 +398,26 @@ void io_seproxyhal_init(void) {
 }
 
 void io_seproxyhal_init_ux(void) {
+#ifdef TARGET_BLUE
   // initialize the touch part
-  G_bagl_last_touched_not_released_component = NULL;
+  G_ux_os.last_touched_not_released_component = NULL;
+#endif // TARGET_BLUE
+
+// #ifdef TARGET_NANOX
+//   // wipe frame buffer
+//   screen_clear();
+// #endif // TARGET_NANOX
 }
 
 void io_seproxyhal_init_button(void) {
   // no button push so far
-  G_button_mask = 0;
-  G_button_same_mask_counter = 0;
+  G_ux_os.button_mask = 0;
+  G_ux_os.button_same_mask_counter = 0;
 }
 
 #ifdef HAVE_BAGL
 
+#ifdef TARGET_BLUE
 unsigned int io_seproxyhal_touch_out(const bagl_element_t* element, bagl_element_callback_t before_display) {
   const bagl_element_t* el;
   if (element->out != NULL) {
@@ -465,7 +529,7 @@ void io_seproxyhal_touch_element_callback(const bagl_element_t* elements, unsign
     }
 
     // only perform out callback when element was in the current array, else, leave it be
-    if (&elements[comp_idx] == G_bagl_last_touched_not_released_component) {
+    if (&elements[comp_idx] == G_ux_os.last_touched_not_released_component) {
       last_touched_not_released_component_was_in_current_array = 1;
     }
 
@@ -475,13 +539,13 @@ void io_seproxyhal_touch_element_callback(const bagl_element_t* elements, unsign
         && elements[comp_idx].component.y-elements[comp_idx].touch_area_brim <= y && y<elements[comp_idx].component.y+elements[comp_idx].component.height+elements[comp_idx].touch_area_brim) {
 
       // outing the previous over'ed component
-      if (&elements[comp_idx] != G_bagl_last_touched_not_released_component 
-              && G_bagl_last_touched_not_released_component != NULL) {
+      if (&elements[comp_idx] != G_ux_os.last_touched_not_released_component 
+              && G_ux_os.last_touched_not_released_component != NULL) {
         // only out the previous element if the newly matching will be displayed 
         if (!before_display || before_display(&elements[comp_idx])) {
-          if (io_seproxyhal_touch_out(G_bagl_last_touched_not_released_component, before_display)) {
+          if (io_seproxyhal_touch_out(G_ux_os.last_touched_not_released_component, before_display)) {
             // previous component is considered released
-            G_bagl_last_touched_not_released_component = NULL;
+            G_ux_os.last_touched_not_released_component = NULL;
             // a display has been issued, avoid double display, wait for another touch event (20ms)
             return;
           }
@@ -501,7 +565,7 @@ void io_seproxyhal_touch_element_callback(const bagl_element_t* elements, unsign
       else if (event_kind == SEPROXYHAL_TAG_FINGER_EVENT_RELEASE) {
         if (io_seproxyhal_touch_tap(&elements[comp_idx], before_display)) {
           // unmark the last component, we've been notified TOUCH 
-          G_bagl_last_touched_not_released_component = NULL;
+          G_ux_os.last_touched_not_released_component = NULL;
           return;
         }
       }
@@ -509,7 +573,7 @@ void io_seproxyhal_touch_element_callback(const bagl_element_t* elements, unsign
         // ask for overing
         if (io_seproxyhal_touch_over(&elements[comp_idx], before_display)) {
           // remember the last touched component
-          G_bagl_last_touched_not_released_component = (bagl_element_t*)&elements[comp_idx];
+          G_ux_os.last_touched_not_released_component = (bagl_element_t*)&elements[comp_idx];
           return;
         }
       }
@@ -518,26 +582,28 @@ void io_seproxyhal_touch_element_callback(const bagl_element_t* elements, unsign
 
   // if overing out of component or over another component, the out event is sent after the over event of the previous component
   if(last_touched_not_released_component_was_in_current_array 
-    && G_bagl_last_touched_not_released_component != NULL) {
+    && G_ux_os.last_touched_not_released_component != NULL) {
 
     // we won't be able to notify the out, don't do it, in case a diplay refused the dra of the relased element and the position matched another element of the array (in autocomplete for example)
     if (io_seproxyhal_spi_is_status_sent()) {
       return;
     }
     
-    if (io_seproxyhal_touch_out(G_bagl_last_touched_not_released_component, before_display)) {
+    if (io_seproxyhal_touch_out(G_ux_os.last_touched_not_released_component, before_display)) {
       // ok component out has been emitted
-      G_bagl_last_touched_not_released_component = NULL;
+      G_ux_os.last_touched_not_released_component = NULL;
     }
   }
 
   // not processed
 }
+#endif // TARGET_BLUE
 
 void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h, unsigned int* color_index, unsigned int bit_per_pixel, unsigned char* bitmap) {
   // component type = ICON
   // component icon id = 0
   // => bitmap transmitted
+  if (w && h) {
   bagl_component_t c;
   bagl_icon_details_t d;
   os_memset(&c, 0, sizeof(c));
@@ -573,6 +639,7 @@ void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h, 
   io_seproxyhal_spi_send((unsigned char*)color_index, h);
   io_seproxyhal_spi_send(bitmap, w);
   */
+}
 }
 
 #ifdef SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
@@ -640,14 +707,63 @@ unsigned int io_seproxyhal_display_icon_header_and_colors(bagl_component_t* icon
 }
 #endif // SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
 
+#if defined(TARGET_NANOX)
 void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_details_t* icon_details) {
   bagl_component_t icon_component_mod;
+  // // avoid sending another status :), fixes a lot of bugs in the end
+  // if (io_seproxyhal_spi_is_status_sent()) {
+  //   return;
+  // }
   // ensure not being out of bounds in the icon component agianst the declared icon real size
   os_memmove(&icon_component_mod, icon_component, sizeof(bagl_component_t));
   icon_component_mod.width = icon_details->width;
   icon_component_mod.height = icon_details->height;
   icon_component = &icon_component_mod;
 
+  bagl_draw_glyph(&icon_component_mod, icon_details);
+}
+
+void io_seproxyhal_display_default(const bagl_element_t* element) {
+
+  const bagl_element_t* el = (const bagl_element_t*) PIC(element);
+  const char* txt = (const char*)PIC(el->text);
+  // process automagically address from rom and from ram
+  unsigned int type = (el->component.type & ~(BAGL_FLAG_TOUCHABLE));
+
+  // // avoid sending another status :), fixes a lot of bugs in the end
+  // if (io_seproxyhal_spi_is_status_sent()) {
+  //   return;
+  // }
+
+  if (type != BAGL_NONE) {
+    if (txt != NULL) {
+      // consider an icon details descriptor is pointed by the context
+      if (type == BAGL_ICON && el->component.icon_id == 0) {
+        // SECURITY: due to this wild cast, the code MUST be executed on the application side instead of in 
+        //           the syscall sides to avoid buffer overflows and a real hard way of checking buffer 
+        //           belonging in the syscall dispatch
+        bagl_draw_glyph(&el->component, (const bagl_icon_details_t *)txt);
+      }
+      else {
+        bagl_draw_with_context(&el->component, txt, strlen(txt), BAGL_ENCODING_LATIN1);
+      }
+    }
+    else {
+      bagl_draw_with_context(&el->component, NULL, 0, 0);
+    }
+  }
+}
+
+#else // TARGET_NANOX
+void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_details_t* icon_det) {
+  bagl_component_t icon_component_mod;
+  const bagl_icon_details_t* icon_details = (bagl_icon_details_t*)PIC(icon_det);
+  if (icon_details && icon_details->bitmap) {
+    // ensure not being out of bounds in the icon component agianst the declared icon real size
+    os_memmove(&icon_component_mod, PIC(icon_component), sizeof(bagl_component_t));
+    icon_component_mod.width = icon_details->width;
+    icon_component_mod.height = icon_details->height;
+    icon_component = &icon_component_mod;
 #ifdef SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
   unsigned int len;
   unsigned int icon_len;
@@ -700,8 +816,11 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
   io_seproxyhal_spi_send((unsigned char*)PIC(icon_details->bitmap), w);
 #endif // !SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
 }
+}
 
-void io_seproxyhal_display_default(const bagl_element_t * element) {
+void io_seproxyhal_display_default(const bagl_element_t * el) {
+
+  const bagl_element_t* element = (const bagl_element_t*) PIC(el);
   // process automagically address from rom and from ram
   unsigned int type = (element->component.type & ~(BAGL_FLAG_TOUCHABLE));
 
@@ -737,6 +856,7 @@ void io_seproxyhal_display_default(const bagl_element_t * element) {
     }
   }
 }
+#endif // TARGET_NANOX
 
 unsigned int bagl_label_roundtrip_duration_ms(const bagl_element_t* e, unsigned int average_char_width) {
   return bagl_label_roundtrip_duration_ms_buf(e, e->text, average_char_width);
@@ -767,6 +887,67 @@ unsigned int bagl_label_roundtrip_duration_ms_buf(const bagl_element_t* e, const
   return 2*(textlen - e->component.width)*1000/e->component.icon_id + 2*(e->component.stroke & ~(0x80))*100;
 }
 
+void io_seproxyhal_button_push(button_push_callback_t button_callback, unsigned int new_button_mask) {
+  if (button_callback) {
+    unsigned int button_mask;
+    unsigned int button_same_mask_counter;
+    // enable speeded up long push
+    if (new_button_mask == G_ux_os.button_mask) {
+      // each 100ms ~
+      G_ux_os.button_same_mask_counter++;
+    }
+
+    // when new_button_mask is 0 and 
+
+    // append the button mask
+    button_mask = G_ux_os.button_mask | new_button_mask;
+
+    // pre reset variable due to os_sched_exit
+    button_same_mask_counter = G_ux_os.button_same_mask_counter;
+
+    // reset button mask
+    if (new_button_mask == 0) {
+      // reset next state when button are released
+      G_ux_os.button_mask = 0;
+      G_ux_os.button_same_mask_counter=0;
+
+      // notify button released event
+      button_mask |= BUTTON_EVT_RELEASED;
+    }
+    else {
+      G_ux_os.button_mask = button_mask;
+    }
+
+    // reset counter when button mask changes
+    if (new_button_mask != G_ux_os.button_mask) {
+      G_ux_os.button_same_mask_counter=0;
+    }
+
+    if (button_same_mask_counter >= BUTTON_FAST_THRESHOLD_CS) {
+      // fast bit when pressing and timing is right
+      if ((button_same_mask_counter%BUTTON_FAST_ACTION_CS) == 0) {
+        button_mask |= BUTTON_EVT_FAST;
+      }
+
+      /*
+      // fast bit when releasing and threshold has been exceeded
+      if ((button_mask & BUTTON_EVT_RELEASED)) {
+        button_mask |= BUTTON_EVT_FAST;
+      }
+      */
+
+      // discard the release event after a fastskip has been detected, to avoid strange at release behavior
+      // and also to enable user to cancel an operation by starting triggering the fast skip
+      button_mask &= ~BUTTON_EVT_RELEASED;
+    }
+
+    // indicate if button have been released
+    button_callback(button_mask, button_same_mask_counter);
+
+  }
+}
+
+#endif // HAVE_BAGL
 void io_seproxyhal_setup_ticker(unsigned int interval_ms) {
   G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SET_TICKER_INTERVAL;
   G_io_seproxyhal_spi_buffer[1] = 0;
@@ -793,6 +974,14 @@ void io_seproxyhal_se_reset(void) {
   for(;;);
 }
 
+void io_seproxyhal_disable_ble(void) {
+    // ble off
+  G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_BLE_RADIO_POWER;
+  G_io_seproxyhal_spi_buffer[1] = 0;
+  G_io_seproxyhal_spi_buffer[2] = 1;
+  G_io_seproxyhal_spi_buffer[3] = 0;
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
+}
 void io_seproxyhal_disable_io(void) {
     /* keep ticker on for BOLOS_UX power/lock management
     // disable ticker
@@ -804,12 +993,9 @@ void io_seproxyhal_disable_io(void) {
     io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 5);
     */
 
-    // ble off
-    G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_BLE_RADIO_POWER;
-    G_io_seproxyhal_spi_buffer[1] = 0;
-    G_io_seproxyhal_spi_buffer[2] = 1;
-    G_io_seproxyhal_spi_buffer[3] = 0;
-    io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
+#ifdef HAVE_BLE
+    io_seproxyhal_disable_ble();
+#endif // HAVE_BLE
 
     // usb off
     G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_USB_CONFIG;
@@ -828,64 +1014,6 @@ void io_seproxyhal_backlight(unsigned int flags, unsigned int backlight_percenta
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 5);
 }
 
-void io_seproxyhal_button_push(button_push_callback_t button_callback, unsigned int new_button_mask) {
-  if (button_callback) {
-    unsigned int button_mask;
-    unsigned int button_same_mask_counter;
-    // enable speeded up long push
-    if (new_button_mask == G_button_mask) {
-      // each 100ms ~
-      G_button_same_mask_counter++;
-    }
-
-    // append the button mask
-    button_mask = G_button_mask | new_button_mask;
-
-    // pre reset variable due to os_sched_exit
-    button_same_mask_counter = G_button_same_mask_counter;
-
-    // reset button mask
-    if (new_button_mask == 0) {
-      // reset next state when button are released
-      G_button_mask = 0;
-      G_button_same_mask_counter=0;
-
-      // notify button released event
-      button_mask |= BUTTON_EVT_RELEASED;
-    }
-    else {
-      G_button_mask = button_mask;
-    }
-
-    // reset counter when button mask changes
-    if (new_button_mask != G_button_mask) {
-      G_button_same_mask_counter=0;
-    }
-
-    if (button_same_mask_counter >= BUTTON_FAST_THRESHOLD_CS) {
-      // fast bit when pressing and timing is right
-      if ((button_same_mask_counter%BUTTON_FAST_ACTION_CS) == 0) {
-        button_mask |= BUTTON_EVT_FAST;
-      }
-
-      /*
-      // fast bit when releasing and threshold has been exceeded
-      if ((button_mask & BUTTON_EVT_RELEASED)) {
-        button_mask |= BUTTON_EVT_FAST;
-      }
-      */
-
-      // discard the release event after a fastskip has been detected, to avoid strange at release behavior
-      // and also to enable user to cancel an operation by starting triggering the fast skip
-      button_mask &= ~BUTTON_EVT_RELEASED;
-    }
-
-    // indicate if button have been released
-    button_callback(button_mask, button_same_mask_counter);
-  }
-}
-
-#endif // HAVE_BAGL
 
 #ifdef HAVE_IO_U2F
 u2f_service_t G_io_u2f;
@@ -898,6 +1026,7 @@ unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
   tx_len = 0;
   G_io_apdu_buffer[tx_len++] = 1; // format ID
 
+#ifndef HAVE_BOLOS
   // append app name
   len = os_registry_get_current_app_tag(BOLOS_TAG_APPNAME, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len);
   G_io_apdu_buffer[tx_len++] = len;
@@ -906,9 +1035,25 @@ unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
   len = os_registry_get_current_app_tag(BOLOS_TAG_APPVERSION, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len);
   G_io_apdu_buffer[tx_len++] = len;
   tx_len += len;
+#else // HAVE_BOLOS
+  // append app name
+  len = strlen("BOLOS");
+  G_io_apdu_buffer[tx_len++] = len;
+  strcpy((char*)(G_io_apdu_buffer+tx_len), "BOLOS");
+  tx_len += len;
+  // append app version
+  len = strlen(VERSION);
+  G_io_apdu_buffer[tx_len++] = len;
+  strcpy((char*)(G_io_apdu_buffer+tx_len), VERSION);
+  tx_len += len;
+#endif // HAVE_BOLOS
+
+#if !defined(HAVE_IO_TASK) || !defined(HAVE_BOLOS)
+  // to be fixed within io tasks
   // return OS flags to notify of platform's global state (pin lock etc)
   G_io_apdu_buffer[tx_len++] = 1; // flags length
   G_io_apdu_buffer[tx_len++] = os_flags();
+#endif // !defined(HAVE_IO_TASK) || !defined(HAVE_BOLOS)
 
   // status words
   G_io_apdu_buffer[tx_len++] = 0x90;
@@ -919,6 +1064,7 @@ unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
 
 unsigned short io_exchange(unsigned char channel, unsigned short tx_len) {
   unsigned short rx_len;
+  unsigned int timeout_ms;
 
 #ifdef HAVE_BOLOS_APP_STACK_CANARY
   // behavior upon detected stack overflow is to reset the SE
@@ -954,14 +1100,25 @@ reply_apdu:
     // TODO work up the spi state machine over the HAL proxy until an APDU is available
 
     if (tx_len && !(channel&IO_ASYNCH_REPLY)) {
+      // ensure it's our turn to send a command/status, could lag a bit before sending the reply
+      while (io_seproxyhal_spi_is_status_sent()) {
+        io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+        // process without sending status on tickers etc, to ensure keeping the hand
+        os_io_seph_recv_and_process(1);
+      }
+
+      // reinit sending timeout for APDU replied within io_exchange
+      timeout_ms = G_io_app.ms + IO_RAPDU_TRANSMIT_TIMEOUT_MS;
+
       // until the whole RAPDU is transmitted, send chunks using the current mode for communication
       for (;;) {
-        switch(G_io_apdu_state) {
+        switch(G_io_app.apdu_state) {
           default: 
             // delegate to the hal in case of not generic transport mode (or asynch)
             if (io_exchange_al(channel, tx_len) == 0) {
               goto break_send;
             }
+            __attribute__((fallthrough));
           case APDU_IDLE:
             LOG("invalid state for APDU reply\n");
             THROW(INVALID_STATE);
@@ -979,7 +1136,7 @@ reply_apdu:
             io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
 
             // isngle packet reply, mark immediate idle
-            G_io_apdu_state = APDU_IDLE;
+            G_io_app.apdu_state = APDU_IDLE;
             // finished, no chunking
             goto break_send;
 
@@ -1017,12 +1174,18 @@ reply_apdu:
 
             // continue processing currently received command until completely received.
             while(!u2f_message_repliable(&G_io_u2f)) {
-              io_seproxyhal_general_status();
-              io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-              // if packet is not well formed, then too bad ...
-              io_seproxyhal_handle_event();
-            }          
 
+              io_seproxyhal_general_status();
+              do {
+              io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+                // check for reply timeout
+                if (G_io_app.ms >= timeout_ms) {
+                  THROW(EXCEPTION_IO_RESET);
+                }
+                // avoid a general status to be replied
+                io_seproxyhal_handle_event();
+              } while (io_seproxyhal_spi_is_status_sent());
+            }          
 #ifdef U2F_PROXY_MAGIC
 
             // user presence + counter + rapdu + sw must fit the apdu buffer
@@ -1040,10 +1203,10 @@ reply_apdu:
             os_memset(G_io_apdu_buffer, 0, 5);
             u2f_message_reply(&G_io_u2f, U2F_CMD_MSG, G_io_apdu_buffer, tx_len+5);
 
-#else
+#else // U2F_PROXY_MAGIC
             u2f_message_reply(&G_io_u2f, U2F_CMD_MSG, G_io_apdu_buffer, tx_len);
 
-#endif            
+#endif // U2F_PROXY_MAGIC
 
             goto break_send;
 #endif // HAVE_IO_U2F
@@ -1053,22 +1216,30 @@ reply_apdu:
       break_send:
 
         // wait end of reply transmission
-        while (G_io_apdu_state != APDU_IDLE) {
+        // TODO: add timeout here to avoid spending too much time when host has disconnected
+        while (G_io_app.apdu_state != APDU_IDLE) {
 #ifdef HAVE_TINY_COROUTINE
           tcr_yield();
 #else // HAVE_TINY_COROUTINE
           io_seproxyhal_general_status();
-          io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-          // if packet is not well formed, then too bad ...
-          io_seproxyhal_handle_event();
+          do {
+            io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+            // check for reply timeout (when asynch reply (over hid or u2f for example))
+            // this case shall be covered by usb_ep_timeout but is not, investigate that
+            if (G_io_app.ms >= timeout_ms) {
+              THROW(EXCEPTION_IO_RESET);
+            }
+            // avoid a general status to be replied
+            io_seproxyhal_handle_event();
+          } while (io_seproxyhal_spi_is_status_sent());
 #endif // HAVE_TINY_COROUTINE
         }
 
         // reset apdu state
-        G_io_apdu_state = APDU_IDLE;
-        G_io_apdu_media = IO_APDU_MEDIA_NONE;
+        G_io_app.apdu_state = APDU_IDLE;
+        G_io_app.apdu_media = IO_APDU_MEDIA_NONE;
 
-        G_io_apdu_length = 0;
+        G_io_app.apdu_length = 0;
 
         // continue sending commands, don't issue status yet
         if (channel & IO_RETURN_AFTER_TX) {
@@ -1081,7 +1252,7 @@ reply_apdu:
 
       // perform reset after io exchange
       if (channel & IO_RESET_AFTER_REPLIED) {
-        os_sched_exit(1);
+        os_sched_exit_inline(EXCEPTION_IO_RESET);
         //reset();
       }
     }
@@ -1092,17 +1263,18 @@ reply_apdu:
       // already received the data of the apdu when received the whole apdu
       if ((channel & (CHANNEL_APDU|IO_RECEIVE_DATA)) == (CHANNEL_APDU|IO_RECEIVE_DATA)) {
         // return apdu data - header
-        return G_io_apdu_length-5;
+        return G_io_app.apdu_length-5;
       }
 
       // reply has ended, proceed to next apdu reception (reset status only after asynch reply)
-      G_io_apdu_state = APDU_IDLE;
-      G_io_apdu_media = IO_APDU_MEDIA_NONE;
+      G_io_app.apdu_state = APDU_IDLE;
+      G_io_app.apdu_media = IO_APDU_MEDIA_NONE;
     }
+#else
 #endif // HAVE_TINY_COROUTINE
 
     // reset the received apdu length
-    G_io_apdu_length = 0;
+    G_io_app.apdu_length = 0;
 
     // ensure ready to receive an event (after an apdu processing with asynch flag, it may occur if the channel is not correctly managed)
 
@@ -1122,10 +1294,10 @@ reply_apdu:
       rx_len = io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
 
       // can't process split TLV, continue
-      if (rx_len < 3 && rx_len-3 != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])) {
+      if (rx_len < 3 && rx_len != U2(G_io_seproxyhal_spi_buffer[1],G_io_seproxyhal_spi_buffer[2])+3U) {
         LOG("invalid TLV format\n");
-        G_io_apdu_state = APDU_IDLE;
-        G_io_apdu_length = 0;
+        G_io_app.apdu_state = APDU_IDLE;
+        G_io_app.apdu_length = 0;
         continue;
       }
 
@@ -1133,7 +1305,8 @@ reply_apdu:
 #endif // HAVE_TINY_COROUTINE
 
       // an apdu has been received asynchroneously, return it
-      if (G_io_apdu_state != APDU_IDLE && G_io_apdu_length > 0) {
+      if (G_io_app.apdu_state != APDU_IDLE && G_io_app.apdu_length > 0) {
+#ifndef HAVE_BOLOS_NO_DEFAULT_APDU
         // handle reserved apdus
         // get name and version
         if (os_memcmp(G_io_apdu_buffer, "\xB0\x01\x00\x00", 4) == 0) {
@@ -1151,41 +1324,39 @@ reply_apdu:
           channel |= IO_RESET_AFTER_REPLIED;
           goto reply_apdu; 
         }
-#ifdef HAVE_BOLOS_WITH_VIRGIN_ATTESTATION
-        // app and platform attestation
-        // host: <8:challenge>
-        // device: if no answer given since powercycle, ask user consent
-        // device: if positive user consent, <L1V:attest2pubkey> <L1V:attest2keycert> <L1V:ecdsa_sign(key=attst2privkey, data=hash(hash(challenge)+hash(requestingapplication))> sw=9000
-        // device: if negative user consent, sw=6985
-        else if (os_memcmp(G_io_apdu_buffer, "\xB0\x02\x00\x00\x08", 5) == 0) {
+#ifndef BOLOS_OS_UPGRADER
+        // seed cookie
+        // host: <nothing>
+        // device: <format(1B)> <len(1B)> <seed magic cookie if pin is entered(len)> 9000 | 6985
+        else if (os_memcmp(G_io_apdu_buffer, "\xB0\x02\x00\x00", 4) == 0) {
 
           tx_len = 0;
-#ifdef HAVE_BOLOS_UX
-          G_bolos_ux_context.parameters.ux_id = BOLOS_UX_CONSENT_GENUINENESS;
-          G_bolos_ux_context.parameters.len = 0;
-          if (os_ux_blocking(&G_bolos_ux_context.parameters) == BOLOS_UX_OK) 
-#else // HAVE_BOLOS_UX
-          // allow or not the user to check genuineness ? answer is to be retained the whole powercycle (store it in the UX to make it short)
-          ux.params.ux_id = BOLOS_UX_CONSENT_GENUINENESS;
-          ux.params.len = 0;
-          if (os_ux_blocking(&ux.params) == BOLOS_UX_OK) 
-#endif // HAVE_BOLOS_UX
-          {
-            tx_len = os_attestation_virgin_process(G_io_apdu_buffer, sizeof(G_io_apdu_buffer)-2, G_io_apdu_buffer+5, G_io_apdu_buffer[4]);
+          if (os_global_pin_is_validated() == BOLOS_UX_OK) {
+            unsigned int i;
+            // format
+            G_io_apdu_buffer[tx_len++] = 0x01;
+
+#ifndef HAVE_BOLOS
+            i = os_perso_seed_cookie(G_io_apdu_buffer+1+1, MIN(64,sizeof(G_io_apdu_buffer)-1-1-2));
+#else
+            i = os_perso_seed_cookie_os(G_io_apdu_buffer+1+1, MIN(64,sizeof(G_io_apdu_buffer)-1-1-2));
+#endif // HAVE_BOLOS
+
+            G_io_apdu_buffer[tx_len++] = i;
+            tx_len += i;
             G_io_apdu_buffer[tx_len++] = 0x90;
             G_io_apdu_buffer[tx_len++] = 0x00;
           }
           else {
-            // denied by user
             G_io_apdu_buffer[tx_len++] = 0x69;
             G_io_apdu_buffer[tx_len++] = 0x85;
           }
-          // disable 'return after tx' and 'asynch reply' flags
           channel &= ~IO_FLAGS;
           goto reply_apdu; 
         }
-#endif // HAVE_BOLOS_WITH_VIRGIN_ATTESTATION
-        return G_io_apdu_length;
+#endif // BOLOS_OS_UPGRADER
+#endif // HAVE_BOLOS_NO_DEFAULT_APDU
+        return G_io_app.apdu_length;
       }
     }
     break;
@@ -1195,463 +1366,134 @@ reply_apdu:
   }
 }
 
+unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events) {
+  // send general status before receiving next event
+  if (!io_seproxyhal_spi_is_status_sent()) {
+    io_seproxyhal_general_status();
+  }
+
+  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+
+  switch (G_io_seproxyhal_spi_buffer[0]) {
+    case SEPROXYHAL_TAG_FINGER_EVENT:
+    case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
+    case SEPROXYHAL_TAG_TICKER_EVENT:
+    case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+    case SEPROXYHAL_TAG_STATUS_EVENT:
+      // perform UX event on these ones, don't process as an IO event
+      if (dont_process_ux_events) {
+        return 0;
+      }
+      __attribute__((fallthrough));
+
+    default:
+      // if malformed, then a stall is likely to occur
+      if (io_seproxyhal_handle_event()) {
+        return 1;
+      }
+  }
+  return 0;
+}
+
 unsigned int os_ux_blocking(bolos_ux_params_t* params) {
   unsigned int ret;
-  
+
   // until a real status is returned
-  ret = os_ux(params);
+  os_ux(params);
+  ret = os_sched_last_status(TASK_BOLOS_UX);
   while(ret == BOLOS_UX_IGNORE 
      || ret == BOLOS_UX_CONTINUE) {
 
-    // process events
-    for (;;) {
-      // send general status before receiving next event
-      if (!io_seproxyhal_spi_is_status_sent()) {
-        io_seproxyhal_general_status();
+    // if the IO task is not running, then need to pump events manually
+    if (! os_sched_is_running(TASK_SUBTASKS_START)) {
+      if (os_io_seph_recv_and_process(1)) {
+        continue;
       }
-
-      /*unsigned int rx_len = */io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-      switch (G_io_seproxyhal_spi_buffer[0]) {
-        case SEPROXYHAL_TAG_FINGER_EVENT:
-        case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
-        case SEPROXYHAL_TAG_TICKER_EVENT:
-        case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
-        case SEPROXYHAL_TAG_STATUS_EVENT:
-          // perform UX event on these ones, don't process as an IO event
-          break;
-
-        default:
-          // if malformed, then a stall is likely to occur
-          if (io_seproxyhal_handle_event()) {
-            continue;
-          }
-          break;
-      }
-
-      // pass the packet to the ux
-      break;
+      // prepare processing of the packet by the ux
+      params->ux_id = BOLOS_UX_EVENT;
+      params->len = 0;
+      os_ux(params);
+      ret = os_sched_last_status(TASK_BOLOS_UX);
     }
-    // prepare processing of the packet by the ux
-    params->ux_id = BOLOS_UX_EVENT;
-    params->len = 0;
-    ret = os_ux(params);
+    else {
+      // wait until UX takes some process time and update it's status
+      os_sched_yield(BOLOS_UX_OK);
+      // only retrieve the current UX state
+      ret = os_sched_last_status(TASK_BOLOS_UX);
+    }
   }
 
   return ret;
-} 
+}  
 
 // so unoptimized
-void screen_printc(unsigned char c) {
+void mcu_usb_printc(unsigned char c) {
   unsigned char buf[4];
+#ifdef TARGET_NANOX
+  buf[0] = SEPROXYHAL_TAG_PRINTF;
+#else // TARGET_NANOX
   buf[0] = SEPROXYHAL_TAG_PRINTF_STATUS;
+#endif // TARGET_NANOX
   buf[1] = 0;
   buf[2] = 1;
   buf[3] = c;
   io_seproxyhal_spi_send(buf, 4);
+#ifndef TARGET_NANOX
 #ifndef IO_SEPROXYHAL_DEBUG
   // wait printf ack (no race kthx)
   io_seproxyhal_spi_recv(buf, 3, 0);
   buf[0] = 0; // consume tag to avoid misinterpretation (due to IO_CACHE)
 #endif // IO_SEPROXYHAL_DEBUG
+#endif // TARGET_NANOX
 }
 
-// current ux_menu context (could be pluralised if multiple nested levels of menu are required within bolos_ux for example)
-ux_menu_state_t ux_menu;
-
-const bagl_element_t ux_menu_elements[] = {
-  // erase
-  {{BAGL_RECTANGLE                      , 0x80,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL, 0, 0, 0, NULL, NULL, NULL},
-
-  // icons
-  {{BAGL_ICON                           , 0x81,   3,  14,   7,   4, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP   }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  {{BAGL_ICON                           , 0x82, 118,  14,   7,   4, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  
-
-  // previous setting name
-  {{BAGL_LABELINE                       , 0x41,  14,   3, 100,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  // next setting name
-  {{BAGL_LABELINE                       , 0x42,  14,  35, 100,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-
-  // current setting (x to be adjusted if icon is present etc)
-  {{BAGL_ICON                           , 0x10,  14,   9,   0,   0, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  // single line layout
-  {{BAGL_LABELINE                       , 0x20,  14,  19, 100,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-
-  // 2 lines layout + icon
-  {{BAGL_LABELINE                       , 0x21,  14,  12, 100,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  {{BAGL_LABELINE                       , 0x22,  14,  26, 100,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-
-};
-
-const ux_menu_entry_t* ux_menu_get_entry (unsigned int entry_idx) {
-  if (ux_menu.menu_iterator) {
-    return ux_menu.menu_iterator(entry_idx);
+#ifdef HAVE_IO_TASK
+void io_process(void) {
+  for (;;) {
+    if (!(G_io_app.io_flags & IO_FINISHED)) {
+      G_io_app.apdu_length = io_exchange(CHANNEL_APDU | G_io_app.io_flags, G_io_app.apdu_length);
+      // mark IO as ended
+      G_io_app.io_flags |= IO_FINISHED;
+    }
+    else {
+      // pump packets (process all through handle_events)
+      os_io_seph_recv_and_process(0);
+    }
+    // we have finished our call, notify the other tasks
+    os_sched_yield_inline(BOLOS_UX_OK);
   } 
-  return &ux_menu.menu_entries[entry_idx];
-} 
-
-const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element) {
-  //todo avoid center alignment when text_x or icon_x AND text_x are not 0
-  os_memmove(&ux_menu.tmp_element, element, sizeof(bagl_element_t));
-
-  // ask the current entry first, to setup other entries
-  const ux_menu_entry_t* current_entry = ux_menu_get_entry(ux_menu.current_entry);
-
-  const ux_menu_entry_t* previous_entry = NULL;
-  if (ux_menu.current_entry) {
-    previous_entry = ux_menu_get_entry(ux_menu.current_entry-1);
-  }
-  const ux_menu_entry_t* next_entry = NULL;
-  if (ux_menu.current_entry < ux_menu.menu_entries_count-1) {
-    next_entry = ux_menu_get_entry(ux_menu.current_entry+1);
-  }
-
-  switch(element->component.userid) {
-    case 0x81:
-      if (ux_menu.current_entry == 0) {
-        return NULL;
-      }
-      break;
-    case 0x82:
-      if (ux_menu.current_entry == ux_menu.menu_entries_count-1) {
-        return NULL;
-      }
-      break;
-    // previous setting name
-    case 0x41:
-      if (current_entry->line2 != NULL 
-        || current_entry->icon != NULL
-        || ux_menu.current_entry == 0
-        || ux_menu.menu_entries_count == 1 
-        || previous_entry->icon != NULL
-        || previous_entry->line2 != NULL) {
-        return 0;
-      }
-      ux_menu.tmp_element.text = previous_entry->line1;
-      break;
-    // next setting name
-    case 0x42:
-      if (current_entry->line2 != NULL 
-        || current_entry->icon != NULL
-        || ux_menu.current_entry == ux_menu.menu_entries_count-1
-        || ux_menu.menu_entries_count == 1
-        || next_entry->icon != NULL) {
-        return NULL;
-      }
-      ux_menu.tmp_element.text = next_entry->line1;
-      break;
-    case 0x10:
-      if (current_entry->icon == NULL) {
-        return NULL;
-      }
-      ux_menu.tmp_element.text = (const char*)current_entry->icon;
-      if (current_entry->icon_x) {
-        ux_menu.tmp_element.component.x = current_entry->icon_x;
-      }
-      break;
-    case 0x20:
-      if (current_entry->line2 != NULL) {
-        return NULL;
-      }
-      ux_menu.tmp_element.text = current_entry->line1;
-      goto adjust_text_x;
-    case 0x21:
-      if (current_entry->line2 == NULL) {
-        return NULL;
-      }
-      ux_menu.tmp_element.text = current_entry->line1;
-      goto adjust_text_x;
-    case 0x22:
-      if (current_entry->line2 == NULL) {
-        return NULL;
-      }
-      ux_menu.tmp_element.text = current_entry->line2;
-    adjust_text_x:
-      if (current_entry->text_x) {
-        ux_menu.tmp_element.component.x = current_entry->text_x;
-        // discard the 'center' flag
-        ux_menu.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_EXTRABOLD_11px;
-      }
-      break;
-  }
-  // ensure prepro agrees to the element to be displayed
-  if (ux_menu.menu_entry_preprocessor) {
-    // menu is denied by the menu entry preprocessor
-    return ux_menu.menu_entry_preprocessor(current_entry, &ux_menu.tmp_element);
-  }
-
-  return &ux_menu.tmp_element;
 }
-
-unsigned int ux_menu_elements_button (unsigned int button_mask, unsigned int button_mask_counter) {
-  UNUSED(button_mask_counter);
-
-  const ux_menu_entry_t* current_entry = ux_menu_get_entry(ux_menu.current_entry);
-
-  switch (button_mask) {
-    // enter menu or exit menu
-    case BUTTON_EVT_RELEASED|BUTTON_LEFT|BUTTON_RIGHT:
-      // menu is priority 1
-      if (current_entry->menu) {
-        // use userid as the pointer to current entry in the parent menu
-        UX_MENU_DISPLAY(current_entry->userid, (const ux_menu_entry_t*)PIC(current_entry->menu), ux_menu.menu_entry_preprocessor);
-        return 0;
+void io_task(void) {
+  for(;;) {
+    BEGIN_TRY {
+      TRY {
+        io_start();
+        io_process();
       }
-      // else callback
-      else if (current_entry->callback) {
-        ((ux_menu_callback_t)PIC(current_entry->callback))(current_entry->userid);
-        return 0;
+      CATCH_ALL {
+        // any error leading here is triggering an IO stack reset
+        os_sched_yield_inline(EXCEPTION_IO_RESET);
       }
-      break;
-
-    case BUTTON_EVT_FAST|BUTTON_LEFT:
-    case BUTTON_EVT_RELEASED|BUTTON_LEFT:
-      // entry 0 is the number of entries in the menu list
-      if (ux_menu.current_entry == 0) {
-        return 0;
+      FINALLY {
       }
-      ux_menu.current_entry--;
-      goto redraw;
-
-    case BUTTON_EVT_FAST|BUTTON_RIGHT:
-    case BUTTON_EVT_RELEASED|BUTTON_RIGHT:
-      // entry 0 is the number of entries in the menu list
-      if (ux_menu.current_entry >= ux_menu.menu_entries_count-1) {
-        return 0;
-      }
-      ux_menu.current_entry++;
-    redraw:
-#ifdef HAVE_BOLOS_UX
-      screen_display_init(0);
-#else
-      UX_REDISPLAY();
-#endif
-      return 0;
-  }
-  return 1;
-}
-
-const ux_menu_entry_t UX_MENU_END_ENTRY = UX_MENU_END;
-
-void ux_menu_display(unsigned int current_entry, 
-                     const ux_menu_entry_t* menu_entries,
-                     ux_menu_preprocessor_t menu_entry_preprocessor) {
-  // reset to first entry
-  ux_menu.menu_entries_count = 0;
-
-  // count entries
-  if (menu_entries) {
-    for(;;) {
-      if (os_memcmp(&menu_entries[ux_menu.menu_entries_count], &UX_MENU_END_ENTRY, sizeof(ux_menu_entry_t)) == 0) {
-        break;
-      }
-      ux_menu.menu_entries_count++;
     }
-  }
-
-  if (current_entry != UX_MENU_UNCHANGED_ENTRY) {
-    ux_menu.current_entry = current_entry;
-    if (ux_menu.current_entry > ux_menu.menu_entries_count) {
-      ux_menu.current_entry = 0;
-    }
-  }
-  ux_menu.menu_entries = menu_entries;
-  ux_menu.menu_entry_preprocessor = menu_entry_preprocessor;
-  ux_menu.menu_iterator = NULL;
-
-#ifdef HAVE_BOLOS_UX
-  screen_state_init(0);
-
-  // static dashboard content
-  G_bolos_ux_context.screen_stack[0].element_arrays[0].element_array = ux_menu_elements;
-  G_bolos_ux_context.screen_stack[0].element_arrays[0].element_array_count = ARRAYLEN(ux_menu_elements);
-  G_bolos_ux_context.screen_stack[0].element_arrays_count = 1;
-
-  // ensure the string_buffer will be set before each button is displayed
-  G_bolos_ux_context.screen_stack[0].screen_before_element_display_callback = ux_menu_element_preprocessor;
-  G_bolos_ux_context.screen_stack[0].button_push_callback = ux_menu_elements_button;
-
-  screen_display_init(0);
-#else
-  // display the menu current entry
-  UX_DISPLAY(ux_menu_elements, ux_menu_element_preprocessor);
-#endif
-}
-
-
-
-
-ux_turner_state_t ux_turner;
-
-const bagl_element_t ux_turner_elements[] = {
-  // erase
-  {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL, 0, 0, 0, NULL, NULL, NULL},
-
-  // icons
-  {{BAGL_ICON                           , 0x00,   3,  12,   7,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  {{BAGL_ICON                           , 0x00, 117,  13,   8,   6, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CHECK  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-
-  // current setting (x to be adjusted if icon is present etc)
-  {{BAGL_ICON                           , 0x03,   0,   9,  14,  14, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-
-  // single line layout
-  {{BAGL_LABELINE                       , 0x04,   0,  19, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  // 2 lines layout + icon
-  {{BAGL_LABELINE                       , 0x05,   0,  12, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-  {{BAGL_LABELINE                       , 0x06,   0,  26, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL, 0, 0, 0, NULL, NULL, NULL },
-
-};
-
-const bagl_element_t* ux_turner_element_preprocessor(const bagl_element_t* element) {
-  //todo avoid center alignment when text_x or icon_x AND text_x are not 0
-  os_memmove(&ux_turner.tmp_element, element, sizeof(bagl_element_t));
-
-  switch(element->component.userid) {
-
-    case 0x03:
-      if (ux_turner.steps[ux_turner.current_step].icon == NULL) {
-        return NULL;
-      }
-      ux_turner.tmp_element.text = (const char*)ux_turner.steps[ux_turner.current_step].icon;
-      if (ux_turner.steps[ux_turner.current_step].icon_x) {
-        ux_turner.tmp_element.component.x = ux_turner.steps[ux_turner.current_step].icon_x;
-      }
-      break;
-    case 0x04:
-      if (ux_turner.steps[ux_turner.current_step].line2 != NULL) {
-        return NULL;
-      }
-      if (ux_turner.steps[ux_turner.current_step].fontid1) {
-        ux_turner.tmp_element.component.font_id = ux_turner.steps[ux_turner.current_step].fontid1;
-      }
-      ux_turner.tmp_element.text = ux_turner.steps[ux_turner.current_step].line1;
-      goto adjust_text_x;
-    case 0x05:
-      if (ux_turner.steps[ux_turner.current_step].line2 == NULL) {
-        return NULL;
-      }
-      if (ux_turner.steps[ux_turner.current_step].fontid1) {
-        ux_turner.tmp_element.component.font_id = ux_turner.steps[ux_turner.current_step].fontid1;
-      }
-      ux_turner.tmp_element.text = ux_turner.steps[ux_turner.current_step].line1;
-      goto adjust_text_x;
-    case 0x06:
-      if (ux_turner.steps[ux_turner.current_step].line2 == NULL) {
-        return NULL;
-      }
-      if (ux_turner.steps[ux_turner.current_step].fontid2) {
-        ux_turner.tmp_element.component.font_id = ux_turner.steps[ux_turner.current_step].fontid2;
-      }
-      ux_turner.tmp_element.text = ux_turner.steps[ux_turner.current_step].line2;
-    adjust_text_x:
-      if (ux_turner.steps[ux_turner.current_step].text_x) {
-        ux_turner.tmp_element.component.x = ux_turner.steps[ux_turner.current_step].text_x;
-      }
-      break;
-  }
-  return &ux_turner.tmp_element;
-}
-
-unsigned int ux_turner_elements_button (unsigned int button_mask, unsigned int button_mask_counter) {
-  return ux_turner.button_callback(button_mask, button_mask_counter);
-}
-
-#ifdef HAVE_BOLOS_UX
-unsigned int ux_turner_ticker_bolos_ux(unsigned int ignored) {
-  UNUSED(ignored);
-  // switch to next step
-  ux_turner.current_step=(ux_turner.current_step+1)%ux_turner.steps_count;
-  // setup the next change
-  G_bolos_ux_context.screen_stack[0].ticker_value = ux_turner.steps[ux_turner.current_step].next_step_ms;
-  G_bolos_ux_context.screen_stack[0].ticker_interval = ux_turner.steps[ux_turner.current_step].next_step_ms;
-  screen_display_init(0);
-  return 0;
-}
-#else
-void ux_turner_ticker(unsigned int elapsed_ms) {
-  ux_turner.elapsed_ms -= MIN(ux_turner.elapsed_ms, elapsed_ms);
-  if (ux_turner.elapsed_ms == 0) {
-    // switch to next step
-    ux_turner.current_step=(ux_turner.current_step+1)%ux_turner.steps_count;
-    ux_turner.elapsed_ms = ux_turner.steps[ux_turner.current_step].next_step_ms;
-    UX_DISPLAY(ux_turner_elements, ux_turner_element_preprocessor);
+    END_TRY;
   }
 }
-#endif // HAVE_BOLOS_UX
 
-void ux_turner_display(unsigned int current_step, 
-                     const ux_turner_step_t* steps,
-                     unsigned int steps_count,
-                     button_push_callback_t button_callback) {
-  // reset to first entry
-  ux_turner.steps_count = steps_count;
+#endif // HAVE_IO_TASK
 
-  if (current_step != UX_TURNER_UNCHANGED_ENTRY) {
-    ux_turner.current_step = current_step;
-    if (ux_turner.current_step > ux_turner.steps_count) {
-      ux_turner.current_step = 0;
-    }
-  }
-  ux_turner.steps = steps;
 
-  ux_turner.button_callback = button_callback;
 
-#ifdef HAVE_BOLOS_UX
-  screen_state_init(0);
 
-  // static dashboard content
-  G_bolos_ux_context.screen_stack[0].element_arrays[0].element_array = ux_turner_elements;
-  G_bolos_ux_context.screen_stack[0].element_arrays[0].element_array_count = ARRAYLEN(ux_turner_elements);
-  G_bolos_ux_context.screen_stack[0].element_arrays_count = 1;
-
-  // ensure the string_buffer will be set before each button is displayed
-  G_bolos_ux_context.screen_stack[0].screen_before_element_display_callback = ux_turner_element_preprocessor;
-  G_bolos_ux_context.screen_stack[0].button_push_callback = ux_turner_elements_button;
-  G_bolos_ux_context.screen_stack[0].ticker_value = ux_turner.steps[ux_turner.current_step].next_step_ms;
-  G_bolos_ux_context.screen_stack[0].ticker_interval = ux_turner.steps[ux_turner.current_step].next_step_ms;
-  G_bolos_ux_context.screen_stack[0].ticker_callback = ux_turner_ticker_bolos_ux;
-
-  screen_display_init(0);
-#else
-  ux_turner.elapsed_ms = ux_turner.steps[ux_turner.current_step].next_step_ms;
-  // display the menu current entry
-  UX_DISPLAY(ux_turner_elements, ux_turner_element_preprocessor);
-#endif
-}
-
-void ux_check_status_default(unsigned int status) {
-  // nothing to be done here by default.
-  UNUSED(status);
-}
-
-void ux_check_status(unsigned int status) __attribute__ ((weak, alias ("ux_check_status_default")));
-
-const bagl_element_t const clear_element = {{BAGL_RECTANGLE, 0, 0, 0, 128, 32, 0, 0, 0, 0x000000, 0x000000, 0 , 0},NULL,0,0,0,NULL,NULL,NULL};
-const bagl_element_t const printf_element = {{BAGL_LABELINE, 0, 0, 26, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER |BAGL_FONT_ALIGNMENT_MIDDLE , 0},"Default printf",0,0,0,NULL,NULL,NULL};
-
-void debug_wait_displayed(void) {
-#ifndef TARGET_BLUE
-  // wait up the display processed
-  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+void io_seproxyhal_io_heartbeat(void) {
   io_seproxyhal_general_status();
-#endif // TARGET_BLUE
-  // wait next event (probably a ticker, if not, too bad... this is debug !!)
-  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);  
+  do {
+    io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+    // avoid a general status to be replied
+    if(G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_TICKER_EVENT) {
+      io_seproxyhal_handle_event();
+    }
+  } while (io_seproxyhal_spi_is_status_sent());
 }
-
-void debug_printf(void* buffer) {
-  io_seproxyhal_display_default(&clear_element);
-  debug_wait_displayed();
-  os_memmove(&ux_menu.tmp_element, &printf_element, sizeof(bagl_element_t));
-  ux_menu.tmp_element.text = buffer;
-  io_seproxyhal_display_default(&ux_menu.tmp_element);
-  debug_wait_displayed();
-}
-#ifdef HAVE_DEBUG
-#define L(x) debug_printf(x)
-#else // HAVE_DEBUG
-#define L(x)
-#endif // HAVE_DEBUG
-
 #endif // OS_IO_SEPROXYHAL

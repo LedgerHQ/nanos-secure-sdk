@@ -1,6 +1,6 @@
 #*******************************************************************************
 #   Ledger SDK
-#   (c) 2017, 2018, 2019 Ledger
+#   (c) 2017 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,12 +15,19 @@
 #  limitations under the License.
 #*******************************************************************************
 
-SOURCE_PATH   += $(BOLOS_SDK)/src $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) | grep "\.c$$"))) $(dir $(foreach libdir, $(APP_SOURCE_PATH), $(dir $(shell find $(libdir) | grep "\.c$$"))))
-SOURCE_FILES  := $(foreach path, $(SOURCE_PATH),$(shell find $(path) | grep "\.c$$") ) $(GLYPH_DESTC)
-INCLUDES_PATH := $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) | grep "\.h$$")))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(foreach libdir, $(APP_SOURCE_PATH), $(dir $(shell find $(libdir) | grep "\.h$$"))))
+# temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+SDK_SOURCE_PATH += lib_bagl
+else
+SDK_SOURCE_PATH += lib_ux
+endif
 
-VPATH := $(dir $(SOURCE_FILES))
-OBJECT_FILES := $(sort $(addprefix obj/, $(addsuffix .o, $(basename $(notdir $(SOURCE_FILES))))))
-DEPEND_FILES := $(sort $(addprefix dep/, $(addsuffix .d, $(basename $(notdir $(SOURCE_FILES))))))
+SOURCE_PATH   += $(BOLOS_SDK)/src $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.c'))) $(dir $(foreach libdir, $(APP_SOURCE_PATH), $(dir $(shell find $(libdir) -name '*.c'))))
+SOURCE_FILES  += $(foreach path, $(SOURCE_PATH),$(shell find $(path) -name '*.c') ) $(GLYPH_DESTC)
+INCLUDES_PATH += $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.h')))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(foreach libdir, $(APP_SOURCE_PATH), $(dir $(shell find $(libdir) -name '*.h'))))
+
+VPATH += $(dir $(SOURCE_FILES))
+OBJECT_FILES += $(sort $(addprefix obj/, $(addsuffix .o, $(basename $(notdir $(SOURCE_FILES))))))
+DEPEND_FILES += $(sort $(addprefix dep/, $(addsuffix .d, $(basename $(notdir $(SOURCE_FILES))))))
 
 include $(BOLOS_SDK)/Makefile.rules_generic

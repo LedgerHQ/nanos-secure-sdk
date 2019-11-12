@@ -1,6 +1,7 @@
+
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2016, 2017, 2018, 2019 Ledger
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -20,31 +21,61 @@
 
 #include "os.h"
 
-static const char const g_pcHex[] = {
+#if defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
+
+static const char g_pcHex[] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
 };
-static const char const g_pcHex_cap[] = {
+static const char g_pcHex_cap[] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
 };
+#endif // defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
 
 #ifdef HAVE_PRINTF
+#include "os_io_seproxyhal.h"
+#include "usbd_def.h"
+#include "usbd_core.h"
 
 #ifndef BOLOS_RELEASE
-void screen_prints(const char* str, unsigned int charcount) {
+
+#ifdef TARGET_NANOX
+void mcu_usb_prints(const char* str, unsigned int charcount) {
   while(charcount--) {
-    screen_printc(*str++);
+    mcu_usb_printc(*str++);
   }
 }
 
+#else
+void mcu_usb_prints(const char* str, unsigned int charcount) {
+  if(USBD_Device.dev_state != USBD_STATE_CONFIGURED){
+    return;
+  }
+  unsigned char buf[4];
+  if(io_seproxyhal_spi_is_status_sent()){
+      io_seproxyhal_spi_recv(buf, 3, 0);
+  }
+  buf[0] = SEPROXYHAL_TAG_PRINTF_STATUS;
+  buf[1] = charcount >> 8;
+  buf[2] = charcount;
+  io_seproxyhal_spi_send(buf, 3);
+  io_seproxyhal_spi_send(str, charcount);
+#ifndef IO_SEPROXYHAL_DEBUG
+  // wait printf ack (no race kthx)
+  io_seproxyhal_spi_recv(buf, 3, 0);
+  buf[0] = 0; // consume tag to avoid misinterpretation (due to IO_CACHE)
+#endif // IO_SEPROXYHAL_DEBUG
+}
+#endif // TARGET_NANOX
 
 /**
  * Common printf code, relies on 2 FAL:
- * - screen_prints
+ * - mcu_usb_prints
  * - screen_printc
  */
 
+void screen_printf(const char* format, ...) __attribute__ ((weak, alias ("mcu_usb_printf")));
 
-void screen_printf(const char* format, ...) {
+void mcu_usb_printf(const char* format, ...) {
 
     /* dummy version
     unsigned short i;
@@ -88,7 +119,7 @@ void screen_printf(const char* format, ...) {
         //
         // Write this portion of the string.
         //
-        screen_prints(format, ulIdx);
+        mcu_usb_prints(format, ulIdx);
 
         //
         // Skip the portion of the string that was written.
@@ -176,7 +207,7 @@ again:
                     //
                     // Print out the character.
                     //
-                    screen_prints((char *)&ulValue, 1);
+                    mcu_usb_prints((char *)&ulValue, 1);
 
                     //
                     // This command has been handled.
@@ -319,7 +350,7 @@ again:
                         
                           // padd ulStrlen white space
                           do {
-                            screen_prints(" ", 1);
+                            mcu_usb_prints(" ", 1);
                           } while(ulStrlen-- > 0);
                         
                           goto s_pad;
@@ -335,7 +366,7 @@ again:
                     //
                     switch(ulBase) {
                       default:
-                        screen_prints(pcStr, ulIdx);
+                        mcu_usb_prints(pcStr, ulIdx);
                         break;
                       case 16: {
                         unsigned char nibble1, nibble2;
@@ -344,12 +375,12 @@ again:
                           nibble2 = pcStr[ulCount]&0xF;
                           switch(ulCap) {
                             case 0:
-                              screen_printc(g_pcHex[nibble1]);
-                              screen_printc(g_pcHex[nibble2]);
+                              mcu_usb_printc(g_pcHex[nibble1]);
+                              mcu_usb_printc(g_pcHex[nibble2]);
                               break;
                             case 1:
-                              screen_printc(g_pcHex_cap[nibble1]);
-                              screen_printc(g_pcHex_cap[nibble2]);
+                              mcu_usb_printc(g_pcHex_cap[nibble1]);
+                              mcu_usb_printc(g_pcHex_cap[nibble2]);
                               break;
                           }
                         }
@@ -366,7 +397,7 @@ s_pad:
                         ulCount -= ulIdx;
                         while(ulCount--)
                         {
-                            screen_prints(" ", 1);
+                            mcu_usb_prints(" ", 1);
                         }
                     }
                     //
@@ -518,7 +549,7 @@ convert:
                     //
                     // Write the string.
                     //
-                    screen_prints(pcBuf, ulPos);
+                    mcu_usb_prints(pcBuf, ulPos);
 
                     //
                     // This command has been handled.
@@ -534,7 +565,7 @@ convert:
                     //
                     // Simply write a single %.
                     //
-                    screen_prints(format - 1, 1);
+                    mcu_usb_prints(format - 1, 1);
 
                     //
                     // This command has been handled.
@@ -551,7 +582,7 @@ error:
                     //
                     // Indicate an error.
                     //
-                    screen_prints("ERROR", 5);
+                    mcu_usb_prints("ERROR", 5);
 
                     //
                     // This command has been handled.
@@ -583,12 +614,12 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
     //
     // Check the arguments.
     //
-    if(format == 0 || str == 0 ||str_size < 2) {
+    if(format == NULL || str == NULL ||str_size < 2) {
       return 0;
     }
 
     // ensure terminating string with a \0
-    os_memset(str, 0, str_size);
+    memset(str, 0, str_size);
     str_size--;
 
 
@@ -614,7 +645,7 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
         // Write this portion of the string.
         //
         ulIdx = MIN(ulIdx, str_size);
-        os_memmove(str, format, ulIdx);
+        memmove(str, format, ulIdx);
         str+= ulIdx;
         str_size -= ulIdx;
         if (str_size == 0) {
@@ -659,6 +690,7 @@ again:
             //
             switch(*format++)
             {
+
                 //
                 // Handle the digit characters.
                 //
@@ -854,7 +886,7 @@ again:
                         
                           // padd ulStrlen white space
                           ulStrlen = MIN(ulStrlen, str_size);
-                          os_memset(str, ' ', ulStrlen);
+                          memset(str, ' ', ulStrlen);
                           str+= ulStrlen;
                           str_size -= ulStrlen;
                           if (str_size == 0) {
@@ -875,7 +907,7 @@ again:
                     switch(ulBase) {
                       default:
                         ulIdx = MIN(ulIdx, str_size);
-                        os_memmove(str, pcStr, ulIdx);
+                        memmove(str, pcStr, ulIdx);
                         str+= ulIdx;
                         str_size -= ulIdx;
                         if (str_size == 0) {
@@ -918,7 +950,7 @@ s_pad:
                     {
                         ulCount -= ulIdx;
                         ulCount = MIN(ulCount, str_size);
-                        os_memset(str, ' ', ulCount);
+                        memset(str, ' ', ulCount);
                         str+= ulCount;
                         str_size -= ulCount;
                         if (str_size == 0) {
@@ -931,6 +963,7 @@ s_pad:
                     break;
                 }
 
+#ifdef HAVE_SNPRINTF_FORMAT_U
                 //
                 // Handle the %u command.
                 //
@@ -962,6 +995,7 @@ s_pad:
                     //
                     goto convert;
                 }
+#endif // HAVE_SNPRINTF_FORMAT_U
 
                 //
                 // Handle the %x and %X commands.  Note that they are treated
@@ -971,6 +1005,7 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
+                    __attribute__((fallthrough));
                 case 'x':
                 case 'p':
                 {
@@ -1075,7 +1110,7 @@ convert:
                     // Write the string.
                     //
                     ulPos = MIN(ulPos, str_size);
-                    os_memmove(str, pcBuf, ulPos);
+                    memmove(str, pcBuf, ulPos);
                     str+= ulPos;
                     str_size -= ulPos;
                     if (str_size == 0) {
@@ -1115,16 +1150,18 @@ error:
                 //
                 default:
                 {
+#ifdef HAVE_SNPRINTF_DEBUG
                     //
                     // Indicate an error.
                     //
                     ulPos = MIN(strlen("ERROR"), str_size);
-                    os_memmove(str, "ERROR", ulPos);
+                    memmove(str, "ERROR", ulPos);
                     str+= ulPos;
                     str_size -= ulPos;
                     if (str_size == 0) {
                         return 0;
                     }
+#endif // HAVE_SNPRINTF_DEBUG
 
                     //
                     // This command has been handled.

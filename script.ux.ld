@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Secure firmware
-*   (c) 2016, 2017, 2018, 2019 Ledger
+*   (c) 2016, 2017 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ SECTIONS
     
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
     *(.text*)
+    *(.rodata)
     *(.rodata.[^N]*) /*.data.rel.ro* not here to detect invalid PIC usage */
     *(.rodata.N[^_]*)
 
@@ -64,14 +65,15 @@ SECTIONS
 
     . = ALIGN(PAGE_SIZE);
     
+    _nvram_data = .;
     /* NVM data (ex-filesystem) */
     *(.bss.N_* .rodata.N_*)
 
     . = ALIGN(PAGE_SIZE);
+    _envram_data = .;
+
     _install_parameters = .;
-    PROVIDE(N_install_parameters = .);
     _envram = .;
-    _nvram_data_size = _envram - _nvram_data;
     
   } > FLASH = 0x00
 
@@ -97,6 +99,13 @@ SECTIONS
      * Place RAM uninitialized variables
      */
     _bss = .;
+    
+    PROVIDE(G_io_task_ux_params = .);
+    *(.bss.G_ux_params) /* map parameters of the bolos ux at start of the ram segment to make inter task communication easier */
+    *(.bss.G_ux)
+    *(.bss.G_ux_os*)
+    *(.bss.G_bolos_ux_context) /* last so get trashed upon stack overflow */
+
     *(.bss*)
     _ebss = .;
 
@@ -108,9 +117,11 @@ SECTIONS
     app_stack_canary = .;
     PROVIDE(app_stack_canary = .);
     . += 4;
-    _stack = .;
-    . = _stack + STACK_SIZE;
-    PROVIDE( _stack_size = STACK_SIZE );
+    _stack_validation = .;
+    . = _stack_validation + STACK_SIZE;
+    _stack = ABSOLUTE(END_STACK) - STACK_SIZE;
+    PROVIDE( _stack = ABSOLUTE(END_STACK) - STACK_SIZE);
+    _estack = ABSOLUTE(END_STACK);
     PROVIDE( _estack = ABSOLUTE(END_STACK) );
 
   } > SRAM = 0x00

@@ -1,6 +1,6 @@
 /*******************************************************************************
- *   Ledger Blue - Non secure firmware
- *   (c) 2016, 2017, 2018, 2019 Ledger
+*   Ledger Nano S - Secure firmware
+*   (c) 2019 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -99,6 +99,21 @@ typedef struct {
 
 // --------------------------------------------------------------------------------------
 
+/**
+ * helper structure to help handling icons
+ */
+typedef struct bagl_icon_details_s {
+  unsigned int width;
+  unsigned int height;
+  // bit per pixel
+  unsigned int bpp;
+  const unsigned int *colors;
+  const unsigned char *bitmap;
+} bagl_icon_details_t;
+
+// --------------------------------------------------------------------------------------
+
+#ifdef HAVE_BAGL_GLYPH_ARRAY
 typedef struct {
     unsigned int icon_id;
     unsigned int width;
@@ -111,19 +126,20 @@ typedef struct {
 
 extern bagl_glyph_array_entry_t const C_glyph_array[];
 extern unsigned int const C_glyph_count;
+#endif // HAVE_BAGL_GLYPH_ARRAY
 
 // --------------------------------------------------------------------------------------
 
 typedef struct {
     unsigned char char_width;
     unsigned char bitmap_byte_count;
-    // unsigned char const * bitmap;
+  // unsigned char const * bitmap; // save space by only keeping the offset (2
+  // bytes) instead of the char address (4 bytes)
     unsigned short bitmap_offset;
 } bagl_font_character_t;
 
 typedef struct {
-    unsigned int
-        font_id;       // to allow for sparse font embedding with a linear enum
+  unsigned int font_id; // to allow for sparse font embedding with a linear enum
     unsigned char bpp; // for antialiased fonts
     unsigned char char_height;
     unsigned char baseline_height;
@@ -131,10 +147,13 @@ typedef struct {
     unsigned short first_char;
     unsigned short last_char;
     const bagl_font_character_t *const characters;
+#define PIC_CHAR(x) ((const bagl_font_character_t *)PIC(x))
     unsigned char const *bitmap; // single bitmap for all chars of a font
+#define PIC_BMP(x) ((unsigned char const *)PIC(x))
 } bagl_font_t;
 
 extern const bagl_font_t *const C_bagl_fonts[];
+#define PIC_FONT(x) ((bagl_font_t const *)PIC(x))
 extern const unsigned int C_bagl_fonts_count;
 
 #define BAGL_ENCODING_LATIN1 0
@@ -149,16 +168,15 @@ typedef enum {
     BAGL_FONT_OPEN_SANS_REGULAR_13_18PX,
     BAGL_FONT_OPEN_SANS_REGULAR_22_30PX,
     BAGL_FONT_OPEN_SANS_SEMIBOLD_8_11PX,
-    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px = 8, // validated on nano s
-    BAGL_FONT_OPEN_SANS_LIGHT_16px = 9,     // validated on nano s
-    BAGL_FONT_OPEN_SANS_REGULAR_11px = 10,  // validated on nano s
+  BAGL_FONT_OPEN_SANS_EXTRABOLD_11px = 8u, // validated on nano s
+  BAGL_FONT_OPEN_SANS_LIGHT_16px = 9u,     // validated on nano s
+  BAGL_FONT_OPEN_SANS_REGULAR_11px = 10u,  // validated on nano s
     BAGL_FONT_OPEN_SANS_SEMIBOLD_10_13PX,
     BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX,
     BAGL_FONT_OPEN_SANS_SEMIBOLD_13_18PX,
     BAGL_FONT_SYMBOLS_0,
     BAGL_FONT_SYMBOLS_1,
-    BAGL_FONT_LAST // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE
-                   // CHECKS
+  BAGL_FONT_LAST // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE CHECKS
 } bagl_font_id_e;
 
 #define BAGL_FONT_SYMBOLS_0_CLEAR "\x80"
@@ -230,6 +248,10 @@ enum bagl_glyph_e {
 
 // --------------------------------------------------------------------------------------
 // return y<<16+x after string have been printed
+unsigned short bagl_compute_line_width(unsigned short font_id,
+                                       unsigned short width, const void *text,
+                                       unsigned char text_length,
+                                       unsigned char text_encoding);
 int bagl_draw_string(unsigned short font_id, unsigned int color1,
                      unsigned int color0, int x, int y, unsigned int width,
                      unsigned int height, const void *text,
@@ -239,14 +261,18 @@ void bagl_draw_with_context(const bagl_component_t *component, const void *text,
                             unsigned short text_length,
                             unsigned char text_encoding);
 void bagl_draw(const bagl_component_t *const component);
+void bagl_draw_glyph(const bagl_component_t *component,
+                     const bagl_icon_details_t *icon_details);
 // void bagl_undraw_all(void);
 // void bagl_undraw_id(unsigned short id);
 // void bagl_user_input(unsigned short x, unsigned short y, unsigned char
 // event_kind);
 
+#ifdef HAVE_BAGL_GLYPH_ARRAY
 // for user to setup the glyph matrix to be used
 void bagl_set_glyph_array(const bagl_glyph_array_entry_t *array,
                           unsigned int count);
+#endif // HAVE_BAGL_GLYPH_ARRAY
 
 typedef struct bagl_animated_s {
     // the component to be animated

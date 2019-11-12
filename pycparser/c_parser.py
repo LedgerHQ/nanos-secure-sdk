@@ -715,14 +715,18 @@ class CParser(PLYParser):
                                 | TASKSWITCH
                                 | SHARED
                                 | LIBCALL
+                                | SUDOCALL
         """
         p[0] = p[1]
 
+    #special function specifier to flag function for certain behavior
     def p_function_specifier_2(self, p):
         """ function_specifier  : PERMISSION LPAREN ID RPAREN
                                 | PERMISSION LPAREN constant_expression RPAREN
                                 | CXPORT LPAREN ID RPAREN
                                 | CXPORT LPAREN constant_expression RPAREN
+                                | TASKLEVEL LPAREN ID RPAREN
+                                | TASKLEVEL LPAREN constant_expression RPAREN
         """
         p[0] = p[1] + p[2] + p[3] + p[4]
 

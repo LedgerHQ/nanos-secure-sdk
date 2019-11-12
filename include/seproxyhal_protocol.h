@@ -1,6 +1,6 @@
 /*******************************************************************************
- *   Ledger Blue - Non secure firmware
- *   (c) 2016, 2017, 2018, 2019 Ledger
+*   Ledger Nano S - Secure firmware
+*   (c) 2019 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,8 +24,12 @@
 
 // EVENTS
 #define SEPROXYHAL_TAG_SESSION_START_EVENT                                     \
-    0x01 // <kind(1byte)=reqble|recovery|flashback> <featurebitmap(4bytesBE)>
-         // <seproxyhalversion(L(1)V(L))>
+  0x01 // <kind(1byte)=reqble|recovery|flashback>
+       // <featurebitmap(4bytesBE)>
+       // <seproxyhalversion(L(1)V(L)) (blank when sent by the bootloader>
+       // <mcu_bl_loadkeyid(l1v)>
+       // <mcu_bl_version(l1v) (not included by BL)>
+       // <mcu_seph_signkeyid(l1v)(not included by BL)>
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_REQBLE 0x01
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_RECOVERY 0x02
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_USB 0x00000001UL
@@ -42,14 +46,14 @@
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_MASK 0xF0000000UL
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_BASIC 0x00000000UL
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_MCUSEC 0x10000000UL
+#define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_MCUBL 0x20000000UL
 
 #define SEPROXYHAL_TAG_BLE_PAIRING_ATTEMPT_EVENT 0x02
 #define SEPROXYHAL_TAG_BLE_WRITE_REQUEST_EVENT 0x03
 #define SEPROXYHAL_TAG_BLE_READ_REQUEST_EVENT 0x04
 #define SEPROXYHAL_TAG_BUTTON_PUSH_EVENT 0x05
 #define SEPROXYHAL_TAG_BUTTON_PUSH_ID_MASK                                     \
-    0xFE // up to 7 physical buttons (bit is 1 when pressed, and 0 when
-         // released)
+  0xFE // up to 7 physical buttons (bit is 1 when pressed, and 0 when released)
 #define SEPROXYHAL_TAG_BUTTON_PUSH_INTERVAL_MS                                 \
     100 // an event generated every x ms
 #define SEPROXYHAL_TAG_NFC_FIELD_DETECTION_EVENT 0x06
@@ -81,7 +85,7 @@
 
 #define SEPROXYHAL_TAG_STATUS_EVENT                                            \
     0x15 // <flags(4BE)> <screen_backlight_percentage(1B)> <ledcolorARGB(4B)>
-         // <battery_voltage_mv(4BE)>
+       // <battery_voltage_mv(4BE)> <battery % (1B)>
 #define SEPROXYHAL_TAG_STATUS_EVENT_FLAG_CHARGING 0x00000001
 #define SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_ON 0x00000002
 #define SEPROXYHAL_TAG_STATUS_EVENT_FLAG_BLE_ON 0x00000004
@@ -89,18 +93,32 @@
 
 #define SEPROXYHAL_TAG_CAPDU_EVENT 0x16 // raw command apdu transport
 
-#define SEPROXYHAL_TAG_I2C_EVENT 0x17 // <rfubyte> <rawdata>
+#define SEPROXYHAL_TAG_I2C_EVENT                                               \
+  0x17 // <kind(1):READ(0),WRITE(1),STOP(2),TIMEOUT(3)> <rawdata>
+#define SEPROXYHAL_TAG_I2C_EVENT_KIND_READ 0x01
+#define SEPROXYHAL_TAG_I2C_EVENT_KIND_WRITE 0x02
+#define SEPROXYHAL_TAG_BLE_RECV_EVENT 0x18 // <hcipacket raw>
+#define SEPROXYHAL_TAG_BOOTLOADER_RAPDU_EVENT                                  \
+  0x19 // <RAPDU from the bootloader>
 
 // COMMANDS
-#ifdef HAVE_SEPROXYHAL_MCU_BOOTLOADER
-#define SEPROXYHAL_TAG_MCU_BOOTLOADER 0x31 // DISABLED FOR SECURITY REASON
-#endif                                     // HAVE_SEPROXYHAL_MCU_BOOTLOADER
+#ifdef HAVE_SEPROXYHAL_MCU
+#define SEPROXYHAL_TAG_MCU 0x31 // <type>
+#define SEPROXYHAL_TAG_MCU_TYPE_BOOTLOADER 0x00
+#define SEPROXYHAL_TAG_MCU_TYPE_LOCK 0x01
+#ifdef HAVE_MCU_PROTECT
+#define SEPROXYHAL_TAG_MCU_TYPE_PROTECT                                        \
+  0x02 // for instance ask RDP2 to be engaged
+#endif // HAVE_MCU_PROTECT
+#define SEPROXYHAL_TAG_MCU_BOOTLOADER SEPROXYHAL_TAG_MCU
+#endif // HAVE_SEPROXYHAL_MCU
 #define SEPROXYHAL_TAG_UNSEC_CHUNK_READ                                        \
     0x32 // <length:U2BE> <restart(bit1)|continue=0>
 // available if SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_MCUSEC
 #define SEPROXYHAL_TAG_UNSEC_CHUNK_READ_EXT                                    \
     0x33 // <length:U2BE> <continue=0|restart(bit1)|specifyoffset(bit2)>
          // <offset:U4BE>
+#define SEPROXYHAL_TAG_BLE_SEND 0x38 // <opcode(U2BE)> <hci packet payload>
 #define SEPROXYHAL_TAG_SET_SCREEN_CONFIG                                       \
     0x3E // <flags(1byte):pwron(128)|rotation(0:0,90:2,180:4,270:6)|invert(1)>
          // <brightness percentage(1byte)>
@@ -110,7 +128,12 @@
 #define SEPROXYHAL_TAG_BLE_DEFINE_GENERIC_SETTING 0x41
 #define SEPROXYHAL_TAG_BLE_DEFINE_SERVICE_SETTING 0x42
 #define SEPROXYHAL_TAG_NFC_DEFINE_SERVICE_SETTING 0x43
-#define SEPROXYHAL_TAG_BLE_RADIO_POWER 0x44
+#define SEPROXYHAL_TAG_BLE_RADIO_POWER 0x44 // <action(1byte)>
+#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_ON 0x02
+#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBWIPE 0x04
+#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBSAVE 0x08
+#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBLOAD 0x10
+#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBFREE 0x20
 #define SEPROXYHAL_TAG_NFC_RADIO_POWER 0x45
 #define SEPROXYHAL_TAG_SE_POWER_OFF 0x46
 //#define SEPROXYHAL_TAG_SCREEN_POWER                0x47
@@ -144,12 +167,13 @@
 #define SEPROXYHAL_TAG_USB_EP_PREPARE_DIR_UNSTALL 0x80
 #define SEPROXYHAL_TAG_SET_LED 0x51 // <ledID(1byte)> <ledcolorARGB(4byte)>
 #define SEPROXYHAL_TAG_REQUEST_STATUS                                          \
-    0x52 // no args, request power levels of all peripherals and current
-         // charging state or not if a battery is present.
+  0x52 // no args, request power levels of all peripherals and current charging
+       // state or not if a battery is present.
 #define SEPROXYHAL_TAG_RAPDU 0x53 // raw response apdu transport
 #define SEPROXYHAL_TAG_I2C_XFER                                                \
     0x54 // <flags:b0=Start,b1=Stop,b2=Moreexpected> <address+R/w>
          // <write:rawdata,read=length(1B)>
+#define SEPROXYHAL_TAG_PRINTF 0x5F // <bytes to push to the printf buffer>
 
 // STATUS
 #define SEPROXYHAL_TAG_STATUS_MASK 0x60
@@ -176,11 +200,11 @@
 
 #ifdef TARGET_BLUE
 #define SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS                               \
-    0x69 // <start:0|next:1> [start? <x> <y> <w> <h> <bitperpixel>
-         // <color_count*4 bytes (LE encoding)>] <icon bitmap (row scan, packed,
-         // LE)>
+  0x69 // <start:0|next:1> [start? <x> <y> <w> <h> <bitperpixel> <color_count*4
+       // bytes (LE encoding)>] <icon bitmap (row scan, packed, LE)>
 #define SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_START 0x00
 #define SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_CONT 0x01
 #endif
+#define SEPROXYHAL_TAG_BOOTLOADER_CAPDU_STATUS 0x6A // <CAPDU to the bootloader>
 
 #endif

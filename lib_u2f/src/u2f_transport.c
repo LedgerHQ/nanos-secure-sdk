@@ -1,9 +1,7 @@
-#ifdef HAVE_IO_U2F
 
-/*
-*******************************************************************************
-*   Portable FIDO U2F implementation
-*   (c) 2016 Ledger
+/*******************************************************************************
+*   Ledger Nano S - Secure firmware
+*   (c) 2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -11,17 +9,20 @@
 *
 *      http://www.apache.org/licenses/LICENSE-2.0
 *
-*   Unless required by applicable law or agreed to in writing, software
-*   distributed under the License is distributed on an "AS IS" BASIS,
-*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *  See the License for the specific language governing permissions and
-*   limitations under the License.
+*  limitations under the License.
 ********************************************************************************/
+
+#ifdef HAVE_IO_U2F
 
 #include <stdint.h>
 #include <string.h>
 #include "u2f_service.h"
 #include "u2f_transport.h"
+#include "u2f_processing.h"
 #include "u2f_io.h"
 
 #include "os.h"
@@ -83,11 +84,15 @@ static void u2f_transport_error(u2f_service_t *service, char errorCode) {
  */
 void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
 
-    // previous mark packet as sent
-    if (service->sending) {
+    // don't process when replying to anti timeout requests
+    if (!u2f_message_repliable(service)) {
+        // previous mark packet as sent
         service->sending = false;
         return;
     }
+
+    // previous mark packet as sent
+    service->sending = false;
 
     // if idle (possibly after an error), then only await for a transmission 
     if (service->transportState != U2F_SENDING_RESPONSE 
@@ -134,7 +139,7 @@ void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
     else if (service->transportOffset == service->transportLength) {
         u2f_transport_reset(service);
         // we sent the whole response (even if we haven't yet received the ack for the last sent usb in packet)
-        G_io_apdu_state = APDU_IDLE;
+        G_io_app.apdu_state = APDU_IDLE;
     }
 }
 
@@ -170,8 +175,7 @@ bool u2f_transport_receive_fakeChannel(u2f_service_t *service, uint8_t *buffer, 
         goto error;
     }
     if (service->fakeChannelTransportOffset == 0) {        
-        uint16_t commandLength =
-            (buffer[4 + 1] << 8) | (buffer[4 + 2]) + U2F_COMMAND_HEADER_SIZE;
+        uint16_t commandLength = U2BE(buffer, 4+1) + U2F_COMMAND_HEADER_SIZE;
         // Some buggy implementations can send a WINK here, reply it gently
         if (buffer[4] == U2F_CMD_WINK) {
             u2f_transport_send_wink(service);
@@ -213,6 +217,8 @@ bool u2f_transport_receive_fakeChannel(u2f_service_t *service, uint8_t *buffer, 
     return true;
 error:
     service->fakeChannelTransportState = U2F_INTERNAL_ERROR;
+    // don't hesitate here, the user will have to exit/rerun the app otherwise.
+    THROW(EXCEPTION_IO_RESET);
     return false;    
 }
 
@@ -304,8 +310,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
             goto error;
         }
         // Check the length
-        uint16_t commandLength =
-            (buffer[channelHeader + 1] << 8) | (buffer[channelHeader + 2]);
+        uint16_t commandLength = U2BE(buffer, channelHeader + 1);
         if (commandLength > (service->transportReceiveBufferLength - 3)) {
             // Overflow in message size, abort
             u2f_transport_error(service, ERROR_INVALID_LEN);
@@ -471,8 +476,15 @@ void u2f_message_reply(u2f_service_t *service, uint8_t cmd, uint8_t *buffer, uin
         service->transportOffset = 0;
         service->transportLength = len;
         service->sendCmd = cmd;
-        // pump the first message
-        u2f_transport_sent(service, service->transportMedia);
+        if (service->transportMedia != U2F_MEDIA_BLE) {
+            // pump the first message
+            u2f_transport_sent(service, service->transportMedia);
+        }
+        else {
+            while (G_io_app.apdu_state != APDU_IDLE) {
+                u2f_transport_sent(service, service->transportMedia);       
+            }
+        }
     }
 }
 
