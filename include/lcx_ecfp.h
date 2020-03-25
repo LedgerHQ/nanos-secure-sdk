@@ -450,10 +450,9 @@ CXCALL int cx_ecfp_scalar_mult(cx_curve_t curve,
 /**
  * Initialize a public ECFP Key.
  * Once initialized, the key may be stored in non-volatile memory
- * an reused 'as-is' for any ECDSA/25519 processing
+ * and reused 'as-is' for any ECDSA/25519 processing
  * Passing NULL as raw key initializes the key without value. The key may be
- used
- * as parameter for cx_ecfp_generate_pair.
+ * used as parameter for cx_ecfp_generate_pair.
 
  * @param [in] curve
  *   The curve domain parameters to work with.
@@ -461,7 +460,7 @@ CXCALL int cx_ecfp_scalar_mult(cx_curve_t curve,
  * @param [in] rawkey
  *   Raw key value or NULL.
  *   The value shall be the public point encoded as:
- *     - '04 x y' for Weiertrass curve
+ *     - '04 x y' for Weierstrass curve
  *     - '04 x y'  or '02 y' (plus sign) for twisted Edward curves
  *     - '04 x y'  or '02 x' for Montgomery curves
  *    where x and y are encoded as big endian raw value and have bits length
