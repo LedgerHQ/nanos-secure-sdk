@@ -1166,6 +1166,15 @@ unsigned int os_seph_version ( unsigned char * version, unsigned int maxlength )
   return (unsigned int)(((volatile unsigned int*)parameters)[1]);
 }
 
+unsigned int os_bootloader_version ( unsigned char * version, unsigned int maxlength ) 
+{
+  volatile unsigned int parameters [2+2];
+  parameters[0] = (unsigned int)version;
+  parameters[1] = (unsigned int)maxlength;
+  SVC_Call(SYSCALL_os_bootloader_version_ID_IN, parameters);
+  return (unsigned int)(((volatile unsigned int*)parameters)[1]);
+}
+
 unsigned int os_setting_get ( unsigned int setting_id, unsigned char * value, unsigned int maxlen ) 
 {
   volatile unsigned int parameters [2+3];

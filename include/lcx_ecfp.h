@@ -63,6 +63,9 @@ enum cx_curve_e {
   /* STARK */
   CX_CURVE_Stark256,
 
+  /* BLS */
+  CX_CURVE_BLS12_381_G1,
+
   /** High limit (not included) of Weierstrass curve ID */
   CX_CURVE_WEIERSTRASS_END,
 

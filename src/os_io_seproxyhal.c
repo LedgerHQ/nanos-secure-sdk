@@ -35,6 +35,7 @@
 #endif // HAVE_BLUENRG
 
 #include "ux.h"
+#include "checks.h"
 
 #ifdef HAVE_IO_U2F
 #include "u2f_processing.h"
@@ -397,6 +398,10 @@ void io_seproxyhal_init(void) {
 
   io_seproxyhal_init_ux();
   io_seproxyhal_init_button();
+
+#if !defined(HAVE_BOLOS)
+  check_audited_app();
+#endif // !defined(HAVE_BOLOS)
 }
 
 void io_seproxyhal_init_ux(void) {

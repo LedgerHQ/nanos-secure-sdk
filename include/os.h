@@ -1310,6 +1310,9 @@ SYSCALL unsigned int os_seph_features(void);
 /* Grab the SEPROXYHAL's version */
 SYSCALL unsigned int os_seph_version(unsigned char *version PLENGTH(maxlength),
                                      unsigned int maxlength);
+SYSCALL unsigned int
+os_bootloader_version(unsigned char *version PLENGTH(maxlength),
+                      unsigned int maxlength);
 
 /*
  * Copy the serial number in the given buffer and return its length
@@ -1471,9 +1474,9 @@ os_customca_verify(unsigned char *hash PLENGTH(32),
 #endif // BOLOS_SECURITY_ONBOARD_DELAY_S
 
 #ifndef BOLOS_SECURITY_ATTESTATION_DELAY_S
-// Mininal time interval in between two use of the device's private key (SCP
+// Minimal time interval in between two use of the device's private key (SCP
 // opening and endorsement)
-#define BOLOS_SECURITY_ATTESTATION_DELAY_S 15
+#define BOLOS_SECURITY_ATTESTATION_DELAY_S 5
 #endif // BOLOS_SECURITY_ATTESTATION_DELAY_S
 
 void safe_desynch();

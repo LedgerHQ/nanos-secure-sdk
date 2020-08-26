@@ -500,15 +500,22 @@ extern bolos_ux_params_t G_ux_params;
 
 
 /**
- * Macro to process sequentially display a screen. The call finished when the UX is completely displayed.
+ * Macro to process sequentially display a screen. The call finishes when the UX is completely displayed,
+ * and the state of the MCU <-> SE exchanges is the same as before this macro call.
  */
 #define UX_WAIT_DISPLAYED() \
-    do { \
-      UX_DISPLAY_NEXT_ELEMENT(); \
+    while (!UX_DISPLAYED()) { \
+      /* We wait for the MCU event (should indicate display processed for a bagl element) */ \
       io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0); \
       io_seproxyhal_handle_event(); \
-    /* all items have been displayed */ \
-    } while (!UX_DISPLAYED());
+      UX_DISPLAY_NEXT_ELEMENT(); \
+    } \
+    io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0); \
+    io_seproxyhal_handle_event(); \
+    /* We send a general status which indicates to the MCU that he can process any pending action (i.e. here, display the whole screen) */ \
+    io_seproxyhal_general_status(); \
+    /* We wait for an ack of the MCU. */ \
+    io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
 
 /**
  * Process button push events. Application's button event handler is called only if the ux app does not deny it (modal frame displayed).
