@@ -58,7 +58,7 @@ void mcu_usb_prints(const char* str, unsigned int charcount) {
   buf[1] = charcount >> 8;
   buf[2] = charcount;
   io_seproxyhal_spi_send(buf, 3);
-  io_seproxyhal_spi_send(str, charcount);
+  io_seproxyhal_spi_send((const unsigned char *)str, charcount);
 #ifndef IO_SEPROXYHAL_DEBUG
   // wait printf ack (no race kthx)
   io_seproxyhal_spi_recv(buf, 3, 0);
@@ -1005,7 +1005,7 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
-                    __attribute__((fallthrough));
+                    /* fallthrough */
                 case 'x':
                 case 'p':
                 {
