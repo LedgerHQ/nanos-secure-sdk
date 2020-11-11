@@ -1040,11 +1040,11 @@ unsigned int os_io_seproxyhal_get_app_name_and_version(void) {
 
 #ifndef HAVE_BOLOS
   // append app name
-  len = os_registry_get_current_app_tag(BOLOS_TAG_APPNAME, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len);
+  len = os_registry_get_current_app_tag(BOLOS_TAG_APPNAME, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len-1);
   G_io_apdu_buffer[tx_len++] = len;
   tx_len += len;
   // append app version
-  len = os_registry_get_current_app_tag(BOLOS_TAG_APPVERSION, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len);
+  len = os_registry_get_current_app_tag(BOLOS_TAG_APPVERSION, G_io_apdu_buffer+tx_len+1, sizeof(G_io_apdu_buffer)-tx_len-1);
   G_io_apdu_buffer[tx_len++] = len;
   tx_len += len;
 #else // HAVE_BOLOS
