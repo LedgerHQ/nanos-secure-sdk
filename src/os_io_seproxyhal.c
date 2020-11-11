@@ -316,7 +316,7 @@ unsigned int io_seproxyhal_handle_event(void) {
             }
           }
         }
-        __attribute__((fallthrough));
+        /* fallthrough */
       }
 #endif // HAVE_IO_USB
 #ifdef HAVE_BLE_APDU
@@ -328,7 +328,7 @@ unsigned int io_seproxyhal_handle_event(void) {
             THROW(EXCEPTION_IO_RESET);
           }
         }
-        __attribute__((fallthrough));
+        /* fallthrough */
       }
 #endif // HAVE_BLE_APDU
       // no break is intentional
@@ -770,7 +770,7 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
   const bagl_icon_details_t* icon_details = (bagl_icon_details_t*)PIC(icon_det);
   if (icon_details && icon_details->bitmap) {
     // ensure not being out of bounds in the icon component agianst the declared icon real size
-    os_memmove(&icon_component_mod, PIC(icon_component), sizeof(bagl_component_t));
+    os_memmove(&icon_component_mod, (bagl_component_t *)PIC(icon_component), sizeof(bagl_component_t));
     icon_component_mod.width = icon_details->width;
     icon_component_mod.height = icon_details->height;
     icon_component = &icon_component_mod;
@@ -1130,7 +1130,7 @@ reply_apdu:
             if (io_exchange_al(channel, tx_len) == 0) {
               goto break_send;
             }
-            __attribute__((fallthrough));
+            /* fallthrough */
           case APDU_IDLE:
             LOG("invalid state for APDU reply\n");
             THROW(INVALID_STATE);
@@ -1392,7 +1392,7 @@ unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events) {
       if (dont_process_ux_events) {
         return 0;
       }
-      __attribute__((fallthrough));
+      /* fallthrough */
 
     default:
       // if malformed, then a stall is likely to occur

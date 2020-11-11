@@ -216,6 +216,8 @@ extern u2f_service_t G_io_u2f;
  */
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
 
+void mcu_usb_printc(unsigned char c);
+
 /**
  * Global type that enables to map memory onto the application zone instead of
  * over the os for os side
