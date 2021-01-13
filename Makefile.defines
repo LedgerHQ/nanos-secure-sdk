@@ -1,0 +1,73 @@
+#*******************************************************************************
+#   Ledger SDK
+#   (c) 2017 Ledger
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#*******************************************************************************
+
+#extract TARGET_NAME/TARGET_ID from the SDK to allow for makefile choices
+TARGET_ID:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
+TARGET_NAME:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
+TARGET_VERSION:=$(shell cat $(BOLOS_SDK)/include/bolos_version.h | grep define | cut -f2 -d'"')
+$(info TARGET_NAME=$(TARGET_NAME) TARGET_ID=$(TARGET_ID) TARGET_VERSION=$(TARGET_VERSION))
+
+# extra load parameters for loadApp script
+ifneq ($(SCP_PRIVKEY),)
+PARAM_SCP=--rootPrivateKey $(SCP_PRIVKEY)
+endif
+COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSION)" --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize $$((0x`cat debug/app.map | grep _envram_data | cut -f1 -d' '` - 0x`cat debug/app.map | grep _nvram_data | cut -f1 -d' '`)) `ICONHEX=\`python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
+COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
+
+### platform definitions
+DEFINES += gcc __IO=volatile
+
+# default is not to display make commands
+log = $(if $(strip $(VERBOSE)),$1,@$1)
+
+CC      = clang
+CFLAGS += -gdwarf-2  -gstrict-dwarf
+CFLAGS += -O3 -Os 
+CFLAGS += -I/usr/include
+CFLAGS += -fomit-frame-pointer -momit-leaf-frame-pointer 
+CFLAGS += -mcpu=cortex-m0 -mthumb 
+CFLAGS += -fno-common -mtune=cortex-m0 -mlittle-endian 
+CFLAGS += -std=gnu99 -Werror=int-to-pointer-cast -Wall -Wextra #-save-temps
+CFLAGS += -fdata-sections -ffunction-sections -funsigned-char -fshort-enums 
+CFLAGS += -mno-unaligned-access 
+CFLAGS += -Wno-unused-parameter -Wno-duplicate-decl-specifier
+CFLAGS +=  --target=armv6m-none-eabi
+CFLAGS += -fropi
+CFLAGS += -frwpi
+CFLAGS += -fno-jump-tables # avoid jump tables for switch to avoid problems with invalid PIC access
+CFLAGS += -nostdlib -nodefaultlibs
+
+AFLAGS += -ggdb2 -O3 -Os -mcpu=cortex-m0 -fno-common -mtune=cortex-m0
+
+#LDFLAGS += -fropi -frwpi 
+LDFLAGS += --target=armv6m-none-eabi
+LDFLAGS += -gdwarf-2  -gstrict-dwarf 
+LDFLAGS += -O3 -Os
+LDFLAGS += -I/usr/include
+LDFLAGS += -fomit-frame-pointer -momit-leaf-frame-pointer 
+LDFLAGS += -mno-movt
+LDFLAGS += -Wall 
+LDFLAGS += -mcpu=cortex-m0 -mthumb 
+LDFLAGS += -mtune=cortex-m0 -mlittle-endian 
+LDFLAGS += -fno-common -ffunction-sections -fdata-sections -fwhole-program
+LDFLAGS += -mno-unaligned-access
+LDFLAGS += -nostdlib -nodefaultlibs #-nostartfiles
+LDFLAGS += -L$(BOLOS_SDK)/lib/
+ifndef SCRIPT_LD
+  SCRIPT_LD:=$(BOLOS_SDK)/script.ld
+endif
+LDFLAGS += -T$(SCRIPT_LD) -Wl,--gc-sections -Wl,-Map,debug/app.map #,--cref
