@@ -151,22 +151,6 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   ' ', 0,
   'S', 0,
 };
-#elif defined(TARGET_ARAMIS)
-#ifndef HAVE_LEGACY_PID
-#define USBD_PID                      0x2000
-#else // HAVE_LEGACY_PID
-#define USBD_PID                      0x0002
-#endif // HAVE_LEGACY_PID
-static uint8_t const USBD_PRODUCT_FS_STRING[] = {
-  6*2+2,
-  USB_DESC_TYPE_STRING,
-  'A', 0,
-  'r', 0,
-  'a', 0,
-  'm', 0,
-  'i', 0,
-  's', 0,
-};
 #elif defined(TARGET_HW2)
 #ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x3000
@@ -1481,14 +1465,14 @@ uint8_t SC_ExecuteEscape (uint8_t* escapePtr, uint32_t escapeLen,
 #endif // HAVE_USB_CLASS_CCID
 
 void USB_power(unsigned char enabled) {
-  os_memset(&USBD_Device, 0, sizeof(USBD_Device));
+  memset(&USBD_Device, 0, sizeof(USBD_Device));
 
   // init timeouts and other global fields
-  os_memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
-  os_memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
+  memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
+  memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
 
   if (enabled) {
-    os_memset(&USBD_Device, 0, sizeof(USBD_Device));
+    memset(&USBD_Device, 0, sizeof(USBD_Device));
     /* Init Device Library */
     USBD_Init(&USBD_Device, (USBD_DescriptorsTypeDef*)&HID_Desc, 0);
     
@@ -1505,7 +1489,6 @@ void USB_power(unsigned char enabled) {
 
 #ifdef HAVE_WEBUSB
     USBD_RegisterClassForInterface(WEBUSB_INTF, &USBD_Device, (USBD_ClassTypeDef*)&USBD_WEBUSB);
-    USBD_LL_PrepareReceive(&USBD_Device, WEBUSB_EPOUT_ADDR , WEBUSB_EPOUT_SIZE);
 #endif // HAVE_WEBUSB
 
     /* Start Device Process */

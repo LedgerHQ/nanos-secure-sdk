@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 ********************************************************************************/
 
 #include "ux.h"
+#include "os_utils.h"
 
 #ifdef HAVE_UX_FLOW
+
+#include <string.h>
 
 const bagl_element_t ux_layout_pb_elements[] = {
 #ifdef TARGET_NANOX
@@ -56,7 +59,7 @@ const bagl_element_t* ux_layout_pb_prepro(const bagl_element_t* element) {
   const ux_layout_pb_params_t* params = (const ux_layout_pb_params_t*)ux_stack_get_current_step_params();
 
 	// copy element before any mod
-	os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+	memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   // for dashboard, setup the current application's name
   switch (element->component.userid) {

@@ -27,7 +27,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "os.h"
+#include "os_pic.h"
 #include "usbd_core.h"
+#include "usbd_ioreq.h"
 
 /** @addtogroup STM32_USBD_DEVICE_LIBRARY
 * @{
@@ -338,7 +340,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
       if(pep->rem_length > pep->maxpacket)
       {
         pep->rem_length -=  pep->maxpacket;
-        pdev->pData += pep->maxpacket;
+        pdev->pData = (uint8_t *)pdev->pData + pep->maxpacket;
        
         /* Prepare endpoint for premature end of transfer */
         /*
@@ -348,7 +350,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev ,uint8_t epnum, 
         */
         
         USBD_CtlContinueSendData (pdev, 
-                                  pdev->pData, 
+                                  (uint8_t *)pdev->pData,
                                   pep->rem_length);
         
       }

@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 ********************************************************************************/
 
 #include "ux.h"
+#include "os_helpers.h"
+#include "os_pic.h"
 
-#include "string.h"
+#include <string.h>
 
 #ifdef HAVE_UX_FLOW
 
@@ -256,15 +258,15 @@ void ux_flow_error(unsigned int error) {
 /** 
  * Last step is marked with a FLOW_END_STEP value
  */
-#define FLOW_END_STEP ((void*)0xFFFFFFFFUL)
-#define FLOW_BARRIER  ((void*)0xFFFFFFFEUL)
-#define FLOW_START    ((void*)0xFFFFFFFDUL)
+#define FLOW_END_STEP ((const ux_flow_step_t *)0xFFFFFFFFUL)
+#define FLOW_BARRIER  ((const ux_flow_step_t *)0xFFFFFFFEUL)
+#define FLOW_START    ((const ux_flow_step_t *)0xFFFFFFFDUL)
 void ux_flow_init(unsigned int stack_slot, const ux_flow_step_t* const * steps, const ux_flow_step_t* const start_step) {
 	G_ux.flow_stack[stack_slot].length = G_ux.flow_stack[stack_slot].prev_index = G_ux.flow_stack[stack_slot].index = 0;
 	G_ux.flow_stack[stack_slot].steps = NULL;
 	
 	// reset paging to avoid troubles if first step is a paginated step
-	os_memset(&G_ux.layout_paging, 0, sizeof(G_ux.layout_paging));
+	memset(&G_ux.layout_paging, 0, sizeof(G_ux.layout_paging));
 
 	if (steps) {
 		G_ux.flow_stack[stack_slot].steps = STEPSPIC(steps);
@@ -286,7 +288,9 @@ void ux_flow_init(unsigned int stack_slot, const ux_flow_step_t* const * steps, 
 }
 
 void ux_flow_uninit(unsigned int stack_slot) {
-	memset(&G_ux.flow_stack[stack_slot], 0, sizeof(G_ux.flow_stack[stack_slot]));
+  if (stack_slot < UX_STACK_SLOT_COUNT) {
+    memset(&G_ux.flow_stack[stack_slot], 0, sizeof(G_ux.flow_stack[stack_slot]));
+  }
 }
 
 unsigned int ux_flow_button_callback(unsigned int button_mask, unsigned int button_mask_counter) {

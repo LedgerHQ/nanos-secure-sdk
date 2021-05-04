@@ -29,10 +29,10 @@ GLYPH_DESTC := $(GLYPH_SRC_DIR)/glyphs.c
 GLYPH_DESTH := $(GLYPH_SRC_DIR)/glyphs.h
 ICON_SCRIPT := $(BOLOS_SDK)/icon3.py
 $(GLYPH_DESTH): $(GLYPH_FILES) $(ICON_SCRIPT)
-	$(call log,echo [GLYPH] Compiling...)
-	$(call log,-mkdir -p $(GLYPH_SRC_DIR))
-	$(call log,rm $(GLYPH_DESTC) $(GLYPH_DESTH) 2>/dev/null ; touch $(GLYPH_DESTH) $(GLYPH_DESTC))
-	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then python3 $(ICON_SCRIPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH) ; fi)
-	$(call log,if [ ! -z "$(GLYPH_FILES)" ] ; then python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES) > $(GLYPH_DESTC) ; fi)
+	$(L)echo [GLYPH] Compiling...
+	$(L)-mkdir -p $(GLYPH_SRC_DIR)
+	$(L)rm $(GLYPH_DESTC) $(GLYPH_DESTH) 2>/dev/null ; touch $(GLYPH_DESTH) $(GLYPH_DESTC)
+	$(L)if [ ! -z "$(GLYPH_FILES)" ] ; then python3 $(ICON_SCRIPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH) ; fi
+	$(L)if [ ! -z "$(GLYPH_FILES)" ] ; then python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES) > $(GLYPH_DESTC) ; fi
 #add dependency for generation
 $(GLYPH_DESTC): $(GLYPH_DESTH)

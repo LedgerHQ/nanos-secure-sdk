@@ -212,14 +212,15 @@ uint8_t  USBD_HID_Init (USBD_HandleTypeDef *pdev,
 uint8_t  USBD_HID_DeInit (USBD_HandleTypeDef *pdev, 
                                  uint8_t cfgidx)
 {
+  UNUSED(pdev);
   UNUSED(cfgidx);
-  /* Close HID EP IN */
-  USBD_LL_CloseEP(pdev,
-                  HID_EPIN_ADDR);
+  // /* Close HID EP IN */
+  // USBD_LL_CloseEP(pdev,
+  //                 HID_EPIN_ADDR);
   
-  /* Close HID EP OUT */
-  USBD_LL_CloseEP(pdev,
-                  HID_EPOUT_ADDR);
+  // /* Close HID EP OUT */
+  // USBD_LL_CloseEP(pdev,
+  //                 HID_EPOUT_ADDR);
   
   return USBD_OK;
 }
