@@ -8,24 +8,15 @@
 // error type definition
 typedef unsigned short exception_t;
 
-#if defined(ST31)
-//#include <setjmp.h>
-// GCC/LLVM declare way too big jmp context, reduce them to what is used on CM0+
 typedef struct try_context_s try_context_t;
 
+#if (defined(ST31) || defined(ST33) || defined(STM32)) && defined(__arm__)
+//#include <setjmp.h>
+// GCC/LLVM declare way too big jmp context, reduce them to what is used on CM0+
+
+// jmp context to backup (in increasing order address: r4, r5, r6, r7, r8, r9,
+// r10, r11, SP, setjmpcallPC)
 typedef unsigned int jmp_buf[10];
-
-struct try_context_s {
-  // jmp context to backup (in increasing order address: r4, r5, r6, r7, r8, r9,
-  // r10, r11, SP, setjmpcallPC)
-  jmp_buf jmp_buf;
-
-  // link to the previous jmp_buf context
-  try_context_t *previous;
-
-  // current exception
-  exception_t ex;
-};
 
 // borrowed from setjmp.h
 
@@ -35,33 +26,19 @@ void longjmp(jmp_buf __jmpb, int __retval) __attribute__((__noreturn__));
 void longjmp(jmp_buf __jmpb, int __retval);
 #endif
 int setjmp(jmp_buf __jmpb);
-#endif // ST31
+#else
+#include <setjmp.h>
+#endif
 
-#if defined(ST33)
-//#include <setjmp.h>
-// GCC/LLVM declare way too big jmp context, reduce them to what is used on CM0+
-typedef struct try_context_s try_context_t;
-typedef unsigned int jmp_buf[10];
 struct try_context_s {
-  // jmp context to backup (in increasing order address: r4, r5, r6, r7, r8, r9,
-  // r10, r11, SP, setjmpcallPC)
   jmp_buf jmp_buf;
 
   // link to the previous jmp_buf context
   try_context_t *previous;
+
   // current exception
   exception_t ex;
 };
-
-// borrowed from setjmp.hm0
-
-#ifdef __GNUC__
-void longjmp(jmp_buf __jmpb, int __retval) __attribute__((__noreturn__));
-#else
-void longjmp(jmp_buf __jmpb, int __retval);
-#endif
-int setjmp(jmp_buf __jmpb);
-#endif // ST33
 
 // workaround to make sure defines are replaced by their value for example
 #define CPP_CONCAT(x, y) CPP_CONCAT_x(x, y)
