@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -186,6 +186,7 @@ typedef enum {
 #define BAGL_FONT_SYMBOLS_0_MINIRIGHT "\x84"
 #define BAGL_FONT_SYMBOLS_0_DASHBOARD "\x85"
 #define BAGL_FONT_SYMBOLS_0_SETTINGS "\x86"
+#define BAGL_FONT_SYMBOLS_0_EXIT "\x87"
 #define BAGL_FONT_SYMBOLS_1_CARET "\xA0"
 
 // --------------------------------------------------------------------------------------

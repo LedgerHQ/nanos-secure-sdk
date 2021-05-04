@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ const bagl_element_t* ux_layout_pnn_prepro(const bagl_element_t* element) {
   const ux_layout_pnn_params_t* params = (const ux_layout_pnn_params_t*)ux_stack_get_current_step_params();
 
 	// ocpy element before any mod
-	os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+	memcpy(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   // for dashboard, setup the current application's name
   switch (element->component.userid) {
@@ -90,7 +90,12 @@ const bagl_element_t* ux_layout_pnn_prepro(const bagl_element_t* element) {
   */
   const bagl_element_t* e = ux_layout_pbb_prepro(element);
   if (e && G_ux.tmp_element.component.userid >= 0x10) {
+    // The centering depends on the target.
+#if defined(TARGET_NANOX)
+    G_ux.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER;
+#else
     G_ux.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_REGULAR_11px;
+#endif // TARGET_NANOX
   }
   return e;
 }

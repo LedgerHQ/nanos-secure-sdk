@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,6 +17,11 @@
 ********************************************************************************/
 
 #include "ux.h"
+#include "os_helpers.h"
+#include "os_pic.h"
+#include "os_pin.h"
+#include "os_io_seproxyhal.h"
+#include <string.h>
 
 #ifdef HAVE_UX_LEGACY
 ux_menu_state_t ux_menu;
@@ -56,10 +61,14 @@ const ux_menu_entry_t* ux_menu_get_entry (unsigned int entry_idx) {
 
 const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element) {
   //todo avoid center alignment when text_x or icon_x AND text_x are not 0
-  os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+  memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   // ask the current entry first, to setup other entries
   const ux_menu_entry_t* current_entry = (const ux_menu_entry_t*)PIC(ux_menu_get_entry(ux_menu.current_entry));
+  if (current_entry == NULL) {
+    return NULL;
+  }
+  const bagl_icon_details_t* current_entry_icon = (const bagl_icon_details_t*)PIC(current_entry->icon);
 
   const ux_menu_entry_t* previous_entry = NULL;
   if (ux_menu.current_entry) {
@@ -83,8 +92,7 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
       break;
     // previous setting name
     case 0x41:
-      if (!current_entry
-        || current_entry->line2 != NULL 
+      if (current_entry->line2 != NULL
         || current_entry->icon != NULL
         || ux_menu.current_entry == 0
         || ux_menu.menu_entries_count == 1 
@@ -97,8 +105,7 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
       break;
     // next setting name
     case 0x42:
-      if (!current_entry
-        || current_entry->line2 != NULL 
+      if (current_entry->line2 != NULL
         || current_entry->icon != NULL
         || ux_menu.current_entry == ux_menu.menu_entries_count-1
         || ux_menu.menu_entries_count == 1
@@ -109,7 +116,7 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
       G_ux.tmp_element.text = next_entry->line1;
       break;
     case 0x10:
-      if (!current_entry || current_entry->icon == NULL) {
+      if (current_entry->icon == NULL) {
         return NULL;
       }
       G_ux.tmp_element.text = (const char*)current_entry->icon;
@@ -118,24 +125,28 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
       }
       break;
     case 0x20:
-      if (!current_entry || current_entry->line2 != NULL) {
+      if (current_entry->line2 != NULL) {
         return NULL;
       }
       G_ux.tmp_element.text = current_entry->line1;
       goto adjust_text_x;
     case 0x21:
-      if (!current_entry || current_entry->line2 == NULL) {
+      if (current_entry->line2 == NULL) {
         return NULL;
       }
       G_ux.tmp_element.text = current_entry->line1;
       goto adjust_text_x;
     case 0x22:
-      if (!current_entry || current_entry->line2 == NULL) {
+      if (current_entry->line2 == NULL) {
         return NULL;
       }
       G_ux.tmp_element.text = current_entry->line2;
     adjust_text_x:
-      if (current_entry && current_entry->text_x) {
+      if (current_entry_icon) {
+        G_ux.tmp_element.component.x += current_entry_icon->width;
+        G_ux.tmp_element.component.width -= current_entry_icon->width;
+      }
+      if (current_entry->text_x) {
         G_ux.tmp_element.component.x = current_entry->text_x;
         // discard the 'center' flag
         G_ux.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_EXTRABOLD_11px;
@@ -155,6 +166,9 @@ unsigned int ux_menu_elements_button (unsigned int button_mask, unsigned int but
   UNUSED(button_mask_counter);
 
   const ux_menu_entry_t* current_entry = (const ux_menu_entry_t*)PIC(ux_menu_get_entry(ux_menu.current_entry));
+  if (current_entry == NULL) {
+    return 1;
+  }
 
   switch (button_mask) {
     // enter menu or exit menu
@@ -210,7 +224,7 @@ void ux_menu_display(unsigned int current_entry,
   // count entries
   if (menu_entries) {
     for(;;) {
-      if (os_memcmp(&menu_entries[ux_menu.menu_entries_count], &UX_MENU_END_ENTRY, sizeof(ux_menu_entry_t)) == 0) {
+      if (memcmp(&menu_entries[ux_menu.menu_entries_count], &UX_MENU_END_ENTRY, sizeof(ux_menu_entry_t)) == 0) {
         break;
       }
       ux_menu.menu_entries_count++;
@@ -268,7 +282,7 @@ const bagl_element_t ux_turner_elements[] = {
 
 const bagl_element_t* ux_turner_element_preprocessor(const bagl_element_t* element) {
   //todo avoid center alignment when text_x or icon_x AND text_x are not 0
-  os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+  memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   switch(element->component.userid) {
 
@@ -385,14 +399,23 @@ void ux_turner_display(unsigned int current_step,
 
 #endif // HAVE_UX_LEGACY
 
-const bagl_element_t clear_element = {{BAGL_RECTANGLE, 0, 0, 0, 128, 32, 0, 0, 0, 0x000000, 0x000000, 0 , 0},NULL};
-const bagl_element_t printf_element = {{BAGL_LABELINE, 0, 0, 9, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000, 
+const bagl_element_t clear_element = {{BAGL_RECTANGLE, 0, 0, 0, 128, 32, 0, 0, 0, 0x000000, 0x000000, 0 , 0},NULL
+#ifdef TARGET_BLUE
+  , 0, 0, 0, NULL, NULL, NULL
+#endif // TARGET_BLUE
+};
+
+const bagl_element_t printf_element = {{BAGL_LABELINE, 0, 0, 9, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000,
 #ifdef TARGET_NANOS
   BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER |BAGL_FONT_ALIGNMENT_MIDDLE
 #else // TARGET_NANOS
   BAGL_FONT_OPEN_SANS_REGULAR_8_11PX
 #endif // TARGET_NANOS
-  , 0},"Default printf"};
+  , 0},"Default printf"
+#ifdef TARGET_BLUE
+  , 0, 0, 0, NULL, NULL, NULL
+#endif // TARGET_BLUE
+  };
 
 void debug_wait_displayed(void) {
   // wait next event (probably a ticker, if not, too bad... this is debug !!)
@@ -407,7 +430,7 @@ void debug_printf(void* buffer) {
   io_seproxyhal_display_default(&clear_element);
   debug_wait_displayed();
 #endif // TARGET_NANOS
-  os_memmove(&G_ux.tmp_element, &printf_element, sizeof(bagl_element_t));
+  memmove(&G_ux.tmp_element, &printf_element, sizeof(bagl_element_t));
   G_ux.tmp_element.text = buffer;
   io_seproxyhal_display_default(&G_ux.tmp_element);
   debug_wait_displayed();

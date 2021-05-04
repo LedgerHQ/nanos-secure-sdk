@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2020 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,29 +16,41 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#if !defined(HAVE_BOLOS)
+#if !defined(HAVE_BOLOS) && defined(HAVE_PENDING_REVIEW_SCREEN)
 
-#include "os.h"
+#include "bolos_target.h"
+#include "checks.h"
+#include "os_helpers.h"
+#include "os_pin.h"
+#include "os_io_seproxyhal.h"
+#include "os_screen.h"
 #include "ux.h"
 #include "ux_layouts.h"
-#include "checks.h"
 
 // This label ultimately comes from the application link.
 extern unsigned int const _install_parameters;
 
 // This function is the button callback associated with the 'ui_audited_elements' array below.
-static unsigned int ui_audited_elements_button(unsigned int button_mask, unsigned int button_mask_counter) {
+static unsigned int ui_audited_elements_button(unsigned int button_mask, unsigned int button_mask_counter __attribute__((unused))) {
+  unsigned int slot;
 
   // As soon as the user presses both buttons, we reinitialize the UX and buttons,
   // and the hand is given back to the normal process.
   if ((button_mask & (BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT)) == (BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT)) {
-    G_ux.stack[0].button_push_callback = NULL;
+    // We find the correct slot.
+    for (slot = 0x00; slot < G_ux.stack_count; slot++) {
+      if (G_ux.stack[slot].button_push_callback == ui_audited_elements_button) {
+        G_ux.stack[slot].button_push_callback = NULL;
+        break;
+      }
+    }
   }
   return 0;
 }
 
 // This array is to be displayed under specific circumstances, right at the launch of an application.
 const bagl_element_t ui_audited_elements[] = {
+#if defined(TARGET_NANOS)
   // Erasure of the whole screen,
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
   // First line of text,
@@ -51,8 +63,26 @@ const bagl_element_t ui_audited_elements[] = {
   {
     {BAGL_LABELINE, 0x01, 0, 24, 128, 32, 0, 0, 0, 0xFFFFFF, 0x000000,
       BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
-    "Ledger review",
+      "Ledger review",
   },
+#elif defined(TARGET_NANOX)
+  // Erasure of the whole screen,
+  {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
+  // Warning icon.
+  {{BAGL_ICON                           , 0x02,  57,  10,  14,  14, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, &C_icon_warning},
+  // First line of text,
+  {
+    {BAGL_LABELINE, 0x01, 0, 37, 128, 11, 10, 0, 0, 0xFFFFFF, 0x000000,
+      BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
+      "Pending",
+    },
+  // Last line of text.
+  {
+    {BAGL_LABELINE, 0x01, 0, 51, 128, 11, 10, 0, 0, 0xFFFFFF, 0x000000,
+      BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
+      "Ledger review",
+  },
+#endif // TARGET_NANOS / TARGET_NANOX
 };
 
 // This function is called at the end of the seph initialization.
@@ -62,6 +92,7 @@ const bagl_element_t ui_audited_elements[] = {
 void check_audited_app(void) {
   unsigned char     data = BOLOS_FALSE;
   unsigned char*    buffer = &data;
+  unsigned int      slot;
   unsigned int      length = os_parse_bertlv((unsigned char*)(&_install_parameters),
                                              CHECK_NOT_AUDITED_MAX_LEN,
                                              NULL,
@@ -76,22 +107,27 @@ void check_audited_app(void) {
       && (CHECK_NOT_AUDITED_TLV_VAL == data))
   {
     // We reserve the first slot for this display.
-    ux_stack_push();
-    ux_stack_init(0);
+    slot = ux_stack_push();
+    ux_stack_init(slot);
 
     // We trigger the additional display and wait for it to be completed.
-    UX_DISPLAY(ui_audited_elements, NULL);
+    G_ux.stack[slot].element_arrays[0].element_array = ui_audited_elements;
+    G_ux.stack[slot].element_arrays[0].element_array_count = sizeof(ui_audited_elements) / sizeof(ui_audited_elements[0]);
+    G_ux.stack[slot].button_push_callback = ui_audited_elements_button;
+    G_ux.stack[slot].screen_before_element_display_callback = NULL;
+    UX_WAKE_UP();
+    UX_DISPLAY_NEXT_ELEMENT();
     UX_WAIT_DISPLAYED();
 
     io_seproxyhal_general_status();
 
-    // We wait for the button callback pointer to wiped, and we process the incoming MCU events in the
+    // We wait for the button callback pointer to be wiped, and we process the incoming MCU events in the
     // meantime. This callback will be wiped within the actual 'ui_audited_elements_button' function,
     // as soon as the user presses both buttons.
     do {
       io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
       io_seproxyhal_handle_event();
-    } while (io_seproxyhal_spi_is_status_sent() && G_ux.stack[0].button_push_callback);
+    } while (io_seproxyhal_spi_is_status_sent() && G_ux.stack[slot].button_push_callback);
 
     // We pop the reserved slot but we do not care about the returned value (since we do not need it for
     // further displays at the moment) and reinitialize the UX and buttons.
@@ -104,4 +140,4 @@ void check_audited_app(void) {
   }
 }
 
-#endif // !defined(HAVE_BOLOS)
+#endif // !defined(HAVE_BOLOS)  && defined(HAVE_PENDING_REVIEW_SCREEN)

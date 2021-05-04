@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,7 +17,13 @@
 ********************************************************************************/
 
 #include "ux.h"
-#include "string.h"
+#include "os_pin.h"
+#include "os_seed.h"
+#include "os_screen.h"
+#include "os_types.h"
+#include "os_utils.h"
+#include "os_io_seproxyhal.h"
+#include <string.h>
 
 // return true (stack slot +1) if an element 
 unsigned int ux_stack_is_element_array_present(const bagl_element_t* element_array) {
@@ -35,9 +41,9 @@ unsigned int ux_stack_is_element_array_present(const bagl_element_t* element_arr
 unsigned int ux_stack_push(void) {
   // only push if an available slot exists
   if (G_ux.stack_count < ARRAYLEN(G_ux.stack)) {
-    os_memset(&G_ux.stack[G_ux.stack_count], 0, sizeof(G_ux.stack[0]));
+    memset(&G_ux.stack[G_ux.stack_count], 0, sizeof(G_ux.stack[0]));
 #ifdef HAVE_UX_FLOW
-    os_memset(&G_ux.flow_stack[G_ux.stack_count], 0, sizeof(G_ux.flow_stack[0]));
+    memset(&G_ux.flow_stack[G_ux.stack_count], 0, sizeof(G_ux.flow_stack[0]));
 #endif // HAVE_UX_FLOW
     G_ux.stack_count++;
   }
@@ -49,12 +55,14 @@ unsigned int ux_stack_pop(void) {
   // only pop if more than two stack entry (0 and 1,top is an index not a count)
   if (G_ux.stack_count > 0) {
     G_ux.stack_count--;
-    exit_code = G_ux.stack[G_ux.stack_count].exit_code_after_elements_displayed;
-    // wipe popped slot
-    os_memset(&G_ux.stack[G_ux.stack_count], 0, sizeof(G_ux.stack[0]));
+    if (G_ux.stack_count < UX_STACK_SLOT_COUNT) {
+      exit_code = G_ux.stack[G_ux.stack_count].exit_code_after_elements_displayed;
+      // wipe popped slot
+      memset(&G_ux.stack[G_ux.stack_count], 0, sizeof(G_ux.stack[0]));
 #ifdef HAVE_UX_FLOW
-    os_memset(&G_ux.flow_stack[G_ux.stack_count], 0, sizeof(G_ux.flow_stack[0]));
+      memset(&G_ux.flow_stack[G_ux.stack_count], 0, sizeof(G_ux.flow_stack[0]));
 #endif // HAVE_UX_FLOW
+    }
   }
 
   // prepare output code when popping the last stack screen
@@ -100,9 +108,9 @@ void ux_stack_insert(unsigned int stack_slot) {
 
     // if not inserting as top of stack, then perform move
     if (stack_slot != ARRAYLEN(G_ux.stack)-1) {
-      os_memmove(&G_ux.stack[stack_slot+1], &G_ux.stack[stack_slot], (ARRAYLEN(G_ux.stack)-(stack_slot+1))*sizeof(G_ux.stack[0]));
+      memmove(&G_ux.stack[stack_slot+1], &G_ux.stack[stack_slot], (ARRAYLEN(G_ux.stack)-(stack_slot+1))*sizeof(G_ux.stack[0]));
 #ifdef HAVE_UX_FLOW
-      os_memmove(&G_ux.flow_stack[stack_slot+1], &G_ux.flow_stack[stack_slot], (ARRAYLEN(G_ux.flow_stack)-(stack_slot+1))*sizeof(G_ux.flow_stack[0]));
+      memmove(&G_ux.flow_stack[stack_slot+1], &G_ux.flow_stack[stack_slot], (ARRAYLEN(G_ux.flow_stack)-(stack_slot+1))*sizeof(G_ux.flow_stack[0]));
 #endif // HAVE_UX_FLOW
     }
     memset(&G_ux.stack[stack_slot], 0, sizeof(ux_stack_slot_t));
@@ -130,10 +138,10 @@ void ux_stack_remove(unsigned int stack_slot) {
   // after:  | screenz | other screenz |
 
   if (stack_slot != ARRAYLEN(G_ux.stack)-1) {
-    os_memmove(&G_ux.stack[stack_slot], &G_ux.stack[stack_slot+1], (ARRAYLEN(G_ux.stack)-(stack_slot+1))*sizeof(G_ux.stack[0]));
+    memmove(&G_ux.stack[stack_slot], &G_ux.stack[stack_slot+1], (ARRAYLEN(G_ux.stack)-(stack_slot+1))*sizeof(G_ux.stack[0]));
 #ifdef HAVE_UX_FLOW
     // also move the flow attached to the popped screen
-    os_memmove(&G_ux.flow_stack[stack_slot], &G_ux.flow_stack[stack_slot+1], (ARRAYLEN(G_ux.flow_stack)-(stack_slot+1))*sizeof(G_ux.flow_stack[0]));
+    memmove(&G_ux.flow_stack[stack_slot], &G_ux.flow_stack[stack_slot+1], (ARRAYLEN(G_ux.flow_stack)-(stack_slot+1))*sizeof(G_ux.flow_stack[0]));
 #endif // HAVE_UX_FLOW
   }
 
@@ -152,12 +160,26 @@ void ux_stack_init(unsigned int stack_slot) {
     reset();
   }
   */
-
-  // wipe the slot to be displayed just in case
-  os_memset(&G_ux.stack[stack_slot], 0, sizeof(G_ux.stack[0]));
+ 
+  if (stack_slot < UX_STACK_SLOT_COUNT) {
+#ifdef HAVE_UX_STACK_INIT_KEEP_TICKER
+    callback_int_t ticker_callback = G_ux.stack[stack_slot].ticker_callback;
+    unsigned int ticker_value = G_ux.stack[stack_slot].ticker_value;
+    unsigned int ticker_interval = G_ux.stack[stack_slot].ticker_interval;
+#endif // HAVE_UX_STACK_INIT_KEEP_TICKER  
   
-  // init current screen state
-  G_ux.stack[stack_slot].exit_code_after_elements_displayed = BOLOS_UX_CONTINUE;
+    // wipe the slot to be displayed just in case
+    memset(&G_ux.stack[stack_slot], 0, sizeof(G_ux.stack[0]));
+
+#ifdef HAVE_UX_STACK_INIT_KEEP_TICKER
+    G_ux.stack[stack_slot].ticker_callback = ticker_callback;
+    G_ux.stack[stack_slot].ticker_value = ticker_value;
+    G_ux.stack[stack_slot].ticker_interval = ticker_interval;
+#endif // HAVE_UX_STACK_INIT_KEEP_TICKER
+
+    // init current screen state
+    G_ux.stack[stack_slot].exit_code_after_elements_displayed = BOLOS_UX_CONTINUE;
+  }
 }
 
 // check to process keyboard callback before screen generic callback

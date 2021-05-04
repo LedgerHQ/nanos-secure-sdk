@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include "u2f_processing.h"
 #include "u2f_io.h"
 
+#include "lcx_crc.h"
 #include "os.h"
 #include "os_io_seproxyhal.h"
 
@@ -34,7 +35,9 @@
 static const uint8_t BROADCAST_CHANNEL[] = {0xff, 0xff, 0xff, 0xff};
 static const uint8_t FORBIDDEN_CHANNEL[] = {0x00, 0x00, 0x00, 0x00};
 
-#warning TODO take into account the INIT during SEGMENTED message correctly (avoid erasing the first part of the apdu buffer when doing so)
+/* TODO: take into account the INIT during SEGMENTED message correctly.
+ * Avoid erasing the first part of the apdu buffer when doing so)
+ */
 
 // init
 void u2f_transport_reset(u2f_service_t* service) {
@@ -55,6 +58,7 @@ void u2f_transport_reset(u2f_service_t* service) {
  * Initialize the u2f transport and provide the buffer into which to store incoming message
  */
 void u2f_transport_init(u2f_service_t *service, uint8_t* message_buffer, uint16_t message_buffer_length) {
+    service->next_channel = 1;
     service->transportReceiveBuffer = message_buffer;
     service->transportReceiveBufferLength = message_buffer_length;
     u2f_transport_reset(service);
@@ -117,7 +121,7 @@ void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
         uint16_t offset = 0;
         // Fragment
         if (media == U2F_MEDIA_USB) {
-            os_memmove(G_io_usb_ep_buffer, service->channel, 4);
+            memcpy(G_io_usb_ep_buffer, service->channel, 4);
             offset += 4;
         }
         if (service->transportPacketIndex == 0) {
@@ -128,7 +132,7 @@ void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
             G_io_usb_ep_buffer[offset++] = (service->transportPacketIndex - 1);
         }
         if (service->transportBuffer != NULL) {
-            os_memmove(G_io_usb_ep_buffer + headerSize,
+            memmove(G_io_usb_ep_buffer + headerSize,
                        service->transportBuffer + service->transportOffset, blockSize);
         }
         service->transportOffset += blockSize;
@@ -146,7 +150,7 @@ void u2f_transport_sent(u2f_service_t* service, u2f_transport_media_t media) {
 void u2f_transport_send_usb_user_presence_required(u2f_service_t *service) {
     uint16_t offset = 0;
     service->sending = true;
-    os_memmove(G_io_usb_ep_buffer, service->channel, 4);
+    memcpy(G_io_usb_ep_buffer, service->channel, 4);
     offset += 4;
     G_io_usb_ep_buffer[offset++] = U2F_CMD_MSG;
     G_io_usb_ep_buffer[offset++] = 0;
@@ -159,13 +163,30 @@ void u2f_transport_send_usb_user_presence_required(u2f_service_t *service) {
 void u2f_transport_send_wink(u2f_service_t *service) {
     uint16_t offset = 0;
     service->sending = true;
-    os_memmove(G_io_usb_ep_buffer, service->channel, 4);
+    memcpy(G_io_usb_ep_buffer, service->channel, 4);
     offset += 4;
     G_io_usb_ep_buffer[offset++] = U2F_CMD_WINK;
     G_io_usb_ep_buffer[offset++] = 0;
     G_io_usb_ep_buffer[offset++] = 0;
     u2f_io_send(G_io_usb_ep_buffer, offset, U2F_MEDIA_USB);
 }
+
+
+#ifdef HAVE_FIDO2
+
+void u2f_transport_ctap2_send_keepalive(u2f_service_t *service, uint8_t reason) {
+    uint16_t offset = 0;
+    service->sending = true;
+    memcpy(G_io_usb_ep_buffer, service->channel, 4);
+    offset += 4;
+    G_io_usb_ep_buffer[offset++] = CTAP2_STATUS_KEEPALIVE;
+    G_io_usb_ep_buffer[offset++] = 0;
+    G_io_usb_ep_buffer[offset++] = 1;
+    G_io_usb_ep_buffer[offset++] = reason;
+    u2f_io_send(G_io_usb_ep_buffer, offset, U2F_MEDIA_USB);
+}
+
+#endif
 
 bool u2f_transport_receive_fakeChannel(u2f_service_t *service, uint8_t *buffer, uint16_t size) {
     if (service->fakeChannelTransportState == U2F_INTERNAL_ERROR) {
@@ -233,12 +254,15 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
     uint16_t xfer_len;
     service->media = media;
 
+    //PRINTF("recv %d %d %d %d %d\n", size, service->waitAsynchronousResponse, service->transportState, service->transportOffset, buffer[4]);
+
     // Handle a busy channel and avoid reentry
     if (service->transportState == U2F_SENDING_RESPONSE) {
         u2f_transport_error(service, ERROR_CHANNEL_BUSY);
         goto error;
     }
     if (service->waitAsynchronousResponse != U2F_WAIT_ASYNCH_IDLE) {
+        // TODO : this is an error for FIDO 2
         if (!u2f_transport_receive_fakeChannel(service, buffer, size)) {
             u2f_transport_error(service, ERROR_CHANNEL_BUSY);
             goto error;
@@ -258,13 +282,34 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
     }
     if (media == U2F_MEDIA_USB) {
         // hold the current channel value to reply to, for example, INIT commands within flow of segments.
-        os_memmove(service->channel, buffer, 4);
+        memcpy(service->channel, buffer, 4);
     }
+
+#ifdef HAVE_FIDO2
+
+    // Handle a cancel request if received 
+
+    if ((buffer[channelHeader] == CTAP2_CMD_CANCEL) && 
+        (((media == U2F_MEDIA_USB) && (memcmp(service->transportChannel, service->channel, 4) == 0)) ||
+        (media != U2F_MEDIA_USB))) {
+        // Drop the cancel request if there's no command to be processed, otherwise pass it to the upper layer immediately
+        if (service->transportState != U2F_PROCESSING_COMMAND) {
+            return; 
+        }
+        uint16_t commandLength = U2BE(buffer, channelHeader + 1);
+        ctap2_handle_cmd_cancel(service, buffer + channelHeader + 1 + 2, commandLength);
+        return;
+    }
+
+#endif    
+
 
     // no previous chunk processed for the current message
     if (service->transportOffset == 0
         // on USB we could get an INIT within a flow of segments.
-        || (media == U2F_MEDIA_USB && os_memcmp(service->transportChannel, service->channel, 4) != 0) ) {
+        || (media == U2F_MEDIA_USB && memcmp(service->transportChannel, service->channel, 4) != 0)
+        // CTAP2 transport test (HID-1)
+        || (buffer[channelHeader] == U2F_CMD_INIT)) {
         if (size < (channelHeader + 3)) {
             // Message to short, abort
             u2f_transport_error(service, ERROR_PROP_MESSAGE_TOO_SHORT);
@@ -273,7 +318,8 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         // check this is a command, cannot accept continuation without previous command
         if ((buffer[channelHeader+0]&U2F_MASK_COMMAND) == 0) {
             // Not a command packet, abort
-            u2f_transport_error(service, ERROR_INVALID_SEQ);
+	    // CTAP2 transport test : do not send back an error in this case (HID-1)
+            //u2f_transport_error(service, ERROR_INVALID_SEQ);
             goto error;
         }
 
@@ -281,7 +327,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         // immediately
         if (media == U2F_MEDIA_USB) {
             if ((service->transportState == U2F_HANDLE_SEGMENTED) &&
-                (os_memcmp(service->channel, service->transportChannel, 4) !=
+                (memcmp(service->channel, service->transportChannel, 4) !=
                  0) &&
                 (buffer[channelHeader] != U2F_CMD_INIT)) {
                 // special error case, we reply but don't change the current state of the transport (ongoing message for example)
@@ -289,7 +335,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
                 uint16_t offset = 0;
                 // Fragment
                 if (media == U2F_MEDIA_USB) {
-                    os_memmove(G_io_usb_ep_buffer, service->channel, 4);
+                    memcpy(G_io_usb_ep_buffer, service->channel, 4);
                     offset += 4;
                 }
                 G_io_usb_ep_buffer[offset++] = U2F_STATUS_ERROR;
@@ -320,6 +366,10 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         switch (buffer[channelHeader]) {
         case U2F_CMD_PING:
         case U2F_CMD_MSG:
+#ifdef HAVE_FIDO2
+        case CTAP2_CMD_CBOR:
+        case CTAP2_CMD_CANCEL:
+#endif                
             if (media == U2F_MEDIA_USB) {
                 if (u2f_is_channel_broadcast(service->channel) ||
                     u2f_is_channel_forbidden(service->channel)) {
@@ -352,7 +402,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         //if (buffer[channelHeader] != U2F_CMD_INIT) 
         {
             xfer_len = MIN(size - (channelHeader), U2F_COMMAND_HEADER_SIZE+commandLength);
-            os_memmove(service->transportBuffer, buffer + channelHeader, xfer_len);
+            memmove(service->transportBuffer, buffer + channelHeader, xfer_len);
             if (media == U2F_MEDIA_USB) {
                 service->commandCrc = cx_crc16_update(0, service->transportBuffer, xfer_len);
             }
@@ -361,7 +411,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
             service->transportMedia = media;
             // initialize the response
             service->transportPacketIndex = 0;
-            os_memmove(service->transportChannel, service->channel, 4);
+            memcpy(service->transportChannel, service->channel, 4);
         }
     } else {
         // Continuation
@@ -388,7 +438,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
         }
         if (media == U2F_MEDIA_USB) {
             // Check the channel
-            if (os_memcmp(buffer, service->channel, 4) != 0) {
+            if (memcmp(buffer, service->channel, 4) != 0) {
                 u2f_transport_error(service, ERROR_CHANNEL_BUSY);
                 goto error;
             }
@@ -400,7 +450,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
             goto error;
         }
         xfer_len = MIN(size - (channelHeader + 1), service->transportLength - service->transportOffset);
-        os_memmove(service->transportBuffer + service->transportOffset, buffer + channelHeader + 1, xfer_len);
+        memmove(service->transportBuffer + service->transportOffset, buffer + channelHeader + 1, xfer_len);
         if (media == U2F_MEDIA_USB) {
             service->commandCrc = cx_crc16_update(service->commandCrc, service->transportBuffer + service->transportOffset, xfer_len);
         }        
@@ -429,17 +479,19 @@ error:
 }
 
 bool u2f_is_channel_broadcast(uint8_t *channel) {
-    return (os_memcmp(channel, BROADCAST_CHANNEL, 4) == 0);
+    return (memcmp(channel, BROADCAST_CHANNEL, 4) == 0);
 }
 
 bool u2f_is_channel_forbidden(uint8_t *channel) {
-    return (os_memcmp(channel, FORBIDDEN_CHANNEL, 4) == 0);
+    return (memcmp(channel, FORBIDDEN_CHANNEL, 4) == 0);
 }
 
 /**
  * Auto reply hodl until the real reply is prepared and sent
  */
 void u2f_message_set_autoreply_wait_user_presence(u2f_service_t* service, bool enabled) {
+
+    // TODO : this only works for U2F
 
     if (enabled) {
         // start replying placeholder until user presence validated

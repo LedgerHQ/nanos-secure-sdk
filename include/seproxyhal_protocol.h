@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -49,7 +49,12 @@
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_MCUSEC 0x10000000UL
 #define SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_ISET_MCUBL 0x20000000UL
 
-#define SEPROXYHAL_TAG_BLE_PAIRING_ATTEMPT_EVENT 0x02
+#define SEPROXYHAL_TAG_BLE_SECURITY_DB_EVENT 0x02
+#define SEPROXYHAL_TAG_BLE_SECURITY_DB_LOADED_EVENT                            \
+  0x00 // the security db chunk has ben loaded into MCU's RAM, the SE can
+       // proceed with the next one
+#define SEPROXYHAL_TAG_BLE_SECURITY_DB_DUMP_EVENT                              \
+  0x01 // <off2BE> <data> content of the security db at given offset
 #define SEPROXYHAL_TAG_BLE_WRITE_REQUEST_EVENT 0x03
 #define SEPROXYHAL_TAG_BLE_READ_REQUEST_EVENT 0x04
 #define SEPROXYHAL_TAG_BUTTON_PUSH_EVENT 0x05
@@ -132,13 +137,21 @@
 #define SEPROXYHAL_TAG_BLE_RADIO_POWER 0x44 // <action(1byte)>
 #define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_ON 0x02
 #define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBWIPE 0x04
-#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBSAVE 0x08
-#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBLOAD 0x10
-#define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBFREE 0x20
+// #define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBSAVE 0x08
+// #define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBLOAD 0x10
+// #define SEPROXYHAL_TAG_BLE_RADIO_POWER_ACTION_DBFREE 0x20
 #define SEPROXYHAL_TAG_NFC_RADIO_POWER 0x45
 #define SEPROXYHAL_TAG_SE_POWER_OFF 0x46
 //#define SEPROXYHAL_TAG_SCREEN_POWER                0x47
-#define SEPROXYHAL_TAG_BLE_NOTIFY_INDICATE 0x48
+#define SEPROXYHAL_TAG_BLE_SECURITY_DB 0x48 // <cmd>
+// TODO use a pairing key between the SE and MCU to decrypt/encrypt the content
+// of the pairing DB.
+#define SEPROXYHAL_TAG_BLE_SECURITY_DB_CMD_READ                                \
+  0x01 // -noarg- request the content of the security db to be transmitted
+       // through SEPROXYHAL_TAG_BLE_SECURITY_DB_EVENT
+#define SEPROXYHAL_TAG_BLE_SECURITY_DB_CMD_WRITE                               \
+  0x02 // <off2BE> <data> request to write a chunk of the security db at the
+       // given offset
 #define SEPROXYHAL_TAG_BATTERY_CHARGE 0x49 // <>
 //#define SEPROXYHAL_TAG_SCREEN_DISPLAY              0x4A // wait for
 //display_event after sent
