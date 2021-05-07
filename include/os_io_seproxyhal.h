@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -19,12 +19,20 @@
 #ifndef OS_IO_SEPROXYHAL_H
 #define OS_IO_SEPROXYHAL_H
 
-#include "os.h"
+#if defined(HAVE_BOLOS)
+#include "bolos_privileged_ux.h"
+#endif // HAVE_BOLOS
+
+#include "bolos_target.h"
+#include "decorators.h"
+#include "os_io.h"
+#include "os_print.h"
+#include "os_types.h"
+#include "os_ux.h"
 
 #ifdef OS_IO_SEPROXYHAL
 
 #include "seproxyhal_protocol.h"
-#include "ux.h"
 
 // helper macro to swap values, without intermediate value
 #define SWAP(a, b)                                                             \
@@ -83,10 +91,14 @@ unsigned char io_event(unsigned char channel);
 #ifdef HAVE_BLE
 void BLE_power(unsigned char powered, const char *discovered_name);
 
-void io_hal_ble_wipe_pairing_db(void);
+void io_ble_wipe_pairing_db(void);
 #endif // HAVE_BLE
 
+#ifdef __cplusplus
+extern "C" void USB_power(unsigned char enabled);
+#else
 void USB_power(unsigned char enabled);
+#endif
 
 void io_seproxyhal_handle_usb_event(void);
 void io_seproxyhal_handle_usb_ep_xfer_event(void);
@@ -202,21 +214,11 @@ extern u2f_service_t G_io_u2f;
  *     050002359000
  */
 
-// avoid typing the size each time
-#define SPRINTF(strbuf, ...) snprintf(strbuf, sizeof(strbuf), __VA_ARGS__)
-
-#define ARRAYLEN(array) (sizeof(array) / sizeof(array[0]))
-#define INARRAY(elementptr, array)                                             \
-  ((unsigned int)elementptr >= (unsigned int)array &&                          \
-   (unsigned int)elementptr < ((unsigned int)array) + sizeof(array))
-
 /**
  * Wait until a UX call returns a definitve status. Handle all event packets in
  * between
  */
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
-
-void mcu_usb_printc(unsigned char c);
 
 /**
  * Global type that enables to map memory onto the application zone instead of
@@ -271,13 +273,37 @@ void io_seproxyhal_setup_ticker(unsigned int interval_ms);
 void io_seproxyhal_power_off(void);
 void io_seproxyhal_se_reset(void);
 void io_seproxyhal_disable_io(void);
+
+#ifdef HAVE_BLE
 void io_seproxyhal_disable_ble(void);
+
+void io_seproxyhal_ble_send_db(void);
+
+void io_seproxyhal_ble_pairing_db_from_mcu(
+    unsigned char *mac_addr PLENGTH(mac_addr_len), unsigned int mac_addr_len,
+    unsigned int db_offset, unsigned char *buffer PLENGTH(buffer_len),
+    unsigned int buffer_len);
+
+bolos_bool_t io_seproxyhal_ble_pairing_db_to_mcu(
+    unsigned char *mac_addr PLENGTH(mac_addr_len), unsigned int mac_addr_len,
+    bolos_bool_t send_request);
+
+void io_ble_pairing_db_persist_request(void);
+#endif // HAVE_BLE
 
 /**
  * Function to ensure a I/O channel is not timeouting waiting for operations
  * after a long time without SEPH packet exchanges
  */
 void io_seproxyhal_io_heartbeat(void);
+
+// IO task related function
+unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
+
+#if defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
+// Sends a character to the MCU and waits for the MCU acknowledgement.
+void mcu_usb_printc(unsigned char c);
+#endif // defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
 
 #endif // OS_IO_SEPROXYHAL
 

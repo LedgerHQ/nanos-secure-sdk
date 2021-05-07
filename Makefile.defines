@@ -35,7 +35,8 @@ DEFINES += gcc __IO=volatile
 DEFINES += NDEBUG
 
 # default is not to display make commands
-log = $(if $(strip $(VERBOSE)),$1,@$1)
+log = $(if $(strip $(VERBOSE)),$1,@$1) # kept for retrocompat
+L = $(if $(strip $(VERBOSE)),,@)
 
 ifeq ($(CC),)
 CC        = clang
@@ -49,46 +50,44 @@ CFLAGS   += --sysroot="$(SYSROOT)"
 endif
 
 CFLAGS   += -gdwarf-2  -gstrict-dwarf
-CFLAGS   += -O3 -Os 
-CFLAGS   += -fomit-frame-pointer -momit-leaf-frame-pointer 
-CFLAGS   += -mcpu=cortex-m0 -mthumb 
-CFLAGS   += -fno-common -mtune=cortex-m0 -mlittle-endian 
-CFLAGS   += -std=gnu99 -Werror=int-to-pointer-cast -Wall -Wextra #-save-temps
-CFLAGS   += -fdata-sections -ffunction-sections -funsigned-char -fshort-enums 
-CFLAGS   += -mno-unaligned-access 
-CFLAGS   += -Wno-unused-parameter -Wno-duplicate-decl-specifier
+CFLAGS   += -O3 -Os
+CFLAGS   += -fomit-frame-pointer -momit-leaf-frame-pointer
+CFLAGS   += -mcpu=cortex-m0plus -mthumb
+CFLAGS   += -fno-common -mtune=cortex-m0plus -mlittle-endian
+CFLAGS   += -std=gnu99 -Werror=int-to-pointer-cast -Wall -Wextra -Wno-main
+CFLAGS   += -fdata-sections -ffunction-sections -funsigned-char -fshort-enums
+CFLAGS   += -mno-unaligned-access
 CFLAGS   +=  --target=armv6m-none-eabi
 CFLAGS   += -fropi
 CFLAGS   += -fno-jump-tables # avoid jump tables for switch to avoid problems with invalid PIC access
 CFLAGS   += -nostdlib -nodefaultlibs
 
-AFLAGS   += -ggdb2 -O3 -Os -mcpu=cortex-m0 -fno-common -mtune=cortex-m0
+AFLAGS   += -ggdb2 -O3 -Os -mcpu=cortex-m0plus -fno-common -mtune=cortex-m0plus
 
-LDFLAGS  += -gdwarf-2  -gstrict-dwarf 
+LDFLAGS  += -gdwarf-2  -gstrict-dwarf
 LDFLAGS  += -O3 -Os
-LDFLAGS  += -I/usr/include
-LDFLAGS  += -fomit-frame-pointer 
-LDFLAGS  += -Wall 
-LDFLAGS  += -mcpu=cortex-m0 -mthumb 
+LDFLAGS  += -fomit-frame-pointer
+LDFLAGS  += -Wall
+LDFLAGS  += -mcpu=cortex-m0plus -mthumb
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program
 LDFLAGS  += -mno-unaligned-access
-ifndef SCRIPT_LD
-  SCRIPT_LD:=$(BOLOS_SDK)/script.ld
-endif
-LDFLAGS  += -T$(SCRIPT_LD)  -Wl,--gc-sections -Wl,-Map,debug/app.map #,--cref
+LDFLAGS  += -Wl,--gc-sections -Wl,-Map,debug/app.map
+LDFLAGS  += --specs=nano.specs
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 CFLAGS   += -frwpi
 LDFLAGS  += -momit-leaf-frame-pointer
 LDFLAGS  += --target=armv6m-none-eabi
-LDFLAGS  += -mtune=cortex-m0 -mlittle-endian 
+LDFLAGS  += -mtune=cortex-m0plus -mlittle-endian
 LDFLAGS  += -nostdlib -nodefaultlibs #-nostartfiles
 LDFLAGS  += -mno-movt
 LDFLAGS  += -L$(BOLOS_SDK)/lib/
 else
-LDFLAGS  += -nostartfiles 
+LDFLAGS  += -nostartfiles
 endif
 
+# include builtin CX libs options
+-include $(BOLOS_SDK)/Makefile.conf.cx
 
 ifneq ($(BOLOS_ENV),)
 $(info BOLOS_ENV=$(BOLOS_ENV))
@@ -106,4 +105,3 @@ endif
 
 # define the default makefile target (high in include to avoid glyph.h or what not specific target to be the default one when no target passed on the make command line)
 all: default
-

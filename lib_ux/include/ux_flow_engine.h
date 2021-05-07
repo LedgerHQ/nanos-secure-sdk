@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 ********************************************************************************/
 
 #pragma once
+
+#include "os_seed.h"
+#include "os_helpers.h"
 
 #define STEPSPIC(x) ((const ux_flow_step_t* const * )PIC(x))
 #define STEPPIC(x) ((const ux_flow_step_t* )PIC(x))
@@ -79,16 +82,16 @@ unsigned int ux_flow_relayout(void); // ask for a redisplay of the current displ
 /** 
  * Last step is marked with a FLOW_END_STEP value
  */
-#define FLOW_END_STEP ((void*)0xFFFFFFFFUL)
+#define FLOW_END_STEP ((const ux_flow_step_t *)0xFFFFFFFFUL)
 /**
  * Fake step implying a double press validation to go to the next step (if any)
  */
-#define FLOW_BARRIER  ((void*)0xFFFFFFFEUL)
+#define FLOW_BARRIER  ((const ux_flow_step_t *)0xFFFFFFFEUL)
 /**
  * Fake step to be used as the LAST item of the flow (before the FLOW_END_STEP) to notify
  * that the flow is circular with no end/start for prev/next browsing
  */
-#define FLOW_LOOP     ((void*)0xFFFFFFFDUL)
+#define FLOW_LOOP     ((const ux_flow_step_t *)0xFFFFFFFDUL)
 void ux_flow_init(unsigned int stack_slot, const ux_flow_step_t* const * steps, const ux_flow_step_t* const start_step);
 
 /**

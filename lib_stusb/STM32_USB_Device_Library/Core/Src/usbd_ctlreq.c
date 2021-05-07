@@ -25,6 +25,7 @@
   ******************************************************************************
   */ 
 #include "os.h"
+#include "os_pic.h"
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_ctlreq.h"
@@ -213,8 +214,18 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
   
   uint8_t   ep_addr;
   USBD_StatusTypeDef ret = USBD_OK; 
-  USBD_EndpointTypeDef   *pep;
-  ep_addr  = LOBYTE(req->wIndex);   
+  ep_addr  = LOBYTE(req->wIndex);
+
+  // avoid processing for out of bounds endpoints
+  if ((ep_addr & 0x7F) > IO_USB_MAX_ENDPOINTS) {
+    USBD_CtlError(pdev , req);
+    return ret;
+  }
+
+  // Note: this function consider endpoints are assigned to interfaces as a bijection (endpoint 
+  // 0x01 and 0x81 are assigend to interface 1). This is done to avoid a long endpoint lookup
+  // with the declared interfaces to handle the corresponding setup packet.
+  // Moreover, endpoint directed setup packet are really uncommon.
   
   /* Check if it is a class request */
   if ((req->bmRequest & 0x60) == 0x20 && usbd_is_valid_intf(pdev, LOBYTE(req->wIndex)))
@@ -223,7 +234,8 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
     
     return USBD_OK;
   }
-  
+
+
   switch (req->bRequest) 
   {
     
@@ -236,7 +248,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
       {
         USBD_LL_StallEP(pdev , ep_addr);
       }
-      break;	
+      break;  
       
     case USBD_STATE_CONFIGURED:   
       if (req->wValue == USB_FEATURE_EP_HALT)
@@ -253,7 +265,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
       USBD_CtlSendStatus(pdev);
       break;
         
-    default:                         
+    default:
       USBD_CtlError(pdev , req);
       break;    
     }
@@ -268,7 +280,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
       {
         USBD_LL_StallEP(pdev , ep_addr);
       }
-      break;	
+      break;  
       
     case USBD_STATE_CONFIGURED:   
       if (req->wValue == USB_FEATURE_EP_HALT)
@@ -276,6 +288,7 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
         if ((ep_addr & 0x7F) != 0x00) 
         {        
           USBD_LL_ClearStallEP(pdev , ep_addr);
+
           if(usbd_is_valid_intf(pdev, LOBYTE(req->wIndex))) {
             ((Setup_t)PIC(pdev->interfacesClass[LOBYTE(req->wIndex)].pClass->Setup)) (pdev, req);
           }
@@ -298,26 +311,18 @@ USBD_StatusTypeDef  USBD_StdEPReq (USBD_HandleTypeDef *pdev , USBD_SetupReqTyped
       {
         USBD_LL_StallEP(pdev , ep_addr);
       }
-      break;	
+      break;  
       
     case USBD_STATE_CONFIGURED:
-      pep = ((ep_addr & 0x80) == 0x80) ? &pdev->ep_in[ep_addr & 0x7F]:\
-                                         &pdev->ep_out[ep_addr & 0x7F];
-      if(USBD_LL_IsStallEP(pdev, ep_addr))
       {
-        pep->status = 0x0001;     
+        unsigned short status = USBD_LL_IsStallEP(pdev, ep_addr)? 1 : 0;        
+        USBD_CtlSendData (pdev,
+                          (uint8_t *)&status,
+                          2);
       }
-      else
-      {
-        pep->status = 0x0000;  
-      }
-      
-      USBD_CtlSendData (pdev,
-                        (uint8_t *)&pep->status,
-                        2);
       break;
       
-    default:                         
+    default:
       USBD_CtlError(pdev , req);
       break;
     }
@@ -524,7 +529,7 @@ void USBD_SetConfig(USBD_HandleTypeDef *pdev ,
     {
     case USBD_STATE_ADDRESSED:
       if (cfgidx) 
-      {                                			   							   							   				
+      {                                                                               
         pdev->dev_config = cfgidx;
         pdev->dev_state = USBD_STATE_CONFIGURED;
         if(USBD_SetClassConfig(pdev , cfgidx) == USBD_FAIL)
@@ -560,7 +565,7 @@ void USBD_SetConfig(USBD_HandleTypeDef *pdev ,
       USBD_CtlSendStatus(pdev);
       break;
       
-    default:					
+    default:          
        USBD_CtlError(pdev , req);                     
       break;
     }

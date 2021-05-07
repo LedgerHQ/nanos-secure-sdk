@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -80,9 +80,6 @@ const unsigned char bitmapSYMBOLS_0[] = {
   0x70, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xef, 0x07, 0x00, 0x85, 
   0xdb, 0xff, 0xff, 0xbd, 0x58, 0x00, 
 
-
-  
-
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F, 0xF0, 0xFF,
@@ -118,8 +115,8 @@ const bagl_font_t fontSYMBOLS_0 = {
    16,  /* font ascent (baseline) in pixels  */
    0, /* kerning */
    0x0000, /* first character */
-   0x0006, /* last character  */
-   charactersSYMBOLS_0, 
+   0006, /* last character  */
+   charactersSYMBOLS_0,
    bitmapSYMBOLS_0
 };
 

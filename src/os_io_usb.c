@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 ********************************************************************************/
 
 #include "os_io_usb.h"
+#include "os_utils.h"
+#include "lcx_rng.h"
 #include <string.h>
 
 #ifdef HAVE_USB_APDU
@@ -60,8 +62,8 @@ volatile unsigned char* G_io_usb_hid_current_buffer;
 io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char* buffer, unsigned short l) {
   // avoid over/under flows
   if (buffer != G_io_usb_ep_buffer) {
-    os_memset(G_io_usb_ep_buffer, 0, sizeof(G_io_usb_ep_buffer));
-    os_memmove(G_io_usb_ep_buffer, buffer, MIN(l, sizeof(G_io_usb_ep_buffer)));
+    memset(G_io_usb_ep_buffer, 0, sizeof(G_io_usb_ep_buffer));
+    memmove(G_io_usb_ep_buffer, buffer, MIN(l, sizeof(G_io_usb_ep_buffer)));
   }
 
   // process the chunk content
@@ -96,8 +98,13 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
       if (l > G_io_usb_hid_remaining_length) {
         l = G_io_usb_hid_remaining_length;
       }
+
+      if (l > sizeof(G_io_usb_ep_buffer) - 7) {
+        l = sizeof(G_io_usb_ep_buffer) - 7;
+      }
+
       // copy data
-      os_memmove((void*)G_io_usb_hid_current_buffer, G_io_usb_ep_buffer+7, l);
+      memmove((void*)G_io_usb_hid_current_buffer, G_io_usb_ep_buffer+7, l);
     }
     else {
       // check for invalid length encoding (more data in chunk that announced in the total apdu)
@@ -105,9 +112,13 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
         l = G_io_usb_hid_remaining_length;
       }
 
+      if (l > sizeof(G_io_usb_ep_buffer) - 5) {
+        l = sizeof(G_io_usb_ep_buffer) - 5;
+      }
+
       /// This is a following chunk
       // append content
-      os_memmove((void*)G_io_usb_hid_current_buffer, G_io_usb_ep_buffer+5, l);
+      memmove((void*)G_io_usb_hid_current_buffer, G_io_usb_ep_buffer+5, l);
     }
     // factorize (f)
     G_io_usb_hid_current_buffer += l;
@@ -117,7 +128,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
 
   case 0x00: // get version ID
     // do not reset the current apdu reception if any
-    os_memset(G_io_usb_ep_buffer+3, 0, 4); // PROTOCOL VERSION is 0
+    memset(G_io_usb_ep_buffer+3, 0, 4); // PROTOCOL VERSION is 0
     // send the response
     sndfct(G_io_usb_ep_buffer, IO_HID_EP_LENGTH);
     // await for the next chunk
@@ -125,7 +136,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
 
   case 0x01: // ALLOCATE CHANNEL
     // do not reset the current apdu reception if any
-    cx_rng(G_io_usb_ep_buffer+3, 4);
+    cx_rng_no_throw(G_io_usb_ep_buffer+3, 4);
     // send the response
     sndfct(G_io_usb_ep_buffer, IO_HID_EP_LENGTH);
     // await for the next chunk
@@ -168,7 +179,7 @@ void io_usb_hid_sent(io_send_t sndfct) {
   // only prepare next chunk if some data to be sent remain
   if (G_io_usb_hid_remaining_length && G_io_usb_hid_current_buffer) {
     // fill the chunk
-    os_memset(G_io_usb_ep_buffer, 0, sizeof(G_io_usb_ep_buffer));
+    memset(G_io_usb_ep_buffer, 0, sizeof(G_io_usb_ep_buffer));
 
     // keep the channel identifier
     G_io_usb_ep_buffer[0] = (G_io_usb_hid_channel>>8)&0xFF;
@@ -181,13 +192,13 @@ void io_usb_hid_sent(io_send_t sndfct) {
       l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-7) ? IO_HID_EP_LENGTH-7 : G_io_usb_hid_remaining_length);
       G_io_usb_ep_buffer[5] = G_io_usb_hid_remaining_length>>8;
       G_io_usb_ep_buffer[6] = G_io_usb_hid_remaining_length;
-      os_memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
+      memmove(G_io_usb_ep_buffer+7, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
       G_io_usb_hid_remaining_length -= l;
     }
     else {
       l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : G_io_usb_hid_remaining_length);
-      os_memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
+      memmove(G_io_usb_ep_buffer+5, (const void*)G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
       G_io_usb_hid_remaining_length -= l;   
     }

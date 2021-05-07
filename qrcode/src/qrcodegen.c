@@ -90,9 +90,6 @@ testable void setModuleBounded(uint8_t qrcode[], int x, int y, bool isBlack);
 
 /*---- Private tables of constants ----*/
 
-// For checking text and encoding segments.
-static const char *ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
-
 // For generating error correction codes.
 testable const int8_t ECC_CODEWORDS_PER_BLOCK[][41] = {
 	// Version: (note that index 0 is for padding, and is set to an illegal value)
@@ -116,8 +113,6 @@ static const int PENALTY_N4 = 10;
 
 
 /*---- High-level QR Code encoding functions ----*/
-
-
 
 // Public function - see documentation comment in header file.
 bool qrcodegen_encodeBinary(uint8_t const data[], size_t dataLen, uint8_t temp[], size_t tempLen, uint8_t qrcode[], size_t qrcodeLen,

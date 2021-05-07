@@ -101,12 +101,12 @@ uint8_t  USBD_CCID_DeInit (USBD_HandleTypeDef  *pdev,
                               uint8_t cfgidx)
 {
   UNUSED(cfgidx);
-  /* Close CCID EPs */
-  USBD_LL_CloseEP (pdev , CCID_BULK_IN_EP);
-  USBD_LL_CloseEP (pdev , CCID_BULK_OUT_EP);
-#ifdef HAVE_CCID_INTERRUPT
-  USBD_LL_CloseEP (pdev , CCID_INTR_IN_EP);
-#endif // HAVE_CCID_INTERRUPT  
+//   /* Close CCID EPs */
+//   USBD_LL_CloseEP (pdev , CCID_BULK_IN_EP);
+//   USBD_LL_CloseEP (pdev , CCID_BULK_OUT_EP);
+// #ifdef HAVE_CCID_INTERRUPT
+//   USBD_LL_CloseEP (pdev , CCID_INTR_IN_EP);
+// #endif // HAVE_CCID_INTERRUPT  
     
   /* Un Init the CCID layer */
   CCID_DeInit(pdev);   
