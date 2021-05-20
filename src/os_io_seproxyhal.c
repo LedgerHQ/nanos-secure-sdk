@@ -306,7 +306,6 @@ unsigned int io_seproxyhal_handle_event(void) {
             }
           }
         }
-        __attribute__((fallthrough));
       }
 #endif // HAVE_IO_USB
 #ifdef HAVE_BLE_APDU
@@ -318,9 +317,9 @@ unsigned int io_seproxyhal_handle_event(void) {
             THROW(EXCEPTION_IO_RESET);
           }
         }
-        __attribute__((fallthrough));
       }
 #endif // HAVE_BLE_APDU
+        __attribute__((fallthrough));
       // no break is intentional
     default:
       return io_event(CHANNEL_SPI);
