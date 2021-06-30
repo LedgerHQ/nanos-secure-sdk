@@ -15,6 +15,7 @@
 #include "hci.h"
 #endif // HAVE_BLUENRG
 
+#include "checks.h"
 #include "ux.h"
 
 #ifdef HAVE_IO_U2F
@@ -291,7 +292,6 @@ unsigned int io_seproxyhal_handle_event(void) {
             }
           }
         }
-        __attribute__((fallthrough));
       }
 #endif // HAVE_IO_USB
 #ifdef HAVE_BLE_APDU
@@ -303,10 +303,9 @@ unsigned int io_seproxyhal_handle_event(void) {
             THROW(EXCEPTION_IO_RESET);
           }
         }
-        __attribute__((fallthrough));
       }
 #endif // HAVE_BLE_APDU
-      // no break is intentional
+      __attribute__((fallthrough));
     default:
       return io_event(CHANNEL_SPI);
   }

@@ -81,7 +81,7 @@ SECTIONS
     _envram = .;
     PROVIDE(_envram = . + ORIGIN(FLASH));
     
-  } > FLASH = 0x00
+  } > FLASH
 
   .data (NOLOAD):
   {
@@ -123,20 +123,20 @@ SECTIONS
     _estack = ABSOLUTE(END_STACK);
     PROVIDE( _estack = ABSOLUTE(END_STACK) );
 
-  } > SRAM = 0x00
+  } > SRAM
 
   /****************************************************************/
   /* DEBUG                                                        */
   /****************************************************************/
 
   /* remove the debugging information from the standard libraries */
-  DEBUG (NOLOAD) :
+  /DISCARD/ :
   {
     libc.a ( * )
     libm.a ( * )
     libgcc.a ( * )
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-  } > DISCARD
+  }
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }

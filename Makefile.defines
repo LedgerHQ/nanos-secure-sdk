@@ -35,9 +35,15 @@ DEFINES += gcc __IO=volatile
 log = $(if $(strip $(VERBOSE)),$1,@$1)
 
 CC      = clang
+
+SYSROOT = $(shell $(GCCPATH)arm-none-eabi-gcc -print-sysroot)
+ifeq ($(SYSROOT),)
+CFLAGS   += -I/usr/include
+else
+CFLAGS   += --sysroot="$(SYSROOT)"
+endif
 CFLAGS += -gdwarf-2  -gstrict-dwarf
 CFLAGS += -O3 -Os 
-CFLAGS += -I/usr/include
 CFLAGS += -fomit-frame-pointer -momit-leaf-frame-pointer 
 CFLAGS += -mcpu=cortex-m0 -mthumb 
 CFLAGS += -fno-common -mtune=cortex-m0 -mlittle-endian 
@@ -57,7 +63,6 @@ AFLAGS += -ggdb2 -O3 -Os -mcpu=cortex-m0 -fno-common -mtune=cortex-m0
 LDFLAGS += --target=armv6m-none-eabi
 LDFLAGS += -gdwarf-2  -gstrict-dwarf 
 LDFLAGS += -O3 -Os
-LDFLAGS += -I/usr/include
 LDFLAGS += -fomit-frame-pointer -momit-leaf-frame-pointer 
 LDFLAGS += -mno-movt
 LDFLAGS += -Wall 
