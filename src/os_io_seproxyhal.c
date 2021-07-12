@@ -394,7 +394,9 @@ void io_seproxyhal_handle_capdu_event(void) {
 }
 
 unsigned int io_seproxyhal_handle_event(void) {
+#if defined(HAVE_IO_USB) || defined(HAVE_BLE)
   unsigned int rx_len = U2BE(G_io_seproxyhal_spi_buffer, 1);
+#endif
 
 #ifdef HAVE_BLE
   // continue sending the ble db saved if any
