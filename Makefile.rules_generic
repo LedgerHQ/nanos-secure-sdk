@@ -71,9 +71,9 @@ obj/%.o: %.s
 bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	@echo "[LINK] $@"
 	$(call log,$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@))
-	$(call log,$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex)
+	$(call log,$(OBJCOPY) -O ihex -S bin/app.elf bin/app.hex)
 	$(call log,cp bin/app.elf obj)
-	$(call log,$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm)
+	$(call log,$(OBJDUMP) -S -d bin/app.elf > debug/app.asm)
 
 bin/app.apdu bin/app.sha256: bin/app.elf
 	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256
