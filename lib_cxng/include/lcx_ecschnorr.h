@@ -96,7 +96,7 @@ static inline int cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, int m
  *   Length of input to data.
  *
  * @param [in] sig
- *   ECDSA signature to verify encoded as TLV:  30 L 02 Lr r 02 Ls s
+ *   ECSchnorr to verify encoded as TLV:  30 L 02 Lr r 02 Ls s
  *
  * @return
  *   1 if signature is verified
