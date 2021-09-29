@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -19,7 +19,14 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "os.h"
+#if defined(HAVE_BOLOS)
+# include "bolos_target.h"
+# include "os_math.h"
+#endif // HAVE_BOLOS
+
+#if !defined(MIN)
+# define MIN(x,y) ((x)<(y)?(x):(y))
+#endif // MIN
 
 #if defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
 
@@ -58,7 +65,7 @@ void mcu_usb_prints(const char* str, unsigned int charcount) {
   buf[1] = charcount >> 8;
   buf[2] = charcount;
   io_seproxyhal_spi_send(buf, 3);
-  io_seproxyhal_spi_send(str, charcount);
+  io_seproxyhal_spi_send((unsigned char*)str, charcount);
 #ifndef IO_SEPROXYHAL_DEBUG
   // wait printf ack (no race kthx)
   io_seproxyhal_spi_recv(buf, 3, 0);
@@ -446,6 +453,7 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
+                    __attribute__((fallthrough));
                 case 'x':
                 case 'p':
                 {
@@ -614,7 +622,7 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
     //
     // Check the arguments.
     //
-    if(format == NULL || str == NULL ||str_size < 2) {
+    if(str == NULL ||str_size < 2) {
       return 0;
     }
 
@@ -649,6 +657,7 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
         str+= ulIdx;
         str_size -= ulIdx;
         if (str_size == 0) {
+            va_end(vaArgP);
             return 0;
         }
 
@@ -743,6 +752,7 @@ again:
                     str++;
                     str_size -= 1;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 
@@ -890,6 +900,7 @@ again:
                           str+= ulStrlen;
                           str_size -= ulStrlen;
                           if (str_size == 0) {
+                              va_end(vaArgP);
                               return 0;
                           }
                         
@@ -911,6 +922,7 @@ again:
                         str+= ulIdx;
                         str_size -= ulIdx;
                         if (str_size == 0) {
+                            va_end(vaArgP);
                             return 0;
                         }
                         break;
@@ -920,6 +932,7 @@ again:
                           nibble1 = (pcStr[ulCount]>>4)&0xF;
                           nibble2 = pcStr[ulCount]&0xF;
                           if (str_size < 2) {
+                              va_end(vaArgP);
                               return 0;
                           }
                           switch(ulCap) {
@@ -935,6 +948,7 @@ again:
                           str+= 2;
                           str_size -= 2;
                           if (str_size == 0) {
+                              va_end(vaArgP);
                               return 0;
                           }
                         }
@@ -954,6 +968,7 @@ s_pad:
                         str+= ulCount;
                         str_size -= ulCount;
                         if (str_size == 0) {
+                            va_end(vaArgP);
                             return 0;
                         }
                     }
@@ -1005,7 +1020,9 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
+#if !defined(__clang__)
                     __attribute__((fallthrough));
+#endif // !defined(__clang__)
                 case 'x':
                 case 'p':
                 {
@@ -1114,6 +1131,7 @@ convert:
                     str+= ulPos;
                     str_size -= ulPos;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 
@@ -1135,6 +1153,7 @@ convert:
                     str++;
                     str_size --;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 
@@ -1159,6 +1178,7 @@ error:
                     str+= ulPos;
                     str_size -= ulPos;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 #endif // HAVE_SNPRINTF_DEBUG

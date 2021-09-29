@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -18,13 +18,20 @@
 
 #pragma once
 
+#if defined(HAVE_BOLOS)
+# include "bolos_privileged_ux.h"
+#endif // HAVE_BOLOS
+
 #include "bolos_target.h"
+#include "lcx_ecfp.h"
+#include "os_math.h"
+#include "os_ux.h"
+#include "os_task.h"
 
 //#ifdef TARGET_NANOS 
 #ifndef HAVE_BOLOS_UX
 #ifndef HAVE_UX_FLOW
   #define COMPLIANCE_UX_160
-  #warning Enable legacy UX definition
   #define HAVE_UX_LEGACY
 #endif // HAVE_UX_FLOW
 #endif // HAVE_BOLOS_UX
@@ -34,6 +41,7 @@
 #include "ux_flow_engine.h"
 
 #include "bagl.h"
+#include <string.h>
 
 typedef struct bagl_element_e bagl_element_t;
 
@@ -206,8 +214,6 @@ typedef struct ux_turner_state_s {
 } ux_turner_state_t;
 #endif // HAVE_UX_LEGACY
 
-#include "os_io_seproxyhal.h"
-
 struct ux_stack_slot_s {
     // arrays of element to be displayed (to automate when dealing with static and dynamic elements)
   bolos_task_status_t exit_code_after_elements_displayed;
@@ -248,18 +254,13 @@ struct ux_state_s {
   unsigned char stack_count; // initialized @0 by the bolos ux initialize
   bolos_task_status_t exit_code;
 
-#ifdef TARGET_NANOX
+#ifdef HAVE_BLE
   asynchmodal_end_callback_t asynchmodal_end_callback;
-#endif // TARGET_NANOX
+#endif // HAVE_BLE
 
 #ifdef HAVE_UX_FLOW
   // global context, therefore, don't allow for multiple paging overlayed in a graphic stack
-  struct {
-    unsigned int current;
-    unsigned int count;
-    unsigned short offsets[UX_LAYOUT_PAGING_LINE];
-    unsigned short lengths[UX_LAYOUT_PAGING_LINE];
-  } layout_paging;
+  ux_layout_paging_state_t layout_paging;
   
   // the flow for each stack slot
   ux_flow_state_t flow_stack[UX_STACK_SLOT_COUNT]; 
@@ -288,6 +289,8 @@ struct ux_state_s {
 #ifdef COMPLIANCE_UX_160
   bolos_ux_params_t params;
 #endif // COMPLIANCE_UX_160
+
+  char *externalText;
 };
 
 #ifdef COMPLIANCE_UX_160
@@ -313,8 +316,7 @@ extern bolos_ux_params_t G_ux_params;
 
 #endif // COMPLIANCE_UX_160
 
-
-
+#if defined(TARGET_BLUE)
 /**
  * Setup the status bar foreground and background colors.
  */
@@ -324,6 +326,7 @@ extern bolos_ux_params_t G_ux_params;
   G_ux_params.u.status_bar.fgcolor = fg; \
   G_ux_params.u.status_bar.bgcolor = bg; \
   os_ux_blocking(&G_ux_params);
+#endif // TARGET_BLUE
 
 /**
  * Request displaying the next element in the UX structure. 
@@ -349,23 +352,6 @@ extern bolos_ux_params_t G_ux_params;
       screen_update(); \
     } \
   }
-
-/**
- * internal bolos ux event processing with callback in case event is to be processed by the application
- */
-#define UX_FORWARD_EVENT_REDRAWCB(bypasspincheck, G_ux_params, G_ux, os_ux, os_sched_last_status, callback, redraw_cb, ignoring_app_if_ux_busy) \
-  G_ux_params.ux_id = BOLOS_UX_EVENT; \
-  G_ux_params.len = 0; \
-  os_ux(&G_ux_params); \
-  G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX); \
-  if ((G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE) && G_ux.asynchmodal_end_callback) { asynchmodal_end_callback_t cb = G_ux.asynchmodal_end_callback; G_ux.asynchmodal_end_callback = NULL; cb(G_ux_params.len) ; G_ux_params.len = BOLOS_UX_REDRAW; } \
-  if (G_ux_params.len == BOLOS_UX_REDRAW) { \
-    redraw_cb; \
-  } \
-  else if(!ignoring_app_if_ux_busy || (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE)) { \
-    callback; \
-  }
-
 #else // TARGET_NANOX
 #define UX_DISPLAY_NEXT_ELEMENT() \
   while (G_ux.stack[0].element_arrays[0].element_array \
@@ -381,6 +367,26 @@ extern bolos_ux_params_t G_ux_params;
     } \
     G_ux.stack[0].element_index++; \
   }
+#endif // TARGET_NANOX
+
+#ifdef HAVE_BLE
+/**
+ * internal bolos ux event processing with callback in case event is to be processed by the application
+ */
+#define UX_FORWARD_EVENT_REDRAWCB(bypasspincheck, G_ux_params, G_ux, os_ux, os_sched_last_status, callback, redraw_cb, ignoring_app_if_ux_busy) \
+  G_ux_params.ux_id = BOLOS_UX_EVENT; \
+  G_ux_params.len = 0; \
+  os_ux(&G_ux_params); \
+  G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX); \
+  if (G_ux.asynchmodal_end_callback && os_ux_get_status(BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST) != 0) { asynchmodal_end_callback_t cb = G_ux.asynchmodal_end_callback; G_ux.asynchmodal_end_callback = NULL; cb(os_ux_get_status(BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST)) ; G_ux_params.len = BOLOS_UX_REDRAW; } \
+  if (G_ux_params.len == BOLOS_UX_REDRAW) { \
+    redraw_cb; \
+  } \
+  else if(!ignoring_app_if_ux_busy || (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE)) { \
+    callback; \
+  }
+
+#else // HAVE_BLE
 
 /**
  * internal bolos ux event processing with callback in case event is to be processed by the application
@@ -396,8 +402,7 @@ extern bolos_ux_params_t G_ux_params;
   else if(!ignoring_app_if_ux_busy || (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE)) { \
     callback; \
   }
-
-#endif // TARGET_NANOX
+#endif // HAVE_BLE
 
 /**
  * Request a wake up of the device (backlight, pin lock screen, ...) to display a new interface to the user.
@@ -422,7 +427,6 @@ extern bolos_ux_params_t G_ux_params;
 /**
  * Force redisplay of the screen from the given index in the screen's element array
  */
-#ifndef HAVE_TINY_COROUTINE
 #define UX_REDISPLAY_IDX(index) \
   io_seproxyhal_init_ux(); \
   io_seproxyhal_init_button(); /*ensure to avoid release of a button from a nother screen to mess up with the redisplayed screen */ \
@@ -432,15 +436,6 @@ extern bolos_ux_params_t G_ux_params;
   if (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE) { \
     UX_DISPLAY_NEXT_ELEMENT(); \
   }
-#else // HAVE_TINY_COROUTINE
-#define UX_REDISPLAY_IDX(index) \
-  io_seproxyhal_init_ux(); \
-  io_seproxyhal_init_button(); \
-  G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX); \
-  if (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE) { \
-    G_ux.stack[0].element_index = index; \
-  }
-#endif // HAVE_TINY_COROUTINE
 
 /**
  * Redisplay all elements of the screen
@@ -500,15 +495,22 @@ extern bolos_ux_params_t G_ux_params;
 
 
 /**
- * Macro to process sequentially display a screen. The call finished when the UX is completely displayed.
+ * Macro to process sequentially display a screen. The call finishes when the UX is completely displayed,
+ * and the state of the MCU <-> SE exchanges is the same as before this macro call.
  */
 #define UX_WAIT_DISPLAYED() \
-    do { \
-      UX_DISPLAY_NEXT_ELEMENT(); \
+    while (!UX_DISPLAYED()) { \
+      /* We wait for the MCU event (should indicate display processed for a bagl element) */ \
       io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0); \
       io_seproxyhal_handle_event(); \
-    /* all items have been displayed */ \
-    } while (!UX_DISPLAYED());
+      UX_DISPLAY_NEXT_ELEMENT(); \
+    } \
+    io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0); \
+    io_seproxyhal_handle_event(); \
+    /* We send a general status which indicates to the MCU that he can process any pending action (i.e. here, display the whole screen) */ \
+    io_seproxyhal_general_status(); \
+    /* We wait for an ack of the MCU. */ \
+    io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
 
 /**
  * Process button push events. Application's button event handler is called only if the ux app does not deny it (modal frame displayed).
@@ -612,6 +614,21 @@ void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_deta
  * Helper method on the Blue to output icon header to the MCU and allow for bitmap transformation
  */ 
 unsigned int io_seproxyhal_display_icon_header_and_colors(bagl_component_t* icon_component, bagl_icon_details_t* icon_details, unsigned int* icon_len);
+
+// discriminated from io to allow for different memory placement
+typedef struct ux_seph_s {
+  unsigned int button_mask;
+  unsigned int button_same_mask_counter;
+#ifdef TARGET_BLUE
+  bagl_element_t *last_touched_not_released_component;
+#endif // TARGET_BLUE
+#ifdef HAVE_BOLOS
+  unsigned int ux_id;
+  unsigned int ux_status;
+#endif // HAVE_BOLOS
+} ux_seph_os_and_app_t;
+
+extern ux_seph_os_and_app_t G_ux_os;
 
 #ifdef HAVE_UX_LEGACY
 #define UX_MENU_END {NULL, NULL, 0, NULL, NULL, NULL, 0, 0}

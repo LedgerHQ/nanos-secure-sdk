@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -80,15 +80,42 @@ void ux_layout_bnn_init(unsigned int stack_slot);
  * 1 bold text line with the title
  * 1-3 text lines [nano s/nano x]
  */
-#define UX_LAYOUT_PAGING_LINE 1
+#ifdef TARGET_NANOX
+#define UX_LAYOUT_PAGING_LINE_COUNT 3
+#endif 
+#ifdef TARGET_NANOS
+#define UX_LAYOUT_PAGING_LINE_COUNT 1
+#endif
+
+#include "ux_layout_paging_compute.h"
 
 typedef struct ux_layout_paging_params_s {
 	const char* title;
 	const char* text;
 } ux_layout_paging_params_t;
 
-#define ux_layout_bn_paging_init ux_layout_paging_init
 void ux_layout_paging_init(unsigned int stack_slot);
+
+// variant with string getters instead of hardwired content
+typedef struct ux_layout_paging_func_params_s {
+	const char* (*get_title)(void);
+	const char* (*get_text)(void);
+} ux_layout_paging_func_params_t;
+void ux_layout_paging_func_init(unsigned int stack_slot);
+
+// For paging layouts, the first n/b deals with the first line (the title),
+// and the second n/b deals with the rest of the lines.
+void ux_layout_nn_paging_init(unsigned int stack_slot);
+void ux_layout_nb_paging_init(unsigned int stack_slot);
+void ux_layout_bn_paging_init(unsigned int stack_slot);
+void ux_layout_bb_paging_init(unsigned int stack_slot);
+
+// The layout params are always the same independently of the boldness of the lines.
+#define ux_layout_nn_paging_params_t ux_layout_paging_params_t
+#define ux_layout_nb_paging_params_t ux_layout_paging_params_t
+#define ux_layout_bn_paging_params_t ux_layout_paging_params_t
+#define ux_layout_bb_paging_params_t ux_layout_paging_params_t
+
 // Call to reset the paging component to the first page
 void ux_layout_paging_reset(void);
 
@@ -96,8 +123,6 @@ void ux_layout_paging_reset(void);
 #define ux_layout_bnnn_paging_params_t ux_layout_paging_params_t
 #define ux_layout_bnnn_paging_init ux_layout_paging_init
 #define ux_layout_bnnn_paging_reset ux_layout_paging_reset
-#define ux_layout_bn_paging_params_t ux_layout_paging_params_t
-#define ux_layout_bn_paging_init ux_layout_paging_init
 #define ux_layout_bn_paging_reset ux_layout_paging_reset
 
 /*********************************************************************************

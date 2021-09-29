@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -513,13 +513,13 @@ void bagl_draw_with_context(const bagl_component_t* component, const void* conte
 #ifdef HAVE_BAGL_GLYPH_ARRAY
   int x,y;
 #endif // HAVE_BAGL_GLYPH_ARRAY
-  unsigned int baseline=0;
-  unsigned int char_height=0;
+  int baseline=0;
+  unsigned int height_to_draw=0;
   int strwidth = 0;
   unsigned int ellipsis_1_len = 0;
+#ifdef HAVE_BAGL_ELLIPSIS
   const char* ellipsis_2_start = NULL;
-  unsigned int fgcolor=component->fgcolor; 
-  unsigned int bgcolor=component->bgcolor;
+#endif // HAVE_BAGL_ELLIPSIS
 
 #ifdef HAVE_BAGL_GLYPH_ARRAY
   const bagl_glyph_array_entry_t* glyph=NULL;
@@ -548,7 +548,7 @@ void bagl_draw_with_context(const bagl_component_t* component, const void* conte
 
 idx_ok:
   */
-  
+
   // strip the flags to match kinds
   unsigned int type = component->type&~(BAGL_TYPE_FLAGS_MASK);
 
@@ -557,7 +557,8 @@ idx_ok:
     const bagl_font_t* font = bagl_get_font(component->font_id);
     if (font) {
       baseline = font->baseline_height;
-      char_height = font->char_height;
+      height_to_draw = component->height;
+
       if (context && context_length) {
         // compute with some margin to fit other characters and check if ellipsis algorithm is required
         strwidth = bagl_compute_line_width(component->font_id, component->width+100, context, context_length, context_encoding);
@@ -634,8 +635,11 @@ idx_ok:
     }
   }
 
-  // only check the type only, ignore the touchable flag
-  switch(type) {
+  unsigned int radius = component->radius;
+  radius = MIN(radius, MIN(component->width/2, component->height/2));
+
+  // Check the type only, ignore the touchable flag
+  switch (type) {
     /*
         button (B)
         <   |Icon|Space|Textstring|   >
@@ -644,244 +648,176 @@ idx_ok:
         W.x = I.x+I.w
         T.x = W.x+W.w = I.x+I.w+W.w = B.x+B.w/2-(I.w+W.w+T.w)/2+I.w+W.w = B.x+B.w/2-T.w/2+(I.w+W.w)/2
     */
+
+    // Following types are supposed to draw a rectangle or write text or both
+    case BAGL_BUTTON:
+    case BAGL_LABEL:
     case BAGL_RECTANGLE:
-    case BAGL_BUTTON: // optional icon + textbox + rectangle
-    draw_round_rect: {
-      unsigned int radius = component->radius;
-      
-
-      if (component->fill != BAGL_FILL) {
-        // inner
-        // centered top to bottom
-        bagl_hal_draw_rect(bgcolor, 
-                           component->x+radius,                  
-                           component->y-(type==BAGL_LABELINE?(baseline):0), 
-                           component->width-2*radius, 
-                           component->height);
-        // left to center rect
-        bagl_hal_draw_rect(bgcolor, 
-                           component->x,                                    
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                           radius, 
-                           component->height-2*radius); 
-        // center rect to right
-        bagl_hal_draw_rect(bgcolor, 
-                           component->x+component->width-radius-1, 
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                           radius, 
-                           component->height-2*radius);
-
-        // outline
-        // 4 rectangles (with last pixel of each corner not set)
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x+radius,                  
-                           component->y-(type==BAGL_LABELINE?(baseline):0), 
-                           component->width-2*radius, 
-                           component->stroke); // top
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x+radius,                  
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+component->height-1, 
-                           component->width-2*radius, 
-                           component->stroke); // bottom
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x,                                    
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                           component->stroke, 
-                           component->height-2*radius); // left
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x+component->width-1, 
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                           component->stroke, 
-                           component->height-2*radius); // right
-      }
-      else {
-        // centered top to bottom
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x+radius,                  
-                           component->y-(type==BAGL_LABELINE?(baseline):0), 
-                           component->width-2*radius, 
-                           component->height);
-        // left to center rect
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x,                                    
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                           radius, 
-                           component->height-2*radius); 
-
-        // center rect to right
-        bagl_hal_draw_rect(fgcolor, 
-                           component->x+component->width-radius, 
-                           component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                           radius, 
-                           component->height-2*radius);
-      }
-
-      goto rect;
-    }
-
-    case BAGL_LABELINE:       
-    case BAGL_LABEL: {
-
-
-      // for strings, colors are inverted.     
-      unsigned int radius;
-      unsigned int icon_width;
-      fgcolor=component->bgcolor; 
-      bgcolor=component->fgcolor;
-    rect:
-      icon_width = 0;
-      radius = component->radius;
-      //if (radius > component->width/2 ||radius > component->height/2) 
-      {
-        radius = MIN(radius, MIN(component->width/2, component->height/2));
-      }
-      // draw the background
-      /* shall not be needed
-      if (component->fill == BAGL_FILL) {
-        bagl_hal_draw_rect(component->bgcolor, 
-                           component->x+radius,                  
-                           component->y, 
-                           component->width-2*radius, 
-                           component->stroke); // top
-      }
-      */
-      
-
-      // draw corners
-      if (radius > 1) {
-        unsigned int radiusint = 0;
-        // carve round when not filling
-        if (component->fill != BAGL_FILL && component->stroke < radius) {
-          radiusint = radius-component->stroke;
-        }
-        bagl_draw_circle_helper(fgcolor, 
-                                component->x+radius, 
-                                component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                                radius, 
-                                BAGL_FILL_CIRCLE_PI2_PI, 
-                                radiusint, 
-                                bgcolor);
-        bagl_draw_circle_helper(fgcolor, 
-                                component->x+component->width-radius-component->stroke, 
-                                component->y-(type==BAGL_LABELINE?(baseline):0)+radius, 
-                                radius, 
-                                BAGL_FILL_CIRCLE_0_PI2, 
-                                radiusint, 
-                                bgcolor);
-        bagl_draw_circle_helper(fgcolor, 
-                                component->x+radius, 
-                                component->y-(type==BAGL_LABELINE?(baseline):0)+component->height-radius-component->stroke, 
-                                radius, 
-                                BAGL_FILL_CIRCLE_PI_3PI2, 
-                                radiusint, 
-                                bgcolor);
-        bagl_draw_circle_helper(fgcolor, 
-                                component->x+component->width-radius-component->stroke, 
-                                component->y-(type==BAGL_LABELINE?(baseline):0)+component->height-radius-component->stroke, 
-                                radius, 
-                                BAGL_FILL_CIRCLE_3PI2_2PI, 
-                                radiusint, 
-                                bgcolor);
-      }
-
-      // for rectangle/line/... which fallthrough here
-      if (type != BAGL_LABELINE && type != BAGL_LABEL) {
+    case BAGL_LINE:
+    case BAGL_LABELINE:
+      if((type == BAGL_LINE) && (component->radius == 0)) {
+        bagl_hal_draw_rect(component->fgcolor,
+                           component->x, component->y,
+                           component->width, component->height);
         break;
       }
 
-      if (context && context_length) {
-        // debug centering
-        //bagl_hal_draw_rect(component->fgcolor, component->x, component->y, 2, 2);
+      if ((type == BAGL_LABEL) || (type == BAGL_LABELINE)) {
+        /*if (component->fill == BAGL_FILL)*/ {
+          bagl_hal_draw_rect(component->bgcolor,
+                             component->x, component->y-(type==BAGL_LABELINE?(baseline):0),
+                             component->width, (type==BAGL_LABELINE? height_to_draw : component->height));
+        }
+      }
+      else {
+        // Draw the rounded or not, filled or not rectangle
+        if (component->fill != BAGL_FILL) {
+          // inner
+          // centered top to bottom
+          bagl_hal_draw_rect(component->bgcolor,
+                             component->x+radius, component->y,
+                             component->width-2*radius, component->height);
+          // left to center rect
+          bagl_hal_draw_rect(component->bgcolor,
+                             component->x, component->y+radius,
+                             radius, component->height-2*radius);
+          // center rect to right
+          bagl_hal_draw_rect(component->bgcolor,
+                             component->x+component->width-radius-1, component->y+radius,
+                             radius, component->height-2*radius);
 
-        unsigned int pos = bagl_draw_string(component->font_id,
-                         component->fgcolor, 
-                         component->bgcolor, 
-                         component->x + halignment /*+ component->stroke*/, 
-                         component->y + (type==BAGL_LABELINE?-(baseline):valignment) /*+ component->stroke*/, 
-                         component->width /*- 2*component->stroke*/ - halignment, 
-                         component->height /*- 2*component->stroke*/ - (type==BAGL_LABELINE?0/*-char_height*/:valignment),
-                         context,
-                         ellipsis_1_len,
-                         context_encoding);
+          // outline
+          // 4 rectangles (with last pixel of each corner not set)
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x+radius, component->y,
+                             component->width-2*radius, component->stroke); // top
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x+radius, component->y+component->height-1,
+                             component->width-2*radius, component->stroke); // bottom
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x, component->y+radius,
+                             component->stroke, component->height-2*radius); // left
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x+component->width-1, component->y+radius,
+                             component->stroke, component->height-2*radius); // right
+        }
+        else {
+          // centered top to bottom
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x+radius, component->y,
+                             component->width-2*radius, component->height);
+          // left to center rect
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x, component->y+radius,
+                             radius,  component->height-2*radius);
+
+          // center rect to right
+          bagl_hal_draw_rect(component->fgcolor,
+                             component->x+component->width-radius, component->y+radius,
+                             radius, component->height-2*radius);
+        }
+
+        // draw corners
+        if (radius > 1) {
+          unsigned int radiusint = 0;
+          // carve round when not filling
+          if ((component->fill != BAGL_FILL) && (component->stroke < radius)) {
+            radiusint = radius-component->stroke;
+          }
+          bagl_draw_circle_helper(component->fgcolor,
+                                  component->x+radius,
+                                  component->y+radius,
+                                  radius, BAGL_FILL_CIRCLE_PI2_PI, radiusint,
+                                  component->bgcolor);
+          bagl_draw_circle_helper(component->fgcolor,
+                                  component->x+component->width-radius-component->stroke,
+                                  component->y+radius,
+                                  radius, BAGL_FILL_CIRCLE_0_PI2, radiusint,
+                                  component->bgcolor);
+          bagl_draw_circle_helper(component->fgcolor,
+                                  component->x+radius,
+                                  component->y+component->height-radius-component->stroke,
+                                  radius, BAGL_FILL_CIRCLE_PI_3PI2, radiusint,
+                                  component->bgcolor);
+          bagl_draw_circle_helper(component->fgcolor,
+                                  component->x+component->width-radius-component->stroke,
+                                  component->y+component->height-radius-component->stroke,
+                                  radius, BAGL_FILL_CIRCLE_3PI2_2PI, radiusint,
+                                  component->bgcolor);
+        }
+      }
+
+      if (type == BAGL_LINE) {
+        // No text for this type
+        break;
+      }
+
+      // Text display
+      if (context && context_length) {
+        unsigned int pos = 0;
+        unsigned int fgcolor = component->fgcolor;
+        unsigned int bgcolor = component->bgcolor;
+
+          // Invert colors of text when rectangle/button is filled
+        if (   ((type == BAGL_BUTTON) || (type == BAGL_RECTANGLE))
+            && (component->fill == BAGL_FILL)) {
+          fgcolor = component->bgcolor;
+          bgcolor = component->fgcolor;
+        }
+
+        pos = bagl_draw_string(component->font_id,
+                               fgcolor, bgcolor,
+                               component->x + halignment,
+                               component->y + ((type==BAGL_LABELINE)?-(baseline):valignment),
+                               component->width - halignment,
+                               component->height - ((type==BAGL_LABELINE)?0:valignment),
+                               context,
+                               ellipsis_1_len,
+                               context_encoding);
 #ifdef HAVE_BAGL_ELLIPSIS
         if (ellipsis_2_start) {
           // draw ellipsis
           pos = bagl_draw_string(component->font_id,
-                                 component->fgcolor, 
-                                 component->bgcolor, 
-                                 (pos & 0xFFFF) /*+ component->stroke*/, 
-                                 component->y + (type==BAGL_LABELINE?-(baseline):valignment) /*+ component->stroke*/, 
-                                 component->width /*- 2*component->stroke*/ - halignment, 
-                                 component->height /*- 2*component->stroke*/ - (type==BAGL_LABELINE?0/*-char_height*/:valignment),
+                                 fgcolor, bgcolor,
+                                 (pos & 0xFFFF),
+                                 component->y + ((type==BAGL_LABELINE)?-(baseline):valignment),
+                                 component->width - halignment,
+                                 component->height - (type==BAGL_LABELINE?0:valignment),
                                  "...",
                                  3,
-                                 context_encoding); 
+                                 context_encoding);
           // draw the right part
           pos = bagl_draw_string(component->font_id,
-                                 component->fgcolor, 
-                                 component->bgcolor, 
-                                 (pos & 0xFFFF) /*+ component->stroke*/, 
-                                 component->y + (type==BAGL_LABELINE?-(baseline):valignment) /*+ component->stroke*/, 
-                                 component->width /*- 2*component->stroke*/ - halignment, 
-                                 component->height /*- 2*component->stroke*/ - (type==BAGL_LABELINE?0/*-char_height*/:valignment),
+                                 fgcolor, bgcolor,
+                                 (pos & 0xFFFF),
+                                 component->y + ((type==BAGL_LABELINE)?-(baseline):valignment),
+                                 component->width - halignment,
+                                 component->height - ((type==BAGL_LABELINE)?0:valignment),
                                  ellipsis_2_start,
                                  (context_length - ((unsigned int)ellipsis_2_start-(unsigned int)context) ),
                                  context_encoding);
         }
 #endif // HAVE_BAGL_ELLIPSIS
-        
-        // debug centering
-        //bagl_hal_draw_rect(component->fgcolor, component->x+component->width-2, component->y+component->height-2, 2, 2);
-      }
-      /*
-      if (component->stroke > 0) {
-        goto outline_rect;
-      }
-      */
-      break;
-    }
-    case BAGL_LINE: // a line is just a flat rectangle :p
-    //case BAGL_RECTANGLE:
-      if(/*component->fill == BAGL_FILL &&*/ component->radius == 0) {
-        bagl_hal_draw_rect(component->fgcolor, component->x, component->y, component->width, component->height);
-      }
-      else {
-        goto draw_round_rect;
-        /*
-        // not filled, respect the stroke
-        // left
-        bagl_hal_draw_rect(component->fgcolor, component->x, component->y, MAX(1,component->stroke), component->height);
-        // top
-        bagl_hal_draw_rect(component->fgcolor, component->x, component->y, component->width, MAX(1,component->stroke));
-        // right
-        bagl_hal_draw_rect(component->fgcolor, component->x+component->width-MAX(1,component->stroke), component->y, MAX(1,component->stroke), component->height);
-        // bottom
-        bagl_hal_draw_rect(component->fgcolor, component->x, component->y+component->height-MAX(1,component->stroke), component->width, MAX(1,component->stroke));
-        */
       }
       break;
 
 #ifdef HAVE_BAGL_GLYPH_ARRAY
-    case BAGL_ICON: {
-      x = component->x;
-      y = component->y;
-
+    case BAGL_ICON:
       // icon data follows are in the context
       if (component->icon_id != 0) {
 
         // select the default or custom glyph array
-        if (component->type == BAGL_ICON && context_encoding && G_glyph_array && G_glyph_count > 0) {
+        if (context_encoding && G_glyph_array && G_glyph_count > 0) {
           glyph = bagl_get_glyph(component->icon_id, G_glyph_array, G_glyph_count);
         }
         else {
           glyph = bagl_get_glyph(component->icon_id, C_glyph_array, C_glyph_count);
         }
 
-        // 404 glyph not found 
+        // 404 glyph not found
         if (glyph == NULL) {
           break;
         }
-
 
         // color accounted as bytes in the context length
         if (context_length) {
@@ -899,14 +835,14 @@ idx_ok:
 
         // center glyph in rect
         // draw the glyph from the bitmap using the context for colors
-        bagl_hal_draw_bitmap_within_rect(x + (component->width / 2 - glyph->width / 2), 
-                                         y + (component->height / 2 - glyph->height / 2), 
-                                         glyph->width, 
-                                         glyph->height, 
-                                         context_length, 
+        bagl_hal_draw_bitmap_within_rect(component->x + (component->width / 2 - glyph->width / 2),
+                                         component->y + (component->height / 2 - glyph->height / 2),
+                                         glyph->width,
+                                         glyph->height,
+                                         context_length,
                                          (unsigned int*)context, // Endianness remarkably ignored !
-                                         glyph->bits_per_pixel, 
-                                         glyph->bitmap, 
+                                         glyph->bits_per_pixel,
+                                         glyph->bitmap,
                                          glyph->bits_per_pixel*(glyph->width*glyph->height));
       }
       else {
@@ -916,47 +852,35 @@ idx_ok:
         unsigned int bpp = ((unsigned char*)context)[0];
         // no space to display that
         if (bpp > 2) {
-          return;
+          break;
         }
         unsigned int i=1<<bpp;
         while(i--) {
           colors[i] = U4BE((unsigned char*)context, 1+i*4);
         }
-       
+
         // draw the glyph from the bitmap using the context for colors
-        bagl_hal_draw_bitmap_within_rect(x, 
-                                         y, 
-                                         component->width, 
-                                         component->height, 
-                                         1<<bpp,
-                                         colors,
-                                         bpp, 
-                                         ((unsigned char*)context)+1+(1<<bpp)*4, 
+        bagl_hal_draw_bitmap_within_rect(component->x, component->y,
+                                         component->width, component->height,
+                                         1<<bpp, colors, bpp,
+                                         ((unsigned char*)context)+1+(1<<bpp)*4,
                                          bpp*(component->width*component->height));
       }
-
       break;
-    }
 #endif // HAVE_BAGL_GLYPH_ARRAY
-    
+
     case BAGL_CIRCLE:
       // draw the circle (all 8 octants)
-      bagl_draw_circle_helper(component->fgcolor, component->x+component->radius, component->y+component->radius, component->radius, 0xFF, ((component->fill != BAGL_FILL && component->stroke < component->radius)?component->radius-component->stroke:0), component->bgcolor);
+      bagl_draw_circle_helper(component->fgcolor,
+                              component->x+component->radius, component->y+component->radius,
+                              component->radius, 0xFF,
+                              ((component->fill != BAGL_FILL && component->stroke < component->radius)?component->radius-component->stroke:0),
+                              component->bgcolor);
       break;
 
-    //case BAGL_NONE:
-      // performing, but not registering
-      //bagl_hal_draw_rect(component->fgcolor, component->x, component->y, component->width, component->height);
-      //return;
-    case BAGL_NONE:
     default:
-      return;
+      break;
   }
-
-  /*
-  // remember drawn component for user action
-  memcpy(&bagl_components[comp_idx], component, sizeof(bagl_component_t));  
-  */
 }
 
 // --------------------------------------------------------------------------------------

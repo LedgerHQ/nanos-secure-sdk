@@ -82,10 +82,10 @@ uint8_t PC_to_RDR_IccPowerOn(void)
   }
   
   /* Voltage that is applied to the ICC
-  00h – Automatic Voltage Selection
-  01h – 5.0 volts
-  02h – 3.0 volts
-  03h – 1.8 volts
+  00h ï¿½ Automatic Voltage Selection
+  01h ï¿½ 5.0 volts
+  02h ï¿½ 3.0 volts
+  03h ï¿½ 1.8 volts
   */
   /* G_io_ccid.bulk_header.bulkout.bSpecific_0 Contains bPowerSelect */
   voltage = G_io_ccid.bulk_header.bulkout.bSpecific_0;
@@ -374,7 +374,7 @@ uint8_t  PC_to_RDR_SetParameters(void)
     CCID_UpdateCommandStatus(BM_COMMAND_STATUS_FAILED, BM_ICC_PRESENT_ACTIVE);
   } 
   
-  os_memmove(&G_io_ccid.Protocol0_DataStructure, (Protocol0_DataStructure_t*)(&(G_io_ccid_data_buffer[0])), sizeof(Protocol0_DataStructure_t));
+  memcpy(&G_io_ccid.Protocol0_DataStructure, (Protocol0_DataStructure_t*)(&(G_io_ccid_data_buffer[0])), sizeof(Protocol0_DataStructure_t));
   error = SC_SetParams(&G_io_ccid.Protocol0_DataStructure);
   
    if (error != SLOT_NO_ERROR)
@@ -451,8 +451,8 @@ uint8_t  PC_to_RDR_IccClock(void)
   if (error != 0) 
     return error;
 
-  /* bClockCommand • 00h restarts Clock
-                   • 01h Stops Clock in the state shown in the bClockStop 
+  /* bClockCommand ï¿½ 00h restarts Clock
+                   ï¿½ 01h Stops Clock in the state shown in the bClockStop 
                        field of the PC_to_RDR_SetParameters command 
                        and RDR_to_PC_Parameters message.*/
   if (G_io_ccid.bulk_header.bulkout.bSpecific_0 > 1)
@@ -602,11 +602,11 @@ uint8_t  PC_TO_RDR_Mechanical(void)
     return error;
   
   if (G_io_ccid.bulk_header.bulkout.bSpecific_0 > 0x05)
-  {/* 01h – Accept Card
-      02h – Eject Card
-      03h – Capture Card
-      04h – Lock Card
-      05h – Unlock Card*/
+  {/* 01h ï¿½ Accept Card
+      02h ï¿½ Eject Card
+      03h ï¿½ Capture Card
+      04h ï¿½ Lock Card
+      05h ï¿½ Unlock Card*/
     
    CCID_UpdateCommandStatus(BM_COMMAND_STATUS_FAILED, BM_ICC_PRESENT_ACTIVE); 
    return SLOTERROR_BAD_BFUNCTION_MECHANICAL;
@@ -822,7 +822,7 @@ void RDR_to_PC_Parameters(uint8_t  errorCode)
    G_io_ccid.bulk_header.bulkin.dwLength = 0;
   }
     
-  os_memmove(G_io_ccid_data_buffer, &G_io_ccid.Protocol0_DataStructure, sizeof(G_io_ccid.Protocol0_DataStructure));
+  memcpy(G_io_ccid_data_buffer, &G_io_ccid.Protocol0_DataStructure, sizeof(G_io_ccid.Protocol0_DataStructure));
   
   /* bProtocolNum */
   G_io_ccid.bulk_header.bulkin.bSpecific = BPROTOCOL_NUM_T0; 
