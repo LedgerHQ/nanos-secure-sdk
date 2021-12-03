@@ -4,7 +4,7 @@
 #include "decorators.h"
 
 #ifdef HAVE_BAGL
-#ifdef TARGET_NANOX
+#ifdef HAVE_SE_SCREEN
 // SYSCALL void screen_write_frame(unsigned char* framebuffer
 // PLENGTH(BAGL_WIDTH*BAGL_HEIGHT/8));
 /**
@@ -19,6 +19,12 @@ SYSCALL void screen_clear(void);
  * Require the screen buffer to be pushed into the screen driver.
  */
 SYSCALL void screen_update(void);
+
+/**
+ * Set screen brightness
+ */
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void screen_set_brightness(
+    unsigned int percent);
 /**
  * Require a specific zone not to be cleared/drawn by any graphic HAL to
  * implement screen overlay
@@ -42,5 +48,5 @@ SYSCALL void bagl_hal_draw_bitmap_within_rect(
  */
 SYSCALL void bagl_hal_draw_rect(unsigned int color, int x, int y,
                                 unsigned int width, unsigned int height);
-#endif // TARGET_NANOX
+#endif // HAVE_SE_SCREEN
 #endif // HAVE_BAGL

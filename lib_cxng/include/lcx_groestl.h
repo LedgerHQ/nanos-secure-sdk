@@ -16,9 +16,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_groestl.h
+ * @brief   GROESTL hash function.
+ *
+ * Refer to <a href = "https://www.groestl.info/"> GROESTL info </a> for more details.
  */
 
 #ifdef HAVE_GROESTL
@@ -34,44 +36,58 @@
 #define COLS1024 16
 #define SIZE1024 (ROWS * COLS1024)
 typedef unsigned char BitSequence;
-/**  @Private */
+/**  @private Hash state */
 struct hashState_s {
-  uint8_t      chaining[ROWS][COLS1024]; /* the actual state */
-  uint64_t     block_counter;            /* block counter */
-  unsigned int hashlen;                  /* output length */
-  BitSequence  buffer[SIZE1024];         /* block buffer */
-  unsigned int buf_ptr;                  /* buffer pointer */
-  unsigned int columns;                  /* number of columns in state */
-  unsigned int rounds;                   /* number of rounds in P and Q */
-  unsigned int statesize;                /* size of state (ROWS*columns) */
+  uint8_t      chaining[ROWS][COLS1024]; ///< Actual state
+  uint64_t     block_counter;            ///< Block counter
+  unsigned int hashlen;                  ///< Output length
+  BitSequence  buffer[SIZE1024];         ///< Block buffer
+  unsigned int buf_ptr;                  ///< Buffer pointer
+  unsigned int columns;                  ///< Number of columns in a state
+  unsigned int rounds;                   ///< Number of rounds in P and Q
+  unsigned int statesize;                ///< Size of the state
 };
-/** @Private */
+/** @private */
 typedef struct hashState_s hashState;
 
 /**
- * Groestl context
+ * @brief Groestl context
  */
 struct cx_groestl_s {
-  /** @copydoc cx_ripemd160_s::header */
-  struct cx_hash_header_s header;
-  /** @internal output digest size*/
-  unsigned int output_size;
-
-  struct hashState_s ctx;
+  struct cx_hash_header_s header;       ///< @copydoc cx_ripemd160_s::header
+  unsigned int output_size;             ///< Output digest size
+  struct hashState_s ctx;               ///< Hash state
 };
-/** Convenience type. See #cx_groestl512_s. */
+/** Convenience type.*/
 typedef struct cx_groestl_s cx_groestl_t;
 
 /**
- * Init a groestl224 context.
+ * @brief   Initialize a GROESTL224 context.
  *
- * @param [out] hash the context to init.
- *    The context shall be in RAM
+ * @param[out] hash Pointer to the context to init.
+ * 
+ * @param[in]  size Length of the digest.
  *
- * @return algorithm identifier
+ * @return          Error code:
+ *                  - CX_OK on success
+ *                  - CX_INVALID_PARAMETER
  */
   cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
 
+/**
+ * @brief   Initialize a GROESTL224 context.
+ * 
+ * @details This function throws an exception if the
+ *          initialization fails.
+ *
+ * @param[out] hash Pointer to the context to init.
+ * 
+ * @param[in]  size Length of the digest.
+ *
+ * @return          GROESTL identifier.
+ * 
+ * @throws          CX_INVALID_PARAMETER
+ */
 static inline int cx_groestl_init ( cx_groestl_t * hash, unsigned int size )
 {
   CX_THROW(cx_groestl_init_no_throw(hash, size));

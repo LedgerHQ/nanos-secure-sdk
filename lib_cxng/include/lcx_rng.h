@@ -16,9 +16,13 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_rng.h
+ * @brief   Random Number Generation
+ *
+ * Random numbers with different sizes can be generated: a 8-bit random number, a 32-bit random number
+ * or a random number of arbitrary size. In this case, the number is returned as a buffer of random bytes.
+ * The random number can also be generated within a specific range.
  */
 
 #ifdef HAVE_RNG
@@ -30,13 +34,25 @@
 #include "lcx_hash.h"
 
 /**
- * Generate a random buffer, each bytes between 0 and 255*
+ * @brief   Generate a random buffer such that each byte is between 0 and 255.
  *
- * @param [out] buffer to randomize
- * @param [in]  buffer length
+ * @param[out] buffer Buffer to hold the random data.
+ * 
+ * @param[in]  len    Length of the buffer i.e. number of
+ *                    random bytes to put into the buffer.
  */
 void cx_rng_no_throw(uint8_t *buffer, size_t len);
 
+/**
+ * @brief   Generate a random buffer such that each byte is between 0 and 255.
+ *
+ * @param[out] buffer Buffer to hold the random data.
+ * 
+ * @param[in]  len    Length of the buffer i.e. number of
+ *                    random bytes to put into the buffer.
+ * 
+ * @return            Pointer to the buffer.
+ */
 static inline unsigned char *cx_rng(uint8_t *buffer, size_t len)
 {
   cx_rng_no_throw(buffer, len);
@@ -44,9 +60,9 @@ static inline unsigned char *cx_rng(uint8_t *buffer, size_t len)
 }
 
 /**
- * Generate 32 bits of random. This function is implemented as a SUDOCALL to
- * allow calls from constrained tasks (IO sometimes needs random numbers).
- * @return a random 32bits.
+ * @brief   Output 32 random bits.
+ *
+ * @return  A 32-bit random number.
  */
 static inline uint32_t cx_rng_u32(void) {
   uint32_t r;
@@ -55,8 +71,9 @@ static inline uint32_t cx_rng_u32(void) {
 }
 
 /**
- * Generate 8 bits of random.
- * @return a random 8bits.
+ * @brief   Output 8 random bits.
+ * 
+ * @return  A 8-bit random number.
  */
 static inline uint8_t cx_rng_u8(void) {
   uint8_t r;
@@ -67,30 +84,63 @@ static inline uint8_t cx_rng_u8(void) {
 typedef uint32_t (*cx_rng_u32_range_randfunc_t)(void);
 
 /**
- * Generate a random 32 bits unsigned integer in range [a;b[ with uniform probability.
+ * @brief   Generate a random 32-bit unsigned integer
+ *          with a specified function.
+ * 
+ * @details The generated number is taken in the range [a;b[
+ *          with uniform distribution.
  *
- * @param [in] a        inclusive low bound
- * @param [in] b        exclusive high bound
- * @param [in] randfunc function called to generate random u32 value
+ * @param[in] a        Inclusive low bound.
+ * 
+ * @param[in] b        Exclusive high bound.
+ * 
+ * @param[in] randfunc Function called to generate the random value.
  *
- * @return generated random.
+ * @return             A 32-bit random number.
  */
 uint32_t cx_rng_u32_range_func(uint32_t a, uint32_t b, cx_rng_u32_range_randfunc_t randfunc);
 
 /**
- * Generate a random 32 bits unsigned integer in range [a;b[ with unform probality.
+ * @brief   Generate a random 32-bit unsigned integer.
+ * 
+ * @details The generated number is taken in the range [a;b[
+ *          with uniform distribution.
+ * 
+ * @param[in] a   Inclusive low bound.
+ * 
+ * @param[in] b   Exclusive high bound.
  *
- * @param [in] a   inclusive low bound
- * @param [in] b   exclusive high bound
- *
- * @return generated random.
+ * @return        A 32-bit random number.
  */
 static inline uint32_t cx_rng_u32_range(uint32_t a, uint32_t b) {
   return cx_rng_u32_range_func(a, b, cx_rng_u32);
 }
 
 /**
- * Generate a random buffer according to rfc6979
+ * @brief   Generate a random buffer according to
+ *          <a href="https://tools.ietf.org/html/rfc6979"> RFC6979 </a>.
+ * 
+ * @param[in]  hash_id  Message digest algorithm identifier.
+ *  
+ * @param[in]  x        ECDSA private key.
+ * 
+ * @param[in]  x_len    Length of the key.
+ *  
+ * @param[in]  h1       Hash of the message.
+ * 
+ * @param[in]  h1_len   Length of the hash.
+ * 
+ * @param[in]  q        Prime number that is a divisor of the curve order.
+ * 
+ * @param[in]  q_len    Length of the prime number *q*.
+ * 
+ * @param[out] out      Buffer for the output.
+ * 
+ * @param[in]  out_len  Length of the output.
+ * 
+ * @return              Error code:
+ *                      - CX_OK on success
+ *                      - CX_INVALID_PARAMETER
  */
 cx_err_t cx_rng_rfc6979(cx_md_t hash_id,
                         const uint8_t *x, size_t x_len,

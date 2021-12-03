@@ -140,4 +140,6 @@ unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_fun
   [_NR_cx_swap_buffer64] = (unsigned long)cx_swap_buffer64,
   [_NR_cx_swap_uint32] = (unsigned long)cx_swap_uint32,
   [_NR_cx_swap_uint64] = (unsigned long)cx_swap_uint64,
+  [_NR_cx_x25519] = (unsigned long)cx_x25519,
+  [_NR_cx_x448] = (unsigned long)cx_x448,
 };

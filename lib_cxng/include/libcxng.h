@@ -16,6 +16,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
+/**
+ * @file    libcxng.h
+ * @brief   Include cryptography files.
+ */
+
 #ifndef LIBLCXNG_H
 #define LIBLCXNG_H
 

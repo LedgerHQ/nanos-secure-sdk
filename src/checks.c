@@ -50,7 +50,7 @@ static unsigned int ui_audited_elements_button(unsigned int button_mask, unsigne
 
 // This array is to be displayed under specific circumstances, right at the launch of an application.
 const bagl_element_t ui_audited_elements[] = {
-#if defined(TARGET_NANOS)
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==32)
   // Erasure of the whole screen,
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
   // First line of text,
@@ -65,7 +65,7 @@ const bagl_element_t ui_audited_elements[] = {
       BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
       "Ledger review",
   },
-#elif defined(TARGET_NANOX)
+#elif (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
   // Erasure of the whole screen,
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
   // Warning icon.
@@ -82,7 +82,9 @@ const bagl_element_t ui_audited_elements[] = {
       BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER, 0},
       "Ledger review",
   },
-#endif // TARGET_NANOS / TARGET_NANOX
+#else
+#error "BAGL_WIDTH/BAGL_HEIGHT not defined"
+#endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 };
 
 // This function is called at the end of the seph initialization.

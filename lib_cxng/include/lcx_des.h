@@ -16,10 +16,16 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included direcly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_des.h
+ * @brief   DES (Data Encryption Standard).
+ *
+ * DES is an encryption algorithm designed to encipher and decipher blocks of
+ * 64 bits under control of a 64-bit key.
+ * 
+ * Triple DES variant supports either a 128-bit or 192-bit key.
  */
+
 #ifdef HAVE_DES
 
 #ifndef LCX_DES_H
@@ -32,25 +38,41 @@
 #include <stdint.h>
 
 /**
- * Initialize a DES Key.
+ * @brief   Initialize a DES key.
+ * 
+ * @details Once initialized, the key can be stored in non-volatile memory
+ *          and directly used for any DES processing.
  *
- * Once initialized, the key may be stored in non-volatile memory
- * an reused 'as-is' for any DES processing
- *
- * @param [in] rawkey
- *   raw key value
- *
- * @param [in] key_len
- *   key bytes lenght: 8,16 or 24
- *
- * @param [out] key
- *   DES key to init
- *
- * @param key
- *   ready to use key to init
+ * @param[in]  rawkey  Pointer to the supplied key.
+ * 
+ * @param[in]  key_len Length of the key: 8, 16 or 24 octets.
+ * 
+ * @param[out] key     Pointer to the key.
+ * 
+ * @return             Error code:
+ *                     - CX_OK on success
+ *                     - CX_INVALID_PARAMETER
  */
 cx_err_t cx_des_init_key_no_throw(const uint8_t *rawkey, size_t key_len, cx_des_key_t *key);
 
+/**
+ * @brief   Initialize a DES key.
+ * 
+ * @details Once initialized, the key can be stored in non-volatile memory
+ *          and directly used for any DES processing.
+ *          This functions throws an exception if the initialization
+ *          fails.
+ *
+ * @param[in]  rawkey  Pointer to the supplied key.
+ * 
+ * @param[in]  key_len Length of the key: 8, 16 or 24 octets.
+ * 
+ * @param[out] key     Pointer to the key.
+ * 
+ * @return             Length of the key.
+ * 
+ * @throws             CX_INVALID_PARAMETER
+ */
 static inline int cx_des_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_des_key_t * key )
 {
   CX_THROW(cx_des_init_key_no_throw(rawkey, key_len, key));
@@ -58,53 +80,47 @@ static inline int cx_des_init_key ( const unsigned char * rawkey, unsigned int k
 }
 
 /**
- * Encrypt, Decrypt, Sign or Verify data with DES algorithm.
+ * @brief   Encrypt, Decrypt, Sign or Verify data with DES algorithm.
  *
- * @param [in] key
- *   A des key fully inited with 'cx_des_init_key'
+ * @param[in] key    Pointer to the key initialized with 
+ *                   #cx_des_init_key_no_throw.
+ * 
+ * @param[in] iv     Initialization vector.
+ * 
+ * @param[in] iv_len Length of the initialization vector.
+ * 
+ * @param[in] mode   Crypto mode flags.
+ *                    Supported flags:
+ *                     - CX_LAST
+ *                     - CX_ENCRYPT
+ *                     - CX_DECRYPT
+ *                     - CX_SIGN
+ *                     - CX_VERIFY
+ *                     - CX_PAD_NONE
+ *                     - CX_PAD_ISO9797M1
+ *                     - CX_PAD_ISO9797M2
+ *                     - CX_CHAIN_ECB
+ *                     - CX_CHAIN_CBC
+ *                     - CX_CHAIN_CTR
+ * 
+ * @param[in] in     Input data.
+ * 
+ * @param[in] in_len Length of the input data.
+ *                    If CX_LAST is set, padding is automatically done according to the *mode*.
+ *                    Otherwise, *in_len* shall be a multiple of DES_BLOCK_SIZE.
  *
- * @param [in] mode
- *   Crypto mode flags. See above.
- *   Supported flags:
- *     - CX_LAST
- *     - CX_ENCRYPT
- *     - CX_DECRYPT
- *     - CX_SIGN
- *     - CX_VERIFY
- *     - CX_PAD_NONE
- *     - CX_PAD_ISO9797M1
- *     - CX_PAD_ISO9797M2
- *     - CX_CHAIN_ECB
- *     - CX_CHAIN_CBC
- *     - CX_CHAIN_CTR
+ * @param[out] out   Output data according to the mode:
+ *                     - encrypted/decrypted output data
+ *                     - generated signature
+ *                     - signature to be verified
  *
- * @param [in] in
- *   Input data to encrypt/decrypt
+ * @param[in] out_len Length of the output data.
  *
- * @param [in] len
- *   Length of input to data.
- *   If CX_LAST is set, padding is automatically done according to  'mode'.
- *   Else  'len' shall be a multiple of DES_BLOCK_SIZE.
- *
- * @param [in] iv
- *   Initial IV for chaining mode
- *
- * @param [out] out
- *   Either:
- *     - encrypted/decrypted ouput data
- *     - produced signature
- *     - signature to check
- *
- * @param [in] out_len
- *     size of output buffer
- *
- * @return
- *   - In case of ENCRYPT, DECRYPT or SIGN mode: output lenght data
- *   - In case of VERIFY mode: 0 if signature is false, DES_BLOCK_SIZE if signature is correct
- *
- * @throws INVALID_PARAMETER
+ * @return            Error code:
+ *                    - CX_OK on success
+ *                    - CX_INVALID_PARAMETER
+ *                    - INVALID_PARAMETER
  */
-
 cx_err_t cx_des_iv_no_throw(const cx_des_key_t *key,
                    uint32_t            mode,
                    const uint8_t *     iv,
@@ -114,6 +130,51 @@ cx_err_t cx_des_iv_no_throw(const cx_des_key_t *key,
                    uint8_t *           out,
                    size_t *            out_len);
 
+/**
+ * @brief   Encrypt, Decrypt, Sign or Verify data with DES algorithm.
+ * 
+ * @details This function throws an exception if the computation
+ *          doesn't succeed.
+ *
+ * @param[in] key    Pointer to the key initialized with 
+ *                   #cx_des_init_key_no_throw.
+ * 
+ * @param[in] iv     Initialization vector.
+ * 
+ * @param[in] iv_len Length of the initialization vector.
+ * 
+ * @param[in] mode   Crypto mode flags.
+ *                    Supported flags:
+ *                     - CX_LAST
+ *                     - CX_ENCRYPT
+ *                     - CX_DECRYPT
+ *                     - CX_SIGN
+ *                     - CX_VERIFY
+ *                     - CX_PAD_NONE
+ *                     - CX_PAD_ISO9797M1
+ *                     - CX_PAD_ISO9797M2
+ *                     - CX_CHAIN_ECB
+ *                     - CX_CHAIN_CBC
+ *                     - CX_CHAIN_CTR
+ * 
+ * @param[in] in     Input data.
+ * 
+ * @param[in] in_len Length of the input data.
+ *                    If CX_LAST is set, padding is automatically done according to the *mode*.
+ *                    Otherwise, *in_len* shall be a multiple of DES_BLOCK_SIZE.
+ *
+ * @param[out] out   Output data according to the mode:
+ *                     - encrypted/decrypted output data
+ *                     - generated signature
+ *                     - signature to be verified
+ *
+ * @param[in] out_len Length of the output data.
+ *
+ * @return            Lenght of the output.
+ *
+ * @throws            CX_INVALID_PARAMETER
+ * @throws            INVALID_PARAMETER
+ */
 static inline int cx_des_iv ( const cx_des_key_t * key, int mode, unsigned char * iv, unsigned int iv_len, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
 {
   size_t out_len_ = out_len;
@@ -122,10 +183,83 @@ static inline int cx_des_iv ( const cx_des_key_t * key, int mode, unsigned char 
 }
 
 /**
- *  Same as cx_des_iv with initial IV assumed to be heigt zeros.
+ * @brief   Encrypt, Decrypt, Sign or Verify data with DES algorithm.
+ *
+ * @param[in] key    Pointer to the key initialized with 
+ *                   #cx_des_init_key_no_throw.
+ * 
+ * @param[in] mode   Crypto mode flags.
+ *                    Supported flags:
+ *                     - CX_LAST
+ *                     - CX_ENCRYPT
+ *                     - CX_DECRYPT
+ *                     - CX_SIGN
+ *                     - CX_VERIFY
+ *                     - CX_PAD_NONE
+ *                     - CX_PAD_ISO9797M1
+ *                     - CX_PAD_ISO9797M2
+ *                     - CX_CHAIN_ECB
+ *                     - CX_CHAIN_CBC
+ *                     - CX_CHAIN_CTR
+ * 
+ * @param[in] in     Input data.
+ * 
+ * @param[in] in_len Length of the input data.
+ *                    If CX_LAST is set, padding is automatically done according to the *mode*.
+ *                    Otherwise, *in_len* shall be a multiple of DES_BLOCK_SIZE.
+ *
+ * @param[out] out   Output data according to the mode:
+ *                     - encrypted/decrypted output data
+ *                     - generated signature
+ *                     - signature to be verified
+ *
+ * @param[in] out_len Length of the output data.
+ *
+ * @return            Error code:
+ *                    - CX_OK on success
+ *                    - CX_INVALID_PARAMETER
+ *                    - INVALID_PARAMETER
  */
 cx_err_t cx_des_no_throw(const cx_des_key_t *key, uint32_t mode, const uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
+/**
+ * @brief   Encrypt, Decrypt, Sign or Verify data with DES algorithm.
+ * 
+ * @param[in] key    Pointer to the key initialized with 
+ *                   #cx_des_init_key_no_throw.
+ * 
+ * @param[in] mode   Crypto mode flags.
+ *                    Supported flags:
+ *                     - CX_LAST
+ *                     - CX_ENCRYPT
+ *                     - CX_DECRYPT
+ *                     - CX_SIGN
+ *                     - CX_VERIFY
+ *                     - CX_PAD_NONE
+ *                     - CX_PAD_ISO9797M1
+ *                     - CX_PAD_ISO9797M2
+ *                     - CX_CHAIN_ECB
+ *                     - CX_CHAIN_CBC
+ *                     - CX_CHAIN_CTR
+ * 
+ * @param[in] in     Input data.
+ * 
+ * @param[in] in_len Length of the input data.
+ *                    If CX_LAST is set, padding is automatically done according to the *mode*.
+ *                    Otherwise, *in_len* shall be a multiple of DES_BLOCK_SIZE.
+ *
+ * @param[out] out   Output data according to the mode:
+ *                     - encrypted/decrypted output data
+ *                     - generated signature
+ *                     - signature to be verified
+ *
+ * @param[in] out_len Length of the output data.
+ *
+ * @return            Length of the output.
+ * 
+ * @throws            CX_INVALID_PARAMETER
+ * @throws            INVALID_PARAMETER
+ */
 static inline int cx_des ( const cx_des_key_t * key, int mode, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
 {
   size_t out_len_ = out_len;
@@ -133,8 +267,36 @@ static inline int cx_des ( const cx_des_key_t * key, int mode, const unsigned ch
   return out_len_;
 }
 
+/**
+ * @brief   Encrypt a 8-byte block using DES/3-DES algorithm.
+ * 
+ * @param[in]  key      Pointer to the DES key.
+ * 
+ * @param[in]  inblock  Plaintext block to encrypt.
+ * 
+ * @param[out] outblock Ciphertext block.
+ * 
+ * @return              Error code:
+ *                      - CX_OK
+ *                      - CX_INVALID_PARAMETER
+ *                      - INVALID_PARAMETER
+ */
   void cx_des_enc_block(const cx_des_key_t *key, const uint8_t *inblock, uint8_t *outblock);
 
+/**
+ * @brief   Decrypt a 8-byte block using DES/3-DES algorithm.
+ * 
+ * @param[in]  key      Pointer to the DES key.
+ * 
+ * @param[in]  inblock  Ciphertext block to decrypt.
+ * 
+ * @param[out] outblock Plaintext block.
+ * 
+ * @return              Error code:
+ *                      - CX_OK
+ *                      - CX_INVALID_PARAMETER
+ *                      - INVALID_PARAMETER
+ */
   void cx_des_dec_block(const cx_des_key_t *key, const uint8_t *inblock, uint8_t *outblock);
 
 #endif // HAVE_DES

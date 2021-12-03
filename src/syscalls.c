@@ -700,6 +700,26 @@ cx_err_t cx_ecpoint_is_at_infinity( const cx_ecpoint_t *R, bool *is_infinite ) {
   return SVC_cx_call(SYSCALL_cx_ecpoint_is_at_infinity_ID_IN, parameters);
 }
 
+#ifdef HAVE_X25519
+cx_err_t cx_ecpoint_x25519(const cx_bn_t u, const uint8_t *k, size_t k_len) {
+  unsigned int parameters [2+3];
+  parameters[0] = (unsigned int)u;
+  parameters[1] = (unsigned int)k;
+  parameters[2] = (unsigned int)k_len;
+  return SVC_cx_call(SYSCALL_cx_ecpoint_x25519_ID_IN, parameters);
+}
+#endif // HAVE_X25519
+
+#ifdef HAVE_X448
+cx_err_t cx_ecpoint_x448(const cx_bn_t u, const uint8_t *k, size_t k_len) {
+  unsigned int parameters [2+3];
+  parameters[0] = (unsigned int)u;
+  parameters[1] = (unsigned int)k;
+  parameters[2] = (unsigned int)k_len;
+  return SVC_cx_call(SYSCALL_cx_ecpoint_x448_ID_IN, parameters);
+}
+#endif // HAVE_X448
+
 uint32_t cx_crc32_hw ( const void * buf, size_t len ) {
   unsigned int parameters [2+2];
   parameters[0] = (unsigned int)buf;
@@ -794,6 +814,16 @@ bolos_bool_t os_perso_isonboarded ( void ) {
   return (bolos_bool_t) SVC_Call(SYSCALL_os_perso_isonboarded_ID_IN, parameters);
 }
 
+void os_perso_set_onboarding_status ( unsigned int kind, unsigned int count, unsigned int maxCount, unsigned int isConfirming ) {
+  unsigned int parameters [2+4];
+  parameters[0] = (unsigned int)kind;
+  parameters[1] = (unsigned int)count;
+  parameters[2] = (unsigned int)maxCount;
+  parameters[3] = (unsigned int)isConfirming;
+  SVC_Call(SYSCALL_os_perso_setonboardingstatus_ID_IN, parameters);
+  return;
+}
+
 void os_perso_derive_node_bip32 ( cx_curve_t curve, const unsigned int * path, unsigned int pathLength, unsigned char * privateKey, unsigned char * chain ) {
   unsigned int parameters [2+5];
   parameters[0] = (unsigned int)curve;
@@ -829,12 +859,14 @@ void os_perso_derive_eip2333 ( cx_curve_t curve, const unsigned int * path, unsi
   return;
 }
 
+#if defined(HAVE_SEED_COOKIE)
 unsigned int os_perso_seed_cookie ( unsigned char * seed_cookie, unsigned int seed_cookie_length ) {
   unsigned int parameters [2+2];
   parameters[0] = (unsigned int)seed_cookie;
   parameters[1] = (unsigned int)seed_cookie_length;
   return (unsigned int) SVC_Call(SYSCALL_os_perso_seed_cookie_ID_IN, parameters);
 }
+#endif // HAVE_SEED_COOKIE
 
 unsigned int os_endorsement_get_code_hash ( unsigned char * buffer ) {
   unsigned int parameters [2+1];
@@ -937,6 +969,7 @@ void os_registry_get ( unsigned int app_idx, application_t * out_application_ent
   return;
 }
 
+#if !defined(APP_UX)
 unsigned int os_ux ( bolos_ux_params_t * params ) {
   unsigned int parameters [2+1];
   parameters[0] = (unsigned int)params;
@@ -951,6 +984,7 @@ void os_ux_result ( bolos_ux_params_t * params ) {
   SVC_Call(SYSCALL_os_ux_result_ID_IN, parameters);
   return;
 }
+#endif // !defined(APP_UX)
 
 void os_lib_call ( unsigned int * call_parameters ) {
   unsigned int parameters [2+1];
@@ -1231,26 +1265,6 @@ unsigned int os_seph_serial ( unsigned char * serial, unsigned int maxlength ) {
   return (unsigned int) SVC_Call(SYSCALL_os_seph_serial_ID_IN, parameters);
 }
 
-void os_perso_ble_pairing_db_save ( unsigned char * mac_addr, unsigned int mac_addr_len, unsigned int db_offset, unsigned char * buffer, unsigned int buffer_len ) {
-  unsigned int parameters [2+5];
-  parameters[0] = (unsigned int)mac_addr;
-  parameters[1] = (unsigned int)mac_addr_len;
-  parameters[2] = (unsigned int)db_offset;
-  parameters[3] = (unsigned int)buffer;
-  parameters[4] = (unsigned int)buffer_len;
-  SVC_Call(SYSCALL_os_perso_ble_pairing_db_save_ID_IN, parameters);
-  return;
-}
-
-unsigned int os_perso_ble_pairing_db_load ( unsigned char * mac_addr, unsigned int mac_addr_len, unsigned int db_offset, unsigned char * buffer, unsigned int buffer_len ) {
-  unsigned int parameters [2+5];
-  parameters[0] = (unsigned int)mac_addr;
-  parameters[1] = (unsigned int)mac_addr_len;
-  parameters[2] = (unsigned int)db_offset;
-  parameters[3] = (unsigned int)buffer;
-  parameters[4] = (unsigned int)buffer_len;
-  return (unsigned int) SVC_Call(SYSCALL_os_perso_ble_pairing_db_load_ID_IN, parameters);
-}
 
 void screen_clear ( void ) {
   unsigned int parameters [2];
@@ -1265,6 +1279,15 @@ void screen_update ( void ) {
   SVC_Call(SYSCALL_screen_update_ID_IN, parameters);
   return;
 }
+
+#ifdef HAVE_BRIGHTNESS_SYSCALL
+void screen_set_brightness ( unsigned int percent ) {
+  unsigned int parameters [2+1];
+  parameters[0] = (unsigned int)percent;
+  SVC_Call(SYSCALL_screen_set_brightness_ID_IN, parameters);
+  return;
+}
+#endif // HAVE_BRIGHTNESS_SYSCALL
 
 void screen_set_keepout ( unsigned int x, unsigned int y, unsigned int width, unsigned int height ) {
   unsigned int parameters [2+4];
