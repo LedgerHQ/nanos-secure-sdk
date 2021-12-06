@@ -16,9 +16,14 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_pbkdf2.h
+ * @brief   PBKDF2 (Password-Based Key Derivation Function)
+ *
+ * PBKDF2 is a key derivation function i.e. it produces a key
+ * from a base key (a password) and other parameters (a salt
+ * and an iteration counter).
+ * It consists in iteratively deriving HMAC.
  */
 
 #ifdef HAVE_PBKDF2
@@ -30,34 +35,33 @@
 #include "lcx_hash.h"
 
 /**
- * Compute pbkdf2 bytes sequence as specified by RFC 2898.
+ * @brief   Compute PBKDF2 bytes sequence.
+ * 
+ * @details Compute PBKDF2 bytes sequence according to
+ *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
  *
- * @param [in]  md_type
- *    The hash algo (CX_SHA512, CX_SHA256, ...)
+ * @param[in]  md_type     Message digest algorithm identifier.
  *
- * @param [in]  password
- *    The hmac key
+ * @param[in]  password    Password used as a base key to compute
+ *                         the HMAC.
  *
- * @param [in]  passwordlen
- *    The hmac key bytes length
+ * @param[in]  passwordlen Length of the password i.e. the length
+ *                         of the HMAC key.
  *
- * @param [in]  salt
- *    The initial salt.
+ * @param[in]  salt        Initial salt.
  *
- * @param [in]  saltlen
- *    The salt key bytes length
+ * @param[in]  saltlen     Length of the salt.
  *
- * @param [in]  iterations
- *    Per block iteration.
+ * @param[in]  iterations  Per block iteration.
  *
- * @param [in]  out
- *    Where to put result.
+ * @param[out] out         Buffer where to store the output.
  *
- * @param [in] outLength
- *    How many bytes to generate.
+ * @param[in]  outLength   Lengh of the output.
  *
+ * @return                 Error code:
+ *                         - CX_OK
+ *                         - CX_INVALID_PARAMETER
  */
-
 cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type,
                    const uint8_t *password,
                    size_t         passwordlen,
@@ -67,40 +71,68 @@ cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type,
                    uint8_t *      out,
                    size_t         outLength);
 
+/**
+ * @brief   Compute PBKDF2 bytes sequence.
+ * 
+ * @details Compute PBKDF2 bytes sequence according to
+ *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
+ *          This function throws an exception if the computation doesn't succeed.
+ *
+ * @param[in]  md_type     Message digest algorithm identifier.
+ *
+ * @param[in]  password    Password used as a base key to compute
+ *                         the HMAC.
+ *
+ * @param[in]  passwordlen Length of the password i.e. the length
+ *                         of the HMAC key.
+ *
+ * @param[in]  salt        Initial salt.
+ *
+ * @param[in]  saltlen     Length of the salt.
+ *
+ * @param[in]  iterations  Per block iteration.
+ *
+ * @param[out] out         Buffer where to store the output.
+ *
+ * @param[in]  outLength   Lengh of the output.
+ *
+ * @throws                 CX_INVALID_PARAMETER
+ */
 static inline void cx_pbkdf2 ( cx_md_t md_type, const unsigned char * password, unsigned short passwordlen, unsigned char * salt, unsigned short saltlen, unsigned int iterations, unsigned char * out, unsigned int outLength )
 {
   CX_THROW(cx_pbkdf2_no_throw(md_type, password, passwordlen, salt, saltlen, iterations, out, outLength));
 }
 
 /**
- * Compute pbkdf2 bytes sequence as specified by RFC 2898.
- * The undelying hash function is SHA512
+ * @brief   Compute PBKDF2 bytes sequence with SHA512.
+ * 
+ * @details Compute PBKDF2 bytes sequence according to
+ *          <a href="https://tools.ietf.org/html/rfc2898">  RFC 2898 </a>
+ *          with SHA512 as the underlying hash function.
  *
- * @param [in]  password
- *    The hmac key
+ * @param[in]  password     Password used as a base key to compute
+ *                          the HMAC.
  *
- * @param [in]  passwordlen
- *    The hmac key bytes length
+ * @param[in]  password_len Length of the password i.e. the length
+ *                          of the HMAC key.
  *
- * @param [in]  salt
- *    The initial salt.
+ * @param[in]  salt         Initial salt.
  *
- * @param [in]  saltlen
- *    The salt key bytes length
+ * @param[in]  salt_len     Length of the salt.
  *
- * @param [in]  iterations
- *    Per block iteration.
+ * @param[in]  iterations   Per block iteration.
  *
- * @param [in]  out
- *    Where to put result.
+ * @param[out] out          Buffer where to store the output.
  *
- * @param [in] outLength
- *    How many bytes to generate.
+ * @param[in]  out_len      Lengh of the output.
  *
+ * @return                  Error code:
+ *                          - CX_OK
+ *                          - CX_INVALID_PARAMETER
  */
 #define cx_pbkdf2_sha512(password, password_len, salt, salt_len, iterations, out, out_len) \
     cx_pbkdf2_no_throw(CX_SHA512, password, password_len, salt, salt_len, iterations, out, out_len)
 
-#endif  //LCX_PBKDF2_H
+#endif  // LCX_PBKDF2_H
 
 #endif // HAVE_PBKDF2

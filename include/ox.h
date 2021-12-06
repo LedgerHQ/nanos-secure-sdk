@@ -16,6 +16,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
+/**
+ * @file    ox.h
+ * @brief   Include cryptography-related syscalls.
+ */
+
 #ifndef OX_H
 #define OX_H
 

@@ -8,7 +8,7 @@
 #ifdef HAVE_UX_FLOW
 #ifdef HAVE_BAGL
 
-#if defined(TARGET_NANOS)
+#if !defined(HAVE_SE_SCREEN)
 // We implement a light mecanism in order to be able to retrieve the width of
 // nano S characters, in the two possible fonts:
 // - BAGL_FONT_OPEN_SANS_EXTRABOLD_11px,
@@ -116,13 +116,37 @@ const char nanos_characters_width[96] = {
    7 << 4 |  6,   /* code 007F */
 };
 
+// This function is used to retrieve the length of a string (expressed in bytes) delimited with a boundary width (expressed in pixels).
+uint8_t se_get_cropped_length(const char* text, uint8_t text_length, uint32_t width_limit_in_pixels, uint8_t text_format) {
+  char        current_char;
+  uint8_t     length;
+  uint32_t    current_width_in_pixels = 0;
+
+  for (length = 0; length < text_length; length++) {
+    current_char = text[length];
+
+    if ((text_format & PAGING_FORMAT_NB) == PAGING_FORMAT_NB) {
+      // Bold.
+      current_width_in_pixels += nanos_characters_width[current_char - NANOS_FIRST_CHAR] & 0x0F;
+    }
+    else {
+      // Regular.
+      current_width_in_pixels += (nanos_characters_width[current_char - NANOS_FIRST_CHAR] >> 0x04) & 0x0F;
+    }
+
+    // We stop the processing when we reached the limit.
+    if (current_width_in_pixels > width_limit_in_pixels) {
+      break;
+    }
+  }
+
+  return length;
+}
+
 // This function is used to retrieve the width of a line of text.
-// The formatting of the characters (BAGL_FONT_OPEN_SANS_EXTRABOLD_11px or
-// BAGL_FONT_OPEN_SANS_REGULAR_11px) is indicated within the 'G_ux.layout_paging.format'
-// variable when entering here.
-static unsigned short se_compute_line_width_light(const char* text, unsigned char text_length) {
+static uint32_t se_compute_line_width_light(const char* text, uint8_t text_length, uint8_t text_format) {
   char current_char;
-  unsigned short line_width = 0;
+  uint32_t line_width = 0;
 
   // We parse the characters of the input text on all the input length.
   while (text_length--) {
@@ -136,7 +160,7 @@ static unsigned short se_compute_line_width_light(const char* text, unsigned cha
     else {
       // We retrieve the character width, and the paging format indicates whether we are
       // processing bold characters or not.
-      if ((G_ux.layout_paging.format & PAGING_FORMAT_NB) == PAGING_FORMAT_NB) {
+      if ((text_format & PAGING_FORMAT_NB) == PAGING_FORMAT_NB) {
         // Bold.
         line_width += nanos_characters_width[current_char - NANOS_FIRST_CHAR] & 0x0F;
       }
@@ -150,7 +174,7 @@ static unsigned short se_compute_line_width_light(const char* text, unsigned cha
   return line_width;
 }
 
-#endif // TARGET_NANOS
+#endif // !HAVE_SE_SCREEN
 
 static unsigned int is_word_delim(unsigned char c) {
   // return !((c >= 'a' && c <= 'z') 
@@ -165,7 +189,7 @@ unsigned int ux_layout_paging_compute(const char* text_to_split,
                                       ux_layout_paging_state_t* paging_state,
                                       bagl_font_id_e font
                                       ) {
-#ifndef TARGET_NANOX
+#ifndef HAVE_FONTS
   UNUSED(font);
 #endif
 
@@ -196,11 +220,11 @@ unsigned int ux_layout_paging_compute(const char* text_to_split,
       // && len < sizeof(G_ux.string_buffer)-1
       ) {
       // compute new line length
-#ifdef TARGET_NANOX
+#ifdef HAVE_FONTS
       linew = bagl_compute_line_width(font, 0, start, len+1, BAGL_ENCODING_LATIN1);
-#else // TARGET_NANOX
-      linew = se_compute_line_width_light(start, len + 1);
-#endif //TARGET_NANOX
+#else // HAVE_FONTS
+      linew = se_compute_line_width_light(start, len + 1, G_ux.layout_paging.format);
+#endif //HAVE_FONTS
       //if (start[len] )
       if (linew > PIXEL_PER_LINE) {
         // we got a full line

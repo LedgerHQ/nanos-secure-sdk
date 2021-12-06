@@ -16,9 +16,14 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "ox.h" instead
+/**
+ * @file    ox_des.h
+ * @brief   Data Encryption Standard syscalls.
+ *
+ * This file contains DES definitions and functions:
+ * - Set the DES key in memory
+ * - Encrypt a 64-bit block
+ * - Reset the DES context
  */
 
 #ifndef OX_DES_H
@@ -29,37 +34,49 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/** @internal */
+/** Block size of the DES in bytes */
 #define CX_DES_BLOCK_SIZE 8
 
-/** DES key container.
- *  Such container should be initialized with cx_des_init_key to ensure future
- * API compatibility. Indeed, in next API level, the key store format may
- * changed at all. 8 bytes (simple DES), 16 bytes (triple DES with 2 keys) and
- * 24 bytes (triple DES with 3 keys) are supported.
+/** @brief   DES key container.
+ *
+ *  @details DES key container.
+ *           Such container should be initialized with **cx_des_init_key** to
+ * ensure future API compatibility. Indeed, in next API level, the key store
+ * format may changed at all. 8 bytes (simple DES), 16 bytes (triple DES with 2
+ * keys) and 24 bytes (triple DES with 3 keys) are supported.
  */
 struct cx_des_key_s {
-  /** key size */
-  uint8_t size;
-  /** key value */
-  uint8_t keys[24];
+  uint8_t size;     ///< key size
+  uint8_t keys[24]; ///< key value
 };
 /** Convenience type. See #cx_des_key_s. */
 typedef struct cx_des_key_s cx_des_key_t;
 
 /**
+ * @brief   Set a DES key in hardware.
  *
+ * @param[in] keys DES key.
+ *
+ * @param[in] mode Operation for which the key will be used.
+ *
+ * @return         Error code:
+ *                 - CX_OK on success
+ *                 - INVALID_PARAMETER
  */
 SYSCALL cx_err_t cx_des_set_key_hw(
     const cx_des_key_t *keys PLENGTH(sizeof(cx_des_key_t)), uint32_t mode);
 
 /**
- *
+ * @brief   Reset DES context.
  */
 SYSCALL void cx_des_reset_hw(void);
 
 /**
+ * @brief   Encrypt or decrypt a block with DES.
  *
+ * @param[in]  inblock  Pointer to the block.
+ *
+ * @param[out] outblock Buffer for the output.
  */
 SYSCALL void cx_des_block_hw(const unsigned char *inblock PLENGTH(8),
                              unsigned char *outblock PLENGTH(8));

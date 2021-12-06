@@ -12,6 +12,7 @@
 /* -                            UX DEFINITIONS                           - */
 /* ----------------------------------------------------------------------- */
 
+#if !defined(APP_UX)
 #if !defined(HAVE_BOLOS)
 
 // Enumeration of the UX events usable by the UX library.
@@ -43,7 +44,7 @@ typedef struct bolos_ux_params_s {
   // length of parameters in the u union to be copied during the syscall.
   unsigned int len;
 
-#if (defined(TARGET_BLUE) || defined(HAVE_BLE))
+#if (defined(TARGET_BLUE) || defined(HAVE_BLE) || defined(HAVE_KEYBOARD_UX))
   union {
     // Structure for the lib ux.
 #if defined(TARGET_BLUE)
@@ -52,6 +53,20 @@ typedef struct bolos_ux_params_s {
       unsigned int bgcolor;
     } status_bar;
 #endif // TARGET_BLUE
+
+#if defined(HAVE_KEYBOARD_UX)
+    struct {
+      unsigned int keycode;
+#define BOLOS_UX_MODE_UPPERCASE 0
+#define BOLOS_UX_MODE_LOWERCASE 1
+#define BOLOS_UX_MODE_SYMBOLS 2
+#define BOLOS_UX_MODE_COUNT 3 // number of keyboard modes
+      unsigned int mode;
+      // + 1 EOS (0)
+#define BOLOS_UX_KEYBOARD_TEXT_BUFFER_SIZE 32
+      char entered_text[BOLOS_UX_KEYBOARD_TEXT_BUFFER_SIZE + 1];
+    } keyboard;
+#endif // HAVE_KEYBOARD_UX
 
 #if defined(HAVE_BLE)
     struct {
@@ -64,10 +79,11 @@ typedef struct bolos_ux_params_s {
     } pairing_request;
 #endif // HAVE_BLE
   } u;
-#endif // (defined(TARGET_BLUE) || defined(HAVE_BLE))
+#endif // (defined(TARGET_BLUE) || defined(HAVE_BLE) ||
+       // defined(HAVE_KEYBOARD_UX))
 } bolos_ux_params_t;
 
-#endif // ! HAVE_BOLOS
+#endif // !defined(HAVE_BOLOS)
 
 /* ----------------------------------------------------------------------- */
 /* -                             UX-RELATED                              - */
@@ -88,6 +104,7 @@ os_ux_result(bolos_ux_params_t *params PLENGTH(sizeof(bolos_ux_params_t)));
 // when returning the application must send a general status (or continue its
 // command flow)
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
+#endif // !defined(APP_UX)
 
 #ifdef HAVE_BLE
 SYSCALL void os_ux_set_status(unsigned int ux_id, unsigned int status);

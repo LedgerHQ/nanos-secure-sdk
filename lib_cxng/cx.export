@@ -116,3 +116,5 @@ cx_swap_buffer32
 cx_swap_buffer64
 cx_swap_uint32
 cx_swap_uint64
+cx_x25519
+cx_x448

@@ -113,3 +113,5 @@
 #define _NR_cx_swap_buffer64 0x6d
 #define _NR_cx_swap_uint32 0x6e
 #define _NR_cx_swap_uint64 0x6f
+#define _NR_cx_x25519 0x70
+#define _NR_cx_x448 0x71

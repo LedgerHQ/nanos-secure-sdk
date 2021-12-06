@@ -37,7 +37,7 @@
 
 typedef void (*ux_layout_paging_redisplay_t)(unsigned int stack_slot);
 
-#ifdef TARGET_NANOX
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 static const bagl_element_t ux_layout_paging_elements[] = {
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
@@ -50,7 +50,7 @@ static const bagl_element_t ux_layout_paging_elements[] = {
   {{BAGL_LABELINE                       , 0x12,   (128-PIXEL_PER_LINE)/2,  43, PIXEL_PER_LINE,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, LINE_FONT|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
   {{BAGL_LABELINE                       , 0x13,   (128-PIXEL_PER_LINE)/2,  57, PIXEL_PER_LINE,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, LINE_FONT|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
 };
-#endif // TARGET_NANOX
+#endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 
 static const bagl_element_t* ux_layout_paging_prepro_common(const bagl_element_t* element, 
                                                             const char* title, 
@@ -130,13 +130,13 @@ static const bagl_element_t* ux_layout_paging_prepro_by_func(const bagl_element_
 // redisplay current page
 void ux_layout_paging_redisplay_common(unsigned int stack_slot, const char* text, button_push_callback_t button_callback, bagl_element_callback_t prepro) {
   ux_stack_slot_t* slot = &G_ux.stack[stack_slot];
-#ifndef TARGET_NANOX
-  ux_layout_bb_init_common(stack_slot);
-#else
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
   slot->element_arrays[0].element_array = ux_layout_paging_elements;
   slot->element_arrays[0].element_array_count = ARRAYLEN(ux_layout_paging_elements);
   slot->element_arrays_count = 1;
-#endif // TARGET_NANOX
+#else
+  ux_layout_bb_init_common(stack_slot);
+#endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 
   // request offsets and lengths of lines for the current page
   ux_layout_paging_compute(text, 

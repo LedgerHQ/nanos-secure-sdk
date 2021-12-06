@@ -16,9 +16,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_crc.h
+ * @brief   CRC (Cyclic Redundancy Check).
+ *
+ * CRC-16 is a variant of CRC, an error-detecting code, with a 16-bit long check value.
  */
 
 #ifdef HAVE_CRC
@@ -29,24 +31,33 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/** CRC16 initial value */
+#define CX_CRC16_INIT 0xFFFF
+
 /**
- * Compute a 16 bits checksum value.
- * The 16 bits value is computed according to the CRC16 CCITT definition.
+ * @brief   Compute a 16-bit checksum value.
+ * 
+ * @details The 16-bit value is computed according to the CRC16 CCITT definition.
  *
- * @param [in] buffer
- *   The buffer to compute the crc over.
+ * @param[in] buffer The buffer to compute the CRC over.
  *
- * @param [in]
- *   Bytes Length of the 'buffer'
+ * @param[in] len    Bytes length of the buffer.
  *
- * @return current crc value
- *
+ * @return           Current CRC value.
  */
   uint16_t cx_crc16(const void *buffer, size_t len);
 
-#define CX_CRC16_INIT 0xFFFF
-
-/** Accumulate more data to crc */
+/**
+ * @brief   Accumulate more data to CRC.
+ * 
+ * @param[in] crc    CRC value to be updated.
+ * 
+ * @param[in] buffer The buffer to compute the CRC over.
+ * 
+ * @param[in] len    Bytes length of the buffer.
+ * 
+ * @return           Updated CRC value.
+ */
   uint16_t cx_crc16_update(uint16_t crc, const void *buffer, size_t len);
 
 #endif

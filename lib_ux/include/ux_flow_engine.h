@@ -64,7 +64,7 @@ typedef enum {
 	FLOW_DIRECTION_FORWARD=1,
 } ux_flow_direction_t;
 ux_flow_direction_t ux_flow_direction(void);
-const ux_flow_step_t* ux_flow_step(void); // return the current step pointer
+const ux_flow_step_t* ux_flow_get_current(void); // return the current step pointer
 void ux_flow_next_no_display(void); // prepare displaying next step when flow is relayout
 void ux_flow_next(void); // skip to next step
 void ux_flow_prev(void); // go back to previous step
@@ -162,6 +162,18 @@ void ux_flow_uninit(unsigned int stack_slot);
 #define UX_FLOW_DEF_VALID UX_STEP_VALID
 // deprecated
 #define UX_STEP_VALID UX_STEP_CB
+
+/**
+ * Define a flow step with a validation flow and error flow
+ */
+#define UX_STEP_FLOWCB(stepname, layoutkind, validate_flow, error_flow, ...) \
+	const ux_layout_ ## layoutkind ## _params_t stepname ##_val = __VA_ARGS__; \
+	const ux_flow_step_t stepname = { \
+	  ux_layout_ ## layoutkind ## _init, \
+	  & stepname ## _val, \
+	  validate_flow, \
+	  error_flow, \
+	}
 
 /**
  * Define a flow step with a validation callback and a preinit function to

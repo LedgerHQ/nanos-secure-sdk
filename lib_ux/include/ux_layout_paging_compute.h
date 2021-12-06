@@ -1,3 +1,5 @@
+#ifndef UX_LAYOUT_PAGING_COMPUTE_H
+#define UX_LAYOUT_PAGING_COMPUTE_H
 
 #include "ux_layouts.h"
 
@@ -18,10 +20,16 @@ typedef struct {
   unsigned short lengths[UX_LAYOUT_PAGING_LINE_COUNT];
 } ux_layout_paging_state_t;
 
-unsigned int ux_layout_paging_compute(const char* text_to_split, 
+#if !defined(HAVE_SE_SCREEN)
+uint8_t se_get_cropped_length(const char* text, uint8_t text_length, uint32_t width_limit_in_pixels, uint8_t text_format);
+#endif // !defined(HAVE_SE_SCREEN)
+
+unsigned int ux_layout_paging_compute(const char* text_to_split,
                                       unsigned int page_to_display,
                                       ux_layout_paging_state_t* paging_state,
                                       bagl_font_id_e font
                                       );
 
 #endif // HAVE_UX_FLOW
+
+#endif // UX_LAYOUT_PAGING_COMPUTE_H

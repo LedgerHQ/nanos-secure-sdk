@@ -86,6 +86,22 @@ else
 LDFLAGS  += -nostartfiles
 endif
 
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+# Screen is directly connected to the SE
+DEFINES       += HAVE_SE_SCREEN
+# Button is directly connected to the SE
+DEFINES       += HAVE_SE_BUTTON
+# MCU serial is stored on board of the SE
+DEFINES       += HAVE_MCU_SERIAL_STORAGE
+DEFINES       += HAVE_FONTS
+# already defined within apps
+# DEFINES       += HAVE_BLE
+DEFINES       += HAVE_BATTERY
+else
+DEFINES       += HAVE_SEED_COOKIE
+DEFINES       += BAGL_WIDTH=128 BAGL_HEIGHT=32
+endif
+
 # include builtin CX libs options
 -include $(BOLOS_SDK)/Makefile.conf.cx
 
