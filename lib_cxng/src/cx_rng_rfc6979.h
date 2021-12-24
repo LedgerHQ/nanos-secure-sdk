@@ -21,8 +21,6 @@
 #ifndef CX_RNG_RFC6979_H
 #define CX_RNG_RFC6979_H
 
-#include "cx_ecdsa.h"
-#include "os.h"
 #include "libcxng.h"
 #include "cx_hash.h"
 #include <stddef.h>

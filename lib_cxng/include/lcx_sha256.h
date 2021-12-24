@@ -16,9 +16,15 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_sha256.h
+ * @brief   SHA-2 (Secure Hash Algorithm 2)
+ *
+ * SHA-224 and SHA-256 are secure hash functions belonging to the SHA-2 family
+ * with a digest length of 224 and 256 bits, respectively. The message length should
+ * be less than 2<sup align = right>64</sup> bits.
+ * Refer to <a href="https://csrc.nist.gov/publications/detail/fips/180/4/final">  FIPS 180-4 </a>
+ * for more details.
  */
 
 #if defined(HAVE_SHA256) || defined(HAVE_SHA224)
@@ -32,37 +38,34 @@
 #include <stdint.h>
 
 #if defined(HAVE_SHA224)
-/** SHA224 message digest size */
+/** SHA-224 message digest size */
 #define CX_SHA224_SIZE 28
 #endif
 
-/** SHA256 message digest size */
+/** SHA-256 message digest size */
 #define CX_SHA256_SIZE 32
 
 /**
- * SHA-224 and SHA-256 context
+ * @brief SHA-224 and SHA-256 context
  */
 struct cx_sha256_s {
-  /** @copydoc cx_ripemd160_s::header */
-  struct cx_hash_header_s header;
-  /** @internal @copydoc cx_ripemd160_s::blen */
-  size_t blen;
-  /** @internal @copydoc cx_ripemd160_s::block */
-  uint8_t block[64];
-  /** @copydoc cx_ripemd160_s::acc */
-  uint8_t acc[8 * 4];
+  struct cx_hash_header_s header;  ///< @copydoc cx_ripemd160_s::header
+  size_t blen;                     ///< @copydoc cx_ripemd160_s::blen
+  uint8_t block[64];               ///< @copydoc cx_ripemd160_s::block
+  uint8_t acc[8 * 4];              ///< @copydoc cx_ripemd160_s::acc
 };
 /** Convenience type. See #cx_sha256_s. */
 typedef struct cx_sha256_s cx_sha256_t;
 
 #if defined(HAVE_SHA224)
 /**
- * Initialize a SHA-224 context.
+ * @brief   Initialize a SHA-224 context.
  *
- * @param [out] hash the context to init.
- *    The context shall be in RAM
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
  *
- * @return algorithm identifier
+ * @return          Error code:
+ *                  - CX_OK on success
  */
 cx_err_t cx_sha224_init_no_throw(cx_sha256_t *hash);
 
@@ -74,15 +77,24 @@ static inline int cx_sha224_init ( cx_sha256_t * hash )
 #endif
 
 /**
- * Initialize a SHA-256 context.
+ * @brief   Initialize a SHA-256 context.
  *
- * @param [out] hash the context to init.
- *    The context shall be in RAM
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
  *
- * @return algorithm identifier
+ * @return          Error code:
+ *                  - CX_OK on success
  */
 cx_err_t cx_sha256_init_no_throw(cx_sha256_t *hash);
 
+/**
+ * @brief   Initialize a SHA-256 context.
+ *
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
+ *
+ * @return          SHA256 identifier.
+ */
 static inline int cx_sha256_init ( cx_sha256_t * hash )
 {
   cx_sha256_init_no_throw(hash);
@@ -90,16 +102,16 @@ static inline int cx_sha256_init ( cx_sha256_t * hash )
 }
 
 /**
- * One shot SHA-256 digest
+ * @brief   Compute a one shot SHA-256 digest.
  *
- * @param  [in] in
- *   Input data to compute the hash
+ * @param[in]  in      Input data.
  *
- * @param  [in] len
- *   Length of input data.
+ * @param[in]  len     Length of the input data.
  *
- * @param [out] out
- *   'out' length is implicit
+ * @param[out] out     Buffer where to store the digest.
+ * 
+ * @param[in]  out_len Length of the output.
+ *                     This is actually 256 bits.
  *
  */
   size_t cx_hash_sha256(const uint8_t *in, size_t len, uint8_t *out, size_t out_len);

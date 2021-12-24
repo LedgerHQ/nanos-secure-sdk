@@ -16,9 +16,15 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_sha512.h
+ * @brief   SHA-2 (Secure Hash Algorithm 2)
+ *
+ * SHA-384 and SHA-512 are secure hash functions belonging to the SHA-2 family
+ * with a digest length of 384 and 512 bits, respectively. The message length should
+ * be less than 2<sup align = right>128</sup> bits.
+ * Refer to <a href="https://csrc.nist.gov/publications/detail/fips/180/4/final">  FIPS 180-4 </a>
+ * for more details.
  */
 
 #if defined(HAVE_SHA384) || defined(HAVE_SHA512)
@@ -26,37 +32,42 @@
 #ifndef LCX_SHA512_H
 #define LCX_SHA512_H
 
-/** SHA384 message digest size */
+/** SHA-384 message digest size */
 #define CX_SHA384_SIZE 48
-/** SHA512 message digest size */
+/** SHA-512 message digest size */
 #define CX_SHA512_SIZE 64
 
 /**
- * SHA-384 and SHA-512 context
+ * @brief SHA-384 and SHA-512 context
  */
 struct cx_sha512_s {
-  /** @copydoc cx_ripemd160_s::header */
-  struct cx_hash_header_s header;
-  /** @internal @copydoc cx_ripemd160_s::blen */
-  size_t blen;
-  /** @internal @copydoc cx_ripemd160_s::block */
-  uint8_t block[128];
-  /** @copydoc cx_ripemd160_s::acc */
-  uint8_t acc[8 * 8];
+  struct cx_hash_header_s header;  ///< @copydoc cx_ripemd160_s::header
+  size_t blen;                     ///< @copydoc cx_ripemd160_s::blen
+  uint8_t block[128];              ///< @copydoc cx_ripemd160_s::block
+  uint8_t acc[8 * 8];              ///< @copydoc cx_ripemd160_s::acc
 };
 /** Convenience type. See #cx_sha512_s. */
 typedef struct cx_sha512_s cx_sha512_t;
 
 /**
- * Initialize a SHA-384 context.
+ * @brief   Initialize a SHA-384 context.
  *
- * @param [out] hash the context to initialize.
- *    The context shall be in RAM
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
  *
- * @return algorithm identifier
+ * @return          Error code:
+ *                  - CX_OK on success
  */
 cx_err_t cx_sha384_init_no_throw(cx_sha512_t *hash);
 
+/**
+ * @brief   Initialize a SHA-384 context.
+ *
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
+ *
+ * @return          SHA384 identifier.
+ */
 static inline int cx_sha384_init ( cx_sha512_t * hash )
 {
   cx_sha384_init_no_throw(hash);
@@ -64,15 +75,24 @@ static inline int cx_sha384_init ( cx_sha512_t * hash )
 }
 
 /**
- * Initialize a SHA-512 context.
+ * @brief   Initialize a SHA-512 context.
  *
- * @param [out] hash the context to initialize.
- *    The context shall be in RAM
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
  *
- * @return algorithm identifier
+ * @return          Error code:
+ *                  - CX_OK on success
  */
 cx_err_t cx_sha512_init_no_throw(cx_sha512_t *hash);
 
+/**
+ * @brief   Initialize a SHA-512 context.
+ *
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
+ *
+ * @return          SHA512 identifier.
+ */
 static inline int cx_sha512_init ( cx_sha512_t * hash )
 {
   cx_sha512_init_no_throw(hash);
@@ -80,19 +100,16 @@ static inline int cx_sha512_init ( cx_sha512_t * hash )
 }
 
 /**
- * One shot SHA-512 digest
+ * @brief   Compute a one shot SHA-512 digest.
  *
- * @param  [in] in
- *   Input data to compute the hash
+ * @param[in]  in      Input data.
  *
- * @param  [in] in_len
- *   Length of input data.
+ * @param[in]  in_len  Length of the input data.
  *
- * @param [out] out
- *   'out' buffer
+ * @param[out] out     Buffer where to store the output.
  *
- * @param [out] out_len
- *   max 'out' length
+ * @param[out] out_len Length of the output.
+ *                     This is actually 512 bits.
  */
   size_t cx_hash_sha512(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 

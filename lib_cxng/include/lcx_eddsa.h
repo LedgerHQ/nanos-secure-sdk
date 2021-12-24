@@ -16,9 +16,13 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_eddsa.h
+ * @brief   EDDSA (Edwards Curve Digital Signature Algorithm)
+ *
+ * EDDSA is a digital signature scheme relying on Edwards curves, especially
+ * Ed25519 and Ed448. Refer to <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>
+ * for more details.
  */
 
 #ifdef HAVE_EDDSA
@@ -28,45 +32,44 @@
 
 #ifndef LCX_EDDSA_H
 #define LCX_EDDSA_H
+
 /**
- * Sign a hash message according to EdDSA specification RFC8032.
- *
- * @param [in] pv_key
- *   A private ecfp key fully inited with 'cx_ecfp_init_private_key'.
- *
- *
- * @param [in] mode
- *   Crypto mode flags. See above.
- *   Supported flags:
- *      <none>
- *
- * @param [in] hashID
- *  Hash identifier used to compute the input data. SHA512, SHA3 and Keccak are supported.
- *
- * @param [in] hash
- *   Input data to sign.
- *   The data should be the hash of the original message.
- *   The data length must be lesser than the curve size.
- *
- * @param [in] hash_len
- *   Length of input to data.
- *
- * @param [in] ctx
- *   UNUSED, SHALL BE NULL
- *
- * @param [in] ctx_len
- *   UNUSED, SHALL BE ZERO
- *
- * @param [out] sig
- *   EdDSA signature encoded as : R|S
- *
- * @param [out] info
- *   Set to zero
- *
- * @return
- *   Full length of signature
- *
- * @throws INVALID_PARAMETER
+ * @brief   Sign a message digest.
+ * 
+ * @details Sign a message digest according to the EDDSA specification
+ *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
+ * 
+ * @param[in]  pvkey    Private key.
+ *                      This shall be initialized with #cx_ecfp_init_private_key_no_throw.
+ * 
+ * @param[in]  hashID   Message digest agorithm identifier.
+ *                      Algorithms supported: 
+ *                        - SHA512
+ *                        - SHA3
+ *                        - Keccak
+ * 
+ * @param[in]  hash     Pointer to the message digest.
+ * 
+ * @param[in]  hash_len Length of the digest.
+ * 
+ * @param[out] sig      Buffer where to store the signature.
+ * 
+ * @param[in]  sig_len  Length of the signature.
+ * 
+ * @return              Error code:
+ *                      - CX_OK on success
+ *                      - CX_EC_INVALID_CURVE
+ *                      - CX_INVALID_PARAMETER
+ *                      - INVALID_PARAMETER
+ *                      - CX_NOT_UNLOCKED
+ *                      - CX_INVALID_PARAMETER_SIZE
+ *                      - CX_MEMORY_FULL
+ *                      - CX_NOT_LOCKED
+ *                      - CX_INVALID_PARAMETER_SIZE
+ *                      - CX_EC_INVALID_POINT
+ *                      - CX_EC_INFINITE_POINT
+ *                      - CX_INTERNAL_ERROR
+ *                      - CX_INVALID_PARAMETER_VALUE
  */
 cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
                        cx_md_t                      hashID,
@@ -75,6 +78,54 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
                        uint8_t *                    sig,
                        size_t                       sig_len);
 
+/**
+ * @brief   Sign a message digest.
+ * 
+ * @details Sign a message digest according to the EDDSA specification
+ *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
+ *          This function throws an exception if the computation doesn't
+ *          succeed.
+ * 
+ * @param[in]  pvkey    Private key.
+ *                      This shall be initialized with #cx_ecfp_init_private_key_no_throw.
+ * 
+ * @param[in]  mode     Mode. This parameter is not used.
+ * 
+ * @param[in]  hashID   Message digest agorithm identifier.
+ *                      Algorithms supported: 
+ *                        - SHA512
+ *                        - SHA3
+ *                        - Keccak
+ * 
+ * @param[in]  hash     Pointer to the message digest.
+ * 
+ * @param[in]  hash_len Length of the digest.
+ * 
+ * @param[in]  ctx      Pointer to the context. This parameter is not used.
+ * 
+ * @param[in]  ctx_len  Length of *ctx*. This parameter is not used.
+ * 
+ * @param[out] sig      Buffer where to store the signature.
+ * 
+ * @param[in]  sig_len  Length of the signature.
+ * 
+ * @param[in]  info     Additional information. This parameter is not used.
+ * 
+ * @return              Length of the signature.
+ * 
+ * @throws              CX_EC_INVALID_CURVE
+ * @throws              CX_INVALID_PARAMETER
+ * @throws              INVALID_PARAMETER
+ * @throws              CX_NOT_UNLOCKED
+ * @throws              CX_INVALID_PARAMETER_SIZE
+ * @throws              CX_MEMORY_FULL
+ * @throws              CX_NOT_LOCKED
+ * @throws              CX_INVALID_PARAMETER_SIZE
+ * @throws              CX_EC_INVALID_POINT
+ * @throws              CX_EC_INFINITE_POINT
+ * @throws              CX_INTERNAL_ERROR
+ * @throws              CX_INVALID_PARAMETER_VALUE
+ */
 static inline int cx_eddsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, unsigned char * sig, unsigned int sig_len, unsigned int * info )
 {
   UNUSED(ctx);
@@ -91,44 +142,29 @@ static inline int cx_eddsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode,
 }
 
 /**
- * Verify a hash message signature according to EDDSA specification RFC8032.
- *
- * @param [in] key
- *   A public ecfp key fully inited with 'cx_ecfp_init_public_key'
- *
- * @param [in] mode
- *   Crypto mode flags. See above.
- *   Supported flags:
- *     - <none>
- *
- * @param [in] hashID
- *  Hash identifier used to compute the input data.  SHA512, SHA3 and Keccak are supported.
- *
- * @param [in] hash
- *   Signed input data to verify the signature.
- *   The data should be the hash of the original message.
- *   The data length must be lesser than the curve size.
- *
- * @param [in] hash_len
- *   Length of input to data.
- *
- * @param [in] ctx
- *   UNUSED, SHALL BE NULL
- *
- * @param [in] ctx_len
- *   UNUSED, SHALL BE ZERO
- *
- * @param [in] sig
- *   EDDSA signature to verify encoded as : R|S
- *
- * @param [in] sig_len
- *   sig length in bytes
- *
- * @return
- *   1 if signature is verified
- *   0 is signarure is not verified
- *
- * @throws INVALID_PARAMETER
+ * @brief   Verify a signature.
+ * 
+ * @details Verify a signature according to the specification
+ *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
+ * 
+ * @param[in]  pukey    Public key.
+ *                      This shall be initialized with #cx_ecfp_init_public_key_no_throw.
+ * 
+ * @param[in]  hashID   Message digest agorithm identifier.
+ *                      Algorithms supported: 
+ *                        - SHA512
+ *                        - SHA3
+ *                        - Keccak
+ * 
+ * @param[in]  hash     Pointer to the message digest.
+ * 
+ * @param[in]  hash_len Length of the digest.
+ * 
+ * @param[out] sig      Pointer to the signature.
+ * 
+ * @param[in]  sig_len  Length of the signature.
+ * 
+ * @return              1 if the signature is verified, otherwise 0.
  */
 bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
                      cx_md_t                     hashID,
@@ -137,6 +173,39 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
                      const uint8_t *             sig,
                      size_t                      sig_len);
 
+/**
+ * @brief   Verify a signature.
+ * 
+ * @details Verify a signature according to the specification
+ *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
+ *          This function throws an exception if the computation doesn't
+ *          succeed.
+ * 
+ * @param[in]  pukey    Public key.
+ *                      THis shall be initialized with #cx_ecfp_init_public_key_no_throw.
+ * 
+ * @param[in]  mode     Mode. This parameter is not used.
+ * 
+ * @param[in]  hashID   Message digest agorithm identifier.
+ *                      Algorithms supported: 
+ *                        - SHA512
+ *                        - SHA3
+ *                        - Keccak
+ * 
+ * @param[in]  hash     Pointer to the message digest.
+ * 
+ * @param[in]  hash_len Length of the digest.
+ * 
+ * @param[in]  ctx      Pointer to the context. This parameter is not used.
+ * 
+ * @param[in]  ctx_len  Length of the context. This parameter is not used.
+ * 
+ * @param[out] sig      Pointer to the signature.
+ * 
+ * @param[in]  sig_len  Length of the signature.
+ * 
+ * @return              1 if the signature is verified, otherwise 0.
+ */
 static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, const unsigned char * sig, unsigned int sig_len )
 {
   UNUSED(mode);
@@ -148,16 +217,13 @@ static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode
 
 
 /**
- * Encode coordinates
+ * @brief   Encode the curve point coordinates.
  *
- * @param [in] coord
- *   A pointer to the ec point coordinates in the form x|y
+ * @param[in] coord A pointer to the point coordinates in the form x|y.
  *
- * @param [in] len
- *   Length of the input coordinates
+ * @param[in] len   Length of the coordinates.
  *
- * @param [in] sign
- *  Sign of the coordinates
+ * @param[in] sign  Sign of the x-coordinate.
  *
  */
   void cx_encode_coord(uint8_t * coord,
@@ -165,17 +231,13 @@ static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode
                             int sign);
 
 /**
- * Decode coordinates.
+ * @brief   Decode the curve point coordinates.
  *
- * @param [in] coord
- *   A pointer to the ec point coordinates in the form x|y
+ * @param[in] coord A pointer to the point encoded coordinates.
  *
- * @param [in] len
- *   Length of the input coordinates
+ * @param[in] len   Length of the encoded coordinates.
  *
- * @return [in] sign
- *  Sign of the coordinates
- *
+ * @return Sign of the x-coordinate.
  */
   int cx_decode_coord(uint8_t * coord,
                         int len);

@@ -16,9 +16,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_ripemd160.h
+ * @brief   RIPEMD-160 hash function
+ *
+ * RIPEMD-160 is a 160-bit cryptographic hash function. Refer to <a href = "https://homes.esat.kuleuven.be/~bosselae/ripemd160.html"> 
+ * RIPEMD-160 </a> for more details.
  */
 
 #ifdef HAVE_RIPEMD160
@@ -33,37 +36,39 @@
 #define CX_RIPEMD160_SIZE 20
 
 /**
- * RIPEMD-160 context
+ * @brief RIPEMD-160 context.
  */
 struct cx_ripemd160_s {
-  /** See #cx_hash_header_s */
-  struct cx_hash_header_s header;
-  /** @internal
-   * pending partial block length
-   */
-  size_t blen;
-  /** @internal
-   * pending partial block
-   */
-  uint8_t block[64];
-  /** Current digest state.
-   * After finishing the digest, contains the digest if correct parameters are passed.
-   */
-  uint8_t acc[5 * 4];
+  struct cx_hash_header_s header;   ///< See #cx_hash_header_s
+  size_t blen;                      ///< Pending partial block length
+  uint8_t block[64];                ///< Pending partial block
+  // After finishing the digest,
+  // contains the digest if correct 
+  // parameters are passed.
+  uint8_t acc[5 * 4];               ///< Current digest state
 };
 /** Convenience type. See #cx_ripemd160_s. */
 typedef struct cx_ripemd160_s cx_ripemd160_t;
 
 /**
- * Initialize a RIPEMD-160 context.
+ * @brief   Initialize a RIPEMD-160 context.
  *
- * @param [out] hash the context to init.
- *    The context shall be in RAM
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
  *
- * @return algorithm identifier
+ * @return          Error code:
+ *                  - CX_OK on success
  */
 cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
 
+/**
+ * @brief   Initialize a RIPEMD-160 context.
+ *
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
+ *
+ * @return          RIPEMD160 identifier.
+ */
 static inline int cx_ripemd160_init ( cx_ripemd160_t * hash )
 {
   cx_ripemd160_init_no_throw(hash);

@@ -21,22 +21,24 @@
 
 #ifdef HAVE_UX_FLOW
 
-/*********************************************************************************
- * 2 text lines
- * Uses bb layout
- */
-
-const bagl_element_t* ux_layout_nn_prepro(const bagl_element_t* element) {
-  const bagl_element_t* e = ux_layout_strings_prepro(element);
-  if (e && G_ux.tmp_element.component.userid >= 0x10) {
+const bagl_element_t* ux_layout_pbn_prepro(const bagl_element_t* element) {
+  const bagl_element_t* e = ux_layout_pbb_prepro(element);
+  if (e && G_ux.tmp_element.component.userid == 0x11) {
+    // The centering depends on the target.
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
     G_ux.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER;
+#elif (BAGL_WIDTH==128 && BAGL_HEIGHT==32)
+    G_ux.tmp_element.component.font_id = BAGL_FONT_OPEN_SANS_REGULAR_11px;
+#else
+  #error "BAGL_WIDTH/BAGL_HEIGHT not defined"
+#endif
   }
   return e;
 }
 
-void ux_layout_nn_init(unsigned int stack_slot) {
-  ux_layout_bb_init_common(stack_slot);
-  G_ux.stack[stack_slot].screen_before_element_display_callback = ux_layout_nn_prepro;
+void ux_layout_pbn_init(unsigned int stack_slot) {
+  ux_layout_pbb_init_common(stack_slot);
+  G_ux.stack[stack_slot].screen_before_element_display_callback = ux_layout_pbn_prepro;
   ux_stack_display(stack_slot);
 }
 

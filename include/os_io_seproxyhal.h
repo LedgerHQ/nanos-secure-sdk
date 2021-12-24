@@ -90,8 +90,6 @@ unsigned char io_event(unsigned char channel);
 
 #ifdef HAVE_BLE
 void BLE_power(unsigned char powered, const char *discovered_name);
-
-void io_ble_wipe_pairing_db(void);
 #endif // HAVE_BLE
 
 #ifdef __cplusplus
@@ -146,18 +144,6 @@ typedef enum {
   APDU_RAW,
   APDU_USB_WEBUSB,
 } io_apdu_state_e;
-
-#ifdef HAVE_BLE_APDU
-void BLE_protocol_recv(unsigned char data_length, unsigned char *att_data);
-
-#define BLE_protocol_send_RET_OK 0
-#define BLE_protocol_send_RET_BUSY 1
-#define BLE_protocol_send_RET_ABORTED 2
-// TODO ensure not being stuck in case disconnect or timeout during reply.
-// add a timeout for reply operation
-char BLE_protocol_send(unsigned char *response_apdu,
-                       unsigned short response_apdu_length);
-#endif // HAVE_BLE_APDU
 
 #ifdef HAVE_IO_U2F
 #include "u2f_service.h"
@@ -218,7 +204,9 @@ extern u2f_service_t G_io_u2f;
  * Wait until a UX call returns a definitve status. Handle all event packets in
  * between
  */
+#if !defined(APP_UX)
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
+#endif // !defined(APP_UX)
 
 /**
  * Global type that enables to map memory onto the application zone instead of
@@ -243,11 +231,14 @@ typedef struct io_seph_s {
   unsigned short ble_xfer_timeout;
 #endif // HAVE_BLE_APDU
 
-#ifdef TARGET_NANOX
-  unsigned int display_status_sent;
+#ifdef HAVE_BLE
   // cached here to avoid unavailable zone deref within IO task
   unsigned int plane_mode;
-#endif // TARGET_NANOX
+  unsigned char ble_ready;
+  unsigned char name_changed;
+  unsigned char enabling_advertising;
+  unsigned char disabling_advertising;
+#endif // HAVE_BLE
 
 } io_seph_app_t;
 
@@ -275,20 +266,8 @@ void io_seproxyhal_se_reset(void);
 void io_seproxyhal_disable_io(void);
 
 #ifdef HAVE_BLE
-void io_seproxyhal_disable_ble(void);
-
-void io_seproxyhal_ble_send_db(void);
-
-void io_seproxyhal_ble_pairing_db_from_mcu(
-    unsigned char *mac_addr PLENGTH(mac_addr_len), unsigned int mac_addr_len,
-    unsigned int db_offset, unsigned char *buffer PLENGTH(buffer_len),
-    unsigned int buffer_len);
-
-bolos_bool_t io_seproxyhal_ble_pairing_db_to_mcu(
-    unsigned char *mac_addr PLENGTH(mac_addr_len), unsigned int mac_addr_len,
-    bolos_bool_t send_request);
-
-void io_ble_pairing_db_persist_request(void);
+void io_seph_ble_enable(unsigned char enable);
+void io_seph_ble_clear_bond_db(void);
 #endif // HAVE_BLE
 
 /**
@@ -300,10 +279,10 @@ void io_seproxyhal_io_heartbeat(void);
 // IO task related function
 unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
 
-#if defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
+#ifdef HAVE_PRINTF
 // Sends a character to the MCU and waits for the MCU acknowledgement.
-void mcu_usb_printc(unsigned char c);
-#endif // defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
+void mcu_usb_prints(const char *str, unsigned int charcount);
+#endif // HAVE_PRINTF
 
 #endif // OS_IO_SEPROXYHAL
 

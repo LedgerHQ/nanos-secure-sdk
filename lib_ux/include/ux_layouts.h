@@ -22,7 +22,9 @@
 
 #include "bagl.h"
 
-#ifdef TARGET_NANOX
+#ifdef HAVE_UX_FLOW
+
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 /*********************************************************************************
  * 1 bold text line
  * 3 text lines
@@ -74,17 +76,19 @@ typedef struct ux_layout_bnn_params_s {
 } ux_layout_bnn_params_t;
 
 void ux_layout_bnn_init(unsigned int stack_slot);
-#endif // TARGET_NANOX
+#endif //(BAGL_WIDTH==128 && BAGL_HEIGHT==64)
+
 
 /*********************************************************************************
  * 1 bold text line with the title
  * 1-3 text lines [nano s/nano x]
  */
-#ifdef TARGET_NANOX
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 #define UX_LAYOUT_PAGING_LINE_COUNT 3
-#endif 
-#ifdef TARGET_NANOS
+#elif (BAGL_WIDTH==128 && BAGL_HEIGHT==32)
 #define UX_LAYOUT_PAGING_LINE_COUNT 1
+#else
+#error "BAGL_WIDTH/BAGL_HEIGHT not defined"
 #endif
 
 #include "ux_layout_paging_compute.h"
@@ -202,6 +206,21 @@ typedef struct ux_layout_pnn_params_s {
 
 void ux_layout_pnn_init(unsigned int stack_slot);
 
+
+/*********************************************************************************
+ * ICON
+ * 1 bold text lines
+ * 1 normal text lines
+ */
+
+typedef struct ux_layout_pbn_params_s {
+	const bagl_icon_details_t* icon;
+	const char* line1;
+	const char* line2;
+} ux_layout_pbn_params_t;
+
+void ux_layout_pbn_init(unsigned int stack_slot);
+
 /*********************************************************************************
  * ICON
  * 1 normal text lines
@@ -273,3 +292,4 @@ void ux_menulist_init_select(unsigned int stack_slot,
  */
 void ux_layout_set_timeout(unsigned int stack_slot, unsigned int ms);
 
+#endif // HAVE_UX_FLOW

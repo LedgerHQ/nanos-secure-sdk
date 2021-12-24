@@ -95,6 +95,15 @@
 #define SYSCALL_cx_ecpoint_cmp_ID_IN 0x6000fbc5UL
 #define SYSCALL_cx_ecpoint_is_on_curve_ID_IN 0x6000fcc5UL
 #define SYSCALL_cx_ecpoint_is_at_infinity_ID_IN 0x60014babUL
+
+#ifdef HAVE_X25519
+#define SYSCALL_cx_ecpoint_x25519_ID_IN 0x60001b3dUL
+#endif // HAVE_X25519
+
+#ifdef HAVE_X448
+#define SYSCALL_cx_ecpoint_x448_ID_IN 0x6000609bUL
+#endif // HAVE_X448
+
 #define SYSCALL_cx_crc32_hw_ID_IN 0x60010271UL
 
 #define SYSCALL_cx_get_random_bytes_ID_IN 0x60010775
@@ -106,10 +115,15 @@
 #define SYSCALL_os_perso_set_words_ID_IN 0x60005018UL
 #define SYSCALL_os_perso_finalize_ID_IN 0x60005180UL
 #define SYSCALL_os_perso_isonboarded_ID_IN 0x60009f4fUL
+#define SYSCALL_os_perso_setonboardingstatus_ID_IN 0x60009400UL
 #define SYSCALL_os_perso_derive_node_bip32_ID_IN 0x600053baUL
 #define SYSCALL_os_perso_derive_node_with_seed_key_ID_IN 0x6000a6d8UL
 #define SYSCALL_os_perso_derive_eip2333_ID_IN 0x6000a750UL
+
+#if defined(HAVE_SEED_COOKIE)
 #define SYSCALL_os_perso_seed_cookie_ID_IN 0x6000a8fcUL
+#endif // HAVE_SEED_COOKIE
+
 #define SYSCALL_os_endorsement_get_code_hash_ID_IN 0x6000550fUL
 #define SYSCALL_os_endorsement_get_public_key_ID_IN 0x600056f3UL
 #define SYSCALL_os_endorsement_get_public_key_certificate_ID_IN 0x6000574cUL
@@ -202,13 +216,14 @@
 #define SYSCALL_screen_clear_ID_IN 0x600079f4UL
 #define SYSCALL_screen_update_ID_IN 0x60007af3UL
 #define SYSCALL_screen_set_keepout_ID_IN 0x60007bedUL
+#ifdef HAVE_BRIGHTNESS_SYSCALL
+#define SYSCALL_screen_set_brightness_ID_IN 0x60008cedUL
+#endif // HAVE_BRIGHTNESS_SYSCALL
 #define SYSCALL_bagl_hal_draw_bitmap_within_rect_ID_IN 0x60007ca0UL
 #define SYSCALL_bagl_hal_draw_rect_ID_IN 0x60007da4UL
 #define SYSCALL_os_ux_set_status_ID_IN 0x600134e9UL
 #define SYSCALL_os_ux_get_status_ID_IN 0x60013593UL
 #define SYSCALL_os_seph_serial_ID_IN 0x60006dd4UL
-#define SYSCALL_os_perso_ble_pairing_db_save_ID_IN 0x6000ad9cUL
-#define SYSCALL_os_perso_ble_pairing_db_load_ID_IN 0x6000ae1eUL
 #define SYSCALL_io_button_read_ID_IN 0x60008f22UL
 #endif // ST33
 

@@ -16,9 +16,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-/*
- * This file is not intended to be included directly.
- * Include "lbcxng.h" instead
+/**
+ * @file    lcx_blake2.h
+ * @brief   BLAKE2 crypographic hash function.
+ * 
+ * BLAKE2b is a cryptographic hash function optimized for 64-bit platforms that
+ * produces digests of any size between 1 and 64 bytes. It is specified at https://blake2.net.
  */
 
 #ifdef HAVE_BLAKE2
@@ -30,56 +33,68 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/**  @private */
+/**  @private BLAKE2b constants */
 enum blake2b_constant {
-  BLAKE2B_BLOCKBYTES    = 128,
-  BLAKE2B_OUTBYTES      = 64,
-  BLAKE2B_KEYBYTES      = 64,
-  BLAKE2B_SALTBYTES     = 16,
-  BLAKE2B_PERSONALBYTES = 16
+  BLAKE2B_BLOCKBYTES    = 128,       ///< Size of a block
+  BLAKE2B_OUTBYTES      = 64,        ///< Size of the output
+  BLAKE2B_KEYBYTES      = 64,        ///< Size of the key
+  BLAKE2B_SALTBYTES     = 16,        ///< Size of the salt
+  BLAKE2B_PERSONALBYTES = 16         ///< Size of the personalization string
 };
 
-/**  @private */
+/**  @private BLAKE2b state members */
 struct blake2b_state__ {
-  uint64_t h[8];
-  uint64_t t[2];
-  uint64_t f[2];
-  uint8_t  buf[BLAKE2B_BLOCKBYTES];
-  size_t   buflen;
-  size_t   outlen;
-  uint8_t  last_node;
+  uint64_t h[8];                     ///< Internal state of the hash
+  uint64_t t[2];                     ///< Message byte offset at the end of the current block
+  uint64_t f[2];                     ///< Flag indicating the last block
+  uint8_t  buf[BLAKE2B_BLOCKBYTES];  ///< Buffer for the processed data
+  size_t   buflen;                   ///< Length of the buffer
+  size_t   outlen;                   ///< Length of the output
+  uint8_t  last_node;                ///< Last node
 };
-/** @private */
+/** @private BLAKE2b state */
 typedef struct blake2b_state__ blake2b_state;
 
 /**
- * Blake2b context
+ * @brief BLAKE2b context
  */
 struct cx_blake2b_s {
-  /** @copydoc cx_ripemd160_s::header */
-  struct cx_hash_header_s header;
-  /** @internal output digest size*/
-  size_t                 output_size;
-  struct blake2b_state__ ctx;
+  struct cx_hash_header_s header;     ///< @copydoc cx_ripemd160_s::header
+  size_t                 output_size; ///< Output digest size
+  struct blake2b_state__ ctx;         ///< BLAKE2B state
 };
 /** Convenience type. See #cx_blake2b_s. */
 typedef struct cx_blake2b_s cx_blake2b_t;
 
 /**
- * Init a blake2b context.
+ * @brief   Initialize BLAKE2b message digest context.
  *
- * Blake2b as specified at https://blake2.net.
+ * @param[out] hash    Pointer to the BLAKE2b context to initialize.
+ *                     The context shall be in RAM.
  *
- * @param [out] hash  the context to init.
- *    The context shall be in RAM
+ * @param[in]  out_len Digest size in bits.
  *
- * @param [in] size   output blake2b size, in BITS.
- *
- *
- * @return algorithm identifier
+ * @return             Error code:
+ *                     - CX_OK
+ *                     - CX_INVALID_PARAMETER
  */
-  cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
+cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
 
+/**
+ * @brief   Initialize BLAKE2b message digest context.
+ * 
+ * @details This function throws an exception if the
+ *          initialization fails.
+ *
+ * @param[out] hash    Pointer to the BLAKE2b context to initialize.
+ *                     The context shall be in RAM.
+ *
+ * @param[in]  out_len Digest size in bits.
+ *
+ * @return             BLAKE2b identifier.
+ * 
+ * @throws             CX_INVALID_PARAMETER
+ */
 static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
 {
   CX_THROW(cx_blake2b_init_no_throw(hash, out_len));
@@ -87,25 +102,57 @@ static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
 }
 
 /**
- * Init a blake2b context with salt and personalization string.
- *
- * Blake2b as specified at https://blake2.net.
- *
- * @param [out] hash  the context to init.
- *    The context shall be in RAM
- *
- * @param [in] size   output blake2b size, in BITS.
- *
- *
- * @return algorithm identifier
+ * @brief   Initialize BLAKE2b message digest context with
+ *          salt and personnalization string.
+ * 
+ * @param[out] hash     Pointer to the BLAKE2b context to initialize.
+ *                      The context shall be in RAM.
+ * 
+ * @param[in] out_len   Digest size in bits.
+ * 
+ * @param[in] salt      Pointer to a salt (optional).
+ * 
+ * @param[in] salt_len  Length of the salt.
+ * 
+ * @param[in] perso     Pointer to a personalization string (optional).
+ * 
+ * @param[in] perso_len Length of the personalization string.
+ * 
+ * @return              Error code:
+ *                      - CX_OK on success
+ *                      - CX_INVALID_PARAMETER
  */
-  cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
+cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
                                     size_t        out_len,
                                     uint8_t *     salt,
                                     size_t        salt_len,
                                     uint8_t *     perso,
                                     size_t        perso_len);
 
+/**
+ * @brief   Initialize BLAKE2b message digest context with
+ *          salt and personnalization string.
+ * 
+ * @details This function throws an exception if the initialization
+ *          fails.
+ * 
+ * @param[out] hash     Pointer to the BLAKE2b context to initialize.
+ *                      The context shall be in RAM.
+ * 
+ * @param[in] out_len   Digest size in bits.
+ * 
+ * @param[in] salt      Pointer to a salt (optional).
+ * 
+ * @param[in] salt_len  Length of the salt.
+ * 
+ * @param[in] perso     Pointer to a personalization string (optional).
+ * 
+ * @param[in] perso_len Length of the personalization string.
+ * 
+ * @return              BLAKE2b identifier.
+ * 
+ * @throws              CX_INVALID_PARAMETER
+ */
 static inline int cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len )
 {
   CX_THROW(cx_blake2b_init2_no_throw(hash, out_len, salt, salt_len, perso, perso_len));

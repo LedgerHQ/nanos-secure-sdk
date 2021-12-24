@@ -75,7 +75,7 @@ void u4le_encode(unsigned char *buffer, unsigned int offset,
 #define os_swap_u32(u32) __builtin_bswap32(u32)
 
 void os_memset4(void *dst, unsigned int initval, unsigned int nbintval);
-void os_xor(void *dst, void WIDE *src1, void WIDE *src2, unsigned int length);
+void os_xor(void *dst, void *src1, void *src2, unsigned int length);
 
 // Secure memory comparison
 char os_secure_memcmp(void *src1, void *src2, unsigned int length);

@@ -28,14 +28,12 @@
 #include "os_ux.h"
 #include "os_task.h"
 
-//#ifdef TARGET_NANOS 
 #ifndef HAVE_BOLOS_UX
 #ifndef HAVE_UX_FLOW
   #define COMPLIANCE_UX_160
   #define HAVE_UX_LEGACY
 #endif // HAVE_UX_FLOW
 #endif // HAVE_BOLOS_UX
-//#endif // TARGET_NANOS
 
 #include "ux_layouts.h"
 #include "ux_flow_engine.h"
@@ -59,7 +57,7 @@ struct bagl_element_e {
   int overfgcolor;
   int overbgcolor;
 	bagl_element_callback_t tap;
-	bagl_element_callback_t out;  
+	bagl_element_callback_t out;
 	bagl_element_callback_t over;
 #endif // TARGET_BLUE
 };
@@ -132,16 +130,27 @@ typedef struct ux_stack_slot_s ux_stack_slot_t;
 
 /**
  * Common structure for applications to perform asynchronous UX aside IO operations
- */ 
+ */
 typedef struct ux_state_s ux_state_t;
 
+// returns 0 if the element_array is not found, else stack_index + 1 if the element_array is found
 unsigned int ux_stack_is_element_array_present(const bagl_element_t* element_array);
+
+// push if a slot exists and returns the new slot, otherwise returns the top spot
 unsigned int ux_stack_push(void);
+
+// pops the top slot exists and returns the new slot, then returns the new top slot
 unsigned int ux_stack_pop(void);
+
+// inserts a new slot at the stack_slot
 void ux_stack_insert(unsigned int stack_slot); // insert slot space as given index
+
+// removes the slot at the stack_slot
 void ux_stack_remove(unsigned int stack_slot);
 
-void ux_stack_init(unsigned int stack_slot); 
+void ux_stack_init(unsigned int stack_slot);
+
+// display the slot at index stack_slot
 void ux_stack_display(unsigned int stack_slot);
 
 /** Function to be implemented by the UX manager (to allow specific callback and processing of the target)
@@ -153,9 +162,9 @@ void ux_stack_al_display_next_element(unsigned int stack_slot);
 void ux_stack_redisplay(void);
 
 const bagl_element_t* ux_stack_display_element_callback(const bagl_element_t* element);
-#ifdef TARGET_NANOX
+#ifdef HAVE_SE_SCREEN
 void ux_stack_display_elements(ux_stack_slot_t* slot);
-#endif // TARGET_NANOX
+#endif // HAVE_SE_SCREEN
 
 #ifdef HAVE_UX_LEGACY
 // a menu callback is called with a given userid provided within the menu entry to allow for fast switch of the action to be taken
@@ -186,7 +195,7 @@ typedef const ux_menu_entry_t* (*ux_menu_iterator_t) (unsigned int entry_idx);
 typedef struct ux_menu_state_s {
   const ux_menu_entry_t* menu_entries;
   unsigned int menu_entries_count;
-  unsigned int current_entry; 
+  unsigned int current_entry;
   ux_menu_preprocessor_t menu_entry_preprocessor;
   ux_menu_iterator_t menu_iterator;
 } ux_menu_state_t;
@@ -208,7 +217,7 @@ typedef struct ux_turner_step_s {
 typedef struct ux_turner_state_s {
   const ux_turner_step_t* steps;
   unsigned int steps_count;
-  unsigned int current_step; 
+  unsigned int current_step;
   button_push_callback_t button_callback;
   unsigned int elapsed_ms;
 } ux_turner_state_t;
@@ -247,7 +256,7 @@ struct ux_stack_slot_s {
   callback_int_t keyboard_callback; // the keyboard/pin keyboard must know where to send the key typed
 #endif // TARGET_BLUE
 
-}; 
+};
 
 struct ux_state_s {
 
@@ -261,9 +270,9 @@ struct ux_state_s {
 #ifdef HAVE_UX_FLOW
   // global context, therefore, don't allow for multiple paging overlayed in a graphic stack
   ux_layout_paging_state_t layout_paging;
-  
+
   // the flow for each stack slot
-  ux_flow_state_t flow_stack[UX_STACK_SLOT_COUNT]; 
+  ux_flow_state_t flow_stack[UX_STACK_SLOT_COUNT];
 
 #endif // HAVE_UX_FLOW
 
@@ -273,18 +282,18 @@ struct ux_state_s {
 #endif // defined(HAVE_UX_FLOW) || defined(TARGET_BLUE)
 
   bagl_element_t tmp_element;
-  
+
   // unified arrays
   // maxstack: [onboarding/dashboard/settings] | pairing | pin | batterylow | batterycrit | screensaver
   ux_stack_slot_t stack[UX_STACK_SLOT_COUNT];
 
-#ifndef TARGET_BLUE
+#ifdef HAVE_UX_FLOW
   // for menulist display
   unsigned int menulist_current;
   ux_layout_strings_params_t menulist_params;
   list_item_value_t menulist_getter;
   list_item_select_t menulist_selector;
-#endif // TARGET_BLUE
+#endif // HAVE_UX_FLOW
 
 #ifdef COMPLIANCE_UX_160
   bolos_ux_params_t params;
@@ -300,13 +309,15 @@ struct ux_state_s {
 #define callback_interval_ms stack[0].ticker_interval
 #define UX_INIT() \
   memset(&G_ux, 0, sizeof(G_ux)); \
-  ux_stack_push(); 
+  ux_stack_push();
 extern ux_state_t G_ux;
 
 #else // COMPLIANCE_UX_160
 
 extern ux_state_t G_ux;
+#if !defined(APP_UX)
 extern bolos_ux_params_t G_ux_params;
+#endif // !defined(APP_UX)
 
 /**
  * Initialize the user experience structure
@@ -329,11 +340,11 @@ extern bolos_ux_params_t G_ux_params;
 #endif // TARGET_BLUE
 
 /**
- * Request displaying the next element in the UX structure. 
+ * Request displaying the next element in the UX structure.
  * Take into account if a seproxyhal status has already been issued.
  * Take into account if the next element is allowed/denied for display by the registered preprocessor
  */
-#ifdef TARGET_NANOX
+#ifdef HAVE_SE_SCREEN
 #define UX_DISPLAY_NEXT_ELEMENT() \
   if (G_ux.stack[0].element_arrays[0].element_array \
     && G_ux.stack[0].element_index < G_ux.stack[0].element_arrays[0].element_array_count \
@@ -352,7 +363,7 @@ extern bolos_ux_params_t G_ux_params;
       screen_update(); \
     } \
   }
-#else // TARGET_NANOX
+#else // HAVE_SE_SCREEN
 #define UX_DISPLAY_NEXT_ELEMENT() \
   while (G_ux.stack[0].element_arrays[0].element_array \
     && G_ux.stack[0].element_index < G_ux.stack[0].element_arrays[0].element_array_count \
@@ -367,7 +378,7 @@ extern bolos_ux_params_t G_ux_params;
     } \
     G_ux.stack[0].element_index++; \
   }
-#endif // TARGET_NANOX
+#endif // HAVE_SE_SCREEN
 
 #ifdef HAVE_BLE
 /**
@@ -452,9 +463,9 @@ extern bolos_ux_params_t G_ux_params;
   UX_REDISPLAY();
 
 /**
- * Request the given UX to be redisplayed without emitting a display status right now (to continue 
+ * Request the given UX to be redisplayed without emitting a display status right now (to continue
  * current operation, like transferring an USB reply)
- */ 
+ */
 #define UX_DISPLAY_REQUEST(elements_array, preprocessor) \
   G_ux.stack[0].element_arrays[0].element_array = elements_array; \
   G_ux.stack[0].element_arrays[0].element_array_count = sizeof(elements_array)/sizeof(elements_array[0]); \
@@ -480,7 +491,7 @@ extern bolos_ux_params_t G_ux_params;
       displayed_callback \
     }
 
-/** 
+/**
  * Process display processed event (by the os_ux or by the application code)
  */
 #define UX_DISPLAYED_EVENT(displayed_callback) \
@@ -542,10 +553,10 @@ extern bolos_ux_params_t G_ux_params;
 #else // TARGET_BLUE
 #define UX_FINGER_EVENT(seph_packet)
 #endif // TARGET_BLUE
-/** 
+/**
  * forward the ticker_event to the os ux handler. Ticker event callback is always called whatever the return code of the ux app.
  * Ticker event interval is assumed to be 100 ms.
- */ 
+ */
 #define UX_TICKER_EVENT(seph_packet, callback) \
   UX_FORWARD_EVENT({ \
     unsigned int UX_ALLOWED = (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE); \
@@ -567,7 +578,7 @@ extern bolos_ux_params_t G_ux_params;
   }, 0);
 
 /**
- * Forward the event, ignoring the UX return code, the event must therefore be either not processed or processed with extreme care by the application afterwards 
+ * Forward the event, ignoring the UX return code, the event must therefore be either not processed or processed with extreme care by the application afterwards
  */
 #define UX_DEFAULT_EVENT() \
   UX_FORWARD_EVENT({ \
@@ -605,14 +616,14 @@ void io_seproxyhal_disable_io(void);
 
 void io_seproxyhal_backlight(unsigned int flags, unsigned int backlight_percentage);
 
-/** 
+/**
  * Helper function to send the given bitmap splitting into multiple DISPLAY_RAW packet as the bitmap is not meant to fit in a single SEPROXYHAL packet.
  */
 void io_seproxyhal_display_icon(bagl_component_t* icon_component, bagl_icon_details_t* icon_details);
 
 /**
  * Helper method on the Blue to output icon header to the MCU and allow for bitmap transformation
- */ 
+ */
 unsigned int io_seproxyhal_display_icon_header_and_colors(bagl_component_t* icon_component, bagl_icon_details_t* icon_details, unsigned int* icon_len);
 
 // discriminated from io to allow for different memory placement
@@ -642,7 +653,7 @@ extern ux_seph_os_and_app_t G_ux_os;
 
 // if current_entry == -1UL, then don't change the current entry
 #define UX_MENU_UNCHANGED_ENTRY (-1UL)
-void ux_menu_display(unsigned int current_entry, 
+void ux_menu_display(unsigned int current_entry,
                      const ux_menu_entry_t* menu_entries,
                      ux_menu_preprocessor_t menu_entry_preprocessor);
 const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element);
@@ -659,7 +670,7 @@ extern ux_menu_state_t ux_menu;
 
 // if current_entry == -1UL, then don't change the current entry
 #define UX_TURNER_UNCHANGED_ENTRY (-1UL)
-void ux_turner_display(unsigned int current_step, 
+void ux_turner_display(unsigned int current_step,
                      const ux_turner_step_t* steps,
                      unsigned int steps_count,
                      button_push_callback_t button_callback);
@@ -673,12 +684,12 @@ extern ux_turner_state_t ux_turner;
   // current ux_menu context (could be pluralised if multiple nested levels of menu are required within bolos_ux for example)
 #ifdef BOLOS_RELEASE
 #ifdef TARGET_NANOX
-  #error HAVE_UX_LEGACY must be removed in the release 
+  #error HAVE_UX_LEGACY must be removed in the release
 #else
   #warning Refactor UX plz
 #endif // TARGET_NANOX
 #endif //BOLOS_RELEASE
-#endif // HAVE_UX_LEGACY  
+#endif // HAVE_UX_LEGACY
 
 
 

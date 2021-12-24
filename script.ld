@@ -33,12 +33,6 @@ STACK_SIZE = DEFINED(stack_size) ? stack_size : 1024;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
 
 /*
- * Ensure correct remap cx address
- */
-OFF_G_cx           = 0x20001400 - ORIGIN(CXSRAM);
-_cx_trampoline     = 0x120001;
-
-/*
  * Declare application entry point
  */
 ENTRY(main);
@@ -111,7 +105,7 @@ SECTIONS
   .cx_ram : {
     _cxram = .;
 
-    . = _cxram + OFF_G_cx;
+    . = _cxram + ORIGIN(CXSRAM);
     *(.bss.G_cx)
 
     . = _cxram + LENGTH(CXSRAM);

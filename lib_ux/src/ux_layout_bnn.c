@@ -21,7 +21,7 @@
 
 #ifdef HAVE_UX_FLOW
 
-#ifdef TARGET_NANOX
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 /*********************************************************************************
  * 4 text lines
  */
@@ -33,9 +33,9 @@ const bagl_element_t ux_layout_bnn_elements[] = {
   {{BAGL_ICON                           , 0x01,   2,  28,   4,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_left},
   {{BAGL_ICON                           , 0x02, 122,  28,   4,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_right},
 
-  {{BAGL_LABELINE                       , 0x10,   0,  20, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x11,   0,  36, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x12,   0,  52, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x10,   6,  20, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x11,   6,  36, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x12,   6,  52, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
 };
 
 /*
@@ -84,6 +84,6 @@ void ux_layout_bnn_init(unsigned int stack_slot) {
   G_ux.stack[stack_slot].button_push_callback = ux_flow_button_callback;
   ux_stack_display(stack_slot);
 }
-#endif // TARGET_NANOX
+#endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 
 #endif // HAVE_UX_FLOW

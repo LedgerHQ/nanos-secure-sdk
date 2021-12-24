@@ -119,17 +119,17 @@ os is not an application (it calls ux upon user inputs)
 /* ----------------------------------------------------------------------- */
 /* -                          DEBUG FUNCTIONS                           - */
 /* ----------------------------------------------------------------------- */
+#ifdef HAVE_PRINTF
 void screen_printf(const char *format, ...);
-
-// emit a single byte
-void screen_printc(unsigned char const c);
+void mcu_usb_printf(const char *format, ...);
+#else // !HAVE_PRINTF
+#define PRINTF(...)
+#endif // !HAVE_PRINTF
 
 // redefined if string.h not included
+#ifdef HAVE_SPRINTF
 int snprintf(char *str, size_t str_size, const char *format, ...);
-
-#ifndef PRINTF
-#define PRINTF(...)
-#endif
+#endif // HAVE_SPRINTF
 
 // syscall test
 // SYSCALL void dummy_1(unsigned int* p PLENGTH(2+len+15+ len + 16 +

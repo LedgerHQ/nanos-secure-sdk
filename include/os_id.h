@@ -20,11 +20,11 @@ SYSCALL unsigned int os_version(unsigned char *version PLENGTH(maxlength),
 /* Grab the SE serial number */
 SYSCALL unsigned int os_serial(unsigned char *serial PLENGTH(maxlength),
                                unsigned int maxlength);
-#ifdef TARGET_NANOX
+#ifdef HAVE_MCU_SERIAL_STORAGE
 /* Grab the SEPROXYHAL's MCU serial number */
 SYSCALL unsigned int os_seph_serial(unsigned char *serial PLENGTH(maxlength),
                                     unsigned int maxlength);
-#endif // TARGET_NANOX
+#endif // HAVE_MCU_SERIAL_STORAGE
        /* Grab the SEPROXYHAL's feature set */
 SYSCALL unsigned int os_seph_features(void);
 /* Grab the SEPROXYHAL's version */

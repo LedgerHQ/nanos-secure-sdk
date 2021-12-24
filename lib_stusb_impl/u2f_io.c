@@ -43,7 +43,7 @@ void u2f_io_send(uint8_t *buffer, uint16_t length, u2f_transport_media_t media) 
         break;
 #ifdef HAVE_BLE
     case U2F_MEDIA_BLE:
-        BLE_protocol_send(buffer, length);
+        LEDGER_BLE_send(buffer, length);
         break;
 #endif
     default:
