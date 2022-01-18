@@ -50,6 +50,9 @@ DEFINES += gcc __IO=volatile
 # no assert by default
 DEFINES += NDEBUG
 
+# Debug mode disabled by default
+DEBUG:=0
+
 # default is not to display make commands
 log = $(if $(strip $(VERBOSE)),$1,@$1) # kept for retrocompat
 L = $(if $(strip $(VERBOSE)),,@)
@@ -65,8 +68,17 @@ else
 CFLAGS   += --sysroot="$(SYSROOT)"
 endif
 
+# optimization and debug levels
+ifneq ($(DEBUG),0)
+OPTI_LVL  = -O0
+DBG_LVL   = -g3
+else
+OPTI_LVL  = -Oz
+DBG_LVL   = -g0
+endif
+
 CFLAGS   += -gdwarf-2  -gstrict-dwarf
-CFLAGS   += -O3 -Os
+CFLAGS   += $(OPTI_LVL) $(DBG_LVL)
 CFLAGS   += -fomit-frame-pointer -momit-leaf-frame-pointer
 
 CFLAGS   += -fno-common -mlittle-endian
@@ -77,10 +89,11 @@ CFLAGS   += -fropi
 CFLAGS   += -fno-jump-tables # avoid jump tables for switch to avoid problems with invalid PIC access
 CFLAGS   += -nostdlib -nodefaultlibs
 
-AFLAGS   += -ggdb2 -O3 -Os -fno-common
+# this does not handle -Oz, force -Os instead
+AFLAGS   += -Os $(DBG_LVL) -fno-common
 
 LDFLAGS  += -gdwarf-2  -gstrict-dwarf
-LDFLAGS  += -O3 -Os
+LDFLAGS  += $(OPTI_LVL) $(DBG_LVL)
 LDFLAGS  += -fomit-frame-pointer
 LDFLAGS  += -Wall
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program
