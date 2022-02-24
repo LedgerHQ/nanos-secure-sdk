@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger Blue - Secure firmware
-*   (c) 2016, 2017 Ledger
+*   (c) 2016, 2017, 2018, 2019, 2020 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -19,23 +19,30 @@
  * Global chip memory layout and constants
  *
  */
-
 MEMORY
 {
   DISCARD (rwx) : ORIGIN = 0xd0000000, LENGTH = 1M
 
   FLASH   (rx)  : ORIGIN = 0xc0d00000, LENGTH = 400K
-  SRAM    (rwx) : ORIGIN = 0x20001800, LENGTH = 4K
+  SRAM    (rwx) : ORIGIN = 0x20000200, LENGTH = 4K+512
+  CXSRAM  (rwx) : ORIGIN = 0x20001400, LENGTH = 1K
 }
 
 PAGE_SIZE  = 64;
-STACK_SIZE = 512;
+STACK_SIZE = DEFINED(stack_size) ? stack_size : 1024;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
 
+/*
+ * Declare application entry point
+ */
+ENTRY(main);
+
+
+/*
+ * Layout
+ */
 SECTIONS
 {
-  ENTRY(main)
-
   /****************************************************************/
   /* This section locates the code in FLASH                       */
   /****************************************************************/
@@ -45,13 +52,11 @@ SECTIONS
   {
     /* provide start code symbol, shall be zero */
     _text = .;
-    _nvram = .;
+    _nvram_start = .;
 
-    PROVIDE(_setjmp = setjmp); /*thanks clang*/
+    /* ensure main is always @ 0xC0D00000 */
+    *(.boot*)
 
-     /* ensure main is always @ 0xC0D00000 */
-     *(.boot*)
-    
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
     *(.text*)
     *(.rodata)
@@ -59,14 +64,14 @@ SECTIONS
     *(.rodata.N[^_]*)
 
     . = ALIGN(4);
-    
+
     /* all code placed */
     _etext = .;
 
     . = ALIGN(PAGE_SIZE);
 
     _nvram_data = .;
-    
+
     /* NVM data (ex-filesystem) */
     *(.bss.N_* .rodata.N_*)
 
@@ -74,14 +79,13 @@ SECTIONS
     _envram_data = .;
 
     _install_parameters = .;
-    _envram = .;
-    
+    _nvram_end = .;
   } > FLASH = 0x00
 
   .data (NOLOAD):
   {
     . = ALIGN(4);
-    
+
     /**
      * Place RAM initialized variables
      */
@@ -94,6 +98,19 @@ SECTIONS
 
   } > DISCARD /*> SRAM AT>FLASH = 0x00 */
 
+
+  /*
+   * Here is the 1K for global var of libcxng
+   */
+  .cx_ram : {
+    _cxram = .;
+
+    . = _cxram + ORIGIN(CXSRAM);
+    *(.bss.G_cx)
+
+    . = _cxram + LENGTH(CXSRAM);
+  } > CXSRAM = 0x00
+
   .bss :
   {
     /**
@@ -102,7 +119,6 @@ SECTIONS
     _bss = .;
     *(.bss*)
     _ebss = .;
-
 
     /**
      * Reserve stack size
@@ -120,6 +136,8 @@ SECTIONS
 
   } > SRAM = 0x00
 
+
+
   /****************************************************************/
   /* DEBUG                                                        */
   /****************************************************************/
@@ -133,6 +151,15 @@ SECTIONS
     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
   }
 
+  /DISCARD/ :
+  {
+    *(.ARM.extab)
+    *(.gnu.hash)
+    *(.hash)
+    *(.dynsym)
+    *(.dynstr)
+  }
+
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
   .stabstr       0 : { *(.stabstr) }
@@ -141,6 +168,7 @@ SECTIONS
   .stab.index    0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment       0 : { *(.comment) }
+
   /* DWARF debug sections.
       Symbols in the DWARF debugging sections are relative to the beginning
       of the section so we begin them at 0.  */
@@ -166,5 +194,7 @@ SECTIONS
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
-  
 }
+
+PROVIDE(_nvram = ABSOLUTE(_nvram_start));
+PROVIDE(_envram = ABSOLUTE(_nvram_end));

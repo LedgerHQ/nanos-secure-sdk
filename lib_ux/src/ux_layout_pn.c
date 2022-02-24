@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 ********************************************************************************/
 
 #include "ux.h"
+#include "os_utils.h"
+#include <string.h>
 
 #ifdef HAVE_UX_FLOW
 
 const bagl_element_t ux_layout_pn_elements[] = {
-#ifdef TARGET_NANOX
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 
@@ -30,7 +32,7 @@ const bagl_element_t ux_layout_pn_elements[] = {
 
   {{BAGL_ICON                           , 0x10,  57,  17,  14,  14, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL },
   {{BAGL_LABELINE                       , 0x11,   0,  44, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL },
-#else // TARGET_NANOX
+#elif (BAGL_WIDTH==128 && BAGL_HEIGHT==32)
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 
@@ -40,8 +42,9 @@ const bagl_element_t ux_layout_pn_elements[] = {
   
   {{BAGL_ICON                           , 0x10,  56,  2,  16,  16, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL },
   {{BAGL_LABELINE                       , 0x11,   0, 28, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL },
-#endif // TARGET_NANOX
-
+#else
+  #error "BAGL_WIDTH/BAGL_HEIGHT not defined"
+#endif
 };
 
 const bagl_element_t* ux_layout_pn_prepro(const bagl_element_t* element) {
@@ -49,7 +52,7 @@ const bagl_element_t* ux_layout_pn_prepro(const bagl_element_t* element) {
   const ux_layout_pn_params_t* params = (const ux_layout_pn_params_t*)ux_stack_get_current_step_params();
 
 	// ocpy element before any mod
-	os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+	memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   // for dashboard, setup the current application's name
   switch (element->component.userid) {

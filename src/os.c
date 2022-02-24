@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,15 +16,17 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "os.h"
+#include "exceptions.h"
+#include "lcx_rng.h"
+#include "os_helpers.h"
+#include "os_io.h"
+#include "os_utils.h"
 #include <string.h>
-
-#include "os_io_seproxyhal.h"
 
 // apdu buffer must hold a complete apdu to avoid troubles
 unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
-
+#ifndef BOLOS_OS_UPGRADER_APP
 void os_boot(void) {
   // // TODO patch entry point when romming (f)
   // // set the default try context to nothing
@@ -32,33 +34,7 @@ void os_boot(void) {
   try_context_set(NULL);
 #endif // HAVE_BOLOS
 }
-
-
-REENTRANT(void os_memmove(void * dst, const void WIDE * src, unsigned int length)) {
-#define DSTCHAR ((unsigned char *)dst)
-#define SRCCHAR ((unsigned char WIDE *)src)
-  if (dst > src) {
-    while(length--) {
-      DSTCHAR[length] = SRCCHAR[length];
-    }
-  }
-  else {
-    unsigned short l = 0;
-    while (length--) {
-      DSTCHAR[l] = SRCCHAR[l];
-      l++;
-    }
-  }
-#undef DSTCHAR
-}
-
-void os_memset(void * dst, unsigned char c, unsigned int length) {
-#define DSTCHAR ((unsigned char *)dst)
-  while(length--) {
-    DSTCHAR[length] = c;
-  }
-#undef DSTCHAR
-}
+#endif // BOLOS_OS_UPGRADER_APP
 
 void os_memset4(void* dst, unsigned int initval, unsigned int nbintval) {
   while(nbintval--) {
@@ -66,23 +42,9 @@ void os_memset4(void* dst, unsigned int initval, unsigned int nbintval) {
   }
 }
 
-char os_memcmp(const void WIDE * buf1, const void WIDE * buf2, unsigned int length) {
-#define BUF1 ((unsigned char const WIDE *)buf1)
-#define BUF2 ((unsigned char const WIDE *)buf2)
-  while(length--) {
-    if (BUF1[length] != BUF2[length]) {
-      return (BUF1[length] > BUF2[length])? 1:-1;
-    }
-  }
-  return 0;
-#undef BUF1
-#undef BUF2
-
-}
-
-void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned int length) {
-#define SRC1 ((unsigned char const WIDE *)src1)
-#define SRC2 ((unsigned char const WIDE *)src2)
+void os_xor(void * dst, void * src1, void * src2, unsigned int length) {
+#define SRC1 ((unsigned char const *)src1)
+#define SRC2 ((unsigned char const *)src2)
 #define DST ((unsigned char *)dst)
   unsigned int l = length;
   // don't || to ensure all condition are evaluated
@@ -97,9 +59,9 @@ void os_xor(void * dst, void WIDE* src1, void WIDE* src2, unsigned int length) {
   }
 }
 
-char os_secure_memcmp(void WIDE* src1, void WIDE* src2, unsigned int length) {
-#define SRC1 ((unsigned char const WIDE *)src1)
-#define SRC2 ((unsigned char const WIDE *)src2)
+char os_secure_memcmp(void * src1, void * src2, unsigned int length) {
+#define SRC1 ((unsigned char const *)src1)
+#define SRC2 ((unsigned char const *)src2)
   unsigned int l = length;
   unsigned char xoracc=0;
   // don't || to ensure all condition are evaluated
@@ -114,35 +76,6 @@ char os_secure_memcmp(void WIDE* src1, void WIDE* src2, unsigned int length) {
   }
   return xoracc;
 }
-
-#ifdef BOLOS_EXCEPTION_OLD
-try_context_t* try_context_get(void) {
-  try_context_t* current_ctx;
-  __asm volatile ("mov %0, r9":"=r"(current_ctx));
-  return current_ctx;
-}
-
-void try_context_set(try_context_t* ctx) {
-  __asm volatile ("mov r9, %0"::"r"(ctx));
-}
-
-try_context_t* try_context_get_previous(void) {
-  try_context_t* current_ctx;
-  __asm volatile ("mov %0, r9":"=r"(current_ctx));
-
-  // first context reached ?
-  if (current_ctx == NULL) {
-    // DESIGN NOTE: if not done, then upon END_TRY a wrong context address may be use (if address 
-    // à is readable in the arch, and therefore lead to faulty rethrow or worse)
-    return NULL;
-  }
-
-  // return r9 content saved on the current context. It links to the previous context.
-  // r4 r5 r6 r7 r8 r9 r10 r11 sp lr
-  //                ^ platform register
-  return (try_context_t*) current_ctx->jmp_buf[5];
-}
-#endif // BOLOS_EXCEPTION_OLD
 
 #ifndef HAVE_BOLOS
 void os_longjmp(unsigned int exception) {
@@ -188,9 +121,6 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
     // tag matches
     unsigned int tlvtag = *tlv++;
     remlen--;
-    if (remlen == 0) {
-      goto retret; 
-    }
     unsigned int tlvlen = *tlv++;
     remlen--;
     if (remlen == 0) {
@@ -260,7 +190,7 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
       }
 
       if (!check_equals_buffer) {
-        os_memmove(*buffer, tlv+offset, maxlength);
+        memmove(*buffer, tlv+offset, maxlength);
       }
       else {
         ret = os_secure_memcmp(*buffer, tlv+offset, maxlength) == 0;
@@ -278,14 +208,40 @@ retret:
   return ret;
 }
 
+#ifndef BOLOS_OS_UPGRADER_APP
 void safe_desynch() {
   volatile int a, b;
   unsigned int i;
 
-  i = (cx_rng_u8() + 1u) * 30;
+  i = ((cx_rng_u32()&0xFF) + 1u);
   a = b = 1;
   while(i--) {
     a = 1 + (b << (a / 2));
-    b = cx_rng_u8();
+    b = cx_rng_u32();
   }
+}
+#endif // BOLOS_OS_UPGRADER_APP
+
+void u4be_encode(unsigned char* buffer, unsigned int offset, unsigned int value) {
+  U4BE_ENCODE(buffer, offset, value);
+}
+
+void u4le_encode(unsigned char* buffer, unsigned int offset, unsigned int value) {
+  U4LE_ENCODE(buffer, offset, value);
+}
+
+void *os_memmove(void *dest, const void *src, size_t n) {
+  return memmove(dest, src, n);
+}
+
+void *os_memcpy(void *dest, const void *src, size_t n) {
+  return memmove(dest, src, n);
+}
+
+int os_memcmp(const void *s1, const void *s2, size_t n) {
+  return memcmp(s1, s2, n);
+}
+
+void *os_memset(void *s, int c, size_t n) {
+  return memset(s, c, n);
 }

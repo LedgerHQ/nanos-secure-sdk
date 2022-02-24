@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 ********************************************************************************/
 
 #include "ux.h"
+#include "os_utils.h"
 
 #ifdef HAVE_UX_FLOW
 
-#ifdef TARGET_NANOX
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 /*********************************************************************************
  * 1 bold text line
  * 3 text lines
@@ -33,10 +34,10 @@ const bagl_element_t ux_layout_bnnn_elements[] = {
   {{BAGL_ICON                           , 0x01,   2,  28,   4,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_left},
   {{BAGL_ICON                           , 0x02, 122,  28,   4,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_right},
 
-  {{BAGL_LABELINE                       , 0x10,   0,  15, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x11,   0,  29, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x12,   0,  43, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x13,   0,  57, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x10,   6,  15, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x11,   6,  29, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x12,   6,  43, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x13,   6,  57, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
 };
 
 /*
@@ -44,7 +45,7 @@ const bagl_element_t* ux_layout_bnnn_prepro(const bagl_element_t* element) {
 	// don't display if null
   const ux_layout_bnnn_params_t* params = (const ux_layout_bnnn_params_t*)ux_stack_get_current_step_params();
 	// ocpy element before any mod
-	os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+	memcpy(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   // for dashboard, setup the current application's name
   switch (element->component.userid) {
@@ -86,6 +87,6 @@ void ux_layout_bnnn_init(unsigned int stack_slot) {
   G_ux.stack[stack_slot].button_push_callback = ux_flow_button_callback;
   ux_stack_display(stack_slot);
 }
-#endif // TARGET_NANOX
+#endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 
 #endif // HAVE_UX_FLOW

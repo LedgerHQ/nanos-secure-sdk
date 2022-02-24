@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 ********************************************************************************/
 
 #pragma once
+
+#include "os_seed.h"
+#include "os_helpers.h"
 
 #define STEPSPIC(x) ((const ux_flow_step_t* const * )PIC(x))
 #define STEPPIC(x) ((const ux_flow_step_t* )PIC(x))
@@ -61,7 +64,7 @@ typedef enum {
 	FLOW_DIRECTION_FORWARD=1,
 } ux_flow_direction_t;
 ux_flow_direction_t ux_flow_direction(void);
-const ux_flow_step_t* ux_flow_step(void); // return the current step pointer
+const ux_flow_step_t* ux_flow_get_current(void); // return the current step pointer
 void ux_flow_next_no_display(void); // prepare displaying next step when flow is relayout
 void ux_flow_next(void); // skip to next step
 void ux_flow_prev(void); // go back to previous step
@@ -79,16 +82,16 @@ unsigned int ux_flow_relayout(void); // ask for a redisplay of the current displ
 /** 
  * Last step is marked with a FLOW_END_STEP value
  */
-#define FLOW_END_STEP ((void*)0xFFFFFFFFUL)
+#define FLOW_END_STEP ((const ux_flow_step_t *)0xFFFFFFFFUL)
 /**
  * Fake step implying a double press validation to go to the next step (if any)
  */
-#define FLOW_BARRIER  ((void*)0xFFFFFFFEUL)
+#define FLOW_BARRIER  ((const ux_flow_step_t *)0xFFFFFFFEUL)
 /**
  * Fake step to be used as the LAST item of the flow (before the FLOW_END_STEP) to notify
  * that the flow is circular with no end/start for prev/next browsing
  */
-#define FLOW_LOOP     ((void*)0xFFFFFFFDUL)
+#define FLOW_LOOP     ((const ux_flow_step_t *)0xFFFFFFFDUL)
 void ux_flow_init(unsigned int stack_slot, const ux_flow_step_t* const * steps, const ux_flow_step_t* const start_step);
 
 /**
@@ -159,6 +162,18 @@ void ux_flow_uninit(unsigned int stack_slot);
 #define UX_FLOW_DEF_VALID UX_STEP_VALID
 // deprecated
 #define UX_STEP_VALID UX_STEP_CB
+
+/**
+ * Define a flow step with a validation flow and error flow
+ */
+#define UX_STEP_FLOWCB(stepname, layoutkind, validate_flow, error_flow, ...) \
+	const ux_layout_ ## layoutkind ## _params_t stepname ##_val = __VA_ARGS__; \
+	const ux_flow_step_t stepname = { \
+	  ux_layout_ ## layoutkind ## _init, \
+	  & stepname ## _val, \
+	  validate_flow, \
+	  error_flow, \
+	}
 
 /**
  * Define a flow step with a validation callback and a preinit function to

@@ -22,9 +22,14 @@ else
 SDK_SOURCE_PATH += lib_ux
 endif
 
-SOURCE_PATH   += $(BOLOS_SDK)/src $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.c'))) $(dir $(foreach libdir, $(APP_SOURCE_PATH), $(dir $(shell find $(libdir) -name '*.c'))))
-SOURCE_FILES  += $(foreach path, $(SOURCE_PATH),$(shell find $(path) -name '*.c') ) $(GLYPH_DESTC)
-INCLUDES_PATH += $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.h')))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(foreach libdir, $(APP_SOURCE_PATH), $(dir $(shell find $(libdir) -name '*.h'))))
+#include the lib_cxng definition by default if not asked otherwise
+ifeq ($(NO_CXNG),)
+INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/include
+endif
+
+SOURCE_PATH   += $(BOLOS_SDK)/src $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.[csS]'))) $(dir $(shell find $(APP_SOURCE_PATH) -name '*.[csS]'))
+SOURCE_FILES  += $(shell find $(SOURCE_PATH) -name '*.[csS]') $(GLYPH_DESTC) $(APP_SOURCE_FILES)
+INCLUDES_PATH += $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.h')))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(shell find $(APP_SOURCE_PATH) -name '*.h'))
 
 VPATH += $(dir $(SOURCE_FILES))
 OBJECT_FILES += $(sort $(addprefix obj/, $(addsuffix .o, $(basename $(notdir $(SOURCE_FILES))))))

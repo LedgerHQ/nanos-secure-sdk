@@ -50,45 +50,58 @@ clean:
 	rm -fr obj bin debug dep $(GLYPH_DESTC) $(GLYPH_DESTH)
 
 prepare:
-	$(call log, echo Prepare directories)
+	$(L)echo Prepare directories
 	@mkdir -p bin obj debug dep
 
 default: bin/app.apdu
 
-dep/%.d: %.c $(GLYPH_DESTC) prepare Makefile
-	@echo "[DEP]  $@"
-	@mkdir -p dep
-	$(call log,$(call dep_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@))
-
-obj/%.o: %.c dep/%.d
-	@echo "[CC]	  $@"
-	$(call log,$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@))
+obj/%.o: %.c $(GLYPH_DESTC) prepare Makefile
+	@echo "[CC]   $@"
+	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
 obj/%.o: %.s
 	@echo "[AS]   $@"
-	$(call log,$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@))
+	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
+
+obj/%.o: %.S
+	@echo "[AS]   $@"
+	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
+
+ifeq ($(SCRIPT_LD),)
+SCRIPT_LD:=$(BOLOS_SDK)/script.ld
+else
+$(info Using custom link script: $(SCRIPT_LD))
+endif
+LDFLAGS  += -T$(SCRIPT_LD)
 
 bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	@echo "[LINK] $@"
-	$(call log,$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@))
-	$(call log,$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex)
-	$(call log,cp bin/app.elf obj)
-	$(call log,$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm)
+	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@)
+	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex
+	$(L)cp bin/app.elf obj
+	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm
 
 bin/app.apdu bin/app.sha256: bin/app.elf
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256
+	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256
 
 ### BEGIN GCC COMPILER RULES
 
 # link_cmdline(objects,dest)		Macro that is used to format arguments for the linker
 link_cmdline = $(LD) $(LDFLAGS) -o $(2) $(1)
-
-# dep_cmdline(include,defines,src($<),dest($@))	Macro that is used to format arguments for the dependency creator
-dep_cmdline = $(CC) -M $(CFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) $(3) | sed 's/\($*\)\.o[ :]*/obj\/\1.o: /g' | sed -e 's/[:\t ][^ ]\+\.c//g' > dep/$(basename $(notdir $(4))).d 2>/dev/null
+ifneq ($(APP_STACK_SIZE),)
+link_cmdline += -Wl,--defsym=stack_size=$(APP_STACK_SIZE)
+endif
 
 # cc_cmdline(include,defines,src,dest)	Macro that is used to format arguments for the compiler
-cc_cmdline = $(CC) -c $(CFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
+# dependency files are generated along the object file
+cc_cmdline = $(CC) -c $(CFLAGS) -MMD -MT obj/$(basename $(notdir $(4))).o -MF dep/$(basename $(notdir $(4))).d $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
 
 as_cmdline = $(AS) -c $(AFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
 
 ### END GCC COMPILER RULES
+
+# Run Clang Static Analyzer
+SCAN_BUILD ?= scan-build
+SCAN_BUILD_OUTPUT ?= $(CURDIR)/output-scan-build
+scan-build:
+	$(SCAN_BUILD) --use-cc=$(CC) -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o $(SCAN_BUILD_OUTPUT) $(MAKE) default

@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -17,15 +17,20 @@
 ********************************************************************************/
 
 #include "ux.h"
+#include "os_utils.h"
 
 #ifdef HAVE_UX_FLOW
 
+#include <string.h>
+
 /*********************************************************************************
- * 4 text lines
+ * 1/2 text lines
+ * 1 bold line
+ * 1/2 text lines
  */
 
 const bagl_element_t ux_layout_nnbnn_elements[] = {
-#ifdef TARGET_NANOX
+#if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 
@@ -33,12 +38,12 @@ const bagl_element_t ux_layout_nnbnn_elements[] = {
   {{BAGL_ICON                           , 0x01,   0,  30,   7,   4, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_up},
   {{BAGL_ICON                           , 0x02, 120,  30,   7,   4, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_down},
 
-  {{BAGL_LABELINE                       , 0x10,   0,   4, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x11,   0,  20, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x12,   0,  36, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},  
-  {{BAGL_LABELINE                       , 0x13,   0,  52, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x14,   0,  68, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-#else // TARGET_NANOX
+  {{BAGL_LABELINE                       , 0x10,   8,   4, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x11,   8,  20, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x12,   8,  36, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x13,   8,  52, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x14,   8,  68, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+#elif (BAGL_WIDTH==128 && BAGL_HEIGHT==32)
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, NULL},
 
@@ -46,10 +51,12 @@ const bagl_element_t ux_layout_nnbnn_elements[] = {
   {{BAGL_ICON                           , 0x01,   0,  14,   7,   4, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_up},
   {{BAGL_ICON                           , 0x02, 120,  14,   7,   4, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, (const char*)&C_icon_down},
 
-  {{BAGL_LABELINE                       , 0x11,   0,   3, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-  {{BAGL_LABELINE                       , 0x12,   0,  19, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},  
-  {{BAGL_LABELINE                       , 0x13,   0,  35, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
-#endif // TARGET_NANOX
+  {{BAGL_LABELINE                       , 0x11,   8,   3, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x12,   8,  19, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+  {{BAGL_LABELINE                       , 0x13,   8,  35, 112,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, NULL},
+#else
+  #error "BAGL_WIDTH/BAGL_HEIGHT not defined"
+#endif
 };
 
 const bagl_element_t* ux_layout_nnbnn_prepro(const bagl_element_t* element) {
@@ -57,7 +64,7 @@ const bagl_element_t* ux_layout_nnbnn_prepro(const bagl_element_t* element) {
   const ux_layout_strings_params_t* params = (const ux_layout_strings_params_t*)ux_stack_get_current_step_params();
 
 	// ocpy element before any mod
-	os_memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
+      memmove(&G_ux.tmp_element, element, sizeof(bagl_element_t));
 
   // for dashboard, setup the current application's name
   switch (element->component.userid) {

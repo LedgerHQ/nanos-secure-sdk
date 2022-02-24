@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *   Ledger Nano S - Secure firmware
-*   (c) 2019 Ledger
+*   (c) 2021 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -19,7 +19,14 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "os.h"
+#if defined(HAVE_BOLOS)
+# include "bolos_target.h"
+# include "os_math.h"
+#endif // HAVE_BOLOS
+
+#if !defined(MIN)
+# define MIN(x,y) ((x)<(y)?(x):(y))
+#endif // MIN
 
 #if defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
 
@@ -36,55 +43,9 @@ static const char g_pcHex_cap[] = {
 #include "usbd_def.h"
 #include "usbd_core.h"
 
-#ifndef BOLOS_RELEASE
-
-#ifdef TARGET_NANOX
-void mcu_usb_prints(const char* str, unsigned int charcount) {
-  while(charcount--) {
-    mcu_usb_printc(*str++);
-  }
-}
-
-#else
-void mcu_usb_prints(const char* str, unsigned int charcount) {
-  if(USBD_Device.dev_state != USBD_STATE_CONFIGURED){
-    return;
-  }
-  unsigned char buf[4];
-  if(io_seproxyhal_spi_is_status_sent()){
-      io_seproxyhal_spi_recv(buf, 3, 0);
-  }
-  buf[0] = SEPROXYHAL_TAG_PRINTF_STATUS;
-  buf[1] = charcount >> 8;
-  buf[2] = charcount;
-  io_seproxyhal_spi_send(buf, 3);
-  io_seproxyhal_spi_send(str, charcount);
-#ifndef IO_SEPROXYHAL_DEBUG
-  // wait printf ack (no race kthx)
-  io_seproxyhal_spi_recv(buf, 3, 0);
-  buf[0] = 0; // consume tag to avoid misinterpretation (due to IO_CACHE)
-#endif // IO_SEPROXYHAL_DEBUG
-}
-#endif // TARGET_NANOX
-
-/**
- * Common printf code, relies on 2 FAL:
- * - mcu_usb_prints
- * - screen_printc
- */
-
 void screen_printf(const char* format, ...) __attribute__ ((weak, alias ("mcu_usb_printf")));
 
 void mcu_usb_printf(const char* format, ...) {
-
-    /* dummy version
-    unsigned short i;
-    unsigned short len = strlen(str);
-    for(i=0;i<len;i++){
-
-        screen_printc(str[i]);
-    }
-    */
 
     unsigned long ulIdx, ulValue, ulPos, ulCount, ulBase, ulNeg, ulStrlen, ulCap;
     char *pcStr, pcBuf[16], cFill;
@@ -274,33 +235,33 @@ again:
                 {
                   // ensure next char is '*' and next one is 's'
                   if (format[0] == '*' && (format[1] == 's' || format[1] == 'H' || format[1] == 'h')) {
-                    
+
                     // skip '*' char
                     format++;
-                    
+
                     ulStrlen = va_arg(vaArgP, unsigned long);
                     cStrlenSet = 1;
-                    
+
                     // interpret next char (H/h/s)
                     goto again;
                   }
-                  
+
                   // does not support %.2x for example
                   goto error;
                 }
-                
+
                 case '*':
                 {
-                  if (*format == 's' ) {                    
-                    
+                  if (*format == 's' ) {
+
                     ulStrlen = va_arg(vaArgP, unsigned long);
                     cStrlenSet = 2;
                     goto again;
                   }
-                  
+
                   goto error;
                 }
-                
+
                 case '-': // -XXs
                 {
                   cStrlenSet = 0;
@@ -337,22 +298,22 @@ again:
                         {
                         }
                         break;
-                        
+
                       // use given length
                       case 1:
                         ulIdx = ulStrlen;
                         break;
-                        
+
                       // printout prepad
                       case 2:
                         // if string is empty, then, ' ' padding
                         if (pcStr[0] == '\0') {
-                        
+
                           // padd ulStrlen white space
                           do {
                             mcu_usb_prints(" ", 1);
                           } while(ulStrlen-- > 0);
-                        
+
                           goto s_pad;
                         }
                         goto error; // unsupported if replicating the same string multiple times
@@ -375,12 +336,12 @@ again:
                           nibble2 = pcStr[ulCount]&0xF;
                           switch(ulCap) {
                             case 0:
-                              mcu_usb_printc(g_pcHex[nibble1]);
-                              mcu_usb_printc(g_pcHex[nibble2]);
+                              mcu_usb_prints(&g_pcHex[nibble1], 1);
+                              mcu_usb_prints(&g_pcHex[nibble2], 1);
                               break;
                             case 1:
-                              mcu_usb_printc(g_pcHex_cap[nibble1]);
-                              mcu_usb_printc(g_pcHex_cap[nibble2]);
+                              mcu_usb_prints(&g_pcHex_cap[nibble1], 1);
+                              mcu_usb_prints(&g_pcHex_cap[nibble2], 1);
                               break;
                           }
                         }
@@ -446,6 +407,7 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
+                    __attribute__((fallthrough));
                 case 'x':
                 case 'p':
                 {
@@ -598,8 +560,7 @@ error:
     //
     va_end(vaArgP);
 }
-#endif // BOLOS_RELEASE
- 
+
 #endif // HAVE_PRINTF
 
 #ifdef HAVE_SPRINTF
@@ -610,11 +571,11 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
     char *pcStr, pcBuf[16], cFill;
     va_list vaArgP;
     char cStrlenSet;
-    
+
     //
     // Check the arguments.
     //
-    if(format == NULL || str == NULL ||str_size < 2) {
+    if(str == NULL ||str_size < 2) {
       return 0;
     }
 
@@ -649,6 +610,7 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
         str+= ulIdx;
         str_size -= ulIdx;
         if (str_size == 0) {
+            va_end(vaArgP);
             return 0;
         }
 
@@ -743,6 +705,7 @@ again:
                     str++;
                     str_size -= 1;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 
@@ -811,33 +774,33 @@ again:
                 {
                   // ensure next char is '*' and next one is 's'/'h'/'H'
                   if (format[0] == '*' && (format[1] == 's' || format[1] == 'H' || format[1] == 'h')) {
-                    
+
                     // skip '*' char
                     format++;
-                    
+
                     ulStrlen = va_arg(vaArgP, unsigned long);
                     cStrlenSet = 1;
-                    
+
                     // interpret next char (H/h/s)
                     goto again;
                   }
-                  
+
                   // does not support %.2x for example
                   goto error;
                 }
-                
+
                 case '*':
                 {
-                  if (*format == 's' ) {                    
-                    
+                  if (*format == 's' ) {
+
                     ulStrlen = va_arg(vaArgP, unsigned long);
                     cStrlenSet = 2;
                     goto again;
                   }
-                  
+
                   goto error;
                 }
-                
+
                 case '-': // -XXs
                 {
                   cStrlenSet = 0;
@@ -873,26 +836,27 @@ again:
                         {
                         }
                         break;
-                        
+
                       // use given length
                       case 1:
                         ulIdx = ulStrlen;
                         break;
-                        
+
                       // printout prepad
                       case 2:
                         // if string is empty, then, ' ' padding
                         if (pcStr[0] == '\0') {
-                        
+
                           // padd ulStrlen white space
                           ulStrlen = MIN(ulStrlen, str_size);
                           memset(str, ' ', ulStrlen);
                           str+= ulStrlen;
                           str_size -= ulStrlen;
                           if (str_size == 0) {
+                              va_end(vaArgP);
                               return 0;
                           }
-                        
+
                           goto s_pad;
                         }
                         goto error; // unsupported if replicating the same string multiple times
@@ -911,6 +875,7 @@ again:
                         str+= ulIdx;
                         str_size -= ulIdx;
                         if (str_size == 0) {
+                            va_end(vaArgP);
                             return 0;
                         }
                         break;
@@ -920,6 +885,7 @@ again:
                           nibble1 = (pcStr[ulCount]>>4)&0xF;
                           nibble2 = pcStr[ulCount]&0xF;
                           if (str_size < 2) {
+                              va_end(vaArgP);
                               return 0;
                           }
                           switch(ulCap) {
@@ -935,6 +901,7 @@ again:
                           str+= 2;
                           str_size -= 2;
                           if (str_size == 0) {
+                              va_end(vaArgP);
                               return 0;
                           }
                         }
@@ -954,6 +921,7 @@ s_pad:
                         str+= ulCount;
                         str_size -= ulCount;
                         if (str_size == 0) {
+                            va_end(vaArgP);
                             return 0;
                         }
                     }
@@ -1005,7 +973,9 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
+#if !defined(__clang__)
                     __attribute__((fallthrough));
+#endif // !defined(__clang__)
                 case 'x':
                 case 'p':
                 {
@@ -1114,6 +1084,7 @@ convert:
                     str+= ulPos;
                     str_size -= ulPos;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 
@@ -1135,6 +1106,7 @@ convert:
                     str++;
                     str_size --;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 
@@ -1159,6 +1131,7 @@ error:
                     str+= ulPos;
                     str_size -= ulPos;
                     if (str_size == 0) {
+                        va_end(vaArgP);
                         return 0;
                     }
 #endif // HAVE_SNPRINTF_DEBUG

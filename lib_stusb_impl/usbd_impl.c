@@ -151,22 +151,6 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   ' ', 0,
   'S', 0,
 };
-#elif defined(TARGET_ARAMIS)
-#ifndef HAVE_LEGACY_PID
-#define USBD_PID                      0x2000
-#else // HAVE_LEGACY_PID
-#define USBD_PID                      0x0002
-#endif // HAVE_LEGACY_PID
-static uint8_t const USBD_PRODUCT_FS_STRING[] = {
-  6*2+2,
-  USB_DESC_TYPE_STRING,
-  'A', 0,
-  'r', 0,
-  'a', 0,
-  'm', 0,
-  'i', 0,
-  's', 0,
-};
 #elif defined(TARGET_HW2)
 #ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x3000
@@ -234,6 +218,8 @@ static uint8_t const USBD_MANUFACTURER_STRING[] = {
 #define USBD_INTERFACE_FS_STRING USBD_PRODUCT_FS_STRING
 #define USBD_CONFIGURATION_FS_STRING USBD_PRODUCT_FS_STRING
 
+#ifndef HAVE_USB_HIDKBD
+
 static uint8_t const HID_ReportDesc[] = {
   0x06, 0xA0, 0xFF,       // Usage page (vendor defined)
   0x09, 0x01,     // Usage ID (vendor defined)
@@ -256,6 +242,44 @@ static uint8_t const HID_ReportDesc[] = {
   0x91, 0x08,             // Output (Data, Variable, Absolute)
   0xC0
 };
+
+#else
+
+static uint8_t const HID_ReportDesc_kbd[] = {
+  0x05, 0x01,
+  0x09, 0x06,
+  0xA1, 0x01,
+  0x05, 0x07,
+  0x19, 0xE0,
+  0x29, 0xE7,
+  0x15, 0x00,
+  0x25, 0x01,
+  0x75, 0x01,
+  0x95, 0x08,
+  0x81, 0x02,
+  0x95, 0x01,
+  0x75, 0x08,
+  0x81, 0x01,
+  0x95, 0x05,
+  0x75, 0x01,
+  0x05, 0x08,
+  0x19, 0x01,
+  0x29, 0x05,
+  0x91, 0x02,
+  0x95, 0x01,
+  0x75, 0x03,
+  0x91, 0x01,
+  0x95, 0x06,
+  0x75, 0x08,
+  0x15, 0x00,
+  0x25, 0x65,
+  0x05, 0x07,
+  0x19, 0x00,
+  0x29, 0x65,
+  0x81, 0x00,
+  0xC0
+};
+#endif // HAVE_USB_HIDKBD
 
 #ifdef HAVE_IO_U2F
 static uint8_t const HID_ReportDesc_fido[] = {
@@ -317,8 +341,9 @@ static __ALIGN_BEGIN uint8_t const USBD_CfgDesc[] __ALIGN_END =
   0xC0,         /*bmAttributes: bus powered */
   0x32,         /*MaxPower 100 mA: this current is used for detecting Vbus*/
 
+#ifndef HAVE_USB_HIDKBD
   /* HIDGEN ################################################################################################ */
-  
+
   /************** Descriptor of KBD HID interface ****************/
   0x09,         /*bLength: Interface Descriptor size*/
   USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
@@ -349,7 +374,7 @@ static __ALIGN_BEGIN uint8_t const USBD_CfgDesc[] __ALIGN_END =
   HID_EPIN_SIZE, /*wMaxPacketSize: 2 Byte max */
   0x00,
   0x01,          /*bInterval: Polling Interval (20 ms)*/
-  
+
   0x07,          /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT, /* bDescriptorType: */
   HID_EPOUT_ADDR,  /*bEndpointAddress: Endpoint Address (OUT)*/
@@ -357,6 +382,48 @@ static __ALIGN_BEGIN uint8_t const USBD_CfgDesc[] __ALIGN_END =
   HID_EPOUT_SIZE,  /* wMaxPacketSize: 2 Bytes max  */
   0x00,
   0x01, /* bInterval: Polling Interval (20 ms) */
+
+#else
+  /* HIDKBD ################################################################################################ */
+
+  /************** Descriptor of KBD HID interface ****************/
+  0x09,         /*bLength: Interface Descriptor size*/
+  USB_DESC_TYPE_INTERFACE,/*bDescriptorType: Interface descriptor type*/
+  0x00,         /*bInterfaceNumber: Number of Interface*/
+  0x00,         /*bAlternateSetting: Alternate setting*/
+  0x02,         /*bNumEndpoints*/
+  0x03,         /*bInterfaceClass: HID*/
+  0x01,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
+  0x01,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
+  USBD_IDX_PRODUCT_STR,            /*iInterface: Index of string descriptor*/
+
+  /******************** Descriptor of HID *************************/
+  0x09,         /*bLength: HID Descriptor size*/
+  HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
+  0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
+  0x01,
+  0x21,         /*bCountryCode: Hardware target country*/ // 0x21: US, 0x08: FR, 0x0D: ISO Intl
+  0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
+  0x22,         /*bDescriptorType*/
+  sizeof(HID_ReportDesc_kbd),/*wItemLength: Total length of Report descriptor*/
+  0x00,
+  /******************** Descriptor of Custom HID endpoints ********************/
+  0x07,          /*bLength: Endpoint Descriptor size*/
+  USB_DESC_TYPE_ENDPOINT, /*bDescriptorType:*/
+  HID_EPIN_ADDR,     /*bEndpointAddress: Endpoint Address (IN)*/
+  0x03,          /*bmAttributes: Interrupt endpoint*/
+  8, /*wMaxPacketSize: */
+  0x00,
+  0x01,          /*bInterval: Polling Interval */
+
+  0x07,          /* bLength: Endpoint Descriptor size */
+  USB_DESC_TYPE_ENDPOINT, /* bDescriptorType: */
+  HID_EPOUT_ADDR,  /*bEndpointAddress: Endpoint Address (OUT)*/
+  0x03, /* bmAttributes: Interrupt endpoint */
+  8,  /* wMaxPacketSize: */
+  0x00,
+  0x01, /* bInterval: Polling Interval */
+#endif // HAVE_USB_HIDKBD
 
 #ifdef HAVE_IO_U2F
   /* HID FIDO ################################################################################################ */
@@ -549,6 +616,7 @@ __ALIGN_BEGIN uint8_t const USBD_HID_Desc_fido[] __ALIGN_END =
 };
 #endif // HAVE_IO_U2F
 
+#ifndef HAVE_USB_HIDKBD
 /* USB HID device Configuration Descriptor */
 __ALIGN_BEGIN uint8_t const USBD_HID_Desc[] __ALIGN_END =
 {
@@ -563,6 +631,22 @@ __ALIGN_BEGIN uint8_t const USBD_HID_Desc[] __ALIGN_END =
   sizeof(HID_ReportDesc),/*wItemLength: Total length of Report descriptor*/
   0x00,
 };
+#else 
+/* USB HID device Configuration Descriptor */
+__ALIGN_BEGIN uint8_t const USBD_HID_Desc_kbd[] __ALIGN_END =
+{
+  /******************** Descriptor of HID *************************/
+  0x09,         /*bLength: HID Descriptor size*/
+  HID_DESCRIPTOR_TYPE, /*bDescriptorType: HID*/
+  0x11,         /*bHIDUSTOM_HID: HID Class Spec release number*/
+  0x01,
+  0x21,         /*bCountryCode: Hardware target country*/ // 0x21: US, 0x08: FR, 0x0D: ISO Intl
+  0x01,         /*bNumDescriptors: Number of HID class descriptors to follow*/
+  0x22,         /*bDescriptorType*/
+  sizeof(HID_ReportDesc_kbd),/*wItemLength: Total length of Report descriptor*/
+  0x00,
+};
+#endif // HAVE_USB_HIDKBD
 
 /* USB Standard Device Descriptor */
 static __ALIGN_BEGIN uint8_t const USBD_DeviceQualifierDesc[] __ALIGN_END =
@@ -598,7 +682,12 @@ static uint8_t const USBD_DeviceDesc[]= {
 #if defined(HAVE_VID_PID_PROBER) || defined(HAVE_LEGACY_PID)
   LOBYTE(USBD_PID),           /* idProduct */
 #else  // HAVE_VID_PID_PROBER || defined(HAVE_LEGACY_PID)
-  LOBYTE(USBD_PID | 0x01
+  LOBYTE(USBD_PID 
+#ifndef HAVE_USB_HIDKBD
+    | 0x01
+#else
+    | 0x02
+#endif
 #ifdef HAVE_IO_U2F    
     | 0x04
 #endif // HAVE_IO_U2F
@@ -747,9 +836,15 @@ uint8_t* USBD_HID_GetHidDescriptor_impl(uint16_t* len) {
       *len = sizeof(USBD_HID_Desc_fido);
       return (uint8_t*)USBD_HID_Desc_fido; 
 #endif // HAVE_IO_U2F
+#ifndef HAVE_USB_HIDKBD
     case HID_INTF:
       *len = sizeof(USBD_HID_Desc);
       return (uint8_t*)USBD_HID_Desc; 
+#else
+    case HID_INTF:
+      *len = sizeof(USBD_HID_Desc_kbd);
+      return (uint8_t*)USBD_HID_Desc_kbd; 
+#endif // HAVE_USB_HIDKBD
   }
   *len = 0;
   return 0;
@@ -778,9 +873,15 @@ uint8_t* USBD_HID_GetReportDescriptor_impl(uint16_t* len) {
     *len = sizeof(HID_ReportDesc_fido);
     return (uint8_t*)HID_ReportDesc_fido;
 #endif // HAVE_IO_U2F
+#ifndef HAVE_USB_HIDKBD
   case HID_INTF:
     *len = sizeof(HID_ReportDesc);
     return (uint8_t*)HID_ReportDesc;
+#else
+  case HID_INTF:
+    *len = sizeof(HID_ReportDesc_kbd);
+    return (uint8_t*)HID_ReportDesc_kbd;
+#endif // HAVE_USB_HIDKBD
   }
   *len = 0;
   return 0;
@@ -888,6 +989,7 @@ uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
     // prepare receiving the next chunk (masked time)
     USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , HID_EPOUT_SIZE);
 
+#ifndef HAVE_USB_HIDKBD
     // avoid troubles when an apdu has not been replied yet
     if (G_io_app.apdu_media == IO_APDU_MEDIA_NONE) {      
       // add to the hid transport
@@ -902,6 +1004,7 @@ uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
           break;
       }
     }
+#endif // HAVE_USB_HIDKBD
     break;
   }
 
@@ -1337,7 +1440,6 @@ static const USBD_ClassTypeDef USBD_CCID =
   USBD_GetDeviceQualifierDesc_impl,
 };
 
-
 uint8_t SC_AnswerToReset (uint8_t voltage, uint8_t* atr_buffer) {
   UNUSED(voltage);
   // return the atr length
@@ -1363,14 +1465,14 @@ uint8_t SC_ExecuteEscape (uint8_t* escapePtr, uint32_t escapeLen,
 #endif // HAVE_USB_CLASS_CCID
 
 void USB_power(unsigned char enabled) {
-  os_memset(&USBD_Device, 0, sizeof(USBD_Device));
+  memset(&USBD_Device, 0, sizeof(USBD_Device));
 
   // init timeouts and other global fields
-  os_memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
-  os_memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
+  memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
+  memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
 
   if (enabled) {
-    os_memset(&USBD_Device, 0, sizeof(USBD_Device));
+    memset(&USBD_Device, 0, sizeof(USBD_Device));
     /* Init Device Library */
     USBD_Init(&USBD_Device, (USBD_DescriptorsTypeDef*)&HID_Desc, 0);
     
@@ -1387,7 +1489,6 @@ void USB_power(unsigned char enabled) {
 
 #ifdef HAVE_WEBUSB
     USBD_RegisterClassForInterface(WEBUSB_INTF, &USBD_Device, (USBD_ClassTypeDef*)&USBD_WEBUSB);
-    USBD_LL_PrepareReceive(&USBD_Device, WEBUSB_EPOUT_ADDR , WEBUSB_EPOUT_SIZE);
 #endif // HAVE_WEBUSB
 
     /* Start Device Process */
