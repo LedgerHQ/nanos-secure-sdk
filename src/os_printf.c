@@ -557,8 +557,11 @@ error:
     //
     va_end(vaArgP);
 }
-
-#endif // HAVE_PRINTF
+#else // !HAVE_PRINTF
+void silent_printf(const char *restrict format, ...) {
+    (void) format;
+}
+#endif // !HAVE_PRINTF
 
 #ifdef HAVE_SPRINTF
 //unsigned int snprintf(unsigned char * str, unsigned int str_size, const char* format, ...)

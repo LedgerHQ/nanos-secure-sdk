@@ -123,7 +123,10 @@ os is not an application (it calls ux upon user inputs)
 void screen_printf(const char *format, ...);
 void mcu_usb_printf(const char *format, ...);
 #else // !HAVE_PRINTF
-#define PRINTF(...)
+void silent_printf(const char *restrict format, ...);
+#if !defined(PRINTF)
+#define PRINTF silent_printf
+#endif // !defined(PRINTF)
 #endif // !HAVE_PRINTF
 
 // redefined if string.h not included
