@@ -144,7 +144,7 @@ uint8_t se_get_cropped_length(const char* text, uint8_t text_length, uint32_t wi
 }
 
 // This function is used to retrieve the width of a line of text.
-static uint32_t se_compute_line_width_light(const char* text, uint8_t text_length, uint8_t text_format) {
+uint32_t se_compute_line_width_light(const char* text, uint8_t text_length, uint8_t text_format) {
   char current_char;
   uint32_t line_width = 0;
 

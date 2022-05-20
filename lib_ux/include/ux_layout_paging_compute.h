@@ -22,6 +22,8 @@ typedef struct {
 
 #if !defined(HAVE_SE_SCREEN)
 uint8_t se_get_cropped_length(const char* text, uint8_t text_length, uint32_t width_limit_in_pixels, uint8_t text_format);
+
+uint32_t se_compute_line_width_light(const char* text, uint8_t text_length, uint8_t text_format);
 #endif // !defined(HAVE_SE_SCREEN)
 
 unsigned int ux_layout_paging_compute(const char* text_to_split,
