@@ -52,6 +52,12 @@
 
 #define SIGN_USER_PRESENCE_MASK 0x01
 
+#ifndef U2F_PROXY_MAGIC
+
+static const uint8_t SW_WRONG_LENGTH[] = {0x67, 0x00};
+
+#else // U2F_PROXY_MAGIC
+
 static const uint8_t SW_BUSY[] = {0x90, 0x01};
 static const uint8_t SW_PROOF_OF_PRESENCE_REQUIRED[] = {0x69, 0x85};
 static const uint8_t SW_BAD_KEY_HANDLE[] = {0x6A, 0x80};
@@ -60,8 +66,6 @@ static const uint8_t SW_UNKNOWN_INSTRUCTION[] = {0x6d, 0x00};
 static const uint8_t SW_UNKNOWN_CLASS[] = {0x6e, 0x00};
 static const uint8_t SW_WRONG_LENGTH[] = {0x67, 0x00};
 static const uint8_t SW_INTERNAL[] = {0x6F, 0x00};
-
-#ifdef U2F_PROXY_MAGIC
 
 static const uint8_t U2F_VERSION[] = {'U', '2', 'F', '_', 'V', '2', 0x90, 0x00};
 
@@ -225,10 +229,14 @@ void u2f_handle_cmd_ping(u2f_service_t *service, uint8_t *buffer,
 void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
                         uint16_t length) {
     // screen_printf("U2F msg\n");
+
+#ifdef U2F_PROXY_MAGIC
     uint8_t cla = buffer[0];
     uint8_t ins = buffer[1];
     uint8_t p1 = buffer[2];
     uint8_t p2 = buffer[3];
+#endif // U2F_PROXY_MAGIC
+
     // in extended length buffer[4] must be 0
     uint32_t dataLength = /*(buffer[4] << 16) |*/ (buffer[5] << 8) | (buffer[6]);
     if (dataLength == (uint16_t)(length - 9) || dataLength == (uint16_t)(length - 7)) {
