@@ -17,3 +17,10 @@
 ********************************************************************************/
 
 #include "usbd_hid_impl.h"
+
+/**
+ * Parse the cmd msg header to retrieve the data length.
+ * Return -1 in case of parsing error.
+ * Else return the data length.
+ */
+int u2f_get_cmd_msg_data_length(const uint8_t *buffer, uint16_t length);

@@ -38,6 +38,17 @@
 #define INIT_CAPABILITIES 0x00
 #endif
 
+#define OFFSET_CLA  0
+#define OFFSET_INS  1
+#define OFFSET_P1   2
+#define OFFSET_P2   3
+#define OFFSET_DATA 7
+
+#define APDU_MIN_HEADER      4
+#define LC_FIRST_BYTE_OFFSET 4
+#define LONG_ENC_LC_SIZE     3
+#define LONG_ENC_LE_SIZE     2 // considering only scenarios where Lc is present
+
 #define FIDO_CLA 0x00
 #define FIDO_INS_ENROLL 0x01
 #define FIDO_INS_SIGN 0x02
@@ -226,23 +237,73 @@ void u2f_handle_cmd_ping(u2f_service_t *service, uint8_t *buffer,
     u2f_message_reply(service, U2F_CMD_PING, buffer, length);
 }
 
+int u2f_get_cmd_msg_data_length(const uint8_t *buffer, uint16_t length) {
+    /* Parse buffer to retrieve the data length.
+       Only Extended encoding is supported */
+
+    if (length < APDU_MIN_HEADER) {
+        return -1;
+    }
+
+    if (length == APDU_MIN_HEADER) {
+        // Either short or extended encoding with Lc and Le omitted
+        return 0;
+    }
+
+    if (length < APDU_MIN_HEADER + 3) {
+        // Short encoding or bad length
+        // We don't support short encoding
+        return -1;
+    }
+
+    if (length == APDU_MIN_HEADER + 3) {
+        if (buffer[4] != 0) {
+            // Short encoding or bad length
+            // We don't support short encoding
+            return -1;
+        }
+        // Can't be short encoding as Lc = 0x00 would lead to invalid length
+        // so extended encoding and either:
+        // - Lc = 0x00 0x00 0x00 and Le is omitted
+        // - Lc omitted and Le = 0x00 0xyy 0xzz
+        // so no way to check the value
+        // but anyway the data length is 0
+        return 0;
+    }
+
+    if (buffer[LC_FIRST_BYTE_OFFSET] != 0) {
+        // Short encoding or bad length
+        // We don't support short encoding
+        return -1;
+    }
+
+    // Can't be short encoding as Lc = 0 would lead to invalid length
+    // so extended encoding with Lc field present, optionally Le (2B) is present too
+    uint32_t dataLength = (buffer[LC_FIRST_BYTE_OFFSET + 1] << 8) |
+                          (buffer[LC_FIRST_BYTE_OFFSET + 2]);
+
+    // Ensure that Lc value is consistent
+    if ((APDU_MIN_HEADER + LONG_ENC_LC_SIZE + dataLength != length) && \
+        (APDU_MIN_HEADER + LONG_ENC_LC_SIZE + dataLength + LONG_ENC_LE_SIZE != length)) {
+        return -1;
+    }
+
+    return dataLength;
+}
+
 void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
                         uint16_t length) {
     // screen_printf("U2F msg\n");
 
 #ifdef U2F_PROXY_MAGIC
-    uint8_t cla = buffer[0];
-    uint8_t ins = buffer[1];
-    uint8_t p1 = buffer[2];
-    uint8_t p2 = buffer[3];
+    uint8_t cla = buffer[OFFSET_CLA];
+    uint8_t ins = buffer[OFFSET_INS];
+    uint8_t p1 = buffer[OFFSET_P1];
+    uint8_t p2 = buffer[OFFSET_P2];
 #endif // U2F_PROXY_MAGIC
 
-    // in extended length buffer[4] must be 0
-    uint32_t dataLength = /*(buffer[4] << 16) |*/ (buffer[5] << 8) | (buffer[6]);
-    if (dataLength == (uint16_t)(length - 9) || dataLength == (uint16_t)(length - 7)) {
-        // Le is optional
-        // nominal case from the specification
-    } else {
+    uint32_t dataLength = u2f_get_cmd_msg_data_length(buffer, length);
+    if (dataLength < 0) {
         // invalid size
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_WRONG_LENGTH,
@@ -269,20 +330,20 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
     switch (ins) {
     case FIDO_INS_ENROLL:
         // screen_printf("enroll\n");
-        u2f_apdu_enroll(service, p1, p2, buffer + 7, dataLength);
+        u2f_apdu_enroll(service, p1, p2, buffer + OFFSET_DATA, dataLength);
         break;
     case FIDO_INS_SIGN:
         // screen_printf("sign\n");
-        u2f_apdu_sign(service, p1, p2, buffer + 7, dataLength);
+        u2f_apdu_sign(service, p1, p2, buffer + OFFSET_DATA, dataLength);
         break;
     case FIDO_INS_GET_VERSION:
         // screen_printf("version\n");
-        u2f_apdu_get_version(service, p1, p2, buffer + 7, dataLength);
+        u2f_apdu_get_version(service, p1, p2, buffer + OFFSET_DATA, dataLength);
         break;
 
     // only support by
     case FIDO_INS_PROP_GET_INFO:
-        u2f_apdu_get_info(service, p1, p2, buffer + 7, dataLength);
+        u2f_apdu_get_info(service, p1, p2, buffer + OFFSET_DATA, dataLength);
         break;
 
     default:
