@@ -250,6 +250,17 @@ int u2f_get_cmd_msg_data_length(const uint8_t *buffer, uint16_t length) {
         return 0;
     }
 
+    if (length == APDU_MIN_HEADER + 1) {
+        // Short encoding, with next byte either Le or Lc with the other one omitted
+        // There is no way to tell so no way to check the value
+        // but anyway the data length is 0
+
+        // Support this particular short encoding APDU as Fido Conformance Tool v1.7.0
+        // is using it even though spec requires that short encoding should not be used
+        // over HID.
+        return 0;
+    }
+
     if (length < APDU_MIN_HEADER + 3) {
         // Short encoding or bad length
         // We don't support short encoding
