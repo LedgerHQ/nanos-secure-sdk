@@ -242,15 +242,7 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
     if (dataLength == (uint16_t)(length - 9) || dataLength == (uint16_t)(length - 7)) {
         // Le is optional
         // nominal case from the specification
-    }
-    // circumvent google chrome extended length encoding done on the last byte only (module 256) but all data being transferred
-    else if (dataLength == (uint16_t)(length - 9)%256) {
-        dataLength = length - 9;
-    }
-    else if (dataLength == (uint16_t)(length - 7)%256) {
-        dataLength = length - 7;
-    }
-    else {
+    } else {
         // invalid size
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_WRONG_LENGTH,
