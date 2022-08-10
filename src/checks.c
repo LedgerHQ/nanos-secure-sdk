@@ -121,14 +121,15 @@ void check_audited_app(void) {
     UX_DISPLAY_NEXT_ELEMENT();
     UX_WAIT_DISPLAYED();
 
-    io_seproxyhal_general_status();
 
+    io_seproxyhal_general_status();
     // We wait for the button callback pointer to be wiped, and we process the incoming MCU events in the
     // meantime. This callback will be wiped within the actual 'ui_audited_elements_button' function,
     // as soon as the user presses both buttons.
     do {
       io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
       io_seproxyhal_handle_event();
+      io_seproxyhal_general_status();
     } while (io_seproxyhal_spi_is_status_sent() && G_ux.stack[slot].button_push_callback);
 
     // We pop the reserved slot but we do not care about the returned value (since we do not need it for
