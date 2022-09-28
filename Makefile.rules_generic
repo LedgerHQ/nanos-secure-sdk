@@ -77,9 +77,9 @@ LDFLAGS  += -T$(SCRIPT_LD)
 bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	@echo "[LINK] $@"
 	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@)
-	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex
+	$(L)$(OBJCOPY) -O ihex -S bin/app.elf bin/app.hex
 	$(L)cp bin/app.elf obj
-	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm
+	$(L)$(OBJDUMP) -S -d bin/app.elf > debug/app.asm
 
 bin/app.apdu bin/app.sha256: bin/app.elf
 	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256

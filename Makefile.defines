@@ -42,11 +42,16 @@ ifeq ($(CC),)
 CC        = clang
 endif
 
-SYSROOT = $(shell $(GCCPATH)arm-none-eabi-gcc -print-sysroot)
-ifeq ($(SYSROOT),)
-CFLAGS   += -I/usr/include
-else
-CFLAGS   += --sysroot="$(SYSROOT)"
+TOOL_PREFIX ?= arm-none-eabi-
+USE_SYSROOT ?= 1
+
+ifneq ($(USE_SYSROOT),)
+SYSROOT = $(shell $(GCCPATH)$(TOOL_PREFIX)gcc -print-sysroot)
+  ifeq ($(SYSROOT),)
+  CFLAGS   += -I/usr/include
+  else
+  CFLAGS   += --sysroot="$(SYSROOT)"
+  endif
 endif
 
 CFLAGS   += -gdwarf-2  -gstrict-dwarf
@@ -116,7 +121,14 @@ ifeq ($(CLANGPATH),)
 $(info CLANGPATH is not set: clang will be used from PATH)
 endif
 ifeq ($(GCCPATH),)
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
+$(info GCCPATH is not set: $(TOOL_PREFIX)* will be used from PATH)
+endif
+
+ifeq ($(OBJCOPY),)
+OBJCOPY = $(GCCPATH)$(TOOL_PREFIX)objcopy
+endif
+ifeq ($(OBJDUMP),)
+OBJDUMP = $(GCCPATH)$(TOOL_PREFIX)objdump
 endif
 
 # define the default makefile target (high in include to avoid glyph.h or what not specific target to be the default one when no target passed on the make command line)
