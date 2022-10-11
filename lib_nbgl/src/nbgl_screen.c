@@ -226,9 +226,15 @@ int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTicke
   }
   // if no screen, consider it as a first fake push
   if (nbScreensOnStack == 0) {
-    screenIndex = 0;
+    screenIndex = 1; // push at position 1 because 0 is reserved for background
     topOfStack = &screenStack[screenIndex];
-    topOfStack->next = topOfStack->previous = NULL;
+    topOfStack->next = NULL;
+    // link top of stack to background (even if empty)
+    topOfStack->previous = &screenStack[0];
+    screenStack[0].next = topOfStack;
+    screenStack[0].nbChildren = 0;
+    // count empty background as an active screen
+    nbScreensOnStack++;
   }
   else {
     // find a non used screen in the array

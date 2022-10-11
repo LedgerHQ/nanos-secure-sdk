@@ -25,7 +25,7 @@
  * @brief Max number of objects pointers usable for container pool
  *
  */
-#define OBJ_CONTAINER_POOL_LEN 84
+#define OBJ_CONTAINER_POOL_LEN 128
 
 #define INVALID_LAYER 0xFF
 
