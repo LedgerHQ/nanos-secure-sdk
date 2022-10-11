@@ -1,0 +1,174 @@
+/** @page nbgl_obj Advanced BOLOS GL API
+
+@section nbgl_api_intro Introduction
+This chapter describes briefly the main interface functions of NBGL Graphical Engine. A
+full description of each function can be found in this document
+
+@section concepts Concepts
+In this section, we provide information on how to use NBGL API
+
+@subsection obj_hierarchy Graphic objects hierarchy
+
+@startuml
+
+title Graphic objects types hierarchy
+
+abstract nbgl_obj_t
+nbgl_obj_t <|-- nbgl_container_t
+nbgl_obj_t <|-- nbgl_text_area_t
+nbgl_obj_t <|-- nbgl_button_t
+nbgl_obj_t <|-- nbgl_switch_t
+nbgl_obj_t <|-- nbgl_progress_bar_t
+nbgl_obj_t <|-- nbgl_page_indicator_t
+nbgl_obj_t <|-- nbgl_image_t
+nbgl_container_t <|-- nbgl_panel_t
+
+@enduml
+
+@startuml
+
+title Graphic objects composition
+
+SCREEN o-- OBJECTS
+SCREEN o-- CONTAINER
+SCREEN o-- PANEL
+PANEL o-- OBJECTS
+CONTAINER o-- OBJECTS
+
+@enduml
+
+@subsection create_objects Creating graphic objects
+
+Graphic objects cannot be created dynamically so they must be statically declared.
+
+There must be at least as many declared objects as objects presented on a given screen. But objects can be reused in another
+screen, as long as they are properly set.
+
+For example, if a "Back" button is present in many different screens of the application, it can be reused, the only change being
+the touch callback.
+
+For all objects, its **type** field must be explicitely specified, even if it seems redundant with the nbgl_<type>_t.
+
+For example:
+
+@code
+    nbgl_button_t backButton = {
+        .type = BUTTON,                           // Type of object, MANDATORY
+        .innerColor = WHITE,                      // Color used inside of the button, MANDATORY
+        .borderColor = LIGHT_GRAY,                // Color used for border, MANDATORY
+        .foregroundColor = BLACK,                 // Color used for text and/or icon, MANDATORY
+        .width = 128,                             // Width in pixels, MANDATORY
+        .height = 64,                             // Height in pixels, MANDATORY
+        .radius = 32,                             // Radius of corners in pixels, can be null
+        .text = "Back",                           // Text of the button, if NULL, only an icon
+        .fontId = BAGL_FONT_INTER_REGULAR_24,     // Font used for text, if text is not null
+        .icon = &C_leftArrow32px,                 // Icon of the button, if NULL, only text
+        .alignmentMarginX = 20,                   // Horizontal margin (see layout & aligment)
+        .alignmentMarginY = 20,                   // Vertical margin (see layout & aligment)
+        .alignment = TOP_LEFT,                    // Type of alignment (see layout & aligment)
+        .alignTo = NULL,                          // Alignment reference, if NULL, use parent (see layout & aligment)
+        .touchMask = (1<<VALUE_CHANGED),          // Types of touchscreen events that we want to receive
+        .touchCallback = (nbgl_touchCallback_t)&touchCallback // Callback to be called on touchscreen events.
+        };
+@endcode
+
+For some types of objects (@ref CONTAINER), the **children** field must be set with an
+array of pointers on @ref nbgl_obj_t, which are all the objects contained in these containers.
+
+Once all your objects are defined, they shall be added as children of the main (and unique) @ref SCREEN object, which is
+a special container, thanks to @ref nbgl_screenSet() or @ref nbgl_screenPush().
+
+For example, with a static allocation of objects (not recommanded, see @ref nbgl_objs_mngt):
+
+@code
+    nbgl_button_t backButton = {
+        .type = BUTTON
+        /*....*/
+    };
+    nbgl_text_area_t text1 = {
+        .type = TEXT_AREA
+        /*....*/
+    };
+    nbgl_text_area_t text2 = {
+        .type = TEXT_AREA
+        /*....*/
+    };
+    nbgl_obj_t* containerChildren[] = {
+        (nbgl_obj_t*)&text1,
+        (nbgl_obj_t*)&text2
+    };
+    // container containing 2 text areas
+    nbgl_container_t container = {
+        .type = CONTAINER,
+        .children = containerChildren,
+        .nbChildren = 2
+        /*....*/
+    };
+    // allocate screen 0 for 2 children
+    nbgl_screenSet(&screenChildren, 2, NULL);
+    // set children of screen
+    screenChildren[0] = (nbgl_obj_t*)&backButton;
+    screenChildren[1] = (nbgl_obj_t*)&container;
+
+@endcode
+
+The same example with dynamic  allocation of objects:
+
+@code
+    /* layer 0 is used (background)
+    uint8_t layer = 0;
+
+    /* allocate layer 0 for 2 children (it also releases any objects/containers allocated previously in layer 0) */
+    nbgl_screenSet(&screenChildren, 2, NULL);
+
+    /* allocate backButton dynamically */
+    nbgl_button_t *backButton = nbgl_objPoolGet(BUTTON, layer);
+    /* configure backButton properties here */
+
+    /* allocate text1 dynamically */
+    nbgl_text_area_t *text1 = (nbgl_text_area_t*)nbgl_objPoolGet(TEXT_AREA, layer);
+    /* configure text1 properties here */
+
+    /* allocate text2 dynamically */
+    nbgl_text_area_t *text2 = (nbgl_text_area_t*)nbgl_objPoolGet(TEXT_AREA, layer);
+    /* configure text2 properties here */
+
+    /* allocate container object dynamically */
+    nbgl_container_t *container = (nbgl_container_t*)nbgl_objPoolGet(CONTAINER, layer);
+    /* configure container properties here */
+    container->nbChildren = 2;
+    container->children = (nbgl_obj_t**)nbgl_containerPoolGet(container->nbChildren, layer);
+
+    /* set text areas as children of container */
+    container->children[0] = (nbgl_obj_t*)&text1;
+    container->children[1] = (nbgl_obj_t*)&text2;
+
+    /* set backButton and container as children of screen */
+    screenChildren[0] = (nbgl_obj_t*)backButton;
+    screenChildren[1] = (nbgl_obj_t*)container;
+
+@endcode
+
+@subsection draw_objects Drawing graphic objects
+
+Once defined and set as children (or sub-children) of the main @ref SCREEN, all objects can be drawn in **framebuffer**
+with a simple call to @ref nbgl_screenRedraw().
+
+But if only a given object has been modified since the last redraw, for example by changing its text or its color, it can be redrawn
+(with all of its children and sub-children, if any) with a call to @ref nbgl_redrawObject().
+
+The only properties that should not have changed for this object are its dimensions and position.
+
+Except in some specific cases, the previousObj parameter of @ref nbgl_redrawObject() can be set to NULL and computeDimensions set to false.
+
+@subsection refresh Refreshing screen
+
+After having drawn graphic objects in **framebuffer**, it is necessary to transfer the content of the **framebuffer** on display.
+This operation is called a refresh.
+
+The API to do that is @ref nbgl_refresh().
+
+It will only refresh the rectangle part of the screen having changed (with any object redrawn) since the last refresh.
+
+
+*/

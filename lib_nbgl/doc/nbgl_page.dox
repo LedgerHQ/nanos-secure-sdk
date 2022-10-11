@@ -1,0 +1,243 @@
+/** @page nbgl_page Predefined pages API
+
+@section nbgl_page_intro Introduction
+This chapter describes briefly the high-level API of Advanced BOLOS Graphic Library.
+
+This layer offers a simplified view of a screen page, using predefined pages, like a consent page for example.
+
+A full description of each predefined page can be found in this document
+
+@section nbgl_page_concepts Concepts
+
+This layer uses the mid-level API described in @ref nbgl_layout, but all objects are hidden, in favor to fields to configure, for example
+texts, icons, tokens for callbacks.
+
+Moreover, positions of objects in the page are mostly hidden and automatic.
+
+@subsection nbgl_page_example_1 Example 1
+
+\image{inline} html page1.png "caption" height=300
+
+In this example, a generic information page is used with some configurable fields:
+
+- Top-right button icon type and token when touched
+- Centered information icon, main text and possibly a subsidiary text under it.
+- Centered-bottom button icon type and token when touched
+
+@subsection nbgl_page_example_2 Example 2
+
+\image{inline} html page2.png "caption" height=300
+
+In this more complex example, we use a multi-pages configuration. In this configuration, we decided to use
+the navigation between pages by "tapping" on container to go forward, use the "Back" arrow in progress indicator (top-left of the page)
+to go backward, and footer to exit navigation.
+
+In the "tapable" container, we use a content of type @ref INFO_LONG_PRESS, containing a centered info and a long-press button.
+
+@section nbgl_page_operations Operations
+
+@subsection create_page Draw a predefined page
+
+The configuration of a page is provided in a single function call, and all predefined pages APIs will do the following operations:
+
+- Create the page
+- Add required complex objects in the page
+- Draw the objects in the **framebuffer**
+
+A few APIs are available to draw typical pages, like:
+
+- @ref nbgl_pageDrawLedgerInfo() to draw a simple centered text in Ledger format (typically to provide the status of an action)
+- @ref nbgl_pageDrawSpinner() to draw a spinner (typically a waiting screen)
+- @ref nbgl_pageDrawInfo() to draw a centered info with potential footer (or bottom button), "tapable" container and top-right button
+- @ref nbgl_pageDrawConfirmation() to draw a typical confirmation screen, for example when rejecting a transation (with 1 button for confirmation)
+- @ref nbgl_pageDrawAddressConfirmation() to draw a typical address confirmation screen
+
+In addition, in order to factorize some code, a generic function is available to draw generic content, either for a single page
+or for a multi-pages configuration.
+
+- @ref nbgl_pageDrawGenericContent()
+
+@subsection page_typical_types Typical page types
+
+@subsubsection page_ledger_info Ledger information
+
+\image{inline} html page3.png "caption" height=300
+
+This type is intended to draw a simple centered text in Ledger format (typically to provide the status of an action)
+
+The API to insert such an object is @ref nbgl_pageDrawLedgerInfo() with:
+
+- The text to draw in Ledger frame (upper-case is mandatory).
+- A potential ticker configuration.
+
+@subsubsection page_spinner Spinner
+
+\image{inline} html page4.png "caption" height=300
+
+This type is intended to to draw a spinner (typically a waiting screen)
+
+The API to insert such an object is @ref nbgl_pageDrawLedgerInfo() with:
+
+- The text to draw in Ledger frame (upper-case is mandatory).
+- A potential ticker configuration.
+
+@subsubsection page_info Generic information
+
+\image{inline} html page5.png "caption" height=300
+
+This type is intended to draw a centered info.
+In addition of this centered info, this page can offer controls to interact with the info:
+
+- A potential footer or bottom button
+- A potential "tapable" container
+- A potential top-right button
+
+The API to insert such an object is @ref nbgl_pageDrawInfo() with the @ref nbgl_pageInfoDescription_t structure, containing:
+
+- The text and token to use for a footer.
+- The icon and token to use for a bottom button.
+- The icon and token to use for a top-right button.
+- The centered information parameters (icon, text, sub-text...).
+
+@subsubsection page_confirmation Confirmation page
+
+\image{inline} html page6.png "caption" height=300
+
+This type is intended to draw a typical confirmation screen, for example when rejecting a transation (with 1 button for confirmation).
+In addition of a centered info, this page offer control to interact with the info:
+
+- A bottom button to cancel
+- A single button to confirm
+
+The API to insert such an object is @ref nbgl_pageDrawConfirmation()  with the @ref nbgl_pageConfirmationDescription_t structure, containing:
+
+- The text and token to use for the confirmation button.
+- The text and token to use for the bottom button.
+- The centered information parameters (icon, text, sub-text...).
+
+@subsubsection page_addr_confirmation Address confirmation page
+
+\image{inline} html page22.png "caption" height=300
+
+This type is intended to draw a typical address confirmation screen, when an address has to
+be displayed, either in raw (text) or QR Code mode (with 1 button for confirmation).
+The navigation between the two modes can be done with a page selector.
+In addition of this info, this page offer control to interact with the info:
+
+- A bottom button (footer) to cancel
+- A single button to confirm
+
+The API to insert such an object is @ref nbgl_pageDrawAddressConfirmation()  with the @ref nbgl_pageAddressConfirmationDescription_t structure, containing:
+
+- The text and token to use for the confirmation button.
+- The text and token to use for the bottom button (footer).
+- The information for address, page selector buttons.
+
+@subsection page_generic_types Generic content pages
+
+@subsubsection page_generic_content Generic content types
+
+The different types of generic content are given in @ref nbgl_pageContentType_t enumeration.
+
+- @ref CENTERED_INFO is used to draw a centered info. The structure containing data to build it is @ref nbgl_layoutCenteredInfo_t
+- @ref INFO_LONG_PRESS is used to draw a centered info and a long press button. The structure containing data to build it is @ref nbgl_pageInfoLongPress_t
+- @ref TAG_VALUE_LIST is used to draw alist of tag/value pairs. The structure containing data to build it is @ref nbgl_layoutTagValueList_t
+
+\image{inline} html page15.png "caption" height=300
+
+- @ref TAG_VALUE_DETAILS is used to draw a tag/value pair and a small button to get details on it. The structure containing data to build it is @ref nbgl_pageTagValueDetails_t
+
+\image{inline} html page14.png "caption" height=300
+
+- @ref SWITCHES_LIST is used to draw a list of switches with descriptions. The structure containing data to build it is @ref nbgl_pageSwitchesList_t
+
+\image{inline} html page16.png "caption" height=300
+
+- @ref INFOS_LIST is used to draw a list of infos with titles. The structure containing data to build it is @ref nbgl_pageInfoList_t
+
+\image{inline} html page13.png "caption" height=300
+
+- @ref CHOICES_LIST is used to draw a list of choices through radio buttons. The structure containing data to build it is @ref nbgl_layoutRadioChoice_t
+
+\image{inline} html page11.png "caption" height=300
+
+- @ref BARS_LIST is used to draw a list of touchable bars (with > on the right to go to sub-pages). The structure containing data to build it is @ref nbgl_pageBarsList_t
+
+\image{inline} html page17.png "caption" height=300
+
+@subsubsection page_generic_single Generic content page API
+
+This type is intended to draw generic content for single or multi-pages, with an optionnal way to navigate.
+It doesn't directly manage the different pages, but it provides control to draw a new page when the navigation is used.
+
+The API to create such a page is @ref nbgl_pageDrawGenericContent().
+
+- The first parameter provides the action callback (for all controls)
+- The second one, if not NULL, provides the navigation parameters (see next chapter)
+- The last one provides the content of the page itself
+
+@subsubsection page_generic_navigation Generic content page navigation
+
+When used in a multi-pages configuration, the developer must provide a way to navigate between pages.
+
+There are two main possibilities, with extra-options:
+
+- Either with a navigation bar on the bottom on the screen (if \b navType field of @ref nbgl_pageNavigationInfo_t is set to @ref NAV_WITH_BUTTONS)
+- Or with a tapable container and back button in progress indicator (if \b navType field of @ref nbgl_pageNavigationInfo_t is set to @ref NAV_WITH_TAP)
+
+<u>Navigation with buttons in bottom bar:</u>
+
+In this case, all specific parameters can be found in @ref nbgl_pageNavWithButtons_t:
+
+- The navigation token used when pressing back (left) or forward (right) buttons.
+- A boolean to decide whether a Quit button (X) is used in addition of navigation buttons (in this case, the token value is @ref EXIT_PAGE)
+
+<u>Navigation with "tap":</u>
+
+In this case, all specific parameters can be found in @ref nbgl_pageNavWithTap_t:
+
+- a boolean to decide whether a back button (left arrow) is displayed in the top left corner (if page >=1)
+- a token attached to this potential back button
+- a text used as indication for "Tap to continue", to navigate forward
+- a token used as argument of the action callback when the main container is "taped"
+- the text dispayed in footer, used to quit. If NULL, no footer to quit.
+
+<u>Common parameters:</u>
+
+Some navigation parameters are common to both types:
+
+- the index of the page to display at start-up (from 0 to (nb_pages-1))
+- the number of pages to display (if <2, no navigation bar)
+- the token used as argument of the action callback when the footer or the quit (X) button is touched
+- a boolean to display a progress indicator on top of the page or not
+
+@subsection page_refresh_page Refreshing screen
+
+After having drawn graphic objects in **framebuffer**, it is necessary to transfer the content of the **framebuffer** on display.
+This operation is called a refresh.
+
+The API to do that is @ref nbgl_refresh() (in nbgl_obj.h)
+
+It will only refresh the rectangle part of the screen having changed (with objects redrawn) since the last refresh.
+
+@subsection page_callbacks Control actions management
+
+Some controls, like touchable bars, or a choice by radio buttons, can be interacted with thanks to the Touchscreen.
+
+The developer can subscribe to these events by providing an action callback in @ref nbgl_layoutGet(), with @ref nbgl_layoutTouchCallback_t prototype.
+
+The first parameter (*token*) of this function is a token provided along with the definition of the complex object.
+
+The second parameter (*index*) is only used for some types of complex objects:
+
+- **Navigation bar**: in this case, *index* gives the index of the new active page, when navigating (or @ref EXIT_PAGE when quit button is pressed).
+- **Radio buttons choice**: in this case, *index* gives the index of the selected choice.
+- **Switches**: in this case, if *index* is 0 it means OFF, otherwise it means ON.
+
+@subsection page_release Releasing a predefined page
+
+Before leaving a screen built with a layout, it must be released with a call to @ref nbgl_pageRelease(). It will free the allocated
+objects.
+
+
+*/

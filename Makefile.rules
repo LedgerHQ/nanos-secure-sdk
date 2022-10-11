@@ -1,0 +1,45 @@
+#*******************************************************************************
+#   Ledger SDK
+#   (c) 2017 Ledger
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#*******************************************************************************
+
+# temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
+SDK_SOURCE_PATH += lib_bagl
+else ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
+SDK_SOURCE_PATH += lib_nbgl lib_ux_fatstacks
+CFLAGS += -fms-extensions
+CFLAGS += -Wno-microsoft-anon-tag
+else
+SDK_SOURCE_PATH += lib_bagl lib_ux
+endif
+
+# adding the correct target header to sources
+SDK_SOURCE_PATH += target/$(TARGET)/include
+
+#include the lib_cxng definition by default if not asked otherwise
+ifeq ($(NO_CXNG),)
+INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/include
+endif
+
+SOURCE_PATH   += $(BOLOS_SDK)/src $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.[csS]'))) $(dir $(shell find $(APP_SOURCE_PATH) -name '*.[csS]'))
+SOURCE_FILES  += $(shell find $(SOURCE_PATH) -name '*.[csS]') $(GLYPH_DESTC) $(APP_SOURCE_FILES)
+INCLUDES_PATH += $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.h')))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(shell find $(APP_SOURCE_PATH) -name '*.h'))
+
+VPATH += $(dir $(SOURCE_FILES))
+OBJECT_FILES += $(sort $(addprefix obj/, $(addsuffix .o, $(basename $(notdir $(SOURCE_FILES))))))
+DEPEND_FILES += $(sort $(addprefix dep/, $(addsuffix .d, $(basename $(notdir $(SOURCE_FILES))))))
+
+include $(BOLOS_SDK)/Makefile.rules_generic

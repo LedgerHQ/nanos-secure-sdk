@@ -1,0 +1,107 @@
+#*******************************************************************************
+#   Ledger SDK
+#   (c) 2017 Ledger
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#*******************************************************************************
+
+
+# consider every intermediate target as final to avoid deleting intermediate files
+.SECONDARY:
+
+# disable builtin rules that overload the build process (and the debug log !!)
+.SUFFIXES:
+MAKEFLAGS += -r
+
+SHELL =       /bin/bash
+
+#default building rules
+.SECONDEXPANSION:
+
+ifeq ($(shell $(CC) -v 2>&1 | grep clang),)
+$(error Compiler is not CLANG)
+endif
+
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2 TARGET_FATSTACKS))
+ifeq ($(shell $(LD) -v 2>&1 | grep clang),)
+LD := $(CC)
+ifneq ($(shell [ `$(CC) -v 2>&1 | grep -o "version .*" | cut -f2 -d' ' | cut -f1 -d'.'` -ge 7 ] && echo ok),ok)
+$(error Requires at least CLANG 7 to link correctly with -fropi -frwpi)
+endif
+$(info Linker changed to CLANG)
+endif
+endif
+
+ifeq ($(filter clean,$(MAKECMDGOALS)),)
+-include $(DEPEND_FILES)
+endif
+
+clean:
+	rm -fr obj bin debug dep $(GLYPH_DESTC) $(GLYPH_DESTH)
+
+prepare:
+	$(L)echo Prepare directories
+	@mkdir -p bin obj debug dep
+
+default: bin/app.apdu
+
+obj/%.o: %.c $(GLYPH_DESTC) prepare Makefile
+	@echo "[CC]   $@"
+	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
+
+obj/%.o: %.s
+	@echo "[AS]   $@"
+	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
+
+obj/%.o: %.S
+	@echo "[AS]   $@"
+	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
+
+ifeq ($(SCRIPT_LD),)
+SCRIPT_LD:=$(BOLOS_SDK)/target/$(TARGET)/script.ld
+else
+$(info Using custom link script: $(SCRIPT_LD))
+endif
+LDFLAGS  += -T$(SCRIPT_LD)
+
+bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
+	@echo "[LINK] $@"
+	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@)
+	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex
+	$(L)cp bin/app.elf obj
+	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm
+
+bin/app.apdu bin/app.sha256: bin/app.elf
+	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256
+
+### BEGIN GCC COMPILER RULES
+
+# link_cmdline(objects,dest)		Macro that is used to format arguments for the linker
+link_cmdline = $(LD) $(LDFLAGS) -o $(2) $(1)
+ifneq ($(APP_STACK_SIZE),)
+link_cmdline += -Wl,--defsym=stack_size=$(APP_STACK_SIZE)
+endif
+
+# cc_cmdline(include,defines,src,dest)	Macro that is used to format arguments for the compiler
+# dependency files are generated along the object file
+cc_cmdline = $(CC) -c $(CFLAGS) -MMD -MT obj/$(basename $(notdir $(4))).o -MF dep/$(basename $(notdir $(4))).d $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
+
+as_cmdline = $(AS) -c $(AFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
+
+### END GCC COMPILER RULES
+
+# Run Clang Static Analyzer
+SCAN_BUILD ?= scan-build
+SCAN_BUILD_OUTPUT ?= $(CURDIR)/output-scan-build
+scan-build:
+	$(SCAN_BUILD) --use-cc=$(CC) -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o $(SCAN_BUILD_OUTPUT) $(MAKE) default
