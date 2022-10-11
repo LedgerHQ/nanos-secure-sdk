@@ -1,0 +1,40 @@
+/** @mainpage New BOLOS Graphic API
+
+@section mainpage_intro Introduction
+
+This documentation describes the different interfaces of <b>NBGL</b>, the library that
+is targeted to be integrated in Fatstacks product.
+
+<b>NBGL Engine</b> is responsible for constructing screens and handling Touchscreen input.
+
+@section mainpage_overall_archi Overall architecture
+
+<b>NBGL Engine</b> is a library to be integrated in SDK.
+It is intended to replace existing BAGL/FLOW Graphical Engine (used on Nanos/Blue products)
+
+\image{inline} html NBGLArchi.png "caption" height=600
+
+@section nbgl_drawing_api Screen drawing APIs
+
+@subsection nbgl_high_level_api_1 High-Level API
+The @subpage nbgl_page page contains all information necessary to understand
+and use \b NBGL High-Level API, using predefined pages
+
+@subsection nbgl_mid_level_api_1 Mid-Level API
+The @subpage nbgl_layout page contains all information necessary to understand
+and use \b NBGL Mid-Level API, using complex objects
+
+@subsection nbgl_low_level_api_1 Low-Level API
+The @subpage nbgl_obj page contains all information necessary to understand
+and use \b NBGL Low-Level API
+
+@section nbgl_screen_objs Screen and objects management
+The @subpage nbgl_screens_and_objs page contains all information necessary to understand
+how \b NBGL manages the screens stack and the dynmically allocated objects
+
+@section nbgl_touch_api Touchscreen events management
+The @subpage nbgl_touchscreen page contains all information necessary to understand
+how \b NBGL manages the touchscreen events and how to receive and process these events.
+
+
+*/

@@ -1,0 +1,354 @@
+/** @page nbgl_layout Complex objects layout API
+
+@section nbgl_layout_intro Introduction
+This chapter describes briefly the mid level API of Advanced BOLOS Graphic Library.
+
+This layer offers a simplified view of a screen page, using complex (aggregated) objects, like a radio buttons choice or touchable areas.
+
+A full description of each functions/types can be found in this document
+
+@section concepts2 Concepts
+
+This layer uses the low-level API described in @ref nbgl_obj, but all graphic objects are hidden, in favor to abstract complex objects
+like a radio buttons choice or touchable areas.
+
+Moreover, positions of objects in the page are mostly hidden and automatic.
+
+@subsection example_1 Example 1
+
+\image{inline} html layout1.png "caption" height=300
+
+In this example, 3 "objects" are used and added to the page with dedicated APIs:
+
+- A top-right button with a customizable icon
+- A centered information area with an icon, a main text and possibly a subsidiary text under it.
+- A centered bottom button with a customizable icon
+
+@subsection example_2 Example 2
+
+\image{inline} html layout9.png "caption" height=300
+
+In this more complex example, a "tapable" container is used for the whole screen, except the footer area and the progress indicator.
+
+In the "tapable" container, 2 objects are drawn, a single pair of tag/value, and a "more" button to execute an action.
+
+@section operations Operations
+
+@subsection create_layout Getting a new layout
+
+The first operation is always to get a new layout, with the desired parameters:
+
+- An action callback used for all controls of the page
+- A text and token to be used for action callback if a potential "tapable" container is used in page
+- A boolean indicated whether the page is modal or not (first or second plane)
+- A potential ticker configuration if a ticker is required for the page
+
+The function to actually create the layout is @ref nbgl_layoutGet()
+
+For example 1:
+
+@code
+    nbgl_layoutDescription_t layoutDescription = {
+      .modal = false, // not modal (so on plane 0)
+      .onActionCallback = &myActionCallback, // generic callback for all controls
+      .onTapText = NULL, // no "tapable" main container
+      .ticker.callback = NULL // no ticker
+    };
+    // create layout
+    nbgl_layout_t *layout = nbgl_layoutGet(&layoutDescription);
+@endcode
+
+For example 2:
+
+@code
+    nbgl_layoutDescription_t layoutDescription = {
+      .modal = false, // not modal (so on plane 0)
+      .onActionCallback = &myActionCallback, // generic callback for all controls
+      .onTapText = "Tap to continue", // A "tapable" main container is necessary, with this text
+      .onTapToken = TAP_TOKEN, // token to be used when main container is touched
+      .ticker.callback = NULL // no ticker
+    };
+    /* create layout */
+    nbgl_layout_t *layout = nbgl_layoutGet(&layoutDescription);
+@endcode
+
+@subsection add_objects Populating a layout
+
+Once the layout is defined and retrieved with @ref nbgl_layoutGet(), the page can be filled with complex objects.
+
+If a "tapable" container is used, most objects will be added in it, except the ones on top (progress indicator or top-right button) or on
+bottom (navigation bar or bottom button).
+Otherwise objects are all added in the whole page.
+
+@subsubsection top_right_button Top-right button
+
+\image{inline} html layout1.png "caption" height=300
+
+This object is made of a single round button, on top right of the screen.
+
+The only properties of this object are
+
+- The 32px/32px icon to use in it
+- A \b token used with the action callback when the button is touched
+
+The API to insert such an object is @ref nbgl_layoutAddTopRightButton()
+
+\warning This object is incompatible with Progress indicator, for example
+
+@subsubsection bottom_button Bottom centered button
+
+\image{inline} html layout1.png "caption" height=300
+
+This object is made of a single round button, on middle bottom of the screen.
+
+The only properties of this object are:
+
+- The 32px/32px icon to use in it
+- A \b token used with the action callback when the button is touched
+
+The API to insert such an object is @ref nbgl_layoutAddBottomButton().
+
+Optionnaly, a thin horizontal separation can be drawn on top of the button, if \b separationLine parameter of @ref nbgl_layoutAddBottomButton()
+is true.
+
+\warning This object is incompatible with navigation bar or footer, for example
+
+@subsubsection footer Footer section
+
+\image{inline} html layout1.png "caption" height=300
+
+This object acts as a full with button at the bottom of the screen.
+
+The only properties of this object are:
+
+- The text to be drawn for the footer
+- A \b token used with the action callback when the footer is touched
+
+The API to insert such an object is @ref nbgl_layoutAddFooter().
+
+Optionnaly, a thin horizontal separation can be drawn on top of the button, if \b separationLine parameter of @ref nbgl_layoutAddFooter()
+is true.
+
+\warning This object is incompatible with navigation bar or bottom button, for example
+
+@subsubsection centered_info Centered info area
+
+\image{inline} html layout1.png "caption" height=300
+
+This object is made of:
+
+- An optional icon
+- An optional main text under the icon
+- An optional sub text under the main text
+
+The whole object is centered horizontally in the page
+
+It can be either centered vertically or put on top of the page.
+
+The API to insert such an object is @ref nbgl_layoutAddCenteredInfo(), using @ref nbgl_layoutCenteredInfo_t structure
+
+The colors and fonts for the texts depends of the \b style field used in @ref nbgl_layoutCenteredInfo_t.
+
+- if @ref LARGE_CASE_INFO, main text is in @ref BLACK and large case (INTER 32px), subText in @ref BLACK in INTER 24px
+- if @ref LEDGER_INFO, only text, in @ref BLACK and upper case (HM ALPHA MONO 32px), with Ledger border
+- if @ref NORMAL_INFO, icon in black and main text in INTER 24px in @ref BLACK under it, subText in INTER 24px in @ref DARK_GRAY under it
+
+@subsubsection choice_buttons Choice buttons
+
+\image{inline} html layout14.png "caption" height=300
+
+This object is made of 2 buttons, aligned vertically, each containing a text.
+
+If they are the only objects in the page, these buttons are centered vertically and horizontally.
+
+Otherwise, they are put at the bottom of the main container, on top of a potential navigation bar or bottom button.
+
+Regarding colors:
+
+- Top-button (index 0) is painted in @ref BLACK and is on top of bottom-buttom.
+- Down-button is painted in @ref WHITE, without border.
+
+The API to insert such an object is @ref nbgl_layoutAddChoiceButtons(), with @ref nbgl_layoutChoiceButtons_t structure
+
+@subsubsection single_button Single button
+
+\image{inline} html layout6.png "caption" height=300
+
+This object is made of a single button, in @ref BLACK. The text and optionnal icon are in @ref WHITE
+
+This button occupies the full width of the screen, except if \b fittingContent field of @ref nbgl_layoutButton_t is true, and is put at the bottom of the main container, on top of a potential navigation bar or bottom button.
+
+The API to insert such an object is @ref nbgl_layoutAddButton(), with @ref nbgl_layoutButton_t structure.
+
+@subsubsection long_press_button Long-press button
+
+\image{inline} html layout5.png "caption" height=300
+
+This object is made of an area containing a progress-bar (empty at the initialization), a text describing the action, and a fake round @ref BLACK button
+
+The whole area is touchable and as long as touched, the progress-bar will be automatically updated. After 3s, the long-press button is considered as "touched",
+and the action callback is called with the given \b token.
+
+This button occupies the full width of the screen and is put at the bottom of the main container, on top of a potential navigation bar or bottom button.
+
+The API to insert such an object is @ref nbgl_layoutAddLongPressButton(), with the button text and token as parameters.
+
+@subsubsection item_values Tag/value list
+
+\image{inline} html layout4.png "caption" height=300
+
+This object is made of a list of:
+
+- Pairs of tag/value:
+-- tag being a single line text in @ref DARK_GRAY in 24px font
+-- value being a multi-line text in @ref BLACK in 32px font (auto-wrap, so long tines are automatically broken at maximum
+fitting length)
+
+This area is displayed in the main container, under the previously inserted complex object.
+
+The API to insert such an object is @ref nbgl_layoutAddTagValueList(), with @ref nbgl_layoutTagValueList_t structure
+
+@subsubsection touchable_bar Touchable bar
+
+\image{inline} html layout8.png "caption" height=300
+
+This horizontal bar object is made of:
+
+- An optional icon on the left, in @ref BLACK
+- An optional text, in @ref BLACK
+- An optional icon on the right, in @ref BLACK
+
+Some extra fields in @ref nbgl_layoutBar_t, enable to:
+
+- center text horizontally instead of on the left
+- gray-out the bar to "inactivate" it
+
+This area is displayed in the main container, under the previously inserted complex object.
+
+If \b leftIcon and \b rightIcon fields are NULL, the bar is considered as a title.
+
+When touched, if not inactivated, the \b token provided in @ref nbgl_layoutBar_t is used with the action callback. \b index parameter is not relevant.
+
+The API to insert such an object is @ref nbgl_layoutAddTouchableBar(), with @ref nbgl_layoutBar_t structure
+
+@subsubsection switch Switch
+
+\image{inline} html layout15.png "caption" height=300
+
+This object is made of:
+
+- A mandatory text, in @ref BLACK and bold, on the left
+- An optional text, in @ref BLACK, under the mandatory text
+- A switch, at the given initial state, on the right
+
+This area is displayed in the main container, under the previously inserted complex object.
+
+When touched, if not inactivated, the \b token provided in @ref nbgl_layoutSwitch_t is used with the action callback. \b index parameter meaning is 0 for inactive, 1 for active.
+
+The API to insert such an object is @ref nbgl_layoutAddSwitch(), with @ref nbgl_layoutSwitch_t structure
+
+@subsubsection radio_choices Radio button choices
+
+\image{inline} html layout11.png "caption" height=300
+
+This object is made of a vertical list of *nbChoices* items made of:
+
+- A mandatory text, in @ref BLACK, on the left
+- A radio button, on the right
+
+One and only one button is active at the same time in a single object.
+
+Each line of choice is seperated from the previous one by a thin horizontal sepatation line.
+
+The active button at start-up is given in *initChoice* field of @ref nbgl_layoutRadioChoice_t.
+
+This area is displayed in the main container, under the previously inserted complex object.
+
+The API to insert such an object is @ref nbgl_layoutAddRadioChoice(), with @ref nbgl_layoutRadioChoice_t structure
+
+@subsubsection spinner Spinner
+
+\image{inline} html layout2.png "caption" height=300
+
+This object is a simple centered "Ledger" logo in @ref LIGHT_GRAY, with one of the corner in @ref BLACK, to
+emulate a spinner, with an explanation text under the spinner
+
+The spinner "rotating" corner will automatically be updated every 800 ms.
+
+The API to insert such an object is @ref nbgl_layoutAddSpinner().
+
+\warning No other object shall be inserted beside this one.
+
+@subsubsection progress_indicator Progress indicator
+
+\image{inline} html layout5.png "caption" height=300
+
+This object, drawned in top of the screen, is essentially made of a discrete page progress bar (slashes or digits).
+An optionnal "back" button, symbolized with a left arrow, can also be drawned on the left of the page progress.
+
+The parameters to build this object are:
+
+- The total number of pages
+- The current page (from 0 to (total_nb_pages-1))
+- A boolean to indicate whether to use a "back" button or not
+- A \b token used with the action callback when the "back" button is touched
+
+Digits are represented instead of slashes if the number of pages exceeds 10. In this case, instead of marking the active page
+as a slash in @ref BLACK, the page indicator will indicate *"<current_page> of <total_nb_pages>"*
+
+The API to insert such an object is @ref nbgl_layoutAddProgressIndicator().
+
+\warning This object is incompatible with top-right button and page selector.
+
+@subsubsection qr_code QR Code
+
+\image{inline} html layout13.png "caption" height=300
+
+This object, centered in the main container, is made of a dynamically drawned QR Code (not a picture) and description texts under it.
+
+The parameters to build this object are:
+
+- The URL corresponding to the address to draw in the QR Code
+- The optionnal text to draw under the QR Code (in @ref BLACK, 24px bold)
+- The optionnal sub text to draw under the text (in @ref BLACK, 24px regular)
+
+The API to insert such an object is @ref nbgl_layoutAddQRCode(), with @ref nbgl_layoutQRCode_t structure as parameter.
+
+\warning This object is incompatible with top-right button and progress indicator.
+
+@subsection draw_layout Drawing a populated layout
+
+Once defined and populated, all objects can be drawn in **framebuffer**
+with a simple call to @ref nbgl_layoutDraw().
+
+@subsection refresh_layout Refreshing screen
+
+After having drawn graphic objects in **framebuffer**, it is necessary to transfer the content of the **framebuffer** on display.
+This operation is called a refresh.
+
+The API to do that is @ref nbgl_refresh() (in nbgl_obj.h)
+
+It will only refresh the rectangle part of the screen having changed (with objects redrawn) since the last refresh.
+
+@subsection callbacks Control actions management
+
+Some controls, like a touchable bar, or a choice by radio buttons, can be interacted with thanks to the Touchscreen.
+
+The developer can subscribe to these events by providing an action callback in @ref nbgl_layoutGet(), with @ref nbgl_layoutTouchCallback_t prototype.
+
+The first parameter (*token*) of this function is a token provided along with the definition of the complex object.
+
+The second parameter (*index*) is only used for some types of complex objects:
+
+- **Navigation bar**: in this case, *index* gives the index of the new active page, when navigating.
+- **Radio button choices**: in this case, *index* gives the index of the selected choice.
+- **Switches**: in this case, if *index* is 0 it means OFF, otherwise it means ON.
+- **Choice buttons**: in this case, if *index* is 0, it means top-button (choice 1), otherwise it means bottom-buttom (choice 2)
+
+@subsection release Releasing a layout
+
+Before leaving a screen built with a layout, it must be released with a call to @ref nbgl_layoutRelease(). It will free the potentially allocated
+objects.
+
+
+*/

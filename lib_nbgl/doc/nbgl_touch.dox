@@ -1,0 +1,52 @@
+/** @page nbgl_touchscreen Touchscreen management
+
+@section nbgl_touchscreen_intro Introduction
+This chapter describes briefly how \b NBGL manages the touchscreen events and how to receive and process these events.
+
+@section touchscreen_mngt Touchscreen management
+
+The low-level entry point of NBGL for Touchscreen management is @ref nbgl_touchHandler(). This function is supposed to be called periodically by the
+main scheduler to provide the current state and position of the finger on the Touchscreen.
+
+The position is always useful when the \b state field of @ref nbgl_touchStatePosition_t is @ref PRESSED, and also usefull when the new state is @ref RELEASED.
+
+From a high-level perspective, every object can declare itself as "client" of touchscreen events.
+
+The low-level events are:
+
+- @ref TOUCHED corresponding to an object touched and released at least SHORT_TOUCH_DURATION ms later but less than LONG_TOUCH_DURATION ms
+- @ref LONG_TOUCHED corresponding to an object touched and released at least LONG_TOUCH_DURATION ms later.
+- @ref TOUCHING corresponding to an object that is currently touched
+- @ref OUT_OF_TOUCH corresponding to an object that was touched but that has lost the focus (the finger has moved)
+- @ref TOUCH_RELEASED corresponding to an object that was touched and where the finger has been released.
+
+@startuml
+
+state FINGER_OFF {
+  state TOUCHED #FFFF77
+  state LONG_TOUCHED #FFFF77
+  state RELEASED #FFFF77
+  state OUT_OF_TOUCH #FFFF77
+}
+
+[*] --> FINGER_OFF
+FINGER_OFF: the finger is not on the object
+
+state FINGER_ON {
+  state TOUCHING #FFFF77
+}
+FINGER_ON: the finger is on the object
+
+FINGER_OFF -> TOUCHING : finger pressed \non the object
+TOUCHING -> TOUCHING :finger still pressed on \nthe object 100ms later
+TOUCHING -up-> TOUCHED : finger released \nafter SHORT_PRESSED
+TOUCHING -up-> LONG_TOUCHED : finger released \nafter LONG_PRESSED
+TOUCHING -up-> RELEASED: finger released
+TOUCHING -up-> OUT_OF_TOUCH: finger moved \nout of object
+@enduml
+
+Typically, @ref nbgl_touchHandler() shall be called when \b SEPROXYHAL_TAG_FINGER_EVENT message is received by Bolos UX task or
+by Application's main task.
+
+
+*/

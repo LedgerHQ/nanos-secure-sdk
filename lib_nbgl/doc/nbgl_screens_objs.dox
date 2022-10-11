@@ -1,0 +1,74 @@
+/** @page nbgl_screens_and_objs Screens Stack and dynamic objects management
+
+@section nbgl_screens_and_objs_intro Introduction
+This chapter describes briefly how \b NBGL manages the screens stack and the dynmically allocated objects
+
+@section nbgl_screens_mngt Screens stack management
+
+All windows are full screens, some of them are considered as modals when they are displayed on top of existing ones, catching all user events (on Touchscreen), and giving back the display (and the focus) once they are dismissed.
+
+Let's take the simple example of pin-validation window, which is displayed automatically after a period of inactivity, when the wallet is locked:
+
+\image{inline} html LockUnlock.png "caption" height=300
+
+Pin-validation window doesn't want to take care of the current screen, and to restore it afterwards.
+
+That's why it is created in a separate layer, called *screen*.
+
+*Screens* are organized in a stack. The top of the stack is recovering the previous screen, which is recovering the previous one, and so on.
+
+Even if its size is static, the screens stack is considered as empty at start-up. Then most of windows (and even all of them for applications) are simply created in the background layer of the stack (index 0), by using @ref nbgl_screenSet() function.
+
+When a modal window needs to be displayed, a new screen is pushed on the stack and graphical objects are attached to this new screen as its children (@ref nbgl_screenPush() function)
+
+Then, once this modal window is dismissed, it calls @ref nbgl_screenPop() function to remove it from the stack (even if it is not top of stack anymore), and adapt top of stack if necessary.
+
+\image{inline} html Pop_screens.png "caption" height=400
+
+After any of these operations, @ref nbgl_screenRedraw() needs to be called to actually draw the objects on Display.
+
+@section nbgl_objs_mngt Dynamic objects management
+
+In order to save RAM by not statically allocating memory for all graphic objects of the UX, a dynamic objects allocator has
+been developped.
+
+On the contrary of a regular dynamic memory allocator like malloc(), objects allocated for a given layer (= screen) are released all at once,
+usually when the screen is removed (or when a new one is build in replacement of it).
+
+Actually, there are two different allocators:
+
+- One for graphic objects (all derived from @ref nbgl_obj_t)
+- One for containers of object pointers, used for screen/container/panel children.
+
+The containers of object pointers are arrays of pointers on nbgl_obj_t.
+
+Because these two types of dynamic data are released by layer (= screen), the layer index is passed in all allocation/release API.
+
+@subsection nbgl_objs_mngt_api API
+
+The API to get a single graphic object of the given \b type from pool, for the given \blayer is
+
+- nbgl_obj_t* @ref nbgl_objPoolGet(nbgl_obj_type_t type, uint8_t layer)
+
+The API to release all objects for a given layer is:
+
+- void @ref nbgl_objPoolRelease(uint8_t layer)
+
+The API to get an array of \b nbObjs object pointers, for the given \b layer:
+
+- nbgl_obj_t** @ref nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer)
+
+The API to release all objects pointers for a given \b layer is:
+
+- void @ref nbgl_containerPoolRelease(uint8_t layer)
+
+\note \b layer can be either 0 for the background (when using @ref nbgl_screenSet()) or the return value of @ref nbgl_screenPush()
+
+@subsection nbgl_objs_mngt_automatic Automatic allocation and release
+
+The container for children of a screen are automatically allocated by @ref nbgl_screenSet() or @ref nbgl_screenPush(). It is also automatically
+release by the next call to @ref nbgl_screenSet() (before new allocation) or by @ref nbgl_screenPop().
+
+In the same spirit, all objects allocated for a given screen by the caller are released by the next call to @ref nbgl_screenSet() or by @ref nbgl_screenPop().
+
+*/
