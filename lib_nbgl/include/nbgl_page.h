@@ -67,7 +67,8 @@ typedef struct nbgl_pageTagValueDetails_s {
  * @brief This structure contains data to build a centered info + long press button page content
  */
 typedef struct nbgl_pageInfoLongPress_s {
-    nbgl_layoutCenteredInfo_t centeredInfo; ///< centered info
+    char *text; ///< centered text in large case
+    const nbgl_icon_details_t *icon; ///< a buffer containing the 1BPP icon
     const char *longPressText; ///< text of the long press button
     uint8_t longPressToken; ///< the token used as argument of the onActionCallback when button is long pressed
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when button is touched
@@ -165,7 +166,7 @@ typedef struct nbgl_pageNavWithButtons_s {
 typedef struct nbgl_pageMultiScreensDescription_s {
     uint8_t activePage; ///< the index of the page to display at start-up
     uint8_t nbPages; ///< the number of pages to display (if <2, no navigation bar)
-    uint8_t quitToken; ///< the token used as argument of the actionCallback when the footer or the quit (X) button is touched
+    uint8_t quitToken; ///< the token used as argument of the actionCallback when the footer is touched
     nbgl_pageNavigationType_t navType; ///< type of navigation, it will tell which structure in the following union will be used
     bool progressIndicator; ///< if set to true, display a progress indicator on top of the page
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when next or back is pressed
@@ -227,6 +228,10 @@ nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, c
 nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, nbgl_pageInfoDescription_t *info);
 nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageConfirmationDescription_t *info);
 nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageAddressConfirmationDescription_t *info);
+nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
+                                            nbgl_pageNavigationInfo_t *nav,
+                                            nbgl_pageContent_t* content,
+                                            bool modal);
 nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCallback,
                         nbgl_pageNavigationInfo_t *nav,
                         nbgl_pageContent_t* content);

@@ -692,6 +692,9 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
           fullLen-=lineLen;
           nbChunks++;
         }
+        if ((obj->nbMaxLines > 0) && (nbChunks > obj->nbMaxLines)) {
+          nbChunks = obj->nbMaxLines;
+        }
         LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), line %d, textWidth = %d, nbChunks = %d\n", line, textWidth,nbChunks);
         // then draw each chunk
         tmpText = (char *)text;
@@ -719,7 +722,20 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
           rectArea.y0 = textY0;
           rectArea.width = lineWidth;
 
-          nbgl_drawText(&rectArea, tmpText, lineLen, obj->fontId, obj->textColor);
+          if ((obj->nbMaxLines == 0) || (chunk < (obj->nbMaxLines-1))) {
+            nbgl_drawText(&rectArea, tmpText, lineLen, obj->fontId, obj->textColor);
+          }
+          else {
+            // for last chunk, if nbMaxLines is used, replace the 3 last chars by "..."
+            nbgl_getTextMaxLenAndWidth(obj->fontId,tmpText,obj->width,&lineLen,&lineWidth);
+            // draw line except 3 last chars
+            nbgl_drawText(&rectArea, tmpText, lineLen-3, obj->fontId, obj->textColor);
+            // draw "..." after the other chars
+            rectArea.x0 += nbgl_getSingleLineTextWidthInLen(obj->fontId, tmpText, lineLen-3);
+            rectArea.width = nbgl_getSingleLineTextWidth(obj->fontId,"...");
+            nbgl_drawText(&rectArea, "...", 3, obj->fontId, obj->textColor);
+          }
+
           tmpText+=lineLen;
           chunk++;
         }

@@ -164,7 +164,7 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   layoutObj_t *layoutObj;
 
   UNUSED(eventType);
-  LOG_DEBUG(LAYOUT_LOGGER,"touchCallback(): eventType = %d, obj = %p, gLayout[1].nbChildren = %d\n",eventType,obj,gLayout[1].nbChildren);
+  LOG_DEBUG(LAYOUT_LOGGER,"touchCallback(): obj = %p, gLayout[1].nbChildren = %d\n",obj,gLayout[1].nbChildren);
 
   if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false)
     return;
@@ -423,6 +423,7 @@ nbgl_layout_t *nbgl_layoutGet(nbgl_layoutDescription_t *description) {
     layout->nbUsedCallbackObjs++;
     obj->obj = (nbgl_obj_t*)layout->container;
     obj->token = description->tapActionToken;
+    obj->tuneId = description->tapTuneId;
     layout->container->touchMask = (1<<TOUCHED);
     layout->container->touchCallback = (nbgl_touchCallback_t)&touchCallback;
 
@@ -1218,7 +1219,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
     textArea->textColor = BLACK;
     textArea->text = PIC(info->text1);
     textArea->textAlignment = CENTER;
-    textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    textArea->fontId = (info->largeText1 == true)? BAGL_FONT_INTER_REGULAR_32px : BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
     textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
     textArea->style = NO_STYLE;
@@ -1401,7 +1402,16 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     valueTextArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
     }
     valueTextArea->width = usableWidth;
-    valueTextArea->height = nbgl_getTextHeightInWidth(valueTextArea->fontId,valueTextArea->text,usableWidth);
+    // handle the nbMaxLinesForValue parameter, used to automatically keep only
+    // nbMaxLinesForValue lines
+    uint16_t nbLines = nbgl_getTextNbLinesInWidth(valueTextArea->fontId,valueTextArea->text,usableWidth);
+    // use this nbMaxLinesForValue parameter only if >0
+    if ((list->nbMaxLinesForValue > 0) && (nbLines > list->nbMaxLinesForValue)) {
+      nbLines = list->nbMaxLinesForValue;
+      valueTextArea->nbMaxLines = list->nbMaxLinesForValue;
+    }
+    const nbgl_font_t *font = nbgl_getFont(valueTextArea->fontId);
+    valueTextArea->height = font->char_height+((nbLines-1)*font->line_height);
     valueTextArea->style = NO_STYLE;
     valueTextArea->alignment = BOTTOM_LEFT;
     valueTextArea->alignmentMarginX = 0;
