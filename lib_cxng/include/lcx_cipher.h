@@ -21,6 +21,18 @@
 /** Maximum block size in bytes */
 #define MAX_BLOCK_LENGTH 16
 
+#ifdef HAVE_CMAC
+/** Maximum block length for CMAC */
+#define CMAC_MAX_BLOCK_LENGTH (16)
+
+/** CMAC context */
+typedef struct {
+  uint8_t state[CMAC_MAX_BLOCK_LENGTH];
+  uint8_t unprocessed_block[CMAC_MAX_BLOCK_LENGTH];
+  size_t  unprocessed_len;
+} cx_cmac_context_t;
+#endif // HAVE_CMAC
+
 /** Supported cipher identifiers */
 typedef enum {
     CX_CIPHER_NONE = 0,    ///< No cipher
@@ -74,6 +86,9 @@ typedef struct {
     uint32_t                mode;                                              ///< Mode of operation: ECB, CBC, CTR
     uint8_t                 sig[MAX_BLOCK_LENGTH];                             ///< Last block to be verified
     const cipher_key_t     *cipher_key;                                        ///< Cipher-specific context
+#ifdef HAVE_CMAC
+    cx_cmac_context_t      *cmac_ctx;
+#endif // HAVE_CMAC
 } cx_cipher_context_t;
 
 
@@ -259,3 +274,7 @@ cx_err_t cx_cipher_finish(cx_cipher_context_t *ctx, uint8_t *output, size_t *out
  */
 cx_err_t cx_cipher_enc_dec(cx_cipher_context_t *ctx, const uint8_t *iv, size_t iv_len, const uint8_t *input, size_t in_len,
                            uint8_t *output, size_t *out_len);
+
+void cx_cipher_reset(cx_cipher_context_t *ctx);
+
+void add_one_and_zeros_padding(uint8_t *output, size_t out_len, size_t data_len);

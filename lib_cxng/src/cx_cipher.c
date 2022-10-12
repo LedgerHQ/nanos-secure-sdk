@@ -12,6 +12,12 @@
 static cx_err_t cx_cipher_check_out_len(cx_cipher_context_t *ctx,
                                  size_t in_len, size_t out_len) {
 
+  if (CX_CHAIN_CTR == ctx->mode) {
+    if (out_len < in_len) {
+      return CX_INVALID_PARAMETER;
+    }
+    return CX_OK;
+  }
   if ((CX_SIGN == ctx->operation) || (CX_VERIFY == ctx->operation)) {
     if (out_len < 8) {
       return CX_INVALID_PARAMETER;
@@ -74,7 +80,7 @@ static void add_zeros_padding(uint8_t *output, size_t out_len, size_t data_len) 
   }
 }
 
-static void add_one_and_zeros_padding(uint8_t *output, size_t out_len, size_t data_len) {
+void add_one_and_zeros_padding(uint8_t *output, size_t out_len, size_t data_len) {
   size_t padding_len = out_len - data_len;
   size_t           i = 0;
 
@@ -449,6 +455,13 @@ cx_err_t cx_cipher_enc_dec(cx_cipher_context_t *ctx, const uint8_t *iv, size_t i
 
   end:
     return error;
+}
+
+void cx_cipher_reset(cx_cipher_context_t *ctx) {
+  memset(ctx->iv, 0, MAX_IV_LENGTH);
+  memset(ctx->unprocessed_data, 0, MAX_BLOCK_LENGTH);
+  ctx->unprocessed_len = 0;
+  ctx->iv_size = 0;
 }
 
 #ifdef UNITTEST
