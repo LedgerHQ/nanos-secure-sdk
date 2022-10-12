@@ -84,7 +84,11 @@ cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *key,
   CX_CHECK(cx_ecpoint_alloc(&W, curve));
   CX_CHECK(cx_ecpoint_init(&W, public_point + 1, sz, public_point + 1 + sz, sz));
   // Scalar multiplication with random projective coordinates and additive splitting
-  CX_CHECK(cx_ecpoint_rnd_scalarmul(&W, key->d, key->d_len));
+  if (CX_CURVE_RANGE(curve, WEIERSTRASS)) {
+    CX_CHECK(cx_ecpoint_rnd_fixed_scalarmul(&W, key->d, key->d_len));
+  } else {
+    CX_CHECK(cx_ecpoint_rnd_scalarmul(&W, key->d, key->d_len));
+  }
   switch (mode & CX_MASK_EC) {
   case CX_ECDH_POINT:
     secret[0] = 0x04;
