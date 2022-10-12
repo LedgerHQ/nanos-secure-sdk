@@ -149,7 +149,7 @@ uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *textLen, bool *is_unicode
   return unicode;
 }
 
-static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool breakOnLineEnd) {
+static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool breakOnLineEnd, uint16_t maxLen) {
   uint16_t line_width=0;
   uint16_t max_width=0;
   const nbgl_font_t *font = nbgl_getFont(fontId);
@@ -164,6 +164,8 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
     uint32_t unicode;
     bool is_unicode;
 
+    if (maxLen == 0)
+      break;
     if (*text == '\n') {
       if (breakOnLineEnd)
         break;
@@ -176,6 +178,7 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
       text++;
     }
     unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    maxLen--;
 
     if (is_unicode) {
       const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
@@ -201,14 +204,26 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
 }
 
 /**
- * @brief return the max width in pixels of the given text until the first \n or \0 is incountered
+ * @brief return the max width in pixels of the given text until the first \n or \0 is encountered
  *
  * @param fontId font ID
  * @param text text in UTF8
  * @return the width in pixels of the text
  */
 uint16_t nbgl_getSingleLineTextWidth(nbgl_font_id_e fontId, const char* text) {
-  return getTextWidth(fontId, text, true);
+  return getTextWidth(fontId, text, true, 0xFFFF);
+}
+
+/**
+ * @brief return the max width in pixels of the given text until the first \n or \0 is encountered,
+ * or maxLen characters have been parsed.
+ *
+ * @param fontId font ID
+ * @param text text in UTF8
+ * @return the width in pixels of the text
+ */
+uint16_t nbgl_getSingleLineTextWidthInLen(nbgl_font_id_e fontId, const char* text, uint16_t maxLen) {
+  return getTextWidth(fontId, text, true, maxLen);
 }
 
 /**
@@ -219,7 +234,7 @@ uint16_t nbgl_getSingleLineTextWidth(nbgl_font_id_e fontId, const char* text) {
  * @return the width in pixels of the text
  */
 uint16_t nbgl_getTextWidth(nbgl_font_id_e fontId, const char* text) {
-  return getTextWidth(fontId, text, false);
+  return getTextWidth(fontId, text, false, 0xFFFF);
 }
 
 /**

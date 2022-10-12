@@ -29,7 +29,7 @@ typedef struct AddressConfirmationContext_s {
 /**********************
  *  STATIC VARIABLES
  **********************/
-AddressConfirmationContext_t addressConfirmationContext;
+static AddressConfirmationContext_t addressConfirmationContext;
 
 /**********************
  *  STATIC PROTOTYPES
@@ -50,9 +50,19 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
   }
   switch (content->type) {
     case INFO_LONG_PRESS:
-      nbgl_layoutAddCenteredInfo(layout,&content->infoLongPress.centeredInfo);
+    {
+      nbgl_layoutCenteredInfo_t centeredInfo;
+      centeredInfo.icon = content->infoLongPress.icon;
+      centeredInfo.text1 = content->infoLongPress.text;
+      centeredInfo.text2 = NULL;
+      centeredInfo.text3 = NULL;
+      centeredInfo.style = LARGE_CASE_INFO;
+      centeredInfo.offsetY = -32;
+      centeredInfo.onTop = false;
+      nbgl_layoutAddCenteredInfo(layout,&centeredInfo);
       nbgl_layoutAddLongPressButton(layout,(char*)content->infoLongPress.longPressText,content->infoLongPress.longPressToken,content->infoLongPress.tuneId);
       break;
+    }
     case CENTERED_INFO:
       nbgl_layoutAddCenteredInfo(layout,&content->centeredInfo);
       break;
@@ -241,6 +251,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.tapActionText = (char*)info->tapActionText;
   layoutDescription.tapActionToken = info->tapActionToken;
+  layoutDescription.tapTuneId = info->tuneId;
 
   if (ticker != NULL) {
     layoutDescription.ticker.tickerCallback = ticker->tickerCallback;
@@ -297,15 +308,6 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
-  nbgl_layoutButton_t buttonInfo = {
-    .style = BLACK_BACKGROUND,
-    .text = (char*)info->confirmationText,
-    .icon = NULL,
-    .token = info->confirmationToken,
-    .fittingContent = false,
-    .tuneId = info->tuneId,
-    .onBottom = true
-  };
   layoutDescription.modal = false;
 
   layoutDescription.onActionCallback = onActionCallback;
@@ -314,12 +316,27 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   layoutDescription.ticker.tickerCallback = NULL;
   layout = nbgl_layoutGet(&layoutDescription);
   if (info->cancelText == NULL) {
+    nbgl_layoutButton_t buttonInfo = {
+      .style = BLACK_BACKGROUND,
+      .text = (char*)info->confirmationText,
+      .icon = NULL,
+      .token = info->confirmationToken,
+      .fittingContent = false,
+      .tuneId = info->tuneId,
+      .onBottom = true
+    };
     nbgl_layoutAddBottomButton(layout, PIC(&C_cross32px), info->cancelToken, true, info->tuneId);
+    nbgl_layoutAddButton(layout, &buttonInfo);
   }
   else {
-    nbgl_layoutAddFooter(layout,(char*)PIC(info->cancelText),info->cancelToken, info->tuneId);
+    nbgl_layoutChoiceButtons_t buttonsInfo = {
+      .bottomText = (char*)PIC(info->cancelText),
+      .token = info->confirmationToken,
+      .topText = (char*)PIC(info->confirmationText),
+      .tuneId = info->tuneId
+    };
+    nbgl_layoutAddChoiceButtons(layout,&buttonsInfo);
   }
-  nbgl_layoutAddButton(layout, &buttonInfo);
   nbgl_layoutAddCenteredInfo(layout,&info->centeredInfo);
 
   nbgl_layoutDraw(layout);
@@ -408,21 +425,24 @@ nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActio
  * @param onActionCallback common callback for all actions on this page
  * @param nav structure describing the navigation controls of this page (no navigation if NULL)
  * @param content structure describing the main content of this page
+ * @param modal set to true to draw as a modal
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCallback,
+nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
                         nbgl_pageNavigationInfo_t *nav,
-                        nbgl_pageContent_t* content) {
+                                            nbgl_pageContent_t* content,
+                                            bool modal) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
-  layoutDescription.modal = false;
+  layoutDescription.modal = modal;
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.ticker.tickerCallback = NULL;
 
   if ((nav != NULL) && (nav->navType == NAV_WITH_TAP)) {
     layoutDescription.tapActionText = (char*)nav->navWithTap.nextPageText;
     layoutDescription.tapActionToken = nav->navWithTap.nextPageToken;
+    layoutDescription.tapTuneId = nav->tuneId;
   }
   else {
     layoutDescription.tapActionText = NULL;
@@ -455,6 +475,20 @@ nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCall
   return (nbgl_page_t*)layout;
 }
 
+/**
+ * @brief draw a generic content page, with the given content, and if nav parameter is not NULL, with the given
+ * navigation controls (either with navigation bar or with "tap" and "back")
+ *
+ * @param onActionCallback common callback for all actions on this page
+ * @param nav structure describing the navigation controls of this page (no navigation if NULL)
+ * @param content structure describing the main content of this page
+ * @return the page context (or NULL if error)
+ */
+nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCallback,
+                                         nbgl_pageNavigationInfo_t *nav,
+                                         nbgl_pageContent_t* content) {
+  return nbgl_pageDrawGenericContentExt(onActionCallback,nav,content,false);
+}
 
 /**
  * @brief Release the page obtained with any of the nbgl_pageDrawXXX() functions

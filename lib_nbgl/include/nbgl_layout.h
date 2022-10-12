@@ -69,6 +69,7 @@ typedef struct nbgl_layoutDescription_s {
     bool modal; ///< if true, puts the layout on top of screen stack (modal). Otherwise puts on background (for apps)
     char *tapActionText; ///< Light gray text used when main container is "tapable"
     uint8_t tapActionToken; ///< the token that will be used as argument of the onActionCallback when main container is "tapped"
+    tune_index_e tapTuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when tapping on main container
     nbgl_layoutTouchCallback_t onActionCallback; ///< the callback to be called on any action on the layout
     nbgl_screenTickerConfiguration_t ticker; // configuration of ticker (timeout)
 } nbgl_layoutDescription_t;
@@ -135,6 +136,7 @@ typedef struct {
 typedef struct {
     nbgl_layoutTagValue_t *pairs; ///< array of [tag,value] pairs (nbPairs items)
     uint8_t nbPairs; ///< number of pairs in pairs array
+    uint8_t nbMaxLinesForValue; ///< if > 0, set the max number of lines for value field. And the last line is ended with "..." instead of the 3 last chars
     bool smallCaseForValue; ///< if set to true, a 24px font is used for value text, otherwise a 32px font is used
 } nbgl_layoutTagValueList_t;
 
@@ -173,6 +175,7 @@ typedef struct {
     char *url; ///< URL for QR code
     char *text1; ///< first text (can be null)
     char *text2; ///< second text (can be null)
+    bool largeText1; ///< if set to true, use 32px font for text1
 } nbgl_layoutQRCode_t;
 
 /**

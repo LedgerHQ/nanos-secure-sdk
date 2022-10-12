@@ -120,18 +120,21 @@ The API to insert such an object is @ref nbgl_pageDrawConfirmation()  with the @
 \image{inline} html page22.png "caption" height=300
 
 This type is intended to draw a typical address confirmation screen, when an address has to
-be displayed, either in raw (text) or QR Code mode (with 1 button for confirmation).
-The navigation between the two modes can be done with a page selector.
-In addition of this info, this page offer control to interact with the info:
+be displayed, either in raw (text) or QR Code mode (with a button for confirmation, a footer for rejection).
 
-- A bottom button (footer) to cancel
+The QR Code can be displayed in a modal.
+
+In addition of this info, this page offers controls to interact with the info:
+
+- A bottom button (footer) to reject
 - A single button to confirm
 
 The API to insert such an object is @ref nbgl_pageDrawAddressConfirmation()  with the @ref nbgl_pageAddressConfirmationDescription_t structure, containing:
 
 - The text and token to use for the confirmation button.
 - The text and token to use for the bottom button (footer).
-- The information for address, page selector buttons.
+- The text and token to use for the "display as QR Code" button.
+- The information for address.
 
 @subsection page_generic_types Generic content pages
 

@@ -361,6 +361,7 @@ typedef struct PACKED__ nbgl_text_area_s {
     nbgl_font_id_e fontId; ///< id of the font to use
     bool localized; ///< if set to true, use textId instead of text
     bool autoHideLongLine; ///< if set to true, replace beginning of line by ... to keep it single line
+    uint8_t nbMaxLines; ///< if >0, replace end (3 last chars) of line (nbMaxLines-1) by "..." and stop display here
     char *text; ///< ASCII text to draw (NULL terminated). Can be NULL.
 #if defined(HAVE_LANGUAGE_PACK)
     UX_LOC_STRINGS_INDEX textId; ///< id of the  UTF-8 text
