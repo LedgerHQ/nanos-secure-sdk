@@ -30,6 +30,14 @@ CX_TRAMPOLINE _NR_cx_aes_gcm_update                        cx_aes_gcm_update
 CX_TRAMPOLINE _NR_cx_aes_init_key_no_throw                 cx_aes_init_key_no_throw
 CX_TRAMPOLINE _NR_cx_aes_iv_no_throw                       cx_aes_iv_no_throw
 CX_TRAMPOLINE _NR_cx_aes_no_throw                          cx_aes_no_throw
+CX_TRAMPOLINE _NR_cx_aes_siv_encrypt                       cx_aes_siv_encrypt
+CX_TRAMPOLINE _NR_cx_aes_siv_decrypt                       cx_aes_siv_decrypt
+CX_TRAMPOLINE _NR_cx_aes_siv_init                          cx_aes_siv_init
+CX_TRAMPOLINE _NR_cx_aes_siv_set_key                       cx_aes_siv_set_key
+CX_TRAMPOLINE _NR_cx_aes_siv_start                         cx_aes_siv_start
+CX_TRAMPOLINE _NR_cx_aes_siv_update_aad                    cx_aes_siv_update_aad
+CX_TRAMPOLINE _NR_cx_aes_siv_finish                        cx_aes_siv_finish
+CX_TRAMPOLINE _NR_cx_aes_siv_update                        cx_aes_siv_update
 CX_TRAMPOLINE _NR_cx_blake2b                               cx_blake2b
 CX_TRAMPOLINE _NR_cx_blake2b_final                         cx_blake2b_final
 CX_TRAMPOLINE _NR_cx_blake2b_get_output_size               cx_blake2b_get_output_size
@@ -44,6 +52,7 @@ CX_TRAMPOLINE _NR_cx_cipher_setkey                         cx_cipher_setkey
 CX_TRAMPOLINE _NR_cx_cipher_setup                          cx_cipher_setup
 CX_TRAMPOLINE _NR_cx_cipher_set_padding                    cx_cipher_set_padding
 CX_TRAMPOLINE _NR_cx_cipher_update                         cx_cipher_update
+CX_TRAMPOLINE _NR_cx_cmac                                  cx_cmac
 CX_TRAMPOLINE _NR_cx_crc16                                 cx_crc16
 CX_TRAMPOLINE _NR_cx_crc16_update                          cx_crc16_update
 CX_TRAMPOLINE _NR_cx_crc32                                 cx_crc32

@@ -36,6 +36,7 @@
 #include "cx_poly1305.h"
 #include "lcx_chacha.h"
 #include "cx_cipher.h"
+#include "cx_cmac.h"
 
 /** 1K RAM lib */
 union cx_u {
@@ -106,6 +107,10 @@ union cx_u {
   cx_chacha_context_t chacha;
 #endif // HAVE_CHACHA
   cx_cipher_context_t cipher;
+
+#ifdef HAVE_CMAC
+  cx_cmac_context_t cmac;
+#endif // HAVE_CMAC
 
 };
 extern union cx_u G_cx;
