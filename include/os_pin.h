@@ -13,7 +13,7 @@
 #define DEFAULT_PIN_RETRIES 3
 
 /* set_pin can update the pin if the perso is onboarded (tearing leads to perso wipe though) */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_pin(unsigned int identity, unsigned char* pin PLENGTH(length), unsigned int length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_pin(unsigned int identity, unsigned char* pin PLENGTH(length), unsigned int length, bool update_crc);
 // set the currently unlocked identity pin. (change pin feature)
     SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_current_identity_pin(unsigned char* pin PLENGTH(length), unsigned int length);
 
@@ -28,6 +28,15 @@ SYSCALL                                         bolos_bool_t os_global_pin_is_va
 SYSCALL PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) bolos_bool_t os_global_pin_check(unsigned char* pin_buffer PLENGTH(pin_length), unsigned char pin_length);
     SYSCALL PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) void         os_global_pin_invalidate(void);
 SYSCALL PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_retries(void);
+
+/**
+ * This function checks whether a PIN is present
+ * @return BOLOS_TRUE if the CRC of N_secure_element_nvram_user_sensitive_data
+ * is correct and if a PIN value has been written
+ */
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+bolos_bool_t   os_perso_is_pin_set(void);
+
 
 #if defined(HAVE_AEM_PIN)
 /* ----------------------------------------------------------------------- */
