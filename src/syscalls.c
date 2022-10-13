@@ -1125,11 +1125,12 @@ unsigned int os_endorsement_key2_derive_sign_data ( unsigned char * src, unsigne
   return (unsigned int) SVC_Call(SYSCALL_os_endorsement_key2_derive_sign_data_ID, parameters);
 }
 
-void os_perso_set_pin ( unsigned int identity, unsigned char * pin, unsigned int length ) {
-  unsigned int parameters[3];
+void os_perso_set_pin ( unsigned int identity, unsigned char * pin, unsigned int length, bool update_crc ) {
+  unsigned int parameters[4];
   parameters[0] = (unsigned int)identity;
   parameters[1] = (unsigned int)pin;
   parameters[2] = (unsigned int)length;
+  parameters[3] = (unsigned int)update_crc;
   SVC_Call(SYSCALL_os_perso_set_pin_ID, parameters);
   return;
 }
@@ -1140,6 +1141,12 @@ void os_perso_set_current_identity_pin ( unsigned char * pin, unsigned int lengt
   parameters[1] = (unsigned int)length;
   SVC_Call(SYSCALL_os_perso_set_current_identity_pin_ID, parameters);
   return;
+}
+
+bolos_bool_t os_perso_is_pin_set ( void ) {
+  unsigned int parameters[2];
+  parameters[1] = 0;
+  return (bolos_bool_t) SVC_Call(SYSCALL_os_perso_is_pin_set_ID, parameters);
 }
 
 bolos_bool_t os_global_pin_is_validated ( void ) {

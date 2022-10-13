@@ -124,6 +124,7 @@
 #define SYSCALL_os_perso_derive_and_set_seed_ID                    0x0700004f
 #define SYSCALL_os_perso_set_words_ID                              0x02000050
 #define SYSCALL_os_perso_finalize_ID                               0x00000051
+#define SYSCALL_os_perso_is_pin_set_ID                             0x0000009e
 #define SYSCALL_os_perso_isonboarded_ID                            0x0000009f
 #define SYSCALL_os_perso_setonboardingstatus_ID                    0x03000094
 #define SYSCALL_os_perso_derive_node_bip32_ID                      0x05000053
@@ -140,7 +141,7 @@
 #define SYSCALL_os_endorsement_key1_get_app_secret_ID              0x01000058
 #define SYSCALL_os_endorsement_key1_sign_data_ID                   0x03000059
 #define SYSCALL_os_endorsement_key2_derive_sign_data_ID            0x0300005a
-#define SYSCALL_os_perso_set_pin_ID                                0x0300004c
+#define SYSCALL_os_perso_set_pin_ID                                0x0400004c
 #define SYSCALL_os_perso_set_current_identity_pin_ID               0x0200004d
 #define SYSCALL_os_global_pin_is_validated_ID                      0x000000a0
 #define SYSCALL_os_global_pin_check_ID                             0x020000a1
