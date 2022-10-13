@@ -226,7 +226,7 @@ nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, c
   layoutDescription.ticker.tickerCallback = NULL;
   layout = nbgl_layoutGet(&layoutDescription);
 
-  nbgl_layoutAddSpinner(layout, (char*)text);
+  nbgl_layoutAddSpinner(layout, (char*)text, false);
 
   nbgl_layoutDraw(layout);
 

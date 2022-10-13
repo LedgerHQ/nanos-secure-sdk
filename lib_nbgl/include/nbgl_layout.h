@@ -250,7 +250,7 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_
 int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, nbgl_layoutNavigationBar_t *info);
 int nbgl_layoutAddBottomButton(nbgl_layout_t *layout, const nbgl_icon_details_t *icon, uint8_t token, bool separationLine, tune_index_e tuneId);
 int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, uint8_t nbPages, bool withBack, uint8_t backToken, tune_index_e tuneId);
-int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text);
+int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed);
 
 int nbgl_layoutDraw(nbgl_layout_t *layout);
 int nbgl_layoutRelease(nbgl_layout_t *layout);

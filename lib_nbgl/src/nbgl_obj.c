@@ -22,7 +22,6 @@
  *********************/
 #define NB_MAX_PAGES_WITH_DASHES 10
 
-#define GET_SPINNER_COLOR(_position,_index) (((_position == 0xFF)||(_position == _index))?BLACK:LIGHT_GRAY)
 /**********************
  *      TYPEDEFS
  **********************/
@@ -899,36 +898,101 @@ static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computeP
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
 
-  // draw horizontal segments
   rectArea.bpp = NBGL_BPP_1;
   rectArea.backgroundColor = obj->backgroundColor;
-  rectArea.x0 = obj->x0;
-  rectArea.y0 = obj->y0;
-  rectArea.width = 20;
-  rectArea.height = 4;
-  nbgl_frontDrawHorizontalLine(&rectArea, 0x7, GET_SPINNER_COLOR(obj->position,0)); // top left
-  rectArea.x0 = obj->x0+obj->width-rectArea.width;
-  nbgl_frontDrawHorizontalLine(&rectArea,0x7, GET_SPINNER_COLOR(obj->position,1)); // top right
-  rectArea.y0 = obj->y0+obj->height-4;
-  nbgl_frontDrawHorizontalLine(&rectArea,0xE, GET_SPINNER_COLOR(obj->position,2)); //bottom right
-  rectArea.x0 = obj->x0;
-  nbgl_frontDrawHorizontalLine(&rectArea,0xE, GET_SPINNER_COLOR(obj->position,3)); // bottom left
-  // draw vertical segments
-  rectArea.x0 = obj->x0;
-  rectArea.y0 = obj->y0;
-  rectArea.width = 3;
-  rectArea.height = 12;
-  rectArea.backgroundColor = GET_SPINNER_COLOR(obj->position,0);
-  nbgl_frontDrawRect(&rectArea); // top left
-  rectArea.x0 = obj->x0+obj->width-rectArea.width;
-  rectArea.backgroundColor = GET_SPINNER_COLOR(obj->position,1);
-  nbgl_frontDrawRect(&rectArea); // top right
-  rectArea.y0 = obj->y0+obj->height-rectArea.height;
-  rectArea.backgroundColor = GET_SPINNER_COLOR(obj->position,2);
-  nbgl_frontDrawRect(&rectArea); //bottom right
-  rectArea.x0 = obj->x0;
-  rectArea.backgroundColor = GET_SPINNER_COLOR(obj->position,3);
-  nbgl_frontDrawRect(&rectArea); // bottom left
+  // if position is OxFF, it means "fixed" so draw 4 corners
+  if (obj->position == 0xFF) {
+    // draw horizontal segments
+    rectArea.x0 = obj->x0;
+    rectArea.y0 = obj->y0;
+    rectArea.width = 20;
+    rectArea.height = 4;
+    nbgl_frontDrawHorizontalLine(&rectArea, 0x7, BLACK); // top left
+    rectArea.x0 = obj->x0+obj->width-rectArea.width;
+    nbgl_frontDrawHorizontalLine(&rectArea,0x7, BLACK); // top right
+    rectArea.y0 = obj->y0+obj->height-4;
+    nbgl_frontDrawHorizontalLine(&rectArea,0xE, BLACK); //bottom right
+    rectArea.x0 = obj->x0;
+    nbgl_frontDrawHorizontalLine(&rectArea,0xE, BLACK); // bottom left
+    // draw vertical segments
+    rectArea.x0 = obj->x0;
+    rectArea.y0 = obj->y0;
+    rectArea.width = 3;
+    rectArea.height = 12;
+    rectArea.backgroundColor = BLACK;
+    nbgl_frontDrawRect(&rectArea); // top left
+    rectArea.x0 = obj->x0+obj->width-rectArea.width;
+    nbgl_frontDrawRect(&rectArea); // top right
+    rectArea.y0 = obj->y0+obj->height-rectArea.height;
+    nbgl_frontDrawRect(&rectArea); //bottom right
+    rectArea.x0 = obj->x0;
+    nbgl_frontDrawRect(&rectArea); // bottom left
+  }
+  else {
+    uint8_t mask;
+    // clean up full rectangle
+    rectArea.x0 = obj->x0;
+    rectArea.y0 = obj->y0;
+    rectArea.width = obj->width;
+    rectArea.height = obj->height;
+    rectArea.backgroundColor = WHITE;
+    nbgl_frontDrawRect(&rectArea); // top left
+
+    // draw horizontal segment in BLACK
+    rectArea.width = 20;
+    rectArea.height = 4;
+    switch (obj->position) {
+    case 0: // top left corner
+      rectArea.x0 = obj->x0;
+      rectArea.y0 = obj->y0;
+      mask = 0x7;
+      break;
+    case 1: // top right
+      rectArea.x0 = obj->x0+obj->width-rectArea.width;
+      rectArea.y0 = obj->y0;
+      mask = 0x7;
+      break;
+    case 2: //bottom right
+      rectArea.x0 = obj->x0+obj->width-rectArea.width;
+      rectArea.y0 = obj->y0+obj->height-4;
+      mask = 0xE;
+      break;
+    case 3: // bottom left
+      rectArea.x0 = obj->x0;
+      rectArea.y0 = obj->y0+obj->height-4;
+      mask = 0xE;
+      break;
+    default:
+      return;
+    }
+    nbgl_frontDrawHorizontalLine(&rectArea, mask, BLACK);
+
+    // draw vertical segment in BLACK
+    rectArea.width = 3;
+    rectArea.height = 12;
+    rectArea.backgroundColor = BLACK;
+    switch (obj->position) {
+    case 0:// top left corner
+      rectArea.x0 = obj->x0;
+      rectArea.y0 = obj->y0;
+      break;
+    case 1:// top right corner
+      rectArea.x0 = obj->x0+obj->width-rectArea.width;
+      rectArea.y0 = obj->y0;
+      break;
+    case 2:// bottom right corner
+      rectArea.x0 = obj->x0+obj->width-rectArea.width;
+      rectArea.y0 = obj->y0+obj->height-rectArea.height;
+      break;
+    case 3:// bottom left corner
+      rectArea.x0 = obj->x0;
+      rectArea.y0 = obj->y0+obj->height-rectArea.height;
+      break;
+    default:
+      return;
+    }
+    nbgl_frontDrawRect(&rectArea);
+  }
 }
 
 /**

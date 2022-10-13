@@ -48,6 +48,9 @@
 #define TOUCHABLE_BAR_HEIGHT 80
 #define FOOTER_HEIGHT 80
 
+// refresh period of the spinner, in ms
+#define SPINNER_REFRESH_PERIOD 400
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -329,7 +332,7 @@ static void spinnerTickerCallback(void) {
       spinner->position++;
       spinner->position &= 3; // modulo 4
       nbgl_redrawObject((nbgl_obj_t*)spinner, NULL, false);
-      nbgl_refresh();
+      nbgl_refreshSpecial(BLACK_AND_WHITE_FAST_REFRESH);
       return;
     }
     i++;
@@ -1857,17 +1860,13 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, u
  *
  * @param layout the current layout
  * @param text text to draw under the spinner
+ * @param fixed if set to true, the spinner won't spin and be entirely black
  * @return >= 0 if OK
  */
-int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text) {
+int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
   nbgl_spinner_t *spinner;
-  nbgl_screenTickerConfiguration_t tickerCfg;
-
-  tickerCfg.tickerIntervale = 800; //ms
-  tickerCfg.tickerValue = 800; //ms
-  tickerCfg.tickerCallback = &spinnerTickerCallback;
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddSpinner():\n");
   if (layout == NULL)
@@ -1875,7 +1874,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text) {
 
   // create spinner
   spinner = (nbgl_spinner_t*)nbgl_objPoolGet(SPINNER, layoutInt->layer);
-  spinner->position = 0;
+  spinner->position = fixed? 0xFF : 0;
   spinner->alignmentMarginX = 0;
   spinner->alignmentMarginY = -20;
   spinner->alignTo = NULL;
@@ -1900,8 +1899,15 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text) {
   // set this new spinner as child of the container
   addObjectToLayout(layoutInt,(nbgl_obj_t*)textArea);
 
-  // update ticker to update the spinner periodically
-  nbgl_screenUpdateTicker(layoutInt->layer,&tickerCfg);
+  if (!fixed) {
+    // update ticker to update the spinner periodically
+    nbgl_screenTickerConfiguration_t tickerCfg;
+
+    tickerCfg.tickerIntervale = SPINNER_REFRESH_PERIOD; //ms
+    tickerCfg.tickerValue = SPINNER_REFRESH_PERIOD; //ms
+    tickerCfg.tickerCallback = &spinnerTickerCallback;
+    nbgl_screenUpdateTicker(layoutInt->layer,&tickerCfg);
+  }
 
   return 0;
 }
