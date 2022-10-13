@@ -20,12 +20,17 @@ cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx) {
     return error;
 }
 
-void cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
-                        const uint8_t *key, size_t key_bitlen) {
+cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
+                            const uint8_t *key, size_t key_bitlen) {
+
+  if (key_bitlen > AES_SIV_MAX_KEY_LEN * 16) {
+    return CX_INVALID_PARAMETER_SIZE;
+  }
 
   ctx->key_len = key_bitlen/2;
   memcpy(ctx->key1, key, ctx->key_len/8);
   memcpy(ctx->key2, key + ctx->key_len/8, ctx->key_len/8);
+  return CX_OK;
 }
 
 cx_err_t cx_aes_siv_start(cx_aes_siv_context_t *ctx,

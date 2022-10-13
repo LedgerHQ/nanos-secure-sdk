@@ -66,11 +66,11 @@ cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx);
  * @param[in] ctx        Pointer to the AES-SIV context.
  * @param[in] key        Pointer to the key.
  * @param[in] key_bitlen Size of the key in bits.
- * @return               
+ * @return               Error code
  */
-void cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
-                        const uint8_t *key,
-                        size_t key_bitlen);
+cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
+                            const uint8_t *key,
+                            size_t key_bitlen);
 
 /**
  * @brief Starts the S2V algorithm following RFC5297 specification.
