@@ -23,7 +23,8 @@ cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx) {
 cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
                             const uint8_t *key, size_t key_bitlen) {
 
-  if (key_bitlen > AES_SIV_MAX_KEY_LEN * 16) {
+  // AES SIV uses two keys of either 128, 192 or 256 bits each
+  if (key_bitlen > AES_SIV_MAX_KEY_LEN * AES_SIV_KEY_NUMBER * 8) {
     return CX_INVALID_PARAMETER_SIZE;
   }
 
