@@ -23,6 +23,7 @@
 #include "lcx_cipher.h"
 
 #define AES_SIV_MAX_KEY_LEN (32)
+#define AES_SIV_KEY_NUMBER  (2)
 
 /**
  * @brief AES-SIV context.
