@@ -31,7 +31,7 @@
 
 #ifdef HAVE_BAGL
 
-#ifdef HAVE_BOLOS
+#if (defined HAVE_BOLOS || defined(BUILD_PNG))
 
 static const bagl_element_t ux_layout_pages_elements[] = {
 #if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
@@ -791,7 +791,7 @@ void ux_loc_layout_paging_init(unsigned int stack_slot) {
   ux_layout_pages_init_common(stack_slot, text, ux_loc_layout_paging_redisplay_by_addr);
 }
 
-#endif // HAVE_BOLOS
+#endif // (defined HAVE_BOLOS || defined(BUILD_PNG))
 
 void ux_layout_pages_init_common(unsigned int stack_slot, const char* text, ux_layout_paging_redisplay_t redisplay) {
 
