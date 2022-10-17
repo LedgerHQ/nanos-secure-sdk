@@ -837,23 +837,23 @@ cx_err_t cx_ecpoint_x448(const cx_bn_t u, const uint8_t *k, size_t k_len) {
 #endif // HAVE_X448
 
 #ifdef HAVE_BLS
-cx_err_t ox_bls_sign(const cx_ecfp_384_private_key_t *key, const uint8_t * message, size_t message_len, uint8_t * signature, size_t signature_len) {
+cx_err_t ox_bls12381_sign(const cx_ecfp_384_private_key_t *key, const uint8_t * message, size_t message_len, uint8_t * signature, size_t signature_len) {
   unsigned int parameters [5];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)message;
   parameters[2] = (unsigned int)message_len;
   parameters[3] = (unsigned int)signature;
   parameters[4] = (unsigned int)signature_len;
-  return SVC_cx_call(SYSCALL_ox_bls_sign_ID, parameters);
+  return SVC_cx_call(SYSCALL_ox_bls12381_sign_ID, parameters);
 }
 
-cx_err_t cx_bls_key_gen(uint8_t mode,
-                        const uint8_t *secret, size_t secret_len,
-                        uint8_t *salt, size_t salt_len,
-                        uint8_t *key_info, size_t key_info_len,
-                        cx_ecfp_384_private_key_t *private_key,
-                        uint8_t *public_key,
-                        size_t public_key_len) {
+cx_err_t cx_bls12381_key_gen(uint8_t mode,
+                             const uint8_t *secret, size_t secret_len,
+                             uint8_t *salt, size_t salt_len,
+                             uint8_t *key_info, size_t key_info_len,
+                             cx_ecfp_384_private_key_t *private_key,
+                             uint8_t *public_key,
+                             size_t public_key_len) {
   unsigned int parameters[10];
   parameters[0] = (unsigned int)mode;
   parameters[1] = (unsigned int)secret;
@@ -865,7 +865,7 @@ cx_err_t cx_bls_key_gen(uint8_t mode,
   parameters[7] = (unsigned int)private_key;
   parameters[8] = (unsigned int)public_key;
   parameters[9] = (unsigned int)public_key_len;
-  return SVC_cx_call(SYSCALL_cx_bls_key_gen_ID, parameters);
+  return SVC_cx_call(SYSCALL_cx_bls12381_key_gen_ID, parameters);
 }
 
 cx_err_t cx_hash_to_field(const uint8_t *msg, size_t msg_len, const uint8_t *dst, size_t dst_len, uint8_t *hash, size_t hash_len) {
@@ -879,14 +879,14 @@ cx_err_t cx_hash_to_field(const uint8_t *msg, size_t msg_len, const uint8_t *dst
   return SVC_cx_call(SYSCALL_cx_hash_to_field_ID, parameters);
 }
 
-cx_err_t cx_bls_aggregate(const uint8_t *in, size_t in_len, bool first, uint8_t *aggregated_signature, size_t signature_len) {
+cx_err_t cx_bls12381_aggregate(const uint8_t *in, size_t in_len, bool first, uint8_t *aggregated_signature, size_t signature_len) {
   unsigned int parameters [5];
   parameters[0] = (unsigned int)in;
   parameters[1] = (unsigned int)in_len;
   parameters[2] = (unsigned int)first;
   parameters[3] = (unsigned int)aggregated_signature;
   parameters[4] = (unsigned int)signature_len;
-  return SVC_cx_call(SYSCALL_cx_bls_aggregate_ID, parameters);
+  return SVC_cx_call(SYSCALL_cx_bls12381_aggregate_ID, parameters);
 }
 #endif // HAVE_BLS
 

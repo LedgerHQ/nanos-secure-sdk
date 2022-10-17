@@ -105,10 +105,10 @@
 
 #define SYSCALL_cx_crc32_hw_ID                                     0x02000102
 #ifdef HAVE_BLS
-#define SYSCALL_ox_bls_sign_ID                                     0x05000103
+#define SYSCALL_ox_bls12381_sign_ID                                0x05000103
 #define SYSCALL_cx_hash_to_field_ID                                0x06000104
-#define SYSCALL_cx_bls_aggregate_ID                                0x05000105
-#define SYSCALL_cx_bls_key_gen_ID                                  0x03000108
+#define SYSCALL_cx_bls12381_aggregate_ID                           0x05000105
+#define SYSCALL_cx_bls12381_key_gen_ID                             0x03000108
 #endif // HAVE_BLS
 
 #define SYSCALL_cx_get_random_bytes_ID                             0x02000107
