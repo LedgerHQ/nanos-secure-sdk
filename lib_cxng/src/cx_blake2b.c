@@ -35,6 +35,7 @@ const cx_hash_info_t cx_blake2b_info = {
   CX_BLAKE2B,
   0,
   BLAKE2B_BLOCKBYTES,
+  sizeof(cx_blake2b_t),
   NULL,
   (cx_err_t (*)(cx_hash_t *ctx, const uint8_t *data, size_t len))cx_blake2b_update,
   (cx_err_t (*)(cx_hash_t *ctx, uint8_t *digest))cx_blake2b_final,

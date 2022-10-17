@@ -117,6 +117,7 @@ cx_err_t cx_eddsa_get_public_key_internal(const cx_ecfp_private_key_t *pv_key,
      */
     cx_hash_update(&G_cx.hash_ctx, pv_key->d, pv_key->d_len);
     cx_hash_final(&G_cx.hash_ctx, scal);
+    cx_hash_destroy(&G_cx.hash_ctx);
     if (pv_key->curve == CX_CURVE_Ed25519) {
       /* 2. Prune the buffer: The lowest 3 bits of the first octet are
        * cleared, the highest bit of the last octet is cleared, and the
@@ -274,6 +275,7 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
   cx_hash_update(&G_cx.hash_ctx, r, size);
   cx_hash_update(&G_cx.hash_ctx, hash, hash_len);
   cx_hash_final(&G_cx.hash_ctx, scal);
+  cx_hash_destroy(&G_cx.hash_ctx);
   cx_encode_int(scal, hsize);
 
   CX_CHECK(cx_bn_alloc_init(&bn_h, hsize, scal, hsize));
@@ -309,6 +311,7 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
   cx_hash_update(&G_cx.hash_ctx, sig + size, size);
   cx_hash_update(&G_cx.hash_ctx, hash, hash_len);
   cx_hash_final(&G_cx.hash_ctx, scal);
+  cx_hash_destroy(&G_cx.hash_ctx);
   cx_encode_int(scal, hsize);
 
   // - compute S = r+H(.)a
@@ -439,6 +442,7 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pu_key,
   // -M
   cx_hash_update(&G_cx.hash_ctx, hash, hash_len);
   cx_hash_final(&G_cx.hash_ctx, left);
+  cx_hash_destroy(&G_cx.hash_ctx);
   cx_encode_int(left, hsize);
 
   CX_CHECK(cx_bn_alloc(&bn_n, size));

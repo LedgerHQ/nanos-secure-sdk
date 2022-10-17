@@ -42,6 +42,11 @@ cx_err_t cx_blake2b(cx_hash_t *hash, uint32_t mode, const uint8_t *in, size_t in
 
 const cx_hash_info_t *cx_hash_get_info(cx_md_t md_type);
 
+/**
+ * Destroy/clean the hash context.
+ */
+void cx_hash_destroy(cx_hash_t *hash_ctx);
+
 #endif
 
 #endif // HAVE_HASH

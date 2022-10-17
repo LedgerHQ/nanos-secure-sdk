@@ -375,6 +375,7 @@ cx_err_t cx_pkcs1_emsa_pss_encode_with_salt_len(cx_md_t hID, uint8_t *em, size_t
   cx_memxor(em + PSLen + 1, salt, mSaltLen);
   em[0] &= CX_PSS_MASK[8 * emLen - emBits];
   *size = emLen;
+  explicit_bzero(&G_cx.pkcs1, sizeof(cx_pkcs1_t));
 
  end:
   return error;

@@ -93,6 +93,7 @@ typedef struct {
   cx_md_t md_type;                                                          ///< Message digest algorithm identifier
   size_t  output_size;                                                      ///< Output size
   size_t  block_size;                                                       ///< Block size
+  size_t  ctx_size;                                                         ///< Related size of the context hash
   cx_err_t (*init_func)(cx_hash_t *ctx);                                    ///< Pointer to the initialization function
   cx_err_t (*update_func)(cx_hash_t *ctx, const uint8_t *data, size_t len); ///< Pointer to the update function
   cx_err_t (*finish_func)(cx_hash_t *ctx, uint8_t *digest);                 ///< Pointer to the final function

@@ -147,4 +147,9 @@ cx_err_t cx_hash_no_throw(cx_hash_t *hash, uint32_t mode, const uint8_t *in, siz
   return error;
 }
 
+void cx_hash_destroy(cx_hash_t *hash_ctx)
+{
+  explicit_bzero(hash_ctx, hash_ctx->info->ctx_size);
+}
+
 #endif // HAVE_HASH

@@ -367,6 +367,7 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
   }
 
  end:
+  cx_hash_destroy((cx_hash_t*)&H);
   cx_bn_unlock();
   if (error == CX_OK) {
     if ((mode & CX_MASK_EC) == CX_ECSCHNORR_BIP0340) {
@@ -400,7 +401,6 @@ bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pu_key,
   int                     diff;
   bool                    is_on_curve = false;
 
-#define H G_cx.sha256
   cx_bn_t bn_d, bn_r, bn_s, bn_n;
   cx_bn_t bn_x, bn_y, bn_p;
 
