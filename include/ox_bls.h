@@ -59,13 +59,13 @@
  *                           - CX_EC_INVALID_POINT
  *                           - CX_EC_INFINITE_POINT
  */
-SYSCALL cx_err_t cx_bls_key_gen(uint8_t mode,
-                                const uint8_t *secret, size_t secret_len,
-                                uint8_t *salt, size_t salt_len,
-                                uint8_t *key_info, size_t key_info_len,
-                                cx_ecfp_384_private_key_t *private_key,
-                                uint8_t *public_key,
-                                size_t public_key_len);
+SYSCALL cx_err_t cx_bls12381_key_gen(uint8_t mode,
+                                     const uint8_t *secret, size_t secret_len,
+                                     uint8_t *salt, size_t salt_len,
+                                     uint8_t *key_info, size_t key_info_len,
+                                     cx_ecfp_384_private_key_t *private_key,
+                                     uint8_t *public_key,
+                                     size_t public_key_len);
 
 /**
  * @brief   Hash a message to be signed with BLS12-381 signature scheme.
@@ -123,11 +123,11 @@ SYSCALL cx_err_t cx_hash_to_field(const uint8_t *msg, size_t msg_len,
  *                           - CX_INTERNAL_ERROR
  *                           - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t ox_bls_sign(const cx_ecfp_384_private_key_t *key,
-                             const uint8_t *              message,
-                             size_t                       message_len,
-                             uint8_t *                    signature,
-                             size_t                       signature_len);
+SYSCALL cx_err_t ox_bls12381_sign(const cx_ecfp_384_private_key_t *key,
+                                  const uint8_t *              message,
+                                  size_t                       message_len,
+                                  uint8_t *                    signature,
+                                  size_t                       signature_len);
 
 /**
  * @brief   Aggregate multiple signatures.
@@ -151,8 +151,8 @@ SYSCALL cx_err_t ox_bls_sign(const cx_ecfp_384_private_key_t *key,
  *                                  - CX_INTERNAL_ERROR
  *                                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bls_aggregate(const uint8_t *in, size_t in_len, bool first,
-                                  uint8_t *aggregated_signature, size_t signature_len);
+SYSCALL cx_err_t cx_bls12381_aggregate(const uint8_t *in, size_t in_len, bool first,
+                                       uint8_t *aggregated_signature, size_t signature_len);
 
 #endif // HAVE_BLS
 #endif // OX_BLS_H
