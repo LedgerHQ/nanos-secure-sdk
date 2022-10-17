@@ -33,6 +33,7 @@ const cx_hash_info_t cx_ripemd160_info = {
     CX_RIPEMD160,
     CX_RIPEMD160_SIZE,
     RIPEMD_BLOCK_SIZE,
+    sizeof(cx_ripemd160_t),
     (cx_err_t (*)(cx_hash_t *ctx))cx_ripemd160_init_no_throw,
     (cx_err_t (*)(cx_hash_t *ctx, const uint8_t *data, size_t len))cx_ripemd160_update,
     (cx_err_t (*)(cx_hash_t *ctx, uint8_t *digest))cx_ripemd160_final,
