@@ -929,8 +929,8 @@ static void advertising_enable(uint8_t enable)
 		                         buffer,
 		                         0,
 		                         NULL,
-		                         BLE_SLAVE_CONN_INTERVAL_MIN,
-		                         BLE_SLAVE_CONN_INTERVAL_MAX);
+		                         0,
+		                         0);
 	}
 	else {
 		aci_gap_set_non_discoverable();
