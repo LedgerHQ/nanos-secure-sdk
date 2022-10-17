@@ -837,7 +837,7 @@ cx_err_t cx_ecpoint_x448(const cx_bn_t u, const uint8_t *k, size_t k_len) {
 #endif // HAVE_X448
 
 #ifdef HAVE_BLS
-cx_err_t ox_bls_sign(const cx_ecfp_private_key_t *key, const uint8_t * message, size_t message_len, uint8_t * signature, size_t signature_len) {
+cx_err_t ox_bls_sign(const cx_ecfp_384_private_key_t *key, const uint8_t * message, size_t message_len, uint8_t * signature, size_t signature_len) {
   unsigned int parameters [5];
   parameters[0] = (unsigned int)key;
   parameters[1] = (unsigned int)message;
@@ -851,7 +851,7 @@ cx_err_t cx_bls_key_gen(uint8_t mode,
                         const uint8_t *secret, size_t secret_len,
                         uint8_t *salt, size_t salt_len,
                         uint8_t *key_info, size_t key_info_len,
-                        cx_ecfp_private_key_t *private_key,
+                        cx_ecfp_384_private_key_t *private_key,
                         uint8_t *public_key,
                         size_t public_key_len) {
   unsigned int parameters[10];
