@@ -34,6 +34,12 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char  os_perso_get_seed_a
 
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_words(const unsigned char* words PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_finalize(void);
+#if defined(HAVE_PROTECT)
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_master_seed(unsigned char* master_seed PLENGTH(length), unsigned int length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_get_master_seed(unsigned char* master_seed PLENGTH(length), unsigned int length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_protect_set_state(unsigned char state, bool keep);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char  os_perso_protect_get_state(void);
+#endif // HAVE_PROTECT
 
 // checked in the ux flow to avoid asking the pin for example
 // NBA : could also be checked by applications running in insecure mode - thus unprivilegied
@@ -51,6 +57,7 @@ enum {
   ONBOARDING_STATUS_NEW_DEVICE,
   ONBOARDING_STATUS_NEW_DEVICE_CONFIRMING,
   ONBOARDING_STATUS_RESTORE_SEED,
+  ONBOARDING_STATUS_PROTECT_RESTORE_SEED,
   ONBOARDING_STATUS_SAFETY_WARNINGS,
   ONBOARDING_STATUS_READY,
   ONBOARDING_STATUS_CHOOSE_NAME,

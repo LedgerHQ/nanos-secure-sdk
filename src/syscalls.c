@@ -1006,6 +1006,39 @@ unsigned char os_perso_get_seed_algorithm(void) {
 }
 #endif // HAVE_VAULT_RECOVERY_ALGO
 
+#if defined(HAVE_PROTECT)
+void os_perso_set_master_seed(unsigned char *master_seed, unsigned int length) {
+  unsigned int parameters[2];
+  parameters[0] = (unsigned int)master_seed;
+  parameters[1] = (unsigned int)length;
+  SVC_Call(SYSCALL_os_perso_set_master_seed_ID, parameters);
+  return;
+}
+
+void os_perso_get_master_seed(unsigned char *master_seed, unsigned int length) {
+  unsigned int parameters[2];
+  parameters[0] = (unsigned int)master_seed;
+  parameters[1] = (unsigned int)length;
+  SVC_Call(SYSCALL_os_perso_get_master_seed_ID, parameters);
+  return;
+}
+
+void os_perso_protect_set_state(unsigned char state, bool keep) {
+  unsigned int parameters[2];
+  parameters[0] = (unsigned int)state;
+  parameters[1] = (unsigned int)keep;
+  SVC_Call(SYSCALL_os_perso_protect_set_state_ID, parameters);
+  return;
+}
+
+unsigned char os_perso_protect_get_state(void) {
+  unsigned int parameters[2];
+  parameters[0] = 0;
+  parameters[1] = 0;
+  return (unsigned char)SVC_Call(SYSCALL_os_perso_protect_get_state_ID, parameters);
+}
+#endif // HAVE_PROTECT
+
 void os_perso_set_words ( const unsigned char * words, unsigned int length ) {
   unsigned int parameters[2];
   parameters[0] = (unsigned int)words;
