@@ -29,7 +29,10 @@ ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
 # Fatstacks glyphs files and generation script
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/))))
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
+ifneq (,$(wildcard $(ICONNAME)))
+# Do not try to generate app icon glyph, if image does not exist
 GLYPH_FILES += $(ICONNAME)
+endif
 ICON_SCRIPT = $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py
 GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES) > $(GLYPH_DESTC)
 else
