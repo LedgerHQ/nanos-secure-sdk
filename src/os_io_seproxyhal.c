@@ -508,9 +508,33 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 #endif // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
-void io_seproxyhal_nfc_set_tag(uint8_t *text, uint16_t text_length) {
+// Send NFC init command over seph, with string to program into NFC tag as parameter
+// If NULL is passed NVM setting content is used instead
+void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length) {
   uint8_t tlv[3];
-  tlv[0] = SEPROXYHAL_TAG_NFC_TAG_UPDATE;
+  tlv[0] = SEPROXYHAL_TAG_NFC_INIT;
+  if ((text != NULL) && (text_length)) {
+    tlv[1] = (text_length & 0xFF00) >> 8;
+    tlv[2] = text_length & 0x00FF;
+    io_seproxyhal_spi_send(tlv, 3);
+    io_seproxyhal_spi_send(text, MIN(text_length, NFC_TEXT_MAX_LEN));
+  }
+  else {
+    uint8_t default_text[NFC_TEXT_MAX_LEN];
+    uint16_t default_text_length =  os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)default_text, NFC_TEXT_MAX_LEN);
+    tlv[1] = (default_text_length & 0xFF00) >> 8;
+    tlv[2] = default_text_length & 0x00FF;
+    io_seproxyhal_spi_send(tlv, 3);
+    io_seproxyhal_spi_send(default_text, MIN(default_text_length, NFC_TEXT_MAX_LEN));
+  }  
+}
+
+// Send NFC async init command over seph, with string to program into NFC tag as parameter.
+// To be used in dashboard_apdu_nfc_tag_update to allow reseting tag content after APDU
+// reply was sent, to avoid resetting NFC component when NFC is actively used
+void io_seproxyhal_nfc_init_async(uint8_t *text, uint16_t text_length) {
+  uint8_t tlv[3];
+  tlv[0] = SEPROXYHAL_TAG_NFC_INIT_ASYNC;
   tlv[1] = (text_length & 0xFF00) >> 8;
   tlv[2] = text_length & 0x00FF;
   io_seproxyhal_spi_send(tlv, 3);
