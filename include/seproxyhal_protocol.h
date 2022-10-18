@@ -147,8 +147,9 @@
 //#define SEPROXYHAL_TAG_SCREEN_DISPLAY              0x4A // wait for display_event after sent
 
 #ifdef HAVE_NFC
-#define SEPROXYHAL_TAG_NFC_RAPDU                    0x4A
-#define SEPROXYHAL_TAG_NFC_TAG_UPDATE                    0x34
+#define SEPROXYHAL_TAG_NFC_RAPDU                   0x4A
+#define SEPROXYHAL_TAG_NFC_INIT_ASYNC              0x34
+#define SEPROXYHAL_TAG_NFC_INIT                    0x35
 #endif
 
 #define SEPROXYHAL_TAG_DEVICE_OFF                  0x4B
