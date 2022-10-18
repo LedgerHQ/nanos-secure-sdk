@@ -21,6 +21,7 @@
 #include "cx_rsa.h"
 #include "cx_utils.h"
 #include "cx_ram.h"
+#include "ox.h"
 
 #include <string.h>
 
