@@ -325,6 +325,12 @@ unsigned int io_seproxyhal_handle_event(void) {
         LEDGER_BLE_reset_pairings();
         return 1;
         break;
+
+      case SEPROXYHAL_TAG_UX_CMD_BLE_NAME_CHANGED:
+        // Restart advertising
+        G_io_app.name_changed = 1;
+        io_seph_ble_enable(0);
+        break;
 #endif // HAVE_BLE
 
 #if !defined(HAVE_BOLOS) && defined(HAVE_BAGL)
@@ -924,6 +930,15 @@ void io_seph_ble_clear_bond_db(void)
   G_io_seproxyhal_spi_buffer[1] = 0;
   G_io_seproxyhal_spi_buffer[2] = 1;
   G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_UX_CMD_BLE_RESET_PAIRINGS;
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
+}
+
+void io_seph_ble_name_changed(void)
+{
+  G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_UX_CMD;
+  G_io_seproxyhal_spi_buffer[1] = 0;
+  G_io_seproxyhal_spi_buffer[2] = 1;
+  G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_UX_CMD_BLE_NAME_CHANGED;
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
 }
 #endif // HAVE_BLE
