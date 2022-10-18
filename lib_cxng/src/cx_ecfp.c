@@ -146,6 +146,10 @@ cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t             curve,
   cx_ecpoint_t             W;
   cx_err_t                 error;
 
+#ifndef HAVE_ECC_TWISTED_EDWARDS
+  (void) hashID;
+#endif
+
   CX_CHECK(cx_ecdomain_parameters_length(curve, &size));
 
   // SEC: complex assert param dispatched in code....
