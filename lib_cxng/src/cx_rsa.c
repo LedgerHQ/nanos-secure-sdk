@@ -25,6 +25,9 @@
 
 #include <string.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-qual"
+
 static cx_err_t modulus_valid(size_t modulus_len)
 {
   switch (modulus_len) {
@@ -503,5 +506,7 @@ cx_err_t cx_rsa_decrypt_no_throw(const cx_rsa_private_key_t *key,
   cx_bn_unlock();
   return error;
 }
+
+#pragma GCC diagnostic pop
 
 #endif // HAVE_RSA

@@ -191,7 +191,7 @@ static void test_chacha_round(void **state) {
   assert_memory_equal(state_array, expected_array, sizeof(state_array));
 }
 
-int main() {
+int main(void) {
   const struct CMUnitTest tests[] = {
     cmocka_unit_test(test_chacha_round)
   };
