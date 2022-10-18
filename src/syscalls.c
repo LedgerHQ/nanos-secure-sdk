@@ -849,7 +849,7 @@ cx_err_t ox_bls12381_sign(const cx_ecfp_384_private_key_t *key, const uint8_t * 
 
 cx_err_t cx_bls12381_key_gen(uint8_t mode,
                              const uint8_t *secret, size_t secret_len,
-                             uint8_t *salt, size_t salt_len,
+                             const uint8_t *salt, size_t salt_len,
                              uint8_t *key_info, size_t key_info_len,
                              cx_ecfp_384_private_key_t *private_key,
                              uint8_t *public_key,
