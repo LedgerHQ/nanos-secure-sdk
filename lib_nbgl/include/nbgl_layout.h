@@ -27,6 +27,8 @@ extern "C" {
 #define NO_MORE_OBJ_ERROR -3
 #define NBGL_NO_TUNE NB_TUNES
 
+#define NB_MAX_SUGGESTION_BUTTONS 4
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -225,6 +227,19 @@ typedef struct {
     char *subText; ///< text in gray, under progress bar
 } nbgl_layoutProgressBar_t;
 
+
+/**
+ * @brief This structure contains info to build a keyboard with @ref nbgl_layoutAddKeyboard()
+ *
+ */
+typedef struct {
+    bool lettersOnly; ///< if true, only display letter keys and Backspace
+    bool upperCase; ///< if true, display letter keys in upper case
+    keyboardMode_t mode; ///< keyboard mode to start with
+    uint32_t keyMask; ///< mask used to disable some keys in letters only mod. The 26 LSB bits of mask are used, for the 26 letters of a QWERTY keyboard. Bit[0] for Q, Bit[1] for W and so on
+    keyboardCallback_t callback; ///< function called when an active key is pressed
+} nbgl_layoutKbd_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -252,6 +267,20 @@ int nbgl_layoutAddBottomButton(nbgl_layout_t *layout, const nbgl_icon_details_t 
 int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, uint8_t nbPages, bool withBack, uint8_t backToken, tune_index_e tuneId);
 int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed);
 
+/* layout objects for page with keyboard */
+int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo);
+int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, int index, uint32_t keyMask);
+int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons,
+                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
+                                    int firstButtonToken, tune_index_e tuneId);
+int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, int index, uint8_t nbUsedButtons,
+                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]);
+int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY);
+int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, int index, bool numbered, uint8_t number, char *text, bool grayedOut);
+int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *text, int token, tune_index_e tuneId);
+int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, int index, bool active, char *text);
+
+/* generic functions */
 int nbgl_layoutDraw(nbgl_layout_t *layout);
 int nbgl_layoutRelease(nbgl_layout_t *layout);
 
