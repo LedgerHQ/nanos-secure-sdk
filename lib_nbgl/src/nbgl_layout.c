@@ -52,10 +52,6 @@
 #define SPINNER_REFRESH_PERIOD 400
 
 /**********************
- *      TYPEDEFS
- **********************/
-
-/**********************
  *      MACROS
  **********************/
 #define GET_NEXT_OBJ_FROM_POOL(__layout,__obj) { \
@@ -67,10 +63,6 @@
 }
 
 #define GET_AVAILABLE_WIDTH(__layout) (SCREEN_WIDTH-2*BORDER_MARGIN)
-
-/*********************
- *      DEFINES
- *********************/
 
 /**********************
  *      TYPEDEFS
@@ -117,6 +109,7 @@ typedef struct nbgl_layoutInternal_s {
  */
 static nbgl_layoutInternal_t gLayout[NB_MAX_LAYOUTS] = {0};
 
+static nbgl_button_t *choiceButtons[NB_MAX_SUGGESTION_BUTTONS];
 
 
 /**********************
@@ -472,8 +465,7 @@ int nbgl_layoutAddTopRightButton(nbgl_layout_t *layout, const nbgl_icon_details_
   obj->token = token;
   obj->tuneId = tuneId;
 
-  layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t*)button;
-  layoutInt->nbChildren++;
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)button);
   button->width = BUTTON_HEIGHT;
   button->height = BUTTON_HEIGHT;
   button->radius = BUTTON_RADIUS;
@@ -1909,6 +1901,388 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed) {
     nbgl_screenUpdateTicker(layoutInt->layer,&tickerCfg);
   }
 
+  return 0;
+}
+
+/**
+ * @brief Creates a keyboard on bottom of the screen, with the given configuration
+ *
+ * @param layout the current layout
+ * @param kbdInfo configuration of the keyboard to draw (including the callback when touched)
+ * @return the index of keyboard, to use in @ref nbgl_layoutUpdateKeyboard()
+ */
+int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_keyboard_t *keyboard;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddKeyboard():\n");
+  if (layout == NULL)
+    return -1;
+
+  // create keyboard
+  keyboard = (nbgl_keyboard_t*)nbgl_objPoolGet(KEYBOARD, layoutInt->layer);
+  keyboard->alignmentMarginX = 0;
+  keyboard->alignmentMarginY = 60;
+  keyboard->alignment = BOTTOM_MIDDLE;
+  keyboard->alignTo = NULL;
+  keyboard->borderColor = LIGHT_GRAY;
+  keyboard->callback = kbdInfo->callback;
+  keyboard->lettersOnly = kbdInfo->lettersOnly;
+  keyboard->mode = kbdInfo->mode;
+  keyboard->keyMask = kbdInfo->keyMask;
+  keyboard->upperCase = kbdInfo->upperCase;
+  // set this new keyboard as child of the container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)keyboard);
+
+  // return index of keyboard to be modified later on
+  return (layoutInt->container->nbChildren-1);
+}
+
+/**
+ * @brief Updates an existing keyboard on bottom of the screen, with the given configuration
+ *
+ * @param layout the current layout
+ * @param index index returned by @ref nbgl_layoutAddKeyboard()
+ * @param kbdInfo configuration of the keyboard to draw (including the callback when touched)
+ * @return >=0 if OK
+ */
+int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, int index, uint32_t keyMask) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_keyboard_t *keyboard;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateKeyboard(): keyMask = 0x%X\n",keyMask);
+  if (layout == NULL)
+    return -1;
+
+  // create keyboard
+  keyboard = (nbgl_keyboard_t*)layoutInt->container->children[index];
+  keyboard->keyMask = keyMask;
+
+  nbgl_redrawObject((nbgl_obj_t*)keyboard,NULL,false);
+
+  return 0;
+}
+
+/**
+ * @brief Adds up to 4 black suggestion buttons under the previously added object
+ *
+ * @param layout the current layout
+ * @param nbUsedButtons the number of actually used buttons
+ * @param buttonTexts array of 4 strings for buttons (last ones can be NULL)
+ * @param firstButtonToken first token used for buttons, provided in onActionCallback (the next 3 values will be used for other buttons)
+ * @param tuneId tune to play when any button is pressed
+ * @return >= 0 if OK
+ */
+int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons,
+                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
+                                    int firstButtonToken, tune_index_e tuneId) {
+  layoutObj_t *obj;
+  nbgl_container_t *container;
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddSuggestionButtons():\n");
+  if (layout == NULL)
+    return -1;
+
+  container = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER, layoutInt->layer);
+  container->width = SCREEN_WIDTH;
+  container->height = 2*64+8;
+  container->layout = VERTICAL;
+  container->nbChildren = NB_MAX_SUGGESTION_BUTTONS;
+  container->children = (nbgl_obj_t**)nbgl_containerPoolGet(container->nbChildren,layoutInt->layer);
+  container->alignmentMarginX = 0;
+  container->alignmentMarginY = BORDER_MARGIN;
+  container->alignment = TOP_MIDDLE;
+  container->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
+  container->touchMask = 0;
+
+  // create suggestion buttons, even if not displayed at first
+  nbgl_objPoolGetArray(BUTTON,NB_MAX_SUGGESTION_BUTTONS,0,(nbgl_obj_t**)&choiceButtons);
+  for (int i=0;i<NB_MAX_SUGGESTION_BUTTONS;i++) {
+    GET_NEXT_OBJ_FROM_POOL(layoutInt,obj);
+    obj->obj = (nbgl_obj_t*)choiceButtons[i];
+    obj->token = firstButtonToken+i;
+    obj->tuneId = tuneId;
+    choiceButtons[i]->innerColor = BLACK;
+    choiceButtons[i]->borderColor = BLACK;
+    choiceButtons[i]->foregroundColor = WHITE;
+    choiceButtons[i]->width = (SCREEN_WIDTH-2*BORDER_MARGIN-8)/2;
+    choiceButtons[i]->height = 64;
+    choiceButtons[i]->radius = RADIUS_32_PIXELS;
+    choiceButtons[i]->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+    choiceButtons[i]->icon = NULL;
+    if ((i%2) == 0) {
+      choiceButtons[i]->alignmentMarginX = BORDER_MARGIN;
+      if (i == 0)
+        choiceButtons[i]->alignmentMarginY = 0;
+      else
+        choiceButtons[i]->alignmentMarginY = 8;
+      choiceButtons[i]->alignment = NO_ALIGNMENT;
+      choiceButtons[i]->alignTo = NULL;
+    }
+    else {
+      choiceButtons[i]->alignmentMarginX = 8;
+      choiceButtons[i]->alignmentMarginY = 0;
+      choiceButtons[i]->alignment = MID_RIGHT;
+      choiceButtons[i]->alignTo = (nbgl_obj_t*)choiceButtons[i-1];
+    }
+    choiceButtons[i]->text = buttonTexts[i];
+    choiceButtons[i]->touchMask = (1<<TOUCHED);
+    choiceButtons[i]->touchCallback = (nbgl_touchCallback_t)&touchCallback;
+    // some buttons may not be visible
+    if (i<nbUsedButtons)
+      container->children[i] = (nbgl_obj_t*)choiceButtons[i];
+    else
+      container->children[i] = NULL;
+  }
+  // set this new container as child of the main container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)container);
+
+  // return index of container to be modified later on
+  return (layoutInt->container->nbChildren-1);
+}
+
+/**
+ * @brief Updates the number and/or the text suggestion buttons created with @ref nbgl_layoutAddSuggestionButtons()
+ *
+ * @param layout the current layout
+ * @param index index returned by @ref nbgl_layoutAddSuggestionButtons()
+ * @param nbUsedButtons the number of actually used buttons
+ * @param buttonTexts array of 4 strings for buttons (last ones can be NULL)
+ * @return >= 0 if OK
+ */
+int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, int index, uint8_t nbUsedButtons,
+                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_container_t *container;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateSuggestionButtons():\n");
+  if (layout == NULL)
+    return -1;
+
+  container = (nbgl_container_t *)layoutInt->container->children[index];
+
+  // update suggestion buttons
+  for (int i=0;i<NB_MAX_SUGGESTION_BUTTONS;i++) {
+    choiceButtons[i]->text = buttonTexts[i];
+    // some buttons may not be visible
+    if (i<nbUsedButtons)
+      container->children[i] = (nbgl_obj_t*)choiceButtons[i];
+    else
+      container->children[i] = NULL;
+  }
+  container->forceClean = true;
+
+  nbgl_redrawObject((nbgl_obj_t*)container,NULL,false);
+
+  return 0;
+}
+
+/**
+ * @brief Adds a "text entry" area under the previously entered object. This area can be preceded (beginning of line) by
+ *        an index, indicating for example the entered world.
+ *        A vertical gray line is placed under the text.
+ *        This text must be vertical placed in the screen with offsetY
+ *
+ * @param layout the current layout
+ * @param numbered if true, the "number" param is used as index
+ * @param number index of the text
+ * @param text string to display in the area
+ * @param grayedOut if true, the text is grayed out (but not the potential number)
+ * @param offsetY vertical offset from the top of the page
+ * @return >= 0 if OK
+ */
+int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_text_area_t *textArea;
+  nbgl_line_t *line;
+  static char numText[5];
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddEnteredText():\n");
+  if (layout == NULL)
+    return -1;
+
+  // create gray line
+  line = (nbgl_line_t*)nbgl_objPoolGet(LINE, layoutInt->layer);
+  line->lineColor = LIGHT_GRAY;
+  line->alignmentMarginX = 0;
+  line->alignmentMarginY = offsetY;
+  line->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
+  line->alignment = TOP_MIDDLE;
+  line->width = SCREEN_WIDTH-2*44;
+  line->height = 4;
+  line->direction = HORIZONTAL;
+  line->thickness = 2;
+  line->offset = 2;
+  // set this new line as child of the main container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)line);
+
+  if (numbered) {
+    // create Word num typed text
+    textArea = (nbgl_text_area_t*)nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
+    textArea->textColor = BLACK;
+    snprintf(numText,sizeof(numText),"%d.",number);
+    textArea->text = numText;
+    textArea->onDrawCallback = NULL;
+    textArea->textAlignment = MID_LEFT;
+    textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+    textArea->alignmentMarginX = 0;
+    textArea->alignmentMarginY = 16;
+    textArea->alignTo = (nbgl_obj_t*)line;
+    textArea->alignment = TOP_LEFT;
+    textArea->width = 50;
+    textArea->height = nbgl_getFontHeight(textArea->fontId);
+    textArea->style = 0;
+    // set this new text area as child of the main container
+    addObjectToLayout(layoutInt,(nbgl_obj_t*)textArea);
+  }
+
+  // create text area
+  textArea = (nbgl_text_area_t*)nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
+  textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
+  textArea->text = text;
+  textArea->onDrawCallback = NULL;
+  textArea->textAlignment = CENTER;
+  textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+  textArea->alignmentMarginX = 0;
+  textArea->alignmentMarginY = 16;
+  textArea->alignTo = (nbgl_obj_t*)line;
+  textArea->alignment = TOP_MIDDLE;
+  if (numbered) {
+    textArea->width = line->width - 2*50;
+  }
+  else {
+    textArea->width = SCREEN_WIDTH-2*BORDER_MARGIN;
+  }
+  textArea->height = nbgl_getFontHeight(textArea->fontId);
+  textArea->style = 0;
+  textArea->autoHideLongLine = true;
+  // set this new text area as child of the container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)textArea);
+
+  // return index of text area to be modified later on
+  return (layoutInt->container->nbChildren-1);
+
+}
+
+/**
+ * @brief Updates an existing "text entry" area, created with @ref nbgl_layoutAddEnteredText()
+ *
+ * @param layout the current layout
+ * @param index index of the text (return value of @ref nbgl_layoutAddEnteredText())
+ * @param text string to display in the area
+ * @param grayedOut if true, the text is grayed out (but not the potential number)
+ * @return >= 0 if OK
+ */
+int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, int index, bool numbered, uint8_t number, char *text, bool grayedOut) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_text_area_t *textArea;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateEnteredText():\n");
+  if (layout == NULL)
+    return -1;
+
+  // update main text area
+  textArea = (nbgl_text_area_t*)layoutInt->container->children[index];
+  textArea->text = text;
+  textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
+  nbgl_redrawObject((nbgl_obj_t*)textArea,NULL,false);
+
+  // update number text area
+  if (numbered) {
+    // it is the previously created object
+    textArea = (nbgl_text_area_t*)layoutInt->container->children[index-1];
+    snprintf(textArea->text,5,"%d.",number);
+    nbgl_redrawObject((nbgl_obj_t*)textArea,NULL,false);
+  }
+
+  return 0;
+}
+
+/**
+ * @brief Adds a black full width confirmation button on top of the previously added keyboard.
+ *
+ * @param layout the current layout
+ * @param active if true, button is active, otherwise inactive (grayed-out)
+ * @param text text of the button
+ * @param token token of the button, used in onActionCallback
+ * @param tuneId tune to play when button is pressed
+ * @return >= 0 if OK
+ */
+int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *text, int token, tune_index_e tuneId) {
+  layoutObj_t *obj;
+  nbgl_button_t *button;
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddConfirmationButton():\n");
+  if (layout == NULL)
+    return -1;
+
+  button = (nbgl_button_t *)nbgl_objPoolGet(BUTTON,layoutInt->layer);
+  GET_NEXT_OBJ_FROM_POOL(layoutInt,obj);
+  obj->obj = (nbgl_obj_t*)button;
+  obj->token = token;
+  obj->tuneId = tuneId;
+  button->alignmentMarginY = BORDER_MARGIN+4;
+  button->alignmentMarginX = 0;
+  button->alignment = TOP_MIDDLE;
+  button->foregroundColor = WHITE;
+  if (active) {
+    button->innerColor = BLACK;
+    button->borderColor = BLACK;
+    button->touchMask = (1 << TOUCHED);
+  }
+  else {
+    button->borderColor = DARK_GRAY;
+    button->innerColor = DARK_GRAY;
+    button->touchMask = 0;
+  }
+  button->text = PIC(text);
+  button->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+  button->width = GET_AVAILABLE_WIDTH(layoutInt);
+  button->height = BUTTON_HEIGHT;
+  button->radius = BUTTON_RADIUS;
+  button->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
+  button->touchCallback = (nbgl_touchCallback_t)touchCallback;
+  // set this new button as child of the container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)button);
+
+  // return index of button to be modified later on
+  return (layoutInt->container->nbChildren-1);
+}
+
+/**
+ * @brief Updates an existing black full width confirmation button on top of the previously added keyboard.
+ *
+ * @param layout the current layout
+ * @param index returned value of @ref nbgl_layoutAddConfirmationButton()
+ * @param active if true, button is active
+ * @param text text of the button
+= * @return >= 0 if OK
+ */
+int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, int index, bool active, char *text) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_button_t *button;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateConfirmationButton():\n");
+  if (layout == NULL)
+    return -1;
+
+  // update main text area
+  button = (nbgl_button_t*)layoutInt->container->children[index];
+  button->text = text;
+
+  if (active) {
+    button->innerColor = BLACK;
+    button->borderColor = BLACK;
+    button->touchMask = (1 << TOUCHED);
+  }
+  else {
+    button->borderColor = DARK_GRAY;
+    button->innerColor = DARK_GRAY;
+    button->touchMask = 0;
+  }
+  nbgl_redrawObject((nbgl_obj_t*)button,NULL,false);
   return 0;
 }
 

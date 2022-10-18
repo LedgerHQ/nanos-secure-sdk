@@ -32,7 +32,7 @@ In this more complex example, a "tapable" container is used for the whole screen
 
 In the "tapable" container, 2 objects are drawn, a single pair of tag/value, and a "more" button to execute an action.
 
-@section operations Operations
+@section operations Common operations
 
 @subsection create_layout Getting a new layout
 
@@ -72,7 +72,12 @@ For example 2:
     nbgl_layout_t *layout = nbgl_layoutGet(&layoutDescription);
 @endcode
 
-@subsection add_objects Populating a layout
+@subsection draw_layout Drawing a populated layout
+
+Once defined and populated, all objects can be drawn in **framebuffer**
+with a simple call to @ref nbgl_layoutDraw().
+
+@section add_objects Populating a layout
 
 Once the layout is defined and retrieved with @ref nbgl_layoutGet(), the page can be filled with complex objects.
 
@@ -80,7 +85,7 @@ If a "tapable" container is used, most objects will be added in it, except the o
 bottom (navigation bar or bottom button).
 Otherwise objects are all added in the whole page.
 
-@subsubsection top_right_button Top-right button
+@subsection top_right_button Top-right button
 
 \image{inline} html layout1.png "caption" height=300
 
@@ -95,7 +100,7 @@ The API to insert such an object is @ref nbgl_layoutAddTopRightButton()
 
 \warning This object is incompatible with Progress indicator, for example
 
-@subsubsection bottom_button Bottom centered button
+@subsection bottom_button Bottom centered button
 
 \image{inline} html layout1.png "caption" height=300
 
@@ -113,7 +118,7 @@ is true.
 
 \warning This object is incompatible with navigation bar or footer, for example
 
-@subsubsection footer Footer section
+@subsection footer Footer section
 
 \image{inline} html layout1.png "caption" height=300
 
@@ -131,7 +136,7 @@ is true.
 
 \warning This object is incompatible with navigation bar or bottom button, for example
 
-@subsubsection centered_info Centered info area
+@subsection centered_info Centered info area
 
 \image{inline} html layout1.png "caption" height=300
 
@@ -153,7 +158,7 @@ The colors and fonts for the texts depends of the \b style field used in @ref nb
 - if @ref LEDGER_INFO, only text, in @ref BLACK and upper case (HM ALPHA MONO 32px), with Ledger border
 - if @ref NORMAL_INFO, icon in black and main text in INTER 24px in @ref BLACK under it, subText in INTER 24px in @ref DARK_GRAY under it
 
-@subsubsection choice_buttons Choice buttons
+@subsection choice_buttons Choice buttons
 
 \image{inline} html layout14.png "caption" height=300
 
@@ -170,7 +175,7 @@ Regarding colors:
 
 The API to insert such an object is @ref nbgl_layoutAddChoiceButtons(), with @ref nbgl_layoutChoiceButtons_t structure
 
-@subsubsection single_button Single button
+@subsection single_button Single button
 
 \image{inline} html layout6.png "caption" height=300
 
@@ -180,7 +185,7 @@ This button occupies the full width of the screen, except if \b fittingContent f
 
 The API to insert such an object is @ref nbgl_layoutAddButton(), with @ref nbgl_layoutButton_t structure.
 
-@subsubsection long_press_button Long-press button
+@subsection long_press_button Long-press button
 
 \image{inline} html layout5.png "caption" height=300
 
@@ -193,7 +198,7 @@ This button occupies the full width of the screen and is put at the bottom of th
 
 The API to insert such an object is @ref nbgl_layoutAddLongPressButton(), with the button text and token as parameters.
 
-@subsubsection item_values Tag/value list
+@subsection item_values Tag/value list
 
 \image{inline} html layout4.png "caption" height=300
 
@@ -208,7 +213,7 @@ This area is displayed in the main container, under the previously inserted comp
 
 The API to insert such an object is @ref nbgl_layoutAddTagValueList(), with @ref nbgl_layoutTagValueList_t structure
 
-@subsubsection touchable_bar Touchable bar
+@subsection touchable_bar Touchable bar
 
 \image{inline} html layout8.png "caption" height=300
 
@@ -231,7 +236,7 @@ When touched, if not inactivated, the \b token provided in @ref nbgl_layoutBar_t
 
 The API to insert such an object is @ref nbgl_layoutAddTouchableBar(), with @ref nbgl_layoutBar_t structure
 
-@subsubsection switch Switch
+@subsection switch Switch
 
 \image{inline} html layout15.png "caption" height=300
 
@@ -247,7 +252,7 @@ When touched, if not inactivated, the \b token provided in @ref nbgl_layoutSwitc
 
 The API to insert such an object is @ref nbgl_layoutAddSwitch(), with @ref nbgl_layoutSwitch_t structure
 
-@subsubsection radio_choices Radio button choices
+@subsection radio_choices Radio button choices
 
 \image{inline} html layout11.png "caption" height=300
 
@@ -266,7 +271,7 @@ This area is displayed in the main container, under the previously inserted comp
 
 The API to insert such an object is @ref nbgl_layoutAddRadioChoice(), with @ref nbgl_layoutRadioChoice_t structure
 
-@subsubsection spinner Spinner
+@subsection spinner Spinner
 
 \image{inline} html layout2.png "caption" height=300
 
@@ -279,7 +284,7 @@ The API to insert such an object is @ref nbgl_layoutAddSpinner().
 
 \warning No other object shall be inserted beside this one.
 
-@subsubsection progress_indicator Progress indicator
+@subsection progress_indicator Progress indicator
 
 \image{inline} html layout5.png "caption" height=300
 
@@ -300,7 +305,7 @@ The API to insert such an object is @ref nbgl_layoutAddProgressIndicator().
 
 \warning This object is incompatible with top-right button and page selector.
 
-@subsubsection qr_code QR Code
+@subsection qr_code QR Code
 
 \image{inline} html layout13.png "caption" height=300
 
@@ -316,12 +321,318 @@ The API to insert such an object is @ref nbgl_layoutAddQRCode(), with @ref nbgl_
 
 \warning This object is incompatible with top-right button and progress indicator.
 
-@subsection draw_layout Drawing a populated layout
+@subsection keyboard_section Keyboard-related objects
 
-Once defined and populated, all objects can be drawn in **framebuffer**
-with a simple call to @ref nbgl_layoutDraw().
+Some rare screens require displaying a keyboard at the bottom of the page, to enter text.
 
-@subsection refresh_layout Refreshing screen
+The text to enter may be a generic string or a word (for example BIP39).
+In the first case, a simple confirmation button is also displayed in the screen.
+In the second case, usually suggestion buttons are displayed to avoid issues with unknown words and save time.
+
+Here are some example of these pages in Bolos UX:
+
+\image{inline} html keyboard-usages.png "caption" height=300
+
+To build such screens, some dedicated APIs are necessary, which will be detailled in the sub-chapters.
+
+@subsubsection keyboard_sub_section_1 Adding/Updating keyboard
+
+This object, at the bottom of the main container (with a margin), proposes a Qwerty keyboard.
+
+The parameters to configure this object are:
+
+- The mode in which to start the keyboard (letters, digits or special characters)
+- A boolean to indicate whether to display letters in upper or lower case
+- A boolean to indicate whether to display only letters, with no space and no shift key to sswitch between modes
+- A 32 bits mask used to invalidate (remove) some keys on the keyboard.
+
+The API to insert such an object is @ref nbgl_layoutAddKeyboard(), with @ref nbgl_layoutKbd_t structure as parameter.
+
+This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateKeyboard() function,
+used to modify the mask of an existing keyboard.
+
+@note the 32 bits mask works like this:
+- If mask[0] bit is 1, the 'q' key is invalid
+- If mask[1] bit is 1, the 'w' key is invalid
+- And so on in "qwertyuiopasdfghjklzxcvbnm" string.
+- "space" key has index 29.
+
+@subsubsection keyboard_sub_section_2 Adding/Updating confirmation button
+
+This object, on top of an already added keyboard (the order in function calls is important) consists in a
+black background and white text button.
+
+The parameters to configure this object are:
+
+- The \b text to display in button
+- A boolean to indicate whether to activate/deactivate the button (when deactivated, it is grayed-out)
+- A \b token used with the action callback when the button is touched
+- The tune ID to play when any button is pressed
+
+The API to insert such an object is @ref nbgl_layoutAddConfirmationButton().
+
+This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateConfirmationButton() function,
+used to modify the text or the state of the button (active/inactive).
+
+\warning This object is incompatible with suggestion buttons.
+
+@subsubsection keyboard_sub_section_3 Adding/Updating suggestion buttons
+
+This set of objects, on top of an already added keyboard (the order in function calls is important) consists in 0 to 4
+black background and white text buttons (2 rows x 2 columns).
+
+The parameters to configure this set are:
+
+- The number of actually used (=displayed) buttons
+- An array of 4 strings for buttons (not used can be NULL)
+- An integer for first token used for buttons, provided in onActionCallback (the next 3 integers will be used for other buttons)
+- The tune ID to play when any button is pressed
+
+The API to insert such an object is @ref nbgl_layoutAddSuggestionButtons().
+
+This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateSuggestionButtons() function,
+used to modify the texts or the number of used buttons.
+
+\warning This object is incompatible with confirmation button.
+
+@subsubsection keyboard_sub_section_4 Adding/Updating entered text
+
+This object, displayed under a potential text (or under the back key) consists in a potential number, followed by a centered text
+representing the text entered with the keyboard. A thin gray line is also displayed under the text
+
+If text is too long to be displayed, the beginning is replaced by "..."
+
+The parameters to configure this object are:
+
+- The \b text to display
+- A boolean to indicate whether to displayed a number at the beginning of the line
+- A number to display at the beginning of the line (if \b numbered is true)
+- A boolean to indicate whether to display the text in gray or not.
+
+The API to insert such an object is @ref nbgl_layoutAddEnteredText().
+
+This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateEnteredText() function,
+used to modify the text or the number preceding it.
+
+@subsubsection keyboard_example_1 Example 1
+
+\image{inline} html keyboard-example1.png "caption" height=300
+
+Here is the source code to display this first example:
+
+@code
+enum {
+  BACK_BUTTON_TOKEN = 0,
+  CONTINUE_BUTTON_TOKEN
+};
+
+static char textToEnter[48];
+static nbgl_layout_t *layout;
+static int textIndex;
+
+// function called when back or continue button is touched
+static void layoutTouchCallback(int token, uint8_t index) {
+  if (token == BACK_BUTTON_TOKEN) {
+    // go back to main screen of app
+    nbgl_layoutRelease(layout);
+    app_main();
+  }
+  else if (token == CONTINUE_BUTTON_TOKEN) {
+    // do something with entered text
+
+    // go back to main screen of app
+    nbgl_layoutRelease(layout);
+    app_main();
+  }
+}
+
+// function called when a key of keyboard is touched
+static void keyboardCallback(char touchedKey) {
+  // if not Backspace
+  if (touchedKey != BACKSPACE_KEY) {
+    int textLen = strlen(textToEnter);
+    textToEnter[textLen] = touchedKey;
+    textToEnter[textLen+1] = '\0';
+  }
+  else { // backspace
+    int textLen = strlen(textToEnter);
+    if (textLen == 0)
+      return;
+    textToEnter[textLen-1] = '\0';
+  }
+  // be sure to redraw the text
+  nbgl_layoutUpdateEnteredText(layout,textIndex,false,0,textToEnter,false);
+}
+
+void app_keyboard(void) {
+    nbgl_layoutDescription_t layoutDescription = {
+      .modal = false,
+      .onActionCallback = &layoutTouchCallback
+    };
+    nbgl_layoutKbd_t kbdInfo = {
+      .callback = keyboardCallback,
+      .keyMask = 0,         // no inactive key
+      .lettersOnly = false, // full keyboard
+      .mode = MODE_LETTERS, // start in letters mode
+      .upperCase = false    // start with lower case letters
+    };
+    nbgl_layoutCenteredInfo_t centeredInfo = {
+      .text1 = NULL,
+      .text2 = "Enter passphrase:", // to use as "header"
+      .text3 = NULL,
+      .style = LARGE_CASE_INFO,
+      .icon = NULL,
+      .offsetY = 0,
+      .onTop = true
+    };
+    // get layout
+    layout = nbgl_layoutGet(&layoutDescription);
+    // add back key
+    nbgl_layoutAddProgressIndicator(layout, 0, 0, true, BACK_BUTTON_TOKEN, TUNE_TAP_CASUAL);
+    // add header
+    nbgl_layoutAddCenteredInfo(layout, &centeredInfo);
+    // add keyboard
+    nbgl_layoutAddKeyboard(layout, &kbdInfo);
+    // add confirmation button
+    nbgl_layoutAddConfirmationButton(layout, "Continue", CONTINUE_BUTTON_TOKEN, TUNE_TAP_CASUAL);
+    // add entered text field and memorize index
+    strcpy(textToEnter,"Yellow23@");
+    textIndex = nbgl_layoutAddEnteredText(layout,
+                                          false,       // not numbered
+                                          0,           // not used
+                                          textToEnter, // text to display
+                                          false,       // not grayed-out
+                                          32);         // vertical margin from the button
+
+    // draw layout
+    nbgl_layoutDraw(layout);
+}
+@endcode
+
+@subsubsection keyboard_example_2 Example 2
+
+\image{inline} html keyboard-example2.png "caption" height=300
+
+Here is the source code to display this second example (with simulated transitions):
+
+@code
+enum {
+  BACK_BUTTON_TOKEN = 0,
+  FIRST_SUGGESTION_TOKEN
+};
+
+static char textToEnter[20];
+static char headerText[48];
+static nbgl_layout_t *layout;
+static int textIndex, suggestionIndex, keyboardIndex;
+static int wordNum;
+static char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS] = {0};
+
+// function called when back or any suggestion button is touched
+static void layoutTouchCallback(int token, uint8_t index) {
+  if (token == BACK_BUTTON_TOKEN) {
+    // go back to main screen of app
+    nbgl_layoutRelease(layout);
+    app_main();
+  }
+  else if (token >= FIRST_SUGGESTION_TOKEN) {
+    // do something with touched button
+    printf("Selected word is %s\n", buttonTexts[token - FIRST_SUGGESTION_TOKEN]);
+
+    // go back to main screen of app
+    nbgl_layoutRelease(layout);
+    app_main();
+  }
+}
+
+// function called when a key of keyboard is touched
+static void keyboardCallback(char touchedKey) {
+  // if not Backspace
+  if (touchedKey != BACKSPACE_KEY) {
+    int textLen = strlen(textToEnter);
+    textToEnter[textLen] = touchedKey;
+    textToEnter[textLen+1] = '\0';
+  }
+  else { // backspace
+    int textLen = strlen(textToEnter);
+    if (textLen == 0)
+      return;
+    textToEnter[textLen-1] = '\0';
+  }
+  if (textLen == 0) {
+    // remove any suggestion buttons because empty string
+    nbgl_layoutUpdateSuggestionButtons(backgroundLayoutContext,suggestionIndex,0,buttonTexts);
+    // clear keyboard mask
+    nbgl_layoutUpdateKeyboard(backgroundLayoutContext,keyboardIndex, 0x0);
+  }
+  else {
+    // find up to NB_MAX_SUGGESTION_BUTTONS words beginning with textToEnter
+    int nbMatchingWords = getWordsBeginningWith(textToEnter, buttonTexts, NB_MAX_SUGGESTION_BUTTONS);
+    // use them for buttons
+    nbgl_layoutUpdateSuggestionButtons(backgroundLayoutContext,suggestionIndex,nbMatchingWords,buttonTexts);
+    // get keys to mask on keyboard for possible next letters
+    uint32_t mask = getKeyboardMask(textToEnter);
+    // use it for keyboard
+    nbgl_layoutUpdateKeyboard(backgroundLayoutContext,keyboardIndex, mask);
+  }
+  // be sure to redraw the text
+  nbgl_layoutUpdateEnteredText(layout,textIndex,false,0,textToEnter,false);
+
+  // and refresh screen
+  nbgl_refresh();
+}
+
+void app_keyboard(void) {
+    nbgl_layoutDescription_t layoutDescription = {
+      .modal = false,
+      .onActionCallback = &layoutTouchCallback
+    };
+    nbgl_layoutKbd_t kbdInfo = {
+      .callback = keyboardCallback,
+      .keyMask = 0,         // no inactive key
+      .lettersOnly = true,  // use only letters
+      .mode = MODE_LETTERS, // start in letters mode
+      .upperCase = false    // start with lower case letters
+    };
+    nbgl_layoutCenteredInfo_t centeredInfo = {
+      .text1 = NULL,
+      .text2 = headerText, // to use as "header"
+      .text3 = NULL,
+      .style = LARGE_CASE_INFO,
+      .icon = NULL,
+      .offsetY = 0,
+      .onTop = true
+    };
+    // get layout
+    layout = nbgl_layoutGet(&layoutDescription);
+    // add back key
+    nbgl_layoutAddProgressIndicator(layout, 0, 0, true, BACK_BUTTON_TOKEN, TUNE_TAP_CASUAL);
+    // add header
+    wordNum = 1;
+    sprintf("Enter word no.%d from your Recovery Sheet",wordNum);
+    nbgl_layoutAddCenteredInfo(layout, &centeredInfo);
+    // add keyboard and memorize index
+    keyboardIndex = nbgl_layoutAddKeyboard(layout, &kbdInfo);
+    // add suggestion words (will be removed later) and memorize index
+    suggestionIndex = nbgl_layoutAddSuggestionButtons(backgroundLayoutContext,
+                                                      0, // no used buttons at start-up
+                                                      buttonTexts,
+                                                      FIRST_SUGGESTION_TOKEN,
+                                                      TUNE_TAP_CASUAL);
+    // add entered text field and memorize index
+    strcpy(textToEnter,"");
+    textIndex = nbgl_layoutAddEnteredText(layout,
+                                          true,        // numbered
+                                          wordNum,     // number to use
+                                          textToEnter, // text to display
+                                          false,       // not grayed-out
+                                          32);         // vertical margin from the buttons
+    // draw layout
+    nbgl_layoutDraw(layout);
+}
+@endcode
+
+@section refresh_layout Refreshing screen
 
 After having drawn graphic objects in **framebuffer**, it is necessary to transfer the content of the **framebuffer** on display.
 This operation is called a refresh.
@@ -330,7 +641,7 @@ The API to do that is @ref nbgl_refresh() (in nbgl_obj.h)
 
 It will only refresh the rectangle part of the screen having changed (with objects redrawn) since the last refresh.
 
-@subsection callbacks Control actions management
+@section callbacks Control actions management
 
 Some controls, like a touchable bar, or a choice by radio buttons, can be interacted with thanks to the Touchscreen.
 
