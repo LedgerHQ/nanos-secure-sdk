@@ -1926,7 +1926,7 @@ int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo) {
   keyboard->alignment = BOTTOM_MIDDLE;
   keyboard->alignTo = NULL;
   keyboard->borderColor = LIGHT_GRAY;
-  keyboard->callback = kbdInfo->callback;
+  keyboard->callback = PIC(kbdInfo->callback);
   keyboard->lettersOnly = kbdInfo->lettersOnly;
   keyboard->mode = kbdInfo->mode;
   keyboard->keyMask = kbdInfo->keyMask;
