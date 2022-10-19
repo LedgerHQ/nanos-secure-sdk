@@ -48,7 +48,7 @@ static nbgl_touchStatePosition_t firstTouchedPosition,lastTouchedPosition;
  * @param eventType type of touchscreen event
  */
 static void applytouchStatePosition(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
-  //LOG_DEBUG(TOUCH_LOGGER,"Apply event %s on object of type %d\n",touchTypeStrings[eventType],obj->type);
+  LOG_DEBUG(TOUCH_LOGGER,"Apply event %d on object of type %d\n",eventType,obj->type);
   if (!obj) {
     return;
   }
@@ -193,6 +193,7 @@ void nbgl_touchHandler(nbgl_touchStatePosition_t *touchStatePosition, uint32_t c
       // newly touched object
       lastPressedObj = foundObj;
       lastPressedTime = currentTime;
+      applytouchStatePosition(foundObj,TOUCH_PRESSED);
       applytouchStatePosition(foundObj,TOUCHING);
     }
   }

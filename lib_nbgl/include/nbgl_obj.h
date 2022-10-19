@@ -142,6 +142,7 @@ typedef enum {
     LONG_TOUCHED, ///< corresponding to an object touched and released at least LONG_TOUCH_DURATION ms later.
     TOUCHING, ///< corresponding to an object that is currently touched
     OUT_OF_TOUCH, ///< corresponding to an object that was touched but that has lost the focus (the finger has moved)
+    TOUCH_PRESSED, ///< corresponding to an object that was not touched and where the finger has been pressed.
     TOUCH_RELEASED, ///< corresponding to an object that was touched and where the finger has been released.
     VALUE_CHANGED ///< corresponding to a change of state of the object (indirect event)
 } nbgl_touchType_t;
