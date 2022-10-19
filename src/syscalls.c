@@ -28,6 +28,9 @@
 #include "nbgl_types.h"
 #include "os_pic.h"
 #endif
+#if defined(HAVE_VSS)
+#include "ox_vss.h"
+#endif // HAVE_VSS
 #include <string.h>
 
 unsigned int SVC_Call(unsigned int syscall_id, void *parameters);
@@ -889,6 +892,44 @@ cx_err_t cx_bls12381_aggregate(const uint8_t *in, size_t in_len, bool first, uin
   return SVC_cx_call(SYSCALL_cx_bls12381_aggregate_ID, parameters);
 }
 #endif // HAVE_BLS
+
+#if defined(HAVE_VSS)
+cx_err_t cx_vss_generate_shares(cx_vss_share_t *shares,
+                                cx_vss_commitment_t *commits,
+                                const uint8_t *point,
+                                size_t point_len,
+                                const uint8_t *seed,
+                                size_t seed_len,
+                                const uint8_t *secret,
+                                size_t secret_len,
+                                uint8_t shares_number,
+                                uint8_t threshold) {
+  unsigned int parameters[10];
+  parameters[0] = (unsigned int)shares;
+  parameters[1] = (unsigned int)commits;
+  parameters[2] = (unsigned int)point;
+  parameters[3] = (unsigned int)point_len;
+  parameters[4] = (unsigned int)seed;
+  parameters[5] = (unsigned int)seed_len;
+  parameters[6] = (unsigned int)secret;
+  parameters[7] = (unsigned int)secret_len;
+  parameters[8] = (unsigned int)shares_number;
+  parameters[9] = (unsigned int)threshold;
+  return SVC_cx_call(SYSCALL_cx_vss_generate_shares_ID, parameters);
+}
+
+cx_err_t cx_vss_combine_shares(uint8_t *secret,
+                               size_t secret_len,
+                               cx_vss_share_t *shares,
+                               uint8_t threshold) {
+  unsigned int parameters[4];
+  parameters[0] = (unsigned int)secret;
+  parameters[1] = (unsigned int)secret_len;
+  parameters[2] = (unsigned int)shares;
+  parameters[3] = (unsigned int)threshold;
+  return SVC_cx_call(SYSCALL_cx_vss_combine_shares_ID, parameters);
+}
+#endif // HAVE_VSS
 
 uint32_t cx_crc32_hw ( const void * buf, size_t len ) {
   unsigned int parameters[2];

@@ -36,5 +36,8 @@
 #include "ox_ec.h"
 #include "ox_crc.h"
 #include "ox_rng.h"
+#if defined(HAVE_VSS)
+#include "ox_vss.h"
+#endif // HAVE_VSS
 
 #endif // OX_H
