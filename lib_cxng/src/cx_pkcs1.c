@@ -275,6 +275,9 @@ cx_err_t cx_pkcs1_emsa_v1o5_encode(cx_md_t hID, uint8_t *em, size_t emLen, const
   const uint8_t *oid;
 
   oid = cx_pkcs1_get_hash_oid(hID, &oid_len);
+  if (oid == NULL) {
+    return CX_INVALID_PARAMETER;
+  }
 
   if ((3 + oid_len + mHashLen) >= emLen) {
     return CX_INVALID_PARAMETER;
@@ -303,6 +306,9 @@ bool cx_pkcs1_emsa_v1o5_verify(cx_md_t hID, uint8_t *em, size_t emLen, const uin
   const uint8_t *oid;
 
   oid = cx_pkcs1_get_hash_oid(hID, &oid_len);
+  if (oid == NULL) {
+    return false;
+  }
 
   if ((3 + oid_len + mHashLen) >= emLen) {
     return false;
@@ -518,6 +524,9 @@ cx_err_t cx_pkcs1_eme_oaep_encode(cx_md_t hID, uint8_t *em, size_t emLen, const 
 
   hLen  = cx_pkcs1_get_hash_len(hID);
   lHash = cx_pkcs1_get_hash_oeap(hID, &lHashLen);
+  if (hLen == 0 || lHash == NULL) {
+    return CX_INVALID_PARAMETER;
+  }
 
   if ((hLen + 1) >= emLen) {
     return CX_INVALID_PARAMETER;
@@ -565,6 +574,9 @@ cx_err_t cx_pkcs1_eme_oaep_decode(cx_md_t hID, uint8_t *em, size_t emLen, uint8_
 
   hLen  = cx_pkcs1_get_hash_len(hID);
   lHash = cx_pkcs1_get_hash_oeap(hID, &lHashLen);
+  if (hLen == 0 || lHash == NULL) {
+    return CX_INVALID_PARAMETER;
+  }
   if ((hLen + 1) >= emLen) {
     return CX_INVALID_PARAMETER;
   }
