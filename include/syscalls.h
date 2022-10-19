@@ -103,6 +103,11 @@
 #define SYSCALL_cx_ecpoint_x448_ID                                 0x03000060
 #endif // HAVE_X448
 
+#ifdef HAVE_VSS
+#define SYSCALL_cx_vss_generate_shares_ID                          0x0a000001
+#define SYSCALL_cx_vss_combine_shares_ID                           0x04000002
+#endif // HAVE_VSS
+
 #define SYSCALL_cx_crc32_hw_ID                                     0x02000102
 #ifdef HAVE_BLS
 #define SYSCALL_ox_bls12381_sign_ID                                0x05000103
