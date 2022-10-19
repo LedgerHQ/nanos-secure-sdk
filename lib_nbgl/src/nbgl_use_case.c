@@ -552,7 +552,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
   nbgl_screenTickerConfiguration_t ticker = {
     .tickerCallback = &tickerCallback,
     .tickerIntervale = 0, // not periodic
-    .tickerValue = 1000 // 1 second
+    .tickerValue = 3000 // 3 seconds
   };
   onQuit = quitCallback;
   if (isSuccess) {

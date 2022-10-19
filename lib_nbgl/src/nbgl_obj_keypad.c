@@ -15,6 +15,7 @@
 #include "nbgl_fonts.h"
 #include "nbgl_touch.h"
 #include "glyphs.h"
+#include "os_io_seproxyhal.h"
 
 /*********************
  *      DEFINES
@@ -30,15 +31,7 @@
  **********************/
 
 /**********************
- *  STATIC PROTOTYPES
- **********************/
-
-/**********************
  *  STATIC VARIABLES
- **********************/
-
-/**********************
- *      MACROS
  **********************/
 
 /**********************
@@ -48,27 +41,27 @@
 /**********************
  *  STATIC FUNCTIONS
  **********************/
-static uint8_t getKeypadIndex(nbgl_touchStatePosition_t *position) {
+static uint8_t getKeypadIndex(uint16_t x, uint16_t y) {
   uint8_t i=0;
   // get index of key pressed
-  if (position->y < KEYPAD_KEY_HEIGHT) {
+  if (y < KEYPAD_KEY_HEIGHT) {
     // 1st line:
-    i = position->x/KEY_WIDTH;
+    i = x/KEY_WIDTH;
   }
-  else if (position->y < (2*KEYPAD_KEY_HEIGHT)) {
+  else if (y < (2*KEYPAD_KEY_HEIGHT)) {
     // 2nd line:
-    i = 3 + position->x/KEY_WIDTH;
+    i = 3 + x/KEY_WIDTH;
   }
-  else if (position->y < (3*KEYPAD_KEY_HEIGHT)) {
+  else if (y < (3*KEYPAD_KEY_HEIGHT)) {
     // 3rd line:
-    i = 6 + position->x/KEY_WIDTH;
+    i = 6 + x/KEY_WIDTH;
   }
-  else if (position->y < (4*KEYPAD_KEY_HEIGHT)) {
+  else if (y < (4*KEYPAD_KEY_HEIGHT)) {
     // 4th line
-    if (position->x<KEY_WIDTH) {
+    if (x<KEY_WIDTH) {
       i = BACKSPACE_KEY_INDEX;
     }
-    else if (position->x<(2*KEY_WIDTH)) {
+    else if (x<(2*KEY_WIDTH)) {
       i = 0;
     }
     else {
@@ -84,36 +77,43 @@ static void keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   nbgl_keypad_t *keypad = (nbgl_keypad_t *)obj;
 
   LOG_DEBUG(MISC_LOGGER,"keypadTouchCallback(): eventType = %d\n",eventType);
-  if (eventType != TOUCHED) {
+  if ((eventType != TOUCHED) && (eventType != TOUCH_PRESSED)) {
     return;
   }
   if (nbgl_touchGetTouchedPosition(obj,&firstPosition,&lastPosition) == false) {
     return;
   }
-  // modify positions with keypad position
-  firstPosition->x -= obj->x0;
-  firstPosition->y -= obj->y0;
-  lastPosition->x -= obj->x0;
-  lastPosition->y -= obj->y0;
 
-  firstIndex = getKeypadIndex(firstPosition);
+  // use positions relative to keypad position
+  firstIndex = getKeypadIndex(firstPosition->x - obj->x0, firstPosition->y - obj->y0);
   if (firstIndex > VALIDATE_KEY_INDEX)
     return;
-  lastIndex = getKeypadIndex(lastPosition);
+  lastIndex = getKeypadIndex(lastPosition->x - obj->x0, lastPosition->y - obj->y0);
   if (lastIndex > VALIDATE_KEY_INDEX)
     return;
-  // if position of finger has moved durinng press to another "key", drop it
+
+  // if position of finger has moved during press to another "key", drop it
   if (lastIndex != firstIndex)
     return;
 
   if ((firstIndex<10)&&(keypad->enableDigits)) {
-    keypad->callback(0x30+firstIndex+1);
+    // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
+    if (eventType == TOUCHED)
+      keypad->callback(0x30+firstIndex+1);
+    else
+      io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
   }
   if ((firstIndex == BACKSPACE_KEY_INDEX)&&(keypad->enableBackspace)) { // backspace
-    keypad->callback(BACKSPACE_KEY);
+    // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
+    if (eventType == TOUCHED)
+      keypad->callback(BACKSPACE_KEY);
+    else
+      io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
   }
   else if ((firstIndex == VALIDATE_KEY_INDEX)&&(keypad->enableValidate)) { // validate
-    keypad->callback(VALIDATE_KEY);
+    // only call callback if event is TOUCHED
+    if (eventType == TOUCHED)
+      keypad->callback(VALIDATE_KEY);
   }
 }
 
@@ -257,7 +257,7 @@ static void keypadDraw(nbgl_keypad_t *keypad) {
  * @return the keypad keypad object
  */
 void nbgl_objDrawKeypad(nbgl_keypad_t *kpd) {
-  kpd->touchMask = (1 << TOUCHED);
+  kpd->touchMask = (1 << TOUCHED) | (1 << TOUCH_PRESSED);
   kpd->touchCallback = (nbgl_touchCallback_t)&keypadTouchCallback;
 
   keypadDraw(kpd);
