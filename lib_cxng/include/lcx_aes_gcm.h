@@ -30,7 +30,7 @@
  * @version 1.0
  **/
 
-#if defined(HAVE_AES) && (HAVE_AES_GCM)
+#if defined(HAVE_AES) && defined(HAVE_AES_GCM)
 
 #ifndef LCX_AES_GCM_H
 #define LCX_AES_GCM_H
