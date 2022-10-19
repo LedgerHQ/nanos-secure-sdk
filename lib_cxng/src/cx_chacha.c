@@ -166,6 +166,7 @@ cx_err_t cx_chacha_cipher(uint32_t nrounds,
 #include <cmocka.h>
 
 static void test_chacha_round(void **state) {
+  (void) state;
 
   uint32_t state_array[16] = {0x61707865, 0x3320646e, 0x79622d32, 0x6b206574,
                               0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c,
@@ -190,7 +191,7 @@ static void test_chacha_round(void **state) {
   assert_memory_equal(state_array, expected_array, sizeof(state_array));
 }
 
-int main() {
+int main(void) {
   const struct CMUnitTest tests[] = {
     cmocka_unit_test(test_chacha_round)
   };
