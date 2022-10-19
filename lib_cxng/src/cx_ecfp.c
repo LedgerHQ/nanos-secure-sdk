@@ -194,7 +194,14 @@ cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t             curve,
   if (CX_CURVE_RANGE(curve, WEIERSTRASS)) {
     CX_CHECK(cx_ecpoint_alloc(&W, private_key->curve));
     CX_CHECK(cx_ecdomain_generator_bn(curve, &W));
-    CX_CHECK(cx_ecpoint_rnd_fixed_scalarmul(&W, private_key->d, private_key->d_len));
+    // 'cx_ecpoint_rnd_fixed_scalarmul' doesn't support BLS12-381 so far
+    // use cx_ecpoint_rnd_scalarmul for now
+    if (CX_CURVE_BLS12_381_G1 == private_key->curve) {
+      CX_CHECK(cx_ecpoint_rnd_scalarmul(&W, private_key->d, private_key->d_len));
+    }
+    else {
+      CX_CHECK(cx_ecpoint_rnd_fixed_scalarmul(&W, private_key->d, private_key->d_len));
+    }
     public_key->curve = curve;
     public_key->W_len = 1 + 2 * size;
     public_key->W[0]  = 0x04;
