@@ -100,15 +100,19 @@ static void keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
     if (eventType == TOUCHED)
       keypad->callback(0x30+firstIndex+1);
+#ifdef HAVE_PIEZO_SOUND
     else
       io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
+#endif // HAVE_PIEZO_SOUND
   }
   if ((firstIndex == BACKSPACE_KEY_INDEX)&&(keypad->enableBackspace)) { // backspace
     // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
     if (eventType == TOUCHED)
       keypad->callback(BACKSPACE_KEY);
+#ifdef HAVE_PIEZO_SOUND
     else
       io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
+#endif // HAVE_PIEZO_SOUND
   }
   else if ((firstIndex == VALIDATE_KEY_INDEX)&&(keypad->enableValidate)) { // validate
     // only call callback if event is TOUCHED

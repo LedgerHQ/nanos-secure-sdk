@@ -184,9 +184,11 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   }
   LOG_DEBUG(LAYOUT_LOGGER,"touchCallback(): layout->callback = %p\n",layout->callback);
   if (layout->callback != NULL) {
+#ifdef HAVE_PIEZO_SOUND
     if (layoutObj->tuneId<NBGL_NO_TUNE) {
       io_seproxyhal_play_tune(layoutObj->tuneId);
     }
+#endif // HAVE_PIEZO_SOUND
     layout->callback(layoutObj->token,layoutObj->index);
   }
 }
@@ -296,9 +298,11 @@ static void radioTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   // call callback after redraw to avoid asynchronicity
   if (foundRadio != 0xFF) {
     if (layout->callback != NULL) {
+#ifdef HAVE_PIEZO_SOUND
       if (layout->callbackObjPool[foundRadio].tuneId<NBGL_NO_TUNE) {
         io_seproxyhal_play_tune(layout->callbackObjPool[foundRadio].tuneId);
       }
+#endif // HAVE_PIEZO_SOUND
       layout->callback(layout->callbackObjPool[foundRadio].token,foundRadioIndex);
     }
   }

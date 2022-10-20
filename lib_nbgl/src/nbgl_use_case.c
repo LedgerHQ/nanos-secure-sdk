@@ -556,8 +556,10 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
   };
   onQuit = quitCallback;
   if (isSuccess) {
+#ifdef HAVE_PIEZO_SOUND
     // Play success tune
     io_seproxyhal_play_tune(TUNE_SUCCESS);
+#endif // HAVE_PIEZO_SOUND
 
     pageContext = nbgl_pageDrawLedgerInfo(&pageCallback, &ticker,message);
   }
@@ -639,8 +641,10 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle,
   onQuit = rejectCallback;
   onContinue = continueCallback;
 
+#ifdef HAVE_PIEZO_SOUND
   // Play notification sound
   io_seproxyhal_play_tune(TUNE_LOOK_AT_ME);
+#endif // HAVE_PIEZO_SOUND
 
   pageContext = nbgl_pageDrawInfo(&pageCallback, NULL, &info);
   nbgl_refresh();
