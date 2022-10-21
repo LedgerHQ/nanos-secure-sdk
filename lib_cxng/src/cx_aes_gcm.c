@@ -235,7 +235,7 @@ cx_err_t cx_aes_gcm_update_aad(cx_aes_gcm_context_t *ctx, const uint8_t *aad, si
     return error;
 }
 
-cx_err_t cx_aes_gcm_update(cx_aes_gcm_context_t *ctx, uint8_t *in, uint8_t *out, size_t len) {
+cx_err_t cx_aes_gcm_update(cx_aes_gcm_context_t *ctx, const uint8_t *in, uint8_t *out, size_t len) {
   cx_err_t error = CX_INVALID_PARAMETER;
   size_t   i, block_len;
   uint8_t  tmp[AES_BLOCK_BYTES];
