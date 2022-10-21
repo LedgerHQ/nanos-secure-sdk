@@ -124,7 +124,7 @@ void io_set_timeout(unsigned int timeout);
 #ifdef HAVE_NFC
 void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length);
 void io_seproxyhal_nfc_init_async(uint8_t *text, uint16_t text_length);
-
+void io_seproxyhal_nfc_off(void);
 #define NFC_init(text, text_length) io_seproxyhal_nfc_init(text, text_length)
 #endif
 

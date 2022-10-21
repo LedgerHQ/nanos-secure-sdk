@@ -150,6 +150,7 @@
 #define SEPROXYHAL_TAG_NFC_RAPDU                   0x4A
 #define SEPROXYHAL_TAG_NFC_INIT_ASYNC              0x34
 #define SEPROXYHAL_TAG_NFC_INIT                    0x35
+#define SEPROXYHAL_TAG_NFC_OFF                     0x36
 #endif
 
 #define SEPROXYHAL_TAG_DEVICE_OFF                  0x4B
