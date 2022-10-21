@@ -537,6 +537,14 @@ void io_seproxyhal_nfc_init_async(uint8_t *text, uint16_t text_length) {
     io_seproxyhal_spi_send(text, MIN(text_length, NFC_TEXT_MAX_LEN));
   }
 }
+
+void io_seproxyhal_nfc_off(void) {
+  uint8_t tlv[3];
+  tlv[0] = SEPROXYHAL_TAG_NFC_OFF;
+  tlv[1] = 0;
+  tlv[2] = 0;
+  io_seproxyhal_spi_send(tlv, 3);
+}
 #endif
 
 #ifdef HAVE_BAGL
