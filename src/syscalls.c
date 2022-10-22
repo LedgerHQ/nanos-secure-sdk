@@ -1125,7 +1125,7 @@ unsigned int os_endorsement_key2_derive_sign_data ( unsigned char * src, unsigne
   return (unsigned int) SVC_Call(SYSCALL_os_endorsement_key2_derive_sign_data_ID, parameters);
 }
 
-void os_perso_set_pin ( unsigned int identity, unsigned char * pin, unsigned int length, bool update_crc ) {
+void os_perso_set_pin ( unsigned int identity, const unsigned char * pin, unsigned int length, bool update_crc ) {
   unsigned int parameters[4];
   parameters[0] = (unsigned int)identity;
   parameters[1] = (unsigned int)pin;

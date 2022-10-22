@@ -13,7 +13,7 @@
 #define DEFAULT_PIN_RETRIES 3
 
 /* set_pin can update the pin if the perso is onboarded (tearing leads to perso wipe though) */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_pin(unsigned int identity, unsigned char* pin PLENGTH(length), unsigned int length, bool update_crc);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_pin(unsigned int identity, const unsigned char* pin PLENGTH(length), unsigned int length, bool update_crc);
 // set the currently unlocked identity pin. (change pin feature)
     SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_current_identity_pin(unsigned char* pin PLENGTH(length), unsigned int length);
 
