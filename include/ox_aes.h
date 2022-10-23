@@ -66,7 +66,8 @@
 #include "decorators.h"
 
 /** Block size of the AES in bytes. */
-#define CX_AES_BLOCK_SIZE 16
+#define CX_AES_BLOCK_SIZE  16
+#define CX_AES_128_KEY_LEN 16
 
 /**
  * @brief   AES key container.
