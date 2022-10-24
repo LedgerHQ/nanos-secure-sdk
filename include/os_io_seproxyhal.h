@@ -121,11 +121,17 @@ void io_seproxyhal_send_nbgl_serialized(nbgl_serialized_event_type_e event, nbgl
 // having an APDU handling timeout is useful to solve multiple media interactions.
 void io_set_timeout(unsigned int timeout);
 
+#ifdef HAVE_NFC
+void io_seproxyhal_nfc_set_tag(uint8_t *text, uint16_t text_length);
+#endif
 
 typedef enum {
   APDU_IDLE,
   APDU_BLE,
   APDU_BLE_WAIT_NOTIFY,
+#ifdef HAVE_NFC
+  APDU_NFC,
+#endif
   APDU_NFC_M24SR,
   APDU_NFC_M24SR_SELECT,
   APDU_NFC_M24SR_FIRST,
