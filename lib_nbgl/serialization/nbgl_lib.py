@@ -100,8 +100,7 @@ class NbglFontId(IntEnum):
 
 class NbglStyle(IntEnum):
     NO_STYLE = 0,
-    LEDGER_BORDER = 1,
-    HYPERTEXT = 2
+    LEDGER_BORDER = 1
 
 
 def parse_str(data: bytes) -> Tuple[str, int]:

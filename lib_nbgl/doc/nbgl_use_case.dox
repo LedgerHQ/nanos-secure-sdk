@@ -495,6 +495,7 @@ The API to initiate the display of the set of pages is @ref nbgl_useCaseViewDeta
 
 - the tag name (displayed in gray)
 - the value full value string, that will automatically be split in multiple pages
+- a boolean to indicate whether to wrap \b value text on ' ' or not
 
 In every page except the last one, the last 3 characters of the last line of value are replaced by "...".
 
@@ -537,8 +538,8 @@ static void reviewChoice(bool confirm) {
 // called when "more" button is touched
 static void onButton(int token, uint8_t index) {
   if (token == MORE_DETAILS_TOKEN) {
-    // display details review
-    nbgl_useCaseViewDetails(pair[0].item,pairs[0].value);
+    // display details review (no wrapping)
+    nbgl_useCaseViewDetails(pair[0].item,pairs[0].value,false);
   }
 }
 
