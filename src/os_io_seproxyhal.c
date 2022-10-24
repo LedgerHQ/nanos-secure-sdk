@@ -508,8 +508,6 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 #endif // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
-// Send NFC init command over seph, with string to program into NFC tag as parameter
-// If NULL is passed NVM setting content is used instead
 void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length) {
   uint8_t tlv[3];
   tlv[0] = SEPROXYHAL_TAG_NFC_INIT;
@@ -529,9 +527,6 @@ void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length) {
   }  
 }
 
-// Send NFC async init command over seph, with string to program into NFC tag as parameter.
-// To be used in dashboard_apdu_nfc_tag_update to allow reseting tag content after APDU
-// reply was sent, to avoid resetting NFC component when NFC is actively used
 void io_seproxyhal_nfc_init_async(uint8_t *text, uint16_t text_length) {
   uint8_t tlv[3];
   tlv[0] = SEPROXYHAL_TAG_NFC_INIT_ASYNC;
