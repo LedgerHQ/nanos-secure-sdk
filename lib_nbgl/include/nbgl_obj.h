@@ -110,8 +110,7 @@ typedef enum  {
  */
 typedef enum  {
     NO_STYLE, ///< no border
-    LEDGER_BORDER, ///< Ledger style border, only for @ref TEXT_AREA
-    HYPERTEXT ///< Underlined
+    LEDGER_BORDER ///< Ledger style border, only for @ref TEXT_AREA
 } nbgl_style_t;
 
 /**
@@ -362,6 +361,7 @@ typedef struct PACKED__ nbgl_text_area_s {
     nbgl_font_id_e fontId; ///< id of the font to use
     bool localized; ///< if set to true, use textId instead of text
     bool autoHideLongLine; ///< if set to true, replace beginning of line by ... to keep it single line
+    bool wrapping; ///< if set to true, break lines on ' ' when possible
     uint8_t nbMaxLines; ///< if >0, replace end (3 last chars) of line (nbMaxLines-1) by "..." and stop display here
     char *text; ///< ASCII text to draw (NULL terminated). Can be NULL.
 #if defined(HAVE_LANGUAGE_PACK)
@@ -382,7 +382,7 @@ typedef struct PACKED__ nbgl_spinner_s {
 
 /**
  * @brief prototype of function to be called when a valid key is pressed on keyboard
- * Backspace is equal to 0x8 (ASCII code), Validate (for Keypad) is equal to 15 ('\r')
+ * Backspace is equal to 0x8 (ASCII code), Validate (for Keypad) is equal to 15 ('\\r')
  * @param touchedKey char typed on keyboard
  */
 typedef void (*keyboardCallback_t)(char touchedKey);

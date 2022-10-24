@@ -341,10 +341,10 @@ uint16_t nbgl_getTextLength(const char* text) {
 }
 
 /**
- * @brief compute the len and width of the given text fitting in the maxWidth
+ * @brief compute the max width of the longest line of the given text fitting in the maxWidth
  *
  * @param fontId font ID
- * @param text input UTF-8 string, possibly multi-line (but only first line is handled)
+ * @param text input UTF-8 string, possibly multi-line
  * @param maxWidth maximum width in bytes, if text is greater than that the parsing is escaped
  * @param len (output) consumed bytes in text fitting in maxWidth
  * @param width (output) set to maximum width in pixels in text fitting in maxWidth
@@ -352,11 +352,12 @@ uint16_t nbgl_getTextLength(const char* text) {
  * @return true if maxWidth is reached, false otherwise
  *
  */
-bool nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t *len, uint16_t *width) {
+void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t *len, uint16_t *width, bool wrapping) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
   nbgl_font_unicode_character_t *unicodeCharacters;
   uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
+  uint32_t lenAtLastSpace = 0, widthAtLastSpace = 0;
 
   nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
 
@@ -390,17 +391,26 @@ bool nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
       if ((unicode < font->first_char) || (unicode > font->last_char)) {
         continue;
       }
+      // memorize cursors at last found space
+      if ((wrapping == true) && (unicode == ' ')) {
+        lenAtLastSpace = *len;
+        widthAtLastSpace = *width;
+      }
       character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
       char_width = character->char_width;
     }
     if ((*width+char_width) > maxWidth) {
-      return true;
+      if ((wrapping == true)&&(widthAtLastSpace>0)) {
+        *len = lenAtLastSpace+1;
+        *width = widthAtLastSpace;
+      }
+      return;
     }
     *len += curTextLen-textLen;
     *width = *width+char_width;
   }
-  return false;
 }
+
 
 /**
  * @brief compute the len of the given text (in bytes) fitting in the given maximum nb lines, with the given maximum width
@@ -502,7 +512,7 @@ bool nbgl_getTextMaxLenAndWidthFromEnd(nbgl_font_id_e fontId, const char* text, 
     cur_char = text[textLen];
     // if \n, exit
     if (cur_char == '\n') {
-    *len = *len +1;
+      *len = *len +1;
       continue;
     }
 
@@ -530,13 +540,16 @@ bool nbgl_getTextMaxLenAndWidthFromEnd(nbgl_font_id_e fontId, const char* text, 
  * @param maxWidth maximum width in which the text must fit
  * @return the number of lines in the given text
  */
-uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth) {
+uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, bool wrapping) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
   uint16_t width=0;
   uint16_t nbLines=1;
   nbgl_font_unicode_character_t *unicodeCharacters=NULL;
   uint8_t *unicodeBitmap;
   uint16_t textLen = strlen(text);
+  char *lastSpace = NULL;
+  uint32_t lenAtLastSpace = 0;
+  char *prevText = NULL;
 
   nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
   // end loop when a '\0' is uncountered
@@ -546,12 +559,15 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
     uint32_t unicode;
     bool is_unicode;
 
+    // memorize the last char
+    prevText = (char *)text;
     unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
 
     // if \n, increment the number of lines
     if (unicode == '\n') {
       nbLines++;
       width = 0;
+      lastSpace = NULL;
       continue;
     }
 
@@ -568,16 +584,30 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
       if ((unicode < font->first_char) || (unicode > font->last_char)) {
         continue;
       }
+      // memorize cursors at last found space
+      if ((wrapping == true) && (unicode == ' ')) {
+        lastSpace = prevText;
+        lenAtLastSpace = textLen+1;
+      }
       character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
       char_width = character->char_width;
     }
     // if about to reach max len, increment the number of lines
     if ((width+char_width)>maxWidth) {
+      if ((wrapping == true) && (lastSpace != NULL)) {
+        text = lastSpace+1;
+        lastSpace = NULL;
+        textLen = lenAtLastSpace;
+        width = 0;
+      }
+      else {
+        width = char_width;
+      }
       nbLines++;
-      width = char_width;
-      continue;
     }
-    width += char_width;
+    else {
+      width += char_width;
+    }
   }
   return nbLines;
 }
@@ -592,7 +622,7 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
  */
 uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint16_t maxWidth) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  return font->char_height+((nbgl_getTextNbLinesInWidth(fontId,text,maxWidth)-1)*font->line_height);
+  return font->char_height+((nbgl_getTextNbLinesInWidth(fontId,text,maxWidth,false)-1)*font->line_height);
 }
 
 /**

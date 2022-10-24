@@ -1418,7 +1418,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     valueTextArea->width = usableWidth;
     // handle the nbMaxLinesForValue parameter, used to automatically keep only
     // nbMaxLinesForValue lines
-    uint16_t nbLines = nbgl_getTextNbLinesInWidth(valueTextArea->fontId,valueTextArea->text,usableWidth);
+    uint16_t nbLines = nbgl_getTextNbLinesInWidth(valueTextArea->fontId,valueTextArea->text,usableWidth,list->wrapping);
     // use this nbMaxLinesForValue parameter only if >0
     if ((list->nbMaxLinesForValue > 0) && (nbLines > list->nbMaxLinesForValue)) {
       nbLines = list->nbMaxLinesForValue;
@@ -1431,6 +1431,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     valueTextArea->alignmentMarginX = 0;
     valueTextArea->alignmentMarginY = 12;
     valueTextArea->alignTo = (nbgl_obj_t*)itemTextArea;
+    valueTextArea->wrapping = list->wrapping;
     container->children[container->nbChildren] = (nbgl_obj_t*)valueTextArea;
     container->nbChildren++;
 
@@ -2455,7 +2456,8 @@ int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t 
   }
   else {
     image = (nbgl_image_t*)panel->children[nbActive-1];
-    // if the last "active" is already active, it means that we are decreasing the numer of active
+    // if the last "active" is already active, it means that we are decreasing the number of active
+    // otherwise we are increasing it
     if (image->buffer == &C_round_24px) {
       // all digits are already active
       if (nbActive == panel->nbChildren) {

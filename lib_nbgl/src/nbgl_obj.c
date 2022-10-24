@@ -597,7 +597,6 @@ static void draw_pageIndicator(nbgl_page_indicator_t* obj, nbgl_obj_t *prevObj, 
 static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
   nbgl_area_t rectArea;
   uint16_t textWidth,fontHeight,lineHeight, textHeight;
-  uint16_t textX0 = 0, textY0 = 0;
   uint8_t line,nbLines;
   const char *text;
 
@@ -620,7 +619,7 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
     return;
   }
 
-  LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), x0 = %d, y0 = %d, width = %d, height = %d, text = %s\n", obj->x0, obj->y0, obj->width, obj->height, text);
+  LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), wrapping = %d, x0 = %d, y0 = %d, width = %d, height = %d, text = %s\n", obj->wrapping, obj->x0, obj->y0, obj->width, obj->height, text);
 
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
@@ -663,8 +662,34 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
 
   fontHeight = nbgl_getFontHeight(obj->fontId);
   lineHeight = nbgl_getFontLineHeight(obj->fontId);
+  // special case of autoHideLongLine, when the text is too long for a line, draw '...' at the beginning
+  if (obj->autoHideLongLine == true) {
+    textWidth = nbgl_getSingleLineTextWidth(obj->fontId,text);
+    if (textWidth > obj->width) {
+      uint16_t lineWidth,lineLen;
+      uint16_t dotsWidth;
 
-  nbLines = nbgl_getTextNbLines(text);
+      // at first draw "..." at beginning
+      dotsWidth = nbgl_getTextWidth(obj->fontId,"...");
+      rectArea.x0 = obj->x0;
+      rectArea.y0 = obj->y0 + (obj->height - fontHeight)/2;
+      rectArea.width = dotsWidth;
+      nbgl_drawText(&rectArea, "...", 3, obj->fontId, obj->textColor);
+      // then draw the end of text
+      nbgl_getTextMaxLenAndWidthFromEnd(obj->fontId,text,obj->width-dotsWidth,&lineLen,&lineWidth);
+      rectArea.x0 += dotsWidth;
+      rectArea.width = lineWidth;
+      nbgl_drawText(&rectArea, &text[nbgl_getTextLength(text)-lineLen], lineLen, obj->fontId, obj->textColor);
+      return;
+    }
+  }
+
+  // get nb lines in the given width (depending of wrapping)
+  nbLines = nbgl_getTextNbLinesInWidth(obj->fontId,text,obj->width,obj->wrapping);
+  // saturate nb lines if nbMaxLines is greater than 0
+  if ((obj->nbMaxLines > 0) && (obj->nbMaxLines < nbLines)) {
+    nbLines = obj->nbMaxLines;
+  }
 
   textHeight = (nbLines-1)*lineHeight+fontHeight;
 
@@ -672,129 +697,41 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
   rectArea.height = fontHeight;
   // draw each line
   for (line=0;line<nbLines;line++) {
-    textWidth = nbgl_getSingleLineTextWidth(obj->fontId,text);
+    uint16_t lineWidth,lineLen;
 
-    // handle case when line is too long for area by breaking it to the widest possible
-    if (textWidth > obj->width) {
-      if (obj->autoHideLongLine == false) {
-        uint16_t fullLen = nbgl_getTextLength(text);
-        uint8_t nbChunks = 0;
-        char *tmpText = (char *)text;
-        LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), line %d, textWidth = %d, fullLen = %d\n", line, textWidth,fullLen);
-        // first round to get the number of chunks of the broken line
-        while (fullLen>0) {
-          uint16_t lineWidth,lineLen;
-          nbgl_getTextMaxLenAndWidth(obj->fontId,tmpText,obj->width,&lineLen,&lineWidth);
-          if (lineLen == 0)
-            break;
-          tmpText+=lineLen;
-          fullLen-=lineLen;
-          nbChunks++;
-        }
-        if ((obj->nbMaxLines > 0) && (nbChunks > obj->nbMaxLines)) {
-          nbChunks = obj->nbMaxLines;
-        }
-        LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), line %d, textWidth = %d, nbChunks = %d\n", line, textWidth,nbChunks);
-        // then draw each chunk
-        tmpText = (char *)text;
-        uint8_t chunk = 0;
-        textHeight = (nbChunks-1)*lineHeight+fontHeight;
-        while (chunk < nbChunks) {
-          uint16_t lineWidth,lineLen;
-          nbgl_getTextMaxLenAndWidth(obj->fontId,tmpText,obj->width,&lineLen,&lineWidth);
-          if (obj->textAlignment == MID_LEFT) {
-            textX0 = obj->x0;
-            textY0 = obj->y0 + (obj->height - textHeight)/2 + chunk*lineHeight;
-          }
-          else if (obj->textAlignment == CENTER) {
-            textX0 = obj->x0 + (obj->width - lineWidth)/2;
-            textY0 = obj->y0 + (obj->height - textHeight)/2 + chunk*lineHeight;
-          }
-          else if (obj->textAlignment == MID_RIGHT) {
-            textX0 = obj->x0 + obj->width - lineWidth;
-            textY0 = obj->y0 + (obj->height - textHeight)/2 + chunk*lineHeight;
-          }
-          else {
-            LOG_FATAL(OBJ_LOGGER,"Forbidden obj->textAlignment = %d\n",obj->textAlignment);
-          }
-          rectArea.x0 = textX0;
-          rectArea.y0 = textY0;
-          rectArea.width = lineWidth;
-
-          if ((obj->nbMaxLines == 0) || (chunk < (obj->nbMaxLines-1))) {
-            nbgl_drawText(&rectArea, tmpText, lineLen, obj->fontId, obj->textColor);
-          }
-          else {
-            // for last chunk, if nbMaxLines is used, replace the 3 last chars by "..."
-            nbgl_getTextMaxLenAndWidth(obj->fontId,tmpText,obj->width,&lineLen,&lineWidth);
-            // draw line except 3 last chars
-            nbgl_drawText(&rectArea, tmpText, lineLen-3, obj->fontId, obj->textColor);
-            // draw "..." after the other chars
-            rectArea.x0 += nbgl_getSingleLineTextWidthInLen(obj->fontId, tmpText, lineLen-3);
-            rectArea.width = nbgl_getSingleLineTextWidth(obj->fontId,"...");
-            nbgl_drawText(&rectArea, "...", 3, obj->fontId, obj->textColor);
-          }
-
-          tmpText+=lineLen;
-          chunk++;
-        }
-      }
-      else {
-        uint16_t dotsWidth;
-        uint16_t lineWidth,lineLen;
-        // at first draw "..." at beginning
-        dotsWidth = nbgl_getTextWidth(obj->fontId,"...");
-        textX0 = obj->x0;
-        textY0 = obj->y0 + (obj->height - fontHeight)/2 ;
-        rectArea.x0 = textX0;
-        rectArea.y0 = textY0;
-        rectArea.width = dotsWidth;
-        nbgl_drawText(&rectArea, "...", 3, obj->fontId, obj->textColor);
-        // then draw the end of text
-        nbgl_getTextMaxLenAndWidthFromEnd(obj->fontId,text,obj->width-dotsWidth,&lineLen,&lineWidth);
-        rectArea.x0 += dotsWidth;
-        rectArea.width = lineWidth;
-        nbgl_drawText(&rectArea, &text[nbgl_getTextLength(text)-lineLen], lineLen, obj->fontId, obj->textColor);
-      }
+    nbgl_getTextMaxLenAndWidth(obj->fontId,text,obj->width,&lineLen,&lineWidth,obj->wrapping);
+    if (obj->textAlignment == MID_LEFT) {
+      rectArea.x0 = obj->x0;
+    }
+    else if (obj->textAlignment == CENTER) {
+      rectArea.x0 = obj->x0 + (obj->width - lineWidth)/2;
+    }
+    else if (obj->textAlignment == MID_RIGHT) {
+      rectArea.x0 = obj->x0 + obj->width - lineWidth;
     }
     else {
-      if (obj->textAlignment == MID_LEFT) {
-        textX0 = obj->x0;
-        textY0 = obj->y0 + (obj->height - textHeight)/2 + line*lineHeight;
-      }
-      else if (obj->textAlignment == CENTER) {
-        textX0 = obj->x0 + (obj->width - textWidth)/2;
-        textY0 = obj->y0 + (obj->height - textHeight)/2 + line*lineHeight;
-      }
-      else if (obj->textAlignment == MID_RIGHT) {
-        textX0 = obj->x0 + obj->width - textWidth;
-        textY0 = obj->y0 + (obj->height - textHeight)/2 + line*lineHeight;
-      }
-      else {
-        LOG_FATAL(OBJ_LOGGER,"Forbidden obj->textAlignment = %d\n",obj->textAlignment);
-      }
-      rectArea.x0 = textX0;
-      rectArea.y0 = textY0;
-      rectArea.width = textWidth;
+      LOG_FATAL(OBJ_LOGGER,"Forbidden obj->textAlignment = %d\n",obj->textAlignment);
+    }
+    rectArea.y0 = obj->y0 + (obj->height - textHeight)/2 + line*lineHeight;
+    rectArea.width = lineWidth;
 
-      nbgl_drawText(&rectArea, text, nbgl_getTextLength(text), obj->fontId, obj->textColor);
-      if (obj->style == HYPERTEXT) {
-        // add an underline, only for single line text
-        rectArea.x0 = textX0;
-        rectArea.y0 = textY0+fontHeight;
-        rectArea.width = textWidth;
-        rectArea.height = 4;
-        rectArea.backgroundColor = obj->backgroundColor;
-        nbgl_frontDrawHorizontalLine(&rectArea,0x1, obj->textColor); //bottom right
-      }
+    LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), %s line %d, lineLen %d lineWidth = %d, obj->height = %d, textHeight = %d, obj->nbMaxLines = %d\n",text,  line,lineLen, lineWidth,obj->height, textHeight, obj->nbMaxLines);
+    if ((obj->nbMaxLines == 0) || (line < (obj->nbMaxLines-1))) {
+      nbgl_drawText(&rectArea, text, lineLen, obj->fontId, obj->textColor);
     }
-    // move text to the next line or end of string
-    while ((*text != '\0') && (*text != '\n')) {
-      text++;
-    }
-    if (*text == '\0')
-      break;
     else {
+      // for last chunk, if nbMaxLines is used, replace the 3 last chars by "..."
+      // draw line except 3 last chars
+      nbgl_drawText(&rectArea, text, lineLen-3, obj->fontId, obj->textColor);
+      // draw "..." after the other chars
+      rectArea.x0 += nbgl_getSingleLineTextWidthInLen(obj->fontId, text, lineLen-3);
+      rectArea.width = nbgl_getSingleLineTextWidth(obj->fontId,"...");
+      nbgl_drawText(&rectArea, "...", 3, obj->fontId, obj->textColor);
+      return;
+    }
+    text += lineLen;
+    /* skip trailing \n */
+    if (*text == '\n') {
       text++;
     }
   }

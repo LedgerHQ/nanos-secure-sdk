@@ -70,7 +70,7 @@ void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t 
                                    nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback);
 void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
                               char *rejectText, nbgl_choiceCallback_t callback);
-void nbgl_useCaseViewDetails(char *tag, char *value);
+void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping);
 void nbgl_useCaseAddressConfirmation(char *address, nbgl_choiceCallback_t callback);
 void nbgl_useCaseSpinner(char* text);
 

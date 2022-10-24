@@ -140,6 +140,7 @@ typedef struct {
     uint8_t nbPairs; ///< number of pairs in pairs array
     uint8_t nbMaxLinesForValue; ///< if > 0, set the max number of lines for value field. And the last line is ended with "..." instead of the 3 last chars
     bool smallCaseForValue; ///< if set to true, a 24px font is used for value text, otherwise a 32px font is used
+    bool wrapping; ///< if set to true, value text will be wrapped on ' ' to avoid cutting words
 } nbgl_layoutTagValueList_t;
 
 /**

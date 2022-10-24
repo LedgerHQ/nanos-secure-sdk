@@ -20,7 +20,7 @@
 // maximum number of lines for value field in details pages
 #define NB_MAX_LINES_IN_DETAILS  12
 // maximum number of lines for value field in review pages
-#define NB_MAX_LINES_IN_REVIEW    6
+#define NB_MAX_LINES_IN_REVIEW    9
 
 // height available for tag/value pairs display
 #define TAG_VALUE_AREA_HEIGHT   400
@@ -45,6 +45,7 @@ typedef struct DetailsContext_s {
   uint8_t nbPages;
   uint8_t currentPage;
   int8_t previousPage;
+  bool wrapping;
   char *tag;
   char *value;
   char *previousPageStart;
@@ -123,8 +124,10 @@ static void pageModalCallback(int token, uint8_t index) {
 
 // generic callback for all pages except modal
 static void pageCallback(int token, uint8_t index) {
+  if (token < FIRST_USER_TOKEN) {
   nbgl_pageRelease(pageContext);
   pageContext = NULL;
+  }
   if (token == QUIT_TOKEN) {
     if (onQuit != NULL)
       onQuit();
@@ -147,7 +150,8 @@ static void pageCallback(int token, uint8_t index) {
   }
   else if (token == DETAILS_BUTTON_TOKEN) {
     nbgl_useCaseViewDetails(staticReviewContext.tagValueList->pairs[staticReviewContext.currentPairIndex].item,
-                            staticReviewContext.tagValueList->pairs[staticReviewContext.currentPairIndex].value);
+                            staticReviewContext.tagValueList->pairs[staticReviewContext.currentPairIndex].value,
+                            staticReviewContext.tagValueList->wrapping);
   }
   else if (token == NAV_TOKEN) {
     if (index == EXIT_PAGE) {
@@ -229,6 +233,7 @@ static void displayReviewPage(uint8_t page) {
 
   if (content.type == TAG_VALUE_DETAILS) {
     content.tagValueList.smallCaseForValue = false;
+    // the maximum displayable number of lines for value is NB_MAX_LINES_IN_REVIEW (without More button)
     content.tagValueList.nbMaxLinesForValue = NB_MAX_LINES_IN_REVIEW;
   }
 
@@ -326,7 +331,8 @@ static void displayDetailsPage(uint8_t detailsPage) {
     .type = TAG_VALUE_LIST,
     .tagValueList.nbPairs = 1,
     .tagValueList.pairs = &currentPair,
-    .tagValueList.smallCaseForValue = true
+    .tagValueList.smallCaseForValue = true,
+    .tagValueList.wrapping = detailsContext.wrapping
   };
 
   if (modalPageContext != NULL) {
@@ -354,7 +360,7 @@ static void displayDetailsPage(uint8_t detailsPage) {
   }
   detailsContext.currentPage = detailsPage;
   currentPair.value = detailsContext.currentPageStart;
-  uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, currentPair.value, SCREEN_WIDTH-2*BORDER_MARGIN);
+  uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, currentPair.value, SCREEN_WIDTH-2*BORDER_MARGIN, false);
   if (nbLines>NB_MAX_LINES_IN_DETAILS) {
     uint16_t len;
     nbgl_getTextMaxLenInNbLines(BAGL_FONT_INTER_REGULAR_24px, currentPair.value,SCREEN_WIDTH-2*BORDER_MARGIN,NB_MAX_LINES_IN_DETAILS,&len);
@@ -756,16 +762,18 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
  *
  * @param tag tag name (in gray)
  * @param value full value string, that will be split in multiple pages
+ * @param wrapping if set to true, value text is wrapped on ' ' characters
  */
-void nbgl_useCaseViewDetails(char *tag, char *value) {
-  uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, value, SCREEN_WIDTH-2*BORDER_MARGIN);
+void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping) {
+  uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, value, SCREEN_WIDTH-2*BORDER_MARGIN, wrapping);
 
   // initialize context
   detailsContext.tag = tag;
   detailsContext.value = value;
-  detailsContext.nbPages = (nbLines-1)/NB_MAX_LINES_IN_DETAILS +1;
+  detailsContext.nbPages = (nbLines+NB_MAX_LINES_IN_DETAILS-1)/NB_MAX_LINES_IN_DETAILS;
   detailsContext.currentPage = 0;
   detailsContext.previousPage = -1;
+  detailsContext.wrapping = wrapping;
   // add some spare for room lost with "..." substitution
   if (detailsContext.nbPages > 1) {
     uint16_t nbLostChars = (detailsContext.nbPages - 1)*3;

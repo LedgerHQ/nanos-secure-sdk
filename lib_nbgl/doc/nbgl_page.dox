@@ -148,9 +148,15 @@ The different types of generic content are given in @ref nbgl_pageContentType_t 
 
 \image{inline} html page15.png "caption" height=300
 
+The \b smallCaseForValue field is used to indicate whether to use a 32px (false) or 24px (true) font for \b value text. Normally, the small font is
+supposed to be used only to display details.
+
 - @ref TAG_VALUE_DETAILS is used to draw a tag/value pair and a small button to get details on it. The structure containing data to build it is @ref nbgl_pageTagValueDetails_t
 
 \image{inline} html page14.png "caption" height=300
+
+The "details" button is only displayed if the \b value text is longer than 9 lines. And in this case, the \b value text is truncated at the 6th line, and
+"..." is used to show that the text is truncated.
 
 - @ref SWITCHES_LIST is used to draw a list of switches with descriptions. The structure containing data to build it is @ref nbgl_pageSwitchesList_t
 
