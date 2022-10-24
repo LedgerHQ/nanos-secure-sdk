@@ -84,6 +84,8 @@ nbgl_obj_t *nbgl_screenGetTop(void) {
  * @return the number of used screens on stack
  */
 uint8_t nbgl_screenGetCurrentStackSize(void) {
+  if ((nbScreensOnStack == 1) && (screenStack[0].nbChildren == 0))
+    return 0;
   return nbScreensOnStack;
 }
 

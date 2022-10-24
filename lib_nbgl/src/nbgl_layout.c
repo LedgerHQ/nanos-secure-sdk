@@ -26,7 +26,7 @@
 // internal margin, between sub-items
 #define INTERNAL_MARGIN 8
 
-#define NB_MAX_LAYOUTS 2
+#define NB_MAX_LAYOUTS 3
 
 // used by container
 #define NB_MAX_CONTAINER_CHILDREN 20
@@ -130,15 +130,21 @@ static inline uint8_t get_hold_to_approve_percent(uint32_t touch_duration) {
 
 // function used to retrieve the concerned layout and layout obj matching the given touched obj
 static bool getLayoutAndLayoutObj(nbgl_obj_t *obj, nbgl_layoutInternal_t **layout, layoutObj_t **layoutObj) {
-  uint8_t i = 0;
+  uint8_t i = NB_MAX_LAYOUTS;
 
   // gLayout[1] is on top of gLayout[0] so if gLayout[1] is active, it must catch the event
-  if (gLayout[1].nbChildren > 0) {
-    *layout = &gLayout[1];
+  *layout = NULL;
+  while (i>0) {
+    i--;
+    if (gLayout[i].nbChildren > 0) {
+      *layout = &gLayout[i];
+      break;
+    }
   }
-  else {
-    *layout = &gLayout[0];
+  if (*layout == NULL) {
+    return false;
   }
+  i=0;
   // get index of obj
   while (i<(*layout)->nbUsedCallbackObjs) {
     if (obj == (nbgl_obj_t *)(*layout)->callbackObjPool[i].obj) {
@@ -162,8 +168,10 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   UNUSED(eventType);
   LOG_DEBUG(LAYOUT_LOGGER,"touchCallback(): obj = %p, gLayout[1].nbChildren = %d\n",obj,gLayout[1].nbChildren);
 
-  if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false)
+  if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false) {
+    LOG_WARN(LAYOUT_LOGGER,"touchCallback(): eventType = %d, obj = %p, no active layout\n",eventType,obj);
     return;
+  }
 
   // case of page indicator
   if ((obj == (nbgl_obj_t *)layout->bottomContainer)&&(layout->bottomContainerUsage = PAGE_INDICATOR)) {
@@ -203,8 +211,10 @@ static void longTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
 
   LOG_DEBUG(LAYOUT_LOGGER,"longTouchCallback(): eventType = %d, obj = %p, gLayout[1].nbChildren = %d\n",eventType,obj,gLayout[1].nbChildren);
 
-  if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false)
+  if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false) {
+    LOG_WARN(LAYOUT_LOGGER,"longTouchCallback(): eventType = %d, obj = %p, no active layout\n",eventType,obj);
     return;
+  }
   // case of pressing a long press button
   if (eventType == TOUCHING) {
       uint32_t touchDuration = nbgl_touchGetTouchDuration(obj);
@@ -247,21 +257,26 @@ static void longTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
 
 // callback for radio button touch
 static void radioTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
-  uint8_t i=0, radioIndex=0, foundRadio = 0xFF, foundRadioIndex;
-  nbgl_layoutInternal_t *layout;
+  uint8_t i=NB_MAX_LAYOUTS, radioIndex=0, foundRadio = 0xFF, foundRadioIndex;
+  nbgl_layoutInternal_t *layout=NULL;
 
   if (eventType != TOUCHED) {
     return;
   }
 
   // gLayout[1] is on top of gLayout[0] so if gLayout[1] is active, it must catch the event
-  if (gLayout[1].nbChildren > 0) {
-    layout = &gLayout[1];
+  while (i > 0) {
+    i--;
+    if (gLayout[i].nbChildren > 0) {
+      layout = &gLayout[i];
+      break;
   }
-  else {
-    layout = &gLayout[0];
+  }
+  if (layout == NULL) {
+    return;
   }
 
+  i = 0;
   // parse all objs to find all containers of radio buttons
   while (i<layout->nbUsedCallbackObjs) {
     if ((obj == (nbgl_obj_t *)layout->callbackObjPool[i].obj) && (layout->callbackObjPool[i].obj->type == CONTAINER)) {
@@ -373,15 +388,15 @@ nbgl_layout_t *nbgl_layoutGet(nbgl_layoutDescription_t *description) {
   nbgl_layoutInternal_t *layout = NULL;
 
   // find an empty layout in the proper "layer"
-#if (NB_MAX_LAYOUTS == 2)
   if (description->modal) {
     if (gLayout[1].nbChildren == 0) {
       layout = &gLayout[1];
     }
+    else if (gLayout[2].nbChildren == 0) {
+      layout = &gLayout[2];
+    }
   }
-  else
-#endif
-  {
+  else {
     // automatically "release" a potentially opened non-modal layout
     gLayout[0].nbChildren = 0;
     layout = &gLayout[0];
@@ -1146,7 +1161,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
   container->layout = VERTICAL;
   if (info->onTop) {
     container->alignmentMarginX = BORDER_MARGIN;
-    container->alignmentMarginY = BORDER_MARGIN;
+    container->alignmentMarginY = BORDER_MARGIN+ info->offsetY;
     container->alignment = NO_ALIGNMENT;
   }
   else {
@@ -1505,7 +1520,7 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *b
     textArea->textAlignment = MID_LEFT;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(((nbgl_layoutInternal_t *)layout));
-    textArea->height = 24*nbgl_getTextNbLines(textArea->text);
+    textArea->height = nbgl_getTextHeight(textArea->fontId,textArea->text);
     textArea->style = NO_STYLE;
     textArea->alignment = NO_ALIGNMENT;
     textArea->alignmentMarginX = BORDER_MARGIN;
@@ -1532,7 +1547,7 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *b
     subTextArea->textAlignment = MID_LEFT;
     subTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     subTextArea->width = GET_AVAILABLE_WIDTH(((nbgl_layoutInternal_t *)layout));
-    subTextArea->height = 24*nbgl_getTextNbLines(subTextArea->text);
+    subTextArea->height = nbgl_getTextHeight(subTextArea->fontId,subTextArea->text);
     subTextArea->style = NO_STYLE;
     subTextArea->alignment = NO_ALIGNMENT;
     subTextArea->alignmentMarginX = BORDER_MARGIN;
@@ -1617,7 +1632,8 @@ int nbgl_layoutAddButton(nbgl_layout_t *layout, nbgl_layoutButton_t *buttonInfo)
     button->width = nbgl_getTextWidth(button->fontId,button->text)+64+((button->icon)?(button->icon->width+8):0);
     button->height = 64;
     button->radius = RADIUS_32_PIXELS;
-    button->alignmentMarginX += (SCREEN_WIDTH-2*BORDER_MARGIN-button->width)/2;
+    if (buttonInfo->onBottom != true)
+      button->alignmentMarginX += (SCREEN_WIDTH-2*BORDER_MARGIN-button->width)/2;
   }
   else {
     button->width = GET_AVAILABLE_WIDTH(layoutInt);
@@ -1947,10 +1963,10 @@ int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo) {
  *
  * @param layout the current layout
  * @param index index returned by @ref nbgl_layoutAddKeyboard()
- * @param kbdInfo configuration of the keyboard to draw (including the callback when touched)
+ * @param keyMask mask of keys to activate/deactivate on keyboard
  * @return >=0 if OK
  */
-int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, int index, uint32_t keyMask) {
+int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_keyboard_t *keyboard;
 
@@ -2055,7 +2071,7 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons
  * @param buttonTexts array of 4 strings for buttons (last ones can be NULL)
  * @return >= 0 if OK
  */
-int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, int index, uint8_t nbUsedButtons,
+int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uint8_t nbUsedButtons,
                                     char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_container_t *container;
@@ -2174,11 +2190,13 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
  *
  * @param layout the current layout
  * @param index index of the text (return value of @ref nbgl_layoutAddEnteredText())
+ * @param numbered if set to true, the text is preceded on the left by 'number.'
+ * @param number if numbered is true, number used to build 'number.' text
  * @param text string to display in the area
  * @param grayedOut if true, the text is grayed out (but not the potential number)
  * @return >= 0 if OK
  */
-int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, int index, bool numbered, uint8_t number, char *text, bool grayedOut) {
+int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, char *text, bool grayedOut) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
 
@@ -2264,7 +2282,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *t
  * @param text text of the button
 = * @return >= 0 if OK
  */
-int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, int index, bool active, char *text) {
+int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, char *text) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_button_t *button;
 
@@ -2287,6 +2305,173 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, int index, bool a
     button->touchMask = 0;
   }
   nbgl_redrawObject((nbgl_obj_t*)button,NULL,false);
+  return 0;
+}
+
+/**
+ * @brief Adds a keypad on bottom of the screen, with the associated callback
+ *
+ * @note Validate and Backspace keys are not enabled at start-up
+ *
+ * @param layout the current layout
+ * @param callback function called when any of the key is touched
+ * @return the index of keypad, to use in @ref nbgl_layoutUpdateKeypad()
+ */
+int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_keypad_t *keypad;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddKeypad():\n");
+  if (layout == NULL)
+    return -1;
+
+  // create keypad
+  keypad = (nbgl_keypad_t*)nbgl_objPoolGet(KEYPAD, layoutInt->layer);
+  keypad->alignmentMarginX = 0;
+  keypad->alignmentMarginY = 0;
+  keypad->alignment = BOTTOM_MIDDLE;
+  keypad->alignTo = NULL;
+  keypad->borderColor = LIGHT_GRAY;
+  keypad->callback = PIC(callback);
+  keypad->enableDigits = true;
+  keypad->enableBackspace = false;
+  keypad->enableValidate = false;
+  // set this new keypad as child of the container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)keypad);
+
+  // return index of keypad to be modified later on
+  return (layoutInt->container->nbChildren-1);
+}
+
+/**
+ * @brief Updates an existing keypad on bottom of the screen, with the given configuration
+ *
+ * @param layout the current layout
+ * @param index index returned by @ref nbgl_layoutAddKeypad()
+ * @param enableValidate if true, enable Validate key
+ * @param enableBackspace if true, enable Backspace key
+ * @return >=0 if OK
+ */
+int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableValidate, bool enableBackspace) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_keypad_t *keypad;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateKeypad(): enableValidate = %d, enableBackspace = %d\n",enableValidate,enableBackspace);
+  if (layout == NULL)
+    return -1;
+
+  // get existing keypad
+  keypad = (nbgl_keypad_t*)layoutInt->container->children[index];
+  keypad->enableValidate = enableValidate;
+  keypad->enableBackspace = enableBackspace;
+
+  nbgl_redrawObject((nbgl_obj_t*)keypad,NULL,false);
+
+  return 0;
+}
+
+/**
+ * @brief Adds a set of hidden digits on top of a keypad, to represent the entered digits, as full/empty circles
+ *        The set can be bordered with a gray rounded corners rectangle
+ *
+ * @param layout the current layout
+ * @param nbDigits number of digits to be displayed
+ * @param bordered if true, the set is bordered with a gray rounded corners rectangle
+ * @return the index of digits set, to use in @ref nbgl_layoutUpdateHiddenDigits()
+ */
+int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits, bool bordered) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_panel_t *panel;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddHiddenDigits():\n");
+  if (layout == NULL)
+    return -1;
+
+  // create a panel, invisible or bordered
+  panel = (nbgl_panel_t*)nbgl_objPoolGet(PANEL,layoutInt->layer);
+  panel->nbChildren = nbDigits;
+  panel->children = nbgl_containerPoolGet(panel->nbChildren, 0);
+  panel->borderColor = bordered ? LIGHT_GRAY : WHITE;
+  panel->width = nbDigits*C_circle_24px.width + (nbDigits+1)*8;
+  panel->height = 48;
+  panel->alignmentMarginX = 0;
+  panel->alignmentMarginY = 72;
+  panel->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
+  panel->alignment = TOP_MIDDLE;
+
+  // set this new container as child of the main container
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)panel);
+
+  // create children of the panel, as images (empty circles)
+  nbgl_objPoolGetArray(IMAGE,nbDigits,layoutInt->layer,(nbgl_obj_t**)panel->children);
+  for (int i=0;i<nbDigits;i++) {
+    nbgl_image_t* image = (nbgl_image_t*)panel->children[i];
+    image->buffer = &C_circle_24px;
+    image->foregroundColor = BLACK;
+    image->alignmentMarginX = 8;
+    if (i>0) {
+      image->alignment = MID_RIGHT;
+      image->alignTo = (nbgl_obj_t*)panel->children[i-1];
+      image->alignmentMarginY = 0;
+    }
+    else {
+      image->alignment = NO_ALIGNMENT;
+      image->alignTo = NULL;
+      image->alignmentMarginY = (panel->height - C_circle_24px.width)/2;
+    }
+  }
+
+  // return index of keypad to be modified later on
+  return (layoutInt->container->nbChildren-1);
+}
+
+/**
+ * @brief Updates an existing set of hidden digits, with the given configuration
+ *
+ * @param layout the current layout
+ * @param index index returned by @ref nbgl_layoutAddHiddenDigits()
+ * @param nbActive number of "active" digits (represented by discs instead of circles)
+ * @return >=0 if OK
+ */
+int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_panel_t *panel;
+  nbgl_image_t* image;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateHiddenDigits(): nbActive = %d\n",nbActive);
+  if (layout == NULL)
+    return -1;
+
+  // get panel
+  panel = (nbgl_panel_t*)layoutInt->container->children[index];
+  // sanity check
+  if (nbActive > panel->nbChildren) {
+    return -1;
+  }
+  if (nbActive == 0) {
+    // deactivate the first digit
+    image = (nbgl_image_t*)panel->children[0];
+    image->buffer = &C_circle_24px;
+  }
+  else {
+    image = (nbgl_image_t*)panel->children[nbActive-1];
+    // if the last "active" is already active, it means that we are decreasing the numer of active
+    if (image->buffer == &C_round_24px) {
+      // all digits are already active
+      if (nbActive == panel->nbChildren) {
+        return 0;
+      }
+      // deactivate the next digit
+      image = (nbgl_image_t*)panel->children[nbActive];
+      image->buffer = &C_circle_24px;
+    }
+    else {
+      image->buffer = &C_round_24px;
+    }
+  }
+
+  nbgl_redrawObject((nbgl_obj_t*)image,NULL,false);
+
   return 0;
 }
 
@@ -2322,12 +2507,10 @@ int nbgl_layoutRelease(nbgl_layout_t *layoutParam) {
   LOG_DEBUG(PAGE_LOGGER,"nbgl_layoutRelease(): \n");
   if (layout == NULL)
     return -1;
-#if (NB_MAX_LAYOUTS == 2)
   // if modal
   if (layout->modal) {
     nbgl_screenPop(layout->layer);
   }
-#endif
   layout->nbChildren = 0;
   return 0;
 }
