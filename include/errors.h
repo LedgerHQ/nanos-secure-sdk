@@ -289,6 +289,8 @@ enum generic_identifiers {
 #define SWO_PAR_VAL_25                    (ERR_PAR_VAL + ERR_GEN_ID_25)    // 0x4225
 #define SWO_PAR_VAL_26                    (ERR_PAR_VAL + ERR_GEN_ID_26)    // 0x4226
 #define SWO_PAR_VAL_27                    (ERR_PAR_VAL + ERR_GEN_ID_27)    // 0x4227
+#define SWO_PAR_VAL_28                    (ERR_PAR_VAL + ERR_GEN_ID_28)    // 0x4228
+#define SWO_PAR_VAL_29                    (ERR_PAR_VAL + ERR_GEN_ID_29)    // 0x4229
 
 /**
  * Security-related issues are categorized into:
@@ -538,6 +540,7 @@ enum generic_identifiers {
 #define SWO_APD_HDR_12                    (ERR_APD_HDR + ERR_GEN_ID_12)    // 0x6512
 #define SWO_APD_HDR_13                    (ERR_APD_HDR + ERR_GEN_ID_13)    // 0x6513
 #define SWO_APD_HDR_14                    (ERR_APD_HDR + ERR_GEN_ID_14)    // 0x6514
+#define SWO_APD_HDR_15                    (ERR_APD_HDR + ERR_GEN_ID_15)    // 0x6515
 
 #define SWO_APD_LEN_01                    (ERR_APD_LEN + ERR_GEN_ID_01)    // 0x6701
 #define SWO_APD_LEN_02                    (ERR_APD_LEN + ERR_GEN_ID_02)    // 0x6702
@@ -665,6 +668,7 @@ enum generic_identifiers {
 #define SWO_APD_STA_2D                    (ERR_APD_STA + ERR_GEN_ID_2D)    // 0x662D
 #define SWO_APD_STA_2E                    (ERR_APD_STA + ERR_GEN_ID_2E)    // 0x662E
 #define SWO_APD_STA_2F                    (ERR_APD_STA + ERR_GEN_ID_2F)    // 0x662F
+#define SWO_APD_STA_30                    (ERR_APD_STA + ERR_GEN_ID_30)    // 0x6630
 
 /**
  * The process is successful.

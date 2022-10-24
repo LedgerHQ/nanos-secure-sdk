@@ -278,6 +278,14 @@ void io_seproxyhal_handle_capdu_event(void) {
   }
 }
 
+#ifdef HAVE_NFC
+void io_seproxyhal_handle_nfc_recv_event(void) {
+  G_io_app.apdu_media = IO_APDU_MEDIA_NFC;
+  G_io_app.apdu_state = APDU_NFC;
+  G_io_app.apdu_length = ((G_io_seproxyhal_spi_buffer[1] << 8) & 0xFF00) | (G_io_seproxyhal_spi_buffer[2] & 0x00FF);
+  memcpy(G_io_apdu_buffer, &G_io_seproxyhal_spi_buffer[3], G_io_app.apdu_length);
+}
+#endif
 unsigned int io_seproxyhal_handle_event(void) {
 #if defined(HAVE_IO_USB) || defined(HAVE_BLE)
   unsigned int rx_len = U2BE(G_io_seproxyhal_spi_buffer, 1);
@@ -307,6 +315,12 @@ unsigned int io_seproxyhal_handle_event(void) {
       return 1;
   #endif // HAVE_BLE
 
+  #ifdef HAVE_NFC
+    case SEPROXYHAL_TAG_NFC_APDU_EVENT:
+      io_seproxyhal_handle_nfc_recv_event();
+      return 1;
+  #endif
+  
     case SEPROXYHAL_TAG_UX_EVENT:
       switch (G_io_seproxyhal_spi_buffer[3]) {
 
@@ -492,6 +506,19 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
   io_seproxyhal_spi_send(buffer, 4);
 }
 #endif // HAVE_PIEZO_SOUND
+
+#ifdef HAVE_NFC
+void io_seproxyhal_nfc_set_tag(uint8_t *text, uint16_t text_length) {
+  uint8_t tlv[3];
+  tlv[0] = SEPROXYHAL_TAG_NFC_TAG_UPDATE;
+  tlv[1] = (text_length & 0xFF00) >> 8;
+  tlv[2] = text_length & 0x00FF;
+  io_seproxyhal_spi_send(tlv, 3);
+  if ((text != NULL) && (text_length)) {
+    io_seproxyhal_spi_send(text, MIN(text_length, NFC_TEXT_MAX_LEN));
+  }
+}
+#endif
 
 #ifdef HAVE_BAGL
 
@@ -1191,6 +1218,23 @@ reply_apdu:
             LOG("invalid state for APDU reply\n");
             THROW(INVALID_STATE);
             break;
+#ifdef HAVE_NFC
+          case APDU_NFC:
+            if (tx_len > sizeof(G_io_apdu_buffer)) {
+                THROW(INVALID_PARAMETER);
+            }
+            // reply the NFC APDU over SEPROXYHAL protocol
+            G_io_seproxyhal_spi_buffer[0]  = SEPROXYHAL_TAG_NFC_RAPDU;
+            G_io_seproxyhal_spi_buffer[1]  = (tx_len)>>8;
+            G_io_seproxyhal_spi_buffer[2]  = (tx_len);
+            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
+            io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
+
+            // isngle packet reply, mark immediate idle
+            G_io_app.apdu_state = APDU_IDLE;
+            G_io_app.apdu_media = IO_APDU_MEDIA_NONE;
+            goto break_send;
+#endif
 
           case APDU_RAW:
             if (tx_len > sizeof(G_io_apdu_buffer)) {

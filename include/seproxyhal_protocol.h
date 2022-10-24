@@ -102,6 +102,9 @@
 #define SEPROXYHAL_TAG_BLE_RECV_EVENT              0x18 // <hcipacket raw>
 #define SEPROXYHAL_TAG_BOOTLOADER_RAPDU_EVENT      0x19 // <RAPDU from the bootloader>
 #define SEPROXYHAL_TAG_UX_EVENT                    0x1A //
+#ifdef HAVE_NFC
+#define SEPROXYHAL_TAG_NFC_APDU_EVENT              0x1C
+#endif
 
 #define SEPH_PROTOCOL_EVT_POWER_BUTTON_EVENT       0x1B //
 
@@ -142,6 +145,12 @@
 #define SEPROXYHAL_TAG_BLE_SECURITY_DB_CMD_WRITE    0x02 // <off2BE> <data> request to write a chunk of the security db at the given offset
 #define SEPROXYHAL_TAG_BATTERY_CHARGE              0x49 // <>
 //#define SEPROXYHAL_TAG_SCREEN_DISPLAY              0x4A // wait for display_event after sent
+
+#ifdef HAVE_NFC
+#define SEPROXYHAL_TAG_NFC_RAPDU                    0x4A
+#define SEPROXYHAL_TAG_NFC_TAG_UPDATE                    0x34
+#endif
+
 #define SEPROXYHAL_TAG_DEVICE_OFF                  0x4B
 #define SEPROXYHAL_TAG_MORE_TIME                   0x4C
 #define SEPROXYHAL_TAG_M24SR_C_APDU                0x4D
