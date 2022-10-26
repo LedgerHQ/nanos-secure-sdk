@@ -508,34 +508,28 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 #endif // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
-void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length) {
-  uint8_t tlv[3];
-  tlv[0] = SEPROXYHAL_TAG_NFC_INIT;
+
+void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async) {
+  uint8_t buffer[5];
+  uint16_t total_length = 0;
+  uint8_t is_nfc_enabled = !os_setting_get(OS_SETTING_NFC_DISABLED, NULL, 0);
+  buffer[0] = SEPROXYHAL_TAG_NFC_INIT;
+  // Fill length offsets 1 and 2 later when text length is known
+  buffer[3] = is_nfc_enabled;
+  buffer[4] = (uint8_t) async;
+  total_length += 2;
   if ((text != NULL) && (text_length)) {
-    tlv[1] = (text_length & 0xFF00) >> 8;
-    tlv[2] = text_length & 0x00FF;
-    io_seproxyhal_spi_send(tlv, 3);
-    io_seproxyhal_spi_send(text, MIN(text_length, NFC_TEXT_MAX_LEN));
+    total_length += MIN(text_length, NFC_TEXT_MAX_LEN);
+    memcpy(G_io_seproxyhal_spi_buffer, text, MIN(text_length, NFC_TEXT_MAX_LEN));
   }
   else {
-    uint8_t default_text[NFC_TEXT_MAX_LEN];
-    uint16_t default_text_length =  os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)default_text, NFC_TEXT_MAX_LEN);
-    tlv[1] = (default_text_length & 0xFF00) >> 8;
-    tlv[2] = default_text_length & 0x00FF;
-    io_seproxyhal_spi_send(tlv, 3);
-    io_seproxyhal_spi_send(default_text, MIN(default_text_length, NFC_TEXT_MAX_LEN));
-  }  
-}
-
-void io_seproxyhal_nfc_init_async(uint8_t *text, uint16_t text_length) {
-  uint8_t tlv[3];
-  tlv[0] = SEPROXYHAL_TAG_NFC_INIT_ASYNC;
-  tlv[1] = (text_length & 0xFF00) >> 8;
-  tlv[2] = text_length & 0x00FF;
-  io_seproxyhal_spi_send(tlv, 3);
-  if ((text != NULL) && (text_length)) {
-    io_seproxyhal_spi_send(text, MIN(text_length, NFC_TEXT_MAX_LEN));
+    text_length = os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)G_io_seproxyhal_spi_buffer, NFC_TEXT_MAX_LEN);
+    total_length += MIN(text_length, NFC_TEXT_MAX_LEN);
   }
+  buffer[1] = (total_length & 0xFF00) >> 8;
+  buffer[2] = total_length & 0x00FF;
+  io_seproxyhal_spi_send(buffer, 5);
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, MIN(text_length, NFC_TEXT_MAX_LEN));
 }
 #endif
 

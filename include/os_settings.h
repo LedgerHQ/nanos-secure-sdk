@@ -110,6 +110,7 @@ typedef enum os_setting_e {
   OS_SETTING_BLEMACADR,
 #ifdef HAVE_NFC
   OS_SETTING_NFC_TAG_CONTENT,
+  OS_SETTING_NFC_DISABLED,
 #endif
 
   OS_SETTING_LAST,
