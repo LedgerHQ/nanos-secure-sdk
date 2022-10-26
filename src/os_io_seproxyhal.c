@@ -511,7 +511,6 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 
 void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async) {
   uint8_t buffer[5];
-  uint8_t text_internal[NFC_TEXT_MAX_LEN];
   uint16_t total_length = 0;
   uint8_t is_nfc_enabled = !os_setting_get(OS_SETTING_NFC_DISABLED, NULL, 0);
   buffer[0] = SEPROXYHAL_TAG_NFC_INIT;
@@ -521,16 +520,16 @@ void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async) {
   total_length += 2;
   if ((text != NULL) && (text_length)) {
     total_length += MIN(text_length, NFC_TEXT_MAX_LEN);
-    memcpy(text_internal, text, MIN(text_length, NFC_TEXT_MAX_LEN));
+    memcpy(G_io_seproxyhal_spi_buffer, text, MIN(text_length, NFC_TEXT_MAX_LEN));
   }
   else {
-    text_length = os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)text_internal, NFC_TEXT_MAX_LEN);
+    text_length = os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)G_io_seproxyhal_spi_buffer, NFC_TEXT_MAX_LEN);
     total_length += MIN(text_length, NFC_TEXT_MAX_LEN);
   }
   buffer[1] = (total_length & 0xFF00) >> 8;
   buffer[2] = total_length & 0x00FF;
   io_seproxyhal_spi_send(buffer, 5);
-  io_seproxyhal_spi_send(text_internal, MIN(text_length, NFC_TEXT_MAX_LEN));
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, MIN(text_length, NFC_TEXT_MAX_LEN));
 }
 #endif
 
