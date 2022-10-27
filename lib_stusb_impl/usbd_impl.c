@@ -1137,7 +1137,7 @@ uint8_t USBD_WEBUSB_DataOut (USBD_HandleTypeDef *pdev,
   return USBD_OK;
 }
 
-// arbitrary vendor choosen
+// arbitrary vendor chosen
 #define WEBUSB_VENDOR_CODE 0x1E
 
 // from https://wicg.github.io/webusb/#webusb-platform-capability-descriptor

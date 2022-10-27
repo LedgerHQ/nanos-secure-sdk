@@ -471,7 +471,7 @@ static size_t blake3_compress_subtree(const uint8_t *input, size_t input_len,
   }
 
   // At least two chunks
-  // The left subtree consits of the first 2^(10+log((n-1)/1024)), where n is the input length
+  // The left subtree consists of the first 2^(10+log((n-1)/1024)), where n is the input length
   // and he right substree consists of the remainder
   size_t left_input_len        = 1ULL << highest_one(((input_len - 1) / BLAKE3_CHUNK_LEN) | 1);
   left_input_len               = left_input_len * BLAKE3_CHUNK_LEN;

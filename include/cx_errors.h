@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 /**
- * Checks the error code of a function. 
+ * Checks the error code of a function.
  * @hideinitializer
  */
 #define CX_CHECK(call)	do {                      \
@@ -18,7 +18,7 @@
     }                                             \
   } while (0)
 
-/** 
+/**
  * Checks the error code of a function and ignore
  * it if CX_CARRY.
  * @hideinitializer
@@ -36,7 +36,7 @@
 /** There exists a carry at the end of the operation. */
 #define CX_CARRY                             0xFFFFFF21
 
-/** 
+/**
  *  Multi Precision Integer processor is locked:
  *  operations can be done.
  */
@@ -54,7 +54,7 @@
  */
 #define CX_NOT_LOCKED                        0xFFFFFF83
 
-/** 
+/**
  *  Multi Precision Integer processor is already locked:
  *  it cannot be locked.
  */

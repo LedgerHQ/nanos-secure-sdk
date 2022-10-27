@@ -65,7 +65,7 @@ void cx_poly1305_set_key(cx_poly1305_context_t *ctx, const uint8_t *key);
  *
  * @param ctx       The Poly1305 context to use for the Poly1305 operation.
  *                  This must be initialized and bound to a key.
- * 
+ *
  * @param input     Pointer to the buffer holding the input data.
  *                  This pointer can be \c NULL if `in_len == 0`.
  *

@@ -209,7 +209,7 @@ STATIC_IF_NOT_INDEXED unsigned int ux_layout_paging_button_callback_common(unsig
       ux_layout_paging_next(redisplay);
       break;
     case BUTTON_EVT_RELEASED|BUTTON_LEFT|BUTTON_RIGHT:
-      if (G_ux.layout_paging.count == 0 
+      if (G_ux.layout_paging.count == 0
         || G_ux.layout_paging.count-1 == G_ux.layout_paging.current) {
         ux_flow_validate();
       }

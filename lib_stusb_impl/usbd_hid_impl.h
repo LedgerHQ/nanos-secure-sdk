@@ -63,4 +63,3 @@
 #endif // HAVE_WEBUSB
 
 #endif // USBD_HID_IMPL_H
-

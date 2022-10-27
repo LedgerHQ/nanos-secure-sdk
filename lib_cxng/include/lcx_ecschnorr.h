@@ -34,7 +34,7 @@
 /**
  * @brief   Signs a digest message according to the given mode.
  *
- * @param[in]  pvkey   Pointer to the private key initialized with 
+ * @param[in]  pvkey   Pointer to the private key initialized with
  *                     #cx_ecfp_init_private_key_no_throw beforehand.
  *
  * @param[in]  mode    Mode. Supported flag:
@@ -47,7 +47,7 @@
  *
  * @param[in]  hashID  Message digest algorithm identifier.
  *                     This parameter is mandatory when
- *                     using the CX_RND_RFC6979 
+ *                     using the CX_RND_RFC6979
  *                     pseudorandom number generator.
  *
  * @param[in]  msg     Input data to sign.
@@ -81,14 +81,14 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
 
 /**
  * @brief   Signs a digest message according to the given mode.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
  *
  * @warning It is recommended to use #cx_ecschnorr_sign_no_throw
  *          rather than this function.
  *
- * @param[in]  pvkey   Pointer to the private key initialized with 
+ * @param[in]  pvkey   Pointer to the private key initialized with
  *                     #cx_ecfp_init_private_key_no_throw beforehand.
  *
  * @param[in]  mode    Mode. Supported flag:
@@ -101,7 +101,7 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
  *
  * @param[in]  hashID  Message digest algorithm identifier.
  *                     This parameter is mandatory when
- *                     using the CX_RND_RFC6979 
+ *                     using the CX_RND_RFC6979
  *                     pseudorandom number generator.
  *
  * @param[in]  msg     Input data to sign.
@@ -112,11 +112,11 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
  *                     This parameter holds the auxiliary random data when CX_ECSCHNORR_BIP0340 is used.
  *
  * @param[in]  sig_len Length of the signature.
- * 
+ *
  * @param[in]  info    Additional information. This parameter is not used.
  *
  * @return             Length of the signature.
- * 
+ *
  * @throws             CX_EC_INVALID_CURVE
  * @throws             CX_INVALID_PARAMETER
  * @throws             CX_NOT_UNLOCKED
@@ -136,8 +136,8 @@ static inline size_t cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, ui
 
 /**
  * @brief   Verifies a digest message signature according to the given mode.
- * 
- * @param[in] pukey   Pointer to the public key initialized with 
+ *
+ * @param[in] pukey   Pointer to the public key initialized with
  *                    #cx_ecfp_init_private_key_no_throw beforehand.
  *
  * @param[in] mode    Mode. Supported flag:
@@ -152,15 +152,15 @@ static inline size_t cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, ui
  *                    compute the input data.
  *
  * @param[in] msg     Signed input data to verify the signature.
- *   
+ *
  *
  * @param[in] msg_len Length of the input data.
- *   
+ *
  *
  * @param[in] sig     ECSchnorr signature to verify encoded in
  *                    TLV: **30 || L || 02 || Lr || r || 02 || Ls || s**
- *   
- * 
+ *
+ *
  * @param[in] sig_len Length of the signature.
  *
  * @return            1 if signature is verified, 0 otherwise.

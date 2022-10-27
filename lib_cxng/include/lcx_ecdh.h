@@ -39,28 +39,28 @@
 #if defined(HAVE_ECDH)
 /**
  * @brief   Computes an ECDH shared secret.
- * 
+ *
  * @details Depending on the mode, the shared secret is either the full point or
  *          only the *x* coordinate.
- * 
+ *
  * @param[in]  pvkey        Private key.
  *                          Shall be initialized with #cx_ecfp_init_private_key_no_throw.
- * 
- * @param[in]  mode         Crypto mode flags. 
+ *
+ * @param[in]  mode         Crypto mode flags.
  *                          Supported flags:
  *                           - CX_ECDH_POINT
  *                           - CX_ECDH_X
- * 
+ *
  * @param[in]  P            Pointer to the public key encoded as **04 || x || y**:
  *                          *x* and *y* are encoded as big endian raw values
  *                          and have a binary length equal to curve domain size.
- * 
+ *
  * @param[in]  P_len        Length of the public key in octets.
- * 
+ *
  * @param[out] secret       Buffer where to store the shared secret (full or compressed).
- * 
+ *
  * @param[in]  secret_len   Length of the buffer in octets.
- * 
+ *
  * @return                  Error code:
  *                          - CX_OK on success
  *                          - CX_INVALID_PARAMETER
@@ -81,33 +81,33 @@ cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *pvkey,
 
 /**
  * @brief   Computes an ECDH shared secret.
- * 
+ *
  * @details Depending on the mode, the shared secret is either the full point or
  *          only the *x* coordinate.
  *          This function throws an exception if the computation doesn't succeed.
  *
  * @warning It is recommended to use #cx_ecdh_no_throw rather than this function.
- * 
+ *
  * @param[in]  pvkey        Private key.
  *                          Shall be initialized with #cx_ecfp_init_private_key_no_throw.
- * 
- * @param[in]  mode         Crypto mode flags. 
+ *
+ * @param[in]  mode         Crypto mode flags.
  *                          Supported flags:
  *                           - CX_ECDH_POINT
  *                           - CX_ECDH_X
- * 
+ *
  * @param[in]  P            Pointer to the public key encoded as **04 || x || y**:
  *                          *x* and *y* are encoded as big endian raw values
  *                          and have a binary length equal to curve domain size.
- * 
+ *
  * @param[in]  P_len        Length of the public key in octets.
- * 
+ *
  * @param[out] secret       Buffer where to store the shared secret (full or compressed).
- * 
+ *
  * @param[in]  secret_len   Length of the buffer in octets.
- * 
+ *
  * @return                  Length of the shared secret.
- 
+
  * @throws                  CX_INVALID_PARAMETER
  * @throws                  INVALID_PARAMETER
  * @throws                  CX_EC_INVALID_CURVE

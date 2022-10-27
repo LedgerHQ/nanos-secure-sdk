@@ -42,7 +42,7 @@ typedef void (*nbgl_layoutTouchCallback_t)(int token, uint8_t index);
 
 
 /**
- * @brief type shared externaly
+ * @brief type shared externally
  *
  */
 typedef void* nbgl_layout_t;

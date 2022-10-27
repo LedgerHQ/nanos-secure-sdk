@@ -52,7 +52,7 @@ SECTIONS
     KEEP(*(.boot.ssp_init))
     /* ensure main directly follows __stack_chk_init */
     *(.boot*)
-    
+
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
     *(.text*)
     *(.rodata)
@@ -60,20 +60,20 @@ SECTIONS
     *(.rodata.N[^_]*)
 
     . = ALIGN(4);
-    
+
     /* all code placed */
     _etext = .;
 
     . = ALIGN(PAGE_SIZE);
-    
+
     _nvram_data = .;
-    
+
     /* NVM data (ex-filesystem) */
     *(.bss.N_* .rodata.N_*)
 
     . = ALIGN(PAGE_SIZE);
     _envram_data = .;
-  
+
     _install_parameters = .;
     _nvram_end = .;
   } > FLASH
@@ -81,7 +81,7 @@ SECTIONS
   .data (NOLOAD):
   {
     . = ALIGN(4);
-    
+
     /**
      * Place RAM initialized variables
      */
@@ -176,6 +176,6 @@ SECTIONS
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
 }
-  
+
 PROVIDE(_nvram = ABSOLUTE(_nvram_start));
 PROVIDE(_envram = ABSOLUTE(_nvram_end));

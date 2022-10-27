@@ -67,7 +67,7 @@ SUDOCALL unsigned int os_sched_current_task(void);
  * The newly created task is chrooted in the given nvram/ram1/ram2 segments
  * and its task pointer is set at the end of ram1 segment.
  * The task is bound to the currently running application.
- * The task identifiers are not garanteed to be the same after a power cycle.
+ * The task identifiers are not guaranteed to be the same after a power cycle.
  * At least valid main, nvram segment, ram0 segment and stack segment must be provided with.
  * @param main The main function address to start the task with.
  * @param nvram The nvram segment address start

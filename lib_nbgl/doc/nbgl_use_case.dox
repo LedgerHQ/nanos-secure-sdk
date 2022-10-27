@@ -16,7 +16,7 @@ A full description of each predefined use-case can be found in this document
 
 This layer uses the high-level API described in @ref nbgl_page, but offers to developer more than a single page.
 
-The goal is to simplify the usage of NBGL, but also to offer a better homogeneity accross applications, by pushing
+The goal is to simplify the usage of NBGL, but also to offer a better homogeneity across applications, by pushing
 developers to use common API for common use-cases.
 
 So that not only the look of the pages but also their transitions look the same. Which should be a real help
@@ -81,7 +81,7 @@ void appMain(void) {
 
 \image{inline} html UseCase-Settings1.png "caption" height=300
 
-Usually settings (or informations) of an application consist in a list of pages, each page containing:
+Usually settings (or information) of an application consist in a list of pages, each page containing:
 
 - some radio buttons to make a choice
 - some switches for various configuration
@@ -116,7 +116,7 @@ static const nbgl_layoutSwitch_t switches[] = {
   {
     .initState = false,
     .text = "Blind signing",
-    .subText = "Enable transaction blind\nsigning",
+    .subText = "Enable transaction blind\n" "signing",
     .token = SWITCH1_TOKEN,
     .tuneId = TUNE_TAP_CASUAL
   },
@@ -130,7 +130,7 @@ static const nbgl_layoutSwitch_t switches[] = {
   {
     .initState = true,
     .text = "Nonce",
-    .subText = "Display account nonce\nin transaction",
+    .subText = "Display account nonce\n" "in transaction",
     .token = SWITCH3_TOKEN,
     .tuneId = TUNE_TAP_CASUAL
   },
@@ -430,7 +430,7 @@ presentation and interactions with end-users, but much easier to use for develop
 
 Indeed, in this case, NBGL automatically computes the number of pages, and the pairs to draw in each page.
 In case of a tag/value pair too long to be fully displayed, the "more" button will be automatically drawn and its handling
-automatically performed by NBGL by building a detailled modal view.
+automatically performed by NBGL by building a detailed modal view.
 
 The API to initiate the display of the series of pages is @ref nbgl_useCaseStaticReview(), providing:
 
@@ -585,7 +585,7 @@ void reviewContinue(void) {
 When an address needs to be confirmed, it can be displayed in a Address Confirmation Use Case, at first as simple page with
 the raw address (as text) and a black button/Footer pair to choose to confirm or reject the address.
 
-An extra button under the raw adress enables to open a modal page to see the address as a QR code.
+An extra button under the raw address enables to open a modal page to see the address as a QR code.
 
 The @ref nbgl_useCaseAddressConfirmation() function enables to create such a page, with the following parameters:
 
@@ -621,8 +621,8 @@ void app_ethereumVerifyAddress(void) {
 \image{inline} html UseCase-AddressConfirmationExt.png "caption" height=300
 
 When an address needs to be confirmed, it can be displayed in a Address Confirmation Use Case, at first as simple page with
-the raw address (as text). An extra button under the raw adress enables to open a modal page to see the address as a QR code.
-Moreover, if extra information need to be diplayed, for example a derivation path, it is provided in a second page, also containing
+the raw address (as text). An extra button under the raw address enables to open a modal page to see the address as a QR code.
+Moreover, if extra information need to be displayed, for example a derivation path, it is provided in a second page, also containing
 a black button/Footer pair to choose to confirm or reject the address.
 
 The @ref nbgl_useCaseAddressConfirmationExt() function enables to create such a set of pages, with the following parameters:
@@ -671,7 +671,7 @@ void app_ethereumVerifyAddress(void) {
 When an address needs to be confirmed, it can be displayed in a Address Confirmation Use Case, at first as simple page with
 the raw address (as text) and a black button/Footer pair to choose to confirm or reject the address.
 
-An extra button under the raw adress enables to open a modal page to see the address as a QR code.
+An extra button under the raw address enables to open a modal page to see the address as a QR code.
 
 The @ref nbgl_useCaseSpinner() function enables to create such a page, with the following parameters:
 

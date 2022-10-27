@@ -46,7 +46,7 @@ const bagl_element_t ux_layout_pbb_elements[] = {
   // left/right icons
   {{BAGL_ICON                           , 0x01,   2,  12,   4,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, .text=(const char*)&C_icon_left},
   {{BAGL_ICON                           , 0x02, 122,  12,   4,   7, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, .text=(const char*)&C_icon_right},
-  
+
   {{BAGL_ICON                           , 0x0F,  16,   8,  16,  16, 0, 0, 0        , 0xFFFFFF, 0x000000, 0, 0  }, .text=NULL},
   {{BAGL_LABELINE                       , 0x10,  41,  12, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px, 0  }, .text=NULL},
   {{BAGL_LABELINE                       , 0x11,  41,  26, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px, 0  }, .text=NULL},

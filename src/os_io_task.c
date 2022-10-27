@@ -62,7 +62,7 @@ void io_process(void) {
     }
     // we have finished our call, notify the other tasks
     os_sched_yield(BOLOS_TRUE);
-  } 
+  }
 }
 
 void io_task(void) {

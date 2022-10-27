@@ -91,7 +91,7 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_BUSY,
                   sizeof(SW_BUSY));
-        return;        
+        return;
     }
 
     if (length < U2F_HANDLE_SIGN_HEADER_SIZE + 5 /*at least an apdu header*/) {
@@ -135,7 +135,7 @@ void u2f_apdu_sign(u2f_service_t *service, uint8_t p1, uint8_t p2,
             return;
         }
     }
-    
+
 
     for (i = 0; i < keyHandleLength; i++) {
         buffer[U2F_HANDLE_SIGN_HEADER_SIZE + i] ^= U2F_PROXY_MAGIC[i % (sizeof(U2F_PROXY_MAGIC)-1)];
@@ -176,7 +176,7 @@ void u2f_apdu_get_version(u2f_service_t *service, uint8_t p1, uint8_t p2,
     u2f_message_reply(service, U2F_CMD_MSG, (uint8_t *)U2F_VERSION, sizeof(U2F_VERSION));
 }
 
-// Special command that returns the proxy 
+// Special command that returns the proxy
 void u2f_apdu_get_info(u2f_service_t *service, uint8_t p1, uint8_t p2,
                             uint8_t *buffer, uint16_t length) {
     UNUSED(p1);
@@ -241,8 +241,8 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
     }
     else if (dataLength == (uint16_t)(length - 7)%256) {
         dataLength = length - 7;
-    }    
-    else { 
+    }
+    else {
         // invalid size
         u2f_message_reply(service, U2F_CMD_MSG,
                   (uint8_t *)SW_WRONG_LENGTH,
@@ -280,7 +280,7 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer,
         u2f_apdu_get_version(service, p1, p2, buffer + 7, dataLength);
         break;
 
-    // only support by 
+    // only support by
     case FIDO_INS_PROP_GET_INFO:
         u2f_apdu_get_info(service, p1, p2, buffer + 7, dataLength);
         break;
@@ -316,7 +316,7 @@ void u2f_message_complete(u2f_service_t *service) {
     case CTAP2_CMD_CANCEL:
         ctap2_handle_cmd_cancel(service, service->transportBuffer + 3, length);
         break;
-#endif        	
+#endif
     }
 }
 

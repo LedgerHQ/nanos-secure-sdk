@@ -75,11 +75,11 @@ unsigned int ux_flow_button_callback(unsigned int button_mask, unsigned int butt
 const void *ux_stack_get_current_step_params(void);
 const void *ux_stack_get_step_params(unsigned int stack_slot);
 /**
- * Return 0 when no relayout occured.
+ * Return 0 when no relayout occurred.
  */
 unsigned int ux_flow_relayout(void); // ask for a redisplay of the current displayed step (calling step init function again (recomputing layout if required))
 
-/** 
+/**
  * Last step is marked with a FLOW_END_STEP value
  */
 #define FLOW_END_STEP ((const ux_flow_step_t *)0xFFFFFFFFUL)
@@ -132,7 +132,7 @@ void ux_flow_uninit(unsigned int stack_slot);
 	}
 
 
-/** 
+/**
  * Define a flow step with a specific step init function
  */
 #define UX_STEP_INIT(stepname, validate_flow, error_flow, ...) \
@@ -193,7 +193,7 @@ void ux_flow_uninit(unsigned int stack_slot);
 	  NULL, \
 	}
 
-/** 
+/**
  * Define a flow step with autovalidation after a given timeout (in ms)
  */
 #define UX_STEP_TIMEOUT(stepname, layoutkind, timeout_ms, validate_flow, ...) \
@@ -224,7 +224,7 @@ void ux_flow_uninit(unsigned int stack_slot);
 #define UX_FLOW_DEF_NOCB UX_STEP_NOCB
 
 /**
- * A Step with variant data (which could be overwritten by a flow idplsayed 
+ * A Step with variant data (which could be overwritten by a flow displayed
  * in an higher flow and therefore need to be recomputed when step is redisplayed)
  */
 #define UX_STEP_NOCB_INIT(stepname, layoutkind, preinit, ...) \
@@ -241,7 +241,7 @@ void ux_flow_uninit(unsigned int stack_slot);
 	}
 
 /**
- * A Step with variant data (which could be overwritten by a flow idplsayed 
+ * A Step with variant data (which could be overwritten by a flow displayed
  * in an higher flow and therefore need to be recomputed when step is redisplayed)
  */
 #define UX_STEP_NOCB_POSTINIT(stepname, layoutkind, postinit, ...) \

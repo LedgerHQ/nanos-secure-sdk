@@ -55,7 +55,7 @@ extern "C" {
 #define BOTH_MIRRORS     (HORIZONTAL_MIRROR|VERTICAL_MIRROR)
 
 /**
- * Rotation 90 degres clockwise when rendering bitmap
+ * Rotation 90 degrees clockwise when rendering bitmap
  *
  */
 #define ROTATE_90_CLOCKWISE     0x4
@@ -183,7 +183,7 @@ typedef uint8_t nbgl_transformation_t;
 typedef uint8_t nbgl_color_map_t;
 
 /**
- * @brief Represents all informations about an icon
+ * @brief Represents all information about an icon
  *
  */
 typedef struct PACKED__ nbgl_icon_details_s {

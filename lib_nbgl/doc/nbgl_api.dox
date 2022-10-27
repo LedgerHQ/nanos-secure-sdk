@@ -47,7 +47,7 @@ screen, as long as they are properly set.
 For example, if a "Back" button is present in many different screens of the application, it can be reused, the only change being
 the touch callback.
 
-For all objects, its **type** field must be explicitely specified, even if it seems redundant with the nbgl_<type>_t.
+For all objects, its **type** field must be explicitly specified, even if it seems redundant with the nbgl_<type>_t.
 
 For example:
 
@@ -63,10 +63,10 @@ For example:
         .text = "Back",                           // Text of the button, if NULL, only an icon
         .fontId = BAGL_FONT_INTER_REGULAR_24,     // Font used for text, if text is not null
         .icon = &C_leftArrow32px,                 // Icon of the button, if NULL, only text
-        .alignmentMarginX = 20,                   // Horizontal margin (see layout & aligment)
-        .alignmentMarginY = 20,                   // Vertical margin (see layout & aligment)
-        .alignment = TOP_LEFT,                    // Type of alignment (see layout & aligment)
-        .alignTo = NULL,                          // Alignment reference, if NULL, use parent (see layout & aligment)
+        .alignmentMarginX = 20,                   // Horizontal margin (see layout & alignment)
+        .alignmentMarginY = 20,                   // Vertical margin (see layout & alignment)
+        .alignment = TOP_LEFT,                    // Type of alignment (see layout & alignment)
+        .alignTo = NULL,                          // Alignment reference, if NULL, use parent (see layout & alignment)
         .touchMask = (1<<VALUE_CHANGED),          // Types of touchscreen events that we want to receive
         .touchCallback = (nbgl_touchCallback_t)&touchCallback // Callback to be called on touchscreen events.
         };
@@ -78,7 +78,7 @@ array of pointers on @ref nbgl_obj_t, which are all the objects contained in the
 Once all your objects are defined, they shall be added as children of the main (and unique) @ref SCREEN object, which is
 a special container, thanks to @ref nbgl_screenSet() or @ref nbgl_screenPush().
 
-For example, with a static allocation of objects (not recommanded, see @ref nbgl_objs_mngt):
+For example, with a static allocation of objects (not recommended, see @ref nbgl_objs_mngt):
 
 @code
     nbgl_button_t backButton = {

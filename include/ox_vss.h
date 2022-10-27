@@ -3,7 +3,7 @@
 /**
  * @file    ox_vss.h
  * @brief   Verifiable seret sharing over SECP384R1
- * 
+ *
  * This file contains the functions to share then reconstruct a secret over SECP384R1.
  */
 
@@ -18,7 +18,7 @@
 
 /**
  * @brief Structure to hold a share of a secret over SECP384R1.
- * 
+ *
  */
 typedef struct {
   uint8_t  share[CX_VSS_SECRET_SIZE]; ///< The evaluation of two secret polynomials
@@ -27,7 +27,7 @@ typedef struct {
 
 /**
  * @brief Structure to hold a commitment over SECP384R1.
- * 
+ *
  */
 typedef struct {
   uint8_t  commitment[CX_VSS_SECRET_SIZE]; ///< A point on SECP384R1 which serves as a commitment.
@@ -35,7 +35,7 @@ typedef struct {
 
 /**
  * @brief This function generates some shares along with the commitments.
- * 
+ *
  * @param[out] shares        Pointer to the shares.
  * @param[out] commits       Pointer to the commitments.
  * @param[in]  point         Point on SECP384R1 used to compute the commitments.
@@ -46,7 +46,7 @@ typedef struct {
  * @param[in]  secret_len    Length of the secret. This must be less than 48 bytes.
  * @param[in]  shares_number Number of shares to return.
  * @param[in]  threshold     Threshold of the secret sharing.
- * @return Error code 
+ * @return Error code
  */
 SYSCALL cx_err_t cx_vss_generate_shares(cx_vss_share_t *shares PLENGTH(shares_number),
                                         cx_vss_commitment_t *commits PLENGTH(threshold),
@@ -61,12 +61,12 @@ SYSCALL cx_err_t cx_vss_generate_shares(cx_vss_share_t *shares PLENGTH(shares_nu
 
 /**
  * @brief This functions combines the given shares to get a secret.
- * 
+ *
  * @param[out] secret     Pointer to the reconstructed secret.
  * @param[in]  secret_len Length of the expected secret. This must not exceed 48 bytes.
  * @param[in]  shares     Pointer to the shares.
  * @param[in]  threshold  Threshold of the secret sharing.
- * @return Error code 
+ * @return Error code
  */
 SYSCALL cx_err_t cx_vss_combine_shares(uint8_t *secret PLENGTH(secret_len),
                                        size_t secret_len,

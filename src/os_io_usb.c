@@ -24,7 +24,7 @@
 #ifdef HAVE_USB_APDU
 
 /**
- *  Ledger Protocol 
+ *  Ledger Protocol
  *  HID Report Content
  *  [______________________________]
  *   CCCC TT VVVV.........VV FILL..
@@ -38,9 +38,9 @@
  *  LL is at most the length of the HID Report.
  *
  *  Command/Response APDU are split in chunks.
- * 
+ *
  *  Filler only allowed at the end of the last hid report of a apdu chain in each direction.
- * 
+ *
  *  APDU are using either standard or extended header. up to the application to check the total received length and the lc field
  *
  *  Tags:
@@ -69,14 +69,14 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
   // process the chunk content
   switch(G_io_usb_ep_buffer[2]) {
   case 0x05:
-    // ensure sequence idx is 0 for the first chunk ! 
+    // ensure sequence idx is 0 for the first chunk !
     if ((unsigned int)U2BE(G_io_usb_ep_buffer, 3) != (unsigned int)G_io_usb_hid_sequence_number) {
       // ignore packet
       goto apdu_reset;
     }
     // cid, tag, seq
     l -= 2+1+2;
-    
+
     // append the received chunk to the current command apdu
     if (G_io_usb_hid_sequence_number == 0) {
       /// This is the apdu first chunk
@@ -165,7 +165,7 @@ apdu_reset:
 }
 
 void io_usb_hid_init(void) {
-  G_io_usb_hid_sequence_number = 0; 
+  G_io_usb_hid_sequence_number = 0;
   G_io_usb_hid_remaining_length = 0;
   G_io_usb_hid_current_buffer = NULL;
 }
@@ -200,7 +200,7 @@ void io_usb_hid_sent(io_send_t sndfct) {
       l = ((G_io_usb_hid_remaining_length>IO_HID_EP_LENGTH-5) ? IO_HID_EP_LENGTH-5 : G_io_usb_hid_remaining_length);
       memmove(G_io_usb_ep_buffer+5, G_io_usb_hid_current_buffer, l);
       G_io_usb_hid_current_buffer += l;
-      G_io_usb_hid_remaining_length -= l;   
+      G_io_usb_hid_remaining_length -= l;
     }
     // prepare next chunk numbering
     G_io_usb_hid_sequence_number++;
@@ -220,7 +220,7 @@ void io_usb_hid_sent(io_send_t sndfct) {
 void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength) {
   // perform send
   if (sndlength) {
-    G_io_usb_hid_sequence_number = 0; 
+    G_io_usb_hid_sequence_number = 0;
     G_io_usb_hid_current_buffer = G_io_apdu_buffer;
     G_io_usb_hid_remaining_length = sndlength;
     G_io_usb_hid_total_length = sndlength;

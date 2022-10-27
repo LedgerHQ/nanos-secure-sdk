@@ -66,7 +66,7 @@ size_t cx_groestl_get_output_size(const cx_groestl_t *ctx);
  * @brief   Initializes a GROESTL context.
  *
  * @param[out] hash Pointer to the context to init.ialize.
- * 
+ *
  * @param[in]  size Length of the digest.
  *
  * @return          Error code:
@@ -77,16 +77,16 @@ size_t cx_groestl_get_output_size(const cx_groestl_t *ctx);
 
 /**
  * @brief   Initializes a GROESTL context.
- * 
+ *
  * @details Throws an exception if the
  *          initialization fails.
  *
  * @param[out] hash Pointer to the context to initialize.
- * 
+ *
  * @param[in]  size Length of the digest.
  *
  * @return          GROESTL identifier.
- * 
+ *
  * @throws          CX_INVALID_PARAMETER
  */
 static inline void cx_groestl_init ( cx_groestl_t * hash, unsigned int size )

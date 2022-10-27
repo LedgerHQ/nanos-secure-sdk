@@ -807,6 +807,6 @@ const bagl_font_t fontOPEN_SANS_SEMIBOLD_18PX = {
    0, /* kerning */
    0x0020, /* first character */
    0x007F, /* last character  */
-   charactersOPEN_SANS_SEMIBOLD_18PX 
+   charactersOPEN_SANS_SEMIBOLD_18PX
   ,bitmapOPEN_SANS_SEMIBOLD_18PX
 };

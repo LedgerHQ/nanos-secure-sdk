@@ -19,7 +19,7 @@
 /**
  * @file    ox_des.h
  * @brief   Data Encryption Standard syscalls.
- * 
+ *
  * This file contains DES definitions and functions:
  * - Set the DES key in memory
  * - Encrypt a 64-bit block
@@ -39,7 +39,7 @@
 #define CX_DES_BLOCK_SIZE 8
 
 /** @brief   DES key container.
- * 
+ *
  *  @details DES key container.
  *           Such container should be initialized with **cx_des_init_key_no_throw**.
  *           8 bytes (simple DES), 16 bytes (triple DES with 2 keys) and 24 bytes
@@ -54,11 +54,11 @@ typedef struct cx_des_key_s cx_des_key_t;
 
 /**
  * @brief   Sets a DES key in hardware.
- * 
+ *
  * @param[in] keys DES key.
- * 
+ *
  * @param[in] mode Operation for which the key will be used.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - INVALID_PARAMETER
@@ -72,13 +72,12 @@ SYSCALL void cx_des_reset_hw(void);
 
 /**
  * @brief   Encrypts or decrypts a block with DES.
- * 
+ *
  * @param[in]  inblock  Pointer to the block.
- * 
+ *
  * @param[out] outblock Buffer for the output.
  */
 SYSCALL void cx_des_block_hw(const unsigned char *inblock PLENGTH(8), unsigned char  *outblock PLENGTH(8));
 
 
 #endif
-

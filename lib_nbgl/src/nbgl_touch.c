@@ -143,7 +143,7 @@ void nbgl_touchHandler(nbgl_touchStatePosition_t *touchStatePosition, uint32_t c
     if ((touchStatePosition->state == PRESSED) &&
         (lastState == PRESSED) &&
         (lastPressedObj != NULL)) {
-      // finger has move out of an objet
+      // finger has moved out of an object
       // make sure lastPressedObj still belongs to current screen before warning it
       if (nbgl_screenContainsObj(lastPressedObj)) {
         applytouchStatePosition(lastPressedObj,OUT_OF_TOUCH);
@@ -177,7 +177,7 @@ void nbgl_touchHandler(nbgl_touchStatePosition_t *touchStatePosition, uint32_t c
   else { // PRESSED
     if ((lastState == PRESSED) && (lastPressedObj != NULL)) {
       if (foundObj != lastPressedObj) {
-        // finger has move out of an objet
+        // finger has moved out of an object
         // make sure lastPressedObj still belongs to current screen before warning it
         if (nbgl_screenContainsObj(lastPressedObj)) {
           applytouchStatePosition(lastPressedObj,OUT_OF_TOUCH);

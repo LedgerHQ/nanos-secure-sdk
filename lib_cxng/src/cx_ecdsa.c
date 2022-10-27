@@ -83,7 +83,7 @@ static cx_err_t initialize_hash(const uint8_t *hash,
                                 size_t hash_length,
                                 size_t domain_length) {
   cx_err_t error;
-  
+
   // If the hash length is greater than the domain length, we only
   // consider the 'domain bit length' leftmost bits of the hash
   // for the operation.

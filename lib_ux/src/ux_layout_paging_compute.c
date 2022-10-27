@@ -11,7 +11,7 @@
 
 #if !defined(HAVE_SE_SCREEN)
 
-// We implement a light mecanism in order to be able to retrieve the width of
+// We implement a light mechanism in order to be able to retrieve the width of
 // nano S characters, in the two possible fonts:
 // - BAGL_FONT_OPEN_SANS_EXTRABOLD_11px,
 // - BAGL_FONT_OPEN_SANS_REGULAR_11px.

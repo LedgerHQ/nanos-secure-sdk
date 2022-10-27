@@ -27,7 +27,7 @@
 
 /**
  * @brief AES-SIV context.
- * 
+ *
  */
 typedef struct _cx_aes_siv_context {
   uint8_t              key1[AES_SIV_MAX_KEY_LEN];    ///< Array to store the leftmost bytes of the key
@@ -44,10 +44,10 @@ typedef struct _cx_aes_siv_context {
  * @brief   Initializes the AES-SIV context.
  * @details The cipher context must be initialized beforehand.
  *          This function must be called first and should be followed
- *          by #cx_aes_siv_set_key, #cx_aes_siv_start, multiple calls to 
- *          #cx_aes_siv_update_aad, #cx_aes_siv_finish and finally 
+ *          by #cx_aes_siv_set_key, #cx_aes_siv_start, multiple calls to
+ *          #cx_aes_siv_update_aad, #cx_aes_siv_finish and finally
  *          #cx_aes_siv_update.
- * 
+ *
  * @param[in] ctx Pointer to the AES-SIV context.
  * @return        Error code.
  */
@@ -55,15 +55,15 @@ cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx);
 
 /**
  * @brief   Sets the key to compute AES-SIV.
- * 
- * @details The size of the key is twice the size of 
+ *
+ * @details The size of the key is twice the size of
  *          typical AES key, i.e. the key size is 256 bits
  *          with AES-128, 384 bits with AES-192 and 512 bits
  *          with AES-256.
  *          This function must be called after #cx_aes_siv_init
  *          and the pointer to the key of the cipher context must
  *          be initialized beforehand.
- * 
+ *
  * @param[in] ctx        Pointer to the AES-SIV context.
  * @param[in] key        Pointer to the key.
  * @param[in] key_bitlen Size of the key in bits.
@@ -75,7 +75,7 @@ cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
 
 /**
  * @brief Starts the S2V algorithm following RFC5297 specification.
- * 
+ *
  * @param[in] ctx    Pointer to the AES-SIV context.
  * @param[in] mode   Operation to perform: encryption or decryption.
  * @param[in] iv     Initialization vector: either to initialize the
@@ -92,7 +92,7 @@ cx_err_t cx_aes_siv_start(cx_aes_siv_context_t *ctx,
 
 /**
  * @brief Processes additional data.
- * 
+ *
  * @param[in] ctx     Pointer to the AES-SIV context.
  * @param[in] aad     Pointer to the additional data.
  * @param[in] aad_len Length of the additional data.
@@ -104,10 +104,10 @@ cx_err_t cx_aes_siv_update_aad(cx_aes_siv_context_t *ctx,
 
 /**
  * @brief Processes plaintext or ciphertext with AES-CTR.
- * 
+ *
  * @param[in]  ctx    Pointer to the AES-SIV context.
  * @param[in]  input  Pointer to the input.
- * @param[out] output Pointer to the output. The buffer 
+ * @param[out] output Pointer to the output. The buffer
  *                    will contain *len* bytes.
  * @param[in]  len    Length of the input.
  * @return            Error code.
@@ -118,9 +118,9 @@ cx_err_t cx_aes_siv_update(cx_aes_siv_context_t *ctx,
                            size_t len);
 
 /**
- * @brief Finishes the S2V algorithm and prepares for the 
+ * @brief Finishes the S2V algorithm and prepares for the
  *        AES-CTR computation.
- * 
+ *
  * @param[in]     ctx    Pointer to the AES-SIV context.
  * @param[in]     input  Pointer to the input.
  * @param[in]     in_len Length of the input.
@@ -135,7 +135,7 @@ cx_err_t cx_aes_siv_finish(cx_aes_siv_context_t *ctx,
 
 /**
  * @brief All-in-one encryption.
- * 
+ *
  * @param[in]  ctx     Pointer to the AES-SIV context.
  * @param[in]  input   Pointer to the input.
  * @param[in]  in_len  Length of the input.
@@ -157,7 +157,7 @@ cx_err_t cx_aes_siv_encrypt(cx_aes_siv_context_t *ctx,
 
 /**
  * @brief All-in-one decryption.
- * 
+ *
  * @param[in]  ctx     Pointer to the AES-SIV context.
  * @param[in]  input   Pointer to the input.
  * @param[in]  in_len  Length of the input.

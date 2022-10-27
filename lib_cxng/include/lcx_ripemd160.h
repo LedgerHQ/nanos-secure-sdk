@@ -20,7 +20,7 @@
  * @file    lcx_ripemd160.h
  * @brief   RIPEMD-160 hash function
  *
- * RIPEMD-160 is a 160-bit cryptographic hash function. Refer to <a href = "https://homes.esat.kuleuven.be/~bosselae/ripemd160.html"> 
+ * RIPEMD-160 is a 160-bit cryptographic hash function. Refer to <a href = "https://homes.esat.kuleuven.be/~bosselae/ripemd160.html">
  * RIPEMD-160 </a> for more details.
  */
 
@@ -43,7 +43,7 @@ struct cx_ripemd160_s {
   size_t blen;                      ///< Pending partial block length
   uint8_t block[64];                ///< Pending partial block
   // After finishing the digest,
-  // contains the digest if correct 
+  // contains the digest if correct
   // parameters are passed.
   uint8_t acc[5 * 4];               ///< Current digest state
 };
@@ -79,11 +79,11 @@ static inline int cx_ripemd160_init ( cx_ripemd160_t * hash )
  * @brief   Computes a one shot Ripemd-160 digest.
  *
  * @param[in]  in      Input data.
- * 
+ *
  * @param[in]  in_len  Length of the input data.
- * 
+ *
  * @param[out] out     Buffer where to store the digest.
- * 
+ *
  * @param[in]  out_len Length of the output.
  *
  * @return             Size of a Ripemd-160 digest, i.e. 20 bytes.
