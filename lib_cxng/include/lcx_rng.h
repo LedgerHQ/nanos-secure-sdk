@@ -38,7 +38,7 @@
  *          each byte is between 0 and 255.
  *
  * @param[out] buffer Buffer to hold the random data.
- * 
+ *
  * @param[in]  len    Length of the buffer i.e. number of
  *                    random bytes to put into the buffer.
  */
@@ -49,10 +49,10 @@ void cx_rng_no_throw(uint8_t *buffer, size_t len);
  *          each byte is between 0 and 255.
  *
  * @param[out] buffer Buffer to hold the random data.
- * 
+ *
  * @param[in]  len    Length of the buffer i.e. number of
  *                    random bytes to put into the buffer.
- * 
+ *
  * @return            Pointer to the buffer.
  */
 static inline unsigned char *cx_rng(uint8_t *buffer, size_t len)
@@ -74,7 +74,7 @@ static inline uint32_t cx_rng_u32(void) {
 
 /**
  * @brief   Returns 8 random bits.
- * 
+ *
  * @return  A 8-bit random number.
  */
 static inline uint8_t cx_rng_u8(void) {
@@ -88,14 +88,14 @@ typedef uint32_t (*cx_rng_u32_range_randfunc_t)(void);
 /**
  * @brief   Generates a random 32-bit unsigned integer
  *          with a specified function.
- * 
+ *
  * @details The generated number is taken in the range [a;b[
  *          with uniform distribution.
  *
  * @param[in] a        Inclusive low bound.
- * 
+ *
  * @param[in] b        Exclusive high bound.
- * 
+ *
  * @param[in] randfunc Function called to generate the random value.
  *
  * @return             A 32-bit random number.
@@ -104,12 +104,12 @@ uint32_t cx_rng_u32_range_func(uint32_t a, uint32_t b, cx_rng_u32_range_randfunc
 
 /**
  * @brief   Generates a random 32-bit unsigned integer.
- * 
+ *
  * @details The generated number is taken in the range [a;b[
  *          with uniform distribution.
- * 
+ *
  * @param[in] a   Inclusive low bound.
- * 
+ *
  * @param[in] b   Exclusive high bound.
  *
  * @return        A 32-bit random number.
@@ -121,25 +121,25 @@ static inline uint32_t cx_rng_u32_range(uint32_t a, uint32_t b) {
 /**
  * @brief   Generates a random buffer according to
  *          <a href="https://tools.ietf.org/html/rfc6979"> RFC6979 </a>.
- * 
+ *
  * @param[in]  hash_id  Message digest algorithm identifier.
- *  
+ *
  * @param[in]  x        ECDSA private key.
- * 
+ *
  * @param[in]  x_len    Length of the key.
- *  
+ *
  * @param[in]  h1       Hash of the message.
- * 
+ *
  * @param[in]  h1_len   Length of the hash.
- * 
+ *
  * @param[in]  q        Prime number that is a divisor of the curve order.
- * 
+ *
  * @param[in]  q_len    Length of the prime number *q*.
- * 
+ *
  * @param[out] out      Buffer for the output.
- * 
+ *
  * @param[in]  out_len  Length of the output.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_INVALID_PARAMETER

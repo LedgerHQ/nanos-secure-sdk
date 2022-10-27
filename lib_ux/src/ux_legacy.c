@@ -94,7 +94,7 @@ const bagl_element_t* ux_menu_element_preprocessor(const bagl_element_t* element
       if (current_entry->line2 != NULL
         || current_entry->icon != NULL
         || ux_menu.current_entry == 0
-        || ux_menu.menu_entries_count == 1 
+        || ux_menu.menu_entries_count == 1
         || !previous_entry
         || previous_entry->icon != NULL
         || previous_entry->line2 != NULL) {
@@ -214,7 +214,7 @@ unsigned int ux_menu_elements_button (unsigned int button_mask, unsigned int but
 
 const ux_menu_entry_t UX_MENU_END_ENTRY = UX_MENU_END;
 
-void ux_menu_display(unsigned int current_entry, 
+void ux_menu_display(unsigned int current_entry,
                      const ux_menu_entry_t* menu_entries,
                      ux_menu_preprocessor_t menu_entry_preprocessor) {
   // reset to first entry
@@ -356,7 +356,7 @@ void ux_turner_ticker(unsigned int elapsed_ms) {
 }
 #endif // HAVE_BOLOS_UX
 
-void ux_turner_display(unsigned int current_step, 
+void ux_turner_display(unsigned int current_step,
                      const ux_turner_step_t* steps,
                      unsigned int steps_count,
                      button_push_callback_t button_callback) {
@@ -411,7 +411,7 @@ const bagl_element_t printf_element = {{BAGL_LABELINE, 0, 0, 9, 128, 32, 0, 0, 0
 
 void debug_wait_displayed(void) {
   // wait next event (probably a ticker, if not, too bad... this is debug !!)
-  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);  
+  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
 }
 
 #if defined(HAVE_DEBUG) || defined(BOLOS_DEBUG)
@@ -431,7 +431,7 @@ void debug_printf(void* buffer) {
   // // wait up the display processed
   // io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
   // wait until a button event
-  while (G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_BUTTON_PUSH_EVENT 
+  while (G_io_seproxyhal_spi_buffer[0] != SEPROXYHAL_TAG_BUTTON_PUSH_EVENT
     // not marked as released
     || G_io_seproxyhal_spi_buffer[3] != 0) {
     io_seproxyhal_general_status();

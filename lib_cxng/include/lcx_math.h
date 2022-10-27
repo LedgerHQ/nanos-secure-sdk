@@ -33,16 +33,16 @@
  * @brief Compares two integers represented as byte arrays.
  *
  * @param[in]  a      Pointer to the first integer.
- * 
+ *
  * @param[in]  b      Pointer to the second integer.
- * 
+ *
  * @param[in]  length Number of bytes taken into account for the comparison.
- * 
+ *
  * @param[out] diff   Result of the comparison:
  *                    - 0 if a and b are identical
  *                    - < 0 if a is less than b
  *                    - > 0 if a is greater than b
- * 
+ *
  * @return            Error code:
  *                    - CX_OK on success
  *                    - CX_NOT_UNLOCKED
@@ -55,19 +55,19 @@ cx_err_t cx_math_cmp_no_throw(const uint8_t *a, const uint8_t *b, size_t length,
 
 /**
  * @brief   Compares two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_cmp_no_throw
  *          rather than this function.
  *
  * @param[in]  a      Pointer to the first integer.
- * 
+ *
  * @param[in]  b      Pointer to the second integer.
- * 
+ *
  * @param[in]  length Number of bytes taken into account for the comparison.
- * 
+ *
  * @return            Result of the comparison:
  *                    - 0 if a and b are identical
  *                    - < 0 if a is less than b
@@ -108,10 +108,10 @@ cx_err_t cx_math_add_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
 
 /**
  * @brief   Adds two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_add_no_throw rather
  *          than this function.
  *
@@ -124,7 +124,7 @@ cx_err_t cx_math_add_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
  * @param[in]  len Number of bytes taken into account for the addition.
  *
  * @return         1 if there is a carry, 0 otherwise.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -162,7 +162,7 @@ cx_err_t cx_math_sub_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
 
 /**
  * @brief   Subtracts two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
  *
@@ -178,7 +178,7 @@ cx_err_t cx_math_sub_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
  * @param[in]  len Number of bytes taken into account for the subtraction.
  *
  * @return         1 if there is a carry, 0 otherwise.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -216,10 +216,10 @@ cx_err_t cx_math_mult_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, s
 
 /**
  * @brief   Multiplies two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_mult_no_throw rather
  *          than this function.
  *
@@ -230,7 +230,7 @@ cx_err_t cx_math_mult_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, s
  * @param[in]  b   Pointer to the second integer.
  *
  * @param[in]  len Number of bytes taken into account for the multiplication.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -256,7 +256,7 @@ static inline void cx_math_mult(uint8_t *r, const uint8_t *a, const uint8_t *b, 
  * @param[in]  m   Modulus
  *
  * @param[in]  len Number of bytes taken into account for the operation.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_NOT_UNLOCKED
@@ -270,10 +270,10 @@ cx_err_t cx_math_addm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, c
 /**
  * @brief   Performs a modular addition of
  *          two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation doesn't
  *          succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_addm_no_throw rather than
  *          this function.
  *
@@ -288,7 +288,7 @@ cx_err_t cx_math_addm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, c
  * @param[in]  m   Modulus
  *
  * @param[in]  len Number of bytes taken into account for the operation.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -314,7 +314,7 @@ static inline void cx_math_addm(uint8_t *r, const uint8_t *a, const uint8_t *b, 
  * @param[in]  m   Modulus
  *
  * @param[in]  len Number of bytes taken into account for the operation.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_NOT_UNLOCKED
@@ -328,10 +328,10 @@ cx_err_t cx_math_subm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, c
 /**
  * @brief   Performs a modular subtraction of
  *          two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation doesn't
  *          succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_subm_no_throw rather than
  *          this function.
  *
@@ -371,7 +371,7 @@ static inline void cx_math_subm(uint8_t *r, const uint8_t *a, const uint8_t *b, 
  * @param[in]  m   Modulus
  *
  * @param[in]  len Number of bytes taken into account for the operation.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_NOT_UNLOCKED
@@ -386,10 +386,10 @@ cx_err_t cx_math_multm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, 
 /**
  * @brief   Performs a modular multiplication of
  *          two integers represented as byte arrays.
- * 
+ *
  * @details This function throws an exception if the computation doesn't
  *          succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_multm_no_throw rather than
  *          this function.
  *
@@ -403,7 +403,7 @@ cx_err_t cx_math_multm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, 
  * @param[in]  m   Modulus
  *
  * @param[in]  len Number of bytes taken into account for the operation.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -417,7 +417,7 @@ static inline void cx_math_multm(uint8_t *r, const uint8_t *a, const uint8_t *b,
 
 /**
  * @brief   Performs a modular reduction.
- * 
+ *
  * @details Computes the remainder of the division of v by m. Store the result in v.
  *
  * @param[in,out] v     Pointer to the dividend and buffer for the result.
@@ -425,9 +425,9 @@ static inline void cx_math_multm(uint8_t *r, const uint8_t *a, const uint8_t *b,
  * @param[in]     len_v Number of bytes of the dividend.
  *
  * @param[in]     m     Modulus.
- * 
+ *
  * @param[in]     len_m Number of bytes of the modulus.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_NOT_UNLOCKED
@@ -440,10 +440,10 @@ cx_err_t cx_math_modm_no_throw(uint8_t *v, size_t len_v, const uint8_t *m, size_
 
 /**
  * @brief   Performs a modular reduction.
- * 
+ *
  * @details This function throws an exception if the computation doesn't
  *          succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_modm_no_throw rather
  *          than this function.
  *
@@ -452,9 +452,9 @@ cx_err_t cx_math_modm_no_throw(uint8_t *v, size_t len_v, const uint8_t *m, size_
  * @param[in]     len_v Number of bytes of the dividend.
  *
  * @param[in]     m     Modulus.
- * 
+ *
  * @param[in]     len_m Number of bytes of the modulus.
- * 
+ *
  * @throws              CX_NOT_UNLOCKED
  * @throws              CX_INVALID_PARAMETER_SIZE
  * @throws              CX_NOT_LOCKED
@@ -467,13 +467,13 @@ static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8_t *m, size
 
 /**
  * @brief   Performs a modular exponentiation.
- * 
+ *
  * @details Computes the result of **a^e mod m**.
  *
  * @param[out] r     Buffer for the result.
- * 
+ *
  * @param[in]  a     Pointer to an integer.
- * 
+ *
  * @param[in]  e     Pointer to the exponent.
  *
  * @param[in]  len_e Number of bytes of the exponent.
@@ -481,7 +481,7 @@ static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8_t *m, size
  * @param[in]  m     Modulus
  *
  * @param[in]  len   Number of bytes of the result.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_NOT_UNLOCKED
@@ -494,18 +494,18 @@ cx_err_t cx_math_powm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *e, s
 
 /**
  * @brief   Performs a modular exponentiation.
- * 
+ *
  * @details It computes the result of **a^e mod m**.
- *          This function throws an exception 
+ *          This function throws an exception
  *          if the computation doesn't succeed.
- * 
+ *
  * @warning It is recommended to use #cx_math_powm_no_throw
  *          rather than this function.
  *
  * @param[out] r     Buffer for the result.
- * 
+ *
  * @param[in]  a     Pointer to an integer.
- * 
+ *
  * @param[in]  e     Pointer to the exponent.
  *
  * @param[in]  len_e Number of bytes of the exponent.
@@ -513,7 +513,7 @@ cx_err_t cx_math_powm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *e, s
  * @param[in]  m     Modulus
  *
  * @param[in]  len   Number of bytes of the result.
- * 
+ *
  * @throws           CX_NOT_UNLOCKED
  * @throws           CX_INVALID_PARAMETER_SIZE
  * @throws           CX_NOT_LOCKED
@@ -526,7 +526,7 @@ static inline void cx_math_powm(uint8_t *r, const uint8_t *a, const uint8_t *e, 
 
 /**
  * @brief   Computes the modular inverse with a prime modulus.
- * 
+ *
  * @details It computes the result of **a^(-1) mod m**, for a prime *m*.
  *
  * @param[out] r   Buffer for the result.
@@ -534,9 +534,9 @@ static inline void cx_math_powm(uint8_t *r, const uint8_t *a, const uint8_t *e, 
  * @param[in]  a   Pointer to the integer.
  *
  * @param[in]  m   Modulus. Must be a prime number.
- * 
+ *
  * @param[in]  len Number of bytes of the result.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_NOT_UNLOCKED
@@ -549,7 +549,7 @@ cx_err_t cx_math_invprimem_no_throw(uint8_t *r, const uint8_t *a, const uint8_t 
 
 /**
  * @brief   Computes the modular inverse with a prime modulus.
- * 
+ *
  * @details It computes the result of **a^(-1) mod m**, for a prime *m*.
  *          This function throws an exception if the computation doesn't
  *          succeed.
@@ -562,9 +562,9 @@ cx_err_t cx_math_invprimem_no_throw(uint8_t *r, const uint8_t *a, const uint8_t 
  * @param[in]  a   Pointer to the integer.
  *
  * @param[in]  m   Modulus. Must be a prime number.
- * 
+ *
  * @param[in]  len Number of bytes of the result.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -577,7 +577,7 @@ static inline void cx_math_invprimem(uint8_t *r, const uint8_t *a, const uint8_t
 
 /**
  * @brief   Computes the modular inverse.
- * 
+ *
  * @details It computes the result of **a^(-1) mod m**. *a* must be invertible modulo *m*,
  *          i.e. the greatest common divisor of *a* and *m* is 1.
  *
@@ -586,9 +586,9 @@ static inline void cx_math_invprimem(uint8_t *r, const uint8_t *a, const uint8_t
  * @param[in]  a   Pointer to the integer.
  *
  * @param[in]  m   Modulus.
- * 
+ *
  * @param[in]  len Number of bytes of the result.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_NOT_UNLOCKED
@@ -601,7 +601,7 @@ cx_err_t cx_math_invintm_no_throw(uint8_t *r, uint32_t a, const uint8_t *m, size
 
 /**
  * @brief   Computes the modular inverse.
- * 
+ *
  * @details It computes the result of **a^(-1) mod m**. a must be invertible modulo *m*,
  *          i.e. the greatest common divisor of *a* and *m* is 1.
  *          This function throws an exception if the computation doesn't succeed.
@@ -614,9 +614,9 @@ cx_err_t cx_math_invintm_no_throw(uint8_t *r, uint32_t a, const uint8_t *m, size
  * @param[in]  a   Pointer to the integer.
  *
  * @param[in]  m   Modulus.
- * 
+ *
  * @param[in]  len Number of bytes of the result.
- * 
+ *
  * @throws         CX_NOT_UNLOCKED
  * @throws         CX_INVALID_PARAMETER_SIZE
  * @throws         CX_NOT_LOCKED
@@ -633,7 +633,7 @@ static inline void cx_math_invintm(uint8_t *r, uint32_t a, const uint8_t *m, siz
  * @param[in]  r     Pointer to an integer.
  *
  * @param[in]  len   Number of bytes of the integer.
- * 
+ *
  * @param[out] prime Bool indicating whether r is prime or not:
  *                   - 0 : not prime
  *                   - 1 : prime
@@ -650,7 +650,7 @@ cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
 
 /**
  * @brief   Checks whether a number is probably prime.
- * 
+ *
  * @details This function throws an exception if the
  *          computation doesn't succeed.
  *
@@ -664,7 +664,7 @@ cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
  * @return           Bool indicating whether r is prime or not:
  *                   - 0 : not prime
  *                   - 1 : prime
- * 
+ *
  * @throws           CX_NOT_UNLOCKED
  * @throws           CX_INVALID_PARAMETER_SIZE
  * @throws           CX_NOT_LOCKED
@@ -683,7 +683,7 @@ static inline bool cx_math_is_prime(const uint8_t *r, size_t len) {
  * @param[in, out] r   Pointer to the integer and buffer for the result.
  *
  * @param[in]      len Number of bytes of the integer.
- * 
+ *
  * @return             Error code:
  *                     - CX_OK on success
  *                     - CX_NOT_UNLOCKED
@@ -698,7 +698,7 @@ cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
 
 /**
  * @brief   Computes the next prime after a given number.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
  *
@@ -708,7 +708,7 @@ cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
  * @param[in] r   Pointer to the integer and buffer for the result.
  *
  * @param[in] len Number of bytes of the integer.
- * 
+ *
  * @throws        CX_NOT_UNLOCKED
  * @throws        CX_INVALID_PARAMETER_SIZE
  * @throws        CX_MEMORY_FULL

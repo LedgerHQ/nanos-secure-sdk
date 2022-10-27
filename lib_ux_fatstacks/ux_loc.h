@@ -38,7 +38,7 @@ typedef struct language_pack {
 
 // A language pack is a binary file containing:
 /*
-- the language pack header, including infos about used fonts & glyphes
+- the language pack header, including infos about used fonts & glyphs
 - offsets for each string (2 x nb_strings), from the beginning of the pack!
 - 2 bytes padding if nb_strings is odd
 - nbgl_font_unicode_character_t x nb_characters x 4 fonts
@@ -52,7 +52,7 @@ typedef struct language_pack {
 - all strings, concatenated.
 
 NB:
-- there are 197 countries in the world, so 1 byte might be enought to store language information, unless we plan to integrate dialects (>7000) => use a u_int16_t;
+- there are 197 countries in the world, so 1 byte might be enough to store language information, unless we plan to integrate dialects (>7000) => use a u_int16_t;
 - we may store some CRC, to check language pack's integrity.
 */
 

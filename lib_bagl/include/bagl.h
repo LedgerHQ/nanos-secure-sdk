@@ -39,7 +39,7 @@
 #define BAGL_FILL_CIRCLE_PI2_PI (BAGL_FILL_CIRCLE_7_OCTANT|BAGL_FILL_CIRCLE_8_OCTANT)
 
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 
 typedef enum bagl_components_type_e_ {
   BAGL_NONE = 0, // for fast memset clearing all components
@@ -60,7 +60,7 @@ typedef enum bagl_components_type_e_ {
 } bagl_components_type_e;
 #define BAGL_TYPE_FLAGS_MASK 0x80
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 
 typedef struct {
   bagl_components_type_e type;
@@ -95,7 +95,7 @@ typedef struct {
 // iconid: contains the horizontal scroll speed (in pixel/second)
 #define BAGL_LONGLABEL_TIME_MS(textlength,avgcharwidth,stroke,iconid) (2*(textlength*avgcharwidth)*1000/(iconid) + 2*(stroke & ~(BAGL_STROKE_FLAG_ONESHOT) )*100 )
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 
 
 /**
@@ -111,7 +111,7 @@ typedef struct bagl_icon_details_s {
 } bagl_icon_details_t;
 
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 
 #ifdef HAVE_BAGL_GLYPH_ARRAY
 typedef struct {
@@ -123,11 +123,11 @@ typedef struct {
   const unsigned char* bitmap;
 } bagl_glyph_array_entry_t;
 
-extern bagl_glyph_array_entry_t const C_glyph_array[]; 
+extern bagl_glyph_array_entry_t const C_glyph_array[];
 extern const unsigned int C_glyph_count;
 #endif // HAVE_BAGL_GLYPH_ARRAY
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 
 typedef struct {
   unsigned char char_width;
@@ -235,7 +235,7 @@ typedef enum {
 #define BAGL_FONT_SYMBOLS_0_EXIT        "\x87"
 #define BAGL_FONT_SYMBOLS_1_CARET       "\xA0"
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 
 // Glyphs definitions
 enum bagl_glyph_e {
@@ -294,7 +294,7 @@ enum bagl_glyph_e {
   NB_BAGL_GLYPH_ICON
 };
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 // return y<<16+x after string have been printed
 unsigned short bagl_compute_line_width(unsigned short font_id, unsigned short width, const void * text, unsigned char text_length, unsigned char text_encoding);
 int bagl_draw_string(unsigned short font_id, unsigned int color1, unsigned int color0, int x, int y, unsigned int width, unsigned int height, const void* text, unsigned int text_length, unsigned char text_encoding);
@@ -316,7 +316,7 @@ typedef struct bagl_animated_s {
   // NOTE: icon_id holds the horizontal scroll speed
   // NOTE: stroke holds the pause time (unit is 100ms) when reaching each ends of the content to scroll.
   bagl_component_t c;
-  
+
   // the component context to be animated
   void * text;
   unsigned short text_length;
@@ -324,12 +324,12 @@ typedef struct bagl_animated_s {
   unsigned int current_char_idx;
   unsigned int current_x;
   unsigned int next_ms; // the next time checkpoint to perform an animation
-} bagl_animated_t; 
+} bagl_animated_t;
 
 // perform step animation
 void bagl_animate(bagl_animated_t* anim, unsigned int timestamp_ms, unsigned int interval_ms);
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 // start drawing a bitmap in the given area
 void bagl_hal_draw_bitmap_within_rect(int x, int y, unsigned int width, unsigned int height, unsigned int color_count, const unsigned int * colors, unsigned int bit_per_pixel, const unsigned char* bitmap, unsigned int bitmap_length_bits);
 // continue drawing the bitmap in the previously setup area, take care to use the same bpp
@@ -340,8 +340,7 @@ void bagl_action(const bagl_component_t* component, unsigned char event_kind);
 
 void bagl_init(void);
 
-// -------------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------------
 // internal exposed for smoother coding of printf functions
 
 #endif // BAGL_H_
-

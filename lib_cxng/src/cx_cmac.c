@@ -149,7 +149,7 @@ cx_err_t cx_cmac_finish(cx_cipher_context_t *ctx,
       || (NULL == output)) {
     return CX_INVALID_PARAMETER;
   }
-  
+
   CX_CHECK(cx_cmac_generate_subkeys(ctx, sub_key1, sub_key2));
 
   if (ctx->cmac_ctx->unprocessed_len < ctx->cipher_info->block_size) {
@@ -182,7 +182,7 @@ cx_err_t cx_cmac(const cx_cipher_id_t type,
                  const uint8_t *input,
                  size_t in_len,
                  uint8_t *output) {
-  
+
   cx_cipher_context_t ctx;
   cx_err_t            error;
   cipher_key_t        key_ctx;

@@ -248,7 +248,7 @@ error:
 
 /**
  * Function that process every message received on a media.
- * Performs message concatenation when message is splitted.
+ * Performs message concatenation when message is split.
  */
 void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
                           uint16_t size, u2f_transport_media_t media) {
@@ -423,7 +423,7 @@ void u2f_transport_received(u2f_service_t *service, uint8_t *buffer,
             goto error;
         }
         if (media != service->transportMedia) {
-            // Mixed medias
+            // Mixed media
             u2f_transport_error(service, ERROR_PROP_MEDIA_MIXED);
             goto error;
         }

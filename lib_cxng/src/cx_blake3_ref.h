@@ -89,7 +89,7 @@ static unsigned int highest_one(uint64_t x) {
   return c;
 }
 
-// The Hamming weight of x, i.e. the number of 1 in the binary representation 
+// The Hamming weight of x, i.e. the number of 1 in the binary representation
 INLINE unsigned int hw(uint64_t x) {
   unsigned int count = 0;
   while (x) {

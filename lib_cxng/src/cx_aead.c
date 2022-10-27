@@ -144,7 +144,7 @@ cx_err_t cx_aead_decrypt(cx_aead_context_t *ctx, const uint8_t *iv, size_t iv_le
     return CX_INVALID_PARAMETER;
   }
   *out_len = in_len;
-  return ctx->info->func->auth_decrypt(ctx->base_ctx, in, in_len, iv, iv_len, 
+  return ctx->info->func->auth_decrypt(ctx->base_ctx, in, in_len, iv, iv_len,
                                        ad, ad_len, out, tag, tag_len);
 
 }

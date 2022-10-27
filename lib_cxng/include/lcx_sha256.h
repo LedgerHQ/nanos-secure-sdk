@@ -117,7 +117,7 @@ static inline int cx_sha256_init ( cx_sha256_t * hash )
  * @param[in]  len     Length of the input data.
  *
  * @param[out] out     Buffer where to store the digest.
- * 
+ *
  * @param[in]  out_len Length of the output.
  *                     This is actually 256 bits.
  *

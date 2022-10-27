@@ -499,7 +499,7 @@ page_start_loop:
           // Just continue parsing starting from the same line, but with new text buffer:
           goto page_start_loop;
         }
-        // Currently, escape character use just one additionnal byte.
+        // Currently, escape character use just one additional byte.
         // If next character is '\n' or '\f' or '\0' we'll remove it and store 2 bytes:
         // (this mean we was dealing with a full line icon)
         // -----------------------------

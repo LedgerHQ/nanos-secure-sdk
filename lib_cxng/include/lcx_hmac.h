@@ -79,7 +79,7 @@ cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_
 
 /**
  * @brief   Initializes a HMAC-RIPEMD160 context.
- * 
+ *
  * @details This function throws an exception if the
  *          initialization fails.
  *
@@ -98,7 +98,7 @@ cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_
  *                     The key length shall be less than 64 bytes.
  *
  * @return             RIPEMD160 identifier.
- * 
+ *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const unsigned char * key, unsigned int key_len )
@@ -123,7 +123,7 @@ typedef struct {
 
 /**
  * @brief   Initializes a HMAC-SHA224 context.
- * 
+ *
  * @param[out] hmac    Pointer to the HMAC context.
  *                     The context shall be in RAM.
  *
@@ -146,7 +146,7 @@ cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac, const uint8_t *key, unsigne
 
 /**
  * @brief   Initializes a HMAC-SHA256 context.
- * 
+ *
  * @param[out] hmac    Pointer to the HMAC context.
  *                     The context shall be in RAM.
  *
@@ -172,7 +172,7 @@ cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac, const uint8_t *key
  *
  * @warning It is recommended to use #cx_hmac_sha256_init_no_throw
  *          rather than this function.
- * 
+ *
  * @param[out] hmac    Pointer to the HMAC context.
  *                     The context shall be in RAM.
  *
@@ -185,7 +185,7 @@ cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac, const uint8_t *key
  *                     The key length shall be less than 64 bytes.
  *
  * @return             SHA256 identifier.
- * 
+ *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, const unsigned char * key, unsigned int key_len )
@@ -210,7 +210,7 @@ static inline int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, const unsigned 
  * @param[in]  mac_len Size of the output buffer.
  *                     The buffer size must be larger
  *                     than the length of the HMAC value.
- * 
+ *
  * @return             Length of the HMAC value.
  */
 size_t cx_hmac_sha256(const uint8_t *key, size_t key_len, const uint8_t *in, size_t len, uint8_t *mac, size_t mac_len);
@@ -232,7 +232,7 @@ typedef struct {
 
 /**
  * @brief   Initializes a HMAC-SHA384 context.
- * 
+ *
  * @param[out] hmac    Pointer to the context.
  *                     The context shall be in RAM.
  *
@@ -255,7 +255,7 @@ cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac, const uint8_t *key, unsigne
 
 /**
  * @brief   Initializes a HMAC-SHA512 context.
- * 
+ *
  * @param[out] hmac    Pointer to the context.
  *                     The context shall be in RAM.
  *
@@ -275,7 +275,7 @@ cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key
 
 /**
  * @brief   Initializes a HMAC-SHA512 context.
- * 
+ *
  * @details This function throws an exception if
  *          if the initialization fails.
  *
@@ -294,7 +294,7 @@ cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key
  *                     The key length shall be less than 128 bytes.
  *
  * @return             SHA512 identifier.
- * 
+ *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, const unsigned char * key, unsigned int key_len )
@@ -319,7 +319,7 @@ static inline int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, const unsigned 
  * @param[in]  mac_len Size of the output buffer.
  *                     The buffer size must be larger
  *                     than the length of the HMAC value.
- * 
+ *
  * @return             Length of the HMAC value.
  */
 size_t cx_hmac_sha512(const uint8_t *key, size_t key_len, const uint8_t *in, size_t len, uint8_t *mac, size_t mac_len);
@@ -329,7 +329,7 @@ size_t cx_hmac_sha512(const uint8_t *key, size_t key_len, const uint8_t *in, siz
 /**
  * @brief   Computes a HMAC value according to the specified
  *          hash function.
- * 
+ *
  * @param[in]  hmac    Pointer to the HMAC context.
  *                     The context shall be initialized with
  *                     one of the initialization functions.
@@ -362,13 +362,13 @@ cx_err_t cx_hmac_no_throw(cx_hmac_t *hmac, uint32_t mode, const uint8_t *in, siz
 /**
  * @brief   Computes a HMAC value according to the specified
  *          hash function.
- * 
+ *
  * @details This function throws an exception
  *          if the computation doesn't succeed.
  *
  * @warning It is recommended to use #cx_hmac_no_throw rather than
  *          this function.
- * 
+ *
  * @param[in]  hmac    Pointer to the HMAC context.
  *                     The context shall be initialized with
  *                     one of the initialization functions.
@@ -393,7 +393,7 @@ cx_err_t cx_hmac_no_throw(cx_hmac_t *hmac, uint32_t mode, const uint8_t *in, siz
  *                     than the length of the HMAC value.
  *
  * @return             Identifier of the hash function.
- * 
+ *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char * in, unsigned int len, unsigned char * mac, unsigned int mac_len )
@@ -424,7 +424,7 @@ static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char
 
 /**
  * @brief   Initializes a HMAC context.
- * 
+ *
  * @param[out] hmac    Pointer to the context.
  *                     The context shall be in RAM.
  *
@@ -446,7 +446,7 @@ cx_err_t cx_hmac_init(cx_hmac_t *hmac, cx_md_t hash_id, const uint8_t *key, size
 
 /**
  * @brief   Adds more data to compute the HMAC.
- * 
+ *
  * @details A call to this function is equivalent to:
  *          *cx_hmac_no_throw(hmac, 0, in, in_len, NULL, 0)*.
  *
@@ -465,12 +465,12 @@ cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
 
 /**
  * @brief   Finalizes the HMAC algorithm.
- * 
+ *
  * @details A call to this function is
  *          equivalent to *cx_hmac_no_throw(hash, CX_LAST, NULL, 0, out, out_len)*.
  *
  * @param[in]  ctx     Pointer to the HMAC context.
- * 
+ *
  * @param[out] out     Computed HMAC value is CX_LAST is set.
  *
  * @param[in]  out_len Length of the output (the most significant bytes).

@@ -36,7 +36,7 @@
 
 /**
  * @brief   Computes a 16-bit checksum value.
- * 
+ *
  * @details The 16-bit value is computed according to the CRC16 CCITT definition.
  *
  * @param[in] buffer The buffer to compute the CRC over.
@@ -49,13 +49,13 @@
 
 /**
  * @brief   Accumulates more data to CRC.
- * 
+ *
  * @param[in] crc    CRC value to be updated.
- * 
+ *
  * @param[in] buffer The buffer to compute the CRC over.
- * 
+ *
  * @param[in] len    Bytes length of the buffer.
- * 
+ *
  * @return           Updated CRC value.
  */
   uint16_t cx_crc16_update(uint16_t crc, const void *buffer, size_t len);

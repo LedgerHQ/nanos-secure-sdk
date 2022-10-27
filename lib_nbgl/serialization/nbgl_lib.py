@@ -145,7 +145,7 @@ class NbglGenericJsonSerializable(ABC):
     @classmethod
     def from_json_dict(cls, data: Dict):
         """
-        Get an instance of the class, from its json dict version. 
+        Get an instance of the class, from its json dict version.
         """
         fields = {}
         for field_name, field_obj in cls.__dataclass_fields__.items():
@@ -589,7 +589,7 @@ NbglEvent = Union[
 def deserialize_nbgl_bytes(data: bytes) -> NbglEvent:
     """
     Return a NbglRefreshAreaEvent or a NbglDrawObjectEvent,
-    from input bytes. 
+    from input bytes.
     """
     event_type = NbglEventType(int(data[0]))
 
@@ -602,7 +602,7 @@ def deserialize_nbgl_bytes(data: bytes) -> NbglEvent:
 def deserialize_nbgl_json(data: Dict) -> NbglEvent:
     """
     Return a NbglRefreshAreaEvent or a NbglDrawObjectEvent,
-    from input json-like dictionnary.
+    from input json-like dictionary.
     """
     event_type = NbglEventType[data['event']]
 
@@ -614,7 +614,7 @@ def deserialize_nbgl_json(data: Dict) -> NbglEvent:
 
 def serialize_nbgl_json(data: NbglEvent) -> Dict:
     """
-    Return a json-like dictionnary from
+    Return a json-like dictionary from
     input NbglRefreshAreaEvent / NbglDrawObjectEvent
     """
     EVENT_TYPES = {

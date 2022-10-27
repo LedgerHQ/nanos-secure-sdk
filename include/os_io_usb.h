@@ -53,7 +53,7 @@ io_usb_hid_receive_status_t io_usb_hid_receive (io_send_t sndfct, unsigned char*
  */
 void io_usb_hid_sent(io_send_t sndfct);
 
-/** 
+/**
  * Request transmission of an APDU from the G_io_apdu_buffer using the HID transport protocol
  */
 void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength);

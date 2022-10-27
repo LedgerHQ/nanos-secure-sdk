@@ -140,7 +140,7 @@ typedef struct nbgl_pageContent_s {
 } nbgl_pageContent_t;
 
 /**
- * @brief type shared externaly
+ * @brief type shared externally
  *
  */
 typedef void* nbgl_page_t;
@@ -164,8 +164,8 @@ typedef struct nbgl_pageNavWithTap_s {
     uint8_t backToken; ///< the token used as argument of the actionCallback when the back button is touched
     uint8_t nextPageToken; ///< the token used as argument of the actionCallback when the main panel is "tapped"
     const char *nextPageText; ///< this text is used as indication for "Tap to continue", to navigate forward
-    const char * quitText; ///< the text dispayed in footer, used to quit
-    const char *skipText; ///< if not NULL the text dispayed in right part of footer, used for example to skip pages
+    const char * quitText; ///< the text displayed in footer, used to quit
+    const char *skipText; ///< if not NULL the text displayed in right part of footer, used for example to skip pages
     uint8_t skipToken; ///< if skipText is NULL the token used when right part of footer is touched
 } nbgl_pageNavWithTap_t;
 

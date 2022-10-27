@@ -30,7 +30,7 @@
 #define CHARACTER_EXCHANGE             0x00
 
 #define EXCHANGE_LEVEL_FEATURE         SHORT_APDU_EXCHANGE
-  
+
 #define CCID_INTF 2
 #define CCID_BULK_IN_EP       0x83
 #define CCID_BULK_EPIN_SIZE   64

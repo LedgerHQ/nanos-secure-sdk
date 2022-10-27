@@ -25,7 +25,7 @@
  *
  * The Chacha cipher is a stream cipher which generates a key stream of at most 2^70 bytes
  * composed of blocks of size 512 bits. The possible key sizes are 128 bits and 256 bits and
- * the possible numbers of rounds are 8,12 and, 20. 
+ * the possible numbers of rounds are 8,12 and, 20.
  *
  * @author  Ledger
  * @version 1.0
@@ -55,7 +55,7 @@ typedef struct {
  *                #cx_chacha_set_key and
  *                #cx_chacha_start, then one or more calls to
  *                #cx_chacha_update
- * 
+ *
  * @param ctx     The Chacha context to initialize. This must not be \c NULL.
  *
  * @param nrounds The number of rounds: 8, 12 or 20.
@@ -65,11 +65,11 @@ void cx_chacha_init(cx_chacha_context_t *ctx, uint32_t nrounds);
 
 /**
  * @brief         Set the encryption or decryption key.
- * 
+ *
  * @details       This function must be followed by #cx_chacha_start to set the nonce
  *                and the counter (the initialization vector) and by #cx_chacha_update
  *                to encrypt or decrypt.
- * 
+ *
  * @param ctx     The Chacha context to which the key should be bound. It must be initialized.
  *
  * @param key     Pointer to the key. This must not be \c NULL.
@@ -83,14 +83,14 @@ cx_err_t cx_chacha_set_key(cx_chacha_context_t *ctx, const uint8_t *key, size_t 
 
 /**
  * @brief        Set the nonce and initial counter value.
- * 
+ *
  * @details      The counter value *counter* and the nonce *nonce* are
  *               concatenated to form the initialization vector *iv*:
  *               **iv = counter || nonce**.
  *               The nonce is either 8 or 12 bytes. If the nonce is 8 bytes
  *               then the counter is represented with 8 bytes. If the nonce is
  *               12 bytes then the counter is represented with 4 bytes.
- * 
+ *
  * @param ctx    The Chacha context to which the nonce should be bound.
  *               It must be initialized and bound to a key.
  *
@@ -105,11 +105,11 @@ cx_err_t cx_chacha_start(cx_chacha_context_t *ctx, const uint8_t *iv, size_t iv_
 
 /**
  * @brief        Update the stream: encrypt or decrypt data.
- * 
+ *
  * @details      This function must be called after #cx_chacha_set_key and #cx_chacha_start.
  *               It can be called multiple times for long input data. The result is then the
- *               concatenation of all the ouputs of this function.
- * 
+ *               concatenation of all the outputs of this function.
+ *
  * @param ctx    The Chacha context to use for encryption or decryption. It must be initialized
  *               and bound to a key and a nonce.
  *
@@ -126,7 +126,7 @@ cx_err_t cx_chacha_update(cx_chacha_context_t *ctx, const uint8_t *input, uint8_
 
 /**
  * @brief Encrypt or decrypt data with Chacha and a given key and nonce.
- * 
+ *
  * @param nrounds Number of rounds: 8, 12 or 20.
  *
  * @param key     Pointer to the key. This must not be \c NULL.

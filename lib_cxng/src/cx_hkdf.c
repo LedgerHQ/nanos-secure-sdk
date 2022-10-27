@@ -44,7 +44,7 @@ void cx_hkdf_expand(const cx_md_t hash_id, const unsigned char *prk, unsigned in
   md_len = hash_info->output_size;
 
   hmac_ctx = &G_cx.hmac;
-  
+
   for (i = 1; okm_len > 0; i++) {
     cx_hmac_init(hmac_ctx, hash_id, prk, prk_len);
     if (i > 1) {

@@ -34,7 +34,7 @@ and use \b NBGL Low-Level API
 
 @section nbgl_screen_objs Screen and objects management
 The @subpage nbgl_screens_and_objs page contains all information necessary to understand
-how \b NBGL manages the screens stack and the dynmically allocated objects
+how \b NBGL manages the screens stack and the dynamically allocated objects
 
 @section nbgl_touch_api Touchscreen events management
 The @subpage nbgl_touchscreen page contains all information necessary to understand
