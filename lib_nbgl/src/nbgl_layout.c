@@ -117,11 +117,11 @@ static nbgl_button_t *choiceButtons[NB_MAX_SUGGESTION_BUTTONS];
  **********************/
 
 // Unit step in % of touchable progress bar
-#define HOLD_TO_APPROVE_STEP_PERCENT (25)
+#define HOLD_TO_APPROVE_STEP_PERCENT (17)
 // Duration in ms the user must hold the progress bar
 // to make it progress HOLD_TO_APPROVE_STEP_PERCENT %.
 // This duration must be higher than the screen refresh duration.
-#define HOLD_TO_APPROVE_STEP_DURATION_MS (500)
+#define HOLD_TO_APPROVE_STEP_DURATION_MS (400)
 
 static inline uint8_t get_hold_to_approve_percent(uint32_t touch_duration) {
         uint8_t current_step_nb = (touch_duration / HOLD_TO_APPROVE_STEP_DURATION_MS) + 1;
