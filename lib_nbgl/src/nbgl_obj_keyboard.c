@@ -161,6 +161,7 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     else if (firstIndex==SHIFT_KEY_INDEX) {
       keyboard->upperCase = (keyboard->upperCase == false)? true : false;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
     else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
       keyboard->mode = MODE_DIGITS;
@@ -174,6 +175,7 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     else if (firstIndex==SPECIAL_KEYS_INDEX) {
       keyboard->mode = MODE_SPECIAL;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
     else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
       keyboard->mode = MODE_LETTERS;
@@ -187,6 +189,7 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     else if (firstIndex==SPECIAL_KEYS_INDEX) {
       keyboard->mode = MODE_DIGITS;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
     else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
       keyboard->mode = MODE_LETTERS;
