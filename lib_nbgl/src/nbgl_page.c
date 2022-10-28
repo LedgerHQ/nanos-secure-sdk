@@ -357,7 +357,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
-  layoutDescription.modal = false;
+  layoutDescription.modal = info->modal;
 
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.tapActionText = NULL;
@@ -500,7 +500,10 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
   layout = nbgl_layoutGet(&layoutDescription);
   if (nav != NULL) {
     if (nav->navType == NAV_WITH_TAP) {
-      nbgl_layoutAddFooter(layout, (char*)nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
+      if (nav->navWithTap.skipText == NULL)
+        nbgl_layoutAddFooter(layout, (char*)nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
+      else
+        nbgl_layoutAddSplitFooter(layout, (char*)nav->navWithTap.quitText, nav->quitToken, (char*)nav->navWithTap.skipText, nav->navWithTap.skipToken, nav->tuneId);
       if (nav->progressIndicator)
         nbgl_layoutAddProgressIndicator(layout, nav->activePage, nav->nbPages, nav->navWithTap.backButton, nav->navWithTap.backToken, nav->tuneId);
     }

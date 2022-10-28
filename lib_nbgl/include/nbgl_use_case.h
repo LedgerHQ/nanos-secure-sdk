@@ -26,6 +26,12 @@ extern "C" {
  */
 #define FIRST_USER_TOKEN 20
 
+/**
+ *  @brief value of page parameter used with navigation callback when "skip" button is touched, to display the long press button to confirm
+ *         review.
+ */
+#define LAST_PAGE_FOR_REVIEW 0xFF
+
 /**********************
  *      MACROS
  **********************/

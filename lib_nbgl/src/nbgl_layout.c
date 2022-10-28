@@ -1792,6 +1792,93 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_
 }
 
 /**
+ * @brief Creates 2 touchable texts at the footer of the screen, separated with a thin line from the rest of the screen, and from each other.
+ *
+ * @param layout the current layout
+ * @param leftText text to used in the left part of footer
+ * @param leftToken token to use when the left part of footer is touched
+ * @param rightText text to used in the right part of footer
+ * @param rightToken token to use when the right part of footer is touched
+ * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when button is long pressed
+ * @return >= 0 if OK
+ */
+int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t leftToken, char *rightText, uint8_t rightToken, tune_index_e tuneId) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  layoutObj_t *obj;
+  nbgl_text_area_t *textArea;
+  nbgl_line_t *line;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddSplitFooter():\n");
+  if (layout == NULL)
+    return -1;
+
+  // create left touchable text
+  textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
+  GET_NEXT_OBJ_FROM_POOL(layoutInt,obj);
+  obj->obj = (nbgl_obj_t*)textArea;
+  obj->token = leftToken;
+  obj->tuneId = tuneId;
+  textArea->alignment = BOTTOM_LEFT;
+  textArea->alignmentMarginX = 0;
+  textArea->alignmentMarginY = 0;
+  textArea->textColor = BLACK;
+  textArea->width = GET_AVAILABLE_WIDTH(layoutInt)/2;
+  textArea->height = BUTTON_HEIGHT;
+  textArea->text = PIC(leftText);
+  textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+  textArea->textAlignment = CENTER;
+  textArea->alignTo = NULL;
+  textArea->touchMask = (1 << TOUCHED);
+  textArea->touchCallback = (nbgl_touchCallback_t)touchCallback;
+  layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t*)textArea;
+  layoutInt->nbChildren++;
+
+  // create right touchable text
+  textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
+  GET_NEXT_OBJ_FROM_POOL(layoutInt,obj);
+  obj->obj = (nbgl_obj_t*)textArea;
+  obj->token = rightToken;
+  obj->tuneId = tuneId;
+  textArea->alignment = BOTTOM_RIGHT;
+  textArea->alignmentMarginX = 0;
+  textArea->alignmentMarginY = 0;
+  textArea->textColor = BLACK;
+  textArea->width = GET_AVAILABLE_WIDTH(layoutInt)/2;
+  textArea->height = BUTTON_HEIGHT;
+  textArea->text = PIC(rightText);
+  textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+  textArea->textAlignment = CENTER;
+  textArea->alignTo = NULL;
+  textArea->touchMask = (1 << TOUCHED);
+  textArea->touchCallback = (nbgl_touchCallback_t)touchCallback;
+  layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t*)textArea;
+  layoutInt->nbChildren++;
+
+  // create horizontal line separating footer from main container
+  line = createHorizontalLine(layoutInt->layer);
+  line->alignTo = layoutInt->children[layoutInt->nbChildren-2];
+  line->alignment = TOP_LEFT;
+  layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t*)line;
+  layoutInt->nbChildren++;
+
+  // create vertical line separating both text areas
+  line = (nbgl_line_t*)nbgl_objPoolGet(LINE,layoutInt->layer);
+  line->lineColor = LIGHT_GRAY;
+  line->width = 1;
+  line->height = textArea->height+4;
+  line->direction = VERTICAL;
+  line->thickness = 1;
+  line->alignTo = NULL;
+  line->alignment = BOTTOM_MIDDLE;
+  layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t*)line;
+  layoutInt->nbChildren++;
+
+  layoutInt->container->height -= textArea->height+4;
+
+  return 0;
+}
+
+/**
  * @brief Creates a kind of navigation bar with an optionnal <- arrow on the left. This widget is placed on top of the
  * main container
  *

@@ -33,6 +33,7 @@ enum {
   NEXT_TOKEN,
   QUIT_TOKEN,
   NAV_TOKEN,
+  SKIP_TOKEN,
   CONTINUE_TOKEN,
   BUTTON_TOKEN,
   CHOICE_TOKEN,
@@ -109,8 +110,10 @@ static void pageCallback(int token, uint8_t index);
 static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool forward, bool *tooLongToFit);
 static void addressLayoutTouchCallbackQR(int token, uint8_t index);
 static void displayAddressPage(uint8_t page);
+static void displaySkipWarning(void);
 
 // function called when navigating (or exiting) modal details pages
+// or when skip choice is displayed
 static void pageModalCallback(int token, uint8_t index) {
   nbgl_pageRelease(modalPageContext);
   modalPageContext = NULL;
@@ -124,13 +127,24 @@ static void pageModalCallback(int token, uint8_t index) {
       displayDetailsPage(index);
     }
   }
+  else if (token == CHOICE_TOKEN) {
+    if (index == 0) {
+      // display the last forward only review page, whatever it is
+      displayReviewPage(LAST_PAGE_FOR_REVIEW);
+    }
+    else {
+      // display background, which should be the page where skip has been touched
+      nbgl_screenRedraw();
+      nbgl_refresh();
+    }
+  }
 }
 
 // generic callback for all pages except modal
 static void pageCallback(int token, uint8_t index) {
-  if (token < FIRST_USER_TOKEN) {
-  nbgl_pageRelease(pageContext);
-  pageContext = NULL;
+  if ((token < FIRST_USER_TOKEN) && (token != SKIP_TOKEN)) {
+    nbgl_pageRelease(pageContext);
+    pageContext = NULL;
   }
   if (token == QUIT_TOKEN) {
     if (onQuit != NULL)
@@ -198,6 +212,10 @@ static void pageCallback(int token, uint8_t index) {
     else
       displayStaticReviewPage(navInfo.activePage-1);
   }
+  else if (token == SKIP_TOKEN) {
+    // display a modal warning to confirm skip
+    displaySkipWarning();
+  }
   else if (token == ADDR_BACK_TOKEN) {
     displayAddressPage(navInfo.activePage-1);
   }
@@ -256,6 +274,10 @@ static void displayReviewPage(uint8_t page) {
   if (content.type == INFO_LONG_PRESS) { // last page
     navInfo.navWithTap.nextPageText = NULL;
     content.infoLongPress.longPressToken = CONFIRM_TOKEN;
+    if (forwardNavOnly) {
+      // remove the "Skip" button in Footer
+      navInfo.navWithTap.skipText = NULL;
+    }
   }
   else {
     navInfo.navWithTap.nextPageText = "Tap to continue";
@@ -472,6 +494,25 @@ static void displayAddressPage(uint8_t page) {
   nbgl_refresh();
 }
 
+// called when skip button is touched in footer, during forward only review
+static void displaySkipWarning(void) {
+  nbgl_pageConfirmationDescription_t info = {
+    .cancelToken = CHOICE_TOKEN,
+    .cancelText = "Go back to review",
+    .centeredInfo.text1 = "Skip message review?",
+    .centeredInfo.text2 = "You can skip directly to signing\nif you're sure you don't need to\nreview all the fields.",
+    .centeredInfo.text3 = NULL,
+    .centeredInfo.style = LARGE_CASE_INFO,
+    .centeredInfo.icon = &C_warning64px,
+    .centeredInfo.offsetY = -64,
+    .confirmationText = "Yes, skip",
+    .confirmationToken = CHOICE_TOKEN,
+    .tuneId = TUNE_TAP_CASUAL,
+    .modal = true
+  };
+  modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
+}
+
 static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool forward, bool *tooLongToFit) {
   uint8_t nbPairsInPage = 0;
   uint16_t currentHeight = 24; // upper margin
@@ -535,7 +576,7 @@ void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *t
     .centeredInfo.text1 = appName,
     .centeredInfo.text3 = NULL,
     .centeredInfo.style = LARGE_CASE_INFO,
-    .centeredInfo.offsetY = 32,
+    .centeredInfo.offsetY = -16,
     .footerText = NULL,
     .bottomButtonStyle = QUIT_APP_TEXT,
     .bottomButtonToken = QUIT_TOKEN,
@@ -662,7 +703,8 @@ void nbgl_useCaseChoice(char *message, char *subMessage, char *confirmText, char
     .centeredInfo.offsetY = -64,
     .confirmationText = confirmText,
     .confirmationToken = CHOICE_TOKEN,
-    .tuneId = TUNE_TAP_CASUAL
+    .tuneId = TUNE_TAP_CASUAL,
+    .modal = false
   };
   onChoice = callback;
   pageContext = nbgl_pageDrawConfirmation(&pageCallback, &info);
@@ -733,6 +775,7 @@ void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, char *rejectTe
   navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
   navInfo.navWithTap.quitText = rejectText;
   navInfo.navWithTap.backToken = BACK_TOKEN;
+  navInfo.navWithTap.skipText = NULL;
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
@@ -764,6 +807,8 @@ void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t 
   navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
   navInfo.navWithTap.quitText = rejectText;
   navInfo.navWithTap.backToken = BACK_TOKEN;
+  navInfo.navWithTap.skipText = "Skip >>";
+  navInfo.navWithTap.skipToken = SKIP_TOKEN;
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
@@ -801,6 +846,7 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
   navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
   navInfo.navWithTap.quitText = rejectText;
   navInfo.navWithTap.backToken = BACK_TOKEN;
+  navInfo.navWithTap.skipText = NULL;
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
@@ -876,6 +922,7 @@ void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t cal
   navInfo.navWithTap.quitText = "Cancel";
   navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
   navInfo.navWithTap.backToken = ADDR_BACK_TOKEN;
+  navInfo.navWithTap.skipText = NULL;
   navInfo.quitToken = REJECT_TOKEN;
 
   displayAddressPage(0);

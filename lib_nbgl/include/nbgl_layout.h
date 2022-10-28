@@ -263,6 +263,7 @@ int nbgl_layoutAddSeparationLine(nbgl_layout_t *layout);
 int nbgl_layoutAddButton(nbgl_layout_t *layout, nbgl_layoutButton_t *buttonInfo);
 int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, char *text, uint8_t token, tune_index_e tuneId);
 int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_index_e tuneId);
+int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t leftToken, char *rightText, uint8_t rightToken, tune_index_e tuneId);
 int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, nbgl_layoutNavigationBar_t *info);
 int nbgl_layoutAddBottomButton(nbgl_layout_t *layout, const nbgl_icon_details_t *icon, uint8_t token, bool separationLine, tune_index_e tuneId);
 int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, uint8_t nbPages, bool withBack, uint8_t backToken, tune_index_e tuneId);

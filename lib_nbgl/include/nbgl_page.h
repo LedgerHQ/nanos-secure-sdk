@@ -165,6 +165,8 @@ typedef struct nbgl_pageNavWithTap_s {
     uint8_t nextPageToken; ///< the token used as argument of the actionCallback when the main panel is "tapped"
     const char *nextPageText; ///< this text is used as indication for "Tap to continue", to navigate forward
     const char * quitText; ///< the text dispayed in footer, used to quit
+    const char *skipText; ///< if not NULL the text dispayed in right part of footer, used for example to skip pages
+    uint8_t skipToken; ///< if skipText is NULL the token used when right part of footer is touched
 } nbgl_pageNavWithTap_t;
 
 /**
@@ -203,6 +205,7 @@ typedef struct nbgl_pageConfirmationDescription_s {
     uint8_t confirmationToken; ///< the token used as argument of the onActionCallback
     uint8_t cancelToken; ///< the token used as argument of the onActionCallback when the cancel button is pressed
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when button is pressed
+    bool modal; ///< if true, page is open as a modal
 } nbgl_pageConfirmationDescription_t;
 
 /**
