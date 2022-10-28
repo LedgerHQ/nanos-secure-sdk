@@ -48,6 +48,7 @@ typedef enum {
     INFO_LONG_PRESS, ///< a centered info and a long press button
     TAG_VALUE_LIST, ///< list of tag/value pairs
     TAG_VALUE_DETAILS, ///< a tag/value pair and a small button to get details.
+    TAG_VALUE_CONFIRM, ///< tag/value pairs and a black button/footer to confirm/cancel.
     SWITCHES_LIST, ///< list of switches with descriptions
     INFOS_LIST, ///< list of infos with titles
     CHOICES_LIST, ///< list of choices through radio buttons
@@ -63,6 +64,20 @@ typedef struct nbgl_pageTagValueDetails_s {
     uint8_t detailsButtonToken; ///< the token used as argument of the actionCallback when the "details" button is touched
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when details button is touched
 } nbgl_pageTagValueDetails_t;
+
+/**
+ * @brief This structure contains [item,value] pair(s) and info about a potential "details" button, but also a black button + footer to confirm/cancel
+ */
+typedef struct nbgl_pageTagValueConfirm_s {
+    nbgl_layoutTagValueList_t tagValueList; ///< list of tag/value pairs
+    const char *detailsButtonText; ///< this text is used for "details" button (if NULL, no button)
+    uint8_t detailsButtonToken; ///< the token used as argument of the actionCallback when the "details" button is touched
+    tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when details button is touched
+    const char *confirmationText; ///< text of the confirmation button, if NULL "It matches" is used
+    const char *cancelText; ///< the text used for cancel action, if NULL "It doesn't matches" is used
+    uint8_t confirmationToken; ///< the token used as argument of the onActionCallback
+    uint8_t cancelToken; ///< the token used as argument of the onActionCallback when the cancel button is pressed
+} nbgl_pageTagValueConfirm_t;
 
 /**
  * @brief This structure contains data to build a centered info + long press button page content
@@ -116,6 +131,7 @@ typedef struct nbgl_pageContent_s {
         nbgl_layoutCenteredInfo_t centeredInfo;     ///< @ref CENTERED_INFO type
         nbgl_pageInfoLongPress_t   infoLongPress;   ///< @ref INFO_LONG_PRESS type
         nbgl_pageTagValueDetails_t tagValueDetails; ///< @ref TAG_VALUE_DETAILS type
+        nbgl_pageTagValueConfirm_t tagValueConfirm; ///< @ref TAG_VALUE_CONFIRM type
         nbgl_pageSwitchesList_t switchesList;    ///< @ref SWITCHES_LIST type
         nbgl_pageInfoList_t infosList;              ///< @ref INFOS_LIST type
         nbgl_layoutRadioChoice_t choicesList;           ///< @ref CHOICES_LIST type

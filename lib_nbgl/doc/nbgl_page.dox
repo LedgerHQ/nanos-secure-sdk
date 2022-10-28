@@ -158,6 +158,12 @@ supposed to be used only to display details.
 The "details" button is only displayed if the \b value text is longer than 9 lines. And in this case, the \b value text is truncated at the 6th line, and
 "..." is used to show that the text is truncated.
 
+- @ref TAG_VALUE_CONFIRM is used to draw tag/value pairs and a potential confirmation button in the same page. The structure containing data to build it is @ref nbgl_pageTagValueConfirm_t
+
+\image{inline} html page-TagValueConfirm.png "caption" height=300
+
+The "details" button is only displayed if the \b detailsButtonText is not NULL.
+
 - @ref SWITCHES_LIST is used to draw a list of switches with descriptions. The structure containing data to build it is @ref nbgl_pageSwitchesList_t
 
 \image{inline} html page16.png "caption" height=300
