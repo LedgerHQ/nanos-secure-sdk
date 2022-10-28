@@ -340,12 +340,14 @@ void reviewContinue(void) {
 
 @subsection use_case_forward_only_review Forward only Review Use Case
 
-\image{inline} html UseCase-Review2.png "caption" height=300
+\image{inline} html UseCase-ReviewForwardOnly.png "caption" height=500
 
 Some message/transaction reviews may be too long to be memorized, so it is only possible to move forward.
 
 In this case, no back arrow is available on the top-left of the screen. Moreover, these reviews are always done with
 an unknown number of pages.
+A "Skip" button is added automatically in all pages except the one with Long Press button,
+to jump to last page, after an automatic confirmation modal window is displayed.
 
 The API to initiate the display of the series of forward-only review pages is @ref nbgl_useCaseForwardOnlyReview(), providing:
 
@@ -605,7 +607,7 @@ static void displayAddressCallback(bool confirm) {
 
 // called when tapping on review start page to actually display address
 static void displayAddr(void) {
-  nbgl_useCaseAddressConfirmation(&displayAddressCallback, "bc1pkdcufjh6dxjaaa05hudvxqg5fhspfmwmp8g92gq8cv4gwwnmgrfqfd4jlg");
+  nbgl_useCaseAddressConfirmation("bc1pkdcufjh6dxjaaa05hudvxqg5fhspfmwmp8g92gq8cv4gwwnmgrfqfd4jlg", &displayAddressCallback);
 }
 
 void app_ethereumVerifyAddress(void) {
@@ -653,7 +655,7 @@ static void displayAddressCallback(bool confirm) {
 
 // called when tapping on review start page to actually display address
 static void displayAddr(void) {
-  nbgl_useCaseAddressConfirmationExt(&displayAddressCallback, "bc1pkdcufjh6dxjaaa05hudvxqg5fhspfmwmp8g92gq8cv4gwwnmgrfqfd4jlg", &pairList);
+  nbgl_useCaseAddressConfirmationExt("bc1pkdcufjh6dxjaaa05hudvxqg5fhspfmwmp8g92gq8cv4gwwnmgrfqfd4jlg", &displayAddressCallback, &pairList);
 }
 
 void app_ethereumVerifyAddress(void) {

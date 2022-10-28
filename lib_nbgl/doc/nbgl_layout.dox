@@ -135,6 +135,26 @@ A thin horizontal separation is drawn on top of the text area.
 
 \warning This object is incompatible with navigation bar or bottom button, for example
 
+@subsection split_footer Split footer section
+
+\image{inline} html layout-SplitFooter.png "caption" height=300
+
+This object acts as a two horizontally adjacent touchable text areas at the bottom of the screen.
+
+The properties of this object are:
+
+- The text to be drawn on left part of footer
+- A \b token used with the action callback when the left part of footer is touched
+- The text to be drawn on right part of footer
+- A \b token used with the action callback when the right part of footer is touched
+
+The API to insert such an object is @ref nbgl_layoutAddSplitFooter().
+
+A thin horizontal separation is drawn on top of the text areas.
+A thin vertical separation is drawn between both text areas.
+
+\warning This object is incompatible with navigation bar or bottom button, for example
+
 @subsection centered_info Centered info area
 
 \image{inline} html layout1.png "caption" height=300

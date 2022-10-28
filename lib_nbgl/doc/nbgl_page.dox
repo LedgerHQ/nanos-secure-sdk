@@ -215,7 +215,9 @@ In this case, all specific parameters can be found in @ref nbgl_pageNavWithTap_t
 - a token attached to this potential back button
 - a text used as indication for "Tap to continue", to navigate forward
 - a token used as argument of the action callback when the main container is "taped"
-- the text dispayed in footer, used to quit. If NULL, no footer to quit.
+- the main text dispayed in footer, used to quit. If NULL, no footer to quit.
+- the second text dispayed in footer (on the right), used to skip. If NULL, only main text is displayed
+- a token used as argument of the action callback when the second text dispayed in footer is touched
 
 <u>Common parameters:</u>
 
