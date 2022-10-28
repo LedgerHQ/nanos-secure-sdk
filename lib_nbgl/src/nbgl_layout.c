@@ -1072,7 +1072,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
       textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
     }
     else {
-      textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+      textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
     }
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
     textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);

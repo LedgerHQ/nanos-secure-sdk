@@ -28,14 +28,15 @@ extern "C" {
  **********************/
 
 /**
- * @brief The different types of top-right icon
+ * @brief The different types of top-right / bottom button
  *
  */
 typedef enum {
     NO_BUTTON_STYLE=0, ///< no button.
     SETTINGS_ICON, ///< settings (wheel) icon in the button.
     QUIT_ICON, ///< quit (X) icon in the button.
-    INFO_ICON ///< info (i) icon in the button.
+    INFO_ICON, ///< info (i) icon in the button.
+    QUIT_APP_TEXT ///< A full width button with "Quit app" text (only for bottom button)
 } nbgl_pageButtonStyle_t;
 
 /**

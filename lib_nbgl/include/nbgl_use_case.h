@@ -56,7 +56,7 @@ typedef void (*nbgl_choiceCallback_t)(bool confirm);
  * GLOBAL PROTOTYPES
  **********************/
 void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
-                      nbgl_callback_t bottomCallback, nbgl_callback_t quitCallback);
+                      nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback);
 void nbgl_useCaseSettings(char *settingsTitle, uint8_t initPage, uint8_t nbPages, bool touchableTitle,
                           nbgl_callback_t quitCallback, nbgl_navCallback_t navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback);
