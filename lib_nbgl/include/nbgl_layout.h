@@ -151,7 +151,7 @@ typedef enum  {
     LARGE_CASE_INFO, ///< text in BLACK and large case (INTER 32px), subText in black in Inter24px
     LARGE_CASE_BOLD_INFO, ///< text in BLACK and large case (INTER 32px), subText in black bold Inter24px, text3 in black Inter24px
     LEDGER_INFO, ///< only text, in BLACK and upper case (HM ALPHA MONO), with Ledger border
-    NORMAL_INFO ///< Icon in black, a possible text in black under it, and a possible text in dark gray under it
+    NORMAL_INFO ///< Icon in black, a potential text in black bold 24px under it, a potential text in dark gray (24px) under it, a potential text in black (24px) under it
 } nbgl_centeredInfoStyle_t;
 
 /**

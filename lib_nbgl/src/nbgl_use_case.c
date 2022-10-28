@@ -474,11 +474,11 @@ static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList
  * @param appIcon app icon
  * @param tagline text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
  * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info" (i)
- * @param bottomCallback callback called when bottom button is pressed
+ * @param topRightCallback callback called when top-right button is pressed
  * @param quitCallback callback called when quit button is pressed
  */
 void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
-                      nbgl_callback_t bottomCallback, nbgl_callback_t quitCallback) {
+                      nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
   nbgl_pageInfoDescription_t info = {
     .centeredInfo.icon = appIcon,
     .centeredInfo.text1 = appName,
@@ -486,11 +486,11 @@ void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *t
     .centeredInfo.style = LARGE_CASE_INFO,
     .centeredInfo.offsetY = 32,
     .footerText = NULL,
-    .bottomButtonStyle = withSettings? SETTINGS_ICON:INFO_ICON,
-    .bottomButtonToken = CONTINUE_TOKEN,
+    .bottomButtonStyle = QUIT_APP_TEXT,
+    .bottomButtonToken = QUIT_TOKEN,
     .tapActionText = NULL,
-    .topRightStyle = QUIT_ICON,
-    .topRightToken = QUIT_TOKEN,
+    .topRightStyle = withSettings? SETTINGS_ICON:INFO_ICON,
+    .topRightToken = CONTINUE_TOKEN,
     .tuneId = TUNE_TAP_CASUAL
   };
   if (tagline == NULL) {
@@ -501,7 +501,7 @@ void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *t
     info.centeredInfo.text2 = tagline;
   }
 
-  onContinue = bottomCallback;
+  onContinue = topRightCallback;
   onQuit = quitCallback;
   pageContext = nbgl_pageDrawInfo(&pageCallback, NULL, &info);
   nbgl_refresh();

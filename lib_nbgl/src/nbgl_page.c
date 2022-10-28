@@ -291,7 +291,19 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
       return NULL;
     nbgl_layoutAddTopRightButton(layout, PIC(icon), info->topRightToken, info->tuneId);
   }
-  if (info->bottomButtonStyle != NO_BUTTON_STYLE) {
+  if (info->bottomButtonStyle == QUIT_APP_TEXT) {
+    nbgl_layoutButton_t buttonInfo = {
+      .fittingContent = false,
+      .icon = NULL,
+      .onBottom = true,
+      .style = WHITE_BACKGROUND,
+      .text  = "Quit app",
+      .token = info->bottomButtonToken,
+      .tuneId = info->tuneId
+    };
+    nbgl_layoutAddButton(layout,&buttonInfo);
+  }
+  else if (info->bottomButtonStyle != NO_BUTTON_STYLE) {
     const nbgl_icon_details_t *icon;
     if (info->bottomButtonStyle == SETTINGS_ICON)
       icon = &C_wheel32px;
@@ -472,7 +484,7 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
         .nbPages = nav->nbPages,
         .token = nav->navWithButtons.navToken,
         .withExitKey = nav->navWithButtons.quitButton,
-        .withSeparationLine = false,
+        .withSeparationLine = true,
         .tuneId = nav->tuneId
       };
       nbgl_layoutAddNavigationBar(layout,&navInfo);
