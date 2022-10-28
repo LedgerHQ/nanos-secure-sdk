@@ -24,7 +24,7 @@ extern "C" {
  *  @brief when using controls in page content (@ref nbgl_pageContent_t), this is the first token value
  * usable for these controls
  */
-#define FIRST_USER_TOKEN 10
+#define FIRST_USER_TOKEN 20
 
 /**********************
  *      MACROS
@@ -72,6 +72,7 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
                               char *rejectText, nbgl_choiceCallback_t callback);
 void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping);
 void nbgl_useCaseAddressConfirmation(char *address, nbgl_choiceCallback_t callback);
+void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t callback, nbgl_layoutTagValueList_t *tagValueList);
 void nbgl_useCaseSpinner(char* text);
 
 #ifdef __cplusplus

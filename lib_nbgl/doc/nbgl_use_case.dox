@@ -47,6 +47,7 @@ A few APIs are available to draw typical Use-Cases, like:
 - @ref nbgl_useCaseForwardOnlyReview() to draw the pages of a forward-only review (without back key)
 - @ref nbgl_useCaseViewDetails() to draw the pages displaying the full value of a given long data of a review
 - @ref nbgl_useCaseAddressConfirmation() to draw an address confirmation page, with a possibility to see it as QR Code
+- @ref nbgl_useCaseAddressConfirmationExt() to draw an address confirmation page, with a possibility to see it as QR Code and some extra tag/value pairs
 - @ref nbgl_useCaseSpinner() to draw an infinite spinner page
 
 @subsection use_case_welcome Home screen Use Case
@@ -59,7 +60,7 @@ create such a page, the only configurable parameters being:
 - the application name
 - the application icon
 - the tagline, a text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
-- the callbacks when touching *quit* or *bottom* buttons
+- the callbacks when touching *quit* or *top-right* buttons
 - the type of bottom button (info or settings)
 
 @code
@@ -613,6 +614,54 @@ void app_ethereumVerifyAddress(void) {
 }
 @endcode
 
+@subsection use_case_addr_confirm_ext Extended Address Confirmation Use Case
+
+\image{inline} html UseCase-AddressConfirmationExt.png "caption" height=300
+
+When an address needs to be confirmed, it can be displayed in a Address Confirmation Use Case, at first as simple page with
+the raw address (as text). An extra button under the raw adress enables to open a modal page to see the address as a QR code.
+Moreover, if extra information need to be diplayed, for example a derivation path, it is provided in a second page, also containing
+a black button/Footer pair to choose to confirm or reject the address.
+
+The @ref nbgl_useCaseAddressConfirmationExt() function enables to create such a set of pages, with the following parameters:
+
+- the address to confirm (NULL terminated string)
+- a callback called when button or footer is touched (if true, confirm, if false reject)
+- the list of extra tag/value pairs
+
+Here is the code to display something similar to example picture:
+
+@code
+// 2 pairs of tag/value to display in second page
+static nbgl_layoutTagValue_t pairs[2];
+
+static nbgl_layoutTagValueList_t pairList = {
+  .nbMaxLinesForValue = 0,
+  .nbPairs = 2,
+  .pairs = (nbgl_layoutTagValue_t*)pairs
+};
+
+// called when either confirm button or reject token is called
+static void displayAddressCallback(bool confirm) {
+  if (confirm) {
+    nbgl_useCaseStatus("ADDRESS\nVERIFIED",true,app_fullEthereum);
+  }
+  else {
+    nbgl_useCaseStatus("Address rejected",false,app_fullEthereum);
+  }
+}
+
+// called when tapping on review start page to actually display address
+static void displayAddr(void) {
+  nbgl_useCaseAddressConfirmationExt(&displayAddressCallback, "bc1pkdcufjh6dxjaaa05hudvxqg5fhspfmwmp8g92gq8cv4gwwnmgrfqfd4jlg", &pairList);
+}
+
+void app_ethereumVerifyAddress(void) {
+  nbgl_useCaseReviewStart(myAppIcon,"Verify MyCoin\naddress",NULL,"Cancel",
+                          displayAddr, appMain);
+}
+@endcode
+
 @subsection use_case_spinner Spinner Use Case
 
 \image{inline} html UseCase-Spinner.png "caption" height=300
@@ -622,7 +671,7 @@ the raw address (as text) and a black button/Footer pair to choose to confirm or
 
 An extra button under the raw adress enables to open a modal page to see the address as a QR code.
 
-The @ref nbgl_useCaseAddressConfirmation() function enables to create such a page, with the following parameters:
+The @ref nbgl_useCaseSpinner() function enables to create such a page, with the following parameters:
 
 @section use_case_refresh_page Refreshing screen
 

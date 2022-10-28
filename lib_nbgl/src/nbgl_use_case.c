@@ -37,8 +37,10 @@ enum {
   BUTTON_TOKEN,
   CHOICE_TOKEN,
   DETAILS_BUTTON_TOKEN,
-  LONG_PRESS_TOKEN,
-  REJECT_TOKEN
+  CONFIRM_TOKEN,
+  REJECT_TOKEN,
+  ADDR_BACK_TOKEN,
+  ADDR_NEXT_TOKEN
 };
 
 typedef struct DetailsContext_s {
@@ -62,8 +64,8 @@ typedef struct StaticReviewContext_s {
 
 typedef struct AddressConfirmationContext_s {
   char *address;
-  nbgl_layout_t layout;
   nbgl_layout_t modalLayout;
+  nbgl_layoutTagValueList_t *tagValueList;
 } AddressConfirmationContext_t;
 
 
@@ -105,6 +107,8 @@ static void displaySettingsPage(uint8_t page);
 static void displayStaticReviewPage(uint8_t page);
 static void pageCallback(int token, uint8_t index);
 static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool forward, bool *tooLongToFit);
+static void addressLayoutTouchCallbackQR(int token, uint8_t index);
+static void displayAddressPage(uint8_t page);
 
 // function called when navigating (or exiting) modal details pages
 static void pageModalCallback(int token, uint8_t index) {
@@ -140,7 +144,27 @@ static void pageCallback(int token, uint8_t index) {
     if (onChoice != NULL)
       onChoice((index == 0)?true:false);
   }
-  else if (token == LONG_PRESS_TOKEN) {
+  else if (token == BUTTON_TOKEN) {
+    // display the address as QR Code
+    nbgl_layoutDescription_t layoutDescription = {
+      .modal = true,
+      .onActionCallback = &addressLayoutTouchCallbackQR,
+      .tapActionText = NULL
+    };
+
+    addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
+    nbgl_layoutQRCode_t qrCode = {
+      .url = (char*)addressConfirmationContext.address,
+      .text1 = NULL,
+      .text2 = (char*)addressConfirmationContext.address // display as gray text
+    };
+    nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
+
+    nbgl_layoutAddBottomButton(addressConfirmationContext.modalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
+    nbgl_layoutDraw(addressConfirmationContext.modalLayout);
+    nbgl_refresh();
+  }
+  else if (token == CONFIRM_TOKEN) {
     if (onChoice != NULL)
       onChoice(true);
   }
@@ -173,6 +197,12 @@ static void pageCallback(int token, uint8_t index) {
       displayReviewPage(navInfo.activePage-1);
     else
       displayStaticReviewPage(navInfo.activePage-1);
+  }
+  else if (token == ADDR_BACK_TOKEN) {
+    displayAddressPage(navInfo.activePage-1);
+  }
+  else if (token == ADDR_NEXT_TOKEN) {
+    displayAddressPage(navInfo.activePage+1);
   }
   else { // probably a control provided by caller
     if (onControls != NULL) {
@@ -225,7 +255,7 @@ static void displayReviewPage(uint8_t page) {
 
   if (content.type == INFO_LONG_PRESS) { // last page
     navInfo.navWithTap.nextPageText = NULL;
-    content.infoLongPress.longPressToken = LONG_PRESS_TOKEN;
+    content.infoLongPress.longPressToken = CONFIRM_TOKEN;
   }
   else {
     navInfo.navWithTap.nextPageText = "Tap to continue";
@@ -251,7 +281,7 @@ static void displayStaticReviewPage(uint8_t page) {
     content.infoLongPress.icon = staticReviewContext.infoLongPress->icon;
     content.infoLongPress.longPressText = staticReviewContext.infoLongPress->longPressText;
     content.infoLongPress.text = staticReviewContext.infoLongPress->text;
-    content.infoLongPress.longPressToken = LONG_PRESS_TOKEN;
+    content.infoLongPress.longPressToken = CONFIRM_TOKEN;
     content.tuneId = TUNE_TAP_NEXT;
   }
   else {
@@ -388,37 +418,58 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index) {
   nbgl_refresh();
 }
 
-// called when buttons (or footer) is touched on Address verification page
-static void addressLayoutTouchCallback(int token, uint8_t index) {
-  UNUSED(index);
-  if (token == QUIT_TOKEN) {
-    if (onChoice != NULL)
-      onChoice(false);
-  }
-  else if (token == CONTINUE_TOKEN) {
-    if (onChoice != NULL)
-      onChoice(true);
-  }
-  else if (token == BUTTON_TOKEN) {
-    // display the address as QR Code
-    nbgl_layoutDescription_t layoutDescription = {
-      .modal = true,
-      .onActionCallback = &addressLayoutTouchCallbackQR,
-      .tapActionText = NULL
+// called when navigation is touched on Address verification page
+static void displayAddressPage(uint8_t page) {
+  nbgl_pageContent_t content;
+  content.type = TAG_VALUE_CONFIRM;
+  content.title = NULL;
+  content.isTouchableTitle = false;
+  if (page == 0) {
+    nbgl_layoutTagValue_t tagValuePair = {
+      .item = "Address",
+      .value = (char*)addressConfirmationContext.address
     };
 
-    addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
-    nbgl_layoutQRCode_t qrCode = {
-      .url = (char*)addressConfirmationContext.address,
-      .text1 = NULL,
-      .text2 = (char*)addressConfirmationContext.address // display as gray text
-    };
-    nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
-
-    nbgl_layoutAddBottomButton(addressConfirmationContext.modalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
-    nbgl_layoutDraw(addressConfirmationContext.modalLayout);
-    nbgl_refresh();
+    content.tagValueConfirm.detailsButtonText = "Show as QR";
+    content.tagValueConfirm.detailsButtonToken = BUTTON_TOKEN;
+    content.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
+    content.tagValueConfirm.tagValueList.nbPairs = 1;
+    content.tagValueConfirm.tagValueList.pairs = &tagValuePair;
+    content.tagValueConfirm.tagValueList.smallCaseForValue = false;
+    content.tagValueConfirm.tagValueList.nbMaxLinesForValue = 0;
+    content.tagValueConfirm.tagValueList.wrapping = false;
+    // if it's an extended address verif, it takes 2 pages, so display a "Tap to continue", and no confirmation button
+    if (navInfo.nbPages > 1) {
+      navInfo.navWithTap.nextPageText = "Tap to continue";
+      content.tagValueConfirm.confirmationText = NULL;
+    }
+    else {
+      // otherwise no tap to continue but a confirmation button
+      content.tagValueConfirm.confirmationText = "Confirm";
+      content.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
+    }
   }
+  else if (page == 1) {
+    // the second page is dedicated to the extended tag/value pairs
+    content.type = TAG_VALUE_CONFIRM;
+    content.tagValueConfirm.confirmationText = "Confirm";
+    content.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
+    content.tagValueConfirm.detailsButtonText = NULL;
+    content.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
+    content.tagValueConfirm.tagValueList.nbPairs = addressConfirmationContext.tagValueList->nbPairs;
+    content.tagValueConfirm.tagValueList.pairs = addressConfirmationContext.tagValueList->pairs;
+    content.tagValueConfirm.tagValueList.smallCaseForValue = addressConfirmationContext.tagValueList->smallCaseForValue;
+    content.tagValueConfirm.tagValueList.nbMaxLinesForValue = addressConfirmationContext.tagValueList->nbMaxLinesForValue;
+    content.tagValueConfirm.tagValueList.wrapping = addressConfirmationContext.tagValueList->wrapping;
+
+    // no next page
+    navInfo.navWithTap.nextPageText = NULL;
+  }
+  // fill navigation structure
+  navInfo.activePage = page;
+
+  nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
+  nbgl_refresh();
 }
 
 static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool forward, bool *tooLongToFit) {
@@ -790,59 +841,44 @@ void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping) {
 }
 
 /**
- * @brief draw an address confirmation page. This page contains a "page selector" to display either address in text or QRCode format,
+ * @brief draws an address confirmation page. This page contains the given address in a tag/value layout, with a button to
+ *        open a modal to see address as a QR Code,
  *        and at the bottom a button to confirm and a footer to cancel
  *
  * @param address address to confirm (NULL terminated string)
  * @param callback callback called when button or footer is touched (if true, button, if false footer)
   */
 void nbgl_useCaseAddressConfirmation(char *address, nbgl_choiceCallback_t callback) {
-  nbgl_layoutButton_t buttonInfo;
-  nbgl_layoutDescription_t layoutDescription = {
-    .modal = false,
-    .onActionCallback = &addressLayoutTouchCallback,
-    .tapActionText = NULL
-  };
+  nbgl_useCaseAddressConfirmationExt(address, callback, NULL);
+}
 
+/**
+ * @brief draws an extended address verification page. This page contains the given address in a tag/value layout, with a button to
+ *        open a modal to see address as a QR Code.
+ *        A "tap to continue" enables to open a second review page to display the other given tag/value pairs, with a button to confirm and a footer to cancel
+ *
+ * @param address address to confirm (NULL terminated string)
+ * @param callback callback called when button or footer is touched (if true, button, if false footer)
+ * @param tagValueList list of tag/value pairs (must fit in a single page, and be persistent because no copy)
+  */
+void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t callback, nbgl_layoutTagValueList_t *tagValueList) {
   // save context
   onChoice = callback;
   addressConfirmationContext.address = address;
+  addressConfirmationContext.tagValueList = tagValueList;
 
-  if (addressConfirmationContext.layout)
-    nbgl_layoutRelease(addressConfirmationContext.layout);
+  // fill navigation structure, common to all pages
+  navInfo.navType = NAV_WITH_TAP;
+  navInfo.nbPages = (tagValueList == NULL)? 0 : 2;
+  navInfo.progressIndicator = true;
+  navInfo.tuneId = TUNE_TAP_CASUAL;
+  navInfo.navWithTap.backButton = true;
+  navInfo.navWithTap.quitText = "Cancel";
+  navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
+  navInfo.navWithTap.backToken = ADDR_BACK_TOKEN;
+  navInfo.quitToken = REJECT_TOKEN;
 
-  addressConfirmationContext.layout = nbgl_layoutGet(&layoutDescription);
-  nbgl_layoutAddFooter(addressConfirmationContext.layout, "It doesn't match",
-                       QUIT_TOKEN, TUNE_TAP_CASUAL);
-
-  nbgl_layoutTagValue_t tagValuePair = {
-    .item = "Address",
-    .value = (char*)address
-  };
-  nbgl_layoutTagValueList_t tagValueList = {
-    .nbPairs = 1,
-    .pairs = &tagValuePair,
-    .smallCaseForValue = false
-  };
-  nbgl_layoutAddTagValueList(addressConfirmationContext.layout,&tagValueList);
-  buttonInfo.fittingContent = true;
-  buttonInfo.icon = &C_QRcode32px;
-  buttonInfo.style = WHITE_BACKGROUND;
-  buttonInfo.text = "Show as QR";
-  buttonInfo.token = BUTTON_TOKEN;
-  buttonInfo.tuneId = TUNE_TAP_NEXT;
-  buttonInfo.onBottom = false;
-  nbgl_layoutAddButton(addressConfirmationContext.layout,&buttonInfo);
-  buttonInfo.style = BLACK_BACKGROUND;
-  buttonInfo.icon = NULL;
-  buttonInfo.token = CONTINUE_TOKEN;
-  buttonInfo.fittingContent = false;
-  buttonInfo.tuneId = TUNE_TAP_CASUAL;
-  buttonInfo.onBottom = true;
-  buttonInfo.text = "It matches";
-  nbgl_layoutAddButton(addressConfirmationContext.layout, &buttonInfo);
-  nbgl_layoutDraw(addressConfirmationContext.layout);
-  nbgl_refresh();
+  displayAddressPage(0);
 }
 
 /**

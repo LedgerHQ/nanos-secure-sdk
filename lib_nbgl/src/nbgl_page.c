@@ -94,6 +94,32 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       }
       break;
     }
+    case TAG_VALUE_CONFIRM:
+    {
+      nbgl_layoutButton_t buttonInfo;
+      nbgl_layoutAddTagValueList(layout,&content->tagValueConfirm.tagValueList);
+      if (content->tagValueConfirm.detailsButtonText != NULL) {
+        buttonInfo.fittingContent = true;
+        buttonInfo.icon = NULL;
+        buttonInfo.style = WHITE_BACKGROUND;
+        buttonInfo.text = (char*)content->tagValueConfirm.detailsButtonText;
+        buttonInfo.token = content->tagValueConfirm.detailsButtonToken;
+        buttonInfo.tuneId = content->tagValueConfirm.tuneId;
+        buttonInfo.onBottom = false;
+        nbgl_layoutAddButton(layout,&buttonInfo);
+      }
+      if (content->tagValueConfirm.confirmationText != NULL) {
+        buttonInfo.fittingContent = false;
+        buttonInfo.icon = NULL;
+        buttonInfo.style = BLACK_BACKGROUND;
+        buttonInfo.text = (char*)content->tagValueConfirm.confirmationText;
+        buttonInfo.token = content->tagValueConfirm.confirmationToken;
+        buttonInfo.tuneId = content->tagValueConfirm.tuneId;
+        buttonInfo.onBottom = true;
+        nbgl_layoutAddButton(layout,&buttonInfo);
+      }
+      break;
+    }
     case SWITCHES_LIST:
     {
       uint8_t i;

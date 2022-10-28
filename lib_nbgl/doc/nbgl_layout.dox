@@ -120,9 +120,9 @@ is true.
 
 @subsection footer Footer section
 
-\image{inline} html layout1.png "caption" height=300
+\image{inline} html layout3.png "caption" height=300
 
-This object acts as a full with button at the bottom of the screen.
+This object acts as a full width text area at the bottom of the screen.
 
 The only properties of this object are:
 
@@ -131,8 +131,7 @@ The only properties of this object are:
 
 The API to insert such an object is @ref nbgl_layoutAddFooter().
 
-Optionnaly, a thin horizontal separation can be drawn on top of the button, if \b separationLine parameter of @ref nbgl_layoutAddFooter()
-is true.
+A thin horizontal separation is drawn on top of the text area.
 
 \warning This object is incompatible with navigation bar or bottom button, for example
 
