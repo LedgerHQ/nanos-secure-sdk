@@ -109,6 +109,7 @@ typedef enum {
     NBGL_BPP_1=0, ///< 1 bit per pixel
     NBGL_BPP_2,   ///< 2 bits per pixel
     NBGL_BPP_4,   ///< 4 bits per pixel
+    NB_NBGL_BPP,  ///< Number of NBGL_BPP enums
 } nbgl_bpp_t;
 
 /**
@@ -117,7 +118,8 @@ typedef enum {
  */
 typedef enum {
     NBGL_NO_COMPRESSION = 0, ///< no compression, raw data
-    NBGL_GZLIB_COMPRESSION   ///< gzlib compression
+    NBGL_GZLIB_COMPRESSION,  ///< gzlib compression
+    NB_NBGL_COMPRESSION      ///< Number of NBGL_COMPRESSION enums
 } nbgl_compression_t;
 
 /**
