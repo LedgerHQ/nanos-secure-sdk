@@ -283,10 +283,17 @@ static void displayReviewPage(uint8_t page) {
     navInfo.navWithTap.nextPageText = "Tap to continue";
   }
 
+  // override smallCaseForValue for tag/value types to false
   if (content.type == TAG_VALUE_DETAILS) {
-    content.tagValueList.smallCaseForValue = false;
+    content.tagValueDetails.tagValueList.smallCaseForValue = false;
     // the maximum displayable number of lines for value is NB_MAX_LINES_IN_REVIEW (without More button)
-    content.tagValueList.nbMaxLinesForValue = NB_MAX_LINES_IN_REVIEW;
+    content.tagValueDetails.tagValueList.nbMaxLinesForValue = NB_MAX_LINES_IN_REVIEW;
+  }
+  else if (content.type == TAG_VALUE_LIST) {
+    content.tagValueList.smallCaseForValue = false;
+  }
+  else if (content.type == TAG_VALUE_CONFIRM) {
+    content.tagValueConfirm.tagValueList.smallCaseForValue = false;
   }
 
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
