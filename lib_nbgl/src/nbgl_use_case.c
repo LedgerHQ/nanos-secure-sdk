@@ -142,7 +142,9 @@ static void pageModalCallback(int token, uint8_t index) {
 
 // generic callback for all pages except modal
 static void pageCallback(int token, uint8_t index) {
-  if ((token < FIRST_USER_TOKEN) && (token != SKIP_TOKEN)) {
+  if ((token < FIRST_USER_TOKEN) &&
+      (token != SKIP_TOKEN) &&
+      (token != BUTTON_TOKEN)) {
     nbgl_pageRelease(pageContext);
     pageContext = NULL;
   }
