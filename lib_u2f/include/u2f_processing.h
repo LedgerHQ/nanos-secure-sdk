@@ -28,7 +28,7 @@
 void u2f_message_complete(u2f_service_t *service);
 
 /**
- * Function to be called upon timer event to notify the U2F library of potential 
+ * Function to be called upon timer event to notify the U2F library of potential
  */
 void u2f_timeout(u2f_service_t *service);
 

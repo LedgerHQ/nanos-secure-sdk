@@ -143,13 +143,13 @@ SUDOCALL try_context_t* try_context_set(try_context_t *context);
  When those keywords use are unavoidable, then remember to CLOSE_TRY your
  opened BEGIN/END block.
  To detect those potential problems, here is a basic sed based script to
- narrow down the search to poentially suspicious cases.
+ narrow down the search to potentially suspicious cases.
  for i in `find . -name "*.c"`; do echo $i ; sed -n '/BEGIN_TRY/,/END_TRY/{ /goto/{=;H;g;p} ;/return/{=;H;g;p} ; /continue/{=;H;g;p} ; /break/{=;H;g;p} ; h }' $i ; done
  Run it on your source code if unsure.
  The rule of thumb to respect to decide whether or not to use the CLOSE_TRY
  statement is the following:
  Jumping out of a TRY/CATCH/CATCH_ALL/CATCH_OTHER clause is not closing the
- BEGIN/TRY block if the FINALLY is not executed wholy (jumping to a label
+ BEGIN/TRY block if the FINALLY is not entirely executed (jumping to a label
  at the beginning of the FINALLY is not solving the above stated problem).
 
  Faulty example:

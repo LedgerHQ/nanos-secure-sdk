@@ -35,27 +35,27 @@
 
 /**
  * @brief   Signs a message digest.
- * 
+ *
  * @details The signature is done according to the EDDSA specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
- * 
+ *
  * @param[in]  pvkey    Private key.
  *                      This shall be initialized with #cx_ecfp_init_private_key_no_throw.
- * 
- * @param[in]  hashID   Message digest agorithm identifier.
- *                      Algorithms supported: 
+ *
+ * @param[in]  hashID   Message digest algorithm identifier.
+ *                      Algorithms supported:
  *                        - SHA512
  *                        - SHA3
  *                        - Keccak
- * 
+ *
  * @param[in]  hash     Pointer to the message digest.
- * 
+ *
  * @param[in]  hash_len Length of the digest.
- * 
+ *
  * @param[out] sig      Buffer where to store the signature.
- * 
+ *
  * @param[in]  sig_len  Length of the signature.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_EC_INVALID_CURVE
@@ -80,7 +80,7 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
 
 /**
  * @brief   Signs a message digest.
- * 
+ *
  * @details The signature is done according to the EDDSA specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *          This function throws an exception if the computation doesn't
@@ -88,34 +88,34 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
  *
  * @warning It is recommended to use #cx_eddsa_sign_no_throw rather than
  *          this function.
- * 
+ *
  * @param[in]  pvkey    Private key.
  *                      This shall be initialized with #cx_ecfp_init_private_key_no_throw.
- * 
+ *
  * @param[in]  mode     Mode. This parameter is not used.
- * 
- * @param[in]  hashID   Message digest agorithm identifier.
- *                      Algorithms supported: 
+ *
+ * @param[in]  hashID   Message digest algorithm identifier.
+ *                      Algorithms supported:
  *                        - SHA512
  *                        - SHA3
  *                        - Keccak
- * 
+ *
  * @param[in]  hash     Pointer to the message digest.
- * 
+ *
  * @param[in]  hash_len Length of the digest.
- * 
+ *
  * @param[in]  ctx      Pointer to the context. This parameter is not used.
- * 
+ *
  * @param[in]  ctx_len  Length of *ctx*. This parameter is not used.
- * 
+ *
  * @param[out] sig      Buffer where to store the signature.
- * 
+ *
  * @param[in]  sig_len  Length of the signature.
- * 
+ *
  * @param[in]  info     Additional information. This parameter is not used.
- * 
+ *
  * @return              Length of the signature.
- * 
+ *
  * @throws              CX_EC_INVALID_CURVE
  * @throws              CX_INVALID_PARAMETER
  * @throws              INVALID_PARAMETER
@@ -146,27 +146,27 @@ static inline size_t cx_eddsa_sign ( const cx_ecfp_private_key_t * pvkey, int mo
 
 /**
  * @brief   Verifies a signature.
- * 
+ *
  * @details The verification is done according to the specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
- * 
+ *
  * @param[in]  pukey    Public key.
  *                      This shall be initialized with #cx_ecfp_init_public_key_no_throw.
- * 
- * @param[in]  hashID   Message digest agorithm identifier.
- *                      Algorithms supported: 
+ *
+ * @param[in]  hashID   Message digest algorithm identifier.
+ *                      Algorithms supported:
  *                        - SHA512
  *                        - SHA3
  *                        - Keccak
- * 
+ *
  * @param[in]  hash     Pointer to the message digest.
- * 
+ *
  * @param[in]  hash_len Length of the digest.
- * 
+ *
  * @param[out] sig      Pointer to the signature.
- * 
+ *
  * @param[in]  sig_len  Length of the signature.
- * 
+ *
  * @return              1 if the signature is verified, otherwise 0.
  */
 bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
@@ -178,35 +178,35 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
 
 /**
  * @brief   Verifies a signature.
- * 
+ *
  * @details The verification is done according to the specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *          This function throws an exception if the computation doesn't
  *          succeed.
- * 
+ *
  * @param[in]  pukey    Public key.
  *                      THis shall be initialized with #cx_ecfp_init_public_key_no_throw.
- * 
+ *
  * @param[in]  mode     Mode. This parameter is not used.
- * 
- * @param[in]  hashID   Message digest agorithm identifier.
- *                      Algorithms supported: 
+ *
+ * @param[in]  hashID   Message digest algorithm identifier.
+ *                      Algorithms supported:
  *                        - SHA512
  *                        - SHA3
  *                        - Keccak
- * 
+ *
  * @param[in]  hash     Pointer to the message digest.
- * 
+ *
  * @param[in]  hash_len Length of the digest.
- * 
+ *
  * @param[in]  ctx      Pointer to the context. This parameter is not used.
- * 
+ *
  * @param[in]  ctx_len  Length of the context. This parameter is not used.
- * 
+ *
  * @param[out] sig      Pointer to the signature.
- * 
+ *
  * @param[in]  sig_len  Length of the signature.
- * 
+ *
  * @return              1 if the signature is verified, otherwise 0.
  */
 static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, const unsigned char * sig, unsigned int sig_len )

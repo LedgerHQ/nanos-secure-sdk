@@ -64,14 +64,14 @@ static cx_err_t cx_poly1305_process(cx_poly1305_context_t *ctx,
         buf[0] = needs_padding;
         cx_le_bytes(input + offset, buf + 1, POLY1305_BLOCK_SIZE);
         CX_CHECK(cx_bn_init(d, buf, POLY1305_PADDED_BLOCK_SIZE));
-        
+
         buf[0] = (uint8_t) ctx->acc[4];
         U4BE_ENCODE(buf, 1, ctx->acc[3]);
         U4BE_ENCODE(buf + 4 + 1, 0, ctx->acc[2]);
         U4BE_ENCODE(buf + 8 + 1, 0, ctx->acc[1]);
         U4BE_ENCODE(buf + 12 + 1, 0, ctx->acc[0]);
         cx_bn_init(acc, buf, sizeof(buf));
-        
+
         /* Compute: acc += (padded) block as a 130-bit integer */
         CX_CHECK(cx_bn_add(acc, acc, d));
 

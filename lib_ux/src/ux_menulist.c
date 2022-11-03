@@ -52,7 +52,7 @@ void ux_menulist_refresh(unsigned int stack_slot) {
   for (i = 0; i < 5; i++) {
     G_ux.menulist_params.lines[i] = G_ux.menulist_getter(G_ux.menulist_current+i-2);
   }
-  // display (strings are localized before beeing displayed)
+  // display (strings are localized before being displayed)
   ux_layout_nnbnn_init(stack_slot);
   // change callback to the menulist one
   G_ux.stack[stack_slot].button_push_callback = ux_menulist_button;
@@ -69,9 +69,9 @@ UX_FLOW(
   &ux_menulist_conststep
   );
 
-void ux_menulist_init_select(unsigned int stack_slot, 
-                      list_item_value_t getter, 
-                      list_item_select_t selector, 
+void ux_menulist_init_select(unsigned int stack_slot,
+                      list_item_value_t getter,
+                      list_item_select_t selector,
                       unsigned int selected_item_idx) {
   G_ux.menulist_current  = selected_item_idx;
   G_ux.menulist_getter = getter;
@@ -88,8 +88,8 @@ void ux_menulist_init_select(unsigned int stack_slot,
 }
 
 // based on a nnbnn layout
-void ux_menulist_init(unsigned int stack_slot, 
-                             list_item_value_t getter, 
+void ux_menulist_init(unsigned int stack_slot,
+                             list_item_value_t getter,
                              list_item_select_t selector) {
 	ux_menulist_init_select(stack_slot, getter, selector, 0);
 }

@@ -39,7 +39,7 @@
 #endif
 
 #ifndef NATIVE_64BITS // NO 64BITS
-/** 
+/**
  * @brief   64-bit types, native or by-hands, depending on target and/or compiler
  *          support.
  * @details This type is defined here only because SHA-3 structure uses it INTERNALLY.
@@ -63,7 +63,7 @@ typedef uint64_t uint64bits_t;
  * @brief   Cryptography flags
  * @details Some functions take **logical or** of various flags.
  *          The following flags are globally defined:
- * 
+ *
  * | Bits position  | Values            | Flags                         | Meaning                                    | Algorithms            |
  * |----------------|-------------------|-------------------------------|--------------------------------------------|-----------------------|
  * | 15             | 1000000000000000  | CX_NO_REINIT                  | Do not reinitialize the context on CX_LAST |                       |

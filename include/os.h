@@ -89,7 +89,7 @@ void app_main(void);
 void os_boot(void);
 
 /**
- * Function takes 0 for first call. Returns 0 when timeout has occured. Returned value is passed as argument for next call, acting as a timeout context.
+ * Function takes 0 for first call. Returns 0 when timeout has occurred. Returned value is passed as argument for next call, acting as a timeout context.
  */
 unsigned short io_timeout(unsigned short last_timeout);
 

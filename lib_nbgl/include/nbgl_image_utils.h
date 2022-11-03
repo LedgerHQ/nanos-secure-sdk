@@ -62,7 +62,7 @@ extern "C" {
 #define GET_IMAGE_FILE_WIDTH(image_file) (image_file[WIDTH_OFFSET] | (image_file[WIDTH_OFFSET+1]<<8))
 
 /**
- * @brief macro to get the heigth of the image file
+ * @brief macro to get the height of the image file
  * @param image_file uint8_t* buffer representing the image file
  */
 #define GET_IMAGE_FILE_HEIGHT(image_file) (image_file[HEIGHT_OFFSET] | (image_file[HEIGHT_OFFSET+1]<<8))

@@ -35,10 +35,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/** 
+/**
  * @brief   Abstract RSA public key.
  *
- * @details This type shall not be instantiate, 
+ * @details This type shall not be instantiate,
  *          it is only defined to allow unified API
  *          for RSA operations.
  */
@@ -131,7 +131,7 @@ typedef struct cx_rsa_4096_private_key_s cx_rsa_4096_private_key_t;
 
 /**
  * @brief   Initializes a RSA public key.
- * 
+ *
  * @details Once initialized, the key may be stored in non-volatile memory
  *          and used for any RSA processing.
  *
@@ -139,7 +139,7 @@ typedef struct cx_rsa_4096_private_key_s cx_rsa_4096_private_key_t;
  *          The key cannot be used.
  *
  * @param[in]  exponent     Public exponent: pointer to a raw key value (4 bytes) or NULL.
- * 
+ *
  * @param[in]  exponent_len Length of the exponent.
  *
  * @param[in]  modulus      Modulus: pointer to a raw key as big endian value or NULL.
@@ -160,9 +160,9 @@ cx_err_t cx_rsa_init_public_key_no_throw(const uint8_t *      exponent,
 
 /**
  * @brief   Initializes a RSA public key.
- * 
+ *
  * @details Once initialized, the key may be stored in non-volatile memory
- *          and used for any RSA processing. 
+ *          and used for any RSA processing.
  *
  *          Passing NULL as raw key initializes the key without any value.
  *          The key cannot be used.
@@ -172,7 +172,7 @@ cx_err_t cx_rsa_init_public_key_no_throw(const uint8_t *      exponent,
  *          than this function.
  *
  * @param[in]  exponent     Public exponent: pointer to a raw key value (4 bytes) or NULL.
- * 
+ *
  * @param[in]  exponent_len Length of the exponent.
  *
  * @param[in]  modulus      Modulus: pointer to a raw key as big endian value or NULL.
@@ -182,7 +182,7 @@ cx_err_t cx_rsa_init_public_key_no_throw(const uint8_t *      exponent,
  * @param[out] key          Pointer to the RSA public key.
  *
  * @return                  Length of the modulus.
- * 
+ *
  * @throws                  CX_INVALID_PARAMETER
  */
 static inline int cx_rsa_init_public_key ( const unsigned char * exponent, unsigned int exponent_len, const unsigned char * modulus, unsigned int modulus_len, cx_rsa_public_key_t * key )
@@ -193,7 +193,7 @@ static inline int cx_rsa_init_public_key ( const unsigned char * exponent, unsig
 
 /**
  * @brief   Initializes a RSA private key.
- * 
+ *
  * @details Once initialized, the key may be stored in non-volatile memory
  *          and used for any RSA processing.
  *
@@ -201,7 +201,7 @@ static inline int cx_rsa_init_public_key ( const unsigned char * exponent, unsig
  *          The key cannot be used.
  *
  * @param[in]  exponent     Private exponent: pointer to a raw key value or NULL.
- * 
+ *
  * @param[in]  exponent_len Length of the exponent.
  *
  * @param[in]  modulus      Modulus: pointer to a raw key as big endian value or NULL.
@@ -222,7 +222,7 @@ cx_err_t cx_rsa_init_private_key_no_throw(const uint8_t *       exponent,
 
 /**
  * @brief  Initializes a RSA private key.
- * 
+ *
  * @details Once initialized, the key may be stored in non-volatile memory
  *          and used for any RSA processing.
  *
@@ -234,7 +234,7 @@ cx_err_t cx_rsa_init_private_key_no_throw(const uint8_t *       exponent,
  *          than this function.
  *
  * @param[in]  exponent     Private exponent: pointer to a raw key value or NULL.
- * 
+ *
  * @param[in]  exponent_len Length of the exponent.
  *
  * @param[in]  modulus      Modulus: pointer to a raw key as big endian value or NULL.
@@ -244,7 +244,7 @@ cx_err_t cx_rsa_init_private_key_no_throw(const uint8_t *       exponent,
  * @param[out] key          Pointer to the RSA private key.
  *
  * @return                  Length of the modulus.
- * 
+ *
  * @throws                  CX_INVALID_PARAMETER
  */
 static inline int cx_rsa_init_private_key ( const unsigned char * exponent, unsigned int exponent_len, const unsigned char * modulus, unsigned int modulus_len, cx_rsa_private_key_t * key )
@@ -272,7 +272,7 @@ static inline int cx_rsa_init_private_key ( const unsigned char * exponent, unsi
  *                          No verification is done on the public exponent value except its range.
  *
  * @param[in]  exponent_len Length of the exponent.
- * 
+ *
  * @param[in]  externalPQ   Pointer to the prime factors of the modulus or NULL pointer. Each prime consists of modulus_len/2
  *                          bytes in big endian order.
  *                          P =  externalPQ[0:modulus_len/2-1], Q = externalPQ[modulus_len/2 : modulus_len-1]
@@ -297,7 +297,7 @@ cx_err_t cx_rsa_generate_pair_no_throw(size_t       modulus_len,
 
 /**
  * @brief   Generates a RSA key pair.
- * 
+ *
  * @details This function throws an exception
  *          if the generation failed.
  *
@@ -320,14 +320,14 @@ cx_err_t cx_rsa_generate_pair_no_throw(size_t       modulus_len,
  *                          No verification is done on the public exponent value except its range.
  *
  * @param[in]  exponent_len Length of the exponent.
- * 
+ *
  * @param[in]  externalPQ   Pointer to the prime factors of the modulus or NULL pointer. Each prime consists of modulus_len/2
  *                          bytes in big endian order.
  *                          P =  externalPQ[0:modulus_len/2-1], Q = externalPQ[modulus_len/2 : modulus_len-1]
  *                          There is no verification on provided P and Q.
  *
  * @return                  Length of the modulus.
- * 
+ *
  * @throws                  CX_INVALID_PARAMETER
  * @throws                  CX_NOT_UNLOCKED
  * @throws                  CX_INVALID_PARAMETER_SIZE
@@ -344,14 +344,14 @@ static inline int cx_rsa_generate_pair ( unsigned int modulus_len, cx_rsa_public
 
 /**
  * @brief   Computes a message digest signature according to RSA specification.
- * 
+ *
  * @details When using PSS padding, the salt length is fixed to the hash output length.
- *          The MGF1 function is the one descrided in PKCS1 v2.0 specification, 
+ *          The MGF1 function is the one descrided in PKCS1 v2.0 specification,
  *          using the same hash algorithm as specified by hashID.
  *
  * @param[in] key      RSA private key initialized with #cx_rsa_init_private_key_no_throw.
  *
- * @param[in] mode     Crypto mode flags. Supported flags: 
+ * @param[in] mode     Crypto mode flags. Supported flags:
  *                       - CX_PAD_PKCS1_1o5
  *                       - CX_PAD_PKCS1_PSS
  *
@@ -392,7 +392,7 @@ cx_err_t cx_rsa_sign_with_salt_len(const cx_rsa_private_key_t *key,
 
 /**
  * @brief   Computes a message digest signature according to RSA specification.
- * 
+ *
  * @details When using PSS padding, the salt length is fixed to the hash output length.
  *          If another salt length is used, call #cx_rsa_sign_with_salt_len instead.
  *          The MGF1 function is the one descrided in PKCS1 v2.0 specification, using the
@@ -400,7 +400,7 @@ cx_err_t cx_rsa_sign_with_salt_len(const cx_rsa_private_key_t *key,
  *
  * @param[in] key      RSA private key initialized with #cx_rsa_init_private_key_no_throw.
  *
- * @param[in] mode     Crypto mode flags. Supported flags: 
+ * @param[in] mode     Crypto mode flags. Supported flags:
  *                       - CX_PAD_PKCS1_1o5
  *                       - CX_PAD_PKCS1_PSS
  *
@@ -438,7 +438,7 @@ cx_err_t cx_rsa_sign_no_throw(const cx_rsa_private_key_t *key,
 
 /**
  * @brief   Computes a message digest signature according to RSA specification.
- * 
+ *
  * @details When using PSS padding, the salt length is fixed to the hash output length.
  *          If another salt length is used, call #cx_rsa_sign_with_salt_len instead.
  *          The MGF1 function is the one descrided in PKCS1 v2.0 specification, using the
@@ -449,7 +449,7 @@ cx_err_t cx_rsa_sign_no_throw(const cx_rsa_private_key_t *key,
  *
  * @param[in] key      RSA private key initialized with #cx_rsa_init_private_key_no_throw.
  *
- * @param[in] mode     Crypto mode flags. Supported flags: 
+ * @param[in] mode     Crypto mode flags. Supported flags:
  *                       - CX_PAD_PKCS1_1o5
  *                       - CX_PAD_PKCS1_PSS
  *
@@ -485,13 +485,13 @@ static inline int cx_rsa_sign ( const cx_rsa_private_key_t * key, int mode, cx_m
 
 /**
  * @brief   Verifies a message digest signature.
- * 
+ *
  * @details It verifies a message digest signature according to RSA specification
  *          with a specified salt length.
  *
  * @param[in] key      RSA public key initialized with #cx_rsa_init_public_key_no_throw.
  *
- * @param[in] mode     Crypto mode flags. Supported flags: 
+ * @param[in] mode     Crypto mode flags. Supported flags:
  *                       - CX_PAD_PKCS1_1o5
  *                       - CX_PAD_PKCS1_PSS
  *
@@ -509,9 +509,9 @@ static inline int cx_rsa_sign ( const cx_rsa_private_key_t * key, int mode, cx_m
  *
  * @param[in] sig      RSA signature encoded as raw bytes.
  *                     This is used as a temporary buffer.
- * 
+ *
  * @param[in] sig_len  Length of the signature.
- * 
+ *
  * @param[in] salt_len Length of the salt.
  *
  * @return             1 if the signature is verified, 0 otherwise.
@@ -536,7 +536,7 @@ bool cx_rsa_verify_with_salt_len(const cx_rsa_public_key_t *key,
  *
  * @param[in] key      RSA public key initialized with #cx_rsa_init_public_key_no_throw.
  *
- * @param[in] mode     Crypto mode flags. Supported flags: 
+ * @param[in] mode     Crypto mode flags. Supported flags:
  *                       - CX_PAD_PKCS1_1o5
  *                       - CX_PAD_PKCS1_PSS
  *
@@ -554,7 +554,7 @@ bool cx_rsa_verify_with_salt_len(const cx_rsa_public_key_t *key,
  *
  * @param[in] sig      RSA signature encoded as raw bytes.
  *                     This is used as a temporary buffer.
- * 
+ *
  * @param[in] sig_len  Length of the signature.
  *
  * @return             1 if the signature is verified, 0 otherwise.
@@ -589,7 +589,7 @@ bool cx_rsa_verify_with_salt_len(const cx_rsa_public_key_t *key,
  * @param[in] mesg_len Length of the input.
  *
  * @param[in] enc      Buffer where to store the ciphertext.
- * 
+ *
  * @param[in] enc_len  Length of the ciphertext.
  *
  * @return             Error code:
@@ -610,7 +610,7 @@ cx_err_t cx_rsa_encrypt_no_throw(const cx_rsa_public_key_t *key,
 
 /**
  * @brief   Encrypts a message according to RSA specification.
- * 
+ *
  * @details This function throws an exception if the computation doesn't succeed.
  *
  * @warning It is recommended to use #cx_rsa_encrypt_no_throw rather than this
@@ -634,11 +634,11 @@ cx_err_t cx_rsa_encrypt_no_throw(const cx_rsa_public_key_t *key,
  * @param[in] mesg_len Length of the input.
  *
  * @param[in] enc      Buffer where to store the ciphertext.
- * 
+ *
  * @param[in] enc_len  Length of the ciphertext.
  *
  * @return             Length of the key.
- * 
+ *
  * @throws             CX_INVALID_PARAMETER
  * @throws             CX_NOT_UNLOCKED
  * @throws             CX_INVALID_PARAMETER_SIZE
@@ -672,7 +672,7 @@ static inline int cx_rsa_encrypt ( const cx_rsa_public_key_t * key, int mode, cx
  * @param[in] mesg_len Length of the input.
  *
  * @param[in] dec      Buffer where to store the decrypted data.
- * 
+ *
  * @param[in] dec_len  Length of the output.
  *
  * @return             Error code:
@@ -693,7 +693,7 @@ cx_err_t cx_rsa_decrypt_no_throw(const cx_rsa_private_key_t *key,
 
 /**
  * @brief   Decrypts a message according to RSA specification.
- * 
+ *
  * @details This function throws an exception if the computation doesn't succeed.
  *
  * @warning It is recommended to use #cx_rsa_decrypt_no_throw rather than this
@@ -717,7 +717,7 @@ cx_err_t cx_rsa_decrypt_no_throw(const cx_rsa_private_key_t *key,
  * @param[in] mesg_len Length of the input.
  *
  * @param[in] dec      Buffer where to store the decrypted data.
- * 
+ *
  * @param[in] dec_len  Length of the output.
  *
  * @return             Length of the decrypted message.

@@ -19,7 +19,7 @@
 /**
  * @file    lcx_blake2.h
  * @brief   BLAKE2 crypographic hash function.
- * 
+ *
  * BLAKE2b is a cryptographic hash function optimized for 64-bit platforms that
  * produces digests of any size between 1 and 64 bytes. It is specified at https://blake2.net.
  */
@@ -82,7 +82,7 @@ cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
 
 /**
  * @brief   Initializes BLAKE2b message digest context.
- * 
+ *
  * @details This function throws an exception if the
  *          initialization fails.
  *
@@ -95,7 +95,7 @@ cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
  * @param[in]  out_len Digest size in bits.
  *
  * @return             BLAKE2b identifier.
- * 
+ *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
@@ -107,20 +107,20 @@ static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
 /**
  * @brief   Initializes BLAKE2b message digest context with
  *          salt and personnalization string.
- * 
+ *
  * @param[out] hash     Pointer to the BLAKE2b context to initialize.
  *                      The context shall be in RAM.
- * 
+ *
  * @param[in] out_len   Digest size in bits.
- * 
+ *
  * @param[in] salt      Pointer to a salt (optional).
- * 
+ *
  * @param[in] salt_len  Length of the salt.
- * 
+ *
  * @param[in] perso     Pointer to a personalization string (optional).
- * 
+ *
  * @param[in] perso_len Length of the personalization string.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_INVALID_PARAMETER
@@ -135,28 +135,28 @@ cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
 /**
  * @brief   Initializes BLAKE2b message digest context with
  *          salt and personnalization string.
- * 
+ *
  * @details This function throws an exception if the initialization
  *          fails.
  *
  * @warning It is recommended to use #cx_blake2b_init2_no_throw
  *          rather than this function.
- * 
+ *
  * @param[out] hash     Pointer to the BLAKE2b context to initialize.
  *                      The context shall be in RAM.
- * 
+ *
  * @param[in] out_len   Digest size in bits.
- * 
+ *
  * @param[in] salt      Pointer to a salt (optional).
- * 
+ *
  * @param[in] salt_len  Length of the salt.
- * 
+ *
  * @param[in] perso     Pointer to a personalization string (optional).
- * 
+ *
  * @param[in] perso_len Length of the personalization string.
- * 
+ *
  * @return              BLAKE2b identifier.
- * 
+ *
  * @throws              CX_INVALID_PARAMETER
  */
 static inline int cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len )

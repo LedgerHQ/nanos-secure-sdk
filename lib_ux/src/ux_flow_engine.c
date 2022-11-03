@@ -112,11 +112,11 @@ static void ux_flow_engine_init_step(unsigned int stack_slot) {
 	if (G_ux.flow_stack[stack_slot].steps[G_ux.flow_stack[stack_slot].index] == FLOW_END_STEP) {
 		return;
 	}
-	// this shall not have occured due to previous checks
+	// this shall not have occurred due to previous checks
 	if (G_ux.flow_stack[stack_slot].steps[G_ux.flow_stack[stack_slot].index] == FLOW_BARRIER) {
 		return;
 	}
-	// this shall not have occured due to previous checks
+	// this shall not have occurred due to previous checks
 	if (G_ux.flow_stack[stack_slot].steps[G_ux.flow_stack[stack_slot].index] == FLOW_LOOP) {
 		return;
 	}

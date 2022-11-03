@@ -886,6 +886,6 @@ const bagl_font_t fontCOMIC_SANS_MS_20PX = {
    0, /* kerning */
    0x0020, /* first character */
    0x007F, /* last character  */
-   charactersCOMIC_SANS_MS_20PX 
+   charactersCOMIC_SANS_MS_20PX
   ,bitmapCOMIC_SANS_MS_20PX
 };

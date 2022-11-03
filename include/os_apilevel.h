@@ -23,4 +23,3 @@
 #define CX_COMPAT_APILEVEL 12
 
 #endif // OS_APILEVEL_H
-

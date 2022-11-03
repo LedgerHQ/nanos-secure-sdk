@@ -1,9 +1,9 @@
-/* 
+/*
  * QR Code generator library (C)
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -29,7 +29,7 @@
 
 /*---- Enumeration types and values ----*/
 
-/* 
+/*
  * Represents the error correction level used in a QR Code symbol.
  */
 enum qrcodegen_Ecc {
@@ -40,7 +40,7 @@ enum qrcodegen_Ecc {
 };
 
 
-/* 
+/*
  * Represents the mask pattern used in a QR Code symbol.
  */
 enum qrcodegen_Mask {
@@ -80,7 +80,7 @@ enum qrcodegen_Mask {
 extern "C" {
 #endif
 
-/* 
+/*
  * Encodes the given text string to a QR Code symbol, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
@@ -103,7 +103,7 @@ bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode
 	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
 
-/* 
+/*
  * Encodes the given binary data to a QR Code symbol, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
@@ -128,7 +128,7 @@ bool qrcodegen_encodeBinary(uint8_t const data[], size_t dataLen, uint8_t temp[]
 
 /*---- Functions to extract raw data from QR Codes ----*/
 
-/* 
+/*
  * Returns the side length of the given QR Code, assuming that encoding succeeded.
  * The result is in the range [21, 177]. Note that the length of the array buffer
  * is related to the side length - every 'uint8_t qrcode[]' must have length at least
@@ -137,7 +137,7 @@ bool qrcodegen_encodeBinary(uint8_t const data[], size_t dataLen, uint8_t temp[]
 int qrcodegen_getSize(const uint8_t qrcode[]);
 
 
-/* 
+/*
  * Returns the color of the module (pixel) at the given coordinates, which is either
  * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
  * If the given coordinates are out of bounds, then false (white) is returned.

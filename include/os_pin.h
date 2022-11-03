@@ -74,12 +74,12 @@ bolos_bool_t   os_perso_is_pin_set(void);
  * associated feature.
  * The associated feature is activated when both the AEM PIN and the boot
  * PIN response have been set and are active.
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * @param aem_pin The AEM PIN to be stored in persistent memory.
  * @param aem_pin_length The length of the to-be-set AEM PIN.
  * @throw INVALID_PARAMETER, when the submitted length is less than the
- * minimum accepted lenth for a PIN,
+ * minimum accepted length for a PIN,
  * @throw SWO_PAR_LEN_13 if aem_pin_length < AEM_MIN_PIN_LENGTH,
  * @throw SWO_SEC_PIN_0D when either the device is not onboarded or the
  * user PIN has not been checked beforehand.
@@ -91,7 +91,7 @@ void os_aem_set_pin(unsigned char* aem_pin PLENGTH(aem_pin_length),
 /**
  * This function allows one to unset the AEM PIN value (in such a case, it
  * is erased), and deactivate the associated feature.
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * @throw SWO_SEC_PIN_0E, when either the device is not onboarded or the
  * user PIN has not been checked beforehand.
@@ -101,7 +101,7 @@ void os_aem_unset_pin(void);
 
 /**
  * This function allows one to know whether the AEM PIN has been set.
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * @return BOLOS_TRUE if the AEM PIN has been set, any other value otherwise
  * (depending on the failed internal check).
@@ -113,7 +113,7 @@ bolos_bool_t os_aem_is_pin_set(void);
  * This function allows one to set a value to the AEM response.
  * The associated feature is activated when both the AEM PIN and the boot
  * PIN response have been set and are active.
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * It needs to be followed by a call to 'os_aem_pin_activate_response' in
  * order to be used afterwards.
@@ -121,7 +121,7 @@ bolos_bool_t os_aem_is_pin_set(void);
  * @param aem_response_length The length of the to-be-set response.
  * @param aem_response_format The format of the to-be-set response.
  * @throw SWO_PAR_LEN_14, when the submitted length is more than the
- * maximum accepted lenth (AEM_RESPONSE_MAX_LENGTH bytes), or when the
+ * maximum accepted length (AEM_RESPONSE_MAX_LENGTH bytes), or when the
  * submitted format is not valid,
  * @throw SWO_SEC_PIN_0F, when either the device is not onboarded or the
  * user PIN has not been checked beforehand.
@@ -134,7 +134,7 @@ void os_aem_set_response(
 
 /**
  * This function allows one to activate the AEM response.
- * This fonction can only be properly processed if the device is onboarded,
+ * This function can only be properly processed if the device is onboarded,
  * the classic PIN has been checked beforehand and the length of the response
  * is not zero.
  * @throw SWO_SEC_PIN_10, when either the device is not onboarded, the
@@ -147,7 +147,7 @@ void os_aem_activate_response(void);
 /**
  * This function allows one to deactivate the AEM response, and
  * deactivate the associated feature.
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * @throw SWO_SEC_PIN_11, when either the device is not onboarded or the
  * user PIN has not been checked beforehand.
@@ -158,7 +158,7 @@ void os_aem_deactivate_response(void);
 /**
  * This function allows one to know whether the AEM response
  * has been set and active.
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * @return BOLOS_TRUE if the response has been set and activated, any other
  * value otherwise (depending on the failed internal check).
@@ -169,7 +169,7 @@ bolos_bool_t os_aem_is_response_active(void);
 /**
  * This function allows one to know whether the AEM PIN feature is active
  * (i.e. if the AEM PIN is set, and the response has been set and activated).
- * This fonction can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and the classic PIN has been checked beforehand.
  * @return BOLOS_TRUE if the feature is active, any other value otherwise
  * (depending on the failed internal check).
@@ -243,7 +243,7 @@ void os_aem_invalidate_pin(void);
 /**
  * This function allows one to retrieve the remaining attempts at verifying
  * a PIN against the AEM PIN.
- * This funtion can only be properly processed if the device is onboarded
+ * This function can only be properly processed if the device is onboarded
  * and if the AEM PIN has been set beforehand.
  * @return The AEM PIN try counter.
  * @throw SWO_SEC_PIN_12 when eiher the device is not onboarded or the

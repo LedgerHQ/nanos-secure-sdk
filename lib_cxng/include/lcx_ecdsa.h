@@ -49,7 +49,7 @@
  *                        - CX_RND_TRNG
  *                        - CX_RND_RFC6979
  *
- * @param[in]  hashID   Message digest algorithm identifer.
+ * @param[in]  hashID   Message digest algorithm identifier.
  *                      This parameter is mandatory with the flag CX_RND_RFC6979.
  *
  * @param[in]  hash     Digest of the message to be signed.
@@ -60,7 +60,7 @@
  *
  * @param[out] sig      Buffer where to store the signature.
  *                      The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 || Ls || s**
- * 
+ *
  * @param[in]  sig_len  Length of the buffer in octets.
  *
  * @param[out] info     Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when computing **[k].G**.
@@ -89,7 +89,7 @@ cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
 
 /**
  * @brief   Signs a message digest according to ECDSA specification.
- * 
+ *
  * @details This function throws an exception if the signature
  *          doesn't succeed.
  *
@@ -104,7 +104,7 @@ cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
  *                        - CX_RND_TRNG
  *                        - CX_RND_RFC6979
  *
- * @param[in]  hashID   Message digest algorithm identifer.
+ * @param[in]  hashID   Message digest algorithm identifier.
  *                      This parameter is mandatory with the flag CX_RND_RFC6979.
  *
  * @param[in]  hash     Digest of the message to be signed.
@@ -115,13 +115,13 @@ cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
  *
  * @param[out] sig      Buffer where to store the signature.
  *                      The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 || Ls || s**
- * 
+ *
  * @param[in]  sig_len  Length of the buffer in octets.
  *
  * @param[out] info     Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when computing **[k].G**.
  *
  * @return              Length of the signature.
- * 
+ *
  * @throws              CX_EC_INVALID_CURVE
  * @throws              CX_INVALID_PARAMETER
  * @throws              CX_INTERNAL_ERROR
@@ -147,19 +147,19 @@ static inline size_t cx_ecdsa_sign ( const cx_ecfp_private_key_t * pvkey, uint32
 
 /**
  * @brief   Verifies an ECDSA signature according to ECDSA specification.
- * 
+ *
  * @param[in] pukey    Public key initialized with #cx_ecfp_init_public_key_no_throw.
- * 
+ *
  * @param[in] hash     Digest of the message to be verified.
  *                     The length of *hash* must be smaller than the group order size.
  *                     Otherwise it is truncated.
- * 
+ *
  * @param[in] hash_len Length of the digest in octets.
- * 
+ *
  * @param[in] sig      Pointer to the signature encoded in TLV: **30 || L || 02 || Lr || r || 02 || Ls || s**
- * 
+ *
  * @param[in] sig_len  Length of the signature in octets.
- * 
+ *
  * @return             1 if the signature is verified, 0 otherwise.
  */
 bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
@@ -170,24 +170,24 @@ bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
 
 /**
  * @brief   Verifies an ECDSA signature according to ECDSA specification.
- * 
+ *
  * @param[in] pukey    Public key initialized with #cx_ecfp_init_public_key_no_throw.
- * 
+ *
  * @param[in] mode     ECDSA mode. This parameter is not used.
- * 
- * @param[in] hashID   Message digest algorithm identifer.
+ *
+ * @param[in] hashID   Message digest algorithm identifier.
  *                     This parameter is not used.
- * 
+ *
  * @param[in] hash     Digest of the message to be verified.
  *                     The length of *hash* must be smaller than the group order size.
  *                     Otherwise it is truncated.
- * 
+ *
  * @param[in] hash_len Length of the digest in octets.
- * 
+ *
  * @param[in] sig      Pointer to the signature encoded in TLV: **30 || L || 02 || Lr || r || 02 || Ls || s**
- * 
+ *
  * @param[in] sig_len  Length of the signature in octets.
- * 
+ *
  * @return             1 if the signature is verified, 0 otherwise.
  */
 static inline bool cx_ecdsa_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * sig, unsigned int sig_len)

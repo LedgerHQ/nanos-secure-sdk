@@ -320,7 +320,7 @@ unsigned int io_seproxyhal_handle_event(void) {
       io_seproxyhal_handle_nfc_recv_event();
       return 1;
   #endif
-  
+
     case SEPROXYHAL_TAG_UX_EVENT:
       switch (G_io_seproxyhal_spi_buffer[3]) {
 
@@ -637,7 +637,7 @@ unsigned int io_seproxyhal_display_icon_header_and_colors(const bagl_component_t
   raw.header.seph.len[0] = (len + sizeof(raw) - sizeof(raw.header.seph)) >> 8;
   raw.header.seph.len[1] = (len + sizeof(raw) - sizeof(raw.header.seph));
 
-  // swap endianess of coordinates (make it big endian)
+  // swap endianness of coordinates (make it big endian)
   SWAP(raw.x.b[0], raw.x.b[1]);
   SWAP(raw.y.b[0], raw.y.b[1]);
   SWAP(raw.w.b[0], raw.w.b[1]);
@@ -657,7 +657,7 @@ void io_seproxyhal_display_icon(const bagl_component_t* icon_component, const ba
   const bagl_icon_details_t* icon_details = (const bagl_icon_details_t *)PIC(icon_det);
 
   if (icon_details && icon_details->bitmap) {
-    // ensure not being out of bounds in the icon component agianst the declared icon real size
+    // ensure not being out of bounds in the icon component against the declared icon real size
     memcpy(&icon_component_mod, PIC(icon_component), sizeof(bagl_component_t));
     icon_component_mod.width = icon_details->width;
     icon_component_mod.height = icon_details->height;
@@ -1411,7 +1411,7 @@ reply_apdu:
 
       io_seproxyhal_handle_event();
 
-      // An apdu has been received asynchroneously.
+      // An apdu has been received asynchronously.
       if (G_io_app.apdu_state != APDU_IDLE && G_io_app.apdu_length > 0) {
         if (os_perso_isonboarded() == BOLOS_TRUE && os_global_pin_is_validated() != BOLOS_TRUE) {
           tx_len = 0;

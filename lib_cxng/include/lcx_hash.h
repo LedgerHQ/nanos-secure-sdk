@@ -97,7 +97,7 @@ typedef struct {
   cx_err_t (*init_func)(cx_hash_t *ctx);                                    ///< Pointer to the initialization function
   cx_err_t (*update_func)(cx_hash_t *ctx, const uint8_t *data, size_t len); ///< Pointer to the update function
   cx_err_t (*finish_func)(cx_hash_t *ctx, uint8_t *digest);                 ///< Pointer to the final function
-  cx_err_t (*init_ex_func)(cx_hash_t *ctx, size_t output_size);             ///< Pointer to the initialization function for extendable output 
+  cx_err_t (*init_ex_func)(cx_hash_t *ctx, size_t output_size);             ///< Pointer to the initialization function for extendable output
   size_t (*output_size_func)(const cx_hash_t *ctx);                         ///< Pointer to the output size function
 } cx_hash_info_t;
 
@@ -143,7 +143,7 @@ cx_err_t cx_hash_no_throw(cx_hash_t *hash, uint32_t mode, const uint8_t *in, siz
 
 /**
  * @brief   Hashes data according to the specified algorithm.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
  *
@@ -197,7 +197,7 @@ cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
 
 /**
  * @brief   Initializes a hash context.
- * 
+ *
  * @details It initializes a hash context with a chosen output length
  *          (typically for eXtendable Output Functions (XOF)).
  *
@@ -219,7 +219,7 @@ cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
 
 /**
  * @brief   Adds more data to hash.
- * 
+ *
  * @details A call to this function is equivalent to:
  *          *cx_hash_no_throw(hash, 0, in, in_len, NULL, 0)*.
  *
@@ -237,8 +237,8 @@ cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
 cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
 
 /**
- * @brief   Finalizes the hash. 
- * 
+ * @brief   Finalizes the hash.
+ *
  * @details A call to this function is equivalent to:
  *          *cx_hash_no_throw(hash, CX_LAST, NULL, 0, out, out_len)*.
  *

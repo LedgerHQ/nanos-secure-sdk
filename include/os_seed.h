@@ -36,7 +36,7 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_words(
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_finalize(void);
 
 // checked in the ux flow to avoid asking the pin for example
-// NBA : could also be checked by applications running in unsecure mode - thus unprivilegied
+// NBA : could also be checked by applications running in insecure mode - thus unprivilegied
 // @return BOLOS_UX_OK when perso is onboarded.
 SYSCALL                                       bolos_bool_t   os_perso_isonboarded(void);
 

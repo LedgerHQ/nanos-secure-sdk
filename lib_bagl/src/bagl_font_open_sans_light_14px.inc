@@ -743,6 +743,6 @@ const bagl_font_t fontOPEN_SANS_LIGHT_14PX = {
    0, /* kerning */
    0x0020, /* first character */
    0x007F, /* last character  */
-   charactersOPEN_SANS_LIGHT_14PX 
+   charactersOPEN_SANS_LIGHT_14PX
   ,bitmapOPEN_SANS_LIGHT_14PX
 };

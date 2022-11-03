@@ -49,7 +49,7 @@ A few APIs are available to draw typical pages, like:
 - @ref nbgl_pageDrawLedgerInfo() to draw a simple centered text in Ledger format (typically to provide the status of an action)
 - @ref nbgl_pageDrawSpinner() to draw a spinner (typically a waiting screen)
 - @ref nbgl_pageDrawInfo() to draw a centered info with potential footer (or bottom button), "tapable" container and top-right button
-- @ref nbgl_pageDrawConfirmation() to draw a typical confirmation screen, for example when rejecting a transation (with 1 button for confirmation)
+- @ref nbgl_pageDrawConfirmation() to draw a typical confirmation screen, for example when rejecting a transaction (with 1 button for confirmation)
 - @ref nbgl_pageDrawAddressConfirmation() to draw a typical address confirmation screen
 
 In addition, in order to factorize some code, a generic function is available to draw generic content, either for a single page
@@ -103,7 +103,7 @@ The API to insert such an object is @ref nbgl_pageDrawInfo() with the @ref nbgl_
 
 \image{inline} html page6.png "caption" height=300
 
-This type is intended to draw a typical confirmation screen, for example when rejecting a transation (with 1 button for confirmation).
+This type is intended to draw a typical confirmation screen, for example when rejecting a transaction (with 1 button for confirmation).
 In addition of a centered info, this page offer control to interact with the info:
 
 - A bottom button to cancel
@@ -182,7 +182,7 @@ The "details" button is only displayed if the \b detailsButtonText is not NULL.
 
 @subsubsection page_generic_single Generic content page API
 
-This type is intended to draw generic content for single or multi-pages, with an optionnal way to navigate.
+This type is intended to draw generic content for single or multi-pages, with an optional way to navigate.
 It doesn't directly manage the different pages, but it provides control to draw a new page when the navigation is used.
 
 The API to create such a page is @ref nbgl_pageDrawGenericContent().
@@ -215,9 +215,9 @@ In this case, all specific parameters can be found in @ref nbgl_pageNavWithTap_t
 - a token attached to this potential back button
 - a text used as indication for "Tap to continue", to navigate forward
 - a token used as argument of the action callback when the main container is "taped"
-- the main text dispayed in footer, used to quit. If NULL, no footer to quit.
-- the second text dispayed in footer (on the right), used to skip. If NULL, only main text is displayed
-- a token used as argument of the action callback when the second text dispayed in footer is touched
+- the main text displayed in footer, used to quit. If NULL, no footer to quit.
+- the second text displayed in footer (on the right), used to skip. If NULL, only main text is displayed
+- a token used as argument of the action callback when the second text displayed in footer is touched
 
 <u>Common parameters:</u>
 

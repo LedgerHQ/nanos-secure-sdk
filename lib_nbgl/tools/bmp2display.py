@@ -89,13 +89,13 @@ def parse_bmp_file(bmp_file_name: str, bpp: int):
                     pixel_val = buffer[i]+(buffer[i+1]<<8)+(buffer[i+2]<<16)
                     if (pixel_val == 0xFFFFFF):
                         cur_byte |= (0x3<<(6-pixel_idx))
-                
+
                     elif (pixel_val > 0):
                         cur_byte |= (0x2<<(6-pixel_idx))
                 elif (bpp == 4):
                     bpp_format = 2
                     cur_byte |= get4BPPval(buffer, i)<<(4-pixel_idx)
-                
+
                 pixel_idx+=bpp
                 # the byte is fully filled, let's save its content
                 if (pixel_idx%8 == 0):
@@ -131,7 +131,7 @@ def format_image(img: bytearray, width: int, height: int, compression: bool) -> 
     4: 2
     }
 
-    result = [width&0xFF, width>>8, height&0xFF, height>>8, 
+    result = [width&0xFF, width>>8, height&0xFF, height>>8,
         (BPP_FORMATS[args.bpp]<<4) | compression, len(img)&0xFF, (len(img)>>8)&0xFF,
         (len(img)>>16)&0xFF]
     result.extend(output_buffer)
@@ -160,13 +160,13 @@ if __name__ == "__main__":
         help="number of bit per pixel (1, 2 or 4)")
 
     parser.add_argument(
-        '--compress', 
+        '--compress',
         action='store_true',
         default=False,
         help="compress data")
 
     parser.add_argument(
-        '--file', 
+        '--file',
         action='store_true',
         default=False,
         help="store in Ledger image format")

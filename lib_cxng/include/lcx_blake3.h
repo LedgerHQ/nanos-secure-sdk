@@ -42,7 +42,7 @@
 // Not used within the source code but defines the stack depth.
 // The stack depth is equal to log(BLAKE3_MAX_INPUT_LEN / BLAKE3_CHUNK_LEN)
 // i.e. it is the maximal number of chunks that can be stored within the cv stack.
-// The default input lenght is at most (2**64 - 1) but due to memory constraints
+// The default input length is at most (2**64 - 1) but due to memory constraints
 // it is set to (2**20 - 1)
 #define        BLAKE3_MAX_INPUT_LEN_POWER   20
 #define        BLAKE3_MAX_INPUT_LEN         (1 << BLAKE3_MAX_INPUT_LEN_POWER)

@@ -63,7 +63,7 @@ typedef enum os_setting_v1_e {
 #ifdef HAVE_MCU_UPGRADE
   OS_SETTING_MCU_UPGRADE_V1,
 #endif // HAVE_MCU_UPGRADE
-  
+
   OS_SETTING_LANGUAGE_V1,
 
   // before that value, all settings are only making use of the length value with a null buffer to be set, and are returned through the return value with a maxlength = 0 in the get.
@@ -96,7 +96,7 @@ typedef enum os_setting_e {
 #ifdef HAVE_MCU_UPGRADE
   OS_SETTING_MCU_UPGRADE,
 #endif // HAVE_MCU_UPGRADE
-  
+
   OS_SETTING_LANGUAGE,
 
   OS_SETTING_PIEZO_SOUND,
@@ -137,4 +137,3 @@ void set_os_language(unsigned int language);
 
 // Reset the Preferences to default values
 void os_setting_reset(void);
-

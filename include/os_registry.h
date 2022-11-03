@@ -14,9 +14,9 @@
 
 /**
  * @param appidx The application entry index in the registry (raw, not filtering ux or whatever). If the entry index correspond to the application being installed then RAM structure content is used instead of the NVRAM registry.
- * @param tlvoffset The offset within the install parameters memory area, in bytes. Useful if tag is present multiple times. Can be null. The tlv offset is the offset of the tag in the install parameters area when a tag is matched. This way long tag can be read in multiple time without the need to play with the tlvoffset. Add +1 to skip to the next one when seraching for multiple tag occurences.
+ * @param tlvoffset The offset within the install parameters memory area, in bytes. Useful if tag is present multiple times. Can be null. The tlv offset is the offset of the tag in the install parameters area when a tag is matched. This way long tag can be read in multiple time without the need to play with the tlvoffset. Add +1 to skip to the next one when searching for multiple tag occurrences.
  * @param tag The tag to be searched for
- * @param value_offset The offset within the value for this occurence of the tag. The OS_REGISTRY_GET_TAG_OFFSET_COMPARE_WITH_BUFFER or OS_REGISTRY_GET_TAG_OFFSET_GET_LENGTH can be ORed to perform meta operation on the TLV occurence.
+ * @param value_offset The offset within the value for this occurrence of the tag. The OS_REGISTRY_GET_TAG_OFFSET_COMPARE_WITH_BUFFER or OS_REGISTRY_GET_TAG_OFFSET_GET_LENGTH can be ORed to perform meta operation on the TLV occurrence.
  * @param buffer The user buffer for comparison or to retrieve the value of the tag at the given offset.
  * @param maxlength Size of the buffer to be compared OR to be retrieved (trimmed depending the TLV effective length).
  */
@@ -28,7 +28,7 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned int os_registry_get_tag(u
                                               SYSCALL unsigned int os_registry_get_current_app_tag(unsigned int tag, unsigned char* buffer PLENGTH(maxlen), unsigned int maxlen);
 
 /**
- * This function deletes the application mentioned with its index, as well as all its dependees (the applications which depend on it).
+ * This function deletes the application mentioned with its index, as well as all the applications depending on it.
  * @param index The index of the the application to suppress.
  */
     SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_registry_delete_app_and_dependees(unsigned int app_idx);

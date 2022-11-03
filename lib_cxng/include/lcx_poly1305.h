@@ -22,7 +22,7 @@
  * @brief   POLY1305 Message Authentication Code
  *
  * @section Description
- * 
+ *
  * POLY1305 generates a 16-byte tag which authenticates a message given a 32-byte key.
  * The 32-byte key can be made of two 16-byte keys, e.g. the first 16-byte key is an AES key
  * and the remaining 16-byte come from a random string. POLY1305 has been designed with the AES

@@ -3,7 +3,7 @@
 /**
  * @file    ox_bls.h
  * @brief   BLS signature.
- * 
+ *
  */
 
 #ifndef OX_BLS_H
@@ -41,7 +41,7 @@
  * @param[in] salt_len       Length of the salt.
  *
  * @param[in] key_info       Pointer to an optional key information. If no key information is used,
- *                           this buffer must be allocated to hold at least 2 bytes. 
+ *                           this buffer must be allocated to hold at least 2 bytes.
  *
  * @param[in] key_info_len   Length of the key information.
  *
@@ -69,23 +69,23 @@ SYSCALL cx_err_t cx_bls12381_key_gen(uint8_t mode,
 
 /**
  * @brief   Hash a message to be signed with BLS12-381 signature scheme.
- * 
+ *
  * @details The hash is represented by (h_0, h_1, h_2, h_3) where each h_i is
- *          48-byte long. Thus, the whole hash is 192-byte long. 
- * 
+ *          48-byte long. Thus, the whole hash is 192-byte long.
+ *
  * @param[in]  msg      Message to hash.
- * 
+ *
  * @param[in]  msg_len  Length of the message.
- * 
+ *
  * @param[in]  dst      Domain Separation Tag
- * 
+ *
  * @param[in]  dst_len  Length of the Domain Separation Tag, at most 255 bytes.
- * 
+ *
  * @param[out] hash     Hash of the message: a concatenation of field elements.
- * 
+ *
  * @param[in]  hash_len Curve identifier.
- * 
- * 
+ *
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_INVALID_PARAMETER
@@ -97,16 +97,16 @@ SYSCALL cx_err_t cx_hash_to_field(const uint8_t *msg, size_t msg_len,
 
 /**
  * @brief   Sign the hash of a message.
- * 
+ *
  * @details BLS signature with the curve BLS12-381-G2. The message must be hash beforehand with #cx_hash_to_field.
- * 
+ *
  * @param[in]  key           Private key. The private key must be initialized with #cx_ecfp_init_private_key_no_throw
  *                           given a 32-byte raw key.
- * 
+ *
  * @param[in]  message       Hash of the message, result of #cx_hash_to_field.
- * 
+ *
  * @param[in]  message_len   Length of the hash. This must be 192 bytes.
- * 
+ *
  * @param[out] signature     Compressed signature: only the x-coordinate of the point is returned.
  *                           The most-significant three bits of the signature are used to unambiguously
  *                           determine the y-coordinate among the two possible choices.
@@ -115,9 +115,9 @@ SYSCALL cx_err_t cx_hash_to_field(const uint8_t *msg, size_t msg_len,
  *                           of the bits of signature must be 0.
  *                           The third bit is set iff the y-coordinate is greater than (p-1)/2 where
  *                           p = 0x1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab.
- * 
+ *
  * @param[in]  signature_len Length of the signature. This must be 96 bytes.
- * 
+ *
  * @return                   Error code:
  *                           - CX_OK on success
  *                           - CX_INTERNAL_ERROR
@@ -131,21 +131,21 @@ SYSCALL cx_err_t ox_bls12381_sign(const cx_ecfp_384_private_key_t *key,
 
 /**
  * @brief   Aggregate multiple signatures.
- * 
+ *
  * @details BLS signature aggregation with the curve BLS12-381-G2. This function should be called
  *          for each signature to aggregate, with the first parameter set to 'true' for the first
  *          signature and false for the next signatures.
- * 
+ *
  * @param[in]  in                   Signature to aggregate.
- * 
+ *
  * @param[in]  in_len               Length of the input. This must be the length of one signature.
- * 
+ *
  * @param[in]  first                Indicates if this is the first signature to aggregate.
- * 
+ *
  * @param[out] aggregated_signature Aggregated signature in compressed form.
- * 
+ *
  * @param[in]  signature_len        Length of the aggregated signature. This must be 96 bytes.
- * 
+ *
  * @return                          Error code:
  *                                  - CX_OK on success
  *                                  - CX_INTERNAL_ERROR

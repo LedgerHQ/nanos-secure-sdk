@@ -113,7 +113,7 @@ The only properties of this object are:
 
 The API to insert such an object is @ref nbgl_layoutAddBottomButton().
 
-Optionnaly, a thin horizontal separation can be drawn on top of the button, if \b separationLine parameter of @ref nbgl_layoutAddBottomButton()
+Optionally, a thin horizontal separation can be drawn on top of the button, if \b separationLine parameter of @ref nbgl_layoutAddBottomButton()
 is true.
 
 \warning This object is incompatible with navigation bar or footer, for example
@@ -198,7 +198,7 @@ The API to insert such an object is @ref nbgl_layoutAddChoiceButtons(), with @re
 
 \image{inline} html layout6.png "caption" height=300
 
-This object is made of a single button, in @ref BLACK. The text and optionnal icon are in @ref WHITE
+This object is made of a single button, in @ref BLACK. The text and optional icon are in @ref WHITE
 
 This button occupies the full width of the screen, except if \b fittingContent field of @ref nbgl_layoutButton_t is true, and is put at the bottom of the main container, on top of a potential navigation bar or bottom button.
 
@@ -245,7 +245,7 @@ This horizontal bar object is made of:
 Some extra fields in @ref nbgl_layoutBar_t, enable to:
 
 - center text horizontally instead of on the left
-- gray-out the bar to "inactivate" it
+- gray-out the bar to deactivate it
 
 This area is displayed in the main container, under the previously inserted complex object.
 
@@ -282,7 +282,7 @@ This object is made of a vertical list of *nbChoices* items made of:
 
 One and only one button is active at the same time in a single object.
 
-Each line of choice is seperated from the previous one by a thin horizontal sepatation line.
+Each line of choice is separated from the previous one by a thin horizontal sepatation line.
 
 The active button at start-up is given in *initChoice* field of @ref nbgl_layoutRadioChoice_t.
 
@@ -308,7 +308,7 @@ The API to insert such an object is @ref nbgl_layoutAddSpinner().
 \image{inline} html layout5.png "caption" height=300
 
 This object, drawned in top of the screen, is essentially made of a discrete page progress bar (slashes or digits).
-An optionnal "back" button, symbolized with a left arrow, can also be drawned on the left of the page progress.
+An optional "back" button, symbolized with a left arrow, can also be drawned on the left of the page progress.
 
 The parameters to build this object are:
 
@@ -333,8 +333,8 @@ This object, centered in the main container, is made of a dynamically drawned QR
 The parameters to build this object are:
 
 - The URL corresponding to the address to draw in the QR Code
-- The optionnal text to draw under the QR Code (in @ref BLACK, 24px bold)
-- The optionnal sub text to draw under the text (in @ref BLACK, 24px regular)
+- The optional text to draw under the QR Code (in @ref BLACK, 24px bold)
+- The optional sub text to draw under the text (in @ref BLACK, 24px regular)
 
 The API to insert such an object is @ref nbgl_layoutAddQRCode(), with @ref nbgl_layoutQRCode_t structure as parameter.
 
@@ -352,7 +352,7 @@ Here are some example of these pages in Bolos UX:
 
 \image{inline} html keyboard-usages.png "caption" height=300
 
-To build such screens, some dedicated APIs are necessary, which will be detailled in the sub-chapters.
+To build such screens, some dedicated APIs are necessary, which will be detailed in the sub-chapters.
 
 @subsubsection keyboard_sub_section_1 Adding/Updating keyboard
 
@@ -368,7 +368,7 @@ The parameters to configure this object are:
 
 The API to insert such an object is @ref nbgl_layoutAddKeyboard(), with @ref nbgl_layoutKbd_t structure as parameter.
 
-This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateKeyboard() function,
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateKeyboard() function,
 used to modify the mask of an existing keyboard.
 
 @note the 32 bits mask works like this:
@@ -391,7 +391,7 @@ The parameters to configure this object are:
 
 The API to insert such an object is @ref nbgl_layoutAddConfirmationButton().
 
-This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateConfirmationButton() function,
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateConfirmationButton() function,
 used to modify the text or the state of the button (active/inactive).
 
 \warning This object is incompatible with suggestion buttons.
@@ -410,7 +410,7 @@ The parameters to configure this set are:
 
 The API to insert such an object is @ref nbgl_layoutAddSuggestionButtons().
 
-This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateSuggestionButtons() function,
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateSuggestionButtons() function,
 used to modify the texts or the number of used buttons.
 
 \warning This object is incompatible with confirmation button.
@@ -431,7 +431,7 @@ The parameters to configure this object are:
 
 The API to insert such an object is @ref nbgl_layoutAddEnteredText().
 
-This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateEnteredText() function,
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateEnteredText() function,
 used to modify the text or the number preceding it.
 
 @subsubsection keyboard_example_1 Example 1
@@ -663,7 +663,7 @@ Here are some example of these pages in Bolos UX:
 
 \image{inline} html keypad-usages.png "caption" height=300
 
-To build such screens, some dedicated APIs are necessary, which will be detailled in the sub-chapters.
+To build such screens, some dedicated APIs are necessary, which will be detailed in the sub-chapters.
 
 @subsubsection keypad_sub_section_1 Adding/Updating keypad
 
@@ -673,7 +673,7 @@ The only parameter to configure this object is the callback associated with acti
 
 The API to insert such an object is @ref nbgl_layoutAddKeypad().
 
-This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateKeypad() function,
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateKeypad() function,
 used to modify the mask (active keys) of an existing keypad.
 
 @subsubsection keypad_sub_section_2 Adding/Updating hidden digits area
@@ -688,7 +688,7 @@ The parameters to configure this object are:
 
 The API to insert such an object is @ref nbgl_layoutAddHiddenDigits().
 
-This function returns a positive integer (if successfull) to be used as an index in @ref nbgl_layoutUpdateHiddenDigits() function,
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateHiddenDigits() function,
 used to modify the number of entered digits.
 
 

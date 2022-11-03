@@ -287,7 +287,7 @@ struct ux_state_s {
 #endif // HAVE_BLE
 
 #ifdef HAVE_UX_FLOW
-  // global context, therefore, don't allow for multiple paging overlayed in a graphic stack
+  // global context, therefore, don't allow for multiple paging overlaid in a graphic stack
   ux_layout_paging_state_t layout_paging;
 
   // the flow for each stack slot
@@ -449,7 +449,7 @@ extern bolos_ux_params_t G_ux_params;
   io_seproxyhal_init_ux(); \
   io_seproxyhal_init_button(); /*ensure to avoid release of a button from a nother screen to mess up with the redisplayed screen */ \
   G_ux.stack[0].element_index = index; \
-  /* REDRAW is redisplay already, use os_ux retrun value to check */ \
+  /* REDRAW is redisplay already, use os_ux return value to check */ \
   G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX); \
   if (G_ux_params.len != BOLOS_UX_IGNORE && G_ux_params.len != BOLOS_UX_CONTINUE) { \
     UX_DISPLAY_NEXT_ELEMENT(); \
@@ -481,7 +481,7 @@ extern bolos_ux_params_t G_ux_params;
   UX_WAKE_UP();
 
 /**
- * Request a screen redisplay after the given milliseconds interval has passed. Interval is not repeated, it's a single shot callback. must be reenabled (the JS way).
+ * Request a screen redisplay after the given milliseconds interval has passed. Interval is not repeated, it's a single shot callback. must be re-enabled (the JS way).
  */
 #define UX_CALLBACK_SET_INTERVAL(ms) \
   G_ux.stack[0].ticker_value = ms;

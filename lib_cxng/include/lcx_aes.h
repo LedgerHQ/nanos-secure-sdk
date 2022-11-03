@@ -21,9 +21,9 @@
  * @brief   AES (Advanced Encryption Standard).
  *
  * AES is an encryption standard based on Rijndael algorithm, a symmetric block
- * cipher that can process data blocks of 128 bits. The key length is either 
+ * cipher that can process data blocks of 128 bits. The key length is either
  * 128, 192 or 256 bits.
- * 
+ *
  * Refer to <a href = " https://csrc.nist.gov/publications/detail/fips/197/final"> FIPS 197
  * </a> for more details.
  */
@@ -40,16 +40,16 @@
 
 /**
  * @brief   Initializes an AES Key.
- * 
+ *
  * @details Once initialized, the key can be stored in non-volatile memory
  *          and directly used for any AES processing.
  *
  * @param[in]  rawkey  Pointer to the supplied key.
- * 
+ *
  * @param[in]  key_len Length of the key: 16, 24 or 32 octets.
- * 
+ *
  * @param[out] key     Pointer to the key structure. This must not be NULL.
- * 
+ *
  * @return             Error code:
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
@@ -58,7 +58,7 @@ cx_err_t cx_aes_init_key_no_throw(const uint8_t *rawkey, size_t key_len, cx_aes_
 
 /**
  * @brief   Initializes an AES Key.
- * 
+ *
  * @details Once initialized, the key can be stored in non-volatile memory
  *          and directly used for any AES processing.
  *          This function throws an exception if the initialization fails.
@@ -67,13 +67,13 @@ cx_err_t cx_aes_init_key_no_throw(const uint8_t *rawkey, size_t key_len, cx_aes_
  *          than this function.
  *
  * @param[in]  rawkey  Pointer to the supplied key.
- * 
+ *
  * @param[in]  key_len Length of the key: 16, 24 or 32 octets.
- * 
+ *
  * @param[out] key     Pointer to the key structure. This must not be NULL.
- * 
+ *
  * @return             Length of the key.
- * 
+ *
  * @throw              CX_INVALID_PARAMETER
  */
 static inline size_t cx_aes_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_aes_key_t * key )
@@ -86,7 +86,7 @@ static inline size_t cx_aes_init_key ( const unsigned char * rawkey, unsigned in
  * @brief   Encrypts, decrypts, signs or verifies data with AES algorithm.
  *
  * @param[in] key     Pointer to the key initialized with #cx_aes_init_key_no_throw.
- * 
+ *
  * @param[in] mode    Crypto mode flags
  *                    Supported flags:
  *                     - CX_LAST
@@ -100,16 +100,16 @@ static inline size_t cx_aes_init_key ( const unsigned char * rawkey, unsigned in
  *                     - CX_CHAIN_ECB
  *                     - CX_CHAIN_CBC
  *                     - CX_CHAIN_CTR
- * 
+ *
  *                    When using the CTR mode with AES, CX_ENCRYPT must be used for encryption
  *                    and decryption.
- * 
+ *
  * @param[in] iv      Initialization vector.
- * 
+ *
  * @param[in] iv_len  Length of the initialization vector.
- * 
+ *
  * @param[in] in      Input data.
- * 
+ *
  * @param[in] in_len  Length of the input data.
  *                    If CX_LAST is set, padding is automatically done according to the *mode*.
  *                    Otherwise, *in_len* shall be a multiple of AES_BLOCK_SIZE.
@@ -137,7 +137,7 @@ cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
 
 /**
  * @brief   Encrypts, decrypts, signs or verifies data with AES algorithm.
- * 
+ *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
  *
@@ -145,7 +145,7 @@ cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
  *          this function.
  *
  * @param[in] key     Pointer to the key initialized with #cx_aes_init_key_no_throw.
- * 
+ *
  * @param[in] mode    Crypto mode flags
  *                    Supported flags:
  *                     - CX_LAST
@@ -159,16 +159,16 @@ cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
  *                     - CX_CHAIN_ECB
  *                     - CX_CHAIN_CBC
  *                     - CX_CHAIN_CTR
- * 
+ *
  *                    When using the CTR mode with AES, CX_ENCRYPT must be used for encryption
  *                    and decryption.
- * 
+ *
  * @param[in] iv      Initialization vector.
- * 
+ *
  * @param[in] iv_len  Length of the initialization vector.
- * 
+ *
  * @param[in] in      Input data.
- * 
+ *
  * @param[in] in_len  Length of the input data.
  *                    If CX_LAST is set, padding is automatically done according to the *mode*.
  *                    Otherwise, *in_len* shall be a multiple of AES_BLOCK_SIZE.
@@ -181,7 +181,7 @@ cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
  * @param[in] out_len Length of the output data.
  *
  * @return            Length of the output.
- * 
+ *
  * @throws            CX_INVALID_PARAMETER
  * @throws            INVALID_PARAMETER
  */
@@ -194,12 +194,12 @@ static inline size_t cx_aes_iv ( const cx_aes_key_t * key, uint32_t mode, unsign
 
 /**
  * @brief   Encrypts, decrypts, signs or verifies data with AES algorithm.
- * 
+ *
  * @details Same as #cx_aes_iv_no_throw with initial IV assumed to be sixteen zeros.
  *
- * @param[in] key     Pointer to the key initialized with 
+ * @param[in] key     Pointer to the key initialized with
  *                    #cx_aes_init_key_no_throw.
- * 
+ *
  * @param[in] mode    Crypto mode flags
  *                    Supported flags:
  *                     - CX_LAST
@@ -213,9 +213,9 @@ static inline size_t cx_aes_iv ( const cx_aes_key_t * key, uint32_t mode, unsign
  *                     - CX_CHAIN_ECB
  *                     - CX_CHAIN_CBC
  *                     - CX_CHAIN_CTR
- * 
+ *
  * @param[in] in      Input data.
- * 
+ *
  * @param[in] in_len  Length of the input data.
  *                    If CX_LAST is set, padding is automatically done according to the *mode*.
  *                    Otherwise, *in_len* shall be a multiple of AES_BLOCK_SIZE.
@@ -236,7 +236,7 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
 
 /**
  * @brief   Encrypts, decrypts, signs or verifies data with AES algorithm.
- * 
+ *
  * @details Same as #cx_aes_iv_no_throw with initial IV assumed to be sixteen zeros.
  *          This function throws an exception if the computation
  *          doesn't succeed.
@@ -244,9 +244,9 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
  * @warning It is recommended to use #cx_aes_no_throw rather than this
  *          function.
  *
- * @param[in] key     Pointer to the key initialized with 
+ * @param[in] key     Pointer to the key initialized with
  *                    #cx_aes_init_key_no_throw.
- * 
+ *
  * @param[in] mode    Crypto mode flags
  *                    Supported flags:
  *                     - CX_LAST
@@ -260,9 +260,9 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
  *                     - CX_CHAIN_ECB
  *                     - CX_CHAIN_CBC
  *                     - CX_CHAIN_CTR
- * 
+ *
  * @param[in] in      Input data.
- * 
+ *
  * @param[in] in_len  Length of the input data.
  *                    If CX_LAST is set, padding is automatically done according to the *mode*.
  *                    Otherwise, *in_len* shall be a multiple of AES_BLOCK_SIZE.
@@ -275,7 +275,7 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
  * @param[in] out_len Length of the output data.
  *
  * @return            Length of the output.
- * 
+ *
  * @throws            CX_INVALID_PARAMETER
  * @throws            INVALID_PARAMETER
  */
@@ -290,11 +290,11 @@ static inline size_t cx_aes ( const cx_aes_key_t * key, uint32_t mode, const uns
  * @brief   Encrypts a 16-byte block using AES algorithm.
  *
  * @param[in]  key      Pointer to the AES key.
- * 
+ *
  * @param[in]  inblock  Plaintext block to encrypt.
- * 
+ *
  * @param[out] outblock Ciphertext block.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK
  *                      - CX_INVALID_PARAMETER
@@ -304,13 +304,13 @@ cx_err_t cx_aes_enc_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8
 
 /**
  * @brief   Decrypts a 16-byte block using AES algorithm.
- * 
+ *
  * @param[in]  key      Pointer to the AES key.
- * 
+ *
  * @param[in]  inblock  Ciphertext block to decrypt.
- * 
+ *
  * @param[out] outblock Plaintext block.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK
  *                      - CX_INVALID_PARAMETER

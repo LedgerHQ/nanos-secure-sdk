@@ -1,7 +1,7 @@
 /** @page nbgl_screens_and_objs Screens Stack and dynamic objects management
 
 @section nbgl_screens_and_objs_intro Introduction
-This chapter describes briefly how \b NBGL manages the screens stack and the dynmically allocated objects
+This chapter describes briefly how \b NBGL manages the screens stack and the dynamically allocated objects
 
 @section nbgl_screens_mngt Screens stack management
 
@@ -30,7 +30,7 @@ After any of these operations, @ref nbgl_screenRedraw() needs to be called to ac
 @section nbgl_objs_mngt Dynamic objects management
 
 In order to save RAM by not statically allocating memory for all graphic objects of the UX, a dynamic objects allocator has
-been developped.
+been developed.
 
 On the contrary of a regular dynamic memory allocator like malloc(), objects allocated for a given layer (= screen) are released all at once,
 usually when the screen is removed (or when a new one is build in replacement of it).
