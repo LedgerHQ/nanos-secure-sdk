@@ -53,7 +53,7 @@
 #define ERROR_CHANNEL_BUSY 0x06
 #define ERROR_LOCK_REQUIRED 0x0a
 #define ERROR_INVALID_CID 0x0b
-// CTAP2 errors 
+// CTAP2 errors
 #define ERROR_CBOR_UNEXPECTED_TYPE 0x11
 #define ERROR_INVALID_CBOR 0x12
 #define ERROR_MISSING_PARAMETER 0x14
@@ -109,7 +109,7 @@
  */
 void u2f_transport_init(u2f_service_t *service, uint8_t* message_buffer, uint16_t message_buffer_length);
 
-/** 
+/**
  * Function to be called when an IO message has been sent.
  */
 void u2f_transport_sent(u2f_service_t *service, u2f_transport_media_t media);

@@ -165,7 +165,7 @@
 #define SEPROXYHAL_TAG_USB_CONFIG_TYPE_INTERRUPT     0x02
 #define SEPROXYHAL_TAG_USB_CONFIG_TYPE_BULK          0x03
 #define SEPROXYHAL_TAG_USB_CONFIG_TYPE_ISOCHRONOUS   0x04
-#define SEPROXYHAL_TAG_USB_EP_PREPARE              0x50 // <epnum> <direction:setup/in/out/stall/unstall> <expected_length> <data>
+#define SEPROXYHAL_TAG_USB_EP_PREPARE              0x50 // <epnum> <direction:setup/in/out/stall/un-stall> <expected_length> <data>
 #define SEPROXYHAL_TAG_USB_EP_PREPARE_DIR_SETUP      0x10
 #define SEPROXYHAL_TAG_USB_EP_PREPARE_DIR_IN         0x20
 #define SEPROXYHAL_TAG_USB_EP_PREPARE_DIR_OUT        0x30

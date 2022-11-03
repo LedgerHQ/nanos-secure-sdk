@@ -110,7 +110,7 @@ const nbgl_font_t *nbgl_getFont(nbgl_font_id_e fontId) {
 }
 #endif // BOLOS_OS_UPGRADER_APP
 /**
- * @brief Get the comming unicode value on the given UTF-8 string. If the value is a simple ASCII
+ * @brief Get the coming unicode value on the given UTF-8 string. If the value is a simple ASCII
  * character, is_unicode is set to false.
  *
  * @param txt (in/out) text to get character from. Updated after pop to the next UTF-8 char
@@ -799,4 +799,3 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
   return NULL;
 #endif //defined(HAVE_LANGUAGE_PACK)
 }
-

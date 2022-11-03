@@ -59,7 +59,7 @@ static bool ux_forward_event(bool ignoring_app_if_ux_busy) {
 
 /**
  * @brief Process finger event.
- * @note Application's finger event handler is called only if the ux app does not deny it (finger event catched by BOLOS UX page).
+ * @note Application's finger event handler is called only if the ux app does not deny it (finger event caught by BOLOS UX page).
  *
  * @param seph_packet received SEPH packet
  * @param nbTicks number of 100ms ticks from the launch of the app
@@ -68,7 +68,7 @@ static bool ux_forward_event(bool ignoring_app_if_ux_busy) {
 static nbgl_touchStatePosition_t pos;
 
 void ux_process_finger_event(uint8_t seph_packet[]) {
-  // if the event is not fully consummed by UX, use it for NBGL
+  // if the event is not fully consumed by UX, use it for NBGL
   if (ux_forward_event(true)) {
     pos.state = (seph_packet[3] == SEPROXYHAL_TAG_FINGER_EVENT_TOUCH) ? PRESSED : RELEASED;
     pos.x = (seph_packet[4] << 8) + seph_packet[5];

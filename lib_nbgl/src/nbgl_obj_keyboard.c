@@ -337,7 +337,7 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
     nbgl_frontDrawRect(&rectArea);
   }
 
-  // 4th row, swith to letters and space
+  // 4th row, switch to letters and space
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   rectArea.x0 = keyboard->x0+SWITCH_KEY_WIDTH;
   nbgl_frontDrawRect(&rectArea);

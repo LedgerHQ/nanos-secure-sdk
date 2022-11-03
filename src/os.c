@@ -79,7 +79,7 @@ char os_secure_memcmp(const void *src1, const void* src2, size_t length) {
 
 #ifndef HAVE_BOLOS
 void os_longjmp(unsigned int exception) {
-#ifdef HAVE_PRINTF  
+#ifdef HAVE_PRINTF
   unsigned int lr_val;
   __asm volatile("mov %0, lr" :"=r"(lr_val));
   PRINTF("exception[%d]: LR=0x%08X\n", exception, lr_val);
@@ -93,7 +93,7 @@ void os_longjmp(unsigned int exception) {
 // tag: 1 byte only
 // length: 1 byte if little than 0x80, else 1 byte of length encoding (0x8Y, with Y the number of following bytes the length is encoded on) and then Y bytes of BE encoded total length
 // value: no encoding, raw data
-unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len, 
+unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
                              unsigned int * tlvoffset, unsigned int tag, unsigned int offset, void** buffer, unsigned int maxlength) {
   unsigned int ret, tlvoffset_in;
   unsigned int check_equals_buffer = offset & OS_PARSE_BERTLV_OFFSET_COMPARE_WITH_BUFFER;
@@ -124,12 +124,12 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
     unsigned int tlvlen = *tlv++;
     remlen--;
     if (remlen == 0) {
-      goto retret; 
+      goto retret;
     }
     if (tlvlen >= 0x80) {
       // invalid encoding
       if (tlvlen == 0x80) {
-        goto retret; 
+        goto retret;
       }
       unsigned int tlvlenlen_ = tlvlen & 0x7F;
       tlvlen = 0;
@@ -138,7 +138,7 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
         tlvlen = (tlvlen << 8) | ((*tlv++)&0xFF);
         remlen--;
         if (remlen == 0) {
-          goto retret; 
+          goto retret;
         }
       }
     }
@@ -156,13 +156,13 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
       }
       // avoid OOB
       if (offset > tlvlen || offset > remlen) {
-        goto retret; 
+        goto retret;
       }
 
       // check maxlength is respected for equality
       if (check_equals_buffer && (tlvlen-offset) != maxlength) {
         // buffer to check the complete given length
-        goto retret; 
+        goto retret;
       }
 
       maxlength = MIN(maxlength, MIN(tlvlen-offset, remlen));
@@ -172,13 +172,13 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
         || maxlength > mem_len
         || offset+maxlength > mem_len
         // don't rely only on provided app bounds to avoid address forgery
-        || (unsigned int)tlv < (unsigned int)mem 
-        || (unsigned int)tlv+offset < (unsigned int)mem 
-        || (unsigned int)tlv+offset+maxlength < (unsigned int)mem 
+        || (unsigned int)tlv < (unsigned int)mem
+        || (unsigned int)tlv+offset < (unsigned int)mem
+        || (unsigned int)tlv+offset+maxlength < (unsigned int)mem
         || (unsigned int)tlv > (unsigned int)mem+mem_len
         || (unsigned int)tlv+offset > (unsigned int)mem+mem_len
         || (unsigned int)tlv+offset+maxlength > (unsigned int)mem+mem_len) {
-        goto retret; 
+        goto retret;
       }
 
       // retrieve the tlv's data content at the requested offset, and return the total data length
@@ -194,7 +194,7 @@ unsigned int os_parse_bertlv(unsigned char* mem, unsigned int mem_len,
       }
       else {
         ret = os_secure_memcmp(*buffer, tlv+offset, maxlength) == 0;
-        goto retret; 
+        goto retret;
       }
       ret = maxlength;
       goto retret;

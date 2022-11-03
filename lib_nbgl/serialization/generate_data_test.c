@@ -33,7 +33,7 @@ void test_draw_nbgl_container()
         .width = 460,
         .x0 = 56,
         .y0 = 12,
-        
+
         .layout = VERTICAL,
         .nbChildren = 4,
         .forceClean = true
@@ -196,7 +196,7 @@ void test_draw_nbgl_button()
         .width = 255,
         .x0 = 500,
         .y0 = 1000,
-        
+
         .innerColor = WHITE,
         .borderColor = DARK_GRAY,
         .foregroundColor = LIGHT_GRAY,

@@ -117,7 +117,7 @@ void io_seproxyhal_send_nbgl_serialized(nbgl_serialized_event_type_e event, nbgl
 
 #define NO_TIMEOUT (0UL)
 // Function that allow applications to modulate the APDU handling timeout
-// timeout is defaulty disabled.
+// timeout is disabled by default.
 // having an APDU handling timeout is useful to solve multiple media interactions.
 void io_set_timeout(unsigned int timeout);
 

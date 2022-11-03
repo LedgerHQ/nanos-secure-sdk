@@ -19,7 +19,7 @@
 /**
  * @file    ox_ec.h
  * @brief   Elliptic curve cryptography syscalls.
- * 
+ *
  * This file contains elliptic curves definitions and functions.
  */
 
@@ -276,13 +276,13 @@ typedef enum cx_curve_e cx_curve_t;
 
 /**
  * @brief   Curve domain parameters.
- * 
+ *
  * @details The parameters are common to #cx_curve_weierstrass_s, #cx_curve_twisted_edwards_s, and
  *          #cx_curve_montgomery_s.
- * 
- *  @arg @c curve:    Curve identifier. See #cx_curve_e 
+ *
+ *  @arg @c curve:    Curve identifier. See #cx_curve_e
  *  @arg @c bit_size: Curve size in bits
- *  @arg @c length:   Component lenth in bytes
+ *  @arg @c length:   Component length in bytes
  *  @arg @c a:        a coefficient of the curve equation
  *  @arg @c b:        b (Weierstrass or Montgomery) or d (twisted Edwards) coefficient of the curve equation
  *  @arg @c p:        Prime specifying the base field
@@ -310,7 +310,7 @@ typedef enum cx_curve_e cx_curve_t;
 
 /**
  * @brief   Weierstrass curve defined by **y^3 = x^2 + a*x + b over GF(p)**.
- * 
+ *
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_weierstrass_s {
@@ -322,7 +322,7 @@ typedef struct cx_curve_weierstrass_s cx_curve_weierstrass_t;
 
 /**
  * @brief   Twisted Edwards curve defined by **a*x^2 + y^2 = 1 + d*x2*y2 over GF(q)**.
- * 
+ *
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_twisted_edwards_s {
@@ -334,7 +334,7 @@ typedef struct cx_curve_twisted_edwards_s cx_curve_twisted_edwards_t;
 
 /**
  * @brief   Montgomery curve defined by **B*y^2= x^3 + A*x^2 + x over GF(q)**.
- * 
+ *
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_montgomery_s {
@@ -344,9 +344,9 @@ struct cx_curve_montgomery_s {
 /** Convenience type. See #cx_curve_montgomery_s. */
 typedef struct cx_curve_montgomery_s cx_curve_montgomery_t;
 
-/** 
+/**
  * @brief   Abstract type for elliptic curve domain.
- * 
+ *
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_domain_s {
@@ -362,7 +362,7 @@ typedef struct cx_curve_domain_s cx_curve_domain_t;
  * @brief Elliptic curve point.
  */
 struct cx_ec_point_s {
-    cx_curve_t curve;  ///< Point's curve 
+    cx_curve_t curve;  ///< Point's curve
     cx_bn_t x;         ///< x-coordinate in affine representation
     cx_bn_t y;         ///< y-coordinate in affine representation
     cx_bn_t z;         ///< z-coordinate = 1 in affine representation
@@ -390,11 +390,11 @@ typedef enum cx_curve_dom_param_s cx_curve_dom_param_t;
 
 /**
  * @brief   Gets the bit length of each parameter of the curve.
- * 
+ *
  * @param[in] curve   Curve identifier.
- * 
+ *
  * @param[out] length Bit length of each parameter.
- * 
+ *
  * @return            Error code:
  *                    - CX_OK on success
  *                    - CX_EC_INVALID_CURVE
@@ -403,11 +403,11 @@ SYSCALL cx_err_t cx_ecdomain_size(cx_curve_t curve, size_t *length);
 
 /**
  * @brief   Gets the byte length of each parameter of the curve.
- * 
+ *
  * @param[in]  cv     Curve identifier.
- * 
+ *
  * @param[out] length Byte length of each parameter.
- * 
+ *
  * @return            Error code:
  *                    - CX_OK on success
  *                    - CX_EC_INVALID_CURVE
@@ -416,15 +416,15 @@ SYSCALL cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length);
 
 /**
  * @brief   Gets a specific parameter of the curve.
- * 
+ *
  * @param[in]  cv    Curve identifier.
- * 
+ *
  * @param[in]  id    Parameter identifier.
- * 
+ *
  * @param[out] p     Buffer where to store the parameter.
- * 
+ *
  * @param[in]  p_len Length of the buffer.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_EC_INVALID_CURVE
@@ -434,13 +434,13 @@ SYSCALL cx_err_t cx_ecdomain_parameter(cx_curve_t cv, cx_curve_dom_param_t id, u
 
 /**
  * @brief   Stores a specific parameter of the curve as a BN.
- * 
+ *
  * @param[in]  cv Curve identifier.
- * 
+ *
  * @param[in]  id Parameter identifier.
- * 
+ *
  * @param[out] p  BN where to store the parameter.
- * 
+ *
  * @return        Error code:
  *                - CX_OK on success
  *                - CX_EC_INVALID_CURVE
@@ -452,15 +452,15 @@ SYSCALL cx_err_t cx_ecdomain_parameter_bn(cx_curve_t cv, cx_curve_dom_param_t id
 
 /**
  * @brief   Gets the generator of the curve.
- * 
+ *
  * @param[in] cv   Curve identifier.
- * 
+ *
  * @param[out] Gx  Buffer to store the x-coordinate of the generator.
- * 
+ *
  * @param[out] Gy  Buffer to store the y-coordinate of the generator.
- * 
+ *
  * @param[in]  len Byte length of each coordinate.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_EC_INVALID_CURVE
@@ -470,11 +470,11 @@ SYSCALL cx_err_t cx_ecdomain_generator(cx_curve_t cv, uint8_t *Gx PLENGTH(len), 
 
 /**
  * @brief   Gets the generator of the curve and stores it in the point structure.
- * 
+ *
  * @param[in]  cv Curve identifier.
- * 
+ *
  * @param[out] P  Pointer to the structure where to store the generator.
- * 
+ *
  * @return        Error code:
  *                - CX_OK on success
  *                - CX_EC_INVALID_CURVE
@@ -488,11 +488,11 @@ SYSCALL cx_err_t cx_ecdomain_generator_bn(cx_curve_t cv,  cx_ecpoint_t *P PLENGT
 
 /**
  * @brief   Allocates memory for a point on the curve.
- * 
+ *
  * @param[in] P  Pointer to a point.
- * 
+ *
  * @param[in] cv Curve on which the point is defined.
- * 
+ *
  * @return       Error code:
  *               - CX_OK on success
  *               - CX_EC_INVALID_CURVE
@@ -504,10 +504,10 @@ SYSCALL cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
 
 /**
  * @brief   Destroys a point on the curve.
- * 
+ *
  * @param[in] P Pointer to the point to destroy. If the pointer is NULL,
  *              nothing is done.
- * 
+ *
  * @return      Error code:
  *              - CX_OK on success
  *              - CX_NOT_LOCKED
@@ -518,19 +518,19 @@ SYSCALL cx_err_t cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)
 
 /**
  * @brief   Initializes a point on the curve.
- * 
+ *
  * @param[in] P     Pointer to the point to initialize.
- * 
+ *
  * @param[in] x     x-coordinate of the point. This must belong to the curve field.
- * 
+ *
  * @param[in] x_len Length of the x-coordinate. This must be at most equal to the
  *                  curve's domain number of bytes.
- * 
+ *
  * @param[in] y     y-coordinate of the point. This must belong to the curve field.
- * 
+ *
  * @param[in] y_len Length of the y-coordinate. This must be at most equal to the
  *                  curve's domain number of bytes.
- * 
+ *
  * @return          Error code:
  *                  - CX_OK on success
  *                  - CX_NOT_LOCKED
@@ -541,15 +541,15 @@ SYSCALL cx_err_t cx_ecpoint_init(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)), 
 
 /**
  * @brief   Initializes a point on the curve with the BN indexes of the coordinates.
- * 
+ *
  * @param[in] P Pointer to the point to initialize.
- * 
+ *
  * @param[in] x BN index of the x-coordinate. The coordinate must
  *              belong to the base field.
- * 
+ *
  * @param[in] y BN index of the y-coordinate. The coordinate must
  *              belong to the base field.
- * 
+ *
  * @return      Error code:
  *              - CX_OK on success
  *              - CX_NOT_LOCKED
@@ -560,21 +560,21 @@ SYSCALL cx_err_t cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)
 
 /**
  * @brief   Exports a point.
- * 
+ *
  * @details Fills two distinct buffers with the x-coordinate and the y-coordinate
  *          of the point. If the point is not in affine representation, it will
  *          be normalized first.
- * 
+ *
  * @param[in]  P     Pointer to the point to export.
- * 
+ *
  * @param[out] x     Buffer for the x-coordinate.
- * 
+ *
  * @param[in]  x_len Length of the *x* buffer.
- * 
+ *
  * @param[out] y     Buffer for the y-coordinate.
- * 
+ *
  * @param[in]  y_len Length of the *y* buffer.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_NOT_LOCKED
@@ -587,13 +587,13 @@ SYSCALL cx_err_t cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoi
 
 /**
  * @brief   Exports a point using BN indexes of the coordinates.
- * 
+ *
  * @param[in]  P Pointer to the point to export.
- * 
+ *
  * @param[out] x Pointer to the BN index of the x-coordinate.
- * 
+ *
  * @param[out] y Pointer to the BN index of the y-coordinate.
- * 
+ *
  * @return       Error code:
  *               - CX_OK on success
  *               - CX_NOT_LOCKED
@@ -607,26 +607,26 @@ SYSCALL cx_err_t cx_ecpoint_export_bn(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ec
 
 /**
  * @brief   Computes the compressed form of a point.
- * 
+ *
  * @details The compressed form depends on the curve type.
  *          For a Weierstrass or a Montgomery curve, the
  *          compressed form consists of the x-coordinate and
  *          a prefix. For a Twisted Edwards curve the compressed
  *          form consists of a y-coordinate and a prefix.
- * 
+ *
  * @param[in]  P                 Pointer to the point to be compressed.
- * 
+ *
  * @param[out] xy_compressed     Buffer to hold the compressed
  *                               coordinate.
- * 
+ *
  * @param[in]  xy_compressed_len Length of the compressed coordinate in bytes.
  *                               This should be equal to the length of one coordinate.
- * 
+ *
  * @param[out] sign              Pointer to the sign of the hidden coordinate:
  *                               correspond to the least significant bit of the
  *                               y-coordinate for a Weierstrass or Montgomery curve
  *                               and of the x-coordinate for a Twisted Edwards curve.
- * 
+ *
  * @return                       Error code:
  *                               - CX_OK on success
  *                               - CX_NOT_LOCKED
@@ -639,17 +639,17 @@ SYSCALL cx_err_t cx_ecpoint_compress(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecp
 
 /**
  * @brief   Computes the affine coordinates of a point given its compressed form.
- * 
+ *
  * @param[out] P                 Pointer to the point.
- * 
+ *
  * @param[in]  xy_compressed     Pointer to the buffer holding the compressed
  *                               coordinate.
- * 
+ *
  * @param[in]  xy_compressed_len Length of the compressed coordinate in bytes.
  *                               This should be equal to the length of one coordinate.
- * 
+ *
  * @param[in]  sign              Sign of the coordinate to recover.
- * 
+ *
  * @return                       Error code:
  *                               - CX_OK on success
  *                               - CX_NOT_LOCKED
@@ -657,25 +657,25 @@ SYSCALL cx_err_t cx_ecpoint_compress(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecp
  *                               - CX_EC_INVALID_CURVE
  *                               - CX_MEMORY_FULL
  *                               - CX_NO_RESIDUE
- * 
+ *
  */
 SYSCALL cx_err_t cx_ecpoint_decompress(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)), const uint8_t* xy_compressed PLENGTH(xy_compressed_len), size_t xy_compressed_len, uint32_t sign);
 
 /**
  * @brief   Adds two points on a curve.
- * 
+ *
  * @details Each point should not be the point at infinity.
  *          If one of the point is the point at infinity then
  *          the function returns a CX_EC_INFINITE_POINT error.
- * 
+ *
  * @param[out] R Pointer to the result point.
- * 
- * @param[in]  P Pointer to the first point to add. 
+ *
+ * @param[in]  P Pointer to the first point to add.
  *               The point must be on the curve.
- * 
+ *
  * @param[in]  Q Pointer to the second point to add.
  *               The point must be on the curve.
- * 
+ *
  * @return       Error code:
  *               - CX_OK on success
  *               - CX_NOT_LOCKED
@@ -689,14 +689,14 @@ SYSCALL cx_err_t cx_ecpoint_add(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)), c
 
 /**
  * @brief   Computes the opposite of a point.
- * 
+ *
  * @details The point should not be the point at infinity,
  *          otherwise the function returns a CX_EC_INFINITE_POINT
  *          error.
- * 
+ *
  * @param[in, out] P Pointer to a point of the curve.
  *                   This will hold the result.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_NOT_LOCKED
@@ -710,14 +710,14 @@ SYSCALL cx_err_t cx_ecpoint_neg(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Performs a secure scalar multiplication.
- * 
+ *
  * @param[in, out] P     Pointer to a point on a curve. This will hold the result.
- * 
+ *
  * @param[in]      k     Pointer to the scalar. The scalar is an integer at least equal to 0
  *                       and at most equal to the order of the curve minus 1.
- * 
+ *
  * @param[in]      k_len Length of the scalar. This should be equal to the domain length.
- * 
+ *
  * @return               Error code:
  *                       - CX_OK on success
  *                       - CX_NOT_LOCKED
@@ -731,12 +731,12 @@ SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpo
 
 /**
  * @brief   Performs a secure scalar multiplication given the BN index of the scalar.
- * 
+ *
  * @param[in, out] P    Pointer to a point on a curve. This will hold the result.
- * 
+ *
  * @param[in]      bn_k BN index of the scalar. The scalar is an integer at least equal to 0
  *                      and at most equal to the order of the curve minus 1.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_NOT_LOCKED
@@ -750,14 +750,14 @@ SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_e
 
 /**
  * @brief   Performs a secure scalar multiplication with a fixed scalar length.
- * 
+ *
  * @param[in, out] P     Pointer to a point on a curve. This will hold the result.
- * 
+ *
  * @param[in]      k     Pointer to the scalar. The scalar is an integer at least equal to 0
  *                       and at most equal to the order of the curve minus 1.
- * 
+ *
  * @param[in]      k_len Length of the scalar. This should be equal to the domain length.
- * 
+ *
  * @return               Error code:
  *                       - CX_OK on success
  *                       - CX_NOT_LOCKED
@@ -771,18 +771,18 @@ SYSCALL cx_err_t cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(c
 
 /**
  * @brief   Performs a scalar multiplication.
- * 
+ *
  * @warning This should be called only for non critical purposes.
  *          It is recommended to use #cx_ecpoint_rnd_scalarmul or
  *          #cx_ecpoint_rnd_fixed_scalarmul rather than this function.
- * 
+ *
  * @param[in, out] P      Pointer to a point on a curve. This will hold the result.
- * 
+ *
  * @param[in]      k      Pointer to the scalar. The scalar is an integer at least equal to 0
  *                        and at most equal to the order of the curve minus 1.
- * 
+ *
  * @param[in]      k_len  Length of the scalar.
- * 
+ *
  * @return                Error code:
  *                        - CX_OK on success
  *                        - CX_NOT_LOCKED
@@ -796,16 +796,16 @@ SYSCALL cx_err_t cx_ecpoint_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_
 
 /**
  * @brief   Performs a scalar multiplication given the BN index of the scalar.
- * 
+ *
  * @warning This should be called only for non critical purposes.
  *          It is recommended to use #cx_ecpoint_rnd_scalarmul_bn
  *          rather than this function.
- * 
+ *
  * @param[in, out] P    Pointer to a point on a curve. This will hold the result.
- * 
+ *
  * @param[in]      bn_k BN index of the scalar. The scalar is an integer at least equal to 0
  *                      and at most equal to the order of the curve minus 1.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_NOT_LOCKED
@@ -819,24 +819,24 @@ SYSCALL cx_err_t cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoi
 
 /**
  * @brief   Performs a double scalar multiplication.
- * 
+ *
  * @details This implements the Straus-Shamir algorithm for computing **R = [k]P + [r]Q**.
  *          This should be used only for non-secret computations.
- * 
+ *
  * @param[out] R     Pointer to the result.
- * 
+ *
  * @param[in]  P     Pointer to the first point.
- * 
+ *
  * @param[in]  Q     Pointer to the second point.
- * 
+ *
  * @param[in]  k     Pointer to the first scalar.
- * 
+ *
  * @param[in]  k_len Length of the first scalar.
- * 
+ *
  * @param[in]  r     Pointer to the second scalar.
- * 
+ *
  * @param[in]  r_len Length of the second scalar.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_NOT_LOCKED
@@ -851,20 +851,20 @@ SYSCALL cx_err_t cx_ecpoint_double_scalarmul(cx_ecpoint_t *R PLENGTH(sizeof(cx_e
 /**
  * @brief   Performs a double scalar multiplication
  *          given the BN indexes of the scalars.
- * 
+ *
  * @details This implements the Straus-Shamir algorithm for computing **R = [k]P + [r]Q**.
  *          This should be used only for non-secret computations.
- * 
+ *
  * @param[out] R     Pointer to the result.
- * 
+ *
  * @param[in]  P     Pointer to the first point.
- * 
+ *
  * @param[in]  Q     Pointer to the second point.
- * 
+ *
  * @param[in]  bn_k  BN index of the first scalar.
- * 
+ *
  * @param[in]  bn_r  BN index of the second scalar.
- * 
+ *
  * @return           Error code:
  *                  - CX_OK on success
  *                  - CX_NOT_LOCKED
@@ -878,15 +878,15 @@ SYSCALL cx_err_t cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(c
 
 /**
  * @brief   Compares two points on the same curve.
- * 
+ *
  * @param[in]  P        First point to compare.
- * 
+ *
  * @param[in]  Q        Second point to compare.
- * 
+ *
  * @param[out] is_equal Boolean which indicates whether the two points are equal or not:
  *                      - 1 if the points are equal
  *                      - 0 otherwise
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - CX_NOT_LOCKED
@@ -899,13 +899,13 @@ SYSCALL cx_err_t cx_ecpoint_cmp(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_
 
 /**
  * @brief   Checks whether a given point is on the curve.
- * 
+ *
  * @param[in]  R           Pointer to the point to check.
- * 
+ *
  * @param[out] is_on_curve Boolean which indicates whether the point is on the curve or not:
  *                         - 1 if the point is on the curve
  *                         - 0 otherwise
- * 
+ *
  * @return                 Error code:
  *                         - CX_OK on success
  *                         - CX_NOT_LOCKED
@@ -918,15 +918,15 @@ SYSCALL cx_err_t cx_ecpoint_is_on_curve(const cx_ecpoint_t *R PLENGTH(sizeof(cx_
 
 /**
  * @brief   Checks whether a given point is the point at infinity.
- * 
+ *
  * @details The point at infinity has a z-coordinate equal to 0.
- * 
+ *
  * @param[in]  R              Pointer to the point to check.
- * 
+ *
  * @param[out] is_at_infinity Boolean which indicates whether the point is at infinity or not:
  *                            - 1 if the point is at infinity
  *                            - 0 otherwise
- * 
+ *
  * @return                    Error code:
  *                            - CX_OK on success
  *                            - CX_NOT_LOCKED
@@ -938,25 +938,25 @@ SYSCALL cx_err_t cx_ecpoint_is_at_infinity(const cx_ecpoint_t *R PLENGTH(sizeof(
 #ifdef HAVE_X25519
 /**
  * @brief   x25519 function: scalar multiplication on Curve25519.
- * 
- * @details x25519 performs the scalar multiplication on Curve25519 
+ *
+ * @details x25519 performs the scalar multiplication on Curve25519
  *          with the u-coordinate only. The function returns
  *          only the u-coordinate of the result point.
- * 
+ *
  * @param[in, out] bn_u  BN index of the u-coordinate. This will hold
  *                       the result.
- * 
+ *
  * @param[in]      k     Pointer to the scalar.
- * 
+ *
  * @param[in]      k_len Length of the scalar.
- * 
+ *
  * @return               Error code:
  *                       - CX_OK on success
  *                       - CX_NOT_LOCKED
  *                       - CX_INVALID_PARAMETER
  *                       - CX_EC_INFINITE_POINT
  *                       - CX_MEMORY_FULL
- * 
+ *
  */
 SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k, size_t k_len);
 #endif // HAVE_X25519
@@ -964,25 +964,25 @@ SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k, size_t 
 #ifdef HAVE_X448
 /**
  * @brief   x448 function: scalar multiplication on Curve448.
- * 
+ *
  * @details x448 performs the scalar multiplication on Curve448
  *          with the u-coordinate only. The function returns
  *          only the u-coordinate of the result point.
- * 
+ *
  * @param[in, out] bn_u  BN index of the u-coordinate. This will hold
  *                       the result.
- * 
+ *
  * @param[in]      k     Pointer to the scalar.
- * 
+ *
  * @param[in]      k_len Length of the scalar.
- * 
+ *
  * @return               Error code:
  *                       - CX_OK on success
  *                       - CX_NOT_LOCKED
  *                       - CX_INVALID_PARAMETER
  *                       - CX_EC_INFINITE_POINT
  *                       - CX_MEMORY_FULL
- * 
+ *
  */
 SYSCALL cx_err_t cx_ecpoint_x448(const cx_bn_t bn_u, const uint8_t *k, size_t k_len);
 #endif // HAVE_X448

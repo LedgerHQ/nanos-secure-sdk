@@ -36,7 +36,7 @@
 
 /**
  * @brief   Computes a PBKDF2 bytes sequence.
- * 
+ *
  * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
  *
@@ -56,7 +56,7 @@
  *
  * @param[out] out         Buffer where to store the output.
  *
- * @param[in]  outLength   Lengh of the output.
+ * @param[in]  outLength   Length of the output buffer.
  *
  * @return                 Error code:
  *                         - CX_OK
@@ -73,7 +73,7 @@ cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type,
 
 /**
  * @brief   Computes a PBKDF2 bytes sequence.
- * 
+ *
  * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
  *          This function throws an exception if the computation doesn't succeed.
@@ -97,7 +97,7 @@ cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type,
  *
  * @param[out] out         Buffer where to store the output.
  *
- * @param[in]  outLength   Lengh of the output.
+ * @param[in]  outLength   Length of the output buffer.
  *
  * @throws                 CX_INVALID_PARAMETER
  */
@@ -108,7 +108,7 @@ static inline void cx_pbkdf2 ( cx_md_t md_type, const unsigned char * password, 
 
 /**
  * @brief   Computes a PBKDF2 bytes sequence with SHA512.
- * 
+ *
  * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898">  RFC 2898 </a>
  *          with SHA512 as the underlying hash function.
@@ -127,7 +127,7 @@ static inline void cx_pbkdf2 ( cx_md_t md_type, const unsigned char * password, 
  *
  * @param[out] out          Buffer where to store the output.
  *
- * @param[in]  out_len      Lengh of the output.
+ * @param[in]  out_len      Length of the output buffer.
  *
  * @return                  Error code:
  *                          - CX_OK

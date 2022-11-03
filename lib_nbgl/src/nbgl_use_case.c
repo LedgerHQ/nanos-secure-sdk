@@ -767,7 +767,7 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle,
  * @param rejectText text to use in footer
  * @param navCallback callback called when navigation (back or "tap to continue") is touched
  * @param buttonCallback callback called when a potential button (details) in the content is touched
- * @param choiceCallback callback called when either long_press or footer is called (parm is true for long press)
+ * @param choiceCallback callback called when either long_press or footer is called (param is true for long press)
  */
 void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
                                nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback) {
@@ -799,7 +799,7 @@ void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, char *rejectTe
  * @param rejectText text to use in footer
  * @param buttonCallback callback called when a potential button (details or long press) in the content is touched
  * @param navCallback callback called when navigation "tap to continue" is touched, to get the content of next page
- * @param choiceCallback callback called when either long_press or footer is called (parm is true for long press)
+ * @param choiceCallback callback called when either long_press or footer is called (param is true for long press)
  */
 void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
                                    nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback) {

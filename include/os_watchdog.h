@@ -25,7 +25,7 @@
 #endif // BOLOS_SECURITY_ONBOARD_DELAY_S
 
 #ifndef BOLOS_SECURITY_ATTESTATION_DELAY_S
-// Mininal time interval in between two use of the device's private key (SCP opening and endorsement)
+// Minimal time interval in between two use of the device's private key (SCP opening and endorsement)
 #define BOLOS_SECURITY_ATTESTATION_DELAY_S 5
 #endif // BOLOS_SECURITY_ATTESTATION_DELAY_S
 

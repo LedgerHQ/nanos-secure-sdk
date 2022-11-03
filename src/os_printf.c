@@ -229,7 +229,7 @@ again:
                 }
 
                 //
-                // Handle ths %.*s command
+                // Handle the %.*s command
                 // special %.*H or %.*h format to print a given length of hex digits (case: H UPPER, h lower)
                 //
                 case '.':
@@ -310,7 +310,7 @@ again:
                         // if string is empty, then, ' ' padding
                         if (pcStr[0] == '\0') {
 
-                          // padd ulStrlen white space
+                          // pad with ulStrlen white spaces
                           do {
                             mcu_usb_prints(" ", 1);
                           } while(ulStrlen-- > 0);
@@ -768,7 +768,7 @@ again:
                 }
 
                 //
-                // Handle ths %.*s command
+                // Handle the %.*s command
                 // special %.*H or %.*h format to print a given length of hex digits (case: H UPPER, h lower)
                 //
                 case '.':
@@ -848,7 +848,7 @@ again:
                         // if string is empty, then, ' ' padding
                         if (pcStr[0] == '\0') {
 
-                          // padd ulStrlen white space
+                          // pad with ulStrlen white spaces
                           ulStrlen = MIN(ulStrlen, str_size);
                           memset(str, ' ', ulStrlen);
                           str+= ulStrlen;
@@ -1154,4 +1154,3 @@ error:
     return 0;
 }
 #endif // HAVE_SPRINTF
-

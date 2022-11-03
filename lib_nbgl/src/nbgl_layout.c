@@ -77,7 +77,7 @@ typedef struct {
 
 /**
  * @brief Structure containing all information about the current layout.
- * @note It shall not be used externaly
+ * @note It shall not be used externally
  *
  */
 typedef struct nbgl_layoutInternal_s {
@@ -1879,7 +1879,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t lef
 }
 
 /**
- * @brief Creates a kind of navigation bar with an optionnal <- arrow on the left. This widget is placed on top of the
+ * @brief Creates a kind of navigation bar with an optional <- arrow on the left. This widget is placed on top of the
  * main container
  *
  * @param layout the current layout

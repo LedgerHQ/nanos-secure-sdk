@@ -19,7 +19,7 @@
 /**
  * @file    ox_aes.h
  * @brief   Advanced Encryption Standard syscalls.
- * 
+ *
  * This file contains AES definitions and functions:
  * - Set the AES key in memory
  * - Encrypt a 128-bit block
@@ -27,12 +27,12 @@
  */
 
 /**
- * @mainpage 
- * 
+ * @mainpage
+ *
  * @author  Ledger
- * 
+ *
  * @section Introduction
- * 
+ *
  * This documentation describes the cryptography API and
  * the syscalls that can be invoked to the operating system
  * to use basic arithmetic and cryptographic functions.
@@ -41,7 +41,7 @@
  * authentication codes and encryption algorithms
  * - **syscalls** which enable computations for GF(p) and GF(2<sup align = right>n</sup>) arithmetic and efficient
  * implementation of elliptic curves.
- * 
+ *
  * Here is a non-exhaustive list of supported algorithms:
  * - AES and DES in different modes
  * - ECDSA with a random or deterministic nonce
@@ -68,9 +68,9 @@
 /** Block size of the AES in bytes. */
 #define CX_AES_BLOCK_SIZE 16
 
-/** 
+/**
  * @brief   AES key container.
- *  
+ *
  * @details Such container should be initialized with #cx_aes_init_key_no_throw.
  */
 struct cx_aes_key_s {
@@ -82,11 +82,11 @@ typedef struct cx_aes_key_s cx_aes_key_t;
 
 /**
  * @brief   Sets an AES key in hardware.
- * 
+ *
  * @param[in] key AES key.
- * 
+ *
  * @param[in] mode Operation for which the key will be used.
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_INVALID_PARAMETER
@@ -100,11 +100,11 @@ SYSCALL void cx_aes_reset_hw(void);
 
 /**
  * @brief   Encrypts or decrypts a block with AES.
- * 
+ *
  * @param[in]  inblock  Pointer to the block.
- * 
+ *
  * @param[out] outblock Buffer for the output.
- * 
+ *
  * @return              Error code:
  *                      - CX_OK on success
  *                      - INVALID_PARAMETER
@@ -113,4 +113,3 @@ SYSCALL cx_err_t cx_aes_block_hw(const unsigned char *inblock PLENGTH(16), unsig
 
 
 #endif
-

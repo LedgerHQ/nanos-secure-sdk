@@ -397,7 +397,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
  * @brief draw an address confirmation page. This page contains a "page selector" to display either address in text or QRCode format,
  * and at the bottom a button to confirm and a footer to cancel
  *
- * @param onActionCallback common callback for all actions on this page (confirmation and cancelation)
+ * @param onActionCallback common callback for all actions on this page (confirmation and cancellation)
  * @param info structure describing the all controls of this page
  * @return the page context (or NULL if error)
  */

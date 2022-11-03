@@ -8,7 +8,7 @@ This chapter describes briefly how \b NBGL manages the touchscreen events and ho
 The low-level entry point of NBGL for Touchscreen management is @ref nbgl_touchHandler(). This function is supposed to be called periodically by the
 main scheduler to provide the current state and position of the finger on the Touchscreen.
 
-The position is always useful when the \b state field of @ref nbgl_touchStatePosition_t is @ref PRESSED, and also usefull when the new state is @ref RELEASED.
+The position is always useful when the \b state field of @ref nbgl_touchStatePosition_t is @ref PRESSED, and also useful when the new state is @ref RELEASED.
 
 From a high-level perspective, every object can declare itself as "client" of touchscreen events.
 

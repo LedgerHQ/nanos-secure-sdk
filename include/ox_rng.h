@@ -19,7 +19,7 @@
 /**
  * @file    ox_rng.h
  * @brief   Random number generation syscall.
- * 
+ *
  * This file contains the function for getting random data from the TRNG.
  */
 
@@ -32,11 +32,11 @@
 
 /**
  * @brief   Gets random data from the True Random Number Generation.
- * 
+ *
  * @param[out] buf  Buffer where to store the random data.
- * 
+ *
  * @param[in]  size Size of the random data in bytes.
- * 
+ *
  */
 SYSCALL void     cx_trng_get_random_data(uint8_t *buf PLENGTH(size), size_t size);
 

@@ -94,11 +94,11 @@ typedef struct {
 
 /**
  * @brief   Initialize a cipher context as NONE.
- * 
+ *
  * @details This function must be called first.
- * 
+ *
  * @param[in] ctx Pointer to the context. This must not be NULL.
- * 
+ *
  * @return        Error code:
  *                - CX_OK on success
  *                - CX_INVALID_PARAMETER
@@ -107,9 +107,9 @@ cx_err_t cx_cipher_init(cx_cipher_context_t *ctx);
 
 /**
  * @brief   Initialize and fill the context structure given the cipher info.
- * 
+ *
  * @param[in] ctx  Pointer to the context.
- * 
+ *
  * @param[in] type Cipher to use:
  *                 - CX_CIPHER_AES_128
  *                 - CX_CIPHER_AES_192
@@ -122,7 +122,7 @@ cx_err_t cx_cipher_init(cx_cipher_context_t *ctx);
  *                 - ECB
  *                 - CBC
  *                 - CTR
- * 
+ *
  * @return         Error code:
  *                 - CX_OK on success
  *                 - CX_INVALID_PARAMETER
@@ -132,18 +132,18 @@ cx_err_t cx_cipher_setup(cx_cipher_context_t *ctx, const cx_cipher_id_t type, ui
 
 /**
  * @brief   Set the key to use.
- * 
+ *
  * @details This function must be called after the cipher context is initialized with
  *          #cx_cipher_init.
- * 
+ *
  * @param[in] ctx        Pointer to the context.
  *
  * @param[in] key        Key to use: a buffer of at least *key_bitlen* bits.
- * 
+ *
  * @param[in] key_bitlen Length of key in bits.
- * 
+ *
  * @param[in] operation  The operation that the key will be used for: encryption or decryption.
- * 
+ *
  * @return               Error code:
  *                       - CX_OK on success
  *                       - CX_INVALID_PARAMETER
@@ -154,16 +154,16 @@ cx_err_t cx_cipher_setkey(cx_cipher_context_t *ctx, const uint8_t *key, uint32_t
 
 /**
  * @brief   Set the initialization vector.
- * 
+ *
  * @details This function must be called after the cipher context is initialized with
  *          #cx_cipher_init.
- * 
+ *
  * @param[in] ctx    Pointer to the context.
- * 
+ *
  * @param[in] iv     Initialization vector: a buffer of at least *iv_len* bytes.
- * 
+ *
  * @param[in] iv_len Length of the initialization vector in bytes.
- * 
+ *
  * @return           Error code:
  *                   - CX_OK on success
  *                   - CX_INVALID_PARAMETER
@@ -173,17 +173,17 @@ cx_err_t cx_cipher_setiv(cx_cipher_context_t *ctx, const uint8_t *iv, size_t iv_
 
 /**
  * @brief   Set the padding type.
- * 
+ *
  * @details This function must be called after the cipher context is initialized with
  *          #cx_cipher_init.
- * 
+ *
  * @param[in] ctx Pointer to the context.
- * 
+ *
  * @param[in] padding Type of padding:
  *                    - CX_PAD_NONE: no padding
  *                    - CX_PAD_ISO9797M1: pad with zeros only
  *                    - CX_PAD_ISO9797M2: pad with a single one and several zeros.
- * 
+ *
  * @return            Error code:
  *                    - CX_OK on success
  *                    - CX_INVALID_PARAMETER
@@ -193,9 +193,9 @@ cx_err_t cx_cipher_set_padding(cx_cipher_context_t *ctx, uint32_t padding);
 
 /**
  * @brief   Encrypt or decrypt with the given context.
- * 
+ *
  * @details This function must be called after the cipher context is initialized with
- *          #cx_cipher_init and set with #cx_cipher_setup. The key must be set with 
+ *          #cx_cipher_init and set with #cx_cipher_setup. The key must be set with
  *          #cx_cipher_setkey, the padding method to use must be set with
  *          #cx_cipher_set_padding and the Initialization Vector must be set with
  *          #cx_cipher_setiv.
@@ -203,15 +203,15 @@ cx_err_t cx_cipher_set_padding(cx_cipher_context_t *ctx, uint32_t padding);
  *          that needed to be processed.
  *
  * @param[in]  ctx     Pointer to the context.
- * 
+ *
  * @param[in]  input   Input data: buffer of at least *in_len* bytes.
- * 
+ *
  * @param[in]  in_len  Length of the input in bytes.
- * 
+ *
  * @param[out] output  Output data: a buffer of at least *in_len + block_size* bytes.
- * 
+ *
  * @param[out] out_len Length of the data written to the output.
- * 
+ *
  * @return             Error code:
  *                     - CX_OK on success
  *                     - CX_INTERNAL_ERROR
@@ -222,20 +222,20 @@ cx_err_t cx_cipher_update(cx_cipher_context_t *ctx, const uint8_t *input, size_t
 
 /**
  * @brief   Finalize the operation.
- * 
+ *
  * @details This function must be called after the cipher context is initialized with
- *          #cx_cipher_init and set with #cx_cipher_setup. The key must be set with 
+ *          #cx_cipher_init and set with #cx_cipher_setup. The key must be set with
  *          #cx_cipher_setkey, the padding method to use must be set with
  *          #cx_cipher_set_padding and the Initialization Vector must be set with
  *          #cx_cipher_setiv.
  *          This function must be called after the last #cx_cipher_update.
- * 
+ *
  * @param[in]  ctx     Pointer to the context.
- * 
+ *
  * @param[out] output  Output data: buffer of at least *block_size* bytes.
- * 
+ *
  * @param[out] out_len Length of the data written to the output.
- * 
+ *
  * @return             Error code:
  *                     - CX_Ok on success
  *                     - CX_INTERNAL_ERROR
@@ -246,26 +246,26 @@ cx_err_t cx_cipher_finish(cx_cipher_context_t *ctx, uint8_t *output, size_t *out
 
 /**
  * @brief   All-in-one encryption or decryption.
- * 
+ *
  * @details This function must be called after the cipher context is initialized with
- *          #cx_cipher_init and set with #cx_cipher_setup. The key must be set with 
+ *          #cx_cipher_init and set with #cx_cipher_setup. The key must be set with
  *          #cx_cipher_setkey, the padding method to use must be set with
  *          #cx_cipher_set_padding.
- * 
+ *
  * @param[in] ctx      Pointer to the context.
- * 
+ *
  * @param[in] iv       Initialization vector: a buffer of at least *iv_len* bytes.
- * 
+ *
  * @param[in] iv_len   Length of the initialization vector in bytes.
- * 
+ *
  * @param[in] input    Input data: a buffer of at least *in_len* bytes.
- * 
+ *
  * @param[in] in_len   Length of the input in bytes.
- * 
+ *
  * @param[out] output  Output data: a buffer of at least *in_len + block_size* bytes.
- * 
+ *
  * @param[out] out_len Length of the output.
- * 
+ *
  * @return             Error code:
  *                     - CX_OK on success
  *                     - CX_INTERNAL_ERROR

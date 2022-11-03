@@ -693,7 +693,7 @@ idx_ok:
         ellipsis_1_len = context_length;
 
 #ifdef HAVE_BAGL_ELLIPSIS
-        // ellipsis mode (ensure something is to be splitted!)
+        // ellipsis mode (ensure something is to be split!)
         if (strwidth > component->width && context_length>4) {
           unsigned int robin = 0; // remove char by char either on the left or right side
           unsigned int dots_len = bagl_compute_line_width(component->font_id, 100 /*probably larger than ... whatever the font*/, "...", 3, context_encoding);
@@ -704,7 +704,7 @@ idx_ok:
           while (strwidth > component->width && ellipsis_1_len && (context_length - ((const void *)ellipsis_2_start-(const void *)context) )) {
             unsigned int left_part = bagl_compute_line_width(component->font_id, component->width, context, ellipsis_1_len, context_encoding);
             unsigned int right_part = bagl_compute_line_width(component->font_id, component->width, ellipsis_2_start, (context_length - ((const void *)ellipsis_2_start-(const void *)context)), context_encoding);
-            // update to check and to compute alignement if needed
+            // update to check and to compute alignment if needed
             strwidth = left_part + dots_len + right_part;
             // only start to split if the middle char if odd context_length removal is not sufficient
             if (strwidth > component->width) {

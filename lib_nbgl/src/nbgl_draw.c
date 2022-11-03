@@ -228,7 +228,7 @@ void nbgl_drawRoundedRect(nbgl_area_t *area, nbgl_radius_t radiusIndex, color_t 
  *
  * @param area position, size and background color (outside of the rectangle) to use for the rectangle
  * @param radiusIndex radius size
- * @param stroke tickness of border (fixed to 2)
+ * @param stroke thickness of border (fixed to 2)
  * @param innerColor color to use for inside the rectangle
  * @param borderColor color to use for the border
  */
@@ -367,7 +367,7 @@ void nbgl_drawRoundedBorderedRect(nbgl_area_t *area, nbgl_radius_t radiusIndex, 
  * @param fontColor color to use for font
  */
 void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_font_id_e fontId, color_t fontColor) {
-  // text is a serie of characters, each character being a bitmap
+  // text is a series of characters, each character being a bitmap
   // we need to align bitmaps on width multiple of 4 limitation.
   int16_t x = area->x0;
   nbgl_area_t rectArea;

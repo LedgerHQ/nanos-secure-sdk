@@ -91,7 +91,7 @@ cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *
   return cx_aes_iv_no_throw(key, mode, NULL, 0, in, in_len, out, out_len);
 }
 
-cx_err_t aes_ctr(cx_aes_key_t *ctx_key, size_t len, size_t *nc_off, uint8_t *nonce_counter, uint8_t *stream_block, 
+cx_err_t aes_ctr(cx_aes_key_t *ctx_key, size_t len, size_t *nc_off, uint8_t *nonce_counter, uint8_t *stream_block,
                  const uint8_t *input, uint8_t *output) {
   uint8_t  c;
   size_t   n     = *nc_off;
