@@ -109,6 +109,9 @@ typedef enum os_setting_e {
   OS_SETTING_DEVICENAME,
   OS_SETTING_BLEMACADR,
 
+  OS_SETTING_NFC_TAG_CONTENT,
+  OS_SETTING_NFC_ENABLED,
+
   OS_SETTING_LAST,
 } os_setting_t;
 
