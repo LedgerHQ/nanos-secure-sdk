@@ -541,6 +541,7 @@ enum generic_identifiers {
 #define SWO_APD_HDR_13                    (ERR_APD_HDR + ERR_GEN_ID_13)    // 0x6513
 #define SWO_APD_HDR_14                    (ERR_APD_HDR + ERR_GEN_ID_14)    // 0x6514
 #define SWO_APD_HDR_15                    (ERR_APD_HDR + ERR_GEN_ID_15)    // 0x6515
+#define SWO_APD_HDR_16                    (ERR_APD_HDR + ERR_GEN_ID_16)    // 0x6516
 
 #define SWO_APD_LEN_01                    (ERR_APD_LEN + ERR_GEN_ID_01)    // 0x6701
 #define SWO_APD_LEN_02                    (ERR_APD_LEN + ERR_GEN_ID_02)    // 0x6702
