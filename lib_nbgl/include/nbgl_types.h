@@ -126,7 +126,7 @@ typedef enum {
  * @brief size of gzlib uncompression buffer in bytes
  *
  */
-#define GZLIB_UNCOMPRESSED_CHUNK 2048
+#define GZLIB_UNCOMPRESSED_CHUNK 2049
 
 /**
  * @brief Represents a rectangle area of the screen
