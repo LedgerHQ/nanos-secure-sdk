@@ -96,7 +96,8 @@ typedef enum {
     BLACK=0,
     DARK_GRAY,
     LIGHT_GRAY,
-    WHITE
+    WHITE,
+    NB_NBGL_COLOR
 } color_t;
 
 #endif
