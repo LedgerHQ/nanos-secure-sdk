@@ -620,9 +620,9 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
  * @param maxWidth maximum width in which the text must fit
  * @return the height in pixels
  */
-uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint16_t maxWidth) {
+uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint16_t maxWidth, bool wrapping) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  return font->char_height+((nbgl_getTextNbLinesInWidth(fontId,text,maxWidth,false)-1)*font->line_height);
+  return font->char_height+((nbgl_getTextNbLinesInWidth(fontId,text,maxWidth,wrapping)-1)*font->line_height);
 }
 
 /**
