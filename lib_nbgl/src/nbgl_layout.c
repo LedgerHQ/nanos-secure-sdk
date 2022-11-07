@@ -861,7 +861,7 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, char *text, char *subText) {
     subTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     subTextArea->style = NO_STYLE;
     subTextArea->width = container->width;
-    subTextArea->height = nbgl_getTextHeightInWidth(subTextArea->fontId,subTextArea->text,subTextArea->width);
+    subTextArea->height = nbgl_getTextHeightInWidth(subTextArea->fontId,subTextArea->text,subTextArea->width,false);
     subTextArea->textAlignment = MID_LEFT;
     subTextArea->alignment = NO_ALIGNMENT;
     subTextArea->alignTo = NULL;
@@ -910,7 +910,7 @@ int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, char *text) {
   textArea->textAlignment = MID_LEFT;
   textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
   textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-  textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
+  textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
   textArea->style = NO_STYLE;
   textArea->alignment = NO_ALIGNMENT;
   textArea->alignmentMarginX = BORDER_MARGIN;
@@ -1075,7 +1075,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
       textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
     }
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
+    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
 
     if (info->style == LEDGER_INFO) {
       textArea->style = LEDGER_BORDER;
@@ -1111,7 +1111,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
     textArea->textAlignment = CENTER;
     textArea->fontId = (info->style != LARGE_CASE_BOLD_INFO) ? BAGL_FONT_INTER_REGULAR_24px: BAGL_FONT_INTER_SEMIBOLD_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
+    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
 
     textArea->style = NO_STYLE;
     if (container->nbChildren>0) {
@@ -1138,7 +1138,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
     textArea->textAlignment = CENTER;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
+    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
     textArea->style = NO_STYLE;
     if (container->nbChildren>0) {
       textArea->alignment = BOTTOM_MIDDLE;
@@ -1235,7 +1235,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
     textArea->textAlignment = CENTER;
     textArea->fontId = (info->largeText1 == true)? BAGL_FONT_INTER_REGULAR_32px : BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
+    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
     textArea->style = NO_STYLE;
     textArea->alignment = BOTTOM_MIDDLE;
     textArea->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
@@ -1254,7 +1254,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
     textArea->textAlignment = CENTER;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width);
+    textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
     textArea->style = NO_STYLE;
     textArea->alignment = BOTTOM_MIDDLE;
     textArea->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
@@ -1395,7 +1395,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     itemTextArea->textAlignment = MID_LEFT;
     itemTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     itemTextArea->width = usableWidth;
-    itemTextArea->height = nbgl_getTextHeightInWidth(itemTextArea->fontId,itemTextArea->text,usableWidth);
+    itemTextArea->height = nbgl_getTextHeightInWidth(itemTextArea->fontId,itemTextArea->text,usableWidth,false);
     itemTextArea->style = NO_STYLE;
     itemTextArea->alignment = NO_ALIGNMENT;
     itemTextArea->alignmentMarginX = 0;

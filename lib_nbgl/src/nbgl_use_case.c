@@ -107,7 +107,7 @@ static void displayDetailsPage(uint8_t page);
 static void displaySettingsPage(uint8_t page);
 static void displayStaticReviewPage(uint8_t page);
 static void pageCallback(int token, uint8_t index);
-static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool forward, bool *tooLongToFit);
+static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool wrapping, bool forward, bool *tooLongToFit);
 static void addressLayoutTouchCallbackQR(int token, uint8_t index);
 static void displayAddressPage(uint8_t page);
 static void displaySkipWarning(void);
@@ -333,6 +333,7 @@ static void displayStaticReviewPage(uint8_t page) {
     }
     staticReviewContext.nbPairsInCurrentPage = getNbTagValuesInPage(forward?staticReviewContext.tagValueList->nbPairs-staticReviewContext.currentPairIndex:staticReviewContext.currentPairIndex,
                                                   &staticReviewContext.tagValueList->pairs[staticReviewContext.currentPairIndex],
+                                                  staticReviewContext.tagValueList->wrapping,
                                                   forward,
                                                   &tooLongToFit);
     if (forward == false) {
@@ -347,6 +348,7 @@ static void displayStaticReviewPage(uint8_t page) {
       content.tagValueDetails.tagValueList.nbPairs = 1;
       content.tagValueDetails.tagValueList.pairs = &staticReviewContext.tagValueList->pairs[staticReviewContext.currentPairIndex];
       content.tagValueDetails.tagValueList.smallCaseForValue = false;
+      content.tagValueDetails.tagValueList.wrapping = staticReviewContext.tagValueList->wrapping;
     }
     else {
       content.type = TAG_VALUE_LIST;
@@ -354,6 +356,7 @@ static void displayStaticReviewPage(uint8_t page) {
       content.tagValueList.pairs = &staticReviewContext.tagValueList->pairs[staticReviewContext.currentPairIndex];
       content.tagValueList.smallCaseForValue = false;
       content.tagValueList.nbMaxLinesForValue = NB_MAX_LINES_IN_REVIEW;
+      content.tagValueList.wrapping = staticReviewContext.tagValueList->wrapping;
     }
     content.tuneId = TUNE_TAP_CASUAL;
   }
@@ -522,7 +525,7 @@ static void displaySkipWarning(void) {
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
 }
 
-static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool forward, bool *tooLongToFit) {
+static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool wrapping, bool forward, bool *tooLongToFit) {
   uint8_t nbPairsInPage = 0;
   uint16_t currentHeight = 24; // upper margin
 
@@ -533,7 +536,7 @@ static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pair
     currentHeight += 32; // tag height
     currentHeight += 4; // space between tag and value
     currentHeight += nbgl_getTextHeightInWidth(BAGL_FONT_INTER_REGULAR_32px,
-                                pairs[forward?nbPairsInPage:-nbPairsInPage-1].value,SCREEN_WIDTH-2*BORDER_MARGIN); // value height
+                                pairs[forward?nbPairsInPage:-nbPairsInPage-1].value,SCREEN_WIDTH-2*BORDER_MARGIN, wrapping); // value height
     if (currentHeight >= TAG_VALUE_AREA_HEIGHT)
       break;
     nbPairsInPage++;
@@ -556,7 +559,7 @@ static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList
   while (i < tagValueList->nbPairs) {
     // upper margin
     currentHeight += 24;
-    nbPairsInPage = getNbTagValuesInPage(nbPairs, &tagValueList->pairs[i],true, &tooLongToFit);
+    nbPairsInPage = getNbTagValuesInPage(nbPairs, &tagValueList->pairs[i],tagValueList->wrapping,true, &tooLongToFit);
     i += nbPairsInPage;
     nbPairs -= nbPairsInPage;
     nbPages++;
