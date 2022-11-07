@@ -455,14 +455,15 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index) {
 // called when navigation is touched on Address verification page
 static void displayAddressPage(uint8_t page) {
   nbgl_pageContent_t content;
+  nbgl_layoutTagValue_t tagValuePair = {
+    .item = "Address",
+    .value = (char*)addressConfirmationContext.address
+  };
+
   content.type = TAG_VALUE_CONFIRM;
   content.title = NULL;
   content.isTouchableTitle = false;
   if (page == 0) {
-    nbgl_layoutTagValue_t tagValuePair = {
-      .item = "Address",
-      .value = (char*)addressConfirmationContext.address
-    };
 
     content.tagValueConfirm.detailsButtonText = "Show as QR";
     content.tagValueConfirm.detailsButtonToken = BUTTON_TOKEN;
