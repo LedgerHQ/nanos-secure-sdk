@@ -96,8 +96,6 @@ static void animation_draw(label_anim_t *anim)
                    component.width, component.height,
                    start_label, len,
                    ENCODING);
-
-  /* screen_update(); */
 }
 
 /**
