@@ -102,6 +102,9 @@ def image_to_packed_buffer(im, palette, bits_per_pixel):
                 color_index = palette_func[bits_per_pixel](color_index)
             else:
                 if bits_per_pixel == 1:
+                    # be sure to saturate index to 1
+                    if (color_index > 1):
+                        color_index = 1
                     # in Stax we want 1BPP to be 1 for Black and 0 for White, in GIF it's the opposite
                     if palette[color_index] == 0:
                         color_index = 1
