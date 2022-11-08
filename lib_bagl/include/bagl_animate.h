@@ -59,11 +59,11 @@ typedef enum anim_type_e {
 /**
  * Structured used to animate a label.
  */
-typedef struct label_anim_s {
+typedef struct bagl_anim_s {
   anim_type_t type;
 
   /* Label to animate */
-  unsigned char label[MAX_LABEL_SIZE];
+  char label[MAX_LABEL_SIZE];
   size_t len;
 
   /* Has to be set once at initialization */
@@ -89,19 +89,19 @@ typedef struct label_anim_s {
     } circle;
 
   };
-} label_anim_t;
+} bagl_anim_t;
 
 /**
  * Initialize a label animation.
  */
-void animation_init(label_anim_t *anim,
-                    anim_type_t type,
-                    const unsigned char *label,
-                    size_t len);
+void bagl_animation_init(bagl_anim_t *anim,
+                         anim_type_t type,
+                         const unsigned char *label,
+                         size_t len);
 
 /**
  * Has to be called for each step of the animation.
  */
-void animation_step(label_anim_t *anim);
+void bagl_animation_step(bagl_anim_t *anim);
 
 #endif /* !BAGL_ANIMATE_H_ */

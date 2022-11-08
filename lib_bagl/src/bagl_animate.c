@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "os_math.h"
+#include "os_screen.h"
 #include "bagl_animate.h"
 
 #define LABEL_ANIMATE_ID 0x01
@@ -51,8 +52,7 @@ const bagl_component_t component = {
 
 /* Reset values are depending on the animation type
    and compute at the context initialization */
-static void animation_reset(label_anim_t *anim)
-{
+static void animation_reset(bagl_anim_t *anim) {
   anim->cur_x = anim->reset_cur_x;
   anim->cur_char_idx = anim->reset_cur_char_idx;
   anim->cur_char_w = 0;
@@ -60,8 +60,7 @@ static void animation_reset(label_anim_t *anim)
 }
 
 /* Process the different width properties of the label to animate. */
-static void animation_get_width_properties(label_anim_t *anim)
-{
+static void animation_get_width_properties(bagl_anim_t *anim) {
   const unsigned font_id = component.font_id;
   const unsigned int idx = anim->cur_char_idx;
 
@@ -81,11 +80,9 @@ static void animation_get_width_properties(label_anim_t *anim)
 }
 
 /* Print the label and refresh the screen */
-static void animation_draw(label_anim_t *anim)
-{
+static void animation_draw(bagl_anim_t *anim) {
   const unsigned font_id = component.font_id;
-  /* const bagl_component_t *comp = &anim->component; */
-  const unsigned char *start_label = anim->label + anim->cur_char_idx;
+  const char *start_label = anim->label + anim->cur_char_idx;
   const uint16_t len = anim->len - anim->cur_char_idx;
 
   bagl_draw_bg(component.bgcolor);
@@ -110,8 +107,7 @@ typedef enum classic_state_e {
   STATE_END,
 } classic_state_t;
 
-static void classic_right_to_left(label_anim_t *anim)
-{
+static void classic_right_to_left(bagl_anim_t *anim) {
   /* Char has been entirely displayed ? */
   if (anim->cur_char_displayed_w < anim->cur_char_w) {
     ++anim->cur_x;
@@ -129,8 +125,7 @@ static void classic_right_to_left(label_anim_t *anim)
   }
 }
 
-static void classic_left_to_right(label_anim_t *anim)
-{
+static void classic_left_to_right(bagl_anim_t *anim) {
   /* Char has been entirely displayed ? */
   if (anim->cur_char_displayed_w >= anim->cur_char_w) {
     --anim->cur_char_idx;
@@ -148,9 +143,8 @@ static void classic_left_to_right(label_anim_t *anim)
 }
 
 // A pause in classic animation is based on a number of ticker calls.
-static void classic_pause(label_anim_t *anim,
-                          classic_state_t next_state)
-{
+static void classic_pause(bagl_anim_t *anim,
+                          classic_state_t next_state) {
   ++anim->classic.nr_ticker_pause;
   if (anim->classic.nr_ticker_pause == TICKER_PAUSE) {
     anim->classic.state = next_state;
@@ -159,8 +153,7 @@ static void classic_pause(label_anim_t *anim,
 }
 
 // Statemachine for the classic animation
-static void classic_step(label_anim_t *anim)
-{
+static void classic_step(bagl_anim_t *anim) {
   switch (anim->classic.state) {
     case STATE_FROM_RIGHT_TO_LEFT:
       classic_right_to_left(anim);
@@ -179,19 +172,17 @@ static void classic_step(label_anim_t *anim)
   }
 }
 
-static void fill_label_with_space(unsigned char *label,
+static void fill_label_with_space(char *label,
                                   uint16_t from,
-                                  uint16_t n)
-{
+                                  uint16_t n) {
   for (uint16_t i = 0; i < n; ++i) {
     label[i + from] = ' ';
   }
 }
 
-static void classic_init(label_anim_t *anim,
+static void classic_init(bagl_anim_t *anim,
                          const unsigned char *label,
-                         size_t len)
-{
+                         size_t len) {
   // Add auto padding spaces
   uint16_t nr_space = (MAX_LABEL_SIZE - len) / 2;
   if (nr_space > NR_MAX_SPACE_PADDING) {
@@ -218,10 +209,9 @@ static void classic_init(label_anim_t *anim,
  * Circle common
  */
 
-static void circle_common_init(label_anim_t *anim,
+static void circle_common_init(bagl_anim_t *anim,
                                const unsigned char *label,
-                               size_t len)
-{
+                               size_t len) {
   anim->circle.char_idx_limit = len - 1 + sizeof(DELIMITER) - 1;
   anim->len = MIN(MAX_LABEL_SIZE, 2 * len + sizeof(DELIMITER));
 
@@ -241,8 +231,7 @@ static void circle_common_init(label_anim_t *anim,
  * Circle right to left animation.
  */
 
-static void circle_rl_step(label_anim_t *anim)
-{
+static void circle_rl_step(bagl_anim_t *anim) {
   /* Char has been entirely displayed ? */
   if (anim->cur_char_displayed_w < anim->cur_char_w) {
     ++anim->cur_x;
@@ -260,10 +249,9 @@ static void circle_rl_step(label_anim_t *anim)
   ++anim->cur_x;
 }
 
-static void circle_rl_init(label_anim_t *anim,
+static void circle_rl_init(bagl_anim_t *anim,
                            const unsigned char *label,
-                           size_t len)
-{
+                           size_t len) {
   circle_common_init(anim, label, len);
   anim->reset_cur_char_idx = 0;
   anim->reset_cur_x = 0;
@@ -274,8 +262,7 @@ static void circle_rl_init(label_anim_t *anim,
  * Circle left to right animation.
  */
 
-static void circle_lr_step(label_anim_t *anim)
-{
+static void circle_lr_step(bagl_anim_t *anim) {
 
   /* Char has been entirely displayed ? */
   if (anim->cur_char_displayed_w >= anim->cur_char_w) {
@@ -290,10 +277,9 @@ static void circle_lr_step(label_anim_t *anim)
   --anim->cur_x;
 }
 
-static void circle_lr_init(label_anim_t *anim,
+static void circle_lr_init(bagl_anim_t *anim,
                            const unsigned char *label,
-                           size_t len)
-{
+                           size_t len) {
   circle_common_init(anim, label, len);
   // reset values are processed to have a transparent animation for the user
   anim->reset_cur_x = bagl_compute_line_width(component.font_id, 0,
@@ -304,43 +290,41 @@ static void circle_lr_init(label_anim_t *anim,
   animation_reset(anim);
 }
 
-/**
- * Animation callbacks dispatcher
- */
-typedef struct anim_dispath_s {
-  void (*init_cb)(label_anim_t*, const unsigned char*, size_t);
-  void (*step_cb)(label_anim_t*);
-} anim_dispatch_t;
-
-static const anim_dispatch_t anim_dispatch[] = {
-  [ANIMATION_CLASSIC] = {
-    classic_init,
-    classic_step,
-  },
-  [ANIMATION_CIRCLE_RL] = {
-    circle_rl_init,
-    circle_rl_step,
-  },
-  [ANIMATION_CIRCLE_LR] = {
-    circle_lr_init,
-    circle_lr_step,
-  },
-};
-
-void animation_init(label_anim_t *anim,
-                    anim_type_t type,
-                    const unsigned char *label,
-                    size_t len)
-{
+void bagl_animation_init(bagl_anim_t *anim,
+                         anim_type_t type,
+                         const unsigned char *label,
+                         size_t len) {
   anim->type = type;
   memset(anim->label, 0, MAX_LABEL_SIZE);
   anim->max_char_w = bagl_compute_line_width(component.font_id, 0, "W", 1, ENCODING) + 1;
-  anim_dispatch[anim->type].init_cb(anim, label, len);
+
+  switch (anim->type) {
+    case ANIMATION_CLASSIC:
+      classic_init(anim, label, len);
+      break;
+    case ANIMATION_CIRCLE_RL:
+      circle_rl_init(anim, label, len);
+      break;
+    case ANIMATION_CIRCLE_LR:
+      circle_lr_init(anim, label, len);
+      break;
+  };
 }
 
-void animation_step(label_anim_t *anim)
-{
+void bagl_animation_step(bagl_anim_t *anim) {
   animation_get_width_properties(anim);
   animation_draw(anim);
-  anim_dispatch[anim->type].step_cb(anim);
+  screen_update();
+
+  switch (anim->type) {
+    case ANIMATION_CLASSIC:
+      classic_step(anim);
+      break;
+    case ANIMATION_CIRCLE_RL:
+      circle_rl_step(anim);
+      break;
+    case ANIMATION_CIRCLE_LR:
+      circle_lr_step(anim);
+      break;
+  };
 }
