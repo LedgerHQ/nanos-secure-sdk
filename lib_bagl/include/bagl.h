@@ -311,24 +311,6 @@ void bagl_draw_glyph(const bagl_component_t* component, const bagl_icon_details_
 void bagl_set_glyph_array(const bagl_glyph_array_entry_t* array, unsigned int count);
 #endif // HAVE_BAGL_GLYPH_ARRAY
 
-typedef struct bagl_animated_s {
-  // the component to be animated
-  // NOTE: icon_id holds the horizontal scroll speed
-  // NOTE: stroke holds the pause time (unit is 100ms) when reaching each ends of the content to scroll.
-  bagl_component_t c;
-
-  // the component context to be animated
-  void * text;
-  unsigned short text_length;
-  unsigned char text_encoding;
-  unsigned int current_char_idx;
-  unsigned int current_x;
-  unsigned int next_ms; // the next time checkpoint to perform an animation
-} bagl_animated_t;
-
-// perform step animation
-void bagl_animate(bagl_animated_t* anim, unsigned int timestamp_ms, unsigned int interval_ms);
-
 // --------------------------------------------------------------------------------------
 // start drawing a bitmap in the given area
 void bagl_hal_draw_bitmap_within_rect(int x, int y, unsigned int width, unsigned int height, unsigned int color_count, const unsigned int * colors, unsigned int bit_per_pixel, const unsigned char* bitmap, unsigned int bitmap_length_bits);
