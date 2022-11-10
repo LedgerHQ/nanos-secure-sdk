@@ -182,15 +182,25 @@ typedef struct {
 } nbgl_layoutQRCode_t;
 
 /**
- * @brief This structure contains info to build a pair of buttons, button1 on top of button2, with a simple choice.
- * If the second text and icon2 are NULL, a single button will be used
- * @note both icons must have the same dimensions (32*32px)
- * @note the pair of button is automatically put on bottom of screen if not the only objects, and centered otherwise
+ * @brief The different styles for a pair of buttons
+ *
+ */
+typedef enum {
+    ROUNDED_AND_FOOTER_STYLE = 0, ///< A rounded black background full width button on top of a footer
+    BOTH_ROUNDED_STYLE  ///< A rounded black background full width button on top of a rounded white background full width button
+} nbgl_layoutChoiceButtonsStyle_t;
+
+
+/**
+ * @brief This structure contains info to build a pair of buttons, one on top of the other.
+ *
+ * @note the pair of button is automatically put on bottom of screen
  */
 typedef struct {
     char *topText; ///< up-button text (index 0)
     char *bottomText; ///< bottom-button text (index 1)
     uint8_t token; ///< the token that will be used as argument of the callback
+    nbgl_layoutChoiceButtonsStyle_t style; ///< the style of the pair
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played
 } nbgl_layoutChoiceButtons_t;
 

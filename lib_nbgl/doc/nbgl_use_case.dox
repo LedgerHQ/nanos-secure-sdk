@@ -36,9 +36,10 @@ In this example, a parsing the settings (single level) consists in 2 pages, and 
 
 @section nbgl_use_cases Use Cases
 
-A few APIs are available to draw typical Use-Cases, like:
+A few APIs are available to draw typical Use-Cases, such as:
 
 - @ref nbgl_useCaseHome() to draw the home screen of an application
+- @ref nbgl_useCaseHomeExt() to draw an extended version of home screen of an application (with action button)
 - @ref nbgl_useCaseSettings() to draw a level of settings pages
 - @ref nbgl_useCaseChoice() to draw a typical choice page, for example when rejecting a transaction
 - @ref nbgl_useCaseStatus() to draw a transient status page, without control, for example when a transaction is successfully signed
@@ -50,9 +51,9 @@ A few APIs are available to draw typical Use-Cases, like:
 - @ref nbgl_useCaseAddressConfirmationExt() to draw an address confirmation page, with a possibility to see it as QR Code and some extra tag/value pairs
 - @ref nbgl_useCaseSpinner() to draw an infinite spinner page
 
-@subsection use_case_welcome Home screen Use Case
+@subsection use_case_home Home screen Use Case
 
-\image{inline} html UseCase-Welcome.png "caption" height=300
+\image{inline} html UseCase-Home.png "caption" height=300
 
 Ledger would like all application to have the same home screen, so the @ref nbgl_useCaseHome() function enables to
 create such a page, the only configurable parameters being:
@@ -61,7 +62,7 @@ create such a page, the only configurable parameters being:
 - the application icon
 - the tagline, a text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
 - the callbacks when touching *quit* or *top-right* buttons
-- the type of bottom button (info or settings)
+- the type of top-right button (info or settings)
 
 @code
 extern const nbgl_icon_details_t *myAppIcon;
@@ -73,7 +74,51 @@ void onQuit(void) {
     // exit app here
 }
 void appMain(void) {
-  nbgl_useCaseHome("MyApp", &myAppIcon, NULL, true, myAppSettings, onQuit);
+  nbgl_useCaseHome("MyApp",
+                   &myAppIcon,
+                   NULL,
+                   true, // with settings button
+                   myAppSettings,
+                   onQuit);
+}
+@endcode
+
+@subsection use_case_ext_home Extended Home screen Use Case
+
+\image{inline} html UseCase-HomeExt.png "caption" height=300
+
+In some very specific case, the Home page should provide an "action" button. @ref nbgl_useCaseHomeExt() function enables to
+create such a page, adding to @ref nbgl_useCaseHome() the following parameters:
+
+- the text to display in "action" button
+- the callback when touching "action" buttons
+
+Here is the source code to display something similar to the example:
+
+@code
+extern const nbgl_icon_details_t *myAppIcon;
+
+void myAppSettings(void) {
+    // draw settings page here
+}
+
+void onQuit(void) {
+    // exit app here
+}
+
+// function called when "Do something" button is touched
+void onAction(void) {
+}
+
+void appMain(void) {
+  nbgl_useCaseHomeExt("MyApp",
+                      &myAppIcon,
+                      "This application is intended to do\nsomething",
+                      false, // with info button
+                      "Do something",
+                      onAction,
+                      myAppSettings,
+                      onQuit);
 }
 @endcode
 

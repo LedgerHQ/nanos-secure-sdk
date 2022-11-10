@@ -302,6 +302,20 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
 
   nbgl_layoutAddCenteredInfo(layout,&info->centeredInfo);
 
+  // if action button but not QUIT_APP_TEXT bottom button, use a small black button
+  if ((info->actionButtonText != NULL) && (info->bottomButtonStyle != QUIT_APP_TEXT)) {
+    nbgl_layoutButton_t buttonInfo = {
+      .fittingContent = true,
+      .icon = NULL,
+      .onBottom = false,
+      .style = BLACK_BACKGROUND,
+      .text  = (char*)info->actionButtonText,
+      .token = info->bottomButtonsToken,
+      .tuneId = info->tuneId
+    };
+    nbgl_layoutAddButton(layout,&buttonInfo);
+  }
+
   if (info->footerText != NULL) {
     nbgl_layoutAddFooter(layout, (char*)PIC(info->footerText), info->footerToken, info->tuneId);
   }
@@ -318,16 +332,29 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
     nbgl_layoutAddTopRightButton(layout, PIC(icon), info->topRightToken, info->tuneId);
   }
   if (info->bottomButtonStyle == QUIT_APP_TEXT) {
-    nbgl_layoutButton_t buttonInfo = {
-      .fittingContent = false,
-      .icon = NULL,
-      .onBottom = true,
-      .style = WHITE_BACKGROUND,
-      .text  = "Quit app",
-      .token = info->bottomButtonToken,
-      .tuneId = info->tuneId
-    };
-    nbgl_layoutAddButton(layout,&buttonInfo);
+    // if action button and QUIT_APP_TEXT bottom button, use a pair of choice buttons
+    if ((info->actionButtonText != NULL)) {
+      nbgl_layoutChoiceButtons_t buttonsInfo = {
+        .topText = (char*)info->actionButtonText,
+        .bottomText = "Quit app",
+        .token = info->bottomButtonsToken,
+        .style = BOTH_ROUNDED_STYLE,
+        .tuneId = info->tuneId
+      };
+      nbgl_layoutAddChoiceButtons(layout,&buttonsInfo);
+    }
+    else {
+      nbgl_layoutButton_t buttonInfo = {
+        .fittingContent = false,
+        .icon = NULL,
+        .onBottom = true,
+        .style = WHITE_BACKGROUND,
+        .text  = "Quit app",
+        .token = info->bottomButtonsToken,
+        .tuneId = info->tuneId
+      };
+      nbgl_layoutAddButton(layout,&buttonInfo);
+    }
   }
   else if (info->bottomButtonStyle != NO_BUTTON_STYLE) {
     const nbgl_icon_details_t *icon;
@@ -339,7 +366,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
       icon = &C_cross32px;
     else
       return NULL;
-    nbgl_layoutAddBottomButton(layout, PIC(icon), info->bottomButtonToken, false, info->tuneId);
+    nbgl_layoutAddBottomButton(layout, PIC(icon), info->bottomButtonsToken, false, info->tuneId);
   }
   nbgl_layoutDraw(layout);
 
@@ -382,6 +409,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
       .bottomText = (char*)PIC(info->cancelText),
       .token = info->confirmationToken,
       .topText = (char*)PIC(info->confirmationText),
+      .style = ROUNDED_AND_FOOTER_STYLE,
       .tuneId = info->tuneId
     };
     nbgl_layoutAddChoiceButtons(layout,&buttonsInfo);
@@ -478,7 +506,7 @@ nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActio
  * @return the page context (or NULL if error)
  */
 nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
-                        nbgl_pageNavigationInfo_t *nav,
+                                            nbgl_pageNavigationInfo_t *nav,
                                             nbgl_pageContent_t* content,
                                             bool modal) {
   nbgl_layoutDescription_t layoutDescription;
