@@ -231,11 +231,12 @@ typedef struct nbgl_pageInfoDescription_s {
     nbgl_pageButtonStyle_t topRightStyle; ///< style to apply to the Top-Right button
     nbgl_pageButtonStyle_t bottomButtonStyle; ///< style to apply to the Bottom button
     uint8_t topRightToken; ///< the token that will be used as argument of the onActionCallback
-    uint8_t bottomButtonToken; ///< the token that will be used as argument of the onActionCallback
+    uint8_t bottomButtonsToken; ///< the token that will be used as argument of the onActionCallback if action/bottom button is touched
     const char *footerText; ///< if not NULL, add a touchable footer
     uint8_t footerToken; ///< the token that will be used as argument of the onActionCallback
     const char *tapActionText; ///< if set to true, main area is "tapable", with this text as indication
     uint8_t tapActionToken; ///< the token that will be used as argument of the onActionCallback
+    const char *actionButtonText; ///< if not NULL a black "action" button is set under the centered info
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when button/footer is pressed
 } nbgl_pageInfoDescription_t;
 

@@ -179,18 +179,19 @@ The colors and fonts for the texts depends of the \b style field used in @ref nb
 
 @subsection choice_buttons Choice buttons
 
-\image{inline} html layout14.png "caption" height=300
+\image{inline} html layout_choice_buttons1.png "caption" height=300
+
+\image{inline} html layout_choice_buttons2.png "caption" height=300
 
 This object is made of 2 buttons, aligned vertically, each containing a text.
 
-If they are the only objects in the page, these buttons are centered vertically and horizontally.
+They are put at the bottom of the main container, on top of a potential navigation bar or bottom button.
 
-Otherwise, they are put at the bottom of the main container, on top of a potential navigation bar or bottom button.
+Regarding colors, Top-button (index 0 in callback) is painted in @ref BLACK and is on top of Bottom-buttom (index 1 in callback)
 
-Regarding colors:
+If the \b style field is @ref ROUNDED_AND_FOOTER_STYLE, Bottom-button is painted in @ref WHITE, without border.
 
-- Top-button (index 0) is painted in @ref BLACK and is on top of bottom-buttom.
-- Down-button is painted in @ref WHITE, without border.
+If the \b style field is @ref BOTH_ROUNDED_STYLE, Bottom-button is painted in @ref WHITE, with border.
 
 The API to insert such an object is @ref nbgl_layoutAddChoiceButtons(), with @ref nbgl_layoutChoiceButtons_t structure
 

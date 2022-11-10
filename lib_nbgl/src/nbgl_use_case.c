@@ -36,6 +36,7 @@ enum {
   SKIP_TOKEN,
   CONTINUE_TOKEN,
   BUTTON_TOKEN,
+  ACTION_BUTTON_TOKEN,
   CHOICE_TOKEN,
   DETAILS_BUTTON_TOKEN,
   CONFIRM_TOKEN,
@@ -79,6 +80,7 @@ static char appDescription[APP_DESCRIPTION_MAX_LEN];
 // multi-purposes callbacks
 static nbgl_callback_t onQuit;
 static nbgl_callback_t onContinue;
+static nbgl_callback_t onAction;
 static nbgl_navCallback_t onNav;
 static nbgl_layoutTouchCallback_t onControls;
 static nbgl_choiceCallback_t onChoice;
@@ -159,6 +161,14 @@ static void pageCallback(int token, uint8_t index) {
   else if (token == CHOICE_TOKEN) {
     if (onChoice != NULL)
       onChoice((index == 0)?true:false);
+  }
+  else if (token == ACTION_BUTTON_TOKEN) {
+    if ((index == 0) && (onAction != NULL)) {
+      onAction();
+    }
+    else if ((index == 1) && (onQuit != NULL)) {
+      onQuit();
+    }
   }
   else if (token == BUTTON_TOKEN) {
     // display the address as QR Code
@@ -464,7 +474,6 @@ static void displayAddressPage(uint8_t page) {
   content.title = NULL;
   content.isTouchableTitle = false;
   if (page == 0) {
-
     content.tagValueConfirm.detailsButtonText = "Show as QR";
     content.tagValueConfirm.detailsButtonToken = BUTTON_TOKEN;
     content.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
@@ -526,6 +535,7 @@ static void displaySkipWarning(void) {
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
 }
 
+// computes and returns the number of tag/values pairs displayable in a page, with the given list of tag/value pairs
 static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pairs, bool wrapping, bool forward, bool *tooLongToFit) {
   uint8_t nbPairsInPage = 0;
   uint16_t currentHeight = 24; // upper margin
@@ -549,6 +559,7 @@ static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValue_t *pair
   return nbPairsInPage;
 }
 
+// computes and returns the number of pages necessary to display the given list of tag/value pairs
 static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList) {
   uint8_t nbPages = 0;
   uint8_t nbPairs = tagValueList->nbPairs;
@@ -573,16 +584,36 @@ static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList
  **********************/
 
 /**
- * @brief draws the welcome page of an app (page on which we land when launching it from dashboard)
+ * @brief draws the home page of an app (page on which we land when launching it from dashboard)
  *
  * @param appName app name
  * @param appIcon app icon
  * @param tagline text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
  * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info" (i)
- * @param topRightCallback callback called when top-right button is pressed
- * @param quitCallback callback called when quit button is pressed
+ * @param topRightCallback callback called when top-right button is touched
+ * @param quitCallback callback called when quit button is touched
  */
 void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
+                      nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
+  nbgl_useCaseHomeExt(appName, appIcon, tagline, withSettings, NULL, NULL,
+                      topRightCallback, quitCallback);
+}
+
+/**
+ * @brief draws the extended version of home page of an app (page on which we land when launching it from dashboard)
+ * @note it enables to use an action button (black)
+ *
+ * @param appName app name
+ * @param appIcon app icon
+ * @param tagline text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
+ * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info" (i)
+ * @param actionButtonText if not NULL, text used for an action button (in black, on top of "Quit App" button)
+ * @param actionCallback callback called when action button is touched (if actionButtonText is not NULL)
+ * @param topRightCallback callback called when top-right button is touched
+ * @param quitCallback callback called when quit button is touched
+ */
+void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
+                         char *actionButtonText, nbgl_callback_t actionCallback,
                       nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
   nbgl_pageInfoDescription_t info = {
     .centeredInfo.icon = appIcon,
@@ -592,14 +623,23 @@ void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *t
     .centeredInfo.offsetY = -16,
     .footerText = NULL,
     .bottomButtonStyle = QUIT_APP_TEXT,
-    .bottomButtonToken = QUIT_TOKEN,
     .tapActionText = NULL,
     .topRightStyle = withSettings? SETTINGS_ICON:INFO_ICON,
     .topRightToken = CONTINUE_TOKEN,
+    .actionButtonText = actionButtonText,
     .tuneId = TUNE_TAP_CASUAL
   };
+  if (actionButtonText != NULL) {
+    // trick to use ACTION_BUTTON_TOKEN for action and quit, with index used to distinguish
+    info.bottomButtonsToken = ACTION_BUTTON_TOKEN;
+    onAction = actionCallback;
+  }
+  else {
+    info.bottomButtonsToken = QUIT_TOKEN;
+    onAction = actionCallback;
+  }
   if (tagline == NULL) {
-    snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app confirms actions on the %s network.", appName);
+    snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app confirms actions on\nthe %s network.", appName);
     info.centeredInfo.text2 = appDescription;
   }
   else {
@@ -608,6 +648,9 @@ void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *t
 
   onContinue = topRightCallback;
   onQuit = quitCallback;
+  if (actionButtonText != NULL) {
+    info.centeredInfo.offsetY -= 40;
+  }
   pageContext = nbgl_pageDrawInfo(&pageCallback, NULL, &info);
   nbgl_refresh();
 }
@@ -687,6 +730,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
       .centeredInfo.text3 = NULL,
       .tapActionText = NULL,
       .topRightStyle = NO_BUTTON_STYLE,
+      .actionButtonText = NULL,
       .tuneId = TUNE_TAP_CASUAL
     };
     pageContext = nbgl_pageDrawInfo(&pageCallback, &ticker,&info);
@@ -748,6 +792,7 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle,
     .tapActionText = "Tap to continue",
     .tapActionToken = CONTINUE_TOKEN,
     .topRightStyle = NO_BUTTON_STYLE,
+    .actionButtonText = NULL,
     .tuneId = TUNE_TAP_CASUAL
   };
   onQuit = rejectCallback;

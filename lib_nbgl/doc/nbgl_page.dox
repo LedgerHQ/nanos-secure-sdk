@@ -83,7 +83,7 @@ The API to insert such an object is @ref nbgl_pageDrawLedgerInfo() with:
 
 @subsubsection page_info Generic information
 
-\image{inline} html page5.png "caption" height=300
+\image{inline} html page_drawInfo1.png "caption" height=300
 
 This type is intended to draw a centered info.
 In addition of this centered info, this page can offer controls to interact with the info:
@@ -98,6 +98,14 @@ The API to insert such an object is @ref nbgl_pageDrawInfo() with the @ref nbgl_
 - The icon and token to use for a bottom button.
 - The icon and token to use for a top-right button.
 - The centered information parameters (icon, text, sub-text...).
+
+An optional "action" button can also be displayed for the following case:
+
+\image{inline} html page_drawInfo2.png "caption" height=300
+
+In this case, the \b actionButtonText field of @ref nbgl_pageInfoDescription_t can be used, and \b bottomButtonsToken is used in
+\b actionCallback param, with \b index = 0 for action button, and \b index = 1 for quit button.
+
 
 @subsubsection page_confirmation Confirmation page
 
