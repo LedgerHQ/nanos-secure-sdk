@@ -25,7 +25,7 @@
 #define INTERNAL_SPACE 16
 // internal margin, between sub-items
 #define INTERNAL_MARGIN 8
-// inner marging, between buttons
+// inner margin, between buttons
 #define INNER_MARGIN 12
 
 #define NB_MAX_LAYOUTS 3
