@@ -53,7 +53,9 @@ prepare:
 	$(L)echo Prepare directories
 	@mkdir -p bin obj debug dep
 
-default: bin/app.apdu
+default: bin/app.apdu 
+
+manifest: bin/app.toml
 
 obj/%.o: %.c $(GLYPH_DESTC) prepare Makefile
 	@echo "[CC]   $@"
@@ -105,3 +107,6 @@ SCAN_BUILD ?= scan-build
 SCAN_BUILD_OUTPUT ?= $(CURDIR)/output-scan-build
 scan-build:
 	$(SCAN_BUILD) --use-cc=$(CC) -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o $(SCAN_BUILD_OUTPUT) $(MAKE) default
+
+bin/app.toml: bin/app.elf
+	python3 $(BOLOS_SDK)/create_manifest.py -output $@ $(APP_LOAD_PARAMS) --gif $(ICONNAME)
