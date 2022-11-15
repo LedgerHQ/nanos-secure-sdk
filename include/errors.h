@@ -418,6 +418,7 @@ enum generic_identifiers {
 #define SWO_SEC_CHK_21                    (ERR_SEC_CHK + ERR_GEN_ID_21)    // 0x5321
 #define SWO_SEC_CHK_22                    (ERR_SEC_CHK + ERR_GEN_ID_22)    // 0x5322
 #define SWO_SEC_CHK_23                    (ERR_SEC_CHK + ERR_GEN_ID_23)    // 0x5323
+#define SWO_SEC_CHK_24                    (ERR_SEC_CHK + ERR_GEN_ID_24)    // 0x5324
 
 #define SWO_SEC_KEY_01                    (ERR_SEC_KEY + ERR_GEN_ID_01)    // 0x5401
 
