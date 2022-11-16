@@ -3,6 +3,7 @@
  * @brief Implementation of typical pages (or sets of pages) for Applications
  */
 
+#ifdef NBGL_USE_CASE
 /*********************
  *      INCLUDES
  *********************/
@@ -1037,3 +1038,4 @@ void nbgl_useCaseSpinner(char* text) {
   pageContext = nbgl_pageDrawSpinner(NULL, (const char*)text);
   nbgl_refresh();
 }
+#endif // NBGL_USE_CASE

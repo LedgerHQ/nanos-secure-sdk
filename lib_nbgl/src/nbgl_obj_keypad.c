@@ -5,6 +5,8 @@
  *
  */
 
+#ifdef NBGL_KEYPAD
+
 /*********************
  *      INCLUDES
  *********************/
@@ -266,3 +268,5 @@ void nbgl_objDrawKeypad(nbgl_keypad_t *kpd) {
 
   keypadDraw(kpd);
 }
+
+#endif // NBGL_KEYPAD

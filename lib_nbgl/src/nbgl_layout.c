@@ -107,8 +107,9 @@ typedef struct nbgl_layoutInternal_s {
  */
 static nbgl_layoutInternal_t gLayout[NB_MAX_LAYOUTS] = {0};
 
+#ifdef NBGL_KEYBOARD
 static nbgl_button_t *choiceButtons[NB_MAX_SUGGESTION_BUTTONS];
-
+#endif // NBGL_KEYBOARD
 
 /**********************
  *  STATIC PROTOTYPES
@@ -1931,6 +1932,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed) {
   return 0;
 }
 
+#ifdef NBGL_KEYBOARD
 /**
  * @brief Creates a keyboard on bottom of the screen, with the given configuration
  *
@@ -2296,7 +2298,9 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bo
   nbgl_redrawObject((nbgl_obj_t*)button,NULL,false);
   return 0;
 }
+#endif // NBGL_KEYBOARD
 
+#ifdef NBGL_KEYPAD
 /**
  * @brief Adds a keypad on bottom of the screen, with the associated callback
  *
@@ -2460,6 +2464,7 @@ int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t 
 
   return 0;
 }
+#endif // NBGL_KEYPAD
 
 /**
  * @brief Applies given layout. The screen will be redrawn

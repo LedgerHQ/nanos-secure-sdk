@@ -289,6 +289,7 @@ int nbgl_layoutAddBottomButton(nbgl_layout_t *layout, const nbgl_icon_details_t 
 int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, uint8_t nbPages, bool withBack, uint8_t backToken, tune_index_e tuneId);
 int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed);
 
+#ifdef NBGL_KEYBOARD
 /* layout objects for page with keyboard */
 int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo);
 int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask);
@@ -301,12 +302,15 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
 int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, char *text, bool grayedOut);
 int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *text, int token, tune_index_e tuneId);
 int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, char *text);
+#endif // NBGL_KEYBOARD
 
+#ifdef NBGL_KEYPAD
 /* layout objects for page with keypad */
 int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback);
 int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableValidate, bool enableBackspace);
 int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits, bool bordered);
 int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive);
+#endif // NBGL_KEYPAD
 
 /* generic functions */
 int nbgl_layoutDraw(nbgl_layout_t *layout);

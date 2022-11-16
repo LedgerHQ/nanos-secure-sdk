@@ -761,7 +761,9 @@ static void draw_qrCode(nbgl_qrcode_t* obj, nbgl_obj_t *prevObj, bool computePos
   rectArea.width = obj->width;
   rectArea.height = obj->height;
   rectArea.backgroundColor = obj->backgroundColor;
+#ifdef NBGL_QRCODE
   nbgl_drawQrCode(&rectArea,(obj->version == QRCODE_V4) ? 4:10,obj->text,obj->foregroundColor);
+#endif // NBGL_QRCODE
 
 }
 
@@ -787,7 +789,9 @@ static void draw_keyboard(nbgl_keyboard_t* obj, nbgl_obj_t *prevObj, bool comput
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
 
+#ifdef NBGL_KEYBOARD
   nbgl_objDrawKeyboard(obj);
+#endif // NBGL_KEYBOARD
 
 }
 
@@ -810,7 +814,9 @@ static void draw_keypad(nbgl_keypad_t* obj, nbgl_obj_t *prevObj, bool computePos
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
 
+#ifdef NBGL_KEYPAD
   nbgl_objDrawKeypad(obj);
+#endif // NBGL_KEYPAD
 
 }
 
