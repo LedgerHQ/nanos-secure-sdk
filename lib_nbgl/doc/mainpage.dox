@@ -40,5 +40,18 @@ how \b NBGL manages the screens stack and the dynamically allocated objects
 The @subpage nbgl_touchscreen page contains all information necessary to understand
 how \b NBGL manages the touchscreen events and how to receive and process these events.
 
+@section nbgl_building Compilation options
+In order to reduce the footprint (RAM+Flash), some features are only activated if some building options are defined.
+
+Define        | Meaning       | Default state
+------------- | ------------- | -------------
+\b NBGL_PAGE     | Activate High-Level API  | Active in SDK, not in OS
+\b NBGL_USE_CASE | Activate Use Case API    | Active in SDK, not in OS
+\b NBGL_KEYBOARD | Activate Keyboard object | Active in OS, not in SDK
+\b NBGL_KEYPAD   | Activate Keypad object   | Active in OS, not in SDK
+\b NBGL_QRCODE   | Activate QRCode object   | Active in OS, not in SDK
+
+Applications are free to define \b NBGL_KEYBOARD, \b NBGL_KEYPAD or \b NBGL_QRCODE in their own Makefile if they need to use these
+"rare" objects.
 
 */

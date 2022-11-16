@@ -3,6 +3,7 @@
  * @brief Implementation of predefined pages management for Applications
  */
 
+#ifdef NBGL_PAGE
 /*********************
  *      INCLUDES
  *********************/
@@ -584,3 +585,4 @@ int nbgl_pageRelease(nbgl_page_t* page) {
 
   return ret;
 }
+#endif // NBGL_PAGE

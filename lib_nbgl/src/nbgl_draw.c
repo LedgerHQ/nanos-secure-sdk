@@ -88,8 +88,10 @@ static const nbgl_icon_details_t* quarterCircles[] = {
   &C_quarter_circle_48px_1bpp
 };
 
+#ifdef NBGL_QRCODE
 // ensure that the ramBuffer also used for image file decompression is big enough for QR code
 CCASSERT(qr_code_buffer, sizeof(QrCodeBuffer_t) <= GZLIB_UNCOMPRESSED_CHUNK);
+#endif // NBGL_QRCODE
 
 /**********************
  *      VARIABLES
@@ -420,6 +422,7 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
   }
 }
 
+#ifdef NBGL_QRCODE
 static void nbgl_frontDrawQrInternal(nbgl_area_t *area, color_t foregroundColor)
 {
   int size = qrcodegen_getSize(qrcode);
@@ -496,3 +499,4 @@ void nbgl_drawQrCode(nbgl_area_t *area, uint8_t version, const char *text, color
     LOG_WARN("Impossible to draw QRCode text %s with version %d\n",text, version);
   }
 }
+#endif // NBGL_QRCODE

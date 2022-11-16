@@ -5,6 +5,8 @@
  *
  */
 
+#ifdef NBGL_KEYBOARD
+
 /*********************
  *      INCLUDES
  *********************/
@@ -544,3 +546,4 @@ void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd) {
 
   keyboardDraw(kbd);
 }
+#endif // NBGL_KEYBOARD
