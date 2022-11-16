@@ -479,7 +479,7 @@ automatically performed by NBGL by building a detailed modal view.
 
 The API to initiate the display of the series of pages is @ref nbgl_useCaseStaticReview(), providing:
 
-- the list of tag/value pairs
+- the list of tag/value pairs (or a callback to get them one by one)
 - the texts to use in footer and in last page
 - a callback called when the long press button (with param true) on last page or the footer to reject is used (with param false)
 
@@ -513,6 +513,77 @@ static void reviewChoice(bool confirm) {
     // display a choice to confirm/cancel rejection
     nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
   }
+}
+
+void reviewContinue(void) {
+  static nbgl_pageInfoLongPress_t infoLongPress = {
+    .icon = &myAppIcon,
+    .text = "Confirm transaction\nMyAppCoin send",
+    .longPressText = "Hold to send"
+  };
+
+  // static review, providing the whole list of pairs
+  nbgl_useCaseStaticReview(&pairList, &infoLongPress, "Reject transaction", reviewChoice);
+}
+@endcode
+
+Here is another version of the example code, using a callback mecanism to get tag/value pairs:
+
+@code
+// common tag/value pair to return
+static nbgl_layoutTagValue_t pair;
+
+static nbgl_layoutTagValue_t* getPair(uint8_t index);
+
+static nbgl_layoutTagValueList_t pairList = {
+  .nbMaxLinesForValue = 0,
+  .nbPairs = 4,
+  .pairs = NULL, // to indicate that callback should be used
+  .callback = getPair,
+  .startIndex = 0
+};
+
+// result of the rejection choice
+static void rejectChoice(bool confirm) {
+  if (confirm)
+    onConfirmAbandon();
+  else
+    reviewContinue();
+}
+
+// called when long press button on 3rd page is long-touched or when reject footer is touched
+static void reviewChoice(bool confirm) {
+  if (confirm) {
+    // display a status page and go back to main
+    nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
+  }
+  else {
+    // display a choice to confirm/cancel rejection
+    nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
+  }
+}
+
+// function called by NBGL to get the pair indexed by "index"
+static nbgl_layoutTagValue_t* getPair(uint8_t index) {
+  switch (index) {
+  case 0:
+    pair.item = "To";
+    pair.value = "0x123456";
+    break;
+  case 1:
+    pair.item = "From";
+    pair.value = "0x654321";
+    break;
+  case 2:
+    pair.item = "Amount";
+    pair.value = "1.2345 BTC";
+    break;
+  case 3:
+    pair.item = "Fees";
+    pair.value = "0.1 BTC";
+    break;
+  }
+  return &pair;
 }
 
 void reviewContinue(void) {

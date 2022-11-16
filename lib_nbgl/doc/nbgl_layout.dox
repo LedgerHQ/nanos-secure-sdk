@@ -222,12 +222,16 @@ The API to insert such an object is @ref nbgl_layoutAddLongPressButton(), with t
 
 \image{inline} html layout4.png "caption" height=300
 
-This object is made of a list of:
+The parameters to draw such an item are:
 
-- Pairs of tag/value:
--- tag being a single line text in @ref DARK_GRAY in 24px font
--- value being a multi-line text in @ref BLACK in 32px font (auto-wrap, so long tines are automatically broken at maximum
+- Array of tag/value pairs :
+-- tag being a single line text displayed in @ref DARK_GRAY in 24px font
+-- value being a multi-line text in @ref BLACK in 32px font (auto-wrap, so long lines are automatically broken at maximum
 fitting length)
+- Or a callback (if the array is NULL) to retrieve the pairs one by one
+- A boolean to wrap or not value field on spaces
+- A boolean to indicate whether to use a 24 px font for value field (only used when displaying details)
+- The maximum number of lines of value field to display (if 0, not used)
 
 This area is displayed in the main container, under the previously inserted complex object.
 

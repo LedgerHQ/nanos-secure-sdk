@@ -133,11 +133,21 @@ typedef struct {
 } nbgl_layoutTagValue_t;
 
 /**
+ * @brief prototype of tag/value pair retrieval callback
+ * @param pairIndex index of the tag/value pair to retrieve (from 0 (to nbPairs-1))
+ * @return a pointer on a static tag/value pair
+ */
+typedef nbgl_layoutTagValue_t* (*nbgl_tagValueCallback_t)(uint8_t pairIndex);
+
+
+/**
  * @brief This structure contains a list of [tag,value] pairs
  */
 typedef struct {
-    nbgl_layoutTagValue_t *pairs; ///< array of [tag,value] pairs (nbPairs items)
-    uint8_t nbPairs; ///< number of pairs in pairs array
+    nbgl_layoutTagValue_t *pairs; ///< array of [tag,value] pairs (nbPairs items). If NULL, callback is used instead
+    nbgl_tagValueCallback_t callback; ///< function to call to retrieve a given pair
+    uint8_t nbPairs; ///< number of pairs in pairs array (or max number of pairs to retrieve with callback)
+    uint8_t startIndex; ///< index of the first pair to get with callback
     uint8_t nbMaxLinesForValue; ///< if > 0, set the max number of lines for value field. And the last line is ended with "..." instead of the 3 last chars
     bool smallCaseForValue; ///< if set to true, a 24px font is used for value text, otherwise a 32px font is used
     bool wrapping; ///< if set to true, value text will be wrapped on ' ' to avoid cutting words
