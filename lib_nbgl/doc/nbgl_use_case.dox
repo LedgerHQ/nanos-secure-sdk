@@ -527,7 +527,7 @@ void reviewContinue(void) {
 }
 @endcode
 
-Here is another version of the example code, using a callback mecanism to get tag/value pairs:
+Here is another version of the example code, using a callback mechanism to get tag/value pairs:
 
 @code
 // common tag/value pair to return
