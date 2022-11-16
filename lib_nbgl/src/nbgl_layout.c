@@ -1328,9 +1328,15 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     return -1;
 
   for (i=0;i<list->nbPairs;i++) {
-    nbgl_layoutTagValue_t pair = list->pairs[i];
+    nbgl_layoutTagValue_t *pair;
     uint16_t fullHeight = 0, usableWidth;
 
+    if (list->pairs != NULL) {
+      pair = &list->pairs[i];
+    }
+    else {
+      pair = list->callback(list->startIndex+i);
+    }
     // width that can be used for item and text
     usableWidth = GET_AVAILABLE_WIDTH(layoutInt);
 
@@ -1344,7 +1350,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
 
     // init text area for this choice
     itemTextArea->textColor = DARK_GRAY;
-    itemTextArea->text = PIC(pair.item);
+    itemTextArea->text = PIC(pair->item);
     itemTextArea->textAlignment = MID_LEFT;
     itemTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     itemTextArea->width = usableWidth;
@@ -1361,7 +1367,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
 
     // init button for this choice
     valueTextArea->textColor = BLACK;
-    valueTextArea->text = PIC(pair.value);
+    valueTextArea->text = PIC(pair->value);
     valueTextArea->textAlignment = MID_LEFT;
     if (list->smallCaseForValue) {
       valueTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
