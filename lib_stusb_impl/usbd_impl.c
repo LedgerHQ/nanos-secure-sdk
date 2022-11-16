@@ -215,8 +215,15 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
 #define USBD_PID                      0x0006
 #endif // HAVE_LEGACY_PID
 static uint8_t const USBD_PRODUCT_FS_STRING[] = {
-  4*2+2,
+  11*2+2,
   USB_DESC_TYPE_STRING,
+  'L', 0,
+  'e', 0,
+  'd', 0,
+  'g', 0,
+  'e', 0,
+  'r', 0,
+  ' ', 0,
   'S', 0,
   't', 0,
   'a', 0,
