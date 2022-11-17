@@ -299,14 +299,16 @@ void bagl_animation_init(bagl_anim_t *anim,
   anim->max_char_w = bagl_compute_line_width(component.font_id, 0, "W", 1, ENCODING) + 1;
 
   switch (anim->type) {
-    case ANIMATION_CLASSIC:
+    case ANIMATION_TYPE_CLASSIC:
       classic_init(anim, label, len);
       break;
-    case ANIMATION_CIRCLE_RL:
+    case ANIMATION_TYPE_CIRCLE_RL:
       circle_rl_init(anim, label, len);
       break;
-    case ANIMATION_CIRCLE_LR:
+    case ANIMATION_TYPE_CIRCLE_LR:
       circle_lr_init(anim, label, len);
+      break;
+    case ANIMATION_TYPE_END:
       break;
   };
 }
@@ -317,14 +319,16 @@ void bagl_animation_step(bagl_anim_t *anim) {
   screen_update();
 
   switch (anim->type) {
-    case ANIMATION_CLASSIC:
+    case ANIMATION_TYPE_CLASSIC:
       classic_step(anim);
       break;
-    case ANIMATION_CIRCLE_RL:
+    case ANIMATION_TYPE_CIRCLE_RL:
       circle_rl_step(anim);
       break;
-    case ANIMATION_CIRCLE_LR:
+    case ANIMATION_TYPE_CIRCLE_LR:
       circle_lr_step(anim);
+      break;
+    case ANIMATION_TYPE_END:
       break;
   };
 }
