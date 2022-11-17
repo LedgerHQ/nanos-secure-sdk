@@ -162,6 +162,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
   }
 }
 
+#ifdef NBGL_QRCODE
 static void layoutTouchCallbackQR(int token, uint8_t index);
 
 static void displayQR(void) {
@@ -203,6 +204,12 @@ static void layoutTouchCallbackQR(int token, uint8_t index) {
   nbgl_screenRedraw();
   nbgl_refresh();
 }
+#else // NBGL_QRCODE
+static void layoutTouchCallback(int token, uint8_t index) {
+  UNUSED(token);
+  UNUSED(index);
+}
+#endif // NBGL_QRCODE
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -469,6 +476,7 @@ nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActio
     .smallCaseForValue = false
   };
   nbgl_layoutAddTagValueList(addressConfirmationContext.layout,&tagValueList);
+#ifdef NBGL_QRCODE
   buttonInfo.fittingContent = true;
   buttonInfo.icon = &C_QRcode32px;
   buttonInfo.style = WHITE_BACKGROUND;
@@ -480,6 +488,7 @@ nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActio
   buttonInfo.tuneId = TUNE_TAP_NEXT;
   buttonInfo.onBottom = false;
   nbgl_layoutAddButton(addressConfirmationContext.layout,&buttonInfo);
+#endif // NBGL_QRCODE
   buttonInfo.style = BLACK_BACKGROUND;
   buttonInfo.icon = NULL;
   buttonInfo.token = addressConfirmationContext.description.confirmationToken;
