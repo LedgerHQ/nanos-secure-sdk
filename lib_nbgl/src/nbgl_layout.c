@@ -1141,6 +1141,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
   return 0;
 }
 
+#ifdef NBGL_QRCODE
 /**
  * @brief Creates an area on the center of the main panel, with a QRCode,
  * a possible text in black (bold) under it, and a possible text in black under it
@@ -1234,6 +1235,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
 
   return 0;
 }
+#endif // NBGL_QRCODE
 
 /**
  * @brief Creates two buttons to make a choice. Both buttons are mandatory

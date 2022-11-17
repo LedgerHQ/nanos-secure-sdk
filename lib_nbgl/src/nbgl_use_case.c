@@ -117,7 +117,9 @@ static void displayDetailsPage(uint8_t page);
 static void displaySettingsPage(uint8_t page);
 static void displayStaticReviewPage(uint8_t page);
 static void pageCallback(int token, uint8_t index);
+#ifdef NBGL_QRCODE
 static void addressLayoutTouchCallbackQR(int token, uint8_t index);
+#endif // NBGL_QRCODE
 static void displayAddressPage(uint8_t page);
 static void displaySkipWarning(void);
 static uint8_t getNbPairs(uint8_t page, bool *tooLongToFit);
@@ -179,6 +181,7 @@ static void pageCallback(int token, uint8_t index) {
     }
   }
   else if (token == BUTTON_TOKEN) {
+#ifdef NBGL_QRCODE
     // display the address as QR Code
     nbgl_layoutDescription_t layoutDescription = {
       .modal = true,
@@ -197,6 +200,7 @@ static void pageCallback(int token, uint8_t index) {
     nbgl_layoutAddBottomButton(addressConfirmationContext.modalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
     nbgl_layoutDraw(addressConfirmationContext.modalLayout);
     nbgl_refresh();
+#endif // NBGL_QRCODE
   }
   else if (token == CONFIRM_TOKEN) {
     if (onChoice != NULL)
@@ -465,6 +469,7 @@ static void displayDetailsPage(uint8_t detailsPage) {
   nbgl_refresh();
 }
 
+#ifdef NBGL_QRCODE
 // called when quit button is touched on Address verification page
 static void addressLayoutTouchCallbackQR(int token, uint8_t index) {
   UNUSED(token);
@@ -475,6 +480,7 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index) {
   nbgl_screenRedraw();
   nbgl_refresh();
 }
+#endif // NBGL_QRCODE
 
 // called when navigation is touched on Address verification page
 static void displayAddressPage(uint8_t page) {
@@ -488,8 +494,12 @@ static void displayAddressPage(uint8_t page) {
   content.title = NULL;
   content.isTouchableTitle = false;
   if (page == 0) {
+#ifdef NBGL_QRCODE
     content.tagValueConfirm.detailsButtonText = "Show as QR";
     content.tagValueConfirm.detailsButtonToken = BUTTON_TOKEN;
+#else // NBGL_QRCODE
+    content.tagValueConfirm.detailsButtonText = NULL;
+#endif // NBGL_QRCODE
     content.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
     content.tagValueConfirm.tagValueList.nbPairs = 1;
     content.tagValueConfirm.tagValueList.pairs = &tagValuePair;
