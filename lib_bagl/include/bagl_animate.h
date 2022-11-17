@@ -24,7 +24,7 @@ typedef enum anim_type_e {
    * [     labe] <<
    * ...
    */
-  ANIMATION_CLASSIC,
+  ANIMATION_TYPE_CLASSIC,
 
   /**
    * [  label  ] <<
@@ -37,7 +37,7 @@ typedef enum anim_type_e {
    * [    label] <<
    * ...
    */
-  ANIMATION_CIRCLE_RL,
+  ANIMATION_TYPE_CIRCLE_RL,
 
   /**
    * [  label  ] >>
@@ -50,8 +50,17 @@ typedef enum anim_type_e {
    * [label    ] >>
    * ...
    */
-  ANIMATION_CIRCLE_LR,
+  ANIMATION_TYPE_CIRCLE_LR,
+
+  ANIMATION_TYPE_END,
 } anim_type_t;
+
+typedef enum anim_speed_e {
+  ANIMATION_SPEED_FAST,   // 10ms between two refreshs
+  ANIMATION_SPEED_NORMAL, // 30ms between two refreshs
+  ANIMATION_SPEED_SLOW,   // 60ms between two refreshs
+  ANIMATION_SPEED_END
+} anim_speed_t;
 
 // Maximum size of the label can be animated
 #define MAX_LABEL_SIZE 128
