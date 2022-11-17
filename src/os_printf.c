@@ -41,8 +41,6 @@ static const char g_pcHex_cap[] = {
 
 #ifdef HAVE_PRINTF
 #include "os_io_seproxyhal.h"
-#include "usbd_def.h"
-#include "usbd_core.h"
 
 void screen_printf(const char* format, ...) __attribute__ ((weak, alias ("mcu_usb_printf")));
 

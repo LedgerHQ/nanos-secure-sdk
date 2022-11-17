@@ -17,6 +17,7 @@ typedef enum os_setting_v0_e {
   OS_SETTING_BRIGHTNESS_V0,
   OS_SETTING_INVERT_V0,
   OS_SETTING_ROTATION_V0,
+  OS_SETTING_MCU_UPGRADE_V0=OS_SETTING_ROTATION_V0,
 #ifdef HAVE_BOLOS_NOT_SHUFFLED_PIN
   OS_SETTING_NOSHUFFLE_PIN_V0,
 #endif // HAVE_BOLOS_NOT_SHUFFLED_PIN
@@ -28,10 +29,6 @@ typedef enum os_setting_v0_e {
 
   // default off
   OS_SETTING_PRIVACY_MODE_V0,
-
-#ifdef HAVE_MCU_UPGRADE
-  OS_SETTING_MCU_UPGRADE_V0,
-#endif // HAVE_MCU_UPGRADE
 
   // before that value, all settings are only making use of the length value with a null buffer to be set, and are returned through the return value with a maxlength = 0 in the get.
   OS_SETTING_LAST_INT_V0,
@@ -48,6 +45,7 @@ typedef enum os_setting_v1_e {
   OS_SETTING_BRIGHTNESS_V1,
   OS_SETTING_INVERT_V1,
   OS_SETTING_ROTATION_V1,
+  OS_SETTING_MCU_UPGRADE_V1=OS_SETTING_ROTATION_V1,
 #ifdef HAVE_BOLOS_NOT_SHUFFLED_PIN
   OS_SETTING_NOSHUFFLE_PIN_V1,
 #endif // HAVE_BOLOS_NOT_SHUFFLED_PIN
@@ -59,10 +57,6 @@ typedef enum os_setting_v1_e {
 
   // default off
   OS_SETTING_PRIVACY_MODE_V1,
-
-#ifdef HAVE_MCU_UPGRADE
-  OS_SETTING_MCU_UPGRADE_V1,
-#endif // HAVE_MCU_UPGRADE
 
   OS_SETTING_LANGUAGE_V1,
 
@@ -81,6 +75,7 @@ typedef enum os_setting_e {
   OS_SETTING_BRIGHTNESS,
   OS_SETTING_INVERT,
   OS_SETTING_ROTATION,
+  OS_SETTING_MCU_UPGRADE=OS_SETTING_ROTATION,
 #ifdef HAVE_BOLOS_NOT_SHUFFLED_PIN
   OS_SETTING_NOSHUFFLE_PIN,
 #endif // HAVE_BOLOS_NOT_SHUFFLED_PIN
@@ -92,10 +87,6 @@ typedef enum os_setting_e {
 
   // default off
   OS_SETTING_PRIVACY_MODE,
-
-#ifdef HAVE_MCU_UPGRADE
-  OS_SETTING_MCU_UPGRADE,
-#endif // HAVE_MCU_UPGRADE
 
   OS_SETTING_LANGUAGE,
 
@@ -136,3 +127,5 @@ void set_os_language(unsigned int language);
 
 // Reset the Preferences to default values
 void os_setting_reset(void);
+
+unsigned int os_setting_get_default_device_name(unsigned char* buffer, unsigned int maxlength);
