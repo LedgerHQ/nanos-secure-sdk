@@ -482,13 +482,6 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
     return;
   }
 
-  #ifndef DEBUG_PIEZO
-  // Tune custom is not allowed
-  if(tune_index == TUNE_CUSTOM) {
-    return;
-  }
-  #endif
-
   uint32_t sound_setting = os_setting_get(OS_SETTING_PIEZO_SOUND, NULL, 0);
 
   if ((!IS_NOTIF_ENABLED(sound_setting)) && (tune_index < TUNE_TAP_CASUAL)) {
