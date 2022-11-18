@@ -4,6 +4,7 @@
 import argparse
 import sys
 import os
+import json
 import struct
 from PIL import Image, ImageFont, ImageDraw
 import configparser
@@ -243,6 +244,52 @@ class TTF2INC (object):
 
         return font_id
 
+# -----------------------------------------------------------------------------
+def add_unicode_chars(string, unicode_chars):
+    """
+    Parse string and add unicode characters not already stored
+    """
+    for char in string:
+        # Just check unicode characters
+        # \b, \n, \f and \e\xAB will appear individually, as ASCII chars!
+        if ord(char) > 0x7F and char not in unicode_chars:
+            unicode_chars += char
+
+    return unicode_chars
+
+# -----------------------------------------------------------------------------
+def parse_json_strings(filenames):
+    """
+    Parse the provided JSON file(s) and scan all unicode chars found in strings
+    """
+    # Be sure there are at least some mandatory characters
+    unicode_chars = "�"
+
+    for file in filenames.split():
+
+        if not os.path.exists(file):
+            sys.stderr.write(f"Can't open file {file}\n")
+            sys.exit(-4)
+
+        # Read the JSON file into json_data
+        with open(file, "r") as json_file:
+            json_data = json.load(json_file, strict=False)
+
+        # Parse all strings contained in txt fields of json_data
+        for category in json_data:
+            # Skip Smartling related part of the JSON file
+            if category.lower() == "smartling":
+                continue
+
+            # Parse all "text" strings and add the unicode characters
+            for string in json_data[category]:
+                if not "text" in string.keys():
+                    sys.stdout.write(f"Skipping {string} because it does not "\
+                                     "contain \"text\" field!\n")
+                    continue
+                unicode_chars = add_unicode_chars(string['text'], unicode_chars)
+
+    return unicode_chars
 
 # -----------------------------------------------------------------------------
 # Program entry point:
@@ -254,8 +301,12 @@ if __name__ == "__main__":
 
         with TTF2INC(args) as ttf:
 
+            # If JSON filename(s) was provided, parse them to get the strings
+            if args.json_filenames:
+                string = parse_json_strings(args.json_filenames)
             # Use the provided string or generate all wanted ASCII characters:
-            string = args.string
+            else:
+                string = args.string
             if len(string) == 0:
                 for value in range(ttf.first_character, ttf.last_character+1):
                     string += chr(value)
@@ -420,7 +471,7 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     # Parse arguments:
     parser = argparse.ArgumentParser(
-        description="Convert a .ttf file into a .inc file (Build #210610.1501)")
+        description="Convert a .ttf file into a .inc file (Build #221118.1041)")
 
     parser.add_argument(
         "--output",
@@ -448,6 +499,12 @@ if __name__ == "__main__":
         "--test_align",
         dest="test_align", type=int,
         help="If set, creates a line at the given offset and save the whole string as a picture")
+
+    parser.add_argument(
+        "-j", "--json",
+        dest="json_filenames", type=str,
+        default=None,
+        help="Full path of JSON filenames containing all strings ('%(default)s' by default)")
 
     parser.add_argument(
         "-a", "--append",
