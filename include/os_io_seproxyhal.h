@@ -260,7 +260,7 @@ void io_seproxyhal_disable_io(void);
 
 #ifdef HAVE_PIEZO_SOUND
 typedef enum tune_index_e {
-    TUNE_CUSTOM, // Active only if DEBUG_PIEZO
+    TUNE_RESERVED,
     TUNE_BOOT,
     TUNE_CHARGING,
     TUNE_LEDGER_MOMENT,
