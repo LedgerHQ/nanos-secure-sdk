@@ -168,6 +168,7 @@ static void layoutTouchCallbackQR(int token, uint8_t index);
 static void displayQR(void) {
   nbgl_layoutDescription_t layoutDescription = {
     .modal = true,
+    .withLeftBorder = true,
     .onActionCallback = &layoutTouchCallbackQR,
     .tapActionText = NULL
   };
@@ -236,6 +237,7 @@ nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback
   };
 
   layoutDescription.modal = false;
+  layoutDescription.withLeftBorder = true;
 
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.tapActionText = NULL;
@@ -264,6 +266,7 @@ nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, c
   nbgl_layout_t *layout;
 
   layoutDescription.modal = false;
+  layoutDescription.withLeftBorder = true;
 
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.tapActionText = NULL;
@@ -292,6 +295,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
   nbgl_layout_t *layout;
 
   layoutDescription.modal = false;
+  layoutDescription.withLeftBorder = true;
 
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.tapActionText = (char*)info->tapActionText;
@@ -393,6 +397,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   nbgl_layout_t *layout;
 
   layoutDescription.modal = info->modal;
+  layoutDescription.withLeftBorder = true;
 
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.tapActionText = NULL;
@@ -441,6 +446,7 @@ nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActio
   nbgl_layoutButton_t buttonInfo;
   nbgl_layoutDescription_t layoutDescription = {
     .modal = false,
+    .withLeftBorder = true,
     .onActionCallback = &layoutTouchCallback,
     .tapActionText = NULL
   };
@@ -523,6 +529,7 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
   nbgl_layout_t *layout;
 
   layoutDescription.modal = modal;
+  layoutDescription.withLeftBorder = true;
   layoutDescription.onActionCallback = onActionCallback;
   layoutDescription.ticker.tickerCallback = NULL;
 
