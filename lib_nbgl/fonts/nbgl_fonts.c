@@ -321,7 +321,7 @@ uint16_t nbgl_getTextNbLines(const char*text) {
  */
 uint16_t nbgl_getTextHeight(nbgl_font_id_e fontId, const char*text) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  return font->char_height+((nbgl_getTextNbLines(text)-1)*font->line_height);
+  return (nbgl_getTextNbLines(text)*font->line_height);
 }
 
 /**
@@ -622,7 +622,7 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
  */
 uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint16_t maxWidth, bool wrapping) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  return font->char_height+((nbgl_getTextNbLinesInWidth(fontId,text,maxWidth,wrapping)-1)*font->line_height);
+  return (nbgl_getTextNbLinesInWidth(fontId,text,maxWidth,wrapping)*font->line_height);
 }
 
 /**
