@@ -23,6 +23,9 @@ class TTF2INC (object):
         self.unicode_needed = False
         self.basename = None
         self.directory = None
+        # Be sure there are at least some mandatory characters
+        self.unicode_chars = "�"
+        self.ids = []
         # Store parameters:
         self.args = args
         #read config
@@ -244,52 +247,72 @@ class TTF2INC (object):
 
         return font_id
 
-# -----------------------------------------------------------------------------
-def add_unicode_chars(string, unicode_chars):
-    """
-    Parse string and add unicode characters not already stored
-    """
-    for char in string:
-        # Just check unicode characters
-        # \b, \n, \f and \e\xAB will appear individually, as ASCII chars!
-        if ord(char) > 0x7F and char not in unicode_chars:
-            unicode_chars += char
+    # -------------------------------------------------------------------------
+    def read_ids(self, id_filename):
+        """
+        Read a text file (a .h actually) containing all IDs to use.
+        """
+        if not os.path.exists(id_filename):
+            sys.stderr.write(f"Can't open file {id_filename}\n")
+            sys.exit(-5)
 
-    return unicode_chars
-
-# -----------------------------------------------------------------------------
-def parse_json_strings(filenames):
-    """
-    Parse the provided JSON file(s) and scan all unicode chars found in strings
-    """
-    # Be sure there are at least some mandatory characters
-    unicode_chars = "�"
-
-    for file in filenames.split():
-
-        if not os.path.exists(file):
-            sys.stderr.write(f"Can't open file {file}\n")
-            sys.exit(-4)
-
-        # Read the JSON file into json_data
-        with open(file, "r") as json_file:
-            json_data = json.load(json_file, strict=False)
-
-        # Parse all strings contained in txt fields of json_data
-        for category in json_data:
-            # Skip Smartling related part of the JSON file
-            if category.lower() == "smartling":
-                continue
-
-            # Parse all "text" strings and add the unicode characters
-            for string in json_data[category]:
-                if not "text" in string.keys():
-                    sys.stdout.write(f"Skipping {string} because it does not "\
-                                     "contain \"text\" field!\n")
+        # Read the .h file and store each ID found
+        with open(id_filename, "r") as id_file:
+            for line in id_file:
+                # Ignore lines that don't start with "
+                if line[0] != '"':
                     continue
-                unicode_chars = add_unicode_chars(string['text'], unicode_chars)
+                # Remove leading "
+                line = line.lstrip('"')
+                # Remove trailing ",
+                line = line.rstrip('",\n')
+                self.ids.append(line)
 
-    return unicode_chars
+    # -------------------------------------------------------------------------
+    def add_unicode_chars(self, string, string_id):
+        """
+        Parse string and add unicode characters not already stored
+        """
+        # If we have a list of IDs, be sure that one is included in it
+        if len(self.ids) != 0:
+            if string_id not in self.ids:
+                return
+
+        for char in string:
+            # Just check unicode characters
+            # \b, \n, \f and \e\xAB will appear individually, as ASCII chars!
+            if ord(char) > 0x7F and char not in self.unicode_chars:
+                self.unicode_chars += char
+
+    # -------------------------------------------------------------------------
+    def parse_json_strings(self, filenames):
+        """
+        Parse the provided JSON file(s) and scan all unicode chars found in strings
+        """
+        for file in filenames.split():
+            if not os.path.exists(file):
+                sys.stderr.write(f"Can't open file {file}\n")
+                sys.exit(-4)
+
+            # Read the JSON file into json_data
+            with open(file, "r") as json_file:
+                json_data = json.load(json_file, strict=False)
+
+            # Parse all strings contained in txt fields of json_data
+            for category in json_data:
+                # Skip Smartling related part of the JSON file
+                if category.lower() == "smartling":
+                    continue
+
+                # Parse all "text" strings and add the unicode characters
+                for string in json_data[category]:
+                    if not "text" in string.keys() or not "id" in string.keys():
+                        sys.stdout.write(f"Skipping {string} because it does "\
+                                         "not contain \"text\" or \"id\"!\n")
+                        continue
+                    self.add_unicode_chars(string['text'], string['id'])
+
+        return self.unicode_chars
 
 # -----------------------------------------------------------------------------
 # Program entry point:
@@ -301,9 +324,13 @@ if __name__ == "__main__":
 
         with TTF2INC(args) as ttf:
 
+            # If we provided a list of IDs to use, read the file!
+            if args.id:
+                ttf.read_ids(args.id)
+
             # If JSON filename(s) was provided, parse them to get the strings
             if args.json_filenames:
-                string = parse_json_strings(args.json_filenames)
+                string = ttf.parse_json_strings(args.json_filenames)
             # Use the provided string or generate all wanted ASCII characters:
             else:
                 string = args.string
@@ -505,6 +532,12 @@ if __name__ == "__main__":
         dest="json_filenames", type=str,
         default=None,
         help="Full path of JSON filenames containing all strings ('%(default)s' by default)")
+
+    parser.add_argument(
+        "--id",
+        dest="id", type=str,
+        default=None,
+        help="Filename containing all IDs to use ('%(default)s' by default)")
 
     parser.add_argument(
         "-a", "--append",
