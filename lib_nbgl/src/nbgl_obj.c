@@ -1131,6 +1131,14 @@ void nbgl_refreshSpecial(nbgl_refresh_mode_t mode) {
   #endif
   nbgl_frontRefreshArea(&refreshArea, mode);
   LOG_DEBUG(OBJ_LOGGER,"nbgl_refreshSpecial(), x0,y0 = [%d, %d], w,h = [%d, %d]\n", refreshArea.x0, refreshArea.y0, refreshArea.width, refreshArea.height);
+  nbgl_refreshReset();
+}
+
+/**
+ * @brief This functions resets all changes since the last refresh
+ *
+ */
+void nbgl_refreshReset(void) {
   refreshArea.x0 = SCREEN_WIDTH-1;
   refreshArea.width = 0;
   refreshArea.y0 = SCREEN_HEIGHT-1;
@@ -1144,9 +1152,5 @@ void nbgl_refreshSpecial(nbgl_refresh_mode_t mode) {
  */
 void nbgl_objInit(void) {
   // init area to the smallest size
-  refreshArea.bpp = NBGL_BPP_2;
-  refreshArea.x0 = SCREEN_WIDTH-1;
-  refreshArea.width = 0;
-  refreshArea.y0 = SCREEN_HEIGHT-1;
-  refreshArea.height = 0;
+  nbgl_refreshReset();
 }
