@@ -481,7 +481,7 @@ The API to initiate the display of the series of pages is @ref nbgl_useCaseStati
 
 - the list of tag/value pairs (or a callback to get them one by one)
 - the texts to use in footer and in last page
-- a callback called when the long press button (with param true) on last page or the footer to reject is used (with param false)
+- a callback called when the long press button on last page or the footer to reject is used. The callback's param is true for confirmation, false for rejection.
 
 Here is the code to display something similar to example picture:
 
@@ -597,6 +597,19 @@ void reviewContinue(void) {
   nbgl_useCaseStaticReview(&pairList, &infoLongPress, "Reject transaction", reviewChoice);
 }
 @endcode
+
+@subsection use_case_static_review_light Light Static Review Use Case
+
+\image{inline} html UseCase-ReviewLight.png "caption" height=300
+
+In some cases, the developer may want to display a review but with a less intense confirmation than a long-press button. A simple button is used in this
+case.
+
+The API to initiate the display of the series of pages is @ref nbgl_useCaseStaticReviewLight(), providing:
+
+- the list of tag/value pairs (or a callback to get them one by one)
+- the texts to use in footer and in last page (icon, title, confirmation button text)
+- a callback called when the black button on last page or the footer to reject is used. The callback's param is true for confirmation, false for rejection.
 
 @subsection use_case_details_view Details View Use Case
 

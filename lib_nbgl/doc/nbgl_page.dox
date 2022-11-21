@@ -152,6 +152,7 @@ The different types of generic content are given in @ref nbgl_pageContentType_t 
 
 - @ref CENTERED_INFO is used to draw a centered info. The structure containing data to build it is @ref nbgl_layoutCenteredInfo_t
 - @ref INFO_LONG_PRESS is used to draw a centered info and a long press button. The structure containing data to build it is @ref nbgl_pageInfoLongPress_t
+- @ref INFO_BUTTON is used to draw a centered info and a simple black button. The structure containing data to build it is @ref nbgl_pageInfoButton_t
 - @ref TAG_VALUE_LIST is used to draw alist of tag/value pairs. The structure containing data to build it is @ref nbgl_layoutTagValueList_t
 
 \image{inline} html page15.png "caption" height=300
@@ -210,14 +211,14 @@ There are two main possibilities, with extra-options:
 
 <u>Navigation with buttons in bottom bar:</u>
 
-In this case, all specific parameters can be found in @ref nbgl_pageNavWithButtons_t:
+In this case, all specific parameters can be found in @ref nbgl_pageNavWithButtons_t :
 
 - The navigation token used when pressing back (left) or forward (right) buttons.
 - A boolean to decide whether a Quit button (X) is used in addition of navigation buttons (in this case, the token value is @ref EXIT_PAGE)
 
 <u>Navigation with "tap":</u>
 
-In this case, all specific parameters can be found in @ref nbgl_pageNavWithTap_t:
+In this case, all specific parameters can be found in @ref nbgl_pageNavWithTap_t :
 
 - a boolean to decide whether a back button (left arrow) is displayed in the top left corner (if page >=1)
 - a token attached to this potential back button

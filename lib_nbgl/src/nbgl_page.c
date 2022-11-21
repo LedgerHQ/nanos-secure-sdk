@@ -64,6 +64,30 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       nbgl_layoutAddLongPressButton(layout,(char*)content->infoLongPress.longPressText,content->infoLongPress.longPressToken,content->infoLongPress.tuneId);
       break;
     }
+    case INFO_BUTTON:
+    {
+      nbgl_layoutCenteredInfo_t centeredInfo;
+      nbgl_layoutButton_t buttonInfo;
+
+      centeredInfo.icon = content->infoButton.icon;
+      centeredInfo.text1 = content->infoButton.text;
+      centeredInfo.text2 = NULL;
+      centeredInfo.text3 = NULL;
+      centeredInfo.style = LARGE_CASE_INFO;
+      centeredInfo.offsetY = -40;
+      centeredInfo.onTop = false;
+      nbgl_layoutAddCenteredInfo(layout,&centeredInfo);
+
+      buttonInfo.fittingContent = false;
+      buttonInfo.icon = NULL;
+      buttonInfo.onBottom = true;
+      buttonInfo.style = BLACK_BACKGROUND;
+      buttonInfo.text = (char*)content->infoButton.buttonText;
+      buttonInfo.token = content->infoButton.buttonToken;
+      buttonInfo.tuneId = content->infoButton.tuneId;
+      nbgl_layoutAddButton(layout,&buttonInfo);
+      break;
+    }
     case CENTERED_INFO:
       nbgl_layoutAddCenteredInfo(layout,&content->centeredInfo);
       break;

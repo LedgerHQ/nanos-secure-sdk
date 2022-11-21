@@ -794,7 +794,7 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayou
     container->height += subTextArea->height+INTERNAL_SPACE;
     subTextArea->style = NO_STYLE;
     subTextArea->alignment = NO_ALIGNMENT;
-     subTextArea->alignmentMarginY = INTERNAL_SPACE;
+    subTextArea->alignmentMarginY = INTERNAL_SPACE;
     subTextArea->alignTo = NULL;
     container->children[2] = (nbgl_obj_t*)subTextArea;
     container->nbChildren = 3;
@@ -970,7 +970,7 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, nbgl_layoutRadioChoice_t *c
 
     // init button for this choice
     button->activeColor = BLACK;
-    button->borderColor = DARK_GRAY;
+    button->borderColor = LIGHT_GRAY;
     button->alignmentMarginX = INNER_MARGIN;
     button->alignTo = (nbgl_obj_t*)container;
     button->alignment = MID_RIGHT;
