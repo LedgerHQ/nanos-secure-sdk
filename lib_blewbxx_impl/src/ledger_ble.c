@@ -24,6 +24,7 @@
 #include "ble_hci_le.h"
 #include "ble_hal_aci.h"
 #include "ble_gap_aci.h"
+#include "ble_l2cap_aci.h"
 #include "ble_gatt_aci.h"
 #include "ble_legacy.h"
 
@@ -113,6 +114,9 @@ typedef struct {
 	ble_connection_t connection;
 	uint16_t         pairing_code;
 	uint8_t          pairing_in_progress;
+
+	// L2CAP
+	uint8_t connection_updated;
 
 	// ATT/GATT
 	uint16_t ledger_gatt_service_handle;
@@ -590,6 +594,7 @@ static void hci_evt_le_meta_evt(uint8_t *buffer, uint16_t length)
 		ledger_ble_data.notifications_enabled = 0;
 		ledger_ble_data.advertising_enabled   = 0;
 		ledger_protocol_data.mtu_negotiated   = 0;
+		ledger_ble_data.connection_updated    = 0;
 		break;
 
 	case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
@@ -689,6 +694,13 @@ static void hci_evt_vendor(uint8_t *buffer, uint16_t length)
 		ledger_protocol_data.mtu            = U2LE(buffer, 4)-3+2;
 		ledger_protocol_data.mtu_negotiated = 1;
 		LOG_BLE("MTU : %d\n", U2LE(buffer, 4));
+		break;
+
+	case ACI_L2CAP_CONNECTION_UPDATE_RESP_VSEVT_CODE:
+		LOG_BLE("CONNECTION UPDATE RESP %d\n", buffer[4]);
+		if (!ledger_protocol_data.mtu_negotiated) {
+			aci_gatt_exchange_config(ledger_ble_data.connection.connection_handle);
+		}
 		break;
 
 	case ACI_GATT_WRITE_PERMIT_REQ_VSEVT_CODE:
@@ -801,7 +813,14 @@ static void attribute_modified(uint8_t *buffer, uint16_t length)
 		if (U2LE(buffer, 6) != 0) {
 			LOG_BLE("REGISTERED FOR NOTIFICATIONS\n");
 			ledger_ble_data.notifications_enabled = 1;
-			if (!ledger_protocol_data.mtu_negotiated) {
+			if (!ledger_ble_data.connection_updated) {
+				ledger_ble_data.connection_updated = 1;
+				aci_l2cap_connection_parameter_update_req(ledger_ble_data.connection.connection_handle,
+				                                          BLE_SLAVE_CONN_INTERVAL_MIN, BLE_SLAVE_CONN_INTERVAL_MIN,
+				                                          ledger_ble_data.connection.conn_latency,
+				                                          ledger_ble_data.connection.supervision_timeout);
+			}
+			else if (!ledger_protocol_data.mtu_negotiated) {
 				aci_gatt_exchange_config(ledger_ble_data.connection.connection_handle);
 			}
 		}
