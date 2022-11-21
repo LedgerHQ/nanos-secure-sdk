@@ -34,7 +34,7 @@
 #define NB_MAX_CONTAINER_CHILDREN 20
 
 // used by screen
-#define NB_MAX_SCREEN_CHILDREN 5
+#define NB_MAX_SCREEN_CHILDREN 6
 
 /**
  * @brief Max number of complex objects with callback retrievable from pool
@@ -80,6 +80,7 @@ typedef struct {
  */
 typedef struct nbgl_layoutInternal_s {
   bool modal; ///< if true, means the screen is a modal
+  bool withLeftBorder; ///< if true, draws a light gray left border on the whole height of the screen
   uint8_t layer; ///< if >0, puts the layout on top of screen stack (modal). Otherwise puts on background (for apps)
   uint8_t nbChildren; ///< number of children in above array
   nbgl_obj_t **children; ///< children for main screen
@@ -362,6 +363,19 @@ static nbgl_line_t* createHorizontalLine(uint8_t layer) {
   return line;
 }
 
+static nbgl_line_t* createLeftVerticalLine(uint8_t layer) {
+  nbgl_line_t *line;
+
+  line = (nbgl_line_t*)nbgl_objPoolGet(LINE,layer);
+  line->lineColor = LIGHT_GRAY;
+  line->width = 1;
+  line->height = SCREEN_HEIGHT;
+  line->direction = VERTICAL;
+  line->thickness = 1;
+  line->alignment = MID_LEFT;
+  return line;
+}
+
 // function adding a layout object in the callbackObjPool array for the given layout, and configuring it
 static layoutObj_t *addCallbackObj(nbgl_layoutInternal_t *layout, nbgl_obj_t *obj, uint8_t token, tune_index_e tuneId) {
   layoutObj_t *layoutObj = NULL;
@@ -425,6 +439,7 @@ nbgl_layout_t *nbgl_layoutGet(nbgl_layoutDescription_t *description) {
 
   layout->callback = (nbgl_layoutTouchCallback_t)PIC(description->onActionCallback);
   layout->modal = description->modal;
+  layout->withLeftBorder = description->withLeftBorder;
   if (description->modal) {
     layout->layer = nbgl_screenPush(&layout->children, NB_MAX_SCREEN_CHILDREN, &description->ticker);
   }
@@ -1406,50 +1421,6 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     container->alignment = NO_ALIGNMENT;
 
     addObjectToLayout(layoutInt,(nbgl_obj_t*)container);
-  }
-
-  return 0;
-}
-
-
-/**
- * @brief Creates a list of values, retrieved by callback called during drawing
- *
- * @param layout the current layout
- * @param callback function to be called for each value
- * @param nbValues number of values
- * @return >= 0 if OK
- */
-int nbgl_layoutAddWordList(nbgl_layout_t *layout, onTextDrawCallback_t callback, uint8_t nbValues) {
-  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
-  nbgl_text_area_t *itemTextArea;
-  uint16_t usableWidth;
-  uint8_t i;
-
-  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddWordList():\n");
-  if (layout == NULL)
-    return -1;
-
-  // width that can be used for item and text
-  usableWidth = GET_AVAILABLE_WIDTH(layoutInt);
-
-  for (i=0;i<nbValues;i++) {
-    itemTextArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
-
-    // init text area for this choice
-    itemTextArea->textColor = BLACK;
-    itemTextArea->onDrawCallback = PIC(callback);
-    itemTextArea->token = i;
-    itemTextArea->textAlignment = MID_LEFT;
-    itemTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
-    itemTextArea->width = usableWidth;
-    itemTextArea->height = nbgl_getFontHeight(itemTextArea->fontId);
-    itemTextArea->style = NO_STYLE;
-    itemTextArea->alignment = NO_ALIGNMENT;
-    itemTextArea->alignmentMarginX = BORDER_MARGIN;
-    itemTextArea->alignmentMarginY = INTERNAL_MARGIN;
-
-    addObjectToLayout(layoutInt,(nbgl_obj_t*)itemTextArea);
   }
 
   return 0;
@@ -2483,6 +2454,12 @@ int nbgl_layoutDraw(nbgl_layout_t *layoutParam) {
   if (layout->tapText) {
     // set this new container as child of main container
     addObjectToLayout(layout,(nbgl_obj_t*)layout->tapText);
+  }
+  if (layout->withLeftBorder == true) {
+    // draw now the line
+    nbgl_line_t *line = createLeftVerticalLine(layout->layer);
+    layout->children[layout->nbChildren] = (nbgl_obj_t*)line;
+    layout->nbChildren++;
   }
   nbgl_screenRedraw();
 

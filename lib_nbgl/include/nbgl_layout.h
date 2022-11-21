@@ -69,6 +69,7 @@ typedef struct {
  */
 typedef struct nbgl_layoutDescription_s {
     bool modal; ///< if true, puts the layout on top of screen stack (modal). Otherwise puts on background (for apps)
+    bool withLeftBorder; ///< if true, draws a light gray left border on the whole height of the screen
     char *tapActionText; ///< Light gray text used when main container is "tapable"
     uint8_t tapActionToken; ///< the token that will be used as argument of the onActionCallback when main container is "tapped"
     tune_index_e tapTuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when tapping on main container
@@ -275,7 +276,6 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
 int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info);
 int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_t *info);
 int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t *list);
-int nbgl_layoutAddWordList(nbgl_layout_t *layout, onTextDrawCallback_t callback, uint8_t nbValues);
 int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *barLayout);
 int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, char *text);
 int nbgl_layoutAddSeparationLine(nbgl_layout_t *layout);
