@@ -240,7 +240,7 @@ typedef struct {
 } nbgl_layoutButton_t;
 
 /**
- * @brief This structure contains info to build a progress bar with info
+ * @brief This structure contains info to build a progress bar with info. The progress bar itself is 120px width * 12px height
  *
  */
 typedef struct {

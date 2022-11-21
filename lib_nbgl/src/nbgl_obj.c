@@ -485,7 +485,7 @@ static void draw_radioButton(nbgl_radio_t* obj, nbgl_obj_t *prevObj, bool comput
  * @param computePosition if TRUE, force to compute the object position
  */
 static void draw_progressBar(nbgl_progress_bar_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
-  uint8_t stroke = 2; // 2 pixels for border
+  uint8_t stroke = 3; // 3 pixels for border
   uint16_t levelWidth;
 
   if (computePosition) {
