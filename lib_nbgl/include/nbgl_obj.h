@@ -37,7 +37,7 @@ extern "C" {
 #define EXIT_PAGE 0xFF
 
 // external margin in pixels
-#define BORDER_MARGIN 20
+#define BORDER_MARGIN 24
 
 /**********************
  *      TYPEDEFS
