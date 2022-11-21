@@ -1435,16 +1435,15 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
  */
 int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *barLayout) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
-  nbgl_text_area_t *textArea;
-  nbgl_text_area_t *subTextArea;
   nbgl_progress_bar_t *progress;
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddProgressBar():\n");
   if (layout == NULL)
     return -1;
   if (barLayout->text != NULL) {
-    textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,((nbgl_layoutInternal_t *)layout)->layer);
+    nbgl_text_area_t *textArea;
 
+    textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,((nbgl_layoutInternal_t *)layout)->layer);
     textArea->textColor=BLACK;
     textArea->text = PIC(barLayout->text);
     textArea->textAlignment = MID_LEFT;
@@ -1461,14 +1460,16 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *b
   progress->foregroundColor = BLACK;
   progress->withBorder = true;
   progress->state = barLayout->percentage;
-  progress->width = GET_AVAILABLE_WIDTH(((nbgl_layoutInternal_t *)layout));
-  progress->height = 32;
+  progress->width = 120;
+  progress->height = 12;
   progress->alignment = NO_ALIGNMENT;
-  progress->alignmentMarginX = BORDER_MARGIN;
+  progress->alignmentMarginX = (GET_AVAILABLE_WIDTH(((nbgl_layoutInternal_t *)layout))-progress->width)/2;
   progress->alignmentMarginY = BORDER_MARGIN;
   addObjectToLayout(layoutInt,(nbgl_obj_t*)progress);
 
   if (barLayout->subText != NULL) {
+    nbgl_text_area_t *subTextArea;
+
     subTextArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,((nbgl_layoutInternal_t *)layout)->layer);
     subTextArea->textColor=LIGHT_GRAY;
     subTextArea->text = PIC(barLayout->subText);
@@ -1609,7 +1610,7 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, char *text, uint8_t tok
   container->nbChildren = 4; // progress-bar + text + line + button
   container->children = (nbgl_obj_t**)nbgl_containerPoolGet(container->nbChildren,layoutInt->layer);
   container->alignment = BOTTOM_MIDDLE;
-   container->touchMask = ((1<<TOUCHING)|(1<<TOUCH_RELEASED)|(1<<OUT_OF_TOUCH));
+  container->touchMask = ((1<<TOUCHING)|(1<<TOUCH_RELEASED)|(1<<OUT_OF_TOUCH));
   container->touchCallback = (nbgl_touchCallback_t)longTouchCallback;
 
   button = (nbgl_button_t *)nbgl_objPoolGet(BUTTON,layoutInt->layer);
