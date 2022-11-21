@@ -46,6 +46,7 @@ typedef enum {
 typedef enum {
     CENTERED_INFO=0, ///< a centered info
     INFO_LONG_PRESS, ///< a centered info and a long press button
+    INFO_BUTTON, ///< a centered info and a simple black button
     TAG_VALUE_LIST, ///< list of tag/value pairs
     TAG_VALUE_DETAILS, ///< a tag/value pair and a small button to get details.
     TAG_VALUE_CONFIRM, ///< tag/value pairs and a black button/footer to confirm/cancel.
@@ -91,6 +92,17 @@ typedef struct nbgl_pageInfoLongPress_s {
 } nbgl_pageInfoLongPress_t;
 
 /**
+ * @brief This structure contains data to build a centered info + simple black button page content
+ */
+typedef struct nbgl_pageInfoButton_s {
+    char *text; ///< centered text in large case
+    const nbgl_icon_details_t *icon; ///< a buffer containing the 1BPP icon
+    const char *buttonText; ///< text of the long press button
+    uint8_t buttonToken; ///< the token used as argument of the onActionCallback when button is long pressed
+    tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when button is touched
+} nbgl_pageInfoButton_t;
+
+/**
  * @brief This structure contains data to build a @ref SWITCHES_LIST page content
  */
 typedef struct nbgl_pageSwitchesList_s {
@@ -129,7 +141,8 @@ typedef struct nbgl_pageContent_s {
     union {
         nbgl_layoutTagValueList_t tagValueList;    ///< @ref TAG_VALUE_LIST type
         nbgl_layoutCenteredInfo_t centeredInfo;     ///< @ref CENTERED_INFO type
-        nbgl_pageInfoLongPress_t   infoLongPress;   ///< @ref INFO_LONG_PRESS type
+        nbgl_pageInfoLongPress_t  infoLongPress;   ///< @ref INFO_LONG_PRESS type
+        nbgl_pageInfoButton_t  infoButton;   ///< @ref INFO_BUTTON type
         nbgl_pageTagValueDetails_t tagValueDetails; ///< @ref TAG_VALUE_DETAILS type
         nbgl_pageTagValueConfirm_t tagValueConfirm; ///< @ref TAG_VALUE_CONFIRM type
         nbgl_pageSwitchesList_t switchesList;    ///< @ref SWITCHES_LIST type

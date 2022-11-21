@@ -470,10 +470,10 @@ static void draw_radioButton(nbgl_radio_t* obj, nbgl_obj_t *prevObj, bool comput
   rectArea.backgroundColor = obj->backgroundColor;
   rectArea.bpp = NBGL_BPP_1;
   if (obj->state == OFF_STATE) {
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_radio_inactive_32px.bitmap,NO_TRANSFORMATION,LIGHT_GRAY);
+    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_radio_inactive_32px.bitmap,NO_TRANSFORMATION,obj->borderColor);
   }
   else {
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_radio_active_32px.bitmap,NO_TRANSFORMATION,BLACK);
+    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_radio_active_32px.bitmap,NO_TRANSFORMATION,obj->activeColor);
   }
 }
 

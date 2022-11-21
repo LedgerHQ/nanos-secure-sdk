@@ -60,7 +60,8 @@ typedef struct DetailsContext_s {
 
 typedef struct StaticReviewContext_s {
   nbgl_layoutTagValueList_t tagValueList;
-  nbgl_pageInfoLongPress_t *infoLongPress;
+  bool withLongPress;
+  nbgl_pageInfoLongPress_t infoLongPress;
   uint8_t currentPairIndex;
   uint8_t nbPairsInCurrentPage;
 } StaticReviewContext_t;
@@ -156,7 +157,8 @@ static void pageModalCallback(int token, uint8_t index) {
 static void pageCallback(int token, uint8_t index) {
   if ((token < FIRST_USER_TOKEN) &&
       (token != SKIP_TOKEN) &&
-      (token != BUTTON_TOKEN)) {
+      (token != BUTTON_TOKEN) &&
+      (token != DETAILS_BUTTON_TOKEN)) {
     nbgl_pageRelease(pageContext);
     pageContext = NULL;
   }
@@ -185,6 +187,7 @@ static void pageCallback(int token, uint8_t index) {
     // display the address as QR Code
     nbgl_layoutDescription_t layoutDescription = {
       .modal = true,
+      .withLeftBorder = true,
       .onActionCallback = &addressLayoutTouchCallbackQR,
       .tapActionText = NULL
     };
@@ -335,14 +338,25 @@ static void displayReviewPage(uint8_t page) {
 static void displayStaticReviewPage(uint8_t page) {
   nbgl_pageContent_t content;
 
-  // if it's the last page, display a long press button with the info provided by user (except token)
+  // if it's the last page, display a long press button (or a simple button) with the info provided by user (except token)
   if (page == (navInfo.nbPages - 1)) {
-    content.type = INFO_LONG_PRESS;
-    content.infoLongPress.icon = staticReviewContext.infoLongPress->icon;
-    content.infoLongPress.longPressText = staticReviewContext.infoLongPress->longPressText;
-    content.infoLongPress.text = staticReviewContext.infoLongPress->text;
-    content.infoLongPress.longPressToken = CONFIRM_TOKEN;
-    content.tuneId = TUNE_TAP_NEXT;
+    if (staticReviewContext.withLongPress) {
+      content.type = INFO_LONG_PRESS;
+      content.infoLongPress.icon = staticReviewContext.infoLongPress.icon;
+      content.infoLongPress.longPressText = staticReviewContext.infoLongPress.longPressText;
+      content.infoLongPress.text = staticReviewContext.infoLongPress.text;
+      content.infoLongPress.longPressToken = CONFIRM_TOKEN;
+      content.tuneId = TUNE_TAP_NEXT;
+    }
+    else {
+      // simple button
+      content.type = INFO_BUTTON;
+      content.infoButton.icon = staticReviewContext.infoLongPress.icon;
+      content.infoButton.buttonText = staticReviewContext.infoLongPress.longPressText;
+      content.infoButton.text = staticReviewContext.infoLongPress.text;
+      content.infoButton.buttonToken = CONFIRM_TOKEN;
+      content.tuneId = TUNE_TAP_NEXT;
+    }
   }
   else {
     bool tooLongToFit;
@@ -581,7 +595,7 @@ static uint8_t getNbPairs(uint8_t page, bool *tooLongToFit) {
 // computes and returns the number of tag/values pairs displayable in a page, with the given list of tag/value pairs
 static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValueList_t *tagValueList, uint8_t startIndex, bool *tooLongToFit) {
   uint8_t nbPairsInPage = 0;
-  uint16_t currentHeight = 24; // upper margin
+  uint16_t currentHeight = 12; // upper margin
 
   *tooLongToFit = false;
   while (nbPairsInPage < nbPairs) {
@@ -932,8 +946,8 @@ void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t 
  * @note  All tag/value pairs are provided in the API and the number of pages is automatically computed, the last page
  *        being a long press one
  *
- * @param tagValueList list of tag/value pairs (must be persistent because no copy)
- * @param infoLongPress information to build the last page (must be persistent because no copy)
+ * @param tagValueList list of tag/value pairs
+ * @param infoLongPress information to build the last page
  * @param rejectText text to use in footer
  * @param callback callback called when transaction is accepted (param is true) or rejected (param is false)
  */
@@ -944,8 +958,9 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
   onNav = NULL;
   forwardNavOnly = false;
 
+  staticReviewContext.withLongPress = true;
   memcpy(&staticReviewContext.tagValueList,tagValueList,sizeof(nbgl_layoutTagValueList_t));
-  staticReviewContext.infoLongPress = infoLongPress;
+  memcpy(&staticReviewContext.infoLongPress,infoLongPress,sizeof(nbgl_pageInfoLongPress_t));
   staticReviewContext.currentPairIndex = 0;
   staticReviewContext.nbPairsInCurrentPage = 0;
 
@@ -964,6 +979,43 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
   displayStaticReviewPage(0);
 }
 
+/**
+ * @brief Similar to @ref nbgl_useCaseStaticReview() but with a simple button/footer pair instead of a long press button/footer pair.
+ * @note  All tag/value pairs are provided in the API and the number of pages is automatically computed, the last page
+ *        being a long press one
+ *
+ * @param tagValueList list of tag/value pairs
+ * @param infoLongPress information to build the last page (even if not a real long press, the info is the same)
+ * @param rejectText text to use in footer
+ * @param callback callback called when transaction is accepted (param is true) or rejected (param is false)
+ */
+void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
+                                   char *rejectText, nbgl_choiceCallback_t callback) {
+  // memorize context
+  onChoice = callback;
+  onNav = NULL;
+  forwardNavOnly = false;
+
+  staticReviewContext.withLongPress = false;
+  memcpy(&staticReviewContext.tagValueList,tagValueList,sizeof(nbgl_layoutTagValueList_t));
+  memcpy(&staticReviewContext.infoLongPress,infoLongPress,sizeof(nbgl_pageInfoLongPress_t));
+  staticReviewContext.currentPairIndex = 0;
+  staticReviewContext.nbPairsInCurrentPage = 0;
+
+  // compute number of pages & fill navigation structure
+  navInfo.nbPages = getNbPagesForTagValueList(tagValueList)+1;
+  navInfo.activePage = 0;
+  navInfo.navType = NAV_WITH_TAP;
+  navInfo.quitToken = REJECT_TOKEN;
+  navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
+  navInfo.navWithTap.quitText = rejectText;
+  navInfo.navWithTap.backToken = BACK_TOKEN;
+  navInfo.navWithTap.skipText = NULL;
+  navInfo.progressIndicator = true;
+  navInfo.tuneId = TUNE_TAP_CASUAL;
+
+  displayStaticReviewPage(0);
+}
 
 /**
  * @brief Draws a flow of pages to view details on a given tag/value pair that doesn't fit in a single page
