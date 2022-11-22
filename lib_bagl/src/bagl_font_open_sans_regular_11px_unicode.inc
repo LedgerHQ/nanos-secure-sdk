@@ -1,8 +1,4 @@
-/* @BANNER@ */
-
 const unsigned char bitmapOPEN_SANS_REGULAR_11PX_UNICODE[] = {
-//unicode 0x0000A1
-  0x00, 0x04, 0x49, 0x92, 0x00,
 //unicode 0x0000BF
   0x00, 0x00, 0x02, 0x08, 0x11, 0x21, 0x38, 0x00,
 //unicode 0x0000C9
@@ -28,15 +24,8 @@ const unsigned char bitmapOPEN_SANS_REGULAR_11PX_UNICODE[] = {
 //unicode 0x0000EA
   0x08, 0x05, 0x70, 0x92, 0x27, 0x08, 0x1C, 0x00,
   0x00,
-//unicode 0x0000EB
-  0x00, 0x05, 0x70, 0x92, 0x27, 0x08, 0x1C, 0x00,
-  0x00,
 //unicode 0x0000ED
   0x24, 0x20, 0x22, 0x22, 0x02, 0x00,
-//unicode 0x0000EE
-  0xA2, 0x00, 0x21, 0x84, 0x10, 0x02, 0x00, 0x00,
-//unicode 0x0000EF
-  0x50, 0x20, 0x22, 0x22, 0x02, 0x00,
 //unicode 0x0000F1
   0x2C, 0x09, 0xC0, 0x23, 0x12, 0x89, 0x44, 0x22,
   0x00, 0x00, 0x00,
@@ -45,9 +34,6 @@ const unsigned char bitmapOPEN_SANS_REGULAR_11PX_UNICODE[] = {
   0x00, 0x00, 0x00,
 //unicode 0x0000F4
   0x08, 0x0A, 0x80, 0x23, 0x12, 0x89, 0x44, 0x1C,
-  0x00, 0x00, 0x00,
-//unicode 0x0000F9
-  0x04, 0x04, 0x40, 0x24, 0x12, 0x89, 0x44, 0x3E,
   0x00, 0x00, 0x00,
 //unicode 0x0000FA
   0x08, 0x04, 0x40, 0x24, 0x12, 0x89, 0x44, 0x3E,
@@ -61,28 +47,23 @@ const unsigned char bitmapOPEN_SANS_REGULAR_11PX_UNICODE[] = {
   0x00,
 };
 
-const bagl_font_unicode_character_t charactersOPEN_SANS_REGULAR_11PX_UNICODE[21] = {
-  { 0x0000A1,   3,   5,    0 }, //unicode 0x0000A1
-  { 0x0000BF,   5,   8,    5 }, //unicode 0x0000BF
-  { 0x0000C9,   6,   9,   13 }, //unicode 0x0000C9
-  { 0x0000E0,   6,   9,   22 }, //unicode 0x0000E0
-  { 0x0000E1,   6,   9,   31 }, //unicode 0x0000E1
-  { 0x0000E2,   6,   9,   40 }, //unicode 0x0000E2
-  { 0x0000E7,   5,   8,   49 }, //unicode 0x0000E7
-  { 0x0000E8,   6,   9,   57 }, //unicode 0x0000E8
-  { 0x0000E9,   6,   9,   66 }, //unicode 0x0000E9
-  { 0x0000EA,   6,   9,   75 }, //unicode 0x0000EA
-  { 0x0000EB,   6,   9,   84 }, //unicode 0x0000EB
-  { 0x0000ED,   4,   6,   93 }, //unicode 0x0000ED
-  { 0x0000EE,   5,   8,   99 }, //unicode 0x0000EE
-  { 0x0000EF,   4,   6,  107 }, //unicode 0x0000EF
-  { 0x0000F1,   7,  11,  113 }, //unicode 0x0000F1
-  { 0x0000F3,   7,  11,  124 }, //unicode 0x0000F3
-  { 0x0000F4,   7,  11,  135 }, //unicode 0x0000F4
-  { 0x0000F9,   7,  11,  146 }, //unicode 0x0000F9
-  { 0x0000FA,   7,  11,  157 }, //unicode 0x0000FA
-  { 0x0000FB,   7,  11,  168 }, //unicode 0x0000FB
-  { 0x00FFFD,  11,  17,  179 }, //unicode 0x00FFFD
+const bagl_font_unicode_character_t charactersOPEN_SANS_REGULAR_11PX_UNICODE[16] = {
+  { 0x0000BF,   5,   8,    0 }, //unicode 0x0000BF
+  { 0x0000C9,   6,   9,    8 }, //unicode 0x0000C9
+  { 0x0000E0,   6,   9,   17 }, //unicode 0x0000E0
+  { 0x0000E1,   6,   9,   26 }, //unicode 0x0000E1
+  { 0x0000E2,   6,   9,   35 }, //unicode 0x0000E2
+  { 0x0000E7,   5,   8,   44 }, //unicode 0x0000E7
+  { 0x0000E8,   6,   9,   52 }, //unicode 0x0000E8
+  { 0x0000E9,   6,   9,   61 }, //unicode 0x0000E9
+  { 0x0000EA,   6,   9,   70 }, //unicode 0x0000EA
+  { 0x0000ED,   4,   6,   79 }, //unicode 0x0000ED
+  { 0x0000F1,   7,  11,   85 }, //unicode 0x0000F1
+  { 0x0000F3,   7,  11,   96 }, //unicode 0x0000F3
+  { 0x0000F4,   7,  11,  107 }, //unicode 0x0000F4
+  { 0x0000FA,   7,  11,  118 }, //unicode 0x0000FA
+  { 0x0000FB,   7,  11,  129 }, //unicode 0x0000FB
+  { 0x00FFFD,  11,  17,  140 }, //unicode 0x00FFFD
 };
 
 const bagl_font_unicode_t fontOPEN_SANS_REGULAR_11PX_UNICODE = {
@@ -91,7 +72,7 @@ const bagl_font_unicode_t fontOPEN_SANS_REGULAR_11PX_UNICODE = {
   12, // font height in pixels
   9, // baseline height in pixels
   0, // kerning - specific to the font
-  0xA1, // first character
+  0xBF, // first character
   0xFFFD, // last character
   charactersOPEN_SANS_REGULAR_11PX_UNICODE,
   bitmapOPEN_SANS_REGULAR_11PX_UNICODE
