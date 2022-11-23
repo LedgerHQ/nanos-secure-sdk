@@ -535,6 +535,7 @@ static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length)
 		if (ledger_ble_data.connection.connection_handle != 0xFFFF) {
 			if (G_io_app.disabling_advertising) {
 				// Connected & ordered to disable ble, force disconnection
+				end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
 				LEDGER_BLE_init();
 			}
 		}
@@ -718,6 +719,7 @@ static void hci_evt_vendor(uint8_t *buffer, uint16_t length)
 
 	case ACI_GATT_PROC_TIMEOUT_VSEVT_CODE:
 		LOG_BLE("PROCEDURE TIMEOUT\n");
+		end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
 		LEDGER_BLE_init();
 		break;
 
@@ -1067,6 +1069,7 @@ void LEDGER_BLE_receive(void)
 			ledger_ble_data.connection.connection_handle = 0xFFFF;
 			ledger_ble_data.advertising_enabled          = 0;
 			ledger_ble_data.connection.encrypted         = 0;
+			end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
 			if (G_io_seproxyhal_spi_buffer[9] != 0x28) { // Error code : Instant Passed
 				start_advertising();
 			}
