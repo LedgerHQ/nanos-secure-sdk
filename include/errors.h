@@ -291,6 +291,7 @@ enum generic_identifiers {
 #define SWO_PAR_VAL_27                    (ERR_PAR_VAL + ERR_GEN_ID_27)    // 0x4227
 #define SWO_PAR_VAL_28                    (ERR_PAR_VAL + ERR_GEN_ID_28)    // 0x4228
 #define SWO_PAR_VAL_29                    (ERR_PAR_VAL + ERR_GEN_ID_29)    // 0x4229
+#define SWO_PAR_VAL_2A                    (ERR_PAR_VAL + ERR_GEN_ID_2A)    // 0x422A
 
 /**
  * Security-related issues are categorized into:
