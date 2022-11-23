@@ -122,7 +122,7 @@ void io_seproxyhal_send_nbgl_serialized(nbgl_serialized_event_type_e event, nbgl
 void io_set_timeout(unsigned int timeout);
 
 #ifdef HAVE_NFC
-void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async);
+void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async, bool forceInit);
 #define NFC_init(text, text_length) io_seproxyhal_nfc_init(text, text_length, false)
 #endif
 
