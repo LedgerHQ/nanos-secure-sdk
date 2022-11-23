@@ -502,10 +502,10 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 
 #ifdef HAVE_NFC
 
-void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async) {
+void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async, bool forceInit) {
   uint8_t buffer[5];
   uint16_t total_length = 0;
-  uint8_t is_nfc_enabled = os_setting_get(OS_SETTING_NFC_ENABLED, NULL, 0);
+  uint8_t is_nfc_enabled = forceInit?1:os_setting_get(OS_SETTING_NFC_ENABLED, NULL, 0);
   buffer[0] = SEPROXYHAL_TAG_NFC_INIT;
   // Fill length offsets 1 and 2 later when text length is known
   buffer[3] = is_nfc_enabled;
