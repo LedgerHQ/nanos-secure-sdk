@@ -69,7 +69,8 @@ void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char
 void nbgl_useCaseSettings(char *settingsTitle, uint8_t initPage, uint8_t nbPages, bool touchableTitle,
                           nbgl_callback_t quitCallback, nbgl_navCallback_t navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback);
-void nbgl_useCaseChoice(char *message, char *subMessage, char *confirmText, char *rejectString, nbgl_choiceCallback_t callback);
+void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *subMessage, char *confirmText, char *rejectString, nbgl_choiceCallback_t callback);
+void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, char *rejectText, nbgl_callback_t callback);
 void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallback);
 void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle, char *reviewSubTitle, char *rejectText,
                              nbgl_callback_t continueCallback, nbgl_callback_t rejectCallback);

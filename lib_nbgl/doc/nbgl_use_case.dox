@@ -144,7 +144,7 @@ so no Quit button in navigation bar)
 the content of the page
 - a last callback called when any of the controls provided in content is touched
 
-Example of settings series with touchable title:
+@note All tokens used for the given "settings" must be greater or equal than \ref FIRST_USER_TOKEN
 
 \image{inline} html UseCase-Settings2.png "caption" height=300
 
