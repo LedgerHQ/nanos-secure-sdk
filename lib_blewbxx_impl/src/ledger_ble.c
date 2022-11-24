@@ -1067,7 +1067,13 @@ void LEDGER_BLE_receive(void)
 			ledger_ble_data.connection.connection_handle = 0xFFFF;
 			ledger_ble_data.advertising_enabled          = 0;
 			ledger_ble_data.connection.encrypted         = 0;
-			start_advertising();
+			if (G_io_seproxyhal_spi_buffer[9] != 0x28) { // Error code : Instant Passed
+				start_advertising();
+			}
+			else {
+				// Workaround to avoid unexpected start advertising event in loop (seems to be a bug in the stack)
+				LEDGER_BLE_init();
+			}
 			break;
 
 		case HCI_ENCRYPTION_CHANGE_EVT_CODE:
