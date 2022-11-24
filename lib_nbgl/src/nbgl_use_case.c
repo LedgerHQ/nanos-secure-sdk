@@ -86,6 +86,7 @@ static nbgl_callback_t onAction;
 static nbgl_navCallback_t onNav;
 static nbgl_layoutTouchCallback_t onControls;
 static nbgl_choiceCallback_t onChoice;
+static nbgl_choiceCallback_t onModalChoice;
 
 // contexts for background and modal pages
 static nbgl_page_t *pageContext;
@@ -140,10 +141,20 @@ static void pageModalCallback(int token, uint8_t index) {
       displayDetailsPage(index);
     }
   }
-  else if (token == CHOICE_TOKEN) {
+  else if (token == SKIP_TOKEN) {
     if (index == 0) {
       // display the last forward only review page, whatever it is
       displayReviewPage(LAST_PAGE_FOR_REVIEW);
+    }
+    else {
+      // display background, which should be the page where skip has been touched
+      nbgl_screenRedraw();
+      nbgl_refresh();
+    }
+  }
+  else if (token == CHOICE_TOKEN) {
+    if (index == 0) {
+      onModalChoice(true);
     }
     else {
       // display background, which should be the page where skip has been touched
@@ -155,13 +166,6 @@ static void pageModalCallback(int token, uint8_t index) {
 
 // generic callback for all pages except modal
 static void pageCallback(int token, uint8_t index) {
-  if ((token < FIRST_USER_TOKEN) &&
-      (token != SKIP_TOKEN) &&
-      (token != BUTTON_TOKEN) &&
-      (token != DETAILS_BUTTON_TOKEN)) {
-    nbgl_pageRelease(pageContext);
-    pageContext = NULL;
-  }
   if (token == QUIT_TOKEN) {
     if (onQuit != NULL)
       onQuit();
@@ -258,8 +262,7 @@ static void pageCallback(int token, uint8_t index) {
   }
   else { // probably a control provided by caller
     if (onControls != NULL) {
-      if (onControls != NULL)
-        onControls(token, index);
+      onControls(token, index);
     }
   }
 }
@@ -557,7 +560,6 @@ static void displayAddressPage(uint8_t page) {
 // called when skip button is touched in footer, during forward only review
 static void displaySkipWarning(void) {
   nbgl_pageConfirmationDescription_t info = {
-    .cancelToken = CHOICE_TOKEN,
     .cancelText = "Go back to review",
     .centeredInfo.text1 = "Skip message review?",
     .centeredInfo.text2 = "You can skip directly to signing\nif you're sure you don't need to\nreview all the fields.",
@@ -566,7 +568,7 @@ static void displaySkipWarning(void) {
     .centeredInfo.icon = &C_warning64px,
     .centeredInfo.offsetY = -64,
     .confirmationText = "Yes, skip",
-    .confirmationToken = CHOICE_TOKEN,
+    .confirmationToken = SKIP_TOKEN,
     .tuneId = TUNE_TAP_CASUAL,
     .modal = true
   };
@@ -806,7 +808,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
 }
 
 /**
- * @brief Draws a page to confirm or not an action, described in a centered info (with info icon), thanks to a button and a footer
+ * @brief Draws a generic choice page, described in a centered info (with configurable icon), thanks to a button and a footer
  *        at the bottom of the page. The given callback is called with true as argument if the button is touched, false if footer is touched
  *
  * @param message string to set in center of page (32px)
@@ -815,16 +817,15 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
  * @param rejectText string to set in footer, to reject
  * @param callback callback called when button or footer is touched
  */
-void nbgl_useCaseChoice(char *message, char *subMessage, char *confirmText, char *rejectText, nbgl_choiceCallback_t callback) {
+void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *subMessage, char *confirmText, char *rejectText, nbgl_choiceCallback_t callback) {
   nbgl_pageConfirmationDescription_t info = {
-    .cancelToken = CHOICE_TOKEN,
     .cancelText = rejectText,
     .centeredInfo.text1 = message,
     .centeredInfo.text2 = subMessage,
     .centeredInfo.text3 = NULL,
     .centeredInfo.style = LARGE_CASE_INFO,
-    .centeredInfo.icon = &C_round_warning_64px,
-    .centeredInfo.offsetY = -64,
+    .centeredInfo.icon = icon,
+    .centeredInfo.offsetY = -40,
     .confirmationText = confirmText,
     .confirmationToken = CHOICE_TOKEN,
     .tuneId = TUNE_TAP_CASUAL,
@@ -832,6 +833,36 @@ void nbgl_useCaseChoice(char *message, char *subMessage, char *confirmText, char
   };
   onChoice = callback;
   pageContext = nbgl_pageDrawConfirmation(&pageCallback, &info);
+  nbgl_refresh();
+}
+
+/**
+ * @brief Draws a page to confirm or not an action, described in a centered info (with info icon), thanks to a button and a footer
+ *        at the bottom of the page. The given callback is called if the button is touched. If the footer is touched, the page is only "dismissed"
+ * @note This page is displayed as a modal (so the content of the previous page will be visible when dismissed).
+ *
+ * @param message string to set in center of page (32px)
+ * @param subMessage string to set under message (24px) (can be NULL)
+ * @param confirmText string to set in button, to confirm
+ * @param cancelText string to set in footer, to reject
+ * @param callback callback called when confirmation button is touched
+ */
+void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, char *rejectText, nbgl_callback_t callback) {
+  nbgl_pageConfirmationDescription_t info = {
+    .cancelText = rejectText,
+    .centeredInfo.text1 = message,
+    .centeredInfo.text2 = subMessage,
+    .centeredInfo.text3 = NULL,
+    .centeredInfo.style = LARGE_CASE_INFO,
+    .centeredInfo.icon = &C_round_warning_64px,
+    .centeredInfo.offsetY = -40,
+    .confirmationText = confirmText,
+    .confirmationToken = CHOICE_TOKEN,
+    .tuneId = TUNE_TAP_CASUAL,
+    .modal = true
+  };
+  onModalChoice = callback;
+  modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
   nbgl_refresh();
 }
 

@@ -1281,6 +1281,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_
   obj->index = 1;
   bottomButton->alignment = BOTTOM_MIDDLE;
   if (info->style == ROUNDED_AND_FOOTER_STYLE) {
+    bottomButton->alignmentMarginY = 4; // 4 pixels from screen bottom
     bottomButton->borderColor = WHITE;
   }
   else if (info->style == BOTH_ROUNDED_STYLE) {
@@ -1310,6 +1311,9 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_
   topButton->alignTo = (nbgl_obj_t*)bottomButton;
   if (info->style == BOTH_ROUNDED_STYLE) {
     topButton->alignmentMarginY = INNER_MARGIN; // 12 pixels from bottom button
+  }
+  else {
+    topButton->alignmentMarginY = 4; // 4 pixels from bottom button
   }
   topButton->innerColor = BLACK;
   topButton->borderColor = BLACK;
@@ -2317,9 +2321,10 @@ int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback) {
  * @param index index returned by @ref nbgl_layoutAddKeypad()
  * @param enableValidate if true, enable Validate key
  * @param enableBackspace if true, enable Backspace key
+ * @param enableDigits if true, enable all digit keys
  * @return >=0 if OK
  */
-int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableValidate, bool enableBackspace) {
+int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableValidate, bool enableBackspace, bool enableDigits) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_keypad_t *keypad;
 
@@ -2331,6 +2336,7 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableVal
   keypad = (nbgl_keypad_t*)layoutInt->container->children[index];
   keypad->enableValidate = enableValidate;
   keypad->enableBackspace = enableBackspace;
+  keypad->enableDigits = enableDigits;
 
   nbgl_redrawObject((nbgl_obj_t*)keypad,NULL,false);
 
