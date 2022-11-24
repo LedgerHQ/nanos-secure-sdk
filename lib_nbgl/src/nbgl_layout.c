@@ -2061,6 +2061,9 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uin
     return -1;
 
   container = (nbgl_container_t *)layoutInt->container->children[index];
+  if ((container == NULL) || (container->type != CONTAINER)) {
+    return -1;
+  }
 
   // update suggestion buttons
   for (int i=0;i<NB_MAX_SUGGESTION_BUTTONS;i++) {
@@ -2179,6 +2182,9 @@ int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numb
 
   // update main text area
   textArea = (nbgl_text_area_t*)layoutInt->container->children[index];
+  if ((textArea == NULL) || (textArea->type != TEXT_AREA)) {
+    return -1;
+  }
   textArea->text = text;
   textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
   nbgl_redrawObject((nbgl_obj_t*)textArea,NULL,false);
@@ -2263,6 +2269,9 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bo
 
   // update main text area
   button = (nbgl_button_t*)layoutInt->container->children[index];
+  if ((button == NULL) || (button->type != BUTTON)) {
+    return -1;
+  }
   button->text = text;
 
   if (active) {
@@ -2334,6 +2343,9 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableVal
 
   // get existing keypad
   keypad = (nbgl_keypad_t*)layoutInt->container->children[index];
+  if ((keypad == NULL) || (keypad->type != KEYPAD)) {
+    return -1;
+  }
   keypad->enableValidate = enableValidate;
   keypad->enableBackspace = enableBackspace;
   keypad->enableDigits = enableDigits;
@@ -2419,16 +2431,25 @@ int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t 
   // get panel
   panel = (nbgl_panel_t*)layoutInt->container->children[index];
   // sanity check
+  if ((panel == NULL) || (panel->type != PANEL)) {
+    return -1;
+  }
   if (nbActive > panel->nbChildren) {
     return -1;
   }
   if (nbActive == 0) {
     // deactivate the first digit
     image = (nbgl_image_t*)panel->children[0];
+    if ((image == NULL) || (image->type != IMAGE)) {
+      return -1;
+    }
     image->buffer = &C_circle_24px;
   }
   else {
     image = (nbgl_image_t*)panel->children[nbActive-1];
+    if ((image == NULL) || (image->type != IMAGE)) {
+      return -1;
+    }
     // if the last "active" is already active, it means that we are decreasing the number of active
     // otherwise we are increasing it
     if (image->buffer == &C_round_24px) {
