@@ -20,17 +20,10 @@
 /**********************
  *      TYPEDEFS
  **********************/
-typedef struct AddressConfirmationContext_s {
-  nbgl_pageAddressConfirmationDescription_t description;
-  nbgl_layoutTouchCallback_t callback;
-  nbgl_layout_t layout;
-  nbgl_layout_t modalLayout;
-} AddressConfirmationContext_t;
 
 /**********************
  *  STATIC VARIABLES
  **********************/
-static AddressConfirmationContext_t addressConfirmationContext;
 
 /**********************
  *  STATIC PROTOTYPES
@@ -106,7 +99,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
         content->tagValueDetails.tagValueList.nbMaxLinesForValue -= 3;
         nbgl_layoutAddTagValueList(layout,&content->tagValueDetails.tagValueList);
         buttonInfo.fittingContent = true;
-        buttonInfo.icon = NULL;
+        buttonInfo.icon = content->tagValueDetails.detailsButtonIcon;
         buttonInfo.style = WHITE_BACKGROUND;
         buttonInfo.text = (char*)content->tagValueDetails.detailsButtonText;
         buttonInfo.token = content->tagValueDetails.detailsButtonToken;
@@ -125,7 +118,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       nbgl_layoutAddTagValueList(layout,&content->tagValueConfirm.tagValueList);
       if (content->tagValueConfirm.detailsButtonText != NULL) {
         buttonInfo.fittingContent = true;
-        buttonInfo.icon = NULL;
+        buttonInfo.icon = content->tagValueConfirm.detailsButtonIcon;
         buttonInfo.style = WHITE_BACKGROUND;
         buttonInfo.text = (char*)content->tagValueConfirm.detailsButtonText;
         buttonInfo.token = content->tagValueConfirm.detailsButtonToken;
@@ -185,56 +178,6 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
     }
   }
 }
-
-#ifdef NBGL_QRCODE
-static void layoutTouchCallbackQR(int token, uint8_t index);
-
-static void displayQR(void) {
-  nbgl_layoutDescription_t layoutDescription = {
-    .modal = true,
-    .withLeftBorder = true,
-    .onActionCallback = &layoutTouchCallbackQR,
-    .tapActionText = NULL
-  };
-
-  addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
-    nbgl_layoutQRCode_t qrCode = {
-      .url = (char*)addressConfirmationContext.description.address,
-    .text1 = NULL,
-    .text2 = (char*)addressConfirmationContext.description.address // display as gray text
-    };
-  nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
-
-  nbgl_layoutAddBottomButton(addressConfirmationContext.modalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
-  nbgl_layoutDraw(addressConfirmationContext.modalLayout);
-}
-
-static void layoutTouchCallback(int token, uint8_t index) {
-  if ((token == addressConfirmationContext.description.cancelToken) ||
-      (token == addressConfirmationContext.description.confirmationToken)) {
-    addressConfirmationContext.callback(token, index);
-  }
-  else {
-    // display the address as QR Code
-    displayQR();
-  }
-}
-
-static void layoutTouchCallbackQR(int token, uint8_t index) {
-  UNUSED(token);
-  UNUSED(index);
-
-  // dismiss modal
-  nbgl_layoutRelease(addressConfirmationContext.modalLayout);
-  nbgl_screenRedraw();
-  nbgl_refresh();
-}
-#else // NBGL_QRCODE
-static void layoutTouchCallback(int token, uint8_t index) {
-  UNUSED(token);
-  UNUSED(index);
-}
-#endif // NBGL_QRCODE
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -458,82 +401,6 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   return (nbgl_page_t*)layout;
 }
 
-/**
- * @brief draw an address confirmation page. This page contains a "page selector" to display either address in text or QRCode format,
- * and at the bottom a button to confirm and a footer to cancel
- *
- * @param onActionCallback common callback for all actions on this page (confirmation and cancellation)
- * @param info structure describing the all controls of this page
- * @return the page context (or NULL if error)
- */
-nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageAddressConfirmationDescription_t *info) {
-  nbgl_layoutButton_t buttonInfo;
-  nbgl_layoutDescription_t layoutDescription = {
-    .modal = false,
-    .withLeftBorder = true,
-    .onActionCallback = &layoutTouchCallback,
-    .tapActionText = NULL
-  };
-  uint8_t pageModeToken;
-
-  // save context
-  addressConfirmationContext.callback = onActionCallback;
-  memcpy(&addressConfirmationContext.description,info,sizeof(nbgl_pageAddressConfirmationDescription_t));
-
-  // choose an unused token
-  pageModeToken = addressConfirmationContext.description.confirmationToken+1;
-  if (pageModeToken == addressConfirmationContext.description.cancelToken)
-    pageModeToken++;
-
-  if (addressConfirmationContext.layout)
-    nbgl_layoutRelease(addressConfirmationContext.layout);
-
-  addressConfirmationContext.layout = nbgl_layoutGet(&layoutDescription);
-  if (addressConfirmationContext.description.cancelText != NULL)
-    nbgl_layoutAddFooter(addressConfirmationContext.layout, (char*)addressConfirmationContext.description.cancelText,
-                       addressConfirmationContext.description.cancelToken, TUNE_TAP_CASUAL);
-  else
-    nbgl_layoutAddFooter(addressConfirmationContext.layout, "It doesn't match",
-                       addressConfirmationContext.description.cancelToken, TUNE_TAP_CASUAL);
-
-  nbgl_layoutTagValue_t tagValuePair = {
-    .item = "Address",
-    .value = (char*)addressConfirmationContext.description.address
-  };
-  nbgl_layoutTagValueList_t tagValueList = {
-    .nbPairs = 1,
-    .pairs = &tagValuePair,
-    .smallCaseForValue = false
-  };
-  nbgl_layoutAddTagValueList(addressConfirmationContext.layout,&tagValueList);
-#ifdef NBGL_QRCODE
-  buttonInfo.fittingContent = true;
-  buttonInfo.icon = &C_QRcode32px;
-  buttonInfo.style = WHITE_BACKGROUND;
-  if (addressConfirmationContext.description.qrCodeButtonText != NULL)
-    buttonInfo.text = (char*)addressConfirmationContext.description.qrCodeButtonText;
-  else
-    buttonInfo.text = "Show as QR";
-  buttonInfo.token = pageModeToken;
-  buttonInfo.tuneId = TUNE_TAP_NEXT;
-  buttonInfo.onBottom = false;
-  nbgl_layoutAddButton(addressConfirmationContext.layout,&buttonInfo);
-#endif // NBGL_QRCODE
-  buttonInfo.style = BLACK_BACKGROUND;
-  buttonInfo.icon = NULL;
-  buttonInfo.token = addressConfirmationContext.description.confirmationToken;
-  buttonInfo.fittingContent = false;
-  buttonInfo.tuneId = addressConfirmationContext.description.tuneId;
-  buttonInfo.onBottom = true;
-  if (addressConfirmationContext.description.confirmationText != NULL)
-    buttonInfo.text = (char*)addressConfirmationContext.description.confirmationText;
-  else
-    buttonInfo.text = "It matches";
-  nbgl_layoutAddButton(addressConfirmationContext.layout, &buttonInfo);
-  nbgl_layoutDraw(addressConfirmationContext.layout);
-
-  return (nbgl_page_t*)addressConfirmationContext.layout;
-}
 
 /**
  * @brief draw a generic content page, with the given content, and if nav parameter is not NULL, with the given
