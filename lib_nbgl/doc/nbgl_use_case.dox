@@ -41,7 +41,8 @@ A few APIs are available to draw typical Use-Cases, such as:
 - @ref nbgl_useCaseHome() to draw the home screen of an application
 - @ref nbgl_useCaseHomeExt() to draw an extended version of home screen of an application (with action button)
 - @ref nbgl_useCaseSettings() to draw a level of settings pages
-- @ref nbgl_useCaseChoice() to draw a typical choice page, for example when rejecting a transaction
+- @ref nbgl_useCaseConfirm() to draw a typical confirmation page, for example when rejecting a transaction
+- @ref nbgl_useCaseChoice() to draw a typical dual choice page
 - @ref nbgl_useCaseStatus() to draw a transient status page, without control, for example when a transaction is successfully signed
 - @ref nbgl_useCaseReviewStart() to draw the cover page of a review (initial page, without data)
 - @ref nbgl_useCaseRegularReview() to draw the pages of a regular review (all pages but the cover one)
@@ -222,34 +223,60 @@ void myAppSettings(void) {
 }
 @endcode
 
-@subsection use_case_choice Choice Use Case
+@subsection use_case_confirm Confirmation Use Case
 
-\image{inline} html UseCase-Choice.png "caption" height=300
+\image{inline} html UseCase-Confirm.png "caption" height=300
 
-A choice use-case consists in a single page containing a fixed icon, a configurable message, a black button and a footer to make
-the choice, with configuration texts. The @ref nbgl_useCaseHome() function enables to create such a page.
+A confirmation use-case consists in a single page containing a fixed icon, a configurable message, a black button and a footer to make
+the choice, with configuration texts. The @ref nbgl_useCaseConfirm() function enables to create such a page.
 
-The *callback* argument is called when the button or the footer is touched. Its argument is a boolean which is *true* when button is
-touched, *false* when footer is touched.
+The *callback* argument is called when the button is touched.
+
+When the footer is touched, this modal screen is simply dismissed, revealing the previous page on background.
 
 Here is the code to display the example picture (and a status page for confirmation)
 
 @code
-static void confirmationChoice(bool confirm) {
+static void confirmationCallback(void) {
+  // draw a status screen which continues by returning to appMain
+  nbgl_useCaseStatus("Transaction rejected",false,appMain);
+}
+
+void onRejectTransaction(void) {
+  nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",confirmationCallback);
+}
+@endcode
+
+@subsection use_case_choice Choice Use Case
+
+\image{inline} html UseCase-Choice.png "caption" height=300
+
+A choice use-case consists in a single page containing a fixed icon, a configurable icon, a configurable message, a black button and a footer to make
+the choice, with configuration texts. The @ref nbgl_useCaseChoice() function enables to create such a page.
+
+The *callback* argument is called when the button or the footer is touched. Its argument is a boolean which is *true* when button is
+touched, *false* when footer is touched.
+
+Here is the code to display the example picture
+
+@code
+static void onChoice(bool confirm) {
   if (confirm) {
-    // draw a status screen which continues by returning to appMain
-    nbgl_useCaseStatus("Transaction rejected",false,appMain);
+    // do something on button touch
   }
   else {
-    // continue review of transaction
+    // do something on footer touch
   }
 }
 
 void onRejectTransaction(void) {
-  nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",confirmationChoice);
+  nbgl_useCaseChoice(&C_key_64px,
+                     "Delete all credentials?",
+                     "This includes all saved\ncredentials from all websites\nand services.",
+                     "Yes, erase","No, don't erase",
+                     onChoice);
 }
 @endcode
-
 @subsection use_case_status Status Use Case
 
 \image{inline} html UseCase-Status.png "caption" height=300
@@ -325,12 +352,9 @@ Here is the code to display something similar to example picture:
 // 4 pairs of tag/value to display
 static nbgl_layoutTagValue_t pairs[4];
 
-// result of the rejection choice
-static void rejectChoice(bool confirm) {
-  if (confirm)
-    onConfirmAbandon();
-  else
-    reviewContinue();
+static void onConfirmAbandon(void) {
+  // display a status page and go back to main
+  nbgl_useCaseStatus("Transaction rejected",false,appMain);
 }
 
 // called when long press button on 3rd page is long-touched or when reject footer is touched
@@ -340,7 +364,7 @@ static void reviewChoice(bool confirm) {
     nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
   }
   else {
-    nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
+    nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
   }
 }
 
@@ -408,12 +432,10 @@ Here is the code to display something similar to example picture:
 // 5 pairs of tag/value to display
 static nbgl_layoutTagValue_t pairs[5];
 
-// result of the rejection choice
-static void rejectChoice(bool confirm) {
-  if (confirm)
-    onConfirmAbandon();
-  else
-    reviewContinue();
+// result of the rejection
+static void onConfirmAbandon(void) {
+  // display a status page and go back to main
+  nbgl_useCaseStatus("Transaction rejected",false,appMain);
 }
 
 // called when long press button on 3rd page is long-touched or when reject footer is touched
@@ -423,7 +445,7 @@ static void reviewChoice(bool confirm) {
     nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
   }
   else {
-    nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
+    nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
   }
 }
 
@@ -496,11 +518,9 @@ static nbgl_layoutTagValueList_t pairList = {
 };
 
 // result of the rejection choice
-static void rejectChoice(bool confirm) {
-  if (confirm)
-    onConfirmAbandon();
-  else
-    reviewContinue();
+static void onConfirmAbandon(void) {
+  // display a status page and go back to main
+  nbgl_useCaseStatus("Transaction rejected",false,appMain);
 }
 
 // called when long press button on 3rd page is long-touched or when reject footer is touched
@@ -510,8 +530,8 @@ static void reviewChoice(bool confirm) {
     nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
   }
   else {
-    // display a choice to confirm/cancel rejection
-    nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
+    // display a confirmation to confirm/cancel rejection
+    nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
   }
 }
 
@@ -544,11 +564,9 @@ static nbgl_layoutTagValueList_t pairList = {
 };
 
 // result of the rejection choice
-static void rejectChoice(bool confirm) {
-  if (confirm)
-    onConfirmAbandon();
-  else
-    reviewContinue();
+static void onConfirmAbandon(void) {
+  // display a status page and go back to main
+  nbgl_useCaseStatus("Transaction rejected",false,appMain);
 }
 
 // called when long press button on 3rd page is long-touched or when reject footer is touched
@@ -558,8 +576,8 @@ static void reviewChoice(bool confirm) {
     nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
   }
   else {
-    // display a choice to confirm/cancel rejection
-    nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
+    // display a confirmation to confirm/cancel rejection
+    nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
   }
 }
 
@@ -649,11 +667,9 @@ static nbgl_layoutTagValue_t pair[] = {
 };
 
 // result of the rejection choice
-static void rejectChoice(bool confirm) {
-  if (confirm)
-    onConfirmAbandon();
-  else
-    reviewContinue();
+static void onConfirmAbandon(void) {
+  // display a status page and go back to main
+  nbgl_useCaseStatus("Transaction rejected",false,appMain);
 }
 
 // called when long press button on 3rd page is long-touched or when reject footer is touched
@@ -663,7 +679,7 @@ static void reviewChoice(bool confirm) {
     nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
   }
   else {
-    nbgl_useCaseChoice("Reject transaction?","Yes, Reject","Go back to transaction",rejectChoice);
+    nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
   }
 }
 
