@@ -86,7 +86,7 @@ static nbgl_callback_t onAction;
 static nbgl_navCallback_t onNav;
 static nbgl_layoutTouchCallback_t onControls;
 static nbgl_choiceCallback_t onChoice;
-static nbgl_choiceCallback_t onModalChoice;
+static nbgl_callback_t onModalConfirm;
 
 // contexts for background and modal pages
 static nbgl_page_t *pageContext;
@@ -154,7 +154,7 @@ static void pageModalCallback(int token, uint8_t index) {
   }
   else if (token == CHOICE_TOKEN) {
     if (index == 0) {
-      onModalChoice(true);
+      onModalConfirm();
     }
     else {
       // display background, which should be the page where skip has been touched
@@ -811,15 +811,16 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
  * @brief Draws a generic choice page, described in a centered info (with configurable icon), thanks to a button and a footer
  *        at the bottom of the page. The given callback is called with true as argument if the button is touched, false if footer is touched
  *
+ * @param icon icon to set in center of page
  * @param message string to set in center of page (32px)
  * @param subMessage string to set under message (24px) (can be NULL)
  * @param confirmText string to set in button, to confirm
- * @param rejectText string to set in footer, to reject
+ * @param cancelText string to set in footer, to reject
  * @param callback callback called when button or footer is touched
  */
-void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *subMessage, char *confirmText, char *rejectText, nbgl_choiceCallback_t callback) {
+void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *subMessage, char *confirmText, char *cancelText, nbgl_choiceCallback_t callback) {
   nbgl_pageConfirmationDescription_t info = {
-    .cancelText = rejectText,
+    .cancelText = cancelText,
     .centeredInfo.text1 = message,
     .centeredInfo.text2 = subMessage,
     .centeredInfo.text3 = NULL,
@@ -847,9 +848,9 @@ void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *su
  * @param cancelText string to set in footer, to reject
  * @param callback callback called when confirmation button is touched
  */
-void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, char *rejectText, nbgl_callback_t callback) {
+void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, char *cancelText, nbgl_callback_t callback) {
   nbgl_pageConfirmationDescription_t info = {
-    .cancelText = rejectText,
+    .cancelText = cancelText,
     .centeredInfo.text1 = message,
     .centeredInfo.text2 = subMessage,
     .centeredInfo.text3 = NULL,
@@ -861,7 +862,7 @@ void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, cha
     .tuneId = TUNE_TAP_CASUAL,
     .modal = true
   };
-  onModalChoice = callback;
+  onModalConfirm = callback;
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
   nbgl_refresh();
 }
