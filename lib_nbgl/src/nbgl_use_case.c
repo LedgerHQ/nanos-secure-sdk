@@ -376,6 +376,7 @@ static void displayStaticReviewPage(uint8_t page) {
     if (tooLongToFit) {
       content.type = TAG_VALUE_DETAILS;
       content.tagValueDetails.detailsButtonText = "More";
+      content.tagValueDetails.detailsButtonIcon = NULL;
       content.tagValueDetails.detailsButtonToken = DETAILS_BUTTON_TOKEN;
       content.tagValueDetails.tagValueList.nbMaxLinesForValue = NB_MAX_LINES_IN_REVIEW;
       content.tagValueDetails.tagValueList.nbPairs = 1;
@@ -512,10 +513,12 @@ static void displayAddressPage(uint8_t page) {
   content.isTouchableTitle = false;
   if (page == 0) {
 #ifdef NBGL_QRCODE
+    content.tagValueConfirm.detailsButtonIcon = &C_QRcode32px;
     content.tagValueConfirm.detailsButtonText = "Show as QR";
     content.tagValueConfirm.detailsButtonToken = BUTTON_TOKEN;
 #else // NBGL_QRCODE
     content.tagValueConfirm.detailsButtonText = NULL;
+    content.tagValueConfirm.detailsButtonIcon = NULL;
 #endif // NBGL_QRCODE
     content.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
     content.tagValueConfirm.tagValueList.nbPairs = 1;
@@ -540,6 +543,7 @@ static void displayAddressPage(uint8_t page) {
     content.tagValueConfirm.confirmationText = "Confirm";
     content.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
     content.tagValueConfirm.detailsButtonText = NULL;
+    content.tagValueConfirm.detailsButtonIcon = NULL;
     content.tagValueConfirm.tuneId = TUNE_TAP_CASUAL;
     content.tagValueConfirm.tagValueList.nbPairs = addressConfirmationContext.tagValueList->nbPairs;
     content.tagValueConfirm.tagValueList.pairs = addressConfirmationContext.tagValueList->pairs;
@@ -885,7 +889,7 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle,
     .centeredInfo.text2 = reviewSubTitle,
     .centeredInfo.text3 = NULL,
     .centeredInfo.style = LARGE_CASE_INFO,
-    .centeredInfo.offsetY = -32,
+    .centeredInfo.offsetY = 0,
     .footerText = rejectText,
     .footerToken = QUIT_TOKEN,
     .tapActionText = "Tap to continue",

@@ -50,7 +50,6 @@ A few APIs are available to draw typical pages, like:
 - @ref nbgl_pageDrawSpinner() to draw a spinner (typically a waiting screen)
 - @ref nbgl_pageDrawInfo() to draw a centered info with potential footer (or bottom button), "tapable" container and top-right button
 - @ref nbgl_pageDrawConfirmation() to draw a typical confirmation screen, for example when rejecting a transaction (with 1 button for confirmation)
-- @ref nbgl_pageDrawAddressConfirmation() to draw a typical address confirmation screen
 
 In addition, in order to factorize some code, a generic function is available to draw generic content, either for a single page
 or for a multi-pages configuration.
@@ -122,27 +121,6 @@ The API to insert such an object is @ref nbgl_pageDrawConfirmation()  with the @
 - The text and token to use for the confirmation button.
 - The text and token to use for the bottom button.
 - The centered information parameters (icon, text, sub-text...).
-
-@subsubsection page_addr_confirmation Address confirmation page
-
-\image{inline} html page22.png "caption" height=300
-
-This type is intended to draw a typical address confirmation screen, when an address has to
-be displayed, either in raw (text) or QR Code mode (with a button for confirmation, a footer for rejection).
-
-The QR Code can be displayed in a modal.
-
-In addition of this info, this page offers controls to interact with the info:
-
-- A bottom button (footer) to reject
-- A single button to confirm
-
-The API to insert such an object is @ref nbgl_pageDrawAddressConfirmation()  with the @ref nbgl_pageAddressConfirmationDescription_t structure, containing:
-
-- The text and token to use for the confirmation button.
-- The text and token to use for the bottom button (footer).
-- The text and token to use for the "display as QR Code" button.
-- The information for address.
 
 @subsection page_generic_types Generic content pages
 

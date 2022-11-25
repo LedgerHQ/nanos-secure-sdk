@@ -61,6 +61,7 @@ typedef enum {
  */
 typedef struct nbgl_pageTagValueDetails_s {
     nbgl_layoutTagValueList_t tagValueList; ///< list of tag/value pairs
+    const nbgl_icon_details_t *detailsButtonIcon; ///< icon to use in details button
     const char *detailsButtonText; ///< this text is used for "details" button
     uint8_t detailsButtonToken; ///< the token used as argument of the actionCallback when the "details" button is touched
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when details button is touched
@@ -71,6 +72,7 @@ typedef struct nbgl_pageTagValueDetails_s {
  */
 typedef struct nbgl_pageTagValueConfirm_s {
     nbgl_layoutTagValueList_t tagValueList; ///< list of tag/value pairs
+    const nbgl_icon_details_t *detailsButtonIcon; ///< icon to use in details button
     const char *detailsButtonText; ///< this text is used for "details" button (if NULL, no button)
     uint8_t detailsButtonToken; ///< the token used as argument of the actionCallback when the "details" button is touched
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when details button is touched
@@ -261,7 +263,6 @@ nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback
 nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, const char* text);
 nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, nbgl_pageInfoDescription_t *info);
 nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageConfirmationDescription_t *info);
-nbgl_page_t* nbgl_pageDrawAddressConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageAddressConfirmationDescription_t *info);
 nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
                                             nbgl_pageNavigationInfo_t *nav,
                                             nbgl_pageContent_t* content,
