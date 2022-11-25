@@ -1113,7 +1113,7 @@ void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t cal
   navInfo.nbPages = (tagValueList == NULL)? 0 : 2;
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
-  navInfo.navWithTap.backButton = true;
+  navInfo.navWithTap.backButton = (tagValueList != NULL);
   navInfo.navWithTap.quitText = "Cancel";
   navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
   navInfo.navWithTap.backToken = ADDR_BACK_TOKEN;
