@@ -17,6 +17,13 @@
 #endif // HAVE_VAULT_RECOVERY_ALGO
 #define BOLOS_MASTER_SEED_LEN                               (32)
 
+typedef enum {
+  SET_SEED = 0,
+  GET_SEED,
+  SET_STATE,
+  GET_STATE
+} os_action_t;
+
 /**
  * Set the persisted seed if none yet, else override the volatile seed (in RAM)
  */
@@ -36,10 +43,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char  os_perso_get_seed_a
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_words(const unsigned char* words PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_finalize(void);
 #if defined(HAVE_PROTECT)
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_master_seed(const uint8_t* master_seed PLENGTH(length), size_t length);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_get_master_seed(uint8_t* master_seed PLENGTH(length), size_t length);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_protect_set_state(uint8_t state, bool keep);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) uint8_t        os_perso_protect_get_state(void);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_master_seed(uint8_t* master_seed PLENGTH(length), size_t length, os_action_t action);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_protect_state(uint8_t* state, os_action_t action);
 #endif // HAVE_PROTECT
 
 // checked in the ux flow to avoid asking the pin for example

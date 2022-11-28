@@ -31,6 +31,7 @@
 #if defined(HAVE_VSS)
 #include "ox_vss.h"
 #endif // HAVE_VSS
+#include "os_seed.h"
 #include <string.h>
 
 unsigned int SVC_Call(unsigned int syscall_id, void *parameters);
@@ -1007,36 +1008,23 @@ unsigned char os_perso_get_seed_algorithm(void) {
 #endif // HAVE_VAULT_RECOVERY_ALGO
 
 #if defined(HAVE_PROTECT)
-void os_perso_set_master_seed(const uint8_t *master_seed, size_t length) {
-  unsigned int parameters[2];
+void os_perso_master_seed(uint8_t *master_seed, size_t length, os_action_t action) {
+  unsigned int parameters[3];
   parameters[0] = (unsigned int)master_seed;
   parameters[1] = (unsigned int)length;
-  SVC_Call(SYSCALL_os_perso_set_master_seed_ID, parameters);
+  parameters[2] = (unsigned int)action;
+  SVC_Call(SYSCALL_os_perso_master_seed_ID, parameters);
   return;
 }
 
-void os_perso_get_master_seed(uint8_t *master_seed, size_t length) {
-  unsigned int parameters[2];
-  parameters[0] = (unsigned int)master_seed;
-  parameters[1] = (unsigned int)length;
-  SVC_Call(SYSCALL_os_perso_get_master_seed_ID, parameters);
-  return;
-}
-
-void os_perso_protect_set_state(uint8_t state, bool keep) {
+void os_perso_protect_state(uint8_t *state, os_action_t action) {
   unsigned int parameters[2];
   parameters[0] = (unsigned int)state;
-  parameters[1] = (unsigned int)keep;
-  SVC_Call(SYSCALL_os_perso_protect_set_state_ID, parameters);
+  parameters[1] = (unsigned int)action;
+  SVC_Call(SYSCALL_os_perso_protect_state_ID, parameters);
   return;
 }
 
-uint8_t os_perso_protect_get_state(void) {
-  unsigned int parameters[2];
-  parameters[0] = 0;
-  parameters[1] = 0;
-  return (unsigned char)SVC_Call(SYSCALL_os_perso_protect_get_state_ID, parameters);
-}
 #endif // HAVE_PROTECT
 
 void os_perso_set_words ( const unsigned char * words, unsigned int length ) {

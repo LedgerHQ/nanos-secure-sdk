@@ -132,10 +132,8 @@
 #define SYSCALL_os_perso_derive_eip2333_ID                         0x040000a7
 
 #ifdef HAVE_PROTECT
-#define SYSCALL_os_perso_set_master_seed_ID                        0x02000052
-#define SYSCALL_os_perso_get_master_seed_ID                        0x02000053
-#define SYSCALL_os_perso_protect_set_state_ID                      0x02000054
-#define SYSCALL_os_perso_protect_get_state_ID                      0x00000055
+#define SYSCALL_os_perso_master_seed_ID                            0x02000052
+#define SYSCALL_os_perso_protect_state_ID                          0x02000054
 #endif // HAVE_PROTECT
 
 #if defined(HAVE_SEED_COOKIE)
