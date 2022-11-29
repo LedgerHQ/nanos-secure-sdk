@@ -496,7 +496,7 @@ void nbgl_drawQrCode(nbgl_area_t *area, uint8_t version, const char *text, color
     nbgl_frontDrawQrInternal(area, foregroundColor);
   }
   else {
-    LOG_WARN("Impossible to draw QRCode text %s with version %d\n",text, version);
+    LOG_WARN(DRAW_LOGGER,"Impossible to draw QRCode text %s with version %d\n",text, version);
   }
 }
 #endif // NBGL_QRCODE
