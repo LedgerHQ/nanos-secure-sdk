@@ -60,7 +60,7 @@ SYSCALL cx_err_t cx_vss_generate_shares(cx_vss_share_t *shares PLENGTH(shares_nu
                                         uint8_t threshold);
 
 /**
- * @brief This functions combines the given shares to get a secret.
+ * @brief This function combines the given shares to get a secret.
  *
  * @param[out] secret     Pointer to the reconstructed secret.
  * @param[in]  secret_len Length of the expected secret. This must not exceed 48 bytes.
@@ -72,6 +72,24 @@ SYSCALL cx_err_t cx_vss_combine_shares(uint8_t *secret PLENGTH(secret_len),
                                        size_t secret_len,
                                        cx_vss_share_t *shares PLENGTH(sizeof(cx_vss_share_t)),
                                        uint8_t threshold);
+
+/**
+ * @brief This function verifies whether the coefficients commitments match
+ *        the given share's commitment.
+ * 
+ * @param[in]  commitments      Pointer to the coefficients commitments.
+ * @param[in]  threshold        Threshold parameter of the sheme. It corresponds
+ *                              to the number of coefficients commitments.
+ * @param[in]  share_commitment Pointer to the share's commitment.
+ * @param[in]  share_index      Index of the share corresponding to 'share_commitment'.
+ * @param[out] verified         The commitments match.
+ * @return Error code.
+ */
+SYSCALL cx_err_t cx_vss_verify_commits(cx_vss_commitment_t *commitments,
+                                       uint8_t threshold,
+                                       cx_vss_commitment_t *share_commitment,
+                                       uint32_t share_index,
+                                       bool *verified);
 
 #endif /* OX_VSS_H */
 #endif // HAVE_VSS

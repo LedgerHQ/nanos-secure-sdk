@@ -106,6 +106,7 @@
 #ifdef HAVE_VSS
 #define SYSCALL_cx_vss_generate_shares_ID                          0x0a000001
 #define SYSCALL_cx_vss_combine_shares_ID                           0x04000002
+#define SYSCALL_cx_vss_verify_commits_ID                           0x05000003
 #endif // HAVE_VSS
 
 #define SYSCALL_cx_crc32_hw_ID                                     0x02000102

@@ -937,6 +937,20 @@ cx_err_t cx_vss_combine_shares(uint8_t *secret,
   parameters[3] = (unsigned int)threshold;
   return SVC_cx_call(SYSCALL_cx_vss_combine_shares_ID, parameters);
 }
+
+cx_err_t cx_vss_verify_commits(cx_vss_commitment_t *commitments,
+                               uint8_t threshold,
+                               cx_vss_commitment_t *share_commitment,
+                               uint32_t share_index,
+                               bool *verified) {
+  unsigned int parameters[5];
+  parameters[0] = (unsigned int)commitments;
+  parameters[1] = (unsigned int)threshold;
+  parameters[2] = (unsigned int)share_commitment;
+  parameters[3] = (unsigned int)share_index;
+  parameters[4] = (unsigned int)verified;
+  return SVC_cx_call(SYSCALL_cx_vss_verify_commits_ID, parameters);
+}
 #endif // HAVE_VSS
 
 uint32_t cx_crc32_hw ( const void * buf, size_t len ) {
