@@ -1183,8 +1183,8 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
   container->nbChildren = 0;
 
   qrcode = (nbgl_qrcode_t *)nbgl_objPoolGet(QR_CODE,layoutInt->layer);
-  // version is forced to V10 if url is longer than 114 characters
-  if (strlen(PIC(info->url))>=114) {
+  // version is forced to V10 if url is longer than 62 characters
+  if (strlen(PIC(info->url))>62) {
     qrcode->version = QRCODE_V10;
   }
   else {
