@@ -349,7 +349,7 @@ static void displayStaticReviewPage(uint8_t page) {
       content.infoLongPress.longPressText = staticReviewContext.infoLongPress.longPressText;
       content.infoLongPress.text = staticReviewContext.infoLongPress.text;
       content.infoLongPress.longPressToken = CONFIRM_TOKEN;
-      content.tuneId = TUNE_TAP_NEXT;
+      content.tuneId = TUNE_TAP_CASUAL;
     }
     else {
       // simple button
@@ -358,7 +358,7 @@ static void displayStaticReviewPage(uint8_t page) {
       content.infoButton.buttonText = staticReviewContext.infoLongPress.longPressText;
       content.infoButton.text = staticReviewContext.infoLongPress.text;
       content.infoButton.buttonToken = CONFIRM_TOKEN;
-      content.tuneId = TUNE_TAP_NEXT;
+      content.tuneId = TUNE_TAP_CASUAL;
     }
   }
   else {
