@@ -133,7 +133,4 @@ unsigned int get_os_language(void);
 void set_os_language(unsigned int language);
 #endif //HAVE_LANGUAGE_PACK
 
-// Reset the Preferences to default values
-void os_setting_reset(void);
-
 unsigned int os_setting_get_default_device_name(unsigned char* buffer, unsigned int maxlength);
