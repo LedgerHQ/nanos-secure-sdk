@@ -2377,7 +2377,7 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits, bool bor
   // create a panel, invisible or bordered
   panel = (nbgl_panel_t*)nbgl_objPoolGet(PANEL,layoutInt->layer);
   panel->nbChildren = nbDigits;
-  panel->children = nbgl_containerPoolGet(panel->nbChildren, 0);
+  panel->children = nbgl_containerPoolGet(panel->nbChildren, layoutInt->layer);
   panel->borderColor = bordered ? LIGHT_GRAY : WHITE;
   panel->width = nbDigits*C_circle_24px.width + (nbDigits+1)*8;
   panel->height = 48;
