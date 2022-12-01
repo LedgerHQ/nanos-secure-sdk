@@ -53,6 +53,7 @@ CX_TRAMPOLINE _NR_cx_cipher_setup                          cx_cipher_setup
 CX_TRAMPOLINE _NR_cx_cipher_set_padding                    cx_cipher_set_padding
 CX_TRAMPOLINE _NR_cx_cipher_update                         cx_cipher_update
 CX_TRAMPOLINE _NR_cx_cmac                                  cx_cmac
+CX_TRAMPOLINE _NR_cx_constant_time_eq                      cx_constant_time_eq
 CX_TRAMPOLINE _NR_cx_crc16                                 cx_crc16
 CX_TRAMPOLINE _NR_cx_crc16_update                          cx_crc16_update
 CX_TRAMPOLINE _NR_cx_crc32                                 cx_crc32

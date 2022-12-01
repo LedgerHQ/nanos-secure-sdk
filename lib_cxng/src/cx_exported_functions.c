@@ -61,6 +61,7 @@ unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_fun
   [_NR_cx_cipher_set_padding] = (unsigned long)cx_cipher_set_padding,
   [_NR_cx_cipher_update] = (unsigned long)cx_cipher_update,
   [_NR_cx_cmac] = (unsigned long)cx_cmac,
+  [_NR_cx_constant_time_eq] = (unsigned long)cx_constant_time_eq,
   [_NR_cx_crc16] = (unsigned long)cx_crc16,
   [_NR_cx_crc16_update] = (unsigned long)cx_crc16_update,
   [_NR_cx_crc32] = (unsigned long)cx_crc32,

@@ -41,6 +41,7 @@ cx_cipher_setup
 cx_cipher_set_padding
 cx_cipher_update
 cx_cmac
+cx_constant_time_eq
 cx_crc16
 cx_crc16_update
 cx_crc32
