@@ -219,7 +219,7 @@ int nbgl_objPoolGetArray(nbgl_obj_type_t type, uint8_t nbObjs, uint8_t layer, nb
  */
 void nbgl_containerPoolRelease(uint8_t layer) {
   uint8_t i;
-  LOG_DEBUG(OBJ_POOL_LOGGER,"nbgl_containerPoolRelease(): obj in pool %d\n",nbUsedObjsInPool);
+  LOG_DEBUG(OBJ_POOL_LOGGER,"nbgl_containerPoolRelease(): %d containers in pool\n",nbUsedObjsInContainerPool);
   if (nbUsedObjsInContainerPool == 0) {
     return;
   }
