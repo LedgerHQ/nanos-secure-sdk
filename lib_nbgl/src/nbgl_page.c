@@ -189,9 +189,10 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
  * @param onActionCallback common callback for all actions on this page
  * @param ticker ticker configuration, set to NULL to disable it
  * @param text text in LEDGER style (UPPER CASE only)
+ * @param tapActionToken token passed to onActionCallback, on a tap event
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text) {
+nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
   nbgl_layoutCenteredInfo_t centeredInfo = {
@@ -207,7 +208,9 @@ nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback
   layoutDescription.withLeftBorder = true;
 
   layoutDescription.onActionCallback = onActionCallback;
-  layoutDescription.tapActionText = NULL;
+  layoutDescription.tapActionText = "";
+  layoutDescription.tapActionToken = tapActionToken;
+  layoutDescription.tapTuneId = TUNE_TAP_CASUAL;
 
   layoutDescription.ticker.tickerCallback = ticker->tickerCallback;
   layoutDescription.ticker.tickerIntervale = ticker->tickerIntervale;

@@ -259,7 +259,7 @@ typedef struct nbgl_pageInfoDescription_s {
  * GLOBAL PROTOTYPES
  **********************/
 
-nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text);
+nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken);
 nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, const char* text);
 nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, nbgl_pageInfoDescription_t *info);
 nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageConfirmationDescription_t *info);

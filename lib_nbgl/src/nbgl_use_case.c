@@ -787,7 +787,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
     io_seproxyhal_play_tune(TUNE_LEDGER_MOMENT);
 #endif // HAVE_PIEZO_SOUND
 
-    pageContext = nbgl_pageDrawLedgerInfo(&pageCallback, &ticker,message);
+    pageContext = nbgl_pageDrawLedgerInfo(&pageCallback, &ticker, message, QUIT_TOKEN);
   }
   else {
     nbgl_pageInfoDescription_t info = {
