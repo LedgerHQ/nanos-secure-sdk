@@ -52,12 +52,12 @@ typedef struct {
 static const uint8_t quarter_disc_4px_1bpp[] = {
   0x13, 0xFF
 };
-static const nbgl_icon_details_t C_quarter_disc_4px_1bpp= { 4, 4, NBGL_BPP_1, quarter_disc_4px_1bpp};
+static const nbgl_icon_details_t C_quarter_disc_4px_1bpp= { 4, 4, NBGL_BPP_1, false, quarter_disc_4px_1bpp};
 
 static const uint8_t quarter_circle_4px_1bpp[] = {
   0x13, 0xFF
 };
-static const nbgl_icon_details_t C_quarter_circle_4px_1bpp= { 4, 4, NBGL_BPP_1, quarter_circle_4px_1bpp};
+static const nbgl_icon_details_t C_quarter_circle_4px_1bpp= { 4, 4, NBGL_BPP_1, false, quarter_circle_4px_1bpp};
 
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
 static const uint8_t radiusValues[] = {

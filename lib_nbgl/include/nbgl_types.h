@@ -191,6 +191,7 @@ typedef struct PACKED__ nbgl_icon_details_s {
     uint16_t width;   ///< width of the icon, in pixels
     uint16_t height;  ///< height of the icon, in pixels
     nbgl_bpp_t bpp;   ///< bits per pixel for this area
+    bool isFile;      ///< if true, the bitmap buffer contains an image file
     const uint8_t *bitmap;  ///< buffer containing pixel values
 } nbgl_icon_details_t;
 
