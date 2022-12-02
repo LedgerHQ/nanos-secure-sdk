@@ -38,7 +38,6 @@ LD := $(CC)
 ifneq ($(shell [ `$(CC) -v 2>&1 | grep -o "version .*" | cut -f2 -d' ' | cut -f1 -d'.'` -ge 7 ] && echo ok),ok)
 $(error Requires at least CLANG 7 to link correctly with -fropi -frwpi)
 endif
-$(info Linker changed to CLANG)
 endif
 endif
 
