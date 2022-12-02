@@ -800,7 +800,8 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
       .centeredInfo.text1 = message,
       .centeredInfo.text2 = NULL,
       .centeredInfo.text3 = NULL,
-      .tapActionText = NULL,
+      .tapActionText = "",
+      .tapActionToken = QUIT_TOKEN,
       .topRightStyle = NO_BUTTON_STYLE,
       .actionButtonText = NULL,
       .tuneId = TUNE_TAP_CASUAL
