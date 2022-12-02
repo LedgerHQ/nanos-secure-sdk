@@ -385,6 +385,7 @@ static void draw_line(nbgl_line_t* obj, nbgl_obj_t *prevObj, bool computePositio
 
 static void draw_image(nbgl_image_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
   const nbgl_icon_details_t *iconDetails;
+  nbgl_color_map_t colorMap;
 
   // if buffer is NULL, let's try to call onDrawCallback, if not NULL, to get it
   if (obj->buffer == NULL) {
@@ -410,13 +411,19 @@ static void draw_image(nbgl_image_t* obj, nbgl_obj_t *prevObj, bool computePosit
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
   if (obj->bpp == NBGL_BPP_1) {
-    nbgl_frontDrawImage((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap,NO_TRANSFORMATION, obj->foregroundColor);
+    colorMap = obj->foregroundColor;
   }
   else if (obj->bpp == NBGL_BPP_2) {
-    nbgl_frontDrawImage((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap,NO_TRANSFORMATION, ((WHITE<<6)|(LIGHT_GRAY<<4)|(DARK_GRAY<<2)|BLACK));
+    colorMap = ((WHITE<<6)|(LIGHT_GRAY<<4)|(DARK_GRAY<<2)|BLACK);
   }
   else {
-    nbgl_frontDrawImage((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap,NO_TRANSFORMATION, INVALID_COLOR_MAP);
+    colorMap = INVALID_COLOR_MAP;
+  }
+  if (!iconDetails->isFile) {
+    nbgl_frontDrawImage((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap, NO_TRANSFORMATION, colorMap);
+  }
+  else {
+    nbgl_frontDrawImageFile((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap, colorMap, ramBuffer);
   }
 }
 

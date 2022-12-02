@@ -13,6 +13,7 @@ import struct
 import binascii
 import sys
 import traceback
+import gzip
 
 from PIL import Image
 
@@ -22,6 +23,10 @@ MAX_COLORS = 16
 
 def is_power2(n):
     return n != 0 and ((n & (n - 1)) == 0)
+
+# returns true if the given image size should be compressed
+def toCompress(width, height):
+    return (width >= 64) and (height >= 64)
 
 def get4BPPval(color_index):
     pixel_val = color_index[0]<<16+color_index[1]<<8+color_index[0]
@@ -125,7 +130,45 @@ def image_to_packed_buffer(im, palette, bits_per_pixel):
         # Handle last byte if any
     if current_bit > 0:
         image_data.append(current_byte & 0xFF)
-    return bytes(image_data)
+
+    if toCompress(width,height):
+        output_buffer = apply_compression(image_data)
+        return format_image(output_buffer, width, height, bits_per_pixel)
+    else:
+        return bytes(image_data)
+
+# returns a compressed version of the given pixels_buffer
+def apply_compression(pixels_buffer) -> bytes:
+    output_buffer = []
+    # cut into chunks of 2048 bytes max of uncompressed data (because decompression needs the full buffer)
+    full_uncompressed_size = len(pixels_buffer)
+    i = 0
+    while full_uncompressed_size>0:
+        chunk_size = min(2048,full_uncompressed_size)
+        tmp = bytes(pixels_buffer[i:i+chunk_size])
+        #print("len = %d"%len(tmp))
+        #print("0x%X"%tmp[chunk_size-1])
+        compressed_buffer = gzip.compress(tmp)
+        output_buffer += [len(compressed_buffer)&0xFF, (len(compressed_buffer)>>8)&0xFF]
+        output_buffer += compressed_buffer
+        full_uncompressed_size -= chunk_size
+        i+=chunk_size
+
+    return bytearray(output_buffer)
+
+# returns a "image file" version of the given compressed buffer
+def format_image(output_buffer: bytearray, width: int, height: int, bpp: int) -> bytes:
+    BPP_FORMATS = {
+        1: 0,
+        2: 1,
+        4: 2
+    }
+
+    result = [width&0xFF, width>>8, height&0xFF, height>>8,
+        (BPP_FORMATS[bpp]<<4) | 1, len(output_buffer)&0xFF, (len(output_buffer)>>8)&0xFF,
+        (len(output_buffer)>>16)&0xFF]
+    result.extend(output_buffer)
+    return bytearray(result)
 
 
 def main():
@@ -228,10 +271,15 @@ def main():
             else:
                 # General definitions
                 if not args.glyphcfile:
+                    if toCompress(width,height):
+                        isFile='true'
+                    else:
+                        isFile='false'
                     print("""#ifndef GLYPH_{0}_BPP
   #define GLYPH_{0}_WIDTH {1}
   #define GLYPH_{0}_HEIGHT {2}
-  #define GLYPH_{0}_BPP {3}""".format(image_name, width, height, bits_per_pixel))
+  #define GLYPH_{0}_ISFILE {3}
+  #define GLYPH_{0}_BPP {4}""".format(image_name, width, height, isFile, bits_per_pixel))
 
                 # Print image data
                 if args.glyphcheader:
@@ -263,7 +311,7 @@ def main():
 """.format(image_name))
             elif args.glyphcfile:
                 print("""#ifdef HAVE_NBGL
-const nbgl_icon_details_t C_{0} = {{ GLYPH_{0}_WIDTH, GLYPH_{0}_HEIGHT, NBGL_BPP_{1}, C_{0}_bitmap }};
+const nbgl_icon_details_t C_{0} = {{ GLYPH_{0}_WIDTH, GLYPH_{0}_HEIGHT, NBGL_BPP_{1}, GLYPH_{0}_ISFILE, C_{0}_bitmap }};
 #endif // HAVE_NBGL
 """.format(image_name, bits_per_pixel))
         except:
