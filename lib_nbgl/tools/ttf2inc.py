@@ -5,6 +5,7 @@ import argparse
 import sys
 import os
 import json
+import base64
 import struct
 from PIL import Image, ImageFont, ImageDraw
 import configparser
@@ -248,6 +249,26 @@ class TTF2INC (object):
         return font_id
 
     # -------------------------------------------------------------------------
+    def get_font_id(self):
+        """
+        Return the font id.
+        """
+        # Those ids are defined in nbgl_fonts.h file, in nbgl_font_id_e enums.
+        font_ids={
+            "BAGL_FONT_INTER_REGULAR_24px": 0,
+            "BAGL_FONT_INTER_SEMIBOLD_24px": 1,
+            "BAGL_FONT_INTER_REGULAR_32px": 2,
+            "BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px": 3
+        }
+        font_id_name = self.get_font_id_name()
+        if font_id_name in font_ids.keys():
+            font_id = font_ids[font_id_name]
+        else:
+            font_id = 0        # BAGL_FONT_INTER_REGULAR_24px by default
+
+        return font_id
+
+    # -------------------------------------------------------------------------
     def read_ids(self, id_filename):
         """
         Read a text file (a .h actually) containing all IDs to use.
@@ -313,6 +334,18 @@ class TTF2INC (object):
                     self.add_unicode_chars(string['text'], string['id'])
 
         return self.unicode_chars
+
+# -----------------------------------------------------------------------------
+def change_ext(filename, extension):
+    """
+    Change a filename extension
+    """
+    # Get the filename without current extension
+    new_filename = os.path.splitext(filename)[0]
+    # Add the new extension
+    new_filename += extension
+
+    return new_filename
 
 # -----------------------------------------------------------------------------
 # Program entry point:
@@ -384,25 +417,43 @@ if __name__ == "__main__":
                     sys.stderr.write(f"An error occurred while processing char"
                                      f" '{char}' with font {ttf.font_name}"
                                      f" x {ttf.font_size}: {error}\n")
-                    return -2
+                    return 1
 
             # Last step: generate .inc file with bitmap data for all chars:
             # (the .inc file will be stored in src directory)
-            if args.append:
-                mode = "a"
-            else:
-                mode = "w"
             if args.output_name:
                 inc_filename = args.output_name
             else:
                 filename = f"nbgl_font_{ttf.basename}.inc"
                 inc_filename = os.path.join("../../../public_sdk/lib_bagl/src/", filename)
+
+            # Force .inc extension for inc_filename
+            inc_filename = change_ext(inc_filename, ".inc")
+
+            # Build the corresponding .json file, if we need to
+            if ttf.unicode_needed:
+                inc_json = change_ext(inc_filename, ".json")
+            else:
+                inc_json = None
+
             if args.suffix:
                 suffix = args.suffix
             else:
                 suffix = ""
             if args.verbose:
                 sys.stdout.write(f"Generating file {inc_filename}\n")
+
+            ttf_info_list = []
+            if args.append:
+                mode = "a"
+                # Read previous entries, if such file exists
+                if inc_json and os.path.exists(inc_json):
+                    with open(inc_json, "r") as json_file:
+                        ttf_info_list = json.load(json_file, strict=False)
+            else:
+                mode = "w"
+
+            ttf_info_dictionary = {}
             with open(inc_filename, mode) as inc:
                 if not args.output_name:
                     inc.write("/* @BANNER@ */\n\n")
@@ -412,8 +463,10 @@ if __name__ == "__main__":
                           f" = {{\n")
                 offset = 0
                 first_char = None
+                ttf_info_dictionary["bitmap"] = bytes()
                 for char, info in sorted(char_info.items()):
                     image_data = info["bitmap"]
+                    ttf_info_dictionary["bitmap"] += image_data
                     info["offset"] = offset
                     offset += info["size"]
 
@@ -434,6 +487,10 @@ if __name__ == "__main__":
                         inc.write("\n")
                 inc.write("};\n")
 
+                # Serialize bitmap
+                ttf_info_dictionary["bitmap"] = base64.b64encode(
+                    ttf_info_dictionary["bitmap"]).decode('utf-8')
+
                 # Write the array containing information about characters:
                 if ttf.unicode_needed:
                     typedef = "nbgl_font_unicode_character_t"
@@ -443,12 +500,21 @@ if __name__ == "__main__":
                 inc.write(
                     f"\n __attribute__ ((section(\"._nbgl_fonts_\"))) const {typedef} characters"
                     f"{ttf.basename.upper()}{suffix}[{len(char_info)}] = {{\n")
+
+                ttf_info_dictionary["nbgl_font_unicode_character"] = []
+
                 for char, info in sorted(char_info.items()):
                     width = info["width"]
                     size = info["size"]
                     offset = info["offset"]
                     if ttf.unicode_needed:
                         unicode = f"0x{ord(char):06X}"
+                        ttf_info_dictionary["nbgl_font_unicode_character"].append({
+                            "char_unicode": ord(char),
+                            "char_width": width,
+                            "bitmap_byte_count": size,
+                            "bitmap_offset": offset
+                        })
                         inc.write(f"  {{ 0x{ord(char):06X}, {width:3}, {size:3}"
                                   f", {offset:4} }}, //unicode {unicode}\n")
                     else:
@@ -459,6 +525,16 @@ if __name__ == "__main__":
                 # Write the struct containing information about the font:
                 if ttf.unicode_needed:
                     typedef = "nbgl_font_unicode_t"
+                    ttf_info_dictionary["nbgl_font_unicode"] = {
+                        "font_id": ttf.get_font_id(),
+                        "bpp": 1,
+                        "char_height": ttf.font_size,
+                        "baseline_height": baseline,
+                        "line_height": ttf.line_size,
+                        "char_kerning": 0,
+                        "first_unicode_char": first_char,
+                        "last_unicode_char" : last_char
+                    }
                 else:
                     typedef = "nbgl_font_t"
                 inc.write(
@@ -475,6 +551,12 @@ if __name__ == "__main__":
                     inc.write(f"  characters{ttf.basename.upper()},\n")
                     inc.write(f"  bitmap{ttf.basename.upper()}\n")
                 inc.write("};\n")
+
+                # Do we need to generate a JSON file with unicode related info?
+                if ttf.unicode_needed:
+                    ttf_info_list.append(ttf_info_dictionary)
+                    with open(inc_json, "w") as json_file:
+                        json.dump(ttf_info_list, json_file)
 
                 if args.test_align != None:
                     string_width = 0
