@@ -18,6 +18,7 @@
 #include "nbgl_touch.h"
 #include "glyphs.h"
 #include "os_io_seproxyhal.h"
+#include "lcx_rng.h"
 
 /*********************
  *      DEFINES
@@ -27,6 +28,10 @@
 
 #define BACKSPACE_KEY_INDEX  10
 #define VALIDATE_KEY_INDEX   11
+
+// to save RAM we use 5 uint8, and 4 bits per digit (MSBs for odd digits, LSBs for even ones)
+#define GET_DIGIT_INDEX(_keypad, _digit) ((_digit&1)?(_keypad->digitIndexes[_digit>>1]>>4):(_keypad->digitIndexes[_digit>>1]&0xF))
+#define SET_DIGIT_INDEX(_keypad, _digit, _index) (_keypad->digitIndexes[_digit>>1] |= (_digit&1)?(_index<<4):_index)
 
 /**********************
  *      TYPEDEFS
@@ -48,15 +53,15 @@ static uint8_t getKeypadIndex(uint16_t x, uint16_t y) {
   // get index of key pressed
   if (y < KEYPAD_KEY_HEIGHT) {
     // 1st line:
-    i = x/KEY_WIDTH;
+    i = 1 + x/KEY_WIDTH;
   }
   else if (y < (2*KEYPAD_KEY_HEIGHT)) {
     // 2nd line:
-    i = 3 + x/KEY_WIDTH;
+    i = 4 + x/KEY_WIDTH;
   }
   else if (y < (3*KEYPAD_KEY_HEIGHT)) {
     // 3rd line:
-    i = 6 + x/KEY_WIDTH;
+    i = 7 + x/KEY_WIDTH;
   }
   else if (y < (4*KEYPAD_KEY_HEIGHT)) {
     // 4th line
@@ -101,7 +106,7 @@ static void keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   if ((firstIndex<10)&&(keypad->enableDigits)) {
     // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
     if (eventType == TOUCHED)
-      keypad->callback(0x30+firstIndex+1);
+      keypad->callback(GET_DIGIT_INDEX(keypad,firstIndex) + 0x30);
 #ifdef HAVE_PIEZO_SOUND
     else
       io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
@@ -172,7 +177,8 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
 
   // First row of keys: 1 2 3
   for (i=0;i<3;i++) {
-    key_value = i + 0x30 + 1;
+    key_value = GET_DIGIT_INDEX(keypad,(i+1)) + 0x30;
+
     rectArea.x0 = keypad->x0 + i*KEY_WIDTH;
     rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
     nbgl_drawText(&rectArea, &key_value,
@@ -182,7 +188,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
   // Second row: 4 5 6
   rectArea.y0 += KEYPAD_KEY_HEIGHT;
   for (;i<6;i++) {
-    key_value = i + 0x30 + 1;
+    key_value = GET_DIGIT_INDEX(keypad,(i+1)) + 0x30;
     rectArea.x0 = keypad->x0 + (i-3)*KEY_WIDTH;
     rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
     nbgl_drawText(&rectArea, &key_value,
@@ -192,7 +198,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
   // Third row: 7 8 9
   rectArea.y0 += KEYPAD_KEY_HEIGHT;
   for (;i<9;i++) {
-    key_value = i + 0x30 + 1;
+    key_value = GET_DIGIT_INDEX(keypad,(i+1)) + 0x30;
     rectArea.x0 = keypad->x0 + (i-6)*KEY_WIDTH;
     rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
     nbgl_drawText(&rectArea, &key_value,
@@ -209,7 +215,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
   nbgl_frontDrawImage(&rectArea,(uint8_t*)C_backspace32px.bitmap,NO_TRANSFORMATION, keypad->enableBackspace?BLACK:WHITE);
 
   // draw 0
-  key_value = 0x30;
+  key_value = GET_DIGIT_INDEX(keypad,0)+0x30;
   rectArea.x0 = keypad->x0 + KEY_WIDTH;
   rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
   rectArea.y0 = keypad->y0 + KEYPAD_KEY_HEIGHT*3 + DIGIT_OFFSET_Y;
@@ -266,6 +272,34 @@ void nbgl_objDrawKeypad(nbgl_keypad_t *kpd) {
   kpd->touchMask = (1 << TOUCHED) | (1 << TOUCH_PRESSED);
   kpd->touchCallback = (nbgl_touchCallback_t)&keypadTouchCallback;
 
+  // if the object has not been already used, prepare indexes of digits
+  if (kpd->digitIndexes[0] == 0) {
+    uint32_t i;
+    if (kpd->shuffled) {
+      uint8_t shuffledDigits[10] = {0,1,2,3,4,5,6,7,8,9};
+
+      // modern version of the Fisher-Yates shuffle
+      for (i=0;i<9;i++) {
+        // pick a random number k in [i:9] intervale
+        uint32_t j = cx_rng_u32_range(i, 9);
+        uint8_t tmp = shuffledDigits[j];
+
+        // exchange shuffledDigits[i] and shuffledDigits[j]
+        shuffledDigits[j] = shuffledDigits[i];
+        shuffledDigits[i] = tmp;
+      }
+      for (i=0;i<10;i++) {
+        // apply the permuted value to digit i
+        SET_DIGIT_INDEX(kpd,i,shuffledDigits[i]);
+      }
+    }
+    else {
+      // no shuffling
+      for (i=0;i<10;i++) {
+        SET_DIGIT_INDEX(kpd,i,i);
+      }
+    }
+  }
   keypadDraw(kpd);
 }
 

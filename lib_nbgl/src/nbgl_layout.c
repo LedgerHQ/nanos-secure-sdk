@@ -2326,9 +2326,10 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bo
  *
  * @param layout the current layout
  * @param callback function called when any of the key is touched
+ * @param shuffled if set to true, digits are shuffled in keypad
  * @return the index of keypad, to use in @ref nbgl_layoutUpdateKeypad()
  */
-int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback) {
+int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback, bool shuffled) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_keypad_t *keypad;
 
@@ -2346,6 +2347,7 @@ int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback) {
   keypad->enableDigits = true;
   keypad->enableBackspace = false;
   keypad->enableValidate = false;
+  keypad->shuffled = shuffled;
   // set this new keypad as child of the container
   addObjectToLayout(layoutInt,(nbgl_obj_t*)keypad);
 
