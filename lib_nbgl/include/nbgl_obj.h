@@ -420,6 +420,8 @@ typedef struct PACKED__ nbgl_keypad_s {
     bool enableBackspace; ///< if true, Backspace key is enabled
     bool enableValidate; ///< if true, Validate key is enabled
     bool enableDigits; ///< if true, Digit keys are enabled
+    bool shuffled; ///< if true, Digit keys are shuffled
+    uint8_t digitIndexes[5]; ///< array of digits indexes, 4 bits per digit
     keyboardCallback_t callback; ///< function called when an active key is pressed
 } nbgl_keypad_t;
 #ifdef __clang__

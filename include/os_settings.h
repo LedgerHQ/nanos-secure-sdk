@@ -76,9 +76,6 @@ typedef enum os_setting_e {
   OS_SETTING_INVERT,
   OS_SETTING_ROTATION,
   OS_SETTING_MCU_UPGRADE=OS_SETTING_ROTATION,
-#ifdef HAVE_BOLOS_NOT_SHUFFLED_PIN
-  OS_SETTING_NOSHUFFLE_PIN,
-#endif // HAVE_BOLOS_NOT_SHUFFLED_PIN
   OS_SETTING_AUTO_LOCK_DELAY,
   OS_SETTING_SCREEN_LOCK_DELAY,
   OS_SETTING_POWER_OFF_DELAY,
@@ -101,10 +98,19 @@ typedef enum os_setting_e {
   OS_SETTING_BLEMACADR,
 
   OS_SETTING_NFC_TAG_CONTENT,
-  OS_SETTING_NFC_ENABLED,
+  OS_SETTING_FEATURES,
 
   OS_SETTING_LAST,
 } os_setting_t;
+
+/**
+ * @brief Bitfield for features in OS_SETTING_FEATURES
+ *
+ */
+// if (os_settings[OS_SETTING_FEATURES] & OS_SETTING_FEATURES_NFC_ENABLED) then NFC is enabled
+#define OS_SETTING_FEATURES_NFC_ENABLED     0x1
+// if (os_settings[OS_SETTING_FEATURES] & OS_SETTING_FEATURES_NO_PIN_SHUFFLE) then PIN shuffle is disable
+#define OS_SETTING_FEATURES_NO_PIN_SHUFFLE  0x2
 
 /**
  * Retrieve the value of a setting in a user specified buffer, with a max length, and return the effective returned length.

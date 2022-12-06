@@ -674,7 +674,10 @@ To build such screens, some dedicated APIs are necessary, which will be detailed
 
 This object, at the bottom of the main container (with a margin), proposes a regular keypad, with 10 digits, a backspace and a validate keys.
 
-The only parameter to configure this object is the callback associated with active keypad keys touch events. Only digit keys are active.
+The only parameters to configure this object are:
+
+- the callback associated with active keypad keys touch events. Only digit keys are active.
+- a boolean to choose between shuffled and regular digits.
 
 The API to insert such an object is @ref nbgl_layoutAddKeypad().
 
