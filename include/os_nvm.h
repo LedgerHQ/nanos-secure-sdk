@@ -26,7 +26,8 @@ SUDOCALL void nvm_erase_page(unsigned int page_adr);
 // erase seed, settings AND applications
 SYSCALL                                       void           os_perso_erase_all(void);
 
-#if (defined(HAVE_LANGUAGE_PACK) && !defined(BOLOS_OS_UPGRADER_APP))
-// Wipe all data from N_application_registry.applications, except language packs
-void erase_all_except_language_packs(void);
+#ifndef BOLOS_OS_UPGRADER_APP
+// Wipe all data from N_application_registry.applications,
+// except language packs / background img
+void erase_all_except_user_config_apps(void);
 #endif //(defined(HAVE_LANGUAGE_PACK) && !defined(BOLOS_OS_UPGRADER_APP))
