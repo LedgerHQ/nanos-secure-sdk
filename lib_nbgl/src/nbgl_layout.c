@@ -1021,7 +1021,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_container_t *container;
   nbgl_text_area_t *textArea=NULL;
-  nbgl_image_t *image;
+  nbgl_image_t *image=NULL;
   uint16_t fullHeight = 0;
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddCenteredInfo():\n");
@@ -1030,8 +1030,8 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
 
   container = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER,layoutInt->layer);
 
-  // get container children (max 4)
-  container->children = nbgl_containerPoolGet(4,layoutInt->layer);
+  // get container children (max 5 if PLUGIN_INFO)
+  container->children = nbgl_containerPoolGet((info->style == PLUGIN_INFO)?5:4,layoutInt->layer);
   container->nbChildren = 0;
 
   if (info->icon != NULL) {
@@ -1043,8 +1043,10 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
     image->alignTo = NULL;
 
     fullHeight += image->buffer->height;
-    container->children[container->nbChildren] = (nbgl_obj_t*)image;
-    container->nbChildren++;
+    if ((info->style != PLUGIN_INFO)) {
+      container->children[container->nbChildren] = (nbgl_obj_t*)image;
+      container->nbChildren++;
+    }
   }
   if (info->text1 != NULL) {
     textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
@@ -1054,7 +1056,9 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
     if (info->style == LEDGER_INFO) {
       textArea->fontId = BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px;
     }
-    else if ((info->style == LARGE_CASE_INFO) || (info->style == LARGE_CASE_BOLD_INFO)) {
+    else if ((info->style == LARGE_CASE_INFO) ||
+             (info->style == LARGE_CASE_BOLD_INFO) ||
+             (info->style == PLUGIN_INFO)) {
       textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
     }
     else {
@@ -1087,10 +1091,14 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
   }
   if (info->text2 != NULL) {
     textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
-    if ((info->style != LARGE_CASE_INFO)&&(info->style != LARGE_CASE_BOLD_INFO))
+    if ((info->style != LARGE_CASE_INFO) &&
+        (info->style != LARGE_CASE_BOLD_INFO) &&
+        (info->style != PLUGIN_INFO)) {
       textArea->textColor = DARK_GRAY;
-    else
+    }
+    else {
       textArea->textColor = BLACK;
+    }
     textArea->text = PIC(info->text2);
     textArea->textAlignment = CENTER;
     textArea->fontId = (info->style != LARGE_CASE_BOLD_INFO) ? BAGL_FONT_INTER_REGULAR_24px: BAGL_FONT_INTER_SEMIBOLD_24px;
@@ -1111,6 +1119,28 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
 
     container->children[container->nbChildren] = (nbgl_obj_t*)textArea;
     container->nbChildren++;
+  }
+  // draw small horizontal line if PLUGIN_INFO
+  if (info->style == PLUGIN_INFO) {
+    nbgl_line_t *line = createHorizontalLine(layoutInt->layer);
+    line->width = 120;
+    line->alignmentMarginY = 32;
+    line->alignmentMarginX = 0;
+    line->alignment = BOTTOM_MIDDLE;
+    line->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
+    fullHeight += 32;
+
+    container->children[container->nbChildren] = (nbgl_obj_t*)line;
+    container->nbChildren++;
+    if (image) {
+      // add icon here, under line
+      image->alignmentMarginY = 32;
+      image->alignment = BOTTOM_MIDDLE;
+      image->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
+      container->children[container->nbChildren] = (nbgl_obj_t*)image;
+      container->nbChildren++;
+      fullHeight += 32;
+    }
   }
   if (info->text3 != NULL) {
     textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
