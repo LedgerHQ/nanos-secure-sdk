@@ -64,7 +64,7 @@ void nbgl_screenRedraw(void) {
     return;
   }
   LOG_DEBUG(SCREEN_LOGGER,"nbgl_screenRedraw(): nbScreensOnStack = %d\n",nbScreensOnStack);
-
+  nbgl_screen_reinit();
   nbgl_redrawObject((nbgl_obj_t *)topOfStack, NULL, true);
 }
 

@@ -145,6 +145,13 @@ unsigned int nbgl_font_getFont(unsigned int fontId)
   parameters[0] = (unsigned int)fontId;
   return SVC_Call(SYSCALL_nbgl_get_font_ID, parameters);
 }
+
+unsigned int nbgl_screen_reinit(void)
+{
+  unsigned int parameters[1];
+  parameters[0] = 0;
+  return SVC_Call(SYSCALL_nbgl_screen_reinit_ID, parameters);
+}
 #endif
 
 void nvm_write ( void * dst_adr, void * src_adr, unsigned int src_len ) {
