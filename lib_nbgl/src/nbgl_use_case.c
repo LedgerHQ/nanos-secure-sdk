@@ -17,7 +17,7 @@
 /*********************
  *      DEFINES
  *********************/
-#define APP_DESCRIPTION_MAX_LEN 128
+#define APP_DESCRIPTION_MAX_LEN 64
 // maximum number of lines for value field in details pages
 #define NB_MAX_LINES_IN_DETAILS  12
 // maximum number of lines for value field in review pages
@@ -76,8 +76,9 @@ typedef struct AddressConfirmationContext_s {
 /**********************
  *  STATIC VARIABLES
  **********************/
-// char buffer to build some strings
+// char buffers to build some strings
 static char appDescription[APP_DESCRIPTION_MAX_LEN];
+static char plugInDescription[APP_DESCRIPTION_MAX_LEN];
 
 // multi-purposes callbacks
 static nbgl_callback_t onQuit;
@@ -724,6 +725,58 @@ void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char
   if (actionButtonText != NULL) {
     info.centeredInfo.offsetY -= 40;
   }
+  pageContext = nbgl_pageDrawInfo(&pageCallback, NULL, &info);
+  nbgl_refresh();
+}
+
+/**
+ * @brief draws the home page of a plug-in app (page on which we land when launching it from dashboard)
+ *
+ * @param plugInName plug-in app name
+ * @param appName master app name (app used by plug-in)
+ * @param appIcon master app icon
+ * @param tagline text under plug-in name (if NULL, it will be "This app confirms actions for\n<plugInName>.")
+ * @param subTagline text under master app icon (if NULL, it will be "This app relies on\n<appName>")
+ * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info" (i)
+ * @param topRightCallback callback called when top-right button is touched
+ * @param quitCallback callback called when quit button is touched
+ */
+void nbgl_useCasePlugInHome(char *plugInName, char *appName,
+                            const nbgl_icon_details_t *appIcon, char *tagline,
+                            char *subTagline, bool withSettings,
+                            nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
+  nbgl_pageInfoDescription_t info = {
+    .centeredInfo.icon = appIcon,
+    .centeredInfo.text1 = plugInName,
+    .centeredInfo.style = PLUGIN_INFO,
+    .centeredInfo.offsetY = -16,
+    .footerText = NULL,
+    .bottomButtonStyle = QUIT_APP_TEXT,
+    .tapActionText = NULL,
+    .topRightStyle = withSettings? SETTINGS_ICON:INFO_ICON,
+    .topRightToken = CONTINUE_TOKEN,
+    .actionButtonText = NULL,
+    .tuneId = TUNE_TAP_CASUAL
+  };
+  info.bottomButtonsToken = QUIT_TOKEN;
+  onAction = NULL;
+  if (tagline == NULL) {
+    snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app confirms actions for\n%s.", plugInName);
+    info.centeredInfo.text2 = appDescription;
+  }
+  else {
+    info.centeredInfo.text2 = tagline;
+  }
+  if (subTagline == NULL) {
+    snprintf(plugInDescription, APP_DESCRIPTION_MAX_LEN, "This app relies on\n%s", appName);
+    info.centeredInfo.text3 = plugInDescription;
+  }
+  else {
+    info.centeredInfo.text3 = subTagline;
+  }
+
+  onContinue = topRightCallback;
+  onQuit = quitCallback;
   pageContext = nbgl_pageDrawInfo(&pageCallback, NULL, &info);
   nbgl_refresh();
 }
