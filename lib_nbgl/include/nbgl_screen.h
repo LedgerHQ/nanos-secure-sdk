@@ -65,6 +65,7 @@ typedef struct PACKED__ nbgl_screen_s {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
+unsigned int nbgl_screen_reinit(void);
 void nbgl_screenRedraw(void);
 nbgl_obj_t *nbgl_screenGetTop(void);
 uint8_t nbgl_screenGetCurrentStackSize(void);
