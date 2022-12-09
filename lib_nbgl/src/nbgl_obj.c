@@ -1142,6 +1142,16 @@ void nbgl_refreshSpecial(nbgl_refresh_mode_t mode) {
 }
 
 /**
+ * @brief This functions returns true if there is something to refresh
+ * @return true if there is something to refresh
+ */
+bool nbgl_refreshIsNeeded(void) {
+  if ((refreshArea.width == 0) || (refreshArea.height == 0))
+    return false;
+  return true;
+}
+
+/**
  * @brief This functions resets all changes since the last refresh
  *
  */

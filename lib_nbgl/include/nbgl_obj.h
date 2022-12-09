@@ -435,6 +435,7 @@ void nbgl_redrawObject(nbgl_obj_t* obj, nbgl_obj_t *prevObj, bool computePositio
 
 void nbgl_refresh(void);
 void nbgl_refreshSpecial(nbgl_refresh_mode_t mode);
+bool nbgl_refreshIsNeeded(void);
 void nbgl_refreshReset(void);
 
 void nbgl_objInit(void);
