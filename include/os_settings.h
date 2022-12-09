@@ -111,6 +111,8 @@ typedef enum os_setting_e {
 #define OS_SETTING_FEATURES_NFC_ENABLED     0x1
 // if (os_settings[OS_SETTING_FEATURES] & OS_SETTING_FEATURES_NO_PIN_SHUFFLE) then PIN shuffle is disable
 #define OS_SETTING_FEATURES_NO_PIN_SHUFFLE  0x2
+// if (os_settings[OS_SETTING_FEATURES] & OS_SETTING_FEATURES_BATT_IN_SIDE) then Battery percentage in side screen is enabled
+#define OS_SETTING_FEATURES_BATT_IN_SIDE    0x4
 
 /**
  * Retrieve the value of a setting in a user specified buffer, with a max length, and return the effective returned length.
