@@ -76,9 +76,9 @@ SYSCALL cx_err_t cx_vss_combine_shares(uint8_t *secret PLENGTH(secret_len),
 /**
  * @brief This function verifies whether the coefficients commitments match
  *        the given share's commitment.
- * 
+ *
  * @param[in]  commitments      Pointer to the coefficients commitments.
- * @param[in]  threshold        Threshold parameter of the sheme. It corresponds
+ * @param[in]  threshold        Threshold parameter of the scheme. It corresponds
  *                              to the number of coefficients commitments.
  * @param[in]  share_commitment Pointer to the share's commitment.
  * @param[in]  share_index      Index of the share corresponding to 'share_commitment'.
