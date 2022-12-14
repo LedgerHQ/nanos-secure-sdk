@@ -50,11 +50,12 @@ extern unsigned long gLogger;
  *      MACROS
  **********************/
 #ifdef WITH_STDIO
+extern void mainExit(int exitCode);
 #define LOG_DEBUG(__logger,...) {\
    if (gLogger&(1<<__logger)) printf(__VA_ARGS__); \
 }
 #define LOG_WARN(__logger,...) printf(__VA_ARGS__)
-#define LOG_FATAL(__logger,...) {printf(__VA_ARGS__);exit(-1);}
+#define LOG_FATAL(__logger,...) {printf(__VA_ARGS__);mainExit(-1);}
 
 #else // WITH_STDIO
 #ifdef NBGL_DEBUG
