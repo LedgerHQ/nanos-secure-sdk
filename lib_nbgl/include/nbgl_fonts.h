@@ -100,7 +100,7 @@ typedef enum {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-unsigned int nbgl_font_getFont(unsigned int fontId);
+const nbgl_font_t* nbgl_font_getFont(unsigned int fontId);
 const nbgl_font_t *nbgl_getFont(nbgl_font_id_e fontId);
 uint16_t nbgl_getSingleLineTextWidth(nbgl_font_id_e fontId, const char* text);
 uint16_t nbgl_getSingleLineTextWidthInLen(nbgl_font_id_e fontId, const char* text, uint16_t maxLen);
