@@ -384,6 +384,7 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
     unsigned char ch_height = font->char_height;
     unsigned char ch_kerning = 0;
     unsigned char ch_width = 0;
+    uint16_t      ch_bits = 0;
     const unsigned char * ch_bitmap = NULL;
     int ch_y = y;
 
@@ -408,6 +409,7 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
         const bagl_font_unicode_character_t *character;
         character = get_unicode_character(unicode);
         ch_width = character->char_width;
+        ch_bits = character->bitmap_byte_count * 8;
 
 #if defined(HAVE_LANGUAGE_PACK)
         ch_bitmap = PIC_BMPU(unicode_bitmap);
@@ -435,6 +437,7 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
             ch_y = y + font->baseline_height - font_symbols->baseline_height;
           }
         }
+        ch_bits = bpp*ch_width*ch_height;
       }
     }
     else {
@@ -442,6 +445,8 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
       ch -= font->first_char;
       ch_bitmap = &PIC_BMP(font->bitmap)[PIC_CHAR(font->characters)[ch].bitmap_offset];
       ch_width = PIC_CHAR(font->characters)[ch].char_width;
+      ch_bits = PIC_CHAR(font->characters)[ch].bitmap_byte_count * 8;
+
       ch_kerning = font->char_kerning;
     }
 
@@ -478,7 +483,7 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 
       // chars are storred LSB to MSB in each char, packed chars. horizontal scan
       if (ch_bitmap) {
-        bagl_hal_draw_bitmap_within_rect(xx, ch_y, ch_width, ch_height, (1<<bpp), colors, bpp, ch_bitmap, bpp*ch_width*ch_height); // note, last parameter is computable could be avoided
+        bagl_hal_draw_bitmap_within_rect(xx, ch_y, ch_width, ch_height, (1<<bpp), colors, bpp, ch_bitmap, ch_bits);
       }
       else {
         bagl_hal_draw_rect(bgcolor, xx, ch_y, ch_width, ch_height);
