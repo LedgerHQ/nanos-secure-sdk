@@ -71,9 +71,11 @@ endif
 # optimization and debug levels
 ifneq ($(DEBUG),0)
 OPTI_LVL  = -O0
+OPTI_ALVL = $(OPTI_LVL)
 DBG_LVL   = -g3
 else
 OPTI_LVL  = -Oz
+OPTI_ALVL = -Os # assembler does not handle -Oz, use -Os instead
 DBG_LVL   = -g0
 endif
 
@@ -89,8 +91,7 @@ CFLAGS   += -fropi
 CFLAGS   += -fno-jump-tables # avoid jump tables for switch to avoid problems with invalid PIC access
 CFLAGS   += -nostdlib -nodefaultlibs
 
-# this does not handle -Oz, force -Os instead
-AFLAGS   += -Os $(DBG_LVL) -fno-common
+AFLAGS   += $(OPTI_ALVL) $(DBG_LVL) -fno-common
 
 LDFLAGS  += -gdwarf-2  -gstrict-dwarf
 LDFLAGS  += $(OPTI_LVL) $(DBG_LVL)
