@@ -70,7 +70,7 @@ endif
 
 # optimization and debug levels
 ifneq ($(DEBUG),0)
-OPTI_LVL  = -O0
+OPTI_LVL  = -Og
 OPTI_ALVL = $(OPTI_LVL)
 DBG_LVL   = -g3
 else
