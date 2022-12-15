@@ -79,7 +79,6 @@ OPTI_ALVL = -Os # assembler does not handle -Oz, use -Os instead
 DBG_LVL   = -g0
 endif
 
-CFLAGS   += -gdwarf-2  -gstrict-dwarf
 CFLAGS   += $(OPTI_LVL) $(DBG_LVL)
 CFLAGS   += -fomit-frame-pointer -momit-leaf-frame-pointer
 
@@ -93,7 +92,6 @@ CFLAGS   += -nostdlib -nodefaultlibs
 
 AFLAGS   += $(OPTI_ALVL) $(DBG_LVL) -fno-common
 
-LDFLAGS  += -gdwarf-2  -gstrict-dwarf
 LDFLAGS  += $(OPTI_LVL) $(DBG_LVL)
 LDFLAGS  += -fomit-frame-pointer
 LDFLAGS  += -Wall
