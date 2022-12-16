@@ -522,6 +522,15 @@ static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length)
 				ledger_protocol_data.tx_chunk_length = 0;
 				G_io_app.ble_xfer_timeout = 0;
 				G_io_app.apdu_state       = APDU_IDLE;
+				if (  (!ledger_ble_data.connection_updated)
+				    &&(ledger_ble_data.connection.conn_interval > BLE_SLAVE_CONN_INTERVAL_MIN)
+				   ) {
+					ledger_ble_data.connection_updated = 1;
+					aci_l2cap_connection_parameter_update_req(ledger_ble_data.connection.connection_handle,
+					                                          BLE_SLAVE_CONN_INTERVAL_MIN, BLE_SLAVE_CONN_INTERVAL_MIN,
+					                                          ledger_ble_data.connection.conn_latency,
+					                                          ledger_ble_data.connection.supervision_timeout);
+				}
 			}
 		}
 		G_io_app.apdu_media = IO_APDU_MEDIA_BLE;
@@ -699,9 +708,6 @@ static void hci_evt_vendor(uint8_t *buffer, uint16_t length)
 
 	case ACI_L2CAP_CONNECTION_UPDATE_RESP_VSEVT_CODE:
 		LOG_BLE("CONNECTION UPDATE RESP %d\n", buffer[4]);
-		if (!ledger_protocol_data.mtu_negotiated) {
-			aci_gatt_exchange_config(ledger_ble_data.connection.connection_handle);
-		}
 		break;
 
 	case ACI_GATT_WRITE_PERMIT_REQ_VSEVT_CODE:
@@ -815,14 +821,7 @@ static void attribute_modified(uint8_t *buffer, uint16_t length)
 		if (U2LE(buffer, 6) != 0) {
 			LOG_BLE("REGISTERED FOR NOTIFICATIONS\n");
 			ledger_ble_data.notifications_enabled = 1;
-			if (!ledger_ble_data.connection_updated) {
-				ledger_ble_data.connection_updated = 1;
-				aci_l2cap_connection_parameter_update_req(ledger_ble_data.connection.connection_handle,
-				                                          BLE_SLAVE_CONN_INTERVAL_MIN, BLE_SLAVE_CONN_INTERVAL_MIN,
-				                                          ledger_ble_data.connection.conn_latency,
-				                                          ledger_ble_data.connection.supervision_timeout);
-			}
-			else if (!ledger_protocol_data.mtu_negotiated) {
+			if (!ledger_protocol_data.mtu_negotiated) {
 				aci_gatt_exchange_config(ledger_ble_data.connection.connection_handle);
 			}
 		}
