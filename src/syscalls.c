@@ -26,6 +26,7 @@
 #endif //defined(HAVE_LANGUAGE_PACK)
 #ifdef HAVE_NBGL
 #include "nbgl_types.h"
+#include "nbgl_fonts.h"
 #include "os_pic.h"
 #endif
 #if defined(HAVE_VSS)
