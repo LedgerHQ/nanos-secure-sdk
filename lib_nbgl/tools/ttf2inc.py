@@ -53,9 +53,12 @@ class TTF2INC (object):
         # Get font metrics:
         # - ascent: distance from the baseline to the highest outline point.
         # - descent: distance from the baseline to the lowest outline point.
+        # (descent is a negative value)
         self.ascent, self.descent = self.font.getmetrics()
         if self.args.verbose:
-            sys.stdout.write(f"ascent={self.ascent}, descent={self.descent}\n")
+            sys.stdout.write(f"ascent={self.ascent}, descent={self.descent}, "\
+                             f"size={self.font.size}, "\
+                             f"font.height={self.font.font.height}\n")
 
         self.font_height = self.font.font.height
 
@@ -113,7 +116,8 @@ class TTF2INC (object):
         # (in fact there is a plane value from 0 to 16 then a 16-bit code)
         unicode_value = f"0x{ord(char):06X}"
         # Get text size of the character:
-        width, height = self.font.getsize(char)
+        left, top, right, bottom = self.font.getbbox(char)
+        width, height = right - left, bottom - top
 
         # Build full path of the destination file:
         filename = f"nbgl_font_{self.basename}_{unicode_value}"
