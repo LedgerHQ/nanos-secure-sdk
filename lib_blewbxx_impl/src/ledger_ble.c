@@ -1126,7 +1126,14 @@ void LEDGER_BLE_receive(void)
 
 void LEDGER_BLE_enable_advertising(uint8_t enable)
 {
-	if (G_io_app.ble_ready) {
+	if (  (G_io_app.name_changed)
+	    &&(G_io_app.ble_ready)
+	    &&(!enable)
+	    &&(ledger_ble_data.connection.connection_handle != 0xFFFF)
+	   ) {
+		G_io_app.name_changed = 0;
+	}
+	else if (G_io_app.ble_ready) {
 		if (enable) {
 			G_io_app.enabling_advertising = 1;
 			G_io_app.disabling_advertising = 0;
