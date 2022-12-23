@@ -16,8 +16,6 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "bagl_font_lucida_console_8.inc"
-
 // Nano S
 #include "bagl_font_open_sans_extrabold_11px.inc"
 #include "bagl_font_open_sans_light_16px.inc"

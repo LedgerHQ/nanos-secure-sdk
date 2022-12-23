@@ -88,10 +88,6 @@ static const bagl_element_t ux_layout_pages_elements[] = {
 #endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 };
 
-// Height & Baseline of regular & extrabold fonts:
-#define FONT_HEIGHT   12
-#define FONT_BASELINE 9
-
 // X Coordinate & width of text when there is an icon centered on the side:
 #define BAGL_ICON_TEXT_XCOORD 38
 #define BAGL_ICON_TEXT_WIDTH  (BAGL_WIDTH - BAGL_ICON_TEXT_XCOORD)

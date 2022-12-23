@@ -15,6 +15,7 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
+#include <stdint.h>
 
 #ifndef BAGL_H_
 #define BAGL_H_
@@ -38,6 +39,9 @@
 #define BAGL_FILL_CIRCLE_0_PI2 (BAGL_FILL_CIRCLE_5_OCTANT|BAGL_FILL_CIRCLE_6_OCTANT)
 #define BAGL_FILL_CIRCLE_PI2_PI (BAGL_FILL_CIRCLE_7_OCTANT|BAGL_FILL_CIRCLE_8_OCTANT)
 
+// Height & Baseline of regular & extrabold fonts (non unicode characters)
+#define FONT_HEIGHT   12
+#define FONT_BASELINE 9
 
 // --------------------------------------------------------------------------------------
 
@@ -128,12 +132,14 @@ extern const unsigned int C_glyph_count;
 #endif // HAVE_BAGL_GLYPH_ARRAY
 
 // --------------------------------------------------------------------------------------
-
+// WARNING: please DON'T CHANGE the order of the fields below!
+// (otherwise python tools that generate data will need to be modified too)
 typedef struct {
-  unsigned char char_width;
-  unsigned char bitmap_byte_count;
-  //unsigned char const * bitmap; // save space by only keeping the offset (2 bytes) instead of the char address (4 bytes)
-  unsigned short bitmap_offset;
+    uint32_t  char_width:4;
+    uint32_t  y_offset:4;
+    uint32_t  x_offset:3;   // Added to char_leftmost_x to allow neg values
+    uint32_t  bitmap_byte_count:5;
+    uint32_t  bitmap_offset:16;
 } bagl_font_character_t;
 
 typedef struct {
@@ -141,7 +147,7 @@ typedef struct {
   unsigned char bpp; // for antialiased fonts
   unsigned char char_height;
   unsigned char baseline_height;
-  unsigned char char_kerning; // specific to the font
+  signed char char_leftmost_x;  // Most left X coordinate of any char in the font
   unsigned short first_char;
   unsigned short last_char;
   const bagl_font_character_t * const characters;
@@ -160,12 +166,15 @@ extern const bagl_font_t * const C_bagl_fonts [];
 
 #define BAGL_ENCODING_DEFAULT BAGL_ENCODING_UTF8
 
+// WARNING: please DON'T CHANGE the order of the fields below!
+// (otherwise python tools that generate data will need to be modified too)
 typedef struct {
-  unsigned int  char_unicode; // unicode = plane value from 0 to 16 then 16-bit code.
-  unsigned char char_width;
-  unsigned char bitmap_byte_count;
-  //unsigned char const * bitmap; // save space by only keeping the offset (2 bytes) instead of the char address (4 bytes)
-  unsigned short bitmap_offset;
+  uint32_t  char_unicode:21;  // plane value from 0 to 16 then 16-bit code.
+  uint32_t  char_width:6;
+  uint32_t  x_offset:5;       // Added to char_leftmost_x to allow neg values
+  uint32_t  y_offset:6;
+  uint32_t  bitmap_byte_count:10;
+  uint32_t  bitmap_offset:16;
 } bagl_font_unicode_character_t;
 
 typedef struct {
@@ -173,7 +182,7 @@ typedef struct {
   unsigned char bpp; // for antialiased fonts
   unsigned char char_height;
   unsigned char baseline_height;
-  unsigned char char_kerning; // specific to the font
+  signed char char_leftmost_x;  // Most left X coordinate of any char in the font
   unsigned int first_unicode_char;
   unsigned int last_unicode_char;
 #if !defined(HAVE_LANGUAGE_PACK)

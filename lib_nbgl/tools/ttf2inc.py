@@ -561,6 +561,8 @@ if __name__ == "__main__":
                     ttf_info_list.append(ttf_info_dictionary)
                     with open(inc_json, "w") as json_file:
                         json.dump(ttf_info_list, json_file)
+                        # Be sure there is a newline at the end of the file
+                        json_file.write("\n")
 
                 if args.test_align != None:
                     string_width = 0

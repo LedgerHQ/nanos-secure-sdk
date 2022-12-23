@@ -28,18 +28,6 @@
 
 #include "bagl_font_rom.inc"
 
-const bagl_font_t fontNONE = {
-	(unsigned int)-1, /* last font id */
-	 0 , /* font bit per pixels */
-   0 , /* font height in pixels   */
-   0 , /* baseline distance from top */
-   0, /* kerning */
-   0x0000, /* first character */
-   0x0000, /* last character  */
-   NULL,  /* address of first character */
-   NULL   /* bitmap address*/
-};
-
 const bagl_font_t* const C_bagl_fonts[] = {
 
 #include "bagl_font_rom_struct.inc"

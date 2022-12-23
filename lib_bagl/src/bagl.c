@@ -382,7 +382,8 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 #endif //defined(HAVE_UNICODE_SUPPORT)
 
     unsigned char ch_height = font->char_height;
-    unsigned char ch_kerning = 0;
+    int ch_offset_x = 0;
+    int ch_offset_y = 0;
     unsigned char ch_width = 0;
     uint16_t      ch_bits = 0;
     const unsigned char * ch_bitmap = NULL;
@@ -416,9 +417,15 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 #else //defined(HAVE_LANGUAGE_PACK)
         ch_bitmap = PIC_BMPU(font_unicode->bitmap);
 #endif //defined(HAVE_LANGUAGE_PACK)
-        ch_bitmap += (PIC_CHARU(character))->bitmap_offset;
+        ch_bitmap += character->bitmap_offset;
 
-        ch_kerning = font_unicode->char_kerning;
+        // char_leftmost_x is usually a negative value or 0
+        ch_offset_x = (unsigned int)character->x_offset;
+        ch_offset_x += (int)font_unicode->char_leftmost_x;
+        ch_offset_y = (unsigned int)character->y_offset;
+        // Take in account the difference of baseline with reference value
+        ch_offset_y -= (int)font_unicode->baseline_height - (int)FONT_BASELINE;
+        ch_width -= character->x_offset;
         bpp = font_unicode->bpp;
       } else
 #endif //defined(HAVE_UNICODE_SUPPORT)
@@ -447,24 +454,30 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
       ch_width = PIC_CHAR(font->characters)[ch].char_width;
       ch_bits = PIC_CHAR(font->characters)[ch].bitmap_byte_count * 8;
 
-      ch_kerning = font->char_kerning;
+      // char_leftmost_x is usually a negative value or 0
+      ch_offset_x = (unsigned int)PIC_CHAR(font->characters)[ch].x_offset;
+      ch_offset_x += (int)font->char_leftmost_x;
+      ch_offset_y = (unsigned int)PIC_CHAR(font->characters)[ch].y_offset;
+      // Take in account the difference of baseline with reference value
+      ch_offset_y -= (int)font->baseline_height - (int)FONT_BASELINE;
+      ch_width -= PIC_CHAR(font->characters)[ch].x_offset           ;
     }
 
     if (dont_draw) {
-      // go to next line if needed, kerning is not used here
-      if (width > 0 && xx + (unsigned int)ch_width > width) {
+      // go to next line if needed
+      if ((int)width > 0 && (xx + ch_offset_x + (int)ch_width) > (int)width) {
         return xx;
       }
       // prepare for next char
-      xx += ch_width;
+      xx += ch_offset_x + (int)ch_width;
 
     } else {
       // go to next line if needed
-      if (xx + ch_width > (int)width) {
-        y += ch_height; // no interleave
+      if ((xx + ch_offset_x + (int)ch_width) > (int)width) {
+        y += FONT_HEIGHT; // no interleave
 
         // IGNORED for first line
-        if (y + ch_height > (int)height) {
+        if ((y + ch_offset_y + (int)ch_height) > (int)height) {
           // we're writing half height of the last line ... probably better to put some dashes
           return (y<<16)|(xx&0xFFFF);
         }
@@ -483,13 +496,13 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 
       // chars are storred LSB to MSB in each char, packed chars. horizontal scan
       if (ch_bitmap) {
-        bagl_hal_draw_bitmap_within_rect(xx, ch_y, ch_width, ch_height, (1<<bpp), colors, bpp, ch_bitmap, ch_bits);
+        bagl_hal_draw_bitmap_within_rect(xx + ch_offset_x, ch_y + ch_offset_y, ch_width, ch_height, (1<<bpp), colors, bpp, ch_bitmap, ch_bits);
       }
       else {
         bagl_hal_draw_rect(bgcolor, xx, ch_y, ch_width, ch_height);
       }
       // prepare for next char
-      xx += ch_width + ch_kerning;
+      xx += ch_offset_x + (int)ch_width;
     }
   }
 
