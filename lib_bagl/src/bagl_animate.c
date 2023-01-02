@@ -218,12 +218,17 @@ static void circle_common_init(bagl_anim_t *anim,
                                const unsigned char *label,
                                size_t len) {
   anim->circle.char_idx_limit = len - 1 + sizeof(DELIMITER) - 1;
-  anim->len = MIN(MAX_LABEL_SIZE, 2 * len + sizeof(DELIMITER));
+  anim->len = 0;
 
   /* <--    len     --><-- len(DELIMITER) --><--    len    -->
      [     label      ][                    ][     label     ] */
-  snprintf((char*)anim->label, anim->len,
-           "%s%s%s", label, DELIMITER, label);
+
+  while ((anim->len+len + sizeof(DELIMITER)) < MAX_LABEL_SIZE) {
+    snprintf((char*)(anim->label+anim->len), sizeof(anim->label)-anim->len,
+            "%s%s", label, DELIMITER);
+    anim->len += len + sizeof(DELIMITER);
+  }
+  anim->len -= sizeof(DELIMITER);
 
   // compute once the total width in pixel of the label
   anim->tot_w = bagl_compute_line_width(component.font_id, 0,
@@ -246,6 +251,7 @@ static void circle_rl_step(bagl_anim_t *anim) {
   /* Reset when needed */
   if (anim->cur_char_idx == anim->circle.char_idx_limit) {
     animation_reset(anim);
+    ++anim->cur_x;
     return;
   }
 
@@ -273,6 +279,7 @@ static void circle_lr_step(bagl_anim_t *anim) {
   if (anim->cur_char_displayed_w >= anim->cur_char_w) {
     if (anim->cur_char_idx == 0) {
       animation_reset(anim);
+      ++anim->cur_x;
       return;
     }
     --anim->cur_char_idx;
