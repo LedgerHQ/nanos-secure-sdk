@@ -18,8 +18,8 @@
 
 // Margin on left and width of displayed text
 #define SCREEN_MARGIN_PIXEL 8
-#define LEFT_MARGIN SCREEN_MARGIN_PIXEL
-#define BOX_WIDTH (BAGL_WIDTH - (SCREEN_MARGIN_PIXEL * 2))
+#define LEFT_MARGIN 0
+#define BOX_WIDTH BAGL_WIDTH+SCREEN_MARGIN_PIXEL
 
 // Margin on top and height of the displayed text
 #define TOP_MARGIN ((BAGL_HEIGHT - FONT_HEIGHT_PIXEL) / 2)
@@ -93,6 +93,11 @@ static void animation_draw(bagl_anim_t *anim) {
                    component.width, component.height,
                    start_label, len,
                    ENCODING);
+
+  bagl_hal_draw_rect(component.bgcolor, 0, 0,
+                     SCREEN_MARGIN_PIXEL, BAGL_HEIGHT);
+  bagl_hal_draw_rect(component.bgcolor, BAGL_WIDTH-SCREEN_MARGIN_PIXEL, 0,
+                     SCREEN_MARGIN_PIXEL, BAGL_HEIGHT);
 }
 
 /**
