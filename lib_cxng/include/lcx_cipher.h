@@ -50,8 +50,8 @@ typedef struct {
 
 /** Base cipher information */
 typedef struct {
-    cx_err_t (*enc_func)(const cipher_key_t *ctx_key, const uint8_t *in_block, uint8_t *out_block); ///< Encryption function
-    cx_err_t (*dec_func)(const cipher_key_t *ctx_key, const uint8_t *in_block, uint8_t *out_block); ///< Decryption function
+    cx_err_t (*enc_func)(const uint8_t *in_block, uint8_t *out_block); ///< Encryption function
+    cx_err_t (*dec_func)(const uint8_t *in_block, uint8_t *out_block); ///< Decryption function
     cx_err_t (*ctr_func)(const cipher_key_t *ctx_key, size_t len, size_t *nc_off, uint8_t *nonce_counter,
                          uint8_t *stream_block, const uint8_t *input, uint8_t *output);             ///< Encryption in CTR mode
     cx_err_t (*setkey_func)(const cipher_key_t *ctx_key, uint32_t operation, const uint8_t *key,
