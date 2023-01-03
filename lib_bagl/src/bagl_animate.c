@@ -19,7 +19,7 @@
 // Margin on left and width of displayed text
 #define SCREEN_MARGIN_PIXEL 8
 #define LEFT_MARGIN 0
-#define BOX_WIDTH BAGL_WIDTH+SCREEN_MARGIN_PIXEL
+#define BOX_WIDTH BAGL_WIDTH
 
 // Margin on top and height of the displayed text
 #define TOP_MARGIN ((BAGL_HEIGHT - FONT_HEIGHT_PIXEL) / 2)

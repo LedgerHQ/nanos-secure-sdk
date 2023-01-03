@@ -56,9 +56,9 @@ typedef enum anim_type_e {
 } anim_type_t;
 
 typedef enum anim_speed_e {
-  ANIMATION_SPEED_FAST,   // 10ms between two refreshs
-  ANIMATION_SPEED_NORMAL, // 30ms between two refreshs
-  ANIMATION_SPEED_SLOW,   // 60ms between two refreshs
+  ANIMATION_SPEED_FAST,   // 10ms between two refreshes
+  ANIMATION_SPEED_NORMAL, // 30ms between two refreshes
+  ANIMATION_SPEED_SLOW,   // 60ms between two refreshes
   ANIMATION_SPEED_END
 } anim_speed_t;
 
