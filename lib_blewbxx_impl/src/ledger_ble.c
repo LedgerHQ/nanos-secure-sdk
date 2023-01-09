@@ -676,7 +676,12 @@ static void hci_evt_vendor(uint8_t *buffer, uint16_t length)
 
 		case SMP_PAIRING_STATUS_PAIRING_FAILED:
 			LOG_BLE(" FAILED : %02X\n", buffer[5]);
-			end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
+			if (buffer[5] == 0x08) { // UNSPECIFIED_REASON
+				end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_CANCELLED_FROM_REMOTE);
+			}
+			else {
+				end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
+			}
 			break;
 
 		default:
