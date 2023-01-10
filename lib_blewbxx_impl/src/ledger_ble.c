@@ -774,6 +774,10 @@ static void rsp_user_pairing_numeric_comparison(unsigned int status)
 		end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_CONFIRM_CODE_YES);
 		aci_gap_numeric_comparison_value_confirm_yesno(ledger_ble_data.connection.connection_handle, 1);
 	}
+	else if (status == BOLOS_UX_IGNORE) {
+		ledger_ble_data.pairing_in_progress = 0;
+		aci_gap_numeric_comparison_value_confirm_yesno(ledger_ble_data.connection.connection_handle, 0);
+	}
 	else {
 		end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_CONFIRM_CODE_NO);
 		aci_gap_numeric_comparison_value_confirm_yesno(ledger_ble_data.connection.connection_handle, 0);
