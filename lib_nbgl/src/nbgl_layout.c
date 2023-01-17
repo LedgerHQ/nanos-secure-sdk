@@ -181,9 +181,9 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   // case of switch
   if ((obj->type == CONTAINER) &&
       (((nbgl_container_t*)obj)->nbChildren >= 2) &&
-      (((nbgl_container_t*)obj)->children[0] != NULL) &&
-      (((nbgl_container_t*)obj)->children[0]->type == SWITCH)) {
-    nbgl_switch_t *lSwitch = (nbgl_switch_t*)((nbgl_container_t*)obj)->children[0];
+      (((nbgl_container_t*)obj)->children[1] != NULL) &&
+      (((nbgl_container_t*)obj)->children[1]->type == SWITCH)) {
+    nbgl_switch_t *lSwitch = (nbgl_switch_t*)((nbgl_container_t*)obj)->children[1];
     lSwitch->state = (lSwitch->state == ON_STATE)?OFF_STATE:ON_STATE;
     nbgl_redrawObject((nbgl_obj_t *)lSwitch,false,false);
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
@@ -761,28 +761,28 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayou
   container->touchMask = (1<<TOUCHED);
   container->touchCallback = (nbgl_touchCallback_t)&touchCallback;
 
-  switchObj = (nbgl_switch_t *)nbgl_objPoolGet(SWITCH,layoutInt->layer);
-  switchObj->onColor = BLACK;
-  switchObj->offColor = LIGHT_GRAY;
-  switchObj->state = switchLayout->initState;
-  switchObj->alignment = TOP_RIGHT;
-  switchObj->alignmentMarginY = BORDER_MARGIN-INNER_MARGIN;
-  switchObj->alignTo = NULL;
-  switchObj->touchCallback = NULL;
-
   textArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
   textArea->textColor = BLACK;
   textArea->text = PIC(switchLayout->text);
   textArea->textAlignment = MID_LEFT;
   textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
-  textArea->width = container->width-64;
+  textArea->width = container->width-60; // the width icon has 60px width
   textArea->height = nbgl_getTextHeight(BAGL_FONT_INTER_SEMIBOLD_24px,textArea->text);
   container->height += textArea->height;
   textArea->style = NO_STYLE;
   textArea->alignment = TOP_LEFT;
   textArea->alignmentMarginY = BORDER_MARGIN;
-  container->children[0] = (nbgl_obj_t*)switchObj;
-  container->children[1] = (nbgl_obj_t*)textArea;
+  container->children[0] = (nbgl_obj_t*)textArea;
+
+  switchObj = (nbgl_switch_t *)nbgl_objPoolGet(SWITCH,layoutInt->layer);
+  switchObj->onColor = BLACK;
+  switchObj->offColor = LIGHT_GRAY;
+  switchObj->state = switchLayout->initState;
+  switchObj->alignment = MID_RIGHT;
+  switchObj->alignTo = (nbgl_obj_t*)textArea;
+  switchObj->touchCallback = NULL;
+  container->children[1] = (nbgl_obj_t*)switchObj;
+
   if (switchLayout->subText != NULL) {
     subTextArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
     subTextArea->textColor = DARK_GRAY;
