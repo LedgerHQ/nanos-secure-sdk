@@ -46,6 +46,16 @@ ifeq ($(filter clean,$(MAKECMDGOALS)),)
 -include $(DEPEND_FILES)
 endif
 
+listinfo:
+	@echo TARGET=$(TARGET)
+	@echo TARGET_NAME=$(TARGET_NAME)
+	@echo TARGET_ID=$(TARGET_ID)
+	@echo TARGET_VERSION=$(TARGET_VERSION)
+	@echo APPNAME=$(APPNAME)
+	@echo APPVERSION=$(APPVERSION)
+	@echo SDK_NAME=$(SDK_NAME)
+	@echo SDK_HASH=$(SDK_HASH)
+
 clean:
 	rm -fr obj bin debug dep $(GLYPH_DESTC) $(GLYPH_DESTH)
 
