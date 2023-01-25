@@ -3,7 +3,7 @@
 @section mainpage_intro Introduction
 
 This documentation describes the different interfaces of <b>NBGL</b>, the library that
-is targeted to be integrated in Fatstacks product.
+is targeted to be integrated in Stax product.
 
 <b>NBGL Engine</b> is responsible for constructing screens and handling Touchscreen input.
 

@@ -208,7 +208,7 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   'u', 0,
   's', 0,
 };
-#elif defined(TARGET_FATSTACKS)
+#elif defined(TARGET_STAX)
 #ifndef HAVE_LEGACY_PID
 #define USBD_PID                      0x6000
 #else // HAVE_LEGACY_PID

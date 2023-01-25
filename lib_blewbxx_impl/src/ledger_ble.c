@@ -179,7 +179,7 @@ static void check_transfer_mode(uint8_t enable);
 /* Exported variables --------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-#ifdef TARGET_FATSTACKS
+#ifdef TARGET_STAX
 const uint8_t service_uuid[16] = {0x72,0x65,0x67,0x64,0x65,0x4c,0x00,0x00,0x04,0x60,0x97,0x2C,0x00,0x34,0xD6,0x13,};
 const uint8_t charUuidTX[16]   = {0x72,0x65,0x67,0x64,0x65,0x4c,0x01,0x00,0x04,0x60,0x97,0x2C,0x00,0x34,0xD6,0x13,};
 const uint8_t charUuidRX[16]   = {0x72,0x65,0x67,0x64,0x65,0x4c,0x02,0x00,0x04,0x60,0x97,0x2C,0x00,0x34,0xD6,0x13,};
@@ -445,11 +445,11 @@ static void init_mngr(uint16_t opcode, uint8_t *buffer, uint16_t length)
 	case BLE_INIT_STEP_SET_TX_POWER_LEVEL:
 		ledger_ble_data.hci_cmd_opcode = 0xfc0f;
 		aci_hal_set_tx_power_level(1,     // High power (ignored)
-#ifdef TARGET_FATSTACKS
+#ifdef TARGET_STAX
 		                           0x19); // 0 dBm
-#else // !TARGET_FATSTACKS
+#else // !TARGET_STAX
 		                           0x07); // -14.1 dBm
-#endif // !TARGET_FATSTACKS
+#endif // !TARGET_STAX
 		break;
 
 	case BLE_INIT_STEP_CONFIGURE_ADVERTISING:
