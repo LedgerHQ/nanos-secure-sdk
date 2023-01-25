@@ -69,6 +69,8 @@ typedef struct io_touch_info_s {
     uint16_t x;
     uint16_t y;
     uint8_t state;
+    uint8_t w;
+    uint8_t h;
 } io_touch_info_t;
 
 SYSCALL void touch_get_last_info(io_touch_info_t *info);
