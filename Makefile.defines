@@ -43,6 +43,15 @@ endif
 COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSION)" --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize $$((0x`cat debug/app.map |grep _envram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'` - 0x`cat debug/app.map |grep _nvram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'`)) `ICONHEX=\`python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
 COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
 
+OBJ_PREFIX := obj
+DBG_PREFIX := debug
+DEP_PREFIX := dep
+GEN_SRC_PREFIX := gen_src
+OBJ_DIR := $(OBJ_PREFIX)_$(TARGET)
+DBG_DIR := $(DBG_PREFIX)_$(TARGET)
+DEP_DIR := $(DEP_PREFIX)_$(TARGET)
+GEN_SRC_DIR := $(GEN_SRC_PREFIX)_$(TARGET)
+
 ### platform definitions
 DEFINES += gcc __IO=volatile
 
@@ -86,7 +95,7 @@ LDFLAGS  += -Wall
 LDFLAGS  += -mcpu=cortex-m0plus -mthumb
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program
 LDFLAGS  += -mno-unaligned-access
-LDFLAGS  += -Wl,--gc-sections -Wl,-Map,debug/app.map
+LDFLAGS  += -Wl,--gc-sections -Wl,-Map,$(DBG_DIR)/app.map
 LDFLAGS  += --specs=nano.specs
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
