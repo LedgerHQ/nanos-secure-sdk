@@ -57,23 +57,29 @@ listinfo:
 	@echo SDK_HASH=$(SDK_HASH)
 
 clean:
-	rm -fr obj bin debug dep $(GLYPH_DESTC) $(GLYPH_DESTH)
+	rm -fr $(OBJ_PREFIX)_* $(DBG_PREFIX)_* $(DEP_PREFIX)_* $(GEN_SRC_PREFIX)_* bin debug
+
+clean_target:
+	rm -fr $(OBJ_DIR) $(DBG_DIR) $(DEP_DIR) $(GEN_SRC_DIR) bin debug
 
 prepare:
 	$(L)echo Prepare directories
-	@mkdir -p bin obj debug dep
+	@mkdir -p $(OBJ_DIR) $(DBG_DIR) $(DEP_DIR) $(GEN_SRC_DIR) bin debug
 
-default: bin/app.apdu
+BIN_TARGETS := bin/app.elf bin/app.apdu bin/app.sha256 bin/app.hex
+DBG_TARGETS := debug/app.map debug/app.asm
 
-obj/%.o: %.c $(GLYPH_DESTC) prepare Makefile
+default: $(BIN_TARGETS) $(DBG_TARGETS)
+
+$(OBJ_DIR)/%.o: %.c $(GLYPH_DESTC) prepare Makefile
 	@echo "[CC]   $@"
 	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
-obj/%.o: %.s
+$(OBJ_DIR)/%.o: %.s
 	@echo "[AS]   $@"
 	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
-obj/%.o: %.S
+$(OBJ_DIR)/%.o: %.S
 	@echo "[AS]   $@"
 	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
@@ -84,12 +90,11 @@ $(info Using custom link script: $(SCRIPT_LD))
 endif
 LDFLAGS  += -T$(SCRIPT_LD)
 
-bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
-	@echo "[LINK] $@"
-	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$@)
-	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex
-	$(L)cp bin/app.elf obj
-	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm
+$(OBJ_DIR)/app.elf $(OBJ_DIR)/app.hex $(DBG_DIR)/app.map $(DBG_DIR)/app.asm: $(OBJECT_FILES) $(SCRIPT_LD)
+	@echo "[LINK] $(OBJ_DIR)/app.elf"
+	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$(OBJ_DIR)/app.elf)
+	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S $(OBJ_DIR)/app.elf $(OBJ_DIR)/app.hex
+	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d $(OBJ_DIR)/app.elf > $(DBG_DIR)/app.asm
 	$(L)$(call objcopy_add_section_cmdline,$(TARGET), ledger.target)
 	$(L)$(call objcopy_add_section_cmdline,$(TARGET_NAME), ledger.target_name)
 	$(L)$(call objcopy_add_section_cmdline,$(TARGET_ID), ledger.target_id)
@@ -100,8 +105,20 @@ bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	$(L)$(call objcopy_add_section_cmdline,$(SDK_VERSION), ledger.sdk_version)
 	$(L)$(call objcopy_add_section_cmdline,$(SDK_HASH), ledger.sdk_hash)
 
-bin/app.apdu bin/app.sha256: bin/app.elf
-	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256
+$(OBJ_DIR)/app.apdu $(OBJ_DIR)/app.sha256: bin/app.hex debug/app.map
+	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline $(OBJ_DIR)/app.apdu | grep "Application" | cut -f5 -d' ' > $(OBJ_DIR)/app.sha256
+
+# Set PHONY to force the copy to bin in case we rebuild a previous TARGET
+.PHONY: bin/app.elf bin/app.hex bin/app.apdu bin/app.sha256
+bin/app.elf bin/app.hex bin/app.apdu bin/app.sha256: bin/app.%: $(OBJ_DIR)/app.%
+	@echo "[CP] $< => $@"
+	$(L)cp $< $@
+
+# Set PHONY to force the copy to debug in case we rebuild a previous TARGET
+.PHONY: debug/app.map debug/app.asm
+debug/app.map debug/app.asm: debug/app.%: $(DBG_DIR)/app.%
+	@echo "[CP] $< => $@"
+	$(L)cp $< $@
 
 ### BEGIN GCC COMPILER RULES
 
@@ -113,7 +130,7 @@ endif
 
 # cc_cmdline(include,defines,src,dest)	Macro that is used to format arguments for the compiler
 # dependency files are generated along the object file
-cc_cmdline = $(CC) -c $(CFLAGS) -MMD -MT obj/$(basename $(notdir $(4))).o -MF dep/$(basename $(notdir $(4))).d $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
+cc_cmdline = $(CC) -c $(CFLAGS) -MMD -MT $(OBJ_DIR)/$(basename $(notdir $(4))).o -MF $(DEP_DIR)/$(basename $(notdir $(4))).d $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
 
 as_cmdline = $(AS) -c $(AFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
 
@@ -121,7 +138,8 @@ as_cmdline = $(AS) -c $(AFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4
 TMPFILE := $(shell mktemp)
 objcopy_add_section_cmdline = echo $(1) > $(TMPFILE) && \
     $(GCCPATH)arm-none-eabi-objcopy --add-section $(2)="$(TMPFILE)" \
-	--set-section-flags $(2)=noload,readonly bin/app.elf bin/app.elf && \
+	--set-section-flags $(2)=noload,readonly \
+	$(OBJ_DIR)/app.elf $(OBJ_DIR)/app.elf && \
 	rm $(TMPFILE)
 
 ### END GCC COMPILER RULES
