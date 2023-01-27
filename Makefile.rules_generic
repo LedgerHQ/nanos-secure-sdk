@@ -89,6 +89,14 @@ bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S bin/app.elf bin/app.hex
 	$(L)cp bin/app.elf obj
 	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d bin/app.elf > debug/app.asm
+	$(L)$(call objcopy_add_section_cmdline,$(TARGET), ledger.target)
+	$(L)$(call objcopy_add_section_cmdline,$(TARGET_NAME), ledger.target_name)
+	$(L)$(call objcopy_add_section_cmdline,$(TARGET_ID), ledger.target_id)
+	$(L)$(call objcopy_add_section_cmdline,$(APPNAME), ledger.app_name)
+	$(L)$(call objcopy_add_section_cmdline,$(APPVERSION), ledger.app_version)
+	$(L)$(call objcopy_add_section_cmdline,$(API_LEVEL), ledger.api_level)
+	$(L)$(call objcopy_add_section_cmdline,$(SDK_NAME), ledger.sdk_name)
+	$(L)$(call objcopy_add_section_cmdline,$(SDK_HASH), ledger.sdk_hash)
 
 bin/app.apdu bin/app.sha256: bin/app.elf
 	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline bin/app.apdu | grep "Application" | cut -f5 -d' ' > bin/app.sha256
@@ -106,6 +114,13 @@ endif
 cc_cmdline = $(CC) -c $(CFLAGS) -MMD -MT obj/$(basename $(notdir $(4))).o -MF dep/$(basename $(notdir $(4))).d $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
 
 as_cmdline = $(AS) -c $(AFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
+
+# objcopy_add_section_cmdline(data,section_name)
+TMPFILE := $(shell mktemp)
+objcopy_add_section_cmdline = echo $(1) > $(TMPFILE) && \
+    $(GCCPATH)arm-none-eabi-objcopy --add-section $(2)="$(TMPFILE)" \
+	--set-section-flags $(2)=noload,readonly bin/app.elf bin/app.elf && \
+	rm $(TMPFILE)
 
 ### END GCC COMPILER RULES
 
