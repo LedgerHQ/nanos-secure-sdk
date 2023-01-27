@@ -1082,16 +1082,14 @@ static bolos_bool_t io_process_default_apdus(unsigned char* channel, unsigned sh
           *tx_len = 0;
           G_io_apdu_buffer[(*tx_len)++] = 0x90;
           G_io_apdu_buffer[(*tx_len)++] = 0x00;
-
-#if defined(HAVE_BOLOS)
+          // disable 'return after tx' and 'asynch reply' flags
+          *channel &= ~IO_FLAGS;
           // If this APDU has been received from the dashboard, we don't do
           // anything except resetting the IO flags.
-          *channel &= ~IO_FLAGS;
-#else
+#if !defined(HAVE_BOLOS)
           // We exit the application after having replied.
           *channel |= IO_RESET_AFTER_REPLIED;
-#endif // HAVE_BOLOS
-
+#endif
           processed = BOLOS_TRUE;
         }
         break;
