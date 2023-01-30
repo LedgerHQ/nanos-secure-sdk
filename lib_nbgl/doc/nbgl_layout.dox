@@ -448,7 +448,8 @@ Here is the source code to display this first example:
 @code
 enum {
   BACK_BUTTON_TOKEN = 0,
-  CONTINUE_BUTTON_TOKEN
+  CONTINUE_BUTTON_TOKEN,
+  KBD_TEXT_TOKEN
 };
 
 static char textToEnter[48];
@@ -468,6 +469,9 @@ static void layoutTouchCallback(int token, uint8_t index) {
     // go back to main screen of app
     nbgl_layoutRelease(layout);
     app_main();
+  }
+  else if (token == KBD_TEXT_TOKEN) {
+    // do something with entered text
   }
 }
 
@@ -527,7 +531,8 @@ void app_keyboard(void) {
                                           0,           // not used
                                           textToEnter, // text to display
                                           false,       // not grayed-out
-                                          32);         // vertical margin from the button
+                                          32,          // vertical margin from the button
+                                          KBD_TEXT_TOKEN); // token used when this area is touched
 
     // draw layout
     nbgl_layoutDraw(layout);
@@ -543,7 +548,8 @@ Here is the source code to display this second example (with simulated transitio
 @code
 enum {
   BACK_BUTTON_TOKEN = 0,
-  FIRST_SUGGESTION_TOKEN
+  FIRST_SUGGESTION_TOKEN,
+  KBD_TEXT_TOKEN
 };
 
 static nbgl_layout_t *layout;
@@ -652,7 +658,8 @@ void app_keyboard(void) {
                                           wordNum,     // number to use
                                           textToEnter, // text to display
                                           false,       // not grayed-out
-                                          32);         // vertical margin from the buttons
+                                          32,          // vertical margin from the buttons
+                                          KBD_TEXT_TOKEN);
     // draw layout
     nbgl_layoutDraw(layout);
 }

@@ -150,6 +150,7 @@ typedef struct {
     uint8_t nbPairs; ///< number of pairs in pairs array (or max number of pairs to retrieve with callback)
     uint8_t startIndex; ///< index of the first pair to get with callback
     uint8_t nbMaxLinesForValue; ///< if > 0, set the max number of lines for value field. And the last line is ended with "..." instead of the 3 last chars
+    uint8_t token; ///< the token that will be used as argument of the callback if icon in any tag/value pair is touched (index is the index of the pair in pairs[])
     bool smallCaseForValue; ///< if set to true, a 24px font is used for value text, otherwise a 32px font is used
     bool wrapping; ///< if set to true, value text will be wrapped on ' ' to avoid cutting words
 } nbgl_layoutTagValueList_t;
@@ -299,7 +300,7 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons
                                     int firstButtonToken, tune_index_e tuneId);
 int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uint8_t nbUsedButtons,
                                     char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]);
-int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY);
+int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY, int token);
 int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, char *text, bool grayedOut);
 int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *text, int token, tune_index_e tuneId);
 int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, char *text);

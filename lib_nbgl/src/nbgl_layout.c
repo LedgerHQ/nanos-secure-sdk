@@ -2122,18 +2122,22 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uin
  *        A vertical gray line is placed under the text.
  *        This text must be vertical placed in the screen with offsetY
  *
+ * @note This area is touchable
+ *
  * @param layout the current layout
  * @param numbered if true, the "number" param is used as index
  * @param number index of the text
  * @param text string to display in the area
  * @param grayedOut if true, the text is grayed out (but not the potential number)
  * @param offsetY vertical offset from the top of the page
+ * @param token token provided in onActionCallback when this area is touched
  * @return >= 0 if OK
  */
-int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY) {
+int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY, int token) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
   nbgl_line_t *line;
+  layoutObj_t *obj;
   static char numText[5];
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddEnteredText():\n");
@@ -2188,6 +2192,14 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
   }
   textArea->height = nbgl_getFontLineHeight(textArea->fontId);
   textArea->autoHideLongLine = true;
+
+  obj = addCallbackObj(layoutInt,(nbgl_obj_t*)textArea,token,NBGL_NO_TUNE);
+  if (obj == NULL)
+    return -1;
+  textArea->token = token;
+  textArea->touchMask = (1<<TOUCHED);
+  textArea->touchCallback = (nbgl_touchCallback_t)&touchCallback;
+
   // set this new text area as child of the container
   addObjectToLayout(layoutInt,(nbgl_obj_t*)textArea);
 
