@@ -1781,6 +1781,12 @@ void touch_get_last_info( io_touch_info_t *info ) {
   unsigned int parameters[1] = {(unsigned int) info};
   SVC_Call(SYSCALL_touch_get_last_info_ID, parameters);
 }
+
+void touch_set_state( bool state ) {
+  unsigned int parameters[1] = {(unsigned int) state};
+  SVC_Call(SYSCALL_set_touch_state_ID, parameters);
+}
+
 #endif // HAVE_SE_TOUCH
 
 #ifdef HAVE_IO_I2C
