@@ -186,6 +186,8 @@
 #define SEPROXYHAL_TAG_NBGL_SERIALIZED             0x5C
 #endif
 
+#define SEPROXYHAL_TAG_SET_TOUCH_STATE             0x5B
+
 #define SEPROXYHAL_TAG_PRINTF                      0x5F // <bytes to push to the printf buffer>
 #define SEPROXYHAL_TAG_DBG_SCREEN_DISPLAY_STATUS   0x5E // <bagl_component_t little endian>
 
