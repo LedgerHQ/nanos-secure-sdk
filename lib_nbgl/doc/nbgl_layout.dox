@@ -589,7 +589,7 @@ static void keyboardCallback(char touchedKey) {
     // remove any suggestion buttons because empty string
     nbgl_layoutUpdateSuggestionButtons(layout,suggestionIndex,0,buttonTexts);
     // clear keyboard mask
-    nbgl_layoutUpdateKeyboard(layout,keyboardIndex, 0x0);
+    nbgl_layoutUpdateKeyboard(layout,keyboardIndex, 0x0, LOWER_CASE);
   }
   else {
     // find up to NB_MAX_SUGGESTION_BUTTONS words beginning with textToEnter
@@ -599,7 +599,7 @@ static void keyboardCallback(char touchedKey) {
     // get keys to mask on keyboard for possible next letters
     uint32_t mask = getKeyboardMask(textToEnter);
     // use it for keyboard
-    nbgl_layoutUpdateKeyboard(layout,keyboardIndex, mask);
+    nbgl_layoutUpdateKeyboard(layout,keyboardIndex, mask, LOWER_CASE);
   }
   // be sure to redraw the text
   nbgl_layoutUpdateEnteredText(layout,textIndex,false,0,textToEnter,false);

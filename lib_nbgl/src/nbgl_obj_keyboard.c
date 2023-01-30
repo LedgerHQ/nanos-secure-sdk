@@ -157,11 +157,28 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
 
 
   if (keyboard->mode == MODE_LETTERS) {
+    keyboardCase_t cur_casing = keyboard->casing;
+    // if the casing mode was upper (not-locked), go back to lower case
+    if ((keyboard->casing == UPPER_CASE)&&(firstIndex != SHIFT_KEY_INDEX)) {
+      keyboard->casing = LOWER_CASE;
+      // just redraw, refresh will be done by client (user of keyboard)
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+    }
     if ((firstIndex<26)&&((keyboard->keyMask&(1<<firstIndex))==0)) {
-      keyboard->callback(keyboard->upperCase?kbd_chars_upper[firstIndex]:kbd_chars[firstIndex]);
+      keyboard->callback((cur_casing != LOWER_CASE)?kbd_chars_upper[firstIndex]:kbd_chars[firstIndex]);
     }
     else if (firstIndex==SHIFT_KEY_INDEX) {
-      keyboard->upperCase = (keyboard->upperCase == false)? true : false;
+      switch (keyboard->casing) {
+        case LOWER_CASE:
+          keyboard->casing = UPPER_CASE;
+          break;
+        case UPPER_CASE:
+          keyboard->casing = LOCKED_UPPER_CASE;
+          break;
+        case LOCKED_UPPER_CASE:
+          keyboard->casing = LOWER_CASE;
+          break;
+      }
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
       nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
@@ -179,7 +196,7 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
       nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
-    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
+    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
       keyboard->mode = MODE_LETTERS;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
     }
@@ -193,7 +210,7 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
       nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
-    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
+    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
       keyboard->mode = MODE_LETTERS;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
     }
@@ -351,7 +368,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   nbgl_area_t rectArea;
   char *keys;
 
-  if (keyboard->upperCase)
+  if (keyboard->casing != LOWER_CASE)
     keys = (char *)kbd_chars_upper;
   else
     keys = (char *)kbd_chars;
@@ -390,14 +407,14 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     rectArea.bpp = NBGL_BPP_1;
     rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2;
     rectArea.x0 = 1;
-    rectArea.backgroundColor = (keyboard->upperCase)?BLACK:WHITE;
+    rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
     nbgl_frontDrawRect(&rectArea);
     //draw horizontal line
     rectArea.width = SHIFT_KEY_WIDTH-1;
     rectArea.height = 4;
     rectArea.x0 = 1;
     rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2;
-    rectArea.backgroundColor = (keyboard->upperCase)?BLACK:WHITE;
+    rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
     nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);
     // draw Shift key
     rectArea.width = C_shift32px.width;
@@ -405,8 +422,11 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     rectArea.bpp = NBGL_BPP_1;
     rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2;
     rectArea.x0 = (SHIFT_KEY_WIDTH-rectArea.width)/2;
-    rectArea.backgroundColor = (keyboard->upperCase)?BLACK:WHITE;
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_shift32px.bitmap,NO_TRANSFORMATION,(keyboard->upperCase)?WHITE:BLACK);
+    rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
+    nbgl_frontDrawImage(&rectArea,
+                        (keyboard->casing == LOCKED_UPPER_CASE)?(uint8_t*)C_shift_lock32px.bitmap:(uint8_t*)C_shift32px.bitmap,
+                        NO_TRANSFORMATION,
+                        (keyboard->casing != LOWER_CASE)?WHITE:BLACK);
     rectArea.backgroundColor = WHITE;
     offsetX = keyboard->x0 + SHIFT_KEY_WIDTH;
   }

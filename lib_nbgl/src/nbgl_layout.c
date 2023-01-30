@@ -42,10 +42,7 @@
  */
 #define LAYOUT_OBJ_POOL_LEN 10
 
-#define ITEM_VALUE_ICON_WIDTH 32
-
-#define BUTTON_RADIUS RADIUS_40_PIXELS
-#define BUTTON_HEIGHT 80
+#define TAG_VALUE_ICON_WIDTH 32
 
 #define TOUCHABLE_BAR_HEIGHT 88
 #define FOOTER_HEIGHT 80
@@ -513,8 +510,8 @@ int nbgl_layoutAddTopRightButton(nbgl_layout_t *layout, const nbgl_icon_details_
     return -1;
 
   addObjectToLayout(layoutInt,(nbgl_obj_t*)button);
-  button->width = BUTTON_HEIGHT;
-  button->height = BUTTON_HEIGHT;
+  button->width = BUTTON_DIAMETER;
+  button->height = BUTTON_DIAMETER;
   button->radius = BUTTON_RADIUS;
   button->alignmentMarginX = BORDER_MARGIN;
   button->alignmentMarginY = BORDER_MARGIN;
@@ -1321,7 +1318,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_
   bottomButton->innerColor = WHITE;
   bottomButton->foregroundColor = BLACK;
   bottomButton->width = GET_AVAILABLE_WIDTH(layoutInt);
-  bottomButton->height = BUTTON_HEIGHT;
+  bottomButton->height = BUTTON_DIAMETER;
   bottomButton->radius = BUTTON_RADIUS;
   bottomButton->text = PIC(info->bottomText);
   bottomButton->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
@@ -1349,7 +1346,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_
   topButton->borderColor = BLACK;
   topButton->foregroundColor = WHITE;
   topButton->width = bottomButton->width;
-  topButton->height = BUTTON_HEIGHT;
+  topButton->height = BUTTON_DIAMETER;
   topButton->radius = BUTTON_RADIUS;
   topButton->text = PIC(info->topText);
   topButton->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
@@ -1599,7 +1596,7 @@ int nbgl_layoutAddButton(nbgl_layout_t *layout, nbgl_layoutButton_t *buttonInfo)
   }
   else {
     button->width = GET_AVAILABLE_WIDTH(layoutInt);
-    button->height = BUTTON_HEIGHT;
+    button->height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
   }
   button->alignTo = NULL;
@@ -1653,8 +1650,8 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, char *text, uint8_t tok
   button->innerColor = BLACK;
   button->foregroundColor = WHITE;
   button->borderColor = BLACK;
-  button->width = BUTTON_HEIGHT;
-  button->height = BUTTON_HEIGHT;
+  button->width = BUTTON_DIAMETER;
+  button->height = BUTTON_DIAMETER;
   button->radius = BUTTON_RADIUS;
   button->icon = PIC(&C_check32px);
   container->children[0] = (nbgl_obj_t*)button;
@@ -1718,7 +1715,7 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_
   textArea->alignment = BOTTOM_MIDDLE;
   textArea->textColor = BLACK;
   textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
-  textArea->height = BUTTON_HEIGHT;
+  textArea->height = BUTTON_DIAMETER;
   textArea->text = PIC(text);
   textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
   textArea->textAlignment = CENTER;
@@ -1768,7 +1765,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t lef
   textArea->alignment = BOTTOM_LEFT;
   textArea->textColor = BLACK;
   textArea->width = GET_AVAILABLE_WIDTH(layoutInt)/2;
-  textArea->height = BUTTON_HEIGHT;
+  textArea->height = BUTTON_DIAMETER;
   textArea->text = PIC(leftText);
   textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
   textArea->textAlignment = CENTER;
@@ -1786,7 +1783,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t lef
   textArea->alignment = BOTTOM_RIGHT;
   textArea->textColor = BLACK;
   textArea->width = GET_AVAILABLE_WIDTH(layoutInt)/2;
-  textArea->height = BUTTON_HEIGHT;
+  textArea->height = BUTTON_DIAMETER;
   textArea->text = PIC(rightText);
   textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
   textArea->textAlignment = CENTER;
@@ -1842,7 +1839,7 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, u
 
   container = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER, layoutInt->layer);
   container->width = SCREEN_WIDTH;
-  container->height = BUTTON_HEIGHT+8;
+  container->height = BUTTON_DIAMETER+8;
   container->layout = VERTICAL;
   container->nbChildren = 2;
   container->children = (nbgl_obj_t**)nbgl_containerPoolGet(container->nbChildren,layoutInt->layer);
@@ -1870,8 +1867,8 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, u
     button->innerColor = WHITE;
     button->foregroundColor = BLACK;
     button->borderColor = WHITE;
-    button->width = BUTTON_HEIGHT;
-    button->height = BUTTON_HEIGHT;
+    button->width = BUTTON_DIAMETER;
+    button->height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = PIC(&C_leftArrow32px);
@@ -1966,7 +1963,7 @@ int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo) {
   keyboard->lettersOnly = kbdInfo->lettersOnly;
   keyboard->mode = kbdInfo->mode;
   keyboard->keyMask = kbdInfo->keyMask;
-  keyboard->upperCase = kbdInfo->upperCase;
+  keyboard->casing = kbdInfo->casing;
   // set this new keyboard as child of the container
   addObjectToLayout(layoutInt,(nbgl_obj_t*)keyboard);
 
@@ -1980,9 +1977,11 @@ int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo) {
  * @param layout the current layout
  * @param index index returned by @ref nbgl_layoutAddKeyboard()
  * @param keyMask mask of keys to activate/deactivate on keyboard
+ * @param updateCasing if true, update keyboard casing with given value
+ * @param casing  casing to use
  * @return >=0 if OK
  */
-int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask) {
+int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask, bool updateCasing, keyboardCase_t casing) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_keyboard_t *keyboard;
 
@@ -1990,9 +1989,15 @@ int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t key
   if (layout == NULL)
     return -1;
 
-  // create keyboard
+  // get keyboard at given index
   keyboard = (nbgl_keyboard_t*)layoutInt->container->children[index];
+  if ((keyboard == NULL) || (keyboard->type != KEYBOARD)) {
+    return -1;
+  }
   keyboard->keyMask = keyMask;
+  if (updateCasing) {
+    keyboard->casing  = casing;
+  }
 
   nbgl_redrawObject((nbgl_obj_t*)keyboard,NULL,false);
 
@@ -2269,7 +2274,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *t
   button->text = PIC(text);
   button->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
   button->width = GET_AVAILABLE_WIDTH(layoutInt);
-  button->height = BUTTON_HEIGHT;
+  button->height = BUTTON_DIAMETER;
   button->radius = BUTTON_RADIUS;
   button->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
   button->touchCallback = (nbgl_touchCallback_t)touchCallback;

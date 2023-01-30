@@ -39,6 +39,10 @@ extern "C" {
 // external margin in pixels
 #define BORDER_MARGIN 24
 
+// common dimensions for buttons
+#define BUTTON_RADIUS RADIUS_40_PIXELS
+#define BUTTON_DIAMETER 80
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -387,11 +391,25 @@ typedef struct PACKED__ nbgl_spinner_s {
  */
 typedef void (*keyboardCallback_t)(char touchedKey);
 
+/**
+ * @brief Mode in which to open/set the keyboard
+ *
+ */
 typedef enum {
-  MODE_LETTERS=0,
-  MODE_DIGITS,
-  MODE_SPECIAL
+  MODE_LETTERS=0, ///< letters mode
+  MODE_DIGITS,    ///< digits and some special characters mode
+  MODE_SPECIAL    ///< extended special characters mode
 } keyboardMode_t;
+
+/**
+ * @brief Letters casing in which to open/set the keyboard
+ *
+ */
+typedef enum {
+  LOWER_CASE=0,     ///< lower case mode
+  UPPER_CASE,       ///< upper case mode for one character
+  LOCKED_UPPER_CASE ///< locked upper case mode
+} keyboardCase_t;
 
 /**
  * @brief struct to represent a keyboard (@ref KEYBOARD type)
@@ -402,7 +420,7 @@ typedef struct PACKED__ nbgl_keyboard_s {
     color_t textColor; ///< color set to letters.
     color_t borderColor; ///< color set to key borders
     bool lettersOnly; ///< if true, only display letter keys and Backspace
-    bool upperCase; ///< if true, display letter keys in upper case
+    keyboardCase_t casing; ///< keyboard casing mode (lower, upper once or upper locked)
     keyboardMode_t mode; ///< keyboard mode to start with
     uint32_t keyMask; ///< mask used to disable some keys in letters only mod. The 26 LSB bits of mask are used, for the 26 letters of a QWERTY keyboard. Bit[0] for Q, Bit[1] for W and so on
     keyboardCallback_t callback; ///< function called when an active key is pressed

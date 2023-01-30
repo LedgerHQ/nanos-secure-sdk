@@ -16,8 +16,6 @@
 /*********************
  *      DEFINES
  *********************/
-#define BUTTON_RADIUS RADIUS_40_PIXELS
-#define BUTTON_DIAMETER 80
 #define INTERNAL_SMALL_MARGIN 8
 
 

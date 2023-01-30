@@ -162,7 +162,7 @@ static void nbgl_serializeKeyboard(nbgl_keyboard_t *obj, uint8_t *out, size_t *w
 	nbgl_appendU8((uint8_t) obj->textColor, out, w_cnt, max_len);
 	nbgl_appendU8((uint8_t) obj->borderColor, out, w_cnt, max_len);
 	nbgl_appendU8((uint8_t) obj->lettersOnly, out, w_cnt, max_len);
-	nbgl_appendU8((uint8_t) obj->upperCase, out, w_cnt, max_len);
+	nbgl_appendU8((uint8_t) obj->casing, out, w_cnt, max_len);
 	nbgl_appendU8((uint8_t) obj->mode, out, w_cnt, max_len);
 	nbgl_appendU32(obj->keyMask, out, w_cnt, max_len);
 }

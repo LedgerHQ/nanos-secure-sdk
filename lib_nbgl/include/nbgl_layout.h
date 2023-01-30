@@ -257,7 +257,7 @@ typedef struct {
  */
 typedef struct {
     bool lettersOnly; ///< if true, only display letter keys and Backspace
-    bool upperCase; ///< if true, display letter keys in upper case
+    keyboardCase_t casing; ///< keyboard casing mode (lower, upper once or upper locked)
     keyboardMode_t mode; ///< keyboard mode to start with
     uint32_t keyMask; ///< mask used to disable some keys in letters only mod. The 26 LSB bits of mask are used, for the 26 letters of a QWERTY keyboard. Bit[0] for Q, Bit[1] for W and so on
     keyboardCallback_t callback; ///< function called when an active key is pressed
@@ -293,7 +293,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed);
 #ifdef NBGL_KEYBOARD
 /* layout objects for page with keyboard */
 int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo);
-int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask);
+int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask, bool updateCasing, keyboardCase_t casing);
 int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons,
                                     char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
                                     int firstButtonToken, tune_index_e tuneId);
