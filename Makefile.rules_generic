@@ -54,6 +54,7 @@ listinfo:
 	@echo APPNAME=$(APPNAME)
 	@echo APPVERSION=$(APPVERSION)
 	@echo SDK_NAME=$(SDK_NAME)
+	@echo SDK_VERSION=$(SDK_VERSION)
 	@echo SDK_HASH=$(SDK_HASH)
 
 clean:
@@ -97,6 +98,7 @@ bin/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	$(L)$(call objcopy_add_section_cmdline,$(APPNAME), ledger.app_name)
 	$(L)$(call objcopy_add_section_cmdline,$(APPVERSION), ledger.app_version)
 	$(L)$(call objcopy_add_section_cmdline,$(SDK_NAME), ledger.sdk_name)
+	$(L)$(call objcopy_add_section_cmdline,$(SDK_VERSION), ledger.sdk_version)
 	$(L)$(call objcopy_add_section_cmdline,$(SDK_HASH), ledger.sdk_hash)
 
 bin/app.apdu bin/app.sha256: bin/app.elf

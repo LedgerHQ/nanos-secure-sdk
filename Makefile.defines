@@ -21,11 +21,20 @@ TARGET_ID:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ID | cu
 TARGET_NAME:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
 TARGET_VERSION:=$(shell cat $(BOLOS_SDK)/include/bolos_version.h | grep define | cut -f2 -d'"')
 SDK_NAME    := "nanos-secure-sdk"
+SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
 SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
+ifeq ($(SDK_VERSION),)
+SDK_VERSION := "None"
+endif
 ifeq ($(SDK_HASH),)
 SDK_HASH := "None"
 endif
+
 $(info TARGET_NAME=$(TARGET_NAME) TARGET_ID=$(TARGET_ID) TARGET_VERSION=$(TARGET_VERSION))
+
+# Expose SDK_VERSION and SDK_HASH to the app.
+DEFINES += SDK_VERSION=\"$(SDK_VERSION)\"
+DEFINES += SDK_HASH=\"$(SDK_HASH)\"
 
 # extra load parameters for loadApp script
 ifneq ($(SCP_PRIVKEY),)
