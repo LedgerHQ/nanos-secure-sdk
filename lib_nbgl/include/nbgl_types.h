@@ -149,6 +149,7 @@ typedef struct PACKED__ nbgl_area_s {
 typedef enum {
    FULL_COLOR_REFRESH,           ///< to be used for normal refresh
    FULL_COLOR_PARTIAL_REFRESH,   ///< to be used for small partial refresh (radio buttons, switches)
+   FULL_COLOR_CLEAN_REFRESH,     ///< to be used for lock screen display (cleaner but longer refresh)
    BLACK_AND_WHITE_REFRESH,      ///< to be used for pure B&W area, when contrast is important
    BLACK_AND_WHITE_FAST_REFRESH, ///< to be used for pure B&W area, when contrast is not priority
    NB_REFRESH_MODES
