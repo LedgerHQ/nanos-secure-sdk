@@ -314,6 +314,7 @@ static void radioTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
       if (layout->callbackObjPool[foundRadio].tuneId<NBGL_NO_TUNE) {
         io_seproxyhal_play_tune(layout->callbackObjPool[foundRadio].tuneId);
       }
+      nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 #endif // HAVE_PIEZO_SOUND
       layout->callback(layout->callbackObjPool[foundRadio].token,foundRadioIndex);
     }
