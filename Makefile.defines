@@ -15,18 +15,37 @@
 #  limitations under the License.
 #*******************************************************************************
 
-# TARGET should be set as an environment variable to know for which target to build
+# TARGET should be set as an environment variable otherwise it will be read from a `.target`
+# file in the SDK root repository
 TARGETS := nanos nanox nanos2 fatstacks
+ifeq ($(TARGET),)
+ifeq ("$(wildcard $(BOLOS_SDK)/.target)","")
+$(error "No TARGET specified and no .target file in SDK repository $(BOLOS_SDK))
+else
+TARGET := $(shell cat $(BOLOS_SDK)/.target)
+endif
+endif
+
 ifeq ($(filter $(TARGET),$(TARGETS)),)
-$(error TARGET not set (possible values: nanos, nanox, nanos2, fatstacks))
+$(error TARGET not set to a valid value (possible values: $(TARGETS)))
 endif
 
 API_LEVEL   := 1
 TARGET_PATH := $(BOLOS_SDK)/target/$(TARGET)
 TARGET_ID   := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
 TARGET_NAME := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
-
-$(info TARGET_NAME=$(TARGET_NAME) TARGET_ID=$(TARGET_ID))
+SDK_NAME    := "ledger-secure-sdk"
+SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
+SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
+ifeq ($(SDK_VERSION),)
+SDK_VERSION := "None"
+endif
+ifeq ($(SDK_HASH),)
+SDK_HASH := "None"
+endif
+# Expose SDK_VERSION and SDK_HASH to the app.
+DEFINES += SDK_VERSION=\"$(SDK_VERSION)\"
+DEFINES += SDK_HASH=\"$(SDK_HASH)\"
 
 # extra load parameters for loadApp script
 ifneq ($(SCP_PRIVKEY),)
@@ -44,11 +63,23 @@ endif
 COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSION)" --apiLevel $(API_LEVEL) --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize $$((0x`cat debug/app.map |grep _envram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'` - 0x`cat debug/app.map |grep _nvram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'`)) `ICONHEX=\`$(ICONHEX_CMD)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
 COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
 
+OBJ_PREFIX := obj
+DBG_PREFIX := debug
+DEP_PREFIX := dep
+GEN_SRC_PREFIX := gen_src
+OBJ_DIR := $(OBJ_PREFIX)_$(TARGET)
+DBG_DIR := $(DBG_PREFIX)_$(TARGET)
+DEP_DIR := $(DEP_PREFIX)_$(TARGET)
+GEN_SRC_DIR := $(GEN_SRC_PREFIX)_$(TARGET)
+
 ### platform definitions
 DEFINES += gcc __IO=volatile
 
 # no assert by default
 DEFINES += NDEBUG
+
+# Debug mode disabled by default
+DEBUG:=0
 
 # default is not to display make commands
 log = $(if $(strip $(VERBOSE)),$1,@$1) # kept for retrocompat
@@ -65,8 +96,18 @@ else
 CFLAGS   += --sysroot="$(SYSROOT)"
 endif
 
-CFLAGS   += -gdwarf-2  -gstrict-dwarf
-CFLAGS   += -O3 -Os
+# optimization and debug levels
+ifneq ($(DEBUG),0)
+OPTI_LVL  = -Og
+OPTI_ALVL = $(OPTI_LVL)
+DBG_LVL   = -g3
+else
+OPTI_LVL  = -Oz
+OPTI_ALVL = -Os # assembler does not handle -Oz, use -Os instead
+DBG_LVL   = -g0
+endif
+
+CFLAGS   += $(OPTI_LVL) $(DBG_LVL)
 CFLAGS   += -fomit-frame-pointer -momit-leaf-frame-pointer
 
 CFLAGS   += -fno-common -mlittle-endian
@@ -77,15 +118,14 @@ CFLAGS   += -fropi
 CFLAGS   += -fno-jump-tables # avoid jump tables for switch to avoid problems with invalid PIC access
 CFLAGS   += -nostdlib -nodefaultlibs
 
-AFLAGS   += -ggdb2 -O3 -Os -fno-common
+AFLAGS   += $(OPTI_ALVL) $(DBG_LVL) -fno-common
 
-LDFLAGS  += -gdwarf-2  -gstrict-dwarf
-LDFLAGS  += -O3 -Os
+LDFLAGS  += $(OPTI_LVL) $(DBG_LVL)
 LDFLAGS  += -fomit-frame-pointer
 LDFLAGS  += -Wall
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program
 LDFLAGS  += -mno-unaligned-access
-LDFLAGS  += -Wl,--gc-sections -Wl,-Map,debug/app.map
+LDFLAGS  += -Wl,--gc-sections -Wl,-Map,$(DBG_DIR)/app.map
 
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS))
 CFLAGS   += --target=armv6m-none-eabi -mthumb
@@ -157,20 +197,6 @@ endif
 
 # include builtin CX libs options
 -include $(BOLOS_SDK)/Makefile.conf.cx
-
-ifneq ($(BOLOS_ENV),)
-$(info BOLOS_ENV=$(BOLOS_ENV))
-CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
-GCCPATH := $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
-else
-$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
-endif
-ifeq ($(CLANGPATH),)
-$(info CLANGPATH is not set: clang will be used from PATH)
-endif
-ifeq ($(GCCPATH),)
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
-endif
 
 # define the default makefile target (high in include to avoid glyph.h or what not specific target to be the default one when no target passed on the make command line)
 all: default
