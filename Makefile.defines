@@ -15,10 +15,19 @@
 #  limitations under the License.
 #*******************************************************************************
 
-# TARGET should be set as an environment variable to know for which target to build
+# TARGET should be set as an environment variable otherwise it will be read from a `.target`
+# file in the SDK root repository
 TARGETS := nanos nanox nanos2 fatstacks
+ifeq ($(TARGET),)
+ifeq ("$(wildcard $(BOLOS_SDK)/.target)","")
+$(error "No TARGET specified and no .target file in SDK repository $(BOLOS_SDK))
+else
+TARGET := $(shell cat $(BOLOS_SDK)/.target)
+endif
+endif
+
 ifeq ($(filter $(TARGET),$(TARGETS)),)
-$(error TARGET not set (possible values: nanos, nanox, nanos2, fatstacks))
+$(error TARGET not set to a valid value (possible values: $(TARGETS)))
 endif
 
 API_LEVEL   := 1
