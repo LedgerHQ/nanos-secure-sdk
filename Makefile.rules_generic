@@ -91,7 +91,7 @@ $(info Using custom link script: $(SCRIPT_LD))
 endif
 LDFLAGS  += -T$(SCRIPT_LD)
 
-$(OBJ_DIR)/app.elf $(OBJ_DIR)/app.hex $(DBG_DIR)/app.map $(DBG_DIR)/app.asm: $(OBJECT_FILES) $(SCRIPT_LD)
+$(OBJ_DIR)/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
 	@echo "[LINK] $(OBJ_DIR)/app.elf"
 	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$(OBJ_DIR)/app.elf)
 	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S $(OBJ_DIR)/app.elf $(OBJ_DIR)/app.hex
@@ -106,8 +106,18 @@ $(OBJ_DIR)/app.elf $(OBJ_DIR)/app.hex $(DBG_DIR)/app.map $(DBG_DIR)/app.asm: $(O
 	$(L)$(call objcopy_add_section_cmdline,$(SDK_VERSION), ledger.sdk_version)
 	$(L)$(call objcopy_add_section_cmdline,$(SDK_HASH), ledger.sdk_hash)
 
-$(OBJ_DIR)/app.apdu $(OBJ_DIR)/app.sha256: bin/app.hex debug/app.map
+# This targets are generated along $(OBJ_DIR)/app.elf but we can't make them co-target
+# otherwise building with `make -j` fails due to multiple threads running simultaneously
+# this target while it needs to be run only once.
+$(OBJ_DIR)/app.hex $(DBG_DIR)/app.map $(DBG_DIR)/app.asm: $(OBJ_DIR)/app.elf
+
+$(OBJ_DIR)/app.apdu: bin/app.hex debug/app.map
 	$(L)python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline $(OBJ_DIR)/app.apdu | grep "Application" | cut -f5 -d' ' > $(OBJ_DIR)/app.sha256
+
+# This target is generated along $(OBJ_DIR)/app.apdu but we can't make them co-target
+# otherwise building with `make -j` ends up with multiple threads running simultaneously
+# this target while it needs to be run only once.
+$(OBJ_DIR)/app.sha256: $(OBJ_DIR)/app.apdu
 
 # Set PHONY to force the copy to bin in case we rebuild a previous TARGET
 .PHONY: bin/app.elf bin/app.hex bin/app.apdu bin/app.sha256
