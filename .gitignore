@@ -1,4 +1,5 @@
 .vscode
+.target
 *.o
 *.su
 *.pyc
