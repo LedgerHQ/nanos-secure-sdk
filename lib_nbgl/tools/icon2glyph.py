@@ -148,7 +148,7 @@ def apply_compression(pixels_buffer) -> bytes:
         tmp = bytes(pixels_buffer[i:i+chunk_size])
         #print("len = %d"%len(tmp))
         #print("0x%X"%tmp[chunk_size-1])
-        compressed_buffer = gzip.compress(tmp)
+        compressed_buffer = gzip.compress(tmp, mtime=0)
         output_buffer += [len(compressed_buffer)&0xFF, (len(compressed_buffer)>>8)&0xFF]
         output_buffer += compressed_buffer
         full_uncompressed_size -= chunk_size
