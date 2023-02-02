@@ -34,21 +34,25 @@ ifneq (,$(wildcard $(ICONNAME)))
 GLYPH_FILES += $(ICONNAME)
 endif
 ICON_SCRIPT = $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py
-GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES) > $(GLYPH_DESTC)
+GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES)
 else
 # Nano glyphs files and generation script
 GLYPH_FILES += $(foreach gp,$(GLYPH_PATH),$(addprefix $(gp)/,$(sort $(notdir $(shell find $(gp))))))
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_ux/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_ux/glyphs/))))
 ICON_SCRIPT = $(BOLOS_SDK)/icon3.py
-GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --factorize --glyphcfile $(GLYPH_FILES) > $(GLYPH_DESTC)
+GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --factorize --glyphcfile $(GLYPH_FILES)
 endif
 
 $(GLYPH_DESTH): $(GLYPH_FILES) $(ICON_SCRIPT)
-	$(L)echo [GLYPH] Compiling...
+	$(L)echo "[GLYPH] Compiling..."
 	$(L)-mkdir -p $(GLYPH_SRC_DIR)
-	$(L)python3 $(ICON_SCRIPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH)
-	$(L)$(GENERATE_GLYPHS_CMD)
+	$(L)rm -f $(GLYPH_DESTC) $(GLYPH_DESTH)
+	@# Use temporary files to prevent issues when build is interrupted
+	$(L)python3 $(ICON_SCRIPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH)_tmp
+	$(L)$(GENERATE_GLYPHS_CMD) > $(GLYPH_DESTC)_tmp
+	$(L)mv $(GLYPH_DESTC)_tmp $(GLYPH_DESTC)
+	$(L)mv $(GLYPH_DESTH)_tmp $(GLYPH_DESTH)
 
 #add dependency for generation
 $(GLYPH_DESTC): $(GLYPH_DESTH)
