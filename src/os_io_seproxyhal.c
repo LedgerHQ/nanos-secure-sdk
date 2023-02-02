@@ -526,6 +526,14 @@ void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async, boo
 }
 #endif
 
+#ifdef HAVE_SE_TOUCH
+#ifdef HAVE_TOUCH_DEBUG
+void io_seproxyhal_touch_read_sensi(uint8_t * sensi_data) {
+  touch_read_sensitivity(sensi_data);
+}
+#endif
+#endif
+
 #ifdef HAVE_BAGL
 
 void io_seproxyhal_init_ux(void) {

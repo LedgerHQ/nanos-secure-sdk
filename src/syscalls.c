@@ -1787,6 +1787,13 @@ void touch_set_state( bool state ) {
   SVC_Call(SYSCALL_set_touch_state_ID, parameters);
 }
 
+#ifdef HAVE_TOUCH_DEBUG
+void touch_read_sensitivity(uint8_t *sensi_data) {
+  unsigned int parameters[1] = {(unsigned int) sensi_data};
+  SVC_Call(SYSCALL_touch_read_sensi_ID, parameters);
+}
+#endif
+
 #endif // HAVE_SE_TOUCH
 
 #ifdef HAVE_IO_I2C
