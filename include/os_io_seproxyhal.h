@@ -126,6 +126,12 @@ void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async, boo
 #define NFC_init(text, text_length) io_seproxyhal_nfc_init(text, text_length, false)
 #endif
 
+#ifdef HAVE_SE_TOUCH
+#ifdef HAVE_TOUCH_DEBUG
+void io_seproxyhal_touch_read_sensi(uint8_t * sensi_data);
+#endif
+#endif
+
 typedef enum {
   APDU_IDLE,
   APDU_BLE,

@@ -75,4 +75,9 @@ typedef struct io_touch_info_s {
 
 SYSCALL void touch_get_last_info(io_touch_info_t *info);
 SYSCALL void touch_set_state( bool state );
+#ifdef HAVE_SE_TOUCH
+#ifdef HAVE_TOUCH_DEBUG
+SYSCALL void touch_read_sensitivity(uint8_t *sensi_data);
+#endif
+#endif
 #endif // HAVE_SE_TOUCH
