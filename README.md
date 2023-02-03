@@ -34,7 +34,7 @@ But for that, they need to understand how OS and SDK compatibility are tracked. 
 
 The `API_LEVEL` on `master` branch is kept as the reserved value `0`.
 
-For each released OS there is a corresponding tag in the format `<device>_<os_version>`, e.g. `nanox_2.1.0` for the release of the OS version `2.1.0` for Nano X device. While on this tag, if you look at the value of the `API_LEVEL` which is defined in `Makefile.defines` you will retrieve the OS `API_LEVEL`.
+For each released OS there is a corresponding tag in the format `<Device>_<os_version>`, e.g. `NanoX_v2.1.0` for the release of the OS version `v2.1.0` for Nano X device. While on this tag, if you look at the value of the `API_LEVEL` which is defined in `Makefile.defines` you will retrieve the OS `API_LEVEL`.
 
 There are also `API_LEVEL_<N>` branches with `API_LEVEL` value set to `N`. Their purpose is to allow cherry-picks of bug fixes and improvements that are merged on `master` so that they are available when building the apps for the corresponding OS.
 
