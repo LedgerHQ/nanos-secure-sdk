@@ -115,15 +115,15 @@ static uint8_t tooLongToFitPerPage[32];
 /**********************
  *  STATIC FUNCTIONS
  **********************/
-static void displayReviewPage(uint8_t page);
-static void displayDetailsPage(uint8_t page);
-static void displaySettingsPage(uint8_t page);
-static void displayStaticReviewPage(uint8_t page);
+static void displayReviewPage(uint8_t page, bool forceFullRefresh);
+static void displayDetailsPage(uint8_t page, bool forceFullRefresh);
+static void displaySettingsPage(uint8_t page, bool forceFullRefresh);
+static void displayStaticReviewPage(uint8_t page, bool forceFullRefresh);
 static void pageCallback(int token, uint8_t index);
 #ifdef NBGL_QRCODE
 static void addressLayoutTouchCallbackQR(int token, uint8_t index);
 #endif // NBGL_QRCODE
-static void displayAddressPage(uint8_t page);
+static void displayAddressPage(uint8_t page, bool forceFullRefresh);
 static void displaySkipWarning(void);
 static uint8_t getNbPairs(uint8_t page, bool *tooLongToFit);
 
@@ -139,13 +139,13 @@ static void pageModalCallback(int token, uint8_t index) {
       nbgl_refresh();
     }
     else {
-      displayDetailsPage(index);
+      displayDetailsPage(index, false);
     }
   }
   else if (token == SKIP_TOKEN) {
     if (index == 0) {
       // display the last forward only review page, whatever it is
-      displayReviewPage(LAST_PAGE_FOR_REVIEW);
+      displayReviewPage(LAST_PAGE_FOR_REVIEW, true);
     }
     else {
       // display background, which should be the page where skip has been touched
@@ -236,30 +236,30 @@ static void pageCallback(int token, uint8_t index) {
         onQuit();
     }
     else {
-      displaySettingsPage(index);
+      displaySettingsPage(index, false);
     }
   }
   else if (token == NEXT_TOKEN) {
     if (onNav != NULL)
-      displayReviewPage(navInfo.activePage+1);
+      displayReviewPage(navInfo.activePage+1, false);
     else
-      displayStaticReviewPage(navInfo.activePage+1);
+      displayStaticReviewPage(navInfo.activePage+1, false);
   }
   else if (token == BACK_TOKEN) {
     if (onNav != NULL)
-      displayReviewPage(navInfo.activePage-1);
+      displayReviewPage(navInfo.activePage-1, true);
     else
-      displayStaticReviewPage(navInfo.activePage-1);
+      displayStaticReviewPage(navInfo.activePage-1, true);
   }
   else if (token == SKIP_TOKEN) {
     // display a modal warning to confirm skip
     displaySkipWarning();
   }
   else if (token == ADDR_BACK_TOKEN) {
-    displayAddressPage(navInfo.activePage-1);
+    displayAddressPage(navInfo.activePage-1, true);
   }
   else if (token == ADDR_NEXT_TOKEN) {
-    displayAddressPage(navInfo.activePage+1);
+    displayAddressPage(navInfo.activePage+1, false);
   }
   else { // probably a control provided by caller
     if (onControls != NULL) {
@@ -276,7 +276,7 @@ static void tickerCallback(void) {
 }
 
 // function used to display the current page in review
-static void displaySettingsPage(uint8_t page) {
+static void displaySettingsPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageContent_t content;
 
   if ((onNav == NULL) || (onNav(page, &content) == false))
@@ -290,11 +290,16 @@ static void displaySettingsPage(uint8_t page) {
 
   navInfo.activePage = page;
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
-  nbgl_refresh();
+
+  if (forceFullRefresh) {
+    nbgl_refresh();
+  } else {
+    nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+  }
 }
 
 // function used to display the current page in review
-static void displayReviewPage(uint8_t page) {
+static void displayReviewPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageContent_t content;
 
   navInfo.activePage = page;
@@ -335,11 +340,16 @@ static void displayReviewPage(uint8_t page) {
   }
 
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
-  nbgl_refresh();
+
+  if (forceFullRefresh || (content.type == INFO_LONG_PRESS)) {
+    nbgl_refresh();
+  } else {
+    nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+  }
 }
 
 // function used to display the current page in static review (no call to user to get content)
-static void displayStaticReviewPage(uint8_t page) {
+static void displayStaticReviewPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageContent_t content;
 
   // if it's the last page, display a long press button (or a simple button) with the info provided by user (except token)
@@ -423,11 +433,16 @@ static void displayStaticReviewPage(uint8_t page) {
   }
 
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
-  nbgl_refresh();
+
+  if (forceFullRefresh || (content.type == INFO_LONG_PRESS)) {
+    nbgl_refresh();
+  } else {
+    nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+  }
 }
 
 // function used to display the current page in details review mode
-static void displayDetailsPage(uint8_t detailsPage) {
+static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh) {
   static nbgl_layoutTagValue_t currentPair;
   nbgl_pageNavigationInfo_t info = {
     .activePage = detailsPage,
@@ -458,6 +473,10 @@ static void displayDetailsPage(uint8_t detailsPage) {
       detailsContext.previousPage = -1;
       detailsContext.previousPageStart = NULL;
     }
+
+    // Go backward: force full refresh
+    // detailsContext.previousPage = detailsPage - 1;
+    forceFullRefresh = true;
   }
   // else if move backward
   else if (detailsPage>detailsContext.currentPage) {
@@ -472,6 +491,7 @@ static void displayDetailsPage(uint8_t detailsPage) {
   detailsContext.currentPage = detailsPage;
   currentPair.value = detailsContext.currentPageStart;
   uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, currentPair.value, SCREEN_WIDTH-2*BORDER_MARGIN, false);
+
   if (nbLines>NB_MAX_LINES_IN_DETAILS) {
     uint16_t len;
     nbgl_getTextMaxLenInNbLines(BAGL_FONT_INTER_REGULAR_24px, currentPair.value,SCREEN_WIDTH-2*BORDER_MARGIN,NB_MAX_LINES_IN_DETAILS,&len);
@@ -485,7 +505,12 @@ static void displayDetailsPage(uint8_t detailsPage) {
     content.tagValueList.nbMaxLinesForValue = 0;
   }
   modalPageContext = nbgl_pageDrawGenericContentExt(&pageModalCallback, &info, &content, true);
-  nbgl_refresh();
+
+  if (forceFullRefresh) {
+    nbgl_refresh();
+  } else {
+    nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+  }
 }
 
 #ifdef NBGL_QRCODE
@@ -502,7 +527,7 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index) {
 #endif // NBGL_QRCODE
 
 // called when navigation is touched on Address verification page
-static void displayAddressPage(uint8_t page) {
+static void displayAddressPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageContent_t content;
   nbgl_layoutTagValue_t tagValuePair = {
     .item = "Address",
@@ -559,7 +584,12 @@ static void displayAddressPage(uint8_t page) {
   navInfo.activePage = page;
 
   nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
-  nbgl_refresh();
+
+  if (forceFullRefresh) {
+    nbgl_refresh();
+  } else {
+    nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+  }
 }
 
 // called when skip button is touched in footer, during forward only review
@@ -578,6 +608,7 @@ static void displaySkipWarning(void) {
     .modal = true
   };
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
+  nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
 }
 
 ///////////// STATIC REVIEW UTILITIES /////////////
@@ -818,7 +849,7 @@ void nbgl_useCaseSettings(char *title, uint8_t initPage, uint8_t nbPages, bool t
   navInfo.progressIndicator = false;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
-  displaySettingsPage(navInfo.activePage);
+  displaySettingsPage(navInfo.activePage, true);
 }
 
 /**
@@ -861,7 +892,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
     };
     pageContext = nbgl_pageDrawInfo(&pageCallback, &ticker,&info);
   }
-  nbgl_refresh();
+  nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
 }
 
 /**
@@ -891,7 +922,7 @@ void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *su
   };
   onChoice = callback;
   pageContext = nbgl_pageDrawConfirmation(&pageCallback, &info);
-  nbgl_refresh();
+  nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
 
 /**
@@ -921,7 +952,7 @@ void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, cha
   };
   onModalConfirm = callback;
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
-  nbgl_refresh();
+  nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
 }
 
 /**
@@ -993,7 +1024,7 @@ void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, char *rejectTe
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
-  displayReviewPage(initPage);
+  displayReviewPage(initPage, true);
 }
 
 /**
@@ -1026,7 +1057,7 @@ void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t 
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
-  displayReviewPage(0);
+  displayReviewPage(0, false);
 }
 
 /**
@@ -1065,7 +1096,7 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
-  displayStaticReviewPage(0);
+  displayStaticReviewPage(0, true);
 }
 
 /**
@@ -1103,7 +1134,7 @@ void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl
   navInfo.progressIndicator = true;
   navInfo.tuneId = TUNE_TAP_CASUAL;
 
-  displayStaticReviewPage(0);
+  displayStaticReviewPage(0, true);
 }
 
 /**
@@ -1135,7 +1166,7 @@ void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping) {
     }
   }
 
-  displayDetailsPage(0);
+  displayDetailsPage(0, true);
 }
 
 /**
@@ -1177,7 +1208,7 @@ void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t cal
   navInfo.navWithTap.skipText = NULL;
   navInfo.quitToken = REJECT_TOKEN;
 
-  displayAddressPage(0);
+  displayAddressPage(0, true);
 }
 
 /**
@@ -1187,6 +1218,6 @@ void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t cal
  */
 void nbgl_useCaseSpinner(char* text) {
   pageContext = nbgl_pageDrawSpinner(NULL, (const char*)text);
-  nbgl_refresh();
+  nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
 #endif // NBGL_USE_CASE
