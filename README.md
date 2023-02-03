@@ -42,7 +42,7 @@ On these `API_LEVEL_<N>` branches, there are tags following the format `v<N>.<mi
 
 In short, to build an app for an OS, you should:
 - Retrieve the OS `API_LEVEL`: `git checkout <device>_<os_version>` and then `grep API_LEVEL Makefile.defines | head -n1`
-- Use the last tag (`v<N>.<x>.<y>`) of the corresponding `API_LEVEL_<N>` branch, which should be the same commit than the head of the `API_LEVEL_<N>` branch: `git checkout API_LEVEL_<N>`
+- Check out the `API_LEVEL_<N>` branch related to the OS `API_LEVEL` and make sure it is up to date: `git checkout API_LEVEL_<N>` and then `git pull origin API_LEVEL_<N>`. The last commit should be tagged with the complete version of the SDK (`v<N>.<x>.<y>`)
 - Build the app from your app folder with `make BOLOS_SDK=<path_to_sdk> TARGET=<target>` where `target` is one of `nanos`, `nanox`, `nanos2`, `stax` (`nanos2` is used for Nano S+ device).
 
 ## Contributing
