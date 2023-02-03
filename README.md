@@ -10,7 +10,7 @@ If you are developing an application, for a smooth and quick integration:
 
 This directory contains the SDK for Nano S, Nano X, Nano S+ and Stax applications development.
 
-It is the unified version of the previous Nanos, Nanox, Nanos+ SDKs.
+It is the unified version of the previous Nano S, Nano X, Nano S+ SDKs.
 
 As the previous SDKs, this SDK is tightly linked to the Ledger Hardware Wallet OS: BOLOS.
 
@@ -41,9 +41,15 @@ There are also `API_LEVEL_<N>` branches with `API_LEVEL` value set to `N`. Their
 On these `API_LEVEL_<N>` branches, there are tags following the format `v<N>.<minor>.<patch>`, e.g. `v1.1.0` where `N` is the `API_LEVEL`. These tags are used to generate the `SDK_VERSION` which is available at compile time and allows to track the SDK version used to build an app.
 
 In short, to build an app for an OS, you should:
-- Retrieve the OS `API_LEVEL`: `git checkout <device>_<os_version>` and then `grep API_LEVEL Makefile.defines | head -n1`
-- Check out the `API_LEVEL_<N>` branch related to the OS `API_LEVEL` and make sure it is up to date: `git checkout API_LEVEL_<N>` and then `git pull origin API_LEVEL_<N>`. The last commit should be tagged with the complete version of the SDK (`v<N>.<x>.<y>`)
-- Build the app from your app folder with `make BOLOS_SDK=<path_to_sdk> TARGET=<target>` where `target` is one of `nanos`, `nanox`, `nanos2`, `stax` (`nanos2` is used for Nano S+ device).
+- Retrieve the OS `API_LEVEL`:
+    - `git checkout <device>_<os_version>`
+    - `grep API_LEVEL Makefile.defines | head -n1`
+- Check out the `API_LEVEL_<N>` branch related to the OS `API_LEVEL` and make sure it is up to date:
+    - `git checkout API_LEVEL_<N>`
+    - `git pull`
+    - The last commit should be tagged with the complete version of the SDK (`v<N>.<x>.<y>`)
+- Build the app from your app folder:
+    - `make BOLOS_SDK=<path_to_sdk> TARGET=<target>` where `target` is one of `nanos`, `nanox`, `nanos2`, `stax` (`nanos2` is used for Nano S+ device).
 
 ## Contributing
 
