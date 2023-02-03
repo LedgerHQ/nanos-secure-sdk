@@ -24,7 +24,7 @@ You can find below two possibilities to build against the right SDK version.
 
 The easiest way to build against last device OS is to use the docker image provided by ledger and accessible on ghcr.io.
 
-The corresponding GIT repository can be found [here](https://github.com/LedgerHQ/ledger-app-builder/). Please have a look at it's `README.md` for information about its usage.
+The corresponding GIT repository can be found [here](https://github.com/LedgerHQ/ledger-app-builder/). Please have a look at its `README.md` for information about its usage.
 
 ## Using the SDK directly (advanced users)
 
