@@ -1,5 +1,5 @@
 
-INC := -I ../include/ -I ../../lib_ux_fatstacks/
+INC := -I ../include/ -I ../../lib_ux_stax/
 DEFINES := -DLINUX_SIMU -DHAVE_LANGUAGE_PACK -DNBGL_GENERATE_DATA_TEST
 
 default: generate_data_test.c

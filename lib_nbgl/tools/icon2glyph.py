@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Converts the given icons, in bmp or gif format, to Fatstacks compatible glyphs, as C arrays
+Converts the given icons, in bmp or gif format, to Stax compatible glyphs, as C arrays
 """
 
 import argparse

@@ -18,8 +18,8 @@
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
 SDK_SOURCE_PATH += lib_bagl
-else ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
-SDK_SOURCE_PATH += lib_nbgl lib_ux_fatstacks qrcode
+else ifeq ($(TARGET_NAME),TARGET_STAX)
+SDK_SOURCE_PATH += lib_nbgl lib_ux_stax qrcode
 CFLAGS += -fms-extensions
 CFLAGS += -Wno-microsoft-anon-tag
 else

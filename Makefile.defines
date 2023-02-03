@@ -17,7 +17,7 @@
 
 # TARGET should be set as an environment variable otherwise it will be read from a `.target`
 # file in the SDK root repository
-TARGETS := nanos nanox nanos2 fatstacks
+TARGETS := nanos nanox nanos2 stax
 ifeq ($(TARGET),)
 ifeq ("$(wildcard $(BOLOS_SDK)/.target)","")
 $(error No TARGET specified and no .target file in SDK repository $(BOLOS_SDK))
@@ -54,7 +54,7 @@ endif
 
 # Command to print ICONNAME hexadecimal bitmap on stdout
 # according to the hardware target.
-ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
+ifeq ($(TARGET_NAME),TARGET_STAX)
 ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --hexbitmaponly $(ICONNAME)
 else
 ICONHEX_CMD=python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)
@@ -146,7 +146,7 @@ LDFLAGS  += -L$(BOLOS_SDK)/arch/st33/lib/
 AFLAGS   += -mcpu=cortex-m0plus -mtune=cortex-m0plus -mthumb
 endif
 
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_FATSTACKS TARGET_NANOS2))
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_NANOS2))
 CFLAGS   += -mno-movt -frwpi --target=armv8m-none-eabi -mcpu=cortex-m35p+nodsp -mthumb -msoft-float -mtune=cortex-m35p+nodsp
 LDFLAGS  += -momit-leaf-frame-pointer
 LDFLAGS  += --target=armv8m-none-eabi
@@ -168,7 +168,7 @@ DEFINES += HAVE_UX_FLOW
 LDFLAGS  += -L$(BOLOS_SDK)/lib/
 endif
 
-ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
+ifeq ($(TARGET_NAME),TARGET_STAX)
 DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_24PX
 DEFINES += HAVE_BAGL_FONT_INTER_SEMIBOLD_24PX
 DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_32PX

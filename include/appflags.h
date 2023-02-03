@@ -72,7 +72,7 @@
 #define APPLICATION_FLAG_ENABLED         0x8000
 
 /**
- * Application is actually a Fatstacks background image
+ * Application is actually a Stax background image
  */
 #define APPLICATION_FLAG_BACKGROUND_IMG 0x10000
 

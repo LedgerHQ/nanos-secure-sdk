@@ -282,7 +282,7 @@
 #define SYSCALL_log_mem_ID                                         0x02000120
 #endif // BOLOS_DEBUG
 
-// Fatstacks syscalls
+// Stax syscalls
 #ifdef HAVE_NBGL
 #define SYSCALL_nbgl_front_draw_rect_ID                                  0x01fa0000
 #define SYSCALL_nbgl_front_draw_horizontal_line_ID                       0x03fa0001

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """
-Converts input bmp file in 24 bits format to Fatstacks bitmap, as buffer in stdout
+Converts input bmp file in 24 bits format to Stax bitmap, as buffer in stdout
 """
 # -----------------------------------------------------------------------------
 import argparse
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     # -------------------------------------------------------------------------
     # Parse arguments:
     parser = argparse.ArgumentParser(
-        description="Converts input bmp file in 24 bits format to Fatstacks bitmap, as buffer in stdout")
+        description="Converts input bmp file in 24 bits format to Stax bitmap, as buffer in stdout")
 
     parser.add_argument(
         "-i", "--input",
