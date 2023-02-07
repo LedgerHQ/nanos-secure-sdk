@@ -501,8 +501,9 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 #endif // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
+#include "bolos_nfc.h"
 
-void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async, bool forceInit) {
+void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceInit) {
   uint8_t buffer[5];
   uint16_t total_length = 0;
   uint8_t is_nfc_enabled = forceInit?1:(os_setting_get(OS_SETTING_FEATURES, NULL, 0)&OS_SETTING_FEATURES_NFC_ENABLED);
@@ -511,18 +512,17 @@ void io_seproxyhal_nfc_init(uint8_t *text, uint16_t text_length, bool async, boo
   buffer[3] = is_nfc_enabled;
   buffer[4] = (uint8_t) async;
   total_length += 2;
-  if ((text != NULL) && (text_length)) {
-    total_length += MIN(text_length, NFC_TEXT_MAX_LEN);
-    memcpy(G_io_seproxyhal_spi_buffer, text, MIN(text_length, NFC_TEXT_MAX_LEN));
+  if (ndef_message != NULL) {
+    total_length += sizeof(ndef_struct_t);
+    memcpy(G_io_seproxyhal_spi_buffer, ndef_message, sizeof(ndef_struct_t));
   }
   else {
-    text_length = os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)G_io_seproxyhal_spi_buffer, NFC_TEXT_MAX_LEN);
-    total_length += MIN(text_length, NFC_TEXT_MAX_LEN);
+    total_length += os_setting_get(OS_SETTING_NFC_TAG_CONTENT, (uint8_t*)G_io_seproxyhal_spi_buffer, sizeof(ndef_struct_t));
   }
   buffer[1] = (total_length & 0xFF00) >> 8;
   buffer[2] = total_length & 0x00FF;
   io_seproxyhal_spi_send(buffer, 5);
-  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, MIN(text_length, NFC_TEXT_MAX_LEN));
+  io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, total_length-2);
 }
 #endif
 
