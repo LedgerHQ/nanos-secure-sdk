@@ -501,8 +501,15 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 #endif // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
-#include "bolos_nfc.h"
+#include "nfc.h"
 
+/**
+ * @brief Send a SEPH message to MCU to init NFC
+ *
+ * @param ndef_message NDEF message to program into tag, can be NULL (ie no message in tag)
+ * @param async set to true, if nfc_init is performed while an NFC transfer is ongoing, set to false otherwise
+ * @param forceInit set to true, to force NFC init even if NFC is de-activated in settings, false otherwise
+ */
 void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceInit) {
   uint8_t buffer[5];
   uint16_t total_length = 0;

@@ -123,7 +123,6 @@ void io_set_timeout(unsigned int timeout);
 
 #ifdef HAVE_NFC
 void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceInit);
-#define NFC_init(ndef_message) io_seproxyhal_nfc_init(ndef_message, false)
 #endif
 
 #ifdef HAVE_SE_TOUCH
