@@ -20,6 +20,7 @@
 
 #include "os.h"
 #include "io.h"
+#include "macros.h"
 
 uint8_t G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 ux_state_t G_ux;
@@ -91,7 +92,7 @@ void app_main() {
 /**
  * Exit the application and go back to the dashboard.
  */
-void app_exit() {
+WEAK void app_exit() {
     BEGIN_TRY_L(exit) {
         TRY_L(exit) {
             os_sched_exit(-1);
@@ -105,7 +106,7 @@ void app_exit() {
 /**
  * Main loop to setup USB, Bluetooth, UI and launch app_main().
  */
-__attribute__((section(".boot"))) int main() {
+WEAK __attribute__((section(".boot"))) int main() {
     __asm volatile("cpsie i");
 
     os_boot();

@@ -31,12 +31,12 @@
 #include "write.h"
 
 #ifdef HAVE_BAGL
-void io_seproxyhal_display(const bagl_element_t *element) {
+WEAK void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default(element);
 }
 #endif  // HAVE_BAGL
 
-uint8_t io_event(uint8_t channel) {
+WEAK uint8_t io_event(uint8_t channel) {
     (void) channel;
 
     switch (G_io_seproxyhal_spi_buffer[0]) {
@@ -80,7 +80,7 @@ uint8_t io_event(uint8_t channel) {
     return 1;
 }
 
-uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len) {
+WEAK uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len) {
     switch (channel & ~(IO_FLAGS)) {
         case CHANNEL_KEYBOARD:
             break;
@@ -113,13 +113,13 @@ static uint32_t G_output_len = 0;
  */
 static io_state_e G_io_state = READY;
 
-void io_init() {
+WEAK void io_init() {
     // Reset length of APDU response
     G_output_len = 0;
     G_io_state = READY;
 }
 
-int io_recv_command() {
+WEAK int io_recv_command() {
     int ret = -1;
 
     switch (G_io_state) {
@@ -141,7 +141,7 @@ int io_recv_command() {
     return ret;
 }
 
-int io_send_response(const buffer_t *rdata, uint16_t sw) {
+WEAK int io_send_response(const buffer_t *rdata, uint16_t sw) {
     int ret = -1;
 
     if (rdata != NULL) {
@@ -177,6 +177,6 @@ int io_send_response(const buffer_t *rdata, uint16_t sw) {
     return ret;
 }
 
-int io_send_sw(uint16_t sw) {
+WEAK int io_send_sw(uint16_t sw) {
     return io_send_response(NULL, sw);
 }
