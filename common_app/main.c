@@ -19,15 +19,7 @@
 #include <string.h>  // memset, explicit_bzero
 
 #include "os.h"
-#include "ux.h"
-
-#include "types.h"
-#include "globals.h"
 #include "io.h"
-#include "sw.h"
-#include "ui/menu.h"
-#include "apdu/parser.h"
-#include "apdu/dispatcher.h"
 
 uint8_t G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 ux_state_t G_ux;

@@ -27,10 +27,8 @@
 #endif  // HAVE_NBGL
 
 #include "io.h"
-#include "globals.h"
-#include "sw.h"
-#include "common/buffer.h"
-#include "common/write.h"
+#include "buffer.h"
+#include "write.h"
 
 #ifdef HAVE_BAGL
 void io_seproxyhal_display(const bagl_element_t *element) {
