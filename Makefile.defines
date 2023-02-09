@@ -64,12 +64,12 @@ COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSI
 COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
 
 BUILD_DIR := build
-TARGET_DIR := $(BUILD_DIR)/$(TARGET)
-BIN_DIR := $(TARGET_DIR)/bin
-OBJ_DIR := $(TARGET_DIR)/obj
-DBG_DIR := $(TARGET_DIR)/dbg
-DEP_DIR := $(TARGET_DIR)/dep
-GEN_SRC_DIR := $(TARGET_DIR)/gen_src
+TARGET_BUILD_DIR := $(BUILD_DIR)/$(TARGET)
+BIN_DIR := $(TARGET_BUILD_DIR)/bin
+OBJ_DIR := $(TARGET_BUILD_DIR)/obj
+DBG_DIR := $(TARGET_BUILD_DIR)/dbg
+DEP_DIR := $(TARGET_BUILD_DIR)/dep
+GEN_SRC_DIR := $(TARGET_BUILD_DIR)/gen_src
 
 ### platform definitions
 DEFINES += gcc __IO=volatile
