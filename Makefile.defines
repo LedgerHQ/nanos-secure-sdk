@@ -16,10 +16,25 @@
 #*******************************************************************************
 
 #extract TARGET_NAME/TARGET_ID from the SDK to allow for makefile choices
+TARGET := "nanos"
 TARGET_ID:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
 TARGET_NAME:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
 TARGET_VERSION:=$(shell cat $(BOLOS_SDK)/include/bolos_version.h | grep define | cut -f2 -d'"')
+SDK_NAME    := "nanos-secure-sdk"
+SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
+SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
+ifeq ($(SDK_VERSION),)
+SDK_VERSION := "None"
+endif
+ifeq ($(SDK_HASH),)
+SDK_HASH := "None"
+endif
+
 $(info TARGET_NAME=$(TARGET_NAME) TARGET_ID=$(TARGET_ID) TARGET_VERSION=$(TARGET_VERSION))
+
+# Expose SDK_VERSION and SDK_HASH to the app.
+DEFINES += SDK_VERSION=\"$(SDK_VERSION)\"
+DEFINES += SDK_HASH=\"$(SDK_HASH)\"
 
 # extra load parameters for loadApp script
 ifneq ($(SCP_PRIVKEY),)
@@ -27,6 +42,14 @@ PARAM_SCP+=--rootPrivateKey $(SCP_PRIVKEY)
 endif
 COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSION)" --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize $$((0x`cat debug/app.map |grep _envram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'` - 0x`cat debug/app.map |grep _nvram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'`)) `ICONHEX=\`python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
 COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
+
+BUILD_DIR := build
+TARGET_BUILD_DIR := $(BUILD_DIR)/$(TARGET)
+BIN_DIR := $(TARGET_BUILD_DIR)/bin
+OBJ_DIR := $(TARGET_BUILD_DIR)/obj
+DBG_DIR := $(TARGET_BUILD_DIR)/dbg
+DEP_DIR := $(TARGET_BUILD_DIR)/dep
+GEN_SRC_DIR := $(TARGET_BUILD_DIR)/gen_src
 
 ### platform definitions
 DEFINES += gcc __IO=volatile
@@ -71,7 +94,7 @@ LDFLAGS  += -Wall
 LDFLAGS  += -mcpu=cortex-m0plus -mthumb
 LDFLAGS  += -fno-common -ffunction-sections -fdata-sections -fwhole-program
 LDFLAGS  += -mno-unaligned-access
-LDFLAGS  += -Wl,--gc-sections -Wl,-Map,debug/app.map
+LDFLAGS  += -Wl,--gc-sections -Wl,-Map,$(DBG_DIR)/app.map
 LDFLAGS  += --specs=nano.specs
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
