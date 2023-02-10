@@ -60,7 +60,7 @@ clean:
 	rm -fr $(BUILD_DIR) bin debug
 
 clean_target:
-	rm -fr $(TARGET_DIR)
+	rm -fr $(TARGET_BUILD_DIR)
 
 prepare:
 	$(L)echo Prepare directories
