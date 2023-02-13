@@ -125,18 +125,18 @@ uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *textLen, bool *is_unicode
 
   *is_unicode = true;
   // Handle UTF-8 decoding:
-  if ((cur_char > 0xF0) && (*textLen >= 3)) {        // 4 bytes
+  if ((cur_char >= 0xF0) && (*textLen >= 3)) {        // 4 bytes
     unicode = (cur_char - 0xF0) << 18;
     unicode |= (*txt++ & 0x7F) << 12;
     unicode |= (*txt++ & 0x7F) << 6;
     unicode |= (*txt++ & 0x7F);
 
-  } else if ((cur_char > 0xE0) && (*textLen >= 2)) { // 3 bytes
+  } else if ((cur_char >= 0xE0) && (*textLen >= 2)) { // 3 bytes
     unicode = (cur_char - 0xE0) << 12;
     unicode |= (*txt++ & 0x7F) << 6;
     unicode |= (*txt++ & 0x7F);
 
-  } else if ((cur_char > 0xC0) && (*textLen >= 1)) { // 2 bytes
+  } else if ((cur_char >= 0xC0) && (*textLen >= 1)) { // 2 bytes
     unicode = (cur_char - 0xC0) << 6;
     unicode |= (*txt++ & 0x7F);
 
