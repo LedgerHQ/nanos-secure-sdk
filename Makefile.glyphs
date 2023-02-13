@@ -16,7 +16,7 @@
 #*******************************************************************************
 #allow for makefile override of the default placement for generated glyph header/c files
 ifeq ($(GLYPH_SRC_DIR),)
-GLYPH_SRC_DIR = src
+GLYPH_SRC_DIR = $(GEN_SRC_DIR)
 endif
 ifeq ($(BOLOS_SDK),)
 $(error BOLOS_SDK not set)
