@@ -483,7 +483,8 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh) {
   if (detailsPage <= detailsContext.currentPage) {
     // recompute current start from beginning
     currentPair.value = getDetailsPageAt(detailsPage);
-    }
+    forceFullRefresh = true;
+  }
   // else move forward
   else {
     currentPair.value = detailsContext.nextPageStart;
