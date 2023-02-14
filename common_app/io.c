@@ -29,6 +29,10 @@
 #include "buffer.h"
 #include "write.h"
 
+// TODO: Temporary workaround, at some point all status words should be defined by the SDK and
+// removed from the application
+#define SW_WRONG_RESPONSE_LENGTH 0xB000
+
 #ifdef HAVE_BAGL
 WEAK void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default(element);
