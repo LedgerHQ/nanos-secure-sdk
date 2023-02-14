@@ -304,7 +304,7 @@
 
 #ifdef HAVE_SE_TOUCH
 #define SYSCALL_touch_get_last_info_ID                                   0x01fa000b
-#define SYSCALL_set_touch_state_ID                                       0x01fa000e
+#define SYSCALL_os_configure_standby_ID                                         0x01fa000e
 #ifdef HAVE_TOUCH_DEBUG
 #define SYSCALL_touch_read_sensi_ID                                      0x01fa000f
 #endif
