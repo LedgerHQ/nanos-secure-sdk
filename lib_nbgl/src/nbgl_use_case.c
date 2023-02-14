@@ -49,12 +49,9 @@ enum {
 typedef struct DetailsContext_s {
   uint8_t nbPages;
   uint8_t currentPage;
-  int8_t previousPage;
   bool wrapping;
   char *tag;
   char *value;
-  char *previousPageStart;
-  char *currentPageStart;
   char *nextPageStart;
 } DetailsContext_t;
 
@@ -441,6 +438,23 @@ static void displayStaticReviewPage(uint8_t page, bool forceFullRefresh) {
   }
 }
 
+// from the current details context, return a pointer on the details at the given page
+static char *getDetailsPageAt(uint8_t detailsPage) {
+  uint8_t page = 0;
+  char *currentChar = detailsContext.value;
+  while (page<detailsPage) {
+    uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, currentChar, SCREEN_WIDTH-2*BORDER_MARGIN, false);
+    if (nbLines>NB_MAX_LINES_IN_DETAILS) {
+      uint16_t len;
+      nbgl_getTextMaxLenInNbLines(BAGL_FONT_INTER_REGULAR_24px, currentChar,SCREEN_WIDTH-2*BORDER_MARGIN,NB_MAX_LINES_IN_DETAILS,&len);
+      len-=3;
+      currentChar = currentChar+len;
+    }
+    page++;
+  }
+  return currentChar;
+}
+
 // function used to display the current page in details review mode
 static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh) {
   static nbgl_layoutTagValue_t currentPair;
@@ -465,37 +479,23 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh) {
     nbgl_pageRelease(modalPageContext);
   }
   currentPair.item = detailsContext.tag;
-  // if move backward
-  if (detailsPage == detailsContext.previousPage) {
-    detailsContext.currentPageStart = detailsContext.previousPageStart;
-    // if first page, reset some context variables
-    if (detailsContext.previousPage == 0) {
-      detailsContext.previousPage = -1;
-      detailsContext.previousPageStart = NULL;
+  // if move backward or first page
+  if (detailsPage <= detailsContext.currentPage) {
+    // recompute current start from beginning
+    currentPair.value = getDetailsPageAt(detailsPage);
     }
-
-    // Go backward: force full refresh
-    // detailsContext.previousPage = detailsPage - 1;
-    forceFullRefresh = true;
-  }
-  // else if move backward
-  else if (detailsPage>detailsContext.currentPage) {
-    detailsContext.previousPage = detailsContext.currentPage;
-    detailsContext.previousPageStart = detailsContext.currentPageStart;
-    detailsContext.currentPageStart = detailsContext.nextPageStart;
-  }
+  // else move forward
   else {
-    // init case
-    detailsContext.currentPageStart = detailsContext.value;
+    currentPair.value = detailsContext.nextPageStart;
   }
   detailsContext.currentPage = detailsPage;
-  currentPair.value = detailsContext.currentPageStart;
   uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, currentPair.value, SCREEN_WIDTH-2*BORDER_MARGIN, false);
 
   if (nbLines>NB_MAX_LINES_IN_DETAILS) {
     uint16_t len;
     nbgl_getTextMaxLenInNbLines(BAGL_FONT_INTER_REGULAR_24px, currentPair.value,SCREEN_WIDTH-2*BORDER_MARGIN,NB_MAX_LINES_IN_DETAILS,&len);
     len-=3;
+    // memorize next position to save processing
     detailsContext.nextPageStart = currentPair.value+len;
     // use special feature to keep only NB_MAX_LINES_IN_DETAILS lines and replace the last 3 chars by "..."
     content.tagValueList.nbMaxLinesForValue = NB_MAX_LINES_IN_DETAILS;
@@ -1152,7 +1152,6 @@ void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping) {
   detailsContext.value = value;
   detailsContext.nbPages = (nbLines+NB_MAX_LINES_IN_DETAILS-1)/NB_MAX_LINES_IN_DETAILS;
   detailsContext.currentPage = 0;
-  detailsContext.previousPage = -1;
   detailsContext.wrapping = wrapping;
   // add some spare for room lost with "..." substitution
   if (detailsContext.nbPages > 1) {
