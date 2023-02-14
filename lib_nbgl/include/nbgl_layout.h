@@ -131,6 +131,7 @@ typedef struct {
 typedef struct {
     char *item; ///< string giving the tag name
     char *value; ///< string giving the value name
+    const nbgl_icon_details_t *valueIcon; ///< a buffer containing the 32px 1BPP icon for icon on right of value (can be NULL)
 } nbgl_layoutTagValue_t;
 
 /**
