@@ -58,14 +58,14 @@ WEAK __attribute__((section(".boot"))) int main() {
 
 #ifdef HAVE_BLE
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif  // HAVE_BLE
+#endif // HAVE_BLE
                 USB_power(0);
                 USB_power(1);
 
 #ifdef HAVE_BLE
                 BLE_power(0, NULL);
                 BLE_power(1, NULL);
-#endif  // HAVE_BLE
+#endif // HAVE_BLE
                 app_main();
             }
             CATCH(EXCEPTION_IO_RESET) {
