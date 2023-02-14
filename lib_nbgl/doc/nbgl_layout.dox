@@ -222,15 +222,21 @@ The API to insert such an object is @ref nbgl_layoutAddLongPressButton(), with t
 
 \image{inline} html layout4.png "caption" height=300
 
+A touchable icon can also be added on right of value:
+
+\image{inline} html layout4_bis.png "caption" height=300
+
 The parameters to draw such an item are:
 
 - Array of tag/value pairs :
--- tag being a single line text displayed in @ref DARK_GRAY in 24px font
--- value being a multi-line text in @ref BLACK in 32px font (auto-wrap, so long lines are automatically broken at maximum
+ - \b tag being a single line text displayed in @ref DARK_GRAY in 24px font
+ - \b value being a multi-line text in @ref BLACK in 32px font (auto-wrap, so long lines are automatically broken at maximum
 fitting length)
+ - \b icon being buffer containing the 32px 1BPP icon for touchable icon on right of value (can be NULL)
 - Or a callback (if the array is NULL) to retrieve the pairs one by one
 - A boolean to wrap or not value field on spaces
 - A boolean to indicate whether to use a 24 px font for value field (only used when displaying details)
+- A token that will be used as argument of the callback if icon in any tag/value pair is touched (index is the index of the pair in pairs[])
 - The maximum number of lines of value field to display (if 0, not used)
 
 This area is displayed in the main container, under the previously inserted complex object.

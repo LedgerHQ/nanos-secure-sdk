@@ -299,6 +299,10 @@ static void displaySettingsPage(uint8_t page, bool forceFullRefresh) {
 static void displayReviewPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageContent_t content;
 
+  // ensure the page is valid
+  if ((navInfo.nbPages != 0) && (page >= (navInfo.nbPages))) {
+    return;
+  }
   navInfo.activePage = page;
   if ((onNav == NULL) || (onNav(navInfo.activePage, &content) == false))
     return;
@@ -334,6 +338,10 @@ static void displayReviewPage(uint8_t page, bool forceFullRefresh) {
   }
   else if (content.type == TAG_VALUE_CONFIRM) {
     content.tagValueConfirm.tagValueList.smallCaseForValue = false;
+    // no next because confirmation is always the last page
+    navInfo.navWithTap.nextPageText = NULL;
+    // use confirm token for black button
+    content.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
   }
 
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);

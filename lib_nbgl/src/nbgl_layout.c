@@ -129,32 +129,26 @@ static inline uint8_t get_hold_to_approve_percent(uint32_t touch_duration) {
 static bool getLayoutAndLayoutObj(nbgl_obj_t *obj, nbgl_layoutInternal_t **layout, layoutObj_t **layoutObj) {
   uint8_t i = NB_MAX_LAYOUTS;
 
-  // gLayout[1] is on top of gLayout[0] so if gLayout[1] is active, it must catch the event
+  // parse all layouts (starting with modals) to find the object
   *layout = NULL;
   while (i>0) {
     i--;
     if (gLayout[i].nbChildren > 0) {
-      *layout = &gLayout[i];
-      break;
-    }
-  }
-  if (*layout == NULL) {
-    return false;
-  }
-  i=0;
-  // get index of obj
-  while (i<(*layout)->nbUsedCallbackObjs) {
-    if (obj == (nbgl_obj_t *)(*layout)->callbackObjPool[i].obj) {
-      break;
-    }
-    i++;
-  }
-  LOG_DEBUG(LAYOUT_LOGGER,"touchCallback(): i = %d, nbUsedCallbackObjs = %d\n",i, (*layout)->nbUsedCallbackObjs);
-  if (i==(*layout)->nbUsedCallbackObjs)
-    return false;
+      uint8_t j;
 
-  *layoutObj = &((*layout)->callbackObjPool[i]);
-  return true;
+      // search index of obj in this layout
+      for (j=0;j<gLayout[i].nbUsedCallbackObjs;j++) {
+        if (obj == gLayout[i].callbackObjPool[j].obj) {
+          LOG_DEBUG(LAYOUT_LOGGER,"getLayoutAndLayoutObj(): obj found in layout[%d], index = %d, nbUsedCallbackObjs = %d\n", i, j, gLayout[i].nbUsedCallbackObjs);
+          *layout = &gLayout[i];
+          *layoutObj = &(gLayout[i].callbackObjPool[j]);
+          return true;
+        }
+      }
+    }
+  }
+  // not found
+  return false;
 }
 
 // callback for most touched object
@@ -163,10 +157,9 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   layoutObj_t *layoutObj;
 
   UNUSED(eventType);
-  LOG_DEBUG(LAYOUT_LOGGER,"touchCallback(): obj = %p, gLayout[1].nbChildren = %d\n",obj,gLayout[1].nbChildren);
 
   if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false) {
-    LOG_WARN(LAYOUT_LOGGER,"touchCallback(): eventType = %d, obj = %p, no active layout\n",eventType,obj);
+    LOG_WARN(LAYOUT_LOGGER,"touchCallback(): eventType = %d, obj = %p, no active layout or obj not found\n",eventType,obj);
     return;
   }
 
@@ -1392,8 +1385,8 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
 
     container = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER,layoutInt->layer);
 
-    // get container children
-    container->children = nbgl_containerPoolGet(2,layoutInt->layer);
+    // get container children (max 3 if a valueIcon, otherwise 2)
+    container->children = nbgl_containerPoolGet((pair->valueIcon != NULL)?3:2,layoutInt->layer);
 
     itemTextArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
     valueTextArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
@@ -1424,7 +1417,14 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     } else {
       valueTextArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
     }
-    valueTextArea->width = usableWidth;
+    if (pair->valueIcon == NULL) {
+      valueTextArea->width = usableWidth;
+    }
+    else {
+      // we assume that value is single line
+      valueTextArea->width = nbgl_getTextWidth(valueTextArea->fontId, valueTextArea->text);
+    }
+
     // handle the nbMaxLinesForValue parameter, used to automatically keep only
     // nbMaxLinesForValue lines
     uint16_t nbLines = nbgl_getTextNbLinesInWidth(valueTextArea->fontId,valueTextArea->text,usableWidth,list->wrapping);
@@ -1444,8 +1444,23 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
     container->nbChildren++;
 
     fullHeight += valueTextArea->height;
+    if (pair->valueIcon != NULL) {
+      nbgl_image_t *image = (nbgl_image_t *)nbgl_objPoolGet(IMAGE,layoutInt->layer);
+      layoutObj_t *obj = addCallbackObj(layoutInt,(nbgl_obj_t*)image,list->token,TUNE_TAP_CASUAL);
+      obj->index = i;
+      image->foregroundColor = BLACK;
+      image->buffer = PIC(pair->valueIcon);
+      image->alignment = MID_RIGHT;
+      image->alignmentMarginX = 4;
+      image->alignTo = (nbgl_obj_t*)valueTextArea;
+      image->touchMask = (1 << TOUCHED);
+      image->touchCallback = (nbgl_touchCallback_t)touchCallback;
 
-    container->width = GET_AVAILABLE_WIDTH(layoutInt);
+      container->children[container->nbChildren] = (nbgl_obj_t*)image;
+      container->nbChildren++;
+    }
+
+    container->width = usableWidth;
     container->height = fullHeight;
     container->layout = VERTICAL;
     container->alignmentMarginX = BORDER_MARGIN;
