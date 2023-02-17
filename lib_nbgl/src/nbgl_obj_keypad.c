@@ -183,7 +183,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
     rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
     nbgl_drawText(&rectArea, &key_value,
                   1, BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
-                  BLACK);
+                  keypad->enableDigits ? BLACK :  WHITE);
   }
   // Second row: 4 5 6
   rectArea.y0 += KEYPAD_KEY_HEIGHT;
@@ -193,7 +193,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
     rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
     nbgl_drawText(&rectArea, &key_value,
                   1, BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
-                  BLACK);
+                  keypad->enableDigits ? BLACK :  WHITE);
   }
   // Third row: 7 8 9
   rectArea.y0 += KEYPAD_KEY_HEIGHT;
@@ -203,7 +203,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
     rectArea.x0 += (KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,&key_value))/2;
     nbgl_drawText(&rectArea, &key_value,
                   1, BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
-                  BLACK);
+                  keypad->enableDigits ? BLACK :  WHITE);
   }
   // 4th raw, Backspace, 0 and Validate
   // draw backspace
@@ -221,7 +221,7 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
   rectArea.y0 = keypad->y0 + KEYPAD_KEY_HEIGHT*3 + DIGIT_OFFSET_Y;
   nbgl_drawText(&rectArea, &key_value,
                 1, BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
-                BLACK);
+                keypad->enableDigits ? BLACK :  WHITE);
 
   // draw validate on gray with white background if not enabled
   if (!keypad->enableValidate) {

@@ -311,7 +311,7 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bo
 /* layout objects for page with keypad */
 int nbgl_layoutAddKeypad(nbgl_layout_t *layout, keyboardCallback_t callback, bool shuffled);
 int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableValidate, bool enableBackspace, bool enableDigits);
-int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits, bool bordered);
+int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits);
 int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive);
 #endif // NBGL_KEYPAD
 

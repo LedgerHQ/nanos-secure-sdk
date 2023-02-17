@@ -2421,56 +2421,68 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout, uint8_t index, bool enableVal
 }
 
 /**
- * @brief Adds a set of hidden digits on top of a keypad, to represent the entered digits, as full/empty circles
- *        The set can be bordered with a gray rounded corners rectangle
+ * @brief Adds a placeholder for hidden digits on top of a keypad, to represent the entered digits, as full circles
+ *        The placeholder is "underligned" with a thin horizontal line of the expected full length
  *
  * @note It must be the last added object, after potential back key, title, and keypad. Vertical positions of title and hidden digits will be computed here
  *
  * @param layout the current layout
  * @param nbDigits number of digits to be displayed
- * @param bordered if true, the set is bordered with a gray rounded corners rectangle
  * @return the index of digits set, to use in @ref nbgl_layoutUpdateHiddenDigits()
  */
-int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits, bool bordered) {
+int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
-  nbgl_panel_t *panel;
+  nbgl_container_t *container;
+  nbgl_line_t *line;
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddHiddenDigits():\n");
   if (layout == NULL)
     return -1;
 
-  // create a panel, invisible or bordered
-  panel = (nbgl_panel_t*)nbgl_objPoolGet(PANEL,layoutInt->layer);
-  panel->nbChildren = nbDigits;
-  panel->children = nbgl_containerPoolGet(panel->nbChildren, layoutInt->layer);
-  panel->borderColor = bordered ? LIGHT_GRAY : WHITE;
-  panel->width = nbDigits*C_circle_24px.width + (nbDigits+1)*8;
-  panel->height = 48;
+  // create a container, invisible or bordered
+  container = (nbgl_container_t*)nbgl_objPoolGet(CONTAINER,layoutInt->layer);
+  container->nbChildren = nbDigits+1; // +1 for the line
+  container->children = nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
+  // 12 pixels between each icon (knowing that the effective round are 18px large and the icon 24px)
+  container->width = nbDigits*C_round_24px.width + (nbDigits+1)*12;
+  container->height = 48;
   // distance from digits to title is fixed to 24 px
-  panel->alignmentMarginY = 24;
+  container->alignmentMarginY = 24;
   // item N-2 is the title
-  panel->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-2];
-  panel->alignment = BOTTOM_MIDDLE;
+  container->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-2];
+  container->alignment = BOTTOM_MIDDLE;
 
   // set this new container as child of the main container
-  addObjectToLayout(layoutInt,(nbgl_obj_t*)panel);
+  addObjectToLayout(layoutInt,(nbgl_obj_t*)container);
 
-  // create children of the panel, as images (empty circles)
-  nbgl_objPoolGetArray(IMAGE,nbDigits,layoutInt->layer,(nbgl_obj_t**)panel->children);
+  // create children of the container, as images (empty circles)
+  nbgl_objPoolGetArray(IMAGE,nbDigits,layoutInt->layer,(nbgl_obj_t**)container->children);
   for (int i=0;i<nbDigits;i++) {
-    nbgl_image_t* image = (nbgl_image_t*)panel->children[i];
-    image->buffer = &C_circle_24px;
-    image->foregroundColor = BLACK;
-    image->alignmentMarginX = 8;
+    nbgl_image_t* image = (nbgl_image_t*)container->children[i];
+    image->buffer = &C_round_24px;
+    image->foregroundColor = WHITE;
+    image->alignmentMarginX = 12;
     if (i>0) {
       image->alignment = MID_RIGHT;
-      image->alignTo = (nbgl_obj_t*)panel->children[i-1];
+      image->alignTo = (nbgl_obj_t*)container->children[i-1];
     }
     else {
       image->alignment = NO_ALIGNMENT;
-      image->alignmentMarginY = (panel->height - C_circle_24px.width)/2;
+      image->alignmentMarginY = (container->height - C_round_24px.width)/2;
     }
   }
+  // create gray line
+  line = (nbgl_line_t*)nbgl_objPoolGet(LINE, layoutInt->layer);
+  line->lineColor = LIGHT_GRAY;
+  line->alignmentMarginY = 0;
+  line->alignTo = NULL;
+  line->alignment = BOTTOM_MIDDLE;
+  line->width = container->width;
+  line->height = 4;
+  line->direction = HORIZONTAL;
+  line->thickness = 2;
+  line->offset = 2;
+  container->children[nbDigits] = (nbgl_obj_t*)line;
 
   // return index of keypad to be modified later on
   return (layoutInt->container->nbChildren-1);
@@ -2486,48 +2498,49 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits, bool bor
  */
 int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
-  nbgl_panel_t *panel;
+  nbgl_container_t *container;
   nbgl_image_t* image;
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutUpdateHiddenDigits(): nbActive = %d\n",nbActive);
   if (layout == NULL)
     return -1;
 
-  // get panel
-  panel = (nbgl_panel_t*)layoutInt->container->children[index];
+  // get container
+  container = (nbgl_container_t*)layoutInt->container->children[index];
   // sanity check
-  if ((panel == NULL) || (panel->type != PANEL)) {
+  if ((container == NULL) || (container->type != CONTAINER)) {
     return -1;
   }
-  if (nbActive > panel->nbChildren) {
+  if (nbActive > container->nbChildren) {
     return -1;
   }
   if (nbActive == 0) {
     // deactivate the first digit
-    image = (nbgl_image_t*)panel->children[0];
+    image = (nbgl_image_t*)container->children[0];
     if ((image == NULL) || (image->type != IMAGE)) {
       return -1;
     }
-    image->buffer = &C_circle_24px;
+    image->foregroundColor = WHITE;
   }
   else {
-    image = (nbgl_image_t*)panel->children[nbActive-1];
+    image = (nbgl_image_t*)container->children[nbActive-1];
     if ((image == NULL) || (image->type != IMAGE)) {
       return -1;
     }
     // if the last "active" is already active, it means that we are decreasing the number of active
     // otherwise we are increasing it
-    if (image->buffer == &C_round_24px) {
+    if (image->foregroundColor == BLACK) {
       // all digits are already active
-      if (nbActive == panel->nbChildren) {
+      if (nbActive == container->nbChildren) {
         return 0;
       }
       // deactivate the next digit
-      image = (nbgl_image_t*)panel->children[nbActive];
-      image->buffer = &C_circle_24px;
+      image = (nbgl_image_t*)container->children[nbActive];
+      image->foregroundColor = WHITE;
     }
     else {
       image->buffer = &C_round_24px;
+      image->foregroundColor = BLACK;
     }
   }
 

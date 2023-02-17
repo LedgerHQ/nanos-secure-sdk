@@ -79,8 +79,7 @@ static nbgl_obj_t * getTouchedObject(nbgl_obj_t *obj, nbgl_touchStatePosition_t 
     return NULL;
   }
   if ((obj->type == SCREEN) ||
-      (obj->type == CONTAINER) ||
-      (obj->type == PANEL)) {
+      (obj->type == CONTAINER)) {
     nbgl_container_t *container = (nbgl_container_t *)obj;
     // parse the children, if any
     if (container->children != NULL) {

@@ -699,13 +699,12 @@ used to modify the mask (active keys) of an existing keypad.
 
 @subsubsection keypad_sub_section_2 Adding/Updating hidden digits area
 
-This object, displayed under a potential text (or under the back key) consists in up to 8 circles (or discs) corresponding to
+This object, displayed under a potential text (or under the back key) consists in up to 8 discs (invisible or visible) corresponding to
 hidden entered/not entered digits.
 
 The parameters to configure this object are:
 
 - The number of total digits to be displayed (all digits are considered as "not entered")
-- A boolean indicating whether the set is bordered with a gray rounded corners rectangle or not
 
 The API to insert such an object is @ref nbgl_layoutAddHiddenDigits().
 

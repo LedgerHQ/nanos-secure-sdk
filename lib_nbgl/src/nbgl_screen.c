@@ -371,8 +371,7 @@ static bool objIsIn(nbgl_obj_t *refObj, nbgl_obj_t *obj) {
   }
 
   if ((refObj->type == SCREEN) ||
-      (refObj->type == CONTAINER) ||
-      (refObj->type == PANEL)) {
+      (refObj->type == CONTAINER)) {
     nbgl_container_t *container = (nbgl_container_t *)refObj;
     // draw the children, if any
     if (container->children != NULL) {

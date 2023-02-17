@@ -54,7 +54,6 @@ extern "C" {
 typedef enum  {
     SCREEN,         ///< Main screen
     CONTAINER,      ///< Empty container
-    PANEL,          ///< Container with special border
     IMAGE,          ///< Bitmap (x and width must be multiple of 4)
     LINE,           ///< Vertical or Horizontal line
     TEXT_AREA,      ///< Area to contain text line(s)
@@ -212,16 +211,6 @@ typedef struct PACKED__ nbgl_container_s {
     bool forceClean; ///< if set to true, a paint will be done with background color
     struct nbgl_obj_s **children; ///< children of this object (nbChildren size)
 } nbgl_container_t;
-
-/**
- * @brief struct to represent a panel (@ref PANEL type)
- * @note inherits from container
- *
- */
-typedef struct PACKED__ nbgl_panel_s {
-    struct nbgl_container_s; ///<  common part
-    color_t borderColor; ///<  color of the border of the panel
-} nbgl_panel_t;
 
 /**
  * @brief struct to represent a vertical or horizontal line

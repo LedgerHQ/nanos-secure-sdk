@@ -242,15 +242,6 @@ static void draw_container(nbgl_container_t* obj, nbgl_obj_t *prevObj, bool comp
   }
 }
 
-static void draw_panel(nbgl_panel_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
-  // panel inherits from container
-  draw_container((nbgl_container_t*)obj, prevObj, computePosition);
-  LOG_DEBUG(OBJ_LOGGER,"draw_panel(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
-  nbgl_drawRoundedBorderedRect((nbgl_area_t*)obj,
-                            RADIUS_8_PIXELS, 2,
-                            WHITE, obj->borderColor);
-}
-
 /**
  * @brief internal function used to draw a button
  * @note The button contains an icon AND/OR a single-line UTF-8 text
@@ -985,9 +976,6 @@ static void draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePositi
     case CONTAINER:
       draw_container((nbgl_container_t*)obj, prevObj, computePosition);
       break;
-    case PANEL:
-      draw_panel((nbgl_panel_t*)obj, prevObj, computePosition);
-      break;
     case BUTTON:
       draw_button((nbgl_button_t*)obj, prevObj, computePosition);
       break;
@@ -1096,8 +1084,7 @@ void nbgl_redrawObject(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePositio
   draw_object(obj,prevObj,computePosition);
 
   if ((obj->type == SCREEN) ||
-      (obj->type == CONTAINER) ||
-      (obj->type == PANEL)) {
+      (obj->type == CONTAINER)) {
     nbgl_container_t *container = (nbgl_container_t *)obj;
     nbgl_obj_t *prev = NULL;
     LOG_DEBUG(OBJ_LOGGER,"nbgl_redrawObject(): container->children = %p\n",container->children);

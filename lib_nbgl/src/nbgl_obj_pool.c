@@ -45,7 +45,6 @@ typedef struct {
     nbgl_container_t containerObj;
     nbgl_image_t imageObj;
     nbgl_line_t lineObj;
-    nbgl_panel_t panelObj;
     nbgl_keyboard_t keyboardObj;
     nbgl_keypad_t keypadObj;
     nbgl_spinner_t spinnerObj;

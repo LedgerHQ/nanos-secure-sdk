@@ -21,7 +21,6 @@ nbgl_obj_t <|-- nbgl_switch_t
 nbgl_obj_t <|-- nbgl_progress_bar_t
 nbgl_obj_t <|-- nbgl_page_indicator_t
 nbgl_obj_t <|-- nbgl_image_t
-nbgl_container_t <|-- nbgl_panel_t
 
 @enduml
 
@@ -31,8 +30,6 @@ title Graphic objects composition
 
 SCREEN o-- OBJECTS
 SCREEN o-- CONTAINER
-SCREEN o-- PANEL
-PANEL o-- OBJECTS
 CONTAINER o-- OBJECTS
 
 @enduml
