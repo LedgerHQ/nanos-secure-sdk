@@ -289,6 +289,8 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 #if defined(HAVE_UNICODE_SUPPORT)
   // Make sure font_unicode is recomputed using current language pack
   font_unicode = NULL;
+#else //defined(HAVE_UNICODE_SUPPORT)
+  UNUSED(text_encoding);
 #endif //defined(HAVE_UNICODE_SUPPORT)
 
   const bagl_font_t *font = bagl_get_font(font_id);
