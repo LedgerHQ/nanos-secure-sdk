@@ -234,8 +234,9 @@ STATIC_IF_NOT_INDEXED unsigned int se_compute_line_width_light(const char* text,
 #if defined(HAVE_UNICODE_SUPPORT)
     unsigned int unicode;
 
-    // Handle UTF-8 decoding:
-    if (ch > 0xF0 && text_length >= 3) {        // 4 bytes
+    // Handle UTF-8 decoding (bagl.c contains full explanations)
+    // 4 bytes, from 0x1000 to 0x1FFFF
+    if (ch >= 0xF0 && text_length >= 3) {
       unicode = (ch - 0xF0) << 18;
       unicode |= (*((const unsigned char*)text+0) - 0x80) << 12;
       unicode |= (*((const unsigned char*)text+1) - 0x80) << 6;
@@ -243,14 +244,17 @@ STATIC_IF_NOT_INDEXED unsigned int se_compute_line_width_light(const char* text,
       text += 3;
       text_length -= 3;
 
-    } else if (ch > 0xE0 && text_length >= 2) { // 3 bytes
+    // 3 bytes, from 0x800 to 0xFFFF
+    } else if (ch >= 0xE0 && text_length >= 2) {
       unicode = (ch - 0xE0) << 12;
       unicode |= (*((const unsigned char*)text+0) - 0x80) << 6;
       unicode |= (*((const unsigned char*)text+1) - 0x80);
       text += 2;
       text_length -= 2;
 
-    } else if (ch > 0xC0 && text_length >= 1) { // 2 bytes
+    // 2 bytes UTF-8, Unicode 0x80 to 0x7FF
+    // (0xC0 & 0xC1 are unused and can be used to store something else)
+    } else if (ch >= 0xC2 && text_length >= 1) {
       unicode = (ch - 0xC0) << 6;
       unicode |= (*((const unsigned char*)text+0) - 0x80);
       ++text;

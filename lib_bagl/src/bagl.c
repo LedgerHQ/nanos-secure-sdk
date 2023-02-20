@@ -356,21 +356,57 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 
 #if defined(HAVE_UNICODE_SUPPORT)
     if (text_encoding == BAGL_ENCODING_UTF8) {
-      // Handle UTF-8 decoding:
-      if (ch > 0xF0 && text_length >= 3) {        // 4 bytes
+      // Handle UTF-8 decoding (RFC3629): (https://www.ietf.org/rfc/rfc3629.txt
+      // Char. number range  |        UTF-8 octet sequence
+      // (hexadecimal)    |              (binary)
+      // --------------------+---------------------------------------------
+      // 0000 0000-0000 007F | 0xxxxxxx
+      // 0000 0080-0000 07FF | 110xxxxx 10xxxxxx
+      // 0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
+      // 0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+      //
+      // ISO-10646 mention 6 bytes UTF-8 encoding
+      // https://www.cl.cam.ac.uk/~mgk25/ucs/ISO-10646-UTF-8.html
+      // (but 21-bit unicode characters only need 4 bytes of UTF-8)
+      // I leave the code handling 6 bytes UTF-8, for an eventual future use
+
+      // 6 bytes UTF-8, Unicode 0x400 0000 to 0x7FFF FFFF
+      /*if (ch >= 0xFC && text_length >= 5) {
+        unicode = (ch - 0xFC) << 30;
+        unicode |= (*txt++ - 0x80) << 24;
+        unicode |= (*txt++ - 0x80) << 18;
+        unicode |= (*txt++ - 0x80) << 12;
+        unicode |= (*txt++ - 0x80) << 6;
+        unicode |= (*txt++ - 0x80);
+        text_length -= 5;
+
+      // 5 bytes UTF-8, Unicode 0x20 0000 to 0x3FF FFFF
+      } else if (ch >= 0xF8 && text_length >= 4) {
+        unicode = (ch - 0xF8) << 24;
+        unicode |= (*txt++ - 0x80) << 18;
+        unicode |= (*txt++ - 0x80) << 12;
+        unicode |= (*txt++ - 0x80) << 6;
+        unicode |= (*txt++ - 0x80);
+        text_length -= 4;
+
+      // 4 bytes UTF-8, Unicode 0x1000 to 0x1FFFF
+      } else*/ if (ch >= 0xF0 && text_length >= 3) {
         unicode = (ch - 0xF0) << 18;
         unicode |= (*txt++ - 0x80) << 12;
         unicode |= (*txt++ - 0x80) << 6;
         unicode |= (*txt++ - 0x80);
         text_length -= 3;
 
-      } else if (ch > 0xE0 && text_length >= 2) { // 3 bytes
+      // 3 bytes UTF-8, Unicode 0x800 to 0xFFFF
+      } else if (ch >= 0xE0 && text_length >= 2) {
         unicode = (ch - 0xE0) << 12;
         unicode |= (*txt++ - 0x80) << 6;
         unicode |= (*txt++ - 0x80);
         text_length -= 2;
 
-      } else if (ch > 0xC0 && text_length >= 1) { // 2 bytes
+      // 2 bytes UTF-8, Unicode 0x80 to 0x7FF
+      // (0xC0 & 0xC1 are unused and can be used to store something else)
+      } else if (ch >= 0xC2 && text_length >= 1) {
         unicode = (ch - 0xC0) << 6;
         unicode |= (*txt++ - 0x80);
         text_length -= 1;
