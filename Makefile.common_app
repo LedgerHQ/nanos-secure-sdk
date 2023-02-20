@@ -41,27 +41,35 @@ else
 endif
 
 #####################################################################
-#                          COMMON DEFINES                           #
+#                        IO SEPROXY BUFFER SIZE                     #
 #####################################################################
-ifeq ($(TARGET_NAME), TARGET_NANOS)
-    COMMON_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-else
-    COMMON_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+ifneq ($(DISABLE_DEFAULT_IO_SEPROXY_BUFFER_SIZE), 1)
+    ifeq ($(TARGET_NAME), TARGET_NANOS)
+        COMMON_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+    else
+        COMMON_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+    endif
 endif
 
+#####################################################################
+#                          COMMON DEFINES                           #
+#####################################################################
 COMMON_APP_DEFINES += $(DEFINES_LIB)
 COMMON_APP_DEFINES += APPNAME=\"$(APPNAME)\"
 COMMON_APP_DEFINES += APPVERSION=\"$(APPVERSION)\"
 COMMON_APP_DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
 COMMON_APP_DEFINES += OS_IO_SEPROXYHAL
-COMMON_APP_DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
-COMMON_APP_DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-COMMON_APP_DEFINES += USB_SEGMENT_SIZE=64
-COMMON_APP_DEFINES += BLE_SEGMENT_SIZE=32
-COMMON_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
-COMMON_APP_DEFINES += UNUSED\(x\)=\(void\)x
 
-COMMON_SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+ifneq ($(DISABLE_COMMON_APP_DEFINES), 1)
+    COMMON_APP_DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
+    COMMON_APP_DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
+    COMMON_APP_DEFINES += USB_SEGMENT_SIZE=64
+    COMMON_APP_DEFINES += BLE_SEGMENT_SIZE=32
+    COMMON_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
+    COMMON_APP_DEFINES += UNUSED\(x\)=\(void\)x
+    
+    COMMON_SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+endif
 
 #####################################################################
 #                              UX                                   #
