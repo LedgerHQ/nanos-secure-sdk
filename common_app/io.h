@@ -14,6 +14,14 @@ WEAK void io_seproxyhal_display(const bagl_element_t *element);
 #endif  // HAVE_BAGL
 
 /**
+ * Function to be declared by the application to trigger execute code upon
+ * SEPROXYHAL_TAG_TICKER_EVENT
+ *
+ *
+ */
+WEAK void app_ticker_event_callback(void);
+
+/**
  * IO callback called when an interrupt based channel has received
  * data to be processed.
  *

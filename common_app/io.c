@@ -39,6 +39,10 @@ WEAK void io_seproxyhal_display(const bagl_element_t *element) {
 }
 #endif  // HAVE_BAGL
 
+// This function can be used to declare a callback to SEPROXYHAL_TAG_TICKER_EVENT in the application
+WEAK void app_ticker_event_callback(void) {
+}
+
 WEAK uint8_t io_event(uint8_t channel) {
     (void) channel;
 
@@ -69,6 +73,7 @@ WEAK uint8_t io_event(uint8_t channel) {
             break;
 #endif  // HAVE_NBGL
         case SEPROXYHAL_TAG_TICKER_EVENT:
+            app_ticker_event_callback();
             UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {});
             break;
         default:
