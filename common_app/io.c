@@ -149,7 +149,11 @@ WEAK int io_recv_command() {
     return ret;
 }
 
-WEAK int io_send_response(const buffer_t *rdata, uint16_t sw) {
+WEAK int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw) {
+    return io_send_response_buffer(&(const buffer_t){.ptr = ptr, .size = size, .offset = 0}, sw);
+}
+
+WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw) {
     int ret = -1;
 
     if (rdata != NULL) {
@@ -186,5 +190,5 @@ WEAK int io_send_response(const buffer_t *rdata, uint16_t sw) {
 }
 
 WEAK int io_send_sw(uint16_t sw) {
-    return io_send_response(NULL, sw);
+    return io_send_response_buffer(NULL, sw);
 }
