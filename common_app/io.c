@@ -18,20 +18,25 @@
 #include <string.h>
 
 #include "os.h"
-#include "ux.h"
-
-#ifdef HAVE_NBGL
-#include "nbgl_touch.h"
-#include "nbgl_page.h"
-#endif  // HAVE_NBGL
-
 #include "io.h"
-#include "buffer.h"
 #include "write.h"
 
 // TODO: Temporary workaround, at some point all status words should be defined by the SDK and
 // removed from the application
 #define SW_WRONG_RESPONSE_LENGTH 0xB000
+
+uint8_t G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
+
+/**
+ * Variable containing the length of the APDU response to send back.
+ */
+static uint32_t G_output_len = 0;
+
+/**
+ * IO state (READY, RECEIVING, WAITING).
+ */
+static io_state_e G_io_state = READY;
+
 
 #ifdef HAVE_BAGL
 WEAK void io_seproxyhal_display(const bagl_element_t *element) {
@@ -110,16 +115,6 @@ WEAK uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len) {
 
     return 0;
 }
-
-/**
- * Variable containing the length of the APDU response to send back.
- */
-static uint32_t G_output_len = 0;
-
-/**
- * IO state (READY, RECEIVING, WAITING).
- */
-static io_state_e G_io_state = READY;
 
 WEAK void io_init() {
     // Reset length of APDU response

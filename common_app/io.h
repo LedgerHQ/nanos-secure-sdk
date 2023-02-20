@@ -24,6 +24,7 @@ WEAK void app_ticker_event_callback(void);
 /**
  * IO callback called when an interrupt based channel has received
  * data to be processed.
+ * This function is responsible of forwarding received events to the UX lib.
  *
  * @return 1 if success, 0 otherwise.
  *
