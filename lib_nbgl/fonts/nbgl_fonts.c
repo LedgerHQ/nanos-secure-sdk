@@ -124,21 +124,25 @@ uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *textLen, bool *is_unicode
   uint32_t unicode;
 
   *is_unicode = true;
-  // Handle UTF-8 decoding:
-  if ((cur_char >= 0xF0) && (*textLen >= 3)) {        // 4 bytes
+  // Handle UTF-8 decoding (bagl.c contains full explanations)
+  // 4 bytes, from 0x1000 to 0x1FFFF
+  if ((cur_char >= 0xF0) && (*textLen >= 4)) {
     unicode = (cur_char - 0xF0) << 18;
-    unicode |= (*txt++ & 0x7F) << 12;
-    unicode |= (*txt++ & 0x7F) << 6;
-    unicode |= (*txt++ & 0x7F);
+    unicode |= (*txt++ - 0x80) << 12;
+    unicode |= (*txt++ - 0x80) << 6;
+    unicode |= (*txt++ - 0x80);
 
-  } else if ((cur_char >= 0xE0) && (*textLen >= 2)) { // 3 bytes
+  // 3 bytes, from 0x800 to 0xFFFF
+  } else if ((cur_char >= 0xE0) && (*textLen >= 3)) {
     unicode = (cur_char - 0xE0) << 12;
-    unicode |= (*txt++ & 0x7F) << 6;
-    unicode |= (*txt++ & 0x7F);
+    unicode |= (*txt++ - 0x80) << 6;
+    unicode |= (*txt++ - 0x80);
 
-  } else if ((cur_char >= 0xC0) && (*textLen >= 1)) { // 2 bytes
+  // 2 bytes UTF-8, Unicode 0x80 to 0x7FF
+  // (0xC0 & 0xC1 are unused and can be used to store something else)
+  } else if ((cur_char >= 0xC2) && (*textLen >= 2)) {
     unicode = (cur_char - 0xC0) << 6;
-    unicode |= (*txt++ & 0x7F);
+    unicode |= (*txt++ - 0x80);
 
   } else {
     *is_unicode = false;
