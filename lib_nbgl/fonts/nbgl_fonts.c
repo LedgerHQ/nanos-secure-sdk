@@ -124,25 +124,33 @@ uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *textLen, bool *is_unicode
   uint32_t unicode;
 
   *is_unicode = true;
-  // Handle UTF-8 decoding (bagl.c contains full explanations)
-  // 4 bytes, from 0x1000 to 0x1FFFF
+  // Handle UTF-8 decoding (RFC3629): (https://www.ietf.org/rfc/rfc3629.txt
+  // Char. number range  |        UTF-8 octet sequence
+  // (hexadecimal)    |              (binary)
+  // --------------------+---------------------------------------------
+  // 0000 0000-0000 007F | 0xxxxxxx
+  // 0000 0080-0000 07FF | 110xxxxx 10xxxxxx
+  // 0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
+  // 0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+
+  // 4 bytes UTF-8, Unicode 0x1000 to 0x1FFFF
   if ((cur_char >= 0xF0) && (*textLen >= 4)) {
-    unicode = (cur_char - 0xF0) << 18;
-    unicode |= (*txt++ - 0x80) << 12;
-    unicode |= (*txt++ - 0x80) << 6;
-    unicode |= (*txt++ - 0x80);
+    unicode = (cur_char & 0x07) << 18;
+    unicode |= (*txt++ & 0x3F) << 12;
+    unicode |= (*txt++ & 0x3F) << 6;
+    unicode |= (*txt++ & 0x3F);
 
   // 3 bytes, from 0x800 to 0xFFFF
   } else if ((cur_char >= 0xE0) && (*textLen >= 3)) {
-    unicode = (cur_char - 0xE0) << 12;
-    unicode |= (*txt++ - 0x80) << 6;
-    unicode |= (*txt++ - 0x80);
+    unicode = (cur_char & 0x0F) << 12;
+    unicode |= (*txt++ & 0x3F) << 6;
+    unicode |= (*txt++ & 0x3F);
 
   // 2 bytes UTF-8, Unicode 0x80 to 0x7FF
   // (0xC0 & 0xC1 are unused and can be used to store something else)
   } else if ((cur_char >= 0xC2) && (*textLen >= 2)) {
-    unicode = (cur_char - 0xC0) << 6;
-    unicode |= (*txt++ - 0x80);
+    unicode = (cur_char & 0x1F) << 6;
+    unicode |= (*txt++ & 0x3F);
 
   } else {
     *is_unicode = false;
