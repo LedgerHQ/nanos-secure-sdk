@@ -409,6 +409,7 @@ typedef struct PACKED__ nbgl_keyboard_s {
     color_t textColor; ///< color set to letters.
     color_t borderColor; ///< color set to key borders
     bool lettersOnly; ///< if true, only display letter keys and Backspace
+    bool needsRefresh; ///< if true, means that the keyboard has been redrawn and needs a refresh
     keyboardCase_t casing; ///< keyboard casing mode (lower, upper once or upper locked)
     keyboardMode_t mode; ///< keyboard mode to start with
     uint32_t keyMask; ///< mask used to disable some keys in letters only mod. The 26 LSB bits of mask are used, for the 26 letters of a QWERTY keyboard. Bit[0] for Q, Bit[1] for W and so on

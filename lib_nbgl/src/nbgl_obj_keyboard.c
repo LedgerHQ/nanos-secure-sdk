@@ -163,6 +163,7 @@ static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
       keyboard->casing = LOWER_CASE;
       // just redraw, refresh will be done by client (user of keyboard)
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      keyboard->needsRefresh = true;
     }
     if ((firstIndex<26)&&((keyboard->keyMask&(1<<firstIndex))==0)) {
       keyboard->callback((cur_casing != LOWER_CASE)?kbd_chars_upper[firstIndex]:kbd_chars[firstIndex]);
@@ -563,6 +564,7 @@ static void keyboardDraw(nbgl_keyboard_t *keyboard) {
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd) {
   kbd->touchMask = (1 << TOUCHED);
   kbd->touchCallback = (nbgl_touchCallback_t)&keyboardTouchCallback;
+  kbd->needsRefresh = false;
 
   keyboardDraw(kbd);
 }

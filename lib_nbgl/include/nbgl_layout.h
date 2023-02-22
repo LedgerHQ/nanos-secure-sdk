@@ -296,6 +296,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed);
 /* layout objects for page with keyboard */
 int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo);
 int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask, bool updateCasing, keyboardCase_t casing);
+bool nbgl_layoutKeyboardNeedsRefresh(nbgl_layout_t *layout, uint8_t index);
 int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons,
                                     char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
                                     int firstButtonToken, tune_index_e tuneId);

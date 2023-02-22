@@ -2021,6 +2021,34 @@ int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t key
 }
 
 /**
+ * @brief function called to know whether the keyboard has been redrawn and needs a refresh
+ *
+ * @param layout the current layout
+ * @param index index returned by @ref nbgl_layoutAddKeyboard()
+ * @return true if keyboard needs a refresh
+ */
+bool nbgl_layoutKeyboardNeedsRefresh(nbgl_layout_t *layout, uint8_t index) {
+  nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
+  nbgl_keyboard_t *keyboard;
+
+  LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutKeyboardNeedsRefresh(): \n");
+  if (layout == NULL)
+    return -1;
+
+  // get keyboard at given index
+  keyboard = (nbgl_keyboard_t*)layoutInt->container->children[index];
+  if ((keyboard == NULL) || (keyboard->type != KEYBOARD)) {
+    return -1;
+  }
+  if (keyboard->needsRefresh) {
+    keyboard->needsRefresh = false;
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * @brief Adds up to 4 black suggestion buttons under the previously added object
  *
  * @param layout the current layout
@@ -2166,7 +2194,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
   line->alignmentMarginY = offsetY;
   line->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
   line->alignment = TOP_MIDDLE;
-  line->width = SCREEN_WIDTH-2*44;
+  line->width = SCREEN_WIDTH-2*32;
   line->height = 4;
   line->direction = HORIZONTAL;
   line->thickness = 2;
@@ -2195,7 +2223,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
   textArea = (nbgl_text_area_t*)nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
   textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
   textArea->text = text;
-  textArea->textAlignment = CENTER;
+  textArea->textAlignment = MID_LEFT;
   textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
   textArea->alignmentMarginY = 12;
   textArea->alignTo = (nbgl_obj_t*)line;
@@ -2204,7 +2232,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
     textArea->width = line->width - 2*50;
   }
   else {
-    textArea->width = SCREEN_WIDTH-2*BORDER_MARGIN;
+    textArea->width = line->width;
   }
   textArea->height = nbgl_getFontLineHeight(textArea->fontId);
   textArea->autoHideLongLine = true;
@@ -2233,7 +2261,8 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
  * @param number if numbered is true, number used to build 'number.' text
  * @param text string to display in the area
  * @param grayedOut if true, the text is grayed out (but not the potential number)
- * @return >= 0 if OK
+ * @return <0 if error, 0 if OK with text fitting the area, 1 of 0K with text
+ * not fitting the area
  */
 int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, char *text, bool grayedOut) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
@@ -2249,7 +2278,8 @@ int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numb
     return -1;
   }
   textArea->text = text;
-  textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
+  textArea->textColor = grayedOut ? LIGHT_GRAY : BLACK;
+  textArea->textAlignment = MID_LEFT;
   nbgl_redrawObject((nbgl_obj_t*)textArea,NULL,false);
 
   // update number text area
@@ -2259,7 +2289,10 @@ int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numb
     snprintf(textArea->text,5,"%d.",number);
     nbgl_redrawObject((nbgl_obj_t*)textArea,NULL,false);
   }
-
+  // if the text doesn't fit, indicate it by returning 1 instead of 0, for different refresh
+  if (nbgl_getSingleLineTextWidth(textArea->fontId, text) > textArea->width) {
+    return 1;
+  }
   return 0;
 }
 
@@ -2296,8 +2329,8 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *t
     button->touchMask = (1 << TOUCHED);
   }
   else {
-    button->borderColor = DARK_GRAY;
-    button->innerColor = DARK_GRAY;
+    button->borderColor = LIGHT_GRAY;
+    button->innerColor = LIGHT_GRAY;
   }
   button->text = PIC(text);
   button->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
@@ -2343,8 +2376,8 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bo
     button->touchMask = (1 << TOUCHED);
   }
   else {
-    button->borderColor = DARK_GRAY;
-    button->innerColor = DARK_GRAY;
+    button->borderColor = LIGHT_GRAY;
+    button->innerColor = LIGHT_GRAY;
   }
   nbgl_redrawObject((nbgl_obj_t*)button,NULL,false);
   return 0;
