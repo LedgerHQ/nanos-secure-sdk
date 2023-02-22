@@ -26,12 +26,6 @@ cx_aes_siv_start
 cx_aes_siv_update_aad
 cx_aes_siv_finish
 cx_aes_siv_update
-cx_blake2b
-cx_blake2b_final
-cx_blake2b_get_output_size
-cx_blake2b_init2_no_throw
-cx_blake2b_init_no_throw
-cx_blake2b_update
 cx_cipher_enc_dec
 cx_cipher_finish
 cx_cipher_init
