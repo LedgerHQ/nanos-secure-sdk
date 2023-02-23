@@ -67,7 +67,7 @@ enum {
   ONBOARDING_STATUS_READY,
   ONBOARDING_STATUS_CHOOSE_NAME,
   ONBOARDING_STATUS_PROTECT_RESTORE_SEED,
-  ONBOARDING_STATUS_START_RESTORE_SEED,
+  ONBOARDING_STATUS_SETUP_CHOICE_RESTORE_SEED
 };
 SYSCALL                                       void os_perso_set_onboarding_status(unsigned int state, unsigned int count, unsigned int total);
 
