@@ -71,7 +71,6 @@ cx_hash_get_size
 cx_hash_init
 cx_hash_init_ex
 cx_hash_no_throw
-cx_hash_ripemd160
 cx_hash_sha256
 cx_hash_sha512
 cx_hash_update
@@ -80,7 +79,6 @@ cx_hkdf_extract
 cx_hmac_final
 cx_hmac_init
 cx_hmac_no_throw
-cx_hmac_ripemd160_init_no_throw
 cx_hmac_sha224_init
 cx_hmac_sha256
 cx_hmac_sha256_init_no_throw
@@ -105,9 +103,6 @@ cx_math_sub_no_throw
 cx_memxor
 cx_pbkdf2_hmac
 cx_pbkdf2_no_throw
-cx_ripemd160_final
-cx_ripemd160_init_no_throw
-cx_ripemd160_update
 cx_rng_no_throw
 cx_rng_rfc6979
 cx_rng_rfc6979_init
