@@ -23,8 +23,8 @@ SYSCALL unsigned int os_flags(void);
 /* Grab the SE serial number */
                                           SYSCALL unsigned int os_serial(unsigned char* serial PLENGTH(maxlength), unsigned int maxlength);
 #ifdef HAVE_MCU_SERIAL_STORAGE
-    /* Grab the SEPROXYHAL's MCU serial number */
-SYSCALL unsigned int os_seph_serial(unsigned char* serial PLENGTH(maxlength), unsigned int maxlength);
+/* Grab the SEPROXYHAL's MCU serial number */
+                                          SYSCALL unsigned int os_seph_serial(unsigned char* serial PLENGTH(maxlength), unsigned int maxlength);
 #endif // HAVE_MCU_SERIAL_STORAGE
 /* Grab the SEPROXYHAL's feature set */
                                           SYSCALL unsigned int os_seph_features(void);
@@ -32,6 +32,9 @@ SYSCALL unsigned int os_seph_serial(unsigned char* serial PLENGTH(maxlength), un
                                           SYSCALL unsigned int os_seph_version(unsigned char* version PLENGTH(maxlength), unsigned int maxlength);
 /* Grab the MCU bootloader's version */
                                           SYSCALL unsigned int os_bootloader_version(unsigned char* version PLENGTH(maxlength), unsigned int maxlength);
+/* Grab factory setting */
+                                          SYSCALL unsigned int os_factory_setting_get(unsigned int id, unsigned char* value PLENGTH(maxlength), unsigned int maxlength);
+
 
 /*
  * Copy the serial number in the given buffer and return its length

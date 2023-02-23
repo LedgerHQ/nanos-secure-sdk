@@ -1304,6 +1304,14 @@ unsigned int os_bootloader_version ( unsigned char * version, unsigned int maxle
   return (unsigned int) SVC_Call(SYSCALL_os_bootloader_version_ID, parameters);
 }
 
+unsigned int os_factory_setting_get ( unsigned int id, unsigned char * value, unsigned int maxlength ) {
+  unsigned int parameters[3];
+  parameters[0] = (unsigned int)id;
+  parameters[1] = (unsigned int)value;
+  parameters[2] = (unsigned int)maxlength;
+  return (unsigned int) SVC_Call(SYSCALL_os_factory_setting_get_ID, parameters);
+}
+
 unsigned int os_setting_get ( unsigned int setting_id, unsigned char * value, unsigned int maxlen ) {
   unsigned int parameters[3];
   parameters[0] = (unsigned int)setting_id;

@@ -165,6 +165,7 @@
 #define SYSCALL_os_seph_features_ID                                0x0000006e
 #define SYSCALL_os_seph_version_ID                                 0x0200006f
 #define SYSCALL_os_bootloader_version_ID                           0x02000073
+#define SYSCALL_os_factory_setting_get_ID                          0x0300014c
 #define SYSCALL_os_setting_get_ID                                  0x03000070
 #define SYSCALL_os_setting_set_ID                                  0x03000071
 #define SYSCALL_os_get_memory_info_ID                              0x01000072
