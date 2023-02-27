@@ -91,6 +91,8 @@ size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len,
 /**
  * @brief Computes a Ripemd-160 digest.
  *
+ * @param[in] mode     Indicate if it is the last digest.
+ *
  * @param[in]  in      Input data.
  *
  * @param[in]  in_len  Length of the input data.
@@ -101,7 +103,7 @@ size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len,
  *
  * @return             Size of a Ripemd-160 digest, i.e. 20 bytes.
  */
-size_t cx_ripemd160(cx_ripemd160_t *ctx,
+size_t cx_ripemd160(cx_ripemd160_t *hash, uint32_t mode,
                     const uint8_t *in, size_t in_len,
                     uint8_t *out, size_t out_len);
 

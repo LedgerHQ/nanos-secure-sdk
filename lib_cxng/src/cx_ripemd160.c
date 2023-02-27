@@ -279,22 +279,25 @@ cx_err_t cx_ripemd160_final(cx_ripemd160_t *ctx, uint8_t *digest) {
   return CX_OK;
 }
 
-size_t cx_ripemd160(cx_ripemd160_t *ctx,
+size_t cx_ripemd160(cx_ripemd160_t *hash, uint32_t mode,
                     const uint8_t *in, size_t in_len,
                     uint8_t *out, size_t out_len) {
   if (out_len < CX_RIPEMD160_SIZE) {
     return 0;
   }
-  cx_ripemd160_init_no_throw(ctx);
-  cx_ripemd160_update(ctx, in, in_len);
-  cx_ripemd160_final(ctx, out);
-  explicit_bzero(ctx, sizeof(cx_ripemd160_t));
+  cx_ripemd160_update(hash, in, in_len);
+  if (mode & CX_LAST) {
+    cx_ripemd160_final(hash, out);
+  }
   return CX_RIPEMD160_SIZE;
 }
 
 size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len,
                          uint8_t *out, size_t out_len) {
-  return cx_ripemd160(&G_cx.ripemd160, in, in_len, out, out_len);
+  cx_ripemd160_init_no_throw(&G_cx.ripemd160);
+  cx_ripemd160(&G_cx.ripemd160, CX_LAST, in, in_len, out, out_len);
+  explicit_bzero(&G_cx.ripemd160, sizeof(cx_ripemd160_t));
+  return CX_RIPEMD160_SIZE;
 }
 
 #endif // HAVE_RIPEMD160
