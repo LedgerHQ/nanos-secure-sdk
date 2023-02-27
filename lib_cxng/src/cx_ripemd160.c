@@ -29,18 +29,6 @@
 
 #define RIPEMD_BLOCK_SIZE 64
 
-const cx_hash_info_t cx_ripemd160_info = {
-    CX_RIPEMD160,
-    CX_RIPEMD160_SIZE,
-    RIPEMD_BLOCK_SIZE,
-    sizeof(cx_ripemd160_t),
-    (cx_err_t (*)(cx_hash_t *ctx))cx_ripemd160_init_no_throw,
-    (cx_err_t (*)(cx_hash_t *ctx, const uint8_t *data, size_t len))cx_ripemd160_update,
-    (cx_err_t (*)(cx_hash_t *ctx, uint8_t *digest))cx_ripemd160_final,
-    NULL,
-    NULL
-  };
-
 /* ----------------------------------------------------------------------- */
 /*                                                                         */
 /* ----------------------------------------------------------------------- */
@@ -119,7 +107,6 @@ static unsigned long int f5(uint32_t *BCD) {
 
 cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash) {
   memset(hash, 0, sizeof(cx_ripemd160_t));
-  hash->header.info = &cx_ripemd160_info;
   memmove(hash->acc, hzero, sizeof(hzero));
   return CX_OK;
 }
@@ -292,15 +279,22 @@ cx_err_t cx_ripemd160_final(cx_ripemd160_t *ctx, uint8_t *digest) {
   return CX_OK;
 }
 
-size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len) {
+size_t cx_ripemd160(cx_ripemd160_t *ctx,
+                    const uint8_t *in, size_t in_len,
+                    uint8_t *out, size_t out_len) {
   if (out_len < CX_RIPEMD160_SIZE) {
     return 0;
   }
-  cx_ripemd160_init_no_throw(&G_cx.ripemd160);
-  cx_ripemd160_update(&G_cx.ripemd160, in, in_len);
-  cx_ripemd160_final(&G_cx.ripemd160, out);
-  explicit_bzero(&G_cx.ripemd160, sizeof(cx_ripemd160_t));
+  cx_ripemd160_init_no_throw(ctx);
+  cx_ripemd160_update(ctx, in, in_len);
+  cx_ripemd160_final(ctx, out);
+  explicit_bzero(ctx, sizeof(cx_ripemd160_t));
   return CX_RIPEMD160_SIZE;
+}
+
+size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len,
+                         uint8_t *out, size_t out_len) {
+  return cx_ripemd160(&G_cx.ripemd160, in, in_len, out, out_len);
 }
 
 #endif // HAVE_RIPEMD160

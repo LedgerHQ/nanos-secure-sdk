@@ -97,14 +97,15 @@ cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_
  * @param [in] key_len Length of the key.
  *                     The key length shall be less than 64 bytes.
  *
- * @return             RIPEMD160 identifier.
+ * @return             RIPEMD160 identifier (deprecated).
+ *
  *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const unsigned char * key, unsigned int key_len )
 {
   CX_THROW(cx_hmac_ripemd160_init_no_throw(hmac, key, key_len));
-  return CX_RIPEMD160;
+  return DEPRECATED_2;
 }
 #endif
 
@@ -414,7 +415,7 @@ static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char
   case CX_SHA512: return CX_SHA512_SIZE;
 #endif
 #ifdef HAVE_RIPEMD160
-  case CX_RIPEMD160: return CX_RIPEMD160_SIZE;
+  case DEPRECATED_2: return CX_RIPEMD160_SIZE;
 #endif
   default:
     CX_THROW(CX_INVALID_PARAMETER);

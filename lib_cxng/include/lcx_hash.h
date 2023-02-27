@@ -51,7 +51,7 @@
 enum cx_md_e {
   CX_NONE = 0,                          ///< No message digest algorithm
   // 20 bytes
-  CX_RIPEMD160 = 1,                     ///< RIPEMD160 digest
+  DEPRECATED_2 = 1,                     ///< Keep compatibility for RIPEMD160 digest
   // 28 bytes
   CX_SHA224 = 2,                        ///< SHA224 digest
   // 32 bytes

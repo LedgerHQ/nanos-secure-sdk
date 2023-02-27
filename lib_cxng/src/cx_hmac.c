@@ -57,7 +57,7 @@ static bool cx_is_allowed_digest(cx_md_t md_type) {
     CX_SHA512,
 #endif
 #ifdef HAVE_RIPEMD160
-    CX_RIPEMD160,
+    DEPRECATED_2,
 #endif
   };
   for (unsigned int i = 0; i < sizeof(allowed_algorithms) / sizeof(allowed_algorithms[0]); i++) {
@@ -162,7 +162,7 @@ cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key
 
 #ifdef HAVE_RIPEMD160
 cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_t *key, size_t key_len) {
-  return cx_hmac_init((cx_hmac_t *)hmac, CX_RIPEMD160, key, key_len);
+  return cx_hmac_init((cx_hmac_t *)hmac, DEPRECATED_2, key, key_len);
 }
 #endif
 

@@ -40,11 +40,6 @@ const cx_hash_info_t *cx_hash_get_info(cx_md_t md_type) {
     return &cx_sha256_info;
 #endif
 
-#ifdef HAVE_RIPEMD160
-  case CX_RIPEMD160:
-    return &cx_ripemd160_info;
-#endif
-
 #ifdef HAVE_SHA224
   case CX_SHA224:
     return &cx_sha224_info;
