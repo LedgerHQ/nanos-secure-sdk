@@ -45,6 +45,7 @@ class TTF2INC (object):
         self.line_size = self.configMain.getint('lineSize')
         self.align_width = self.configMain.getboolean('align',False)
         self.crop = self.configMain.getboolean('crop',False)
+        self.bpp = self.configMain.getint('bpp',1)
         try:
             self.font = ImageFont.truetype(os.path.join(os.path.dirname(args.init_file),self.font_name)+'.otf', self.font_size-1)
         except (BaseException, Exception) as error:
@@ -109,7 +110,7 @@ class TTF2INC (object):
             os.mkdir(self.directory)
 
     # -------------------------------------------------------------------------
-    def get_char_picture(self, char):
+    def get_char_picture(self, char, bpp: int):
         """
         Return the bitmap corresponding to the provided character(s).
         """
@@ -141,10 +142,18 @@ class TTF2INC (object):
                         break
                     i+=4
 
-            img = Image.new('1', (width, self.font.font.height), color='black')
+            # nbgl driver inverts color when displaying 1BPP
+            if bpp == 1:
+                background_color = 'black'
+                text_color = 'white'
+            else:
+                background_color = 'white'
+                text_color = 'black'
+
+            img = Image.new('L', (width, self.font.font.height), color=background_color)
             draw = ImageDraw.Draw(img)
             draw.text((0, 0),
-                    char, font=self.font, fill='white')
+                    char, font=self.font, fill=text_color)
             img = img.crop((0,charY,width,charY+self.font_size))
 
             if not self.args.no_write:
@@ -174,17 +183,23 @@ class TTF2INC (object):
             return val - mod
 
 
-    def get_minimal_window(self, img):
+    def get_minimal_window(self, img, bpp: int):
         width, height = img.size
         x_min = width
         y_min = height
         x_max = 0
         y_max = 0
         y_alignment = 4
-        WHITE_VAL = 0
+
+        # nbgl driver inverts color when displaying 1BPP
+        if bpp == 1:
+            white_val = 0
+        else:
+            white_val = 255
+
         for x in range(0, width):
             for y in range(0, height):
-                if img.getpixel((x, y)) == WHITE_VAL:
+                if img.getpixel((x, y)) == white_val:
                     continue
 
                 if x < x_min:
@@ -212,8 +227,7 @@ class TTF2INC (object):
         return ((x_min, y_min), (x_max, y_max))
 
     # -------------------------------------------------------------------------
-    # (based on icon3.py source code)
-    def image_to_packed_buffer(self, img):
+    def image_to_packed_buffer(self, img, bpp: int):
         """
         Rotate and pack bitmap data of the character.
         """
@@ -222,6 +236,9 @@ class TTF2INC (object):
         current_byte = 0
         current_bit = 0
         image_data = []
+        nb_colors = pow(2, bpp)
+        base_threshold = int(256 / nb_colors)
+        half_threshold = int(base_threshold / 2)
 
         # col first
         for col in reversed(range(width)):
@@ -231,14 +248,14 @@ class TTF2INC (object):
                 # Perform implicit rotation here (0,0) is left top in NBGL,
                 # and generally left bottom for various canvas
                 color_index = img.getpixel((col, row))
-                if color_index >= 128:
-                    color_index = 1
-                else:
-                    color_index = 0
+                color_index = int((color_index + half_threshold) / base_threshold)
 
-                # Big Endian encoded
-                current_byte += color_index << (7-current_bit)
-                current_bit += 1
+                if color_index >= nb_colors:
+                    color_index = nb_colors - 1
+
+                # le encoded
+                current_byte += color_index << ((8-bpp)-current_bit)
+                current_bit += bpp
 
                 if current_bit >= 8:
                     image_data.append(current_byte & 0xFF)
@@ -455,13 +472,13 @@ if __name__ == "__main__":
 
                     # STEP 1: Generate the .gif file if it doesn't exist:
                     # (or load it otherwise)
-                    img = ttf.get_char_picture(char)
+                    img = ttf.get_char_picture(char, ttf.bpp)
                     width, height = img.size
 
                     # STEP 2: Crop image to its minimal window
                     if ttf.crop:
                         ((x_min, y_min), (x_max, y_max)) = \
-                                ttf.get_minimal_window(img)
+                                ttf.get_minimal_window(img, bpp=ttf.bpp)
                         img = img.crop((x_min, y_min, x_max, y_max))
                     else:
                         x_min = 0
@@ -470,7 +487,7 @@ if __name__ == "__main__":
                         y_max = height
 
                     # STEP 3: Get bitmap data based on .gif content:
-                    image_data = ttf.image_to_packed_buffer(img)
+                    image_data = ttf.image_to_packed_buffer(img, ttf.bpp)
 
                     # Store the information to process it later:
                     char_info[char] = {"bitmap": image_data,
@@ -601,7 +618,7 @@ if __name__ == "__main__":
                     typedef = "nbgl_font_unicode_t"
                     ttf_info_dictionary["nbgl_font_unicode"] = {
                         "font_id": ttf.get_font_id(),
-                        "bpp": 1,
+                        "bpp": ttf.bpp,
                         "char_height": ttf.font_size,
                         "baseline_height": baseline,
                         "line_height": ttf.line_size,
@@ -614,7 +631,7 @@ if __name__ == "__main__":
                 inc.write(
                     f"\n __attribute__ ((section(\"._nbgl_fonts_\"))) const {typedef} font{ttf.basename.upper()}{suffix} = {{\n")
                 inc.write(f"  {ttf.get_font_id_name()}, // font id\n")
-                inc.write( "  1, // bpp => 1 for B&W\n")
+                inc.write(f"  (uint8_t) NBGL_BPP_{ttf.bpp}, // bpp\n")
                 inc.write(f"  {ttf.font_size}, // font height in pixels\n")
                 inc.write(f"  {baseline}, // baseline height in pixels\n")
                 inc.write(f"  {ttf.line_size}, // line height in pixels\n")

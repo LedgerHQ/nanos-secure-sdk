@@ -77,7 +77,7 @@ typedef struct {
  */
 typedef struct {
   uint8_t font_id;          ///< ID of the font, from @ref nbgl_font_id_e
-  uint8_t bpp;              ///< number of bits per pixels
+  uint8_t bpp;              ///< Number of bits per pixels, (interpreted as nbgl_bpp_t)
   uint8_t char_height;      ///< height of all characters in pixels
   uint8_t baseline_height;  ///< baseline of all characters in pixels
   uint8_t line_height;      ///< height of a line for all characters in pixels

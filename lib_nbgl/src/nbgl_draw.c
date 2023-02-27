@@ -384,7 +384,8 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
   rectArea.height = font->char_height;
   rectArea.backgroundColor = area->backgroundColor;
   rectArea.y0 = area->y0;
-  rectArea.bpp = NBGL_BPP_1;
+  rectArea.bpp = (nbgl_bpp_t) font->bpp;
+
   while (textLen>0) {
     nbgl_font_character_t *character;
     uint8_t *char_buffer=NULL;
