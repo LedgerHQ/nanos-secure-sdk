@@ -44,6 +44,7 @@ class TTF2INC (object):
         self.font_size = self.configMain.getint('fontSize')
         self.line_size = self.configMain.getint('lineSize')
         self.align_width = self.configMain.getboolean('align',False)
+        self.crop = self.configMain.getboolean('crop',False)
         try:
             self.font = ImageFont.truetype(os.path.join(os.path.dirname(args.init_file),self.font_name)+'.otf', self.font_size-1)
         except (BaseException, Exception) as error:
@@ -159,6 +160,56 @@ class TTF2INC (object):
             img = img.convert('L')
 
         return img
+
+	# Minimal window/crop
+    # -------------------------------------------------------------------------
+    def align(self, val: int, target: int, go_up: bool) -> int:
+        mod = val % target
+        if mod == 0:
+            return val
+
+        if go_up:
+            return val + target - mod
+        else:
+            return val - mod
+
+
+    def get_minimal_window(self, img):
+        width, height = img.size
+        x_min = width
+        y_min = height
+        x_max = 0
+        y_max = 0
+        y_alignment = 4
+        WHITE_VAL = 0
+        for x in range(0, width):
+            for y in range(0, height):
+                if img.getpixel((x, y)) == WHITE_VAL:
+                    continue
+
+                if x < x_min:
+                    x_min = x
+
+                if y < y_min:
+                    y_min = y
+
+                if x+1 > x_max:
+                    x_max = x+1
+
+                if y+1 > y_max:
+                    y_max = y+1
+
+       # Check if it is an empty box
+        if x_max < x_min:
+            x_max = x_min = 0
+
+        if y_max < y_min:
+            y_max = y_min = 0
+
+        # Align coords
+        y_max = self.align(y_max, y_alignment, True)
+        y_min = self.align(y_min, y_alignment, False)
+        return ((x_min, y_min), (x_max, y_max))
 
     # -------------------------------------------------------------------------
     # (based on icon3.py source code)
@@ -405,17 +456,32 @@ if __name__ == "__main__":
                     # STEP 1: Generate the .gif file if it doesn't exist:
                     # (or load it otherwise)
                     img = ttf.get_char_picture(char)
+                    width, height = img.size
 
-                    # STEP 2: Get bitmap data based on .gif content:
+                    # STEP 2: Crop image to its minimal window
+                    if ttf.crop:
+                        ((x_min, y_min), (x_max, y_max)) = \
+                                ttf.get_minimal_window(img)
+                        img = img.crop((x_min, y_min, x_max, y_max))
+                    else:
+                        x_min = 0
+                        y_min = 0
+                        x_max = width
+                        y_max = height
+
+                    # STEP 3: Get bitmap data based on .gif content:
                     image_data = ttf.image_to_packed_buffer(img)
 
                     # Store the information to process it later:
-                    width, _ = img.size
                     char_info[char] = {"bitmap": image_data,
                                        "width": width,
                                        "size": len(image_data),
                                        "offset": 0,
-                                       "img":img}
+                                       "img":img,
+                                       "x_min": x_min,
+                                       "y_min": y_min,
+                                       "x_max": x_max,
+                                       "y_max": y_max}
 
                 except (BaseException, Exception) as error:
                     sys.stderr.write(f"An error occurred while processing char"
@@ -511,6 +577,10 @@ if __name__ == "__main__":
                     width = info["width"]
                     size = info["size"]
                     offset = info["offset"]
+                    x_min = info["x_min"]
+                    y_min = info["y_min"]
+                    x_max = info["x_max"]
+                    y_max = info["y_max"]
                     if ttf.unicode_needed:
                         unicode = f"0x{ord(char):06X}"
                         ttf_info_dictionary["nbgl_font_unicode_character"].append({
@@ -522,8 +592,8 @@ if __name__ == "__main__":
                         inc.write(f"  {{ 0x{ord(char):06X}, {width:3}, {size:3}"
                                   f", {offset:4} }}, //unicode {unicode}\n")
                     else:
-                        inc.write(f"  {{ {width:3}, {size:3}, {offset:4} }},"
-                                  f" //ascii 0x{ord(char):04X}\n")
+                        inc.write(f"  {{ {offset:4}, {width:3}, {x_min}, {y_min}, {x_max}, {y_max} }},"
+                                  f" //asciii 0x{ord(char):04X}\n")
                 inc.write("};\n")
 
                 # Write the struct containing information about the font:

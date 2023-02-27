@@ -409,6 +409,10 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
 #else // HAVE_UNICODE_SUPPORT
       continue;
 #endif // HAVE_UNICODE_SUPPORT
+
+      rectArea.x0 = x;
+      rectArea.width = char_width;
+      nbgl_frontDrawImage(&rectArea, char_buffer,NO_TRANSFORMATION, fontColor);
     }
     else {
       // if not supported char, go to next one
@@ -418,10 +422,13 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
       character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
       char_buffer = (uint8_t *)&font->bitmap[character->bitmap_offset];
       char_width = character->char_width;
+
+      rectArea.x0 = x + character->x_min;
+      rectArea.y0 = area->y0 + character->y_min;
+      rectArea.height = (character->y_max - character->y_min);
+      rectArea.width = (character->x_max - character->x_min);
+      nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
     }
-    rectArea.x0 = x;
-    rectArea.width = char_width;
-    nbgl_frontDrawImage(&rectArea, char_buffer,NO_TRANSFORMATION, fontColor);
     x+=char_width;
   }
 }
