@@ -73,11 +73,6 @@ const cx_hash_info_t *cx_hash_get_info(cx_md_t md_type) {
     return &cx_shake256_info;
 #endif
 
-#ifdef HAVE_BLAKE2
-  case CX_BLAKE2B:
-    return &cx_blake2b_info;
-#endif
-
   default:
     return NULL;
   }

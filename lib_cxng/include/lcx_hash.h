@@ -22,7 +22,6 @@
  *
  * A hash function maps data of arbitrary size to a bit array of a fixed size,
  * called the message digest. Various hash functions are available:
- *   - BLAKE2B
  *   - KECCAK (Pre SHA3)
  *   - RIPEMD-160
  *   - SHAKE-128
@@ -65,8 +64,8 @@ enum cx_md_e {
   CX_KECCAK = 6,                        ///< Keccak (pre-SHA3) digest
   // 28,32,48,64 bytes
   CX_SHA3 = 7,                          ///< SHA3 Digest
-  DEPRECATED_0 = 8,                     ///< Keep compatibility
-  CX_BLAKE2B = 9,                       ///< Blake digest
+  DEPRECATED_0 = 8,                     ///< Keep compatibility for Groestl Digest
+  DEPRECATED_1 = 9,                     ///< Keep compatibility for Blake2 Digest
   // any bytes
   CX_SHAKE128 = 10,                     ///< SHAKE-128 digest
   // any bytes

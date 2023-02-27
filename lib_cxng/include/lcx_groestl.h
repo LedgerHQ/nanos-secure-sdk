@@ -85,8 +85,6 @@ size_t cx_groestl_get_output_size(const cx_groestl_t *ctx);
  *
  * @param[in]  size Length of the digest.
  *
- * @return          GROESTL identifier.
- *
  * @throws          CX_INVALID_PARAMETER
  */
 static inline void cx_groestl_init ( cx_groestl_t * hash, unsigned int size )

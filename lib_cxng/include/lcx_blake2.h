@@ -94,14 +94,11 @@ cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
  *
  * @param[in]  out_len Digest size in bits.
  *
- * @return             BLAKE2b identifier.
- *
  * @throws             CX_INVALID_PARAMETER
  */
-static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
+static inline void cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
 {
   CX_THROW(cx_blake2b_init_no_throw(hash, out_len));
-  return CX_BLAKE2B;
 }
 
 /**
@@ -154,15 +151,12 @@ cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
  * @param[in] perso     Pointer to a personalization string (optional).
  *
  * @param[in] perso_len Length of the personalization string.
- *
- * @return              BLAKE2b identifier.
- *
+ * *
  * @throws              CX_INVALID_PARAMETER
  */
-static inline int cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len )
+static inline void cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len )
 {
   CX_THROW(cx_blake2b_init2_no_throw(hash, out_len, salt, salt_len, perso, perso_len));
-  return CX_BLAKE2B;
 }
 
 #endif
