@@ -76,6 +76,18 @@ extern void ux_process_default_event(void);
 #endif //HAVE_BOLOS
 
 /**
+ * Request a wake up of the device (pin lock screen, ...) to display a new interface to the user.
+ * Wake up prevents power-off features. Therefore, security wise, this function shall only
+ * be called to request direct user interaction.
+ */
+#define UX_WAKE_UP() \
+  G_ux_params.ux_id = BOLOS_UX_WAKE_UP; \
+  G_ux_params.len = 0; \
+  os_ux(&G_ux_params); \
+  G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX);
+
+
+/**
  * forward the finger_event to the os ux handler. if not used by it, it will
  * be used by App controls
  */
