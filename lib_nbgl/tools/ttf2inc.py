@@ -10,6 +10,160 @@ import struct
 from PIL import Image, ImageFont, ImageDraw
 import configparser
 
+from typing import List, Tuple
+
+NB_MIN_PACKED_PIXELS = 3
+NB_MAX_PACKED_PIXELS = 6
+class Rle4bpp():
+
+    @staticmethod
+    def image_to_pixels(img, bpp: int) -> List[Tuple]:
+        """
+        Rotate and pack bitmap data of the character.
+        """
+        width, height = img.size
+
+        color_indexes = []
+        nb_colors = pow(2, bpp)
+        base_threshold = int(256 / nb_colors)
+        half_threshold = int(base_threshold / 2)
+
+        # col first
+        for col in reversed(range(width)):
+            for row in range(height):
+                # Return an index in the indexed colors list
+                # top to bottom
+                # Perform implicit rotation here (0,0) is left top in NBGL,
+                # and generally left bottom for various canvas
+                color_index = img.getpixel((col, row))
+                color_index = int((color_index + half_threshold) / base_threshold)
+
+                if color_index >= nb_colors:
+                    color_index = nb_colors - 1
+
+                color_indexes.append(color_index)
+
+        return color_indexes
+
+
+    @staticmethod
+    def pixels_to_occurrences(pixels: List[int]) -> List[Tuple]:
+        occurrences = []
+        for pixel in pixels:
+            if len(occurrences) == 0:
+                occurrences.append((pixel, 1))
+            else:
+                color, cnt = occurrences[-1]
+                if pixel == color:
+                    occurrences[-1] = (pixel, cnt+1)
+                else:
+                    occurrences.append((pixel, 1))
+        return occurrences
+
+	# Fetch next single pixels that can be packed
+    @classmethod
+    def fetch_next_single_pixels(cls, occurrences: List[Tuple[int, int]]) -> List[int]:
+        result = []
+        for occurrence in occurrences:
+            color, cnt = occurrence
+            if cnt >= 2:
+                break
+            else:
+                result.append(color)
+
+        # Ensure pixels can be packed by groups
+        nb_pixels = len(result)
+        if (nb_pixels % NB_MAX_PACKED_PIXELS < NB_MIN_PACKED_PIXELS):
+            return result[0:(nb_pixels - nb_pixels%NB_MIN_PACKED_PIXELS)]
+        return result
+
+	# Generate bytes from a list of single pixels
+    def generate_packed_single_pixels_bytes(packed_occurences: List[int]) -> bytes:
+        assert len(packed_occurences) >= 3
+        assert len(packed_occurences) <= 6
+        header = (0b10 << 2) | (len(packed_occurences) - 3)
+        nibbles = [header]
+        for occurrence in packed_occurences:
+            nibbles.append(occurrence)
+
+        result = []
+        for i, nibble in enumerate(nibbles):
+            if (i % 2) == 0:
+                result.append(nibble << 4)
+            else:
+                result[-1] += nibble
+        return bytes(result)
+
+    @classmethod
+    def handle_packed_pixels(cls, packed_occurences: List[int]) -> bytes:
+        assert len(packed_occurences) >= 3
+        result = bytes()
+        for i in range(0, len(packed_occurences), NB_MAX_PACKED_PIXELS):
+            result += cls.generate_packed_single_pixels_bytes(packed_occurences[i:i+NB_MAX_PACKED_PIXELS])
+        return result
+
+    @staticmethod
+    def handle_white_occurrence(occurrence: Tuple[int, int]) -> bytes:
+        _, cnt = occurrence
+        unit_cnt_max = 64
+        result = []
+
+        for i in range(0, cnt, unit_cnt_max):
+            diff_cnt = cnt - i
+            if diff_cnt > unit_cnt_max:
+                i_cnt = unit_cnt_max
+            else:
+                i_cnt = diff_cnt
+
+            result.append((0b11 << 6) | (i_cnt-1))
+        return bytes(result)
+
+    @staticmethod
+    def handle_non_white_occurrence(occurrence: Tuple[int, int]) -> bytes:
+        color, cnt = occurrence
+        unit_cnt_max = 8
+        result = []
+
+        for i in range(0, cnt, unit_cnt_max):
+            diff_cnt = cnt - i
+            if diff_cnt > unit_cnt_max:
+                i_cnt = unit_cnt_max
+            else:
+                i_cnt = diff_cnt
+
+            result.append((0 << 7) | (i_cnt-1) << 4 | color)
+
+        return bytes(result)
+
+    @classmethod
+    def occurrences_to_rle(cls, occurrences: Tuple[int, int], bpp: int) -> bytes:
+        result = bytes()
+        WHITE_COLOR = pow(2, bpp) - 1
+        i = 0
+        while i < len(occurrences):
+            # Check if next occurrences are packable in single occurrences
+            single_pixels = cls.fetch_next_single_pixels(occurrences[i:])
+            if len(single_pixels) > 0:
+                # Pack single occurrences
+                result += cls.handle_packed_pixels(single_pixels)
+                i += len(single_pixels)
+            else:
+                # Encode next occurrence
+                occurrence = occurrences[i]
+                color, _ = occurrence
+                if color == WHITE_COLOR:
+                    result += cls.handle_white_occurrence(occurrence)
+                else:
+                    result += cls.handle_non_white_occurrence(occurrence)
+                i += 1
+        return result
+
+    @classmethod
+    def rle_4bpp(cls, img) -> bytes:
+        bpp = 4
+        pixels = cls.image_to_pixels(img, bpp)
+        occurrences = cls.pixels_to_occurrences(pixels)
+        return cls.occurrences_to_rle(occurrences, bpp)
 
 # -----------------------------------------------------------------------------
 class TTF2INC (object):
@@ -126,7 +280,7 @@ class TTF2INC (object):
         fullpath = os.path.join(self.directory, filename)
 
         # STEP 1: Generate the .gif file if it doesn't exist:
-        if not os.path.exists(fullpath + ".gif") or self.args.overwrite:
+        if not os.path.exists(fullpath + ".bmp") or self.args.overwrite:
             # Generate and save the .GIF picture
             # Create a B&W Image with that size
             # get potential offsets to apply for this char
@@ -165,7 +319,7 @@ class TTF2INC (object):
             # We will load the .GIF picture:
             if self.args.verbose:
                 sys.stdout.write(f"Loading {fullpath}.gif\n")
-            img = Image.open(fullpath + ".gif")
+            img = Image.open(fullpath + ".bmp")
             img = img.convert('L')
 
         return img
@@ -487,7 +641,10 @@ if __name__ == "__main__":
                         y_max = height
 
                     # STEP 3: Get bitmap data based on .gif content:
-                    image_data = ttf.image_to_packed_buffer(img, ttf.bpp)
+                    if ttf.bpp == 4:
+                        image_data = Rle4bpp.rle_4bpp(img)
+                    else:
+                        image_data = ttf.image_to_packed_buffer(img, ttf.bpp)
 
                     # Store the information to process it later:
                     char_info[char] = {"bitmap": image_data,
@@ -551,6 +708,7 @@ if __name__ == "__main__":
                 offset = 0
                 first_char = None
                 ttf_info_dictionary["bitmap"] = bytes()
+                bitmap_len = 0
                 for char, info in sorted(char_info.items()):
                     image_data = info["bitmap"]
                     ttf_info_dictionary["bitmap"] += image_data
@@ -598,6 +756,7 @@ if __name__ == "__main__":
                     y_min = info["y_min"]
                     x_max = info["x_max"]
                     y_max = info["y_max"]
+                    bitmap_len += len(info["bitmap"])
                     if ttf.unicode_needed:
                         unicode = f"0x{ord(char):06X}"
                         ttf_info_dictionary["nbgl_font_unicode_character"].append({
@@ -630,6 +789,7 @@ if __name__ == "__main__":
                     typedef = "nbgl_font_t"
                 inc.write(
                     f"\n __attribute__ ((section(\"._nbgl_fonts_\"))) const {typedef} font{ttf.basename.upper()}{suffix} = {{\n")
+                inc.write(f"  {bitmap_len}, // bitmap len\n")
                 inc.write(f"  {ttf.get_font_id_name()}, // font id\n")
                 inc.write(f"  (uint8_t) NBGL_BPP_{ttf.bpp}, // bpp\n")
                 inc.write(f"  {ttf.font_size}, // font height in pixels\n")

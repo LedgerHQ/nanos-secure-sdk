@@ -44,6 +44,7 @@ typedef struct {
  *
  */
 typedef struct {
+  uint32_t bitmap_len;      ///< Size in bytes of the associated bitmap
   uint8_t font_id;          ///< ID of the font, from @ref nbgl_font_id_e
   uint8_t bpp;              ///< number of bits per pixels
   uint8_t char_height;      ///< height of all characters in pixels

@@ -359,6 +359,30 @@ void nbgl_drawRoundedBorderedRect(nbgl_area_t *area, nbgl_radius_t radiusIndex, 
   }
 }
 
+
+/**
+ * @brief Return the size of the bitmap associated to the input font and character
+ *
+ * @param font pointer to the font infos
+ * @param charId id of the character
+ */
+
+static uint16_t get_bitmap_byte_cnt(const nbgl_font_t *font, uint8_t charId) {
+  if ((charId < font->first_char) || (charId > font->last_char)) {
+    return 0;
+  }
+
+  uint16_t baseId = charId - font->first_char;
+  if (charId < font->last_char) {
+    nbgl_font_character_t *character = (nbgl_font_character_t *)PIC(&font->characters[baseId]);
+    nbgl_font_character_t *nextCharacter = (nbgl_font_character_t *)PIC(&font->characters[baseId+1]);
+    return (nextCharacter->bitmap_offset - character->bitmap_offset);
+  } else if (charId == font->last_char) {
+    return (font->bitmap_len - font->characters[baseId].bitmap_offset);
+  }
+  return 0;
+}
+
 /**
  * @brief This function draws the given single-line text, with the given parameters.
  *
@@ -421,14 +445,20 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
         continue;
       }
       character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-      char_buffer = (uint8_t *)&font->bitmap[character->bitmap_offset];
+      char_buffer = (uint8_t *)PIC(&font->bitmap[character->bitmap_offset]);
       char_width = character->char_width;
 
       rectArea.x0 = x + character->x_min;
       rectArea.y0 = area->y0 + character->y_min;
       rectArea.height = (character->y_max - character->y_min);
       rectArea.width = (character->x_max - character->x_min);
-      nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
+
+      if (font->bpp == NBGL_BPP_4) {
+        // 4BPP fonts are RLE encoded
+        nbgl_frontDrawImageRle(&rectArea, char_buffer, get_bitmap_byte_cnt(font, unicode), fontColor);
+      } else {
+        nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
+      }
     }
     x+=char_width;
   }
