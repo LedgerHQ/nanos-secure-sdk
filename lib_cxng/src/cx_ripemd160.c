@@ -282,11 +282,11 @@ cx_err_t cx_ripemd160_final(cx_ripemd160_t *ctx, uint8_t *digest) {
 size_t cx_ripemd160(cx_ripemd160_t *hash, uint32_t mode,
                     const uint8_t *in, size_t in_len,
                     uint8_t *out, size_t out_len) {
-  if (out_len < CX_RIPEMD160_SIZE) {
-    return 0;
-  }
   cx_ripemd160_update(hash, in, in_len);
   if (mode & CX_LAST) {
+    if (out_len < CX_RIPEMD160_SIZE) {
+      return INVALID_PARAMETER;
+    }
     cx_ripemd160_final(hash, out);
   }
   return CX_RIPEMD160_SIZE;
