@@ -84,7 +84,7 @@
 
 #define URI_ID_STRING_MAX_LEN       27 //strlen(URI_ID_0x07_STRING)+1
 
-#define NFC_TEXT_MAX_LEN            217
+#define NFC_TEXT_MAX_LEN            215
 #define NFC_INFO_MAX_LEN            30
 
 #define NFC_NDEF_TYPE_TEXT          0x01
@@ -101,8 +101,8 @@
 typedef struct __attribute__((packed)) ndef_struct_s {
   uint8_t ndef_type;           // NDEF message type NFC_NDEF_TYPE_TEXT / NFC_NDEF_TYPE_URI
   uint8_t uri_id;              // URI string id (only applicable for NFC_NDEF_TYPE_URI)
-  char text[NFC_TEXT_MAX_LEN]; // String to store NDEF text/uri
-  char info[NFC_INFO_MAX_LEN]; // String to store NDEF uri information
+  char text[NFC_TEXT_MAX_LEN+1]; // String to store NDEF text/uri +1 for \0
+  char info[NFC_INFO_MAX_LEN+1]; // String to store NDEF uri information +1 for \0
 } ndef_struct_t;
 
 
@@ -110,7 +110,7 @@ typedef struct __attribute__((packed)) ndef_struct_s {
  * GLOBAL PROTOTYPES
  **********************/
 uint16_t os_get_uri_header(uint8_t uri_id, char *uri_header);
-bolos_err_t os_parse_ndef(uint8_t *in_buffer, ndef_struct_t *parsed);
+uint8_t os_parse_ndef(uint8_t *in_buffer, ndef_struct_t *parsed);
 uint16_t os_ndef_to_string(ndef_struct_t *ndef_message, char * out_string);
 
 #endif
