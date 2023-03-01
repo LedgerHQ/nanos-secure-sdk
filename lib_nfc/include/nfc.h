@@ -87,6 +87,8 @@
 #define NFC_TEXT_MAX_LEN            215
 #define NFC_INFO_MAX_LEN            30
 
+#define NFC_NDEF_MAX_SIZE           (URI_ID_STRING_MAX_LEN+NFC_TEXT_MAX_LEN+NFC_INFO_MAX_LEN+1)
+
 #define NFC_NDEF_TYPE_TEXT          0x01
 #define NFC_NDEF_TYPE_URI           0x02
 
