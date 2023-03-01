@@ -141,12 +141,14 @@ bolos_err_t os_parse_ndef(uint8_t *in_buffer, ndef_struct_t *parsed) {
     parsed->ndef_type = in_buffer[APDU_OFF_P1];
     parsed->uri_id = in_buffer[APDU_OFF_P2];
     text_length = in_buffer[APDU_OFF_DATA];
-    if (text_length > NFC_TEXT_MAX_LEN) {
+    // -1 for '\0'
+    if (text_length > NFC_TEXT_MAX_LEN-1) {
         return SWO_APD_LEN_2F;
     }
     memcpy(parsed->text, &in_buffer[APDU_OFF_DATA+1], text_length);
     info_length = in_buffer[APDU_OFF_DATA+1+text_length];
-    if (info_length > NFC_INFO_MAX_LEN) {
+    // -1 for '\0'
+    if (info_length > NFC_INFO_MAX_LEN-1) {
         return SWO_APD_LEN_30;
     }
     if (info_length) {

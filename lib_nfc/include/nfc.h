@@ -82,9 +82,10 @@
 #define URI_ID_0x22_STRING          "urn:epc:\0"
 #define URI_ID_0x23_STRING          "urn:nfc:\0"
 
+#define URI_ID_STRING_MAX_LEN       27 //strlen(URI_ID_0x07_STRING)+1
 
-#define NFC_TEXT_MAX_LEN            70
-#define NFC_INFO_MAX_LEN        70
+#define NFC_TEXT_MAX_LEN            217
+#define NFC_INFO_MAX_LEN            30
 
 #define NFC_NDEF_TYPE_TEXT          0x01
 #define NFC_NDEF_TYPE_URI           0x02
