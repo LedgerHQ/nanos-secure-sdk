@@ -145,12 +145,14 @@ uint8_t os_parse_ndef(uint8_t *in_buffer, ndef_struct_t *parsed) {
         return 1;
     }
     memcpy(parsed->text, &in_buffer[APDU_OFF_DATA+1], text_length);
+    parsed->text[text_length] = '\0';
     info_length = in_buffer[APDU_OFF_DATA+1+text_length];
     if (info_length > NFC_INFO_MAX_LEN) {
         return 1;
     }
     if (info_length) {
         memcpy(parsed->info, &in_buffer[APDU_OFF_DATA+1+text_length+1], info_length);
+        parsed->info[info_length] = '\0';
     }
     return 0;
 }
