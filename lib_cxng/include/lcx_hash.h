@@ -204,7 +204,6 @@ cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
  *                         The context shall be in RAM.
  *
  * @param [in] hash_id     Hash algorithm identifier. Typically:
- *                           - CX_BLAKE2B
  *                           - CX_SHAKE128
  *                           - CX_SHAKE256
  *
