@@ -384,18 +384,18 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   for (i=0;i<10;i++) {
     rectArea.x0 = keyboard->x0 + i*NORMAL_KEY_WIDTH;
 
-    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px,&keys[i]))/2;
+    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i],
-                  1, BAGL_FONT_INTER_REGULAR_24px,
+                  1, BAGL_FONT_INTER_REGULAR_24px_1bpp,
                   (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // Second row: 9 letters (asdfghjkl)
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   for (i=10;i<19;i++) {
     rectArea.x0 = keyboard->x0 + SECOND_LINE_OFFSET + (i-10)*NORMAL_KEY_WIDTH;
-    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px,&keys[i]))/2;
+    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i],
-                  1, BAGL_FONT_INTER_REGULAR_24px,
+                  1, BAGL_FONT_INTER_REGULAR_24px_1bpp,
                   (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // Third row: Shift key, 7 letters (zxcvbnm) and backspace
@@ -437,9 +437,9 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
   for (i=19;i<26;i++) {
     rectArea.x0 = offsetX + (i-19)*NORMAL_KEY_WIDTH;
-    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px,&keys[i]))/2;
+    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i],
-                  1, BAGL_FONT_INTER_REGULAR_24px,
+                  1, BAGL_FONT_INTER_REGULAR_24px_1bpp,
                   (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // draw backspace
@@ -458,12 +458,12 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
 
   // 4th row, only in Full mode
   if (!keyboard->lettersOnly) {
-    rectArea.x0 = (SWITCH_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px,".?123"))/2;
+    rectArea.x0 = (SWITCH_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,".?123"))/2;
     rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*3 + LETTER_OFFSET_Y;
-    nbgl_drawText(&rectArea, ".?123", 5, BAGL_FONT_INTER_REGULAR_24px, BLACK);
+    nbgl_drawText(&rectArea, ".?123", 5, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
 
-    rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px,"space"))/2;
-    nbgl_drawText(&rectArea, "space", 5, BAGL_FONT_INTER_REGULAR_24px, (keyboard->keyMask&(1<<SPACE_KEY_INDEX))? WHITE:BLACK);
+    rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"space"))/2;
+    nbgl_drawText(&rectArea, "space", 5, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<SPACE_KEY_INDEX))? WHITE:BLACK);
   }
 
 }
@@ -488,34 +488,34 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   // First row of keys: 10 digits (1234567890)
   for (i=0;i<10;i++) {
     rectArea.x0 = keyboard->x0 + i*NORMAL_KEY_WIDTH;
-    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px,&keys[i]))/2;
-    nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
+    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
+    nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // Second row: 9 keys ()
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   for (i=10;i<19;i++) {
     rectArea.x0 = keyboard->x0 + (i-10)*NORMAL_KEY_WIDTH + SECOND_LINE_OFFSET;
-    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px,&keys[i]))/2;
-    nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
+    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
+    nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // Third row: special key, 5 keys and backspace
 
   // draw "#+=" key
   if (keyboard->mode == MODE_DIGITS) {
-    rectArea.x0 = (SPECIAL_CHARS_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px,"#+="))/2;
+    rectArea.x0 = (SPECIAL_CHARS_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"#+="))/2;
     rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
-    nbgl_drawText(&rectArea, "#+=", 3, BAGL_FONT_INTER_REGULAR_24px, BLACK);
+    nbgl_drawText(&rectArea, "#+=", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
   }
   else {
-    rectArea.x0 = (SPECIAL_CHARS_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px,"123"))/2;
+    rectArea.x0 = (SPECIAL_CHARS_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"123"))/2;
     rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
-    nbgl_drawText(&rectArea, "123", 3, BAGL_FONT_INTER_REGULAR_24px, BLACK);
+    nbgl_drawText(&rectArea, "123", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
   }
 
   for (i=19;i<24;i++) {
     rectArea.x0 = SPECIAL_CHARS_KEY_WIDTH + (i-19)*NORMAL_KEY_WIDTH;
-    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px,&keys[i]))/2;
-    nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
+    rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
+    nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // draw backspace
   rectArea.width = C_backspace32px.width;
@@ -527,12 +527,12 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   nbgl_frontDrawImage(&rectArea,(uint8_t*)C_backspace32px.bitmap,NO_TRANSFORMATION,BLACK);
 
   // 4th row
-  rectArea.x0 = (SWITCH_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px,"ABC"))/2;
+  rectArea.x0 = (SWITCH_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"ABC"))/2;
   rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*3 + LETTER_OFFSET_Y;
-  nbgl_drawText(&rectArea, "ABC", 3, BAGL_FONT_INTER_REGULAR_24px, BLACK);
+  nbgl_drawText(&rectArea, "ABC", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
 
-  rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px,"space"))/2;
-  nbgl_drawText(&rectArea, "space", 5, BAGL_FONT_INTER_REGULAR_24px, (keyboard->keyMask&(1<<SPACE_KEY_INDEX))? WHITE:BLACK);
+  rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"space"))/2;
+  nbgl_drawText(&rectArea, "space", 5, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<SPACE_KEY_INDEX))? WHITE:BLACK);
 }
 
 static void keyboardDraw(nbgl_keyboard_t *keyboard) {
