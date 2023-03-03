@@ -2092,7 +2092,7 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons
     choiceButtons[i]->width = (SCREEN_WIDTH-2*BORDER_MARGIN-8)/2;
     choiceButtons[i]->height = 64;
     choiceButtons[i]->radius = RADIUS_32_PIXELS;
-    choiceButtons[i]->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+    choiceButtons[i]->fontId = BAGL_FONT_INTER_SEMIBOLD_24px_1bpp;
     choiceButtons[i]->icon = NULL;
     if ((i%2) == 0) {
       choiceButtons[i]->alignmentMarginX = BORDER_MARGIN;
