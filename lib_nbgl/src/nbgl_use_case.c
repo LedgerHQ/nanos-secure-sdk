@@ -766,7 +766,7 @@ void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char
     info.centeredInfo.offsetY -= 40;
   }
   pageContext = nbgl_pageDrawInfo(&pageCallback, NULL, &info);
-  nbgl_refresh();
+  nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
 }
 
 /**
