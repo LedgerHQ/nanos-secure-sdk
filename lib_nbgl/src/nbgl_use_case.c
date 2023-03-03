@@ -617,7 +617,7 @@ static void displaySkipWarning(void) {
     .modal = true
   };
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
-  nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+  nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
 
 ///////////// STATIC REVIEW UTILITIES /////////////
@@ -901,7 +901,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
     };
     pageContext = nbgl_pageDrawInfo(&pageCallback, &ticker,&info);
   }
-  nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+  nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
 
 /**
@@ -961,7 +961,7 @@ void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, cha
   };
   onModalConfirm = callback;
   modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
-  nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+  nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
 
 /**
