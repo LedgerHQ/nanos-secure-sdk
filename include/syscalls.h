@@ -251,6 +251,8 @@
 #define SYSCALL_io_button_read_ID                                  0x0000008f
 #endif // HAVE_SE_BUTTON
 
+#define SYSCALL_os_standby_ID                                      0x0000d0d0
+
 #ifdef HAVE_MCU_SERIAL_STORAGE
 #define SYSCALL_os_seph_serial_ID                                  0x0200006d
 #endif // HAVE_MCU_SERIAL_STORAGE
