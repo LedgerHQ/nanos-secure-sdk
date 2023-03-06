@@ -73,10 +73,10 @@ typedef struct io_touch_info_s {
     uint8_t h;
 } io_touch_info_t;
 
-SYSCALL void touch_get_last_info(io_touch_info_t *info);
-SYSCALL void os_enter_standby(void);
-SYSCALL void os_leave_standby(void);
+
 #ifdef HAVE_SE_TOUCH
+SYSCALL void touch_get_last_info(io_touch_info_t *info);
+SYSCALL void touch_set_state(bool enable);
 #ifdef HAVE_TOUCH_DEBUG
 SYSCALL void touch_read_sensitivity(uint8_t *sensi_data);
 #endif
