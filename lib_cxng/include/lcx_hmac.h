@@ -16,6 +16,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
+
 /**
  * @file    lcx_hmac.h
  * @brief   HMAC (Keyed-Hash Message Authentication Code)
@@ -42,6 +43,7 @@
  */
 typedef struct {
   uint8_t   key[128];       ///< Key
+  cx_md_t   hash_id;        ///< Hash algorithm
   cx_hash_t hash_ctx;       ///< Hash context
 } cx_hmac_t;
 
@@ -401,7 +403,7 @@ static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char
 {
   CX_THROW(cx_hmac_no_throw(hmac, mode, in, len, mac, mac_len));
 
-  switch (hmac->hash_ctx.info->md_type) {
+  switch (hmac->hash_id) {
 #ifdef HAVE_SHA224
   case CX_SHA224: return CX_SHA224_SIZE;
 #endif

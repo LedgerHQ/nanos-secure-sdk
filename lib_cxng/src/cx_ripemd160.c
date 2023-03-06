@@ -27,8 +27,6 @@
 
 #include <string.h>
 
-#define RIPEMD_BLOCK_SIZE 64
-
 /* ----------------------------------------------------------------------- */
 /*                                                                         */
 /* ----------------------------------------------------------------------- */
@@ -211,7 +209,7 @@ cx_err_t cx_ripemd160_update(cx_ripemd160_t *ctx, const uint8_t *data, size_t le
   uint8_t *    block;
   unsigned int blen;
 
-  block_size = 64;
+  block_size = RIPEMD_BLOCK_SIZE;
   block      = ctx->block;
   blen       = ctx->blen;
   ctx->blen  = 0;
@@ -259,16 +257,16 @@ cx_err_t cx_ripemd160_final(cx_ripemd160_t *ctx, uint8_t *digest) {
 
   // one more block?
   if (64 - blen < 8) {
-    memset(block + blen, 0, (64 - blen));
+    memset(block + blen, 0, (RIPEMD_BLOCK_SIZE - blen));
     cx_ripemd160_block(ctx);
     blen = 0;
   }
   // last block!
-  memset(block + blen, 0, (64 - blen));
+  memset(block + blen, 0, (RIPEMD_BLOCK_SIZE - blen));
 #ifdef ARCH_BIG_ENDIAN
-  (*(unsigned long int *)(&block[64 - 8])) = cx_swap_uint32(bitlen);
+  (*(unsigned long int *)(&block[RIPEMD_BLOCK_SIZE - 8])) = cx_swap_uint32(bitlen);
 #else
-  (*(uint64_t *)(&block[64 - 8])) = bitlen;
+  (*(uint64_t *)(&block[RIPEMD_BLOCK_SIZE - 8])) = bitlen;
 #endif
   cx_ripemd160_block(ctx);
   // provide result

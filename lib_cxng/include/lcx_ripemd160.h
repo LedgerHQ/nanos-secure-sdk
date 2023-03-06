@@ -34,6 +34,7 @@
 
 /** RIPEMD160 message digest size */
 #define CX_RIPEMD160_SIZE 20
+#define RIPEMD_BLOCK_SIZE 64
 
 /**
  * @brief RIPEMD-160 context.
