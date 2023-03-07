@@ -25,10 +25,17 @@
 #include "os_io_seproxyhal.h"
 #include "os_screen.h"
 #include "ux.h"
-#include "ux_layouts.h"
 
 // This label ultimately comes from the application link.
 extern unsigned int const _install_parameters;
+
+#ifdef HAVE_BAGL
+
+static int audited_ux_slot;
+
+static bool ui_audited_done(void) {
+  return !G_ux.stack[audited_ux_slot].button_push_callback;
+}
 
 // This function is the button callback associated with the 'ui_audited_elements' array below.
 static unsigned int ui_audited_elements_button(unsigned int button_mask, unsigned int button_mask_counter __attribute__((unused))) {
@@ -87,6 +94,56 @@ const bagl_element_t ui_audited_elements[] = {
 #endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 };
 
+void ui_audited_init(void) {
+  // We reserve the first slot for this display.
+  audited_ux_slot = ux_stack_push();
+  ux_stack_init(audited_ux_slot);
+
+  // We trigger the additional display and wait for it to be completed.
+  G_ux.stack[audited_ux_slot].element_arrays[0].element_array = ui_audited_elements;
+  G_ux.stack[audited_ux_slot].element_arrays[0].element_array_count = sizeof(ui_audited_elements) / sizeof(ui_audited_elements[0]);
+  G_ux.stack[audited_ux_slot].button_push_callback = ui_audited_elements_button;
+  G_ux.stack[audited_ux_slot].screen_before_element_display_callback = NULL;
+  UX_WAKE_UP();
+  UX_DISPLAY_NEXT_ELEMENT();
+  UX_WAIT_DISPLAYED();
+}
+
+void ui_audited_deinit(void) {
+    // We pop the reserved slot but we do not care about the returned value (since we do not need it for
+  // further displays at the moment) and reinitialize the UX and buttons.
+  ux_stack_pop();
+  io_seproxyhal_init_ux();
+  io_seproxyhal_init_button();
+}
+#endif // HAVE_BAGL
+
+#ifdef HAVE_NBGL
+#include "nbgl_use_case.h"
+
+static bool auditChoiceMade;
+
+static bool ui_audited_done(void) {
+  return auditChoiceMade;
+}
+
+void ui_audited_choice(bool choice) {
+  if (choice) {
+    auditChoiceMade = choice;
+  } else {
+    os_sched_exit(0);
+  }
+}
+
+void ui_audited_init(void) {
+  auditChoiceMade = false;
+  nbgl_useCaseChoice(NULL, "Pending Ledger review", "This app has not been reviewed\nby Ledger.", "Run", "Exit", ui_audited_choice);
+}
+
+void ui_audited_deinit(void) {}
+
+#endif // HAVE_NBGL
+
 // This function is called at the end of the seph initialization.
 // It checks the install parameters of the application to be run, and if this area contains the
 // CHECK_NOT_AUDITED_TLV_TAG tag with the CHECK_NOT_AUDITED_TLV_VAL value, a specific display
@@ -108,19 +165,7 @@ void check_audited_app(void) {
   if (   (length)
       && (CHECK_NOT_AUDITED_TLV_VAL == data))
   {
-    // We reserve the first slot for this display.
-    slot = ux_stack_push();
-    ux_stack_init(slot);
-
-    // We trigger the additional display and wait for it to be completed.
-    G_ux.stack[slot].element_arrays[0].element_array = ui_audited_elements;
-    G_ux.stack[slot].element_arrays[0].element_array_count = sizeof(ui_audited_elements) / sizeof(ui_audited_elements[0]);
-    G_ux.stack[slot].button_push_callback = ui_audited_elements_button;
-    G_ux.stack[slot].screen_before_element_display_callback = NULL;
-    UX_WAKE_UP();
-    UX_DISPLAY_NEXT_ELEMENT();
-    UX_WAIT_DISPLAYED();
-
+    ui_audited_init();
     io_seproxyhal_general_status();
 
     // We wait for the button callback pointer to be wiped, and we process the incoming MCU events in the
@@ -130,13 +175,9 @@ void check_audited_app(void) {
       io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
       io_seproxyhal_handle_event();
       io_seproxyhal_general_status();
-    } while (io_seproxyhal_spi_is_status_sent() && G_ux.stack[slot].button_push_callback);
+    } while (!ui_audited_done());
 
-    // We pop the reserved slot but we do not care about the returned value (since we do not need it for
-    // further displays at the moment) and reinitialize the UX and buttons.
-    ux_stack_pop();
-    io_seproxyhal_init_ux();
-    io_seproxyhal_init_button();
+    ui_audited_deinit();
 
     // Now we can wait for the next MCU status and exit.
     io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
