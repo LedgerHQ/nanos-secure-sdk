@@ -383,6 +383,7 @@ static uint16_t get_bitmap_byte_cnt(const nbgl_font_t *font, uint8_t charId) {
   return 0;
 }
 
+
 /**
  * @brief This function draws the given single-line text, with the given parameters.
  *
@@ -405,17 +406,20 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
   nbgl_unicode_ctx_t *unicode_ctx = nbgl_getUnicodeFont(fontId);
 #endif // HAVE_UNICODE_SUPPORT
 
-  rectArea.height = font->char_height;
   rectArea.backgroundColor = area->backgroundColor;
-  rectArea.y0 = area->y0;
   rectArea.bpp = (nbgl_bpp_t) font->bpp;
 
   while (textLen>0) {
     nbgl_font_character_t *character;
-    uint8_t *char_buffer=NULL;
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
+    uint8_t *char_buffer=NULL;
+    uint8_t char_x_min = 0;
+    uint8_t char_y_min = 0;
+    uint8_t char_x_max = 0;
+    uint8_t char_y_max = 0;
+    uint8_t char_byte_cnt = 0;
 
     unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
 
@@ -430,14 +434,15 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
 #if defined(HAVE_LANGUAGE_PACK)
       char_buffer = (uint8_t*)unicode_ctx->bitmap;
       char_buffer+= unicodeCharacter->bitmap_offset;
+      char_x_min = unicodeCharacter->x_min;
+      char_y_min = unicodeCharacter->y_min;
+      char_x_max = unicodeCharacter->x_max;
+      char_y_max = unicodeCharacter->y_max;
+      char_byte_cnt =  unicodeCharacter->bitmap_byte_count;
 #endif //defined(HAVE_LANGUAGE_PACK)
 #else // HAVE_UNICODE_SUPPORT
       continue;
 #endif // HAVE_UNICODE_SUPPORT
-
-      rectArea.x0 = x;
-      rectArea.width = char_width;
-      nbgl_frontDrawImage(&rectArea, char_buffer,NO_TRANSFORMATION, fontColor);
     }
     else {
       // if not supported char, go to next one
@@ -448,18 +453,26 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
       char_buffer = (uint8_t *)PIC(&font->bitmap[character->bitmap_offset]);
       char_width = character->char_width;
 
-      rectArea.x0 = x + character->x_min;
-      rectArea.y0 = area->y0 + character->y_min;
-      rectArea.height = (character->y_max - character->y_min);
-      rectArea.width = (character->x_max - character->x_min);
-
-      if (font->bpp == NBGL_BPP_4) {
-        // 4BPP fonts are RLE encoded
-        nbgl_frontDrawImageRle(&rectArea, char_buffer, get_bitmap_byte_cnt(font, unicode), fontColor);
-      } else {
-        nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
-      }
+      char_x_min = character->x_min;
+      char_y_min = character->y_min;
+      char_x_max = character->x_max;
+      char_y_max = character->y_max;
+      char_byte_cnt = get_bitmap_byte_cnt(font, unicode);
     }
+
+    // Render character
+    rectArea.x0 = x + char_x_min;
+    rectArea.y0 = area->y0 + char_y_min;
+    rectArea.height = (char_y_max - char_y_min);
+    rectArea.width = (char_x_max -char_x_min);
+
+    if (rectArea.bpp == NBGL_BPP_4) {
+      // 4BPP fonts are RLE encoded
+      nbgl_frontDrawImageRle(&rectArea, char_buffer, char_byte_cnt, fontColor);
+    } else {
+      nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
+    }
+
     x+=char_width;
   }
 }

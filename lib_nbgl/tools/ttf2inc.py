@@ -329,6 +329,7 @@ class TTF2INC (object):
             img = Image.open(found_file)
             img = img.convert('L')
 
+        # img.show()
         return img
 
 	# Minimal window/crop
@@ -776,10 +777,14 @@ if __name__ == "__main__":
                             "char_unicode": ord(char),
                             "char_width": width,
                             "bitmap_byte_count": size,
-                            "bitmap_offset": offset
+                            "bitmap_offset": offset,
+                            "x_min": x_min,
+                            "y_min": y_min,
+                            "x_max": x_max,
+                            "y_max": y_max
                         })
                         inc.write(f"  {{ 0x{ord(char):06X}, {width:3}, {size:3}"
-                                  f", {offset:4} }}, //unicode {unicode}\n")
+                                  f", {offset:4}, {x_min}, {y_min}, {x_max}, {y_max} }}, //unicode {unicode}\n")
                     else:
                         inc.write(f"  {{ {offset:4}, {width:3}, {x_min}, {y_min}, {x_max}, {y_max} }},"
                                   f" //asciii 0x{ord(char):04X}\n")

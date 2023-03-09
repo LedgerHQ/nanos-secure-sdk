@@ -67,9 +67,16 @@ typedef struct {
  */
 typedef struct {
   uint32_t char_unicode;    ///< unicode = plane value from 0 to 16 then 16-bit code.
-  uint8_t char_width;        ///< width of character in pixels
   uint16_t bitmap_byte_count; ///< number of bytes used in chars buffer for this character
   uint16_t bitmap_offset;    ///< offset of this character in chars buffer
+  uint8_t char_width;        ///< width of character in pixels
+  uint8_t x_min;
+  uint8_t y_min;
+  uint8_t x_max;
+  uint8_t y_max;
+  uint8_t pad0;
+  uint8_t pad1;
+  uint8_t pad2;
 } nbgl_font_unicode_character_t;
 
 /**
