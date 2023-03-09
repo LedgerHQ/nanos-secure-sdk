@@ -289,7 +289,7 @@ static void displaySettingsPage(uint8_t page, bool forceFullRefresh) {
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
 
   if (forceFullRefresh) {
-    nbgl_refresh();
+    nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
   } else {
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
   }
@@ -346,8 +346,8 @@ static void displayReviewPage(uint8_t page, bool forceFullRefresh) {
 
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
 
-  if (forceFullRefresh || (content.type == INFO_LONG_PRESS)) {
-    nbgl_refresh();
+  if (forceFullRefresh) {
+    nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
   } else {
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
   }
@@ -439,8 +439,8 @@ static void displayStaticReviewPage(uint8_t page, bool forceFullRefresh) {
 
   pageContext = nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
 
-  if (forceFullRefresh || (content.type == INFO_LONG_PRESS)) {
-    nbgl_refresh();
+  if (forceFullRefresh) {
+    nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
   } else {
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
   }
@@ -516,7 +516,7 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh) {
   modalPageContext = nbgl_pageDrawGenericContentExt(&pageModalCallback, &info, &content, true);
 
   if (forceFullRefresh) {
-    nbgl_refresh();
+    nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
   } else {
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
   }
@@ -595,7 +595,7 @@ static void displayAddressPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
 
   if (forceFullRefresh) {
-    nbgl_refresh();
+    nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
   } else {
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
   }
