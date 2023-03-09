@@ -1108,7 +1108,7 @@ void nbgl_redrawObject(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePositio
  *
  */
 void nbgl_refresh(void) {
-  nbgl_refreshSpecial(FULL_COLOR_REFRESH);
+  nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
 }
 
 /**
