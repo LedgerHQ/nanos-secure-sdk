@@ -1762,16 +1762,14 @@ unsigned int os_endorsement_get_metadata ( unsigned char index, unsigned char * 
 #endif // (defined(HAVE_BOLOS_NOTWIPED_ENDORSEMENT) && defined(HAVE_ENDORSEMENTS_DISPLAY))
 
 #if defined(HAVE_LANGUAGE_PACK)
-void fetch_language_packs(UX_LOC_LANGUAGE_PACK_INFO *packs) {
+void list_language_packs(UX_LOC_LANGUAGE_PACK_INFO *packs) {
   unsigned int parameters [1];
   parameters[0] = (unsigned int)packs;
-  SVC_Call(SYSCALL_fetch_language_packs_ID, parameters);
+  SVC_Call(SYSCALL_list_language_packs_ID, parameters);
 }
-const LANGUAGE_PACK *get_language_pack(unsigned int language, const LANGUAGE_PACK *built_in, unsigned int built_in_length) {
-  unsigned int parameters [3];
+const LANGUAGE_PACK *get_language_pack(unsigned int language) {
+  unsigned int parameters [1];
   parameters[0] = language;
-  parameters[1] = (unsigned int)built_in;
-  parameters[2] = built_in_length;
   return (LANGUAGE_PACK *)SVC_Call(SYSCALL_get_language_pack_ID, parameters);
 }
 #endif //defined(HAVE_LANGUAGE_PACK)

@@ -258,8 +258,8 @@
 #endif // HAVE_MCU_SERIAL_STORAGE
 
 #if defined(HAVE_LANGUAGE_PACK)
-#define SYSCALL_fetch_language_packs_ID                            0x01000153
-#define SYSCALL_get_language_pack_ID                               0x03000154
+#define SYSCALL_list_language_packs_ID                             0x01000153
+#define SYSCALL_get_language_pack_ID                               0x01000154
 #endif //defined(HAVE_LANGUAGE_PACK)
 
 #ifdef HAVE_IO_I2C

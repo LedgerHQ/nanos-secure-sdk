@@ -116,8 +116,8 @@ typedef struct ux_loc_language_pack_infos {
 } UX_LOC_LANGUAGE_PACK_INFO;
 
 // To populate infos about language packs
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void fetch_language_packs(UX_LOC_LANGUAGE_PACK_INFO *packs PLENGTH(NB_LANG*sizeof(UX_LOC_LANGUAGE_PACK_INFO)));
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) const LANGUAGE_PACK *get_language_pack(unsigned int language, const LANGUAGE_PACK *built_in, unsigned int built_in_length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void list_language_packs(UX_LOC_LANGUAGE_PACK_INFO *packs PLENGTH(NB_LANG*sizeof(UX_LOC_LANGUAGE_PACK_INFO)));
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) const LANGUAGE_PACK *get_language_pack(unsigned int language);
 #endif //defined(HAVE_LANGUAGE_PACK)
 
 #ifndef BUTTON_FAST_THRESHOLD_CS
