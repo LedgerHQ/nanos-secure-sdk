@@ -165,7 +165,7 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
   uint16_t line_width=0;
   uint16_t max_width=0;
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters;
+  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
   uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
 
@@ -258,7 +258,7 @@ uint16_t nbgl_getTextWidth(nbgl_font_id_e fontId, const char* text) {
  */
 uint16_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters;
+  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
   uint8_t *unicodeBitmap;
   uint32_t unicode;
   bool is_unicode;
@@ -366,7 +366,7 @@ uint16_t nbgl_getTextLength(const char* text) {
  */
 void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t *len, uint16_t *width, bool wrapping) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters;
+  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
   uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
   uint32_t lenAtLastSpace = 0, widthAtLastSpace = 0;
@@ -438,7 +438,7 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
  */
 bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t maxNbLines, uint16_t *len) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters;
+  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
   uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
   uint16_t width = 0;
