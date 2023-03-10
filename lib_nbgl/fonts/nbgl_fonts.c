@@ -28,17 +28,15 @@
  **********************/
 
 /**********************
- *  STATIC PROTOTYPES
- **********************/
-
-/**********************
  *  STATIC VARIABLES
  **********************/
+#ifdef HAVE_UNICODE_SUPPORT
+static nbgl_unicode_ctx_t unicodeCtx = {0};
+#endif // HAVE_UNICODE_SUPPORT
 
 /**********************
  *      VARIABLES
  **********************/
-static const nbgl_font_unicode_t *font_unicode;
 
 #if defined(HAVE_LANGUAGE_PACK)
 extern const LANGUAGE_PACK *language_pack;
@@ -165,11 +163,11 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
   uint16_t line_width=0;
   uint16_t max_width=0;
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
-  uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_getUnicodeFont(fontId);
+#endif // HAVE_UNICODE_SUPPORT
   // end loop when a \0 is uncountered
   while (*text) {
     uint8_t char_width;
@@ -193,11 +191,15 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
     maxLen--;
 
     if (is_unicode) {
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
       if (!unicodeCharacter) {
         continue;
       }
       char_width = unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+      continue;
+#endif // HAVE_UNICODE_SUPPORT
     }
     else {
       nbgl_font_character_t *character; // non-unicode char
@@ -258,22 +260,26 @@ uint16_t nbgl_getTextWidth(nbgl_font_id_e fontId, const char* text) {
  */
 uint16_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
-  uint8_t *unicodeBitmap;
   uint32_t unicode;
   bool is_unicode;
   uint16_t textLen=4; // max len for a char
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_getUnicodeFont(fontId);
+#endif // HAVE_UNICODE_SUPPORT
 
   unicode = nbgl_popUnicodeChar((uint8_t**)&text, &textLen, &is_unicode);
 
   if (is_unicode) {
-    const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+    const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
     if (!unicodeCharacter) {
       return 0;
     }
     return unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+    return 0;
+#endif // HAVE_UNICODE_SUPPORT
   }
   else {
     nbgl_font_character_t *bagl_character; // non-unicode char
@@ -366,12 +372,12 @@ uint16_t nbgl_getTextLength(const char* text) {
  */
 void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t *len, uint16_t *width, bool wrapping) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
-  uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
   uint32_t lenAtLastSpace = 0, widthAtLastSpace = 0;
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_getUnicodeFont(fontId);
+#endif // HAVE_UNICODE_SUPPORT
 
   *width=0;
   *len=0;
@@ -391,12 +397,16 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
     }
 
     if (is_unicode) {
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
       // if not printable, go to next char
       if (!unicodeCharacter) {
         continue;
       }
       char_width = unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+      continue;
+#endif // HAVE_UNICODE_SUPPORT
     }
     else {
       // skip not printable char
@@ -438,12 +448,12 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
  */
 bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t maxNbLines, uint16_t *len) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters = NULL;
-  uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
   uint16_t width = 0;
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_getUnicodeFont(fontId);
+#endif // HAVE_UNICODE_SUPPORT
 
   *len=0;
   while ((textLen)&&(maxNbLines>0)) {
@@ -463,12 +473,16 @@ bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16
     }
 
     if (is_unicode) {
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
       // if not printable, go to next char
       if (!unicodeCharacter) {
         continue;
       }
       char_width = unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+      continue;
+#endif // HAVE_UNICODE_SUPPORT
     }
     else {
       // skip not printable char
@@ -556,14 +570,14 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
   const nbgl_font_t *font = nbgl_getFont(fontId);
   uint16_t width=0;
   uint16_t nbLines=1;
-  nbgl_font_unicode_character_t *unicodeCharacters=NULL;
-  uint8_t *unicodeBitmap;
   uint16_t textLen = strlen(text);
   char *lastSpace = NULL;
   uint32_t lenAtLastSpace = 0;
   char *prevText = NULL;
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_getUnicodeFont(fontId);
+#endif // HAVE_UNICODE_SUPPORT
   // end loop when a '\0' is uncountered
   while (textLen) {
     nbgl_font_character_t *character;
@@ -584,12 +598,16 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
     }
 
     if (is_unicode) {
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
       // if not printable, go to next char
       if (!unicodeCharacter) {
         continue;
       }
       char_width = unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+      continue;
+#endif // HAVE_UNICODE_SUPPORT
     }
     else {
       // if not printable, go to next char
@@ -638,50 +656,6 @@ uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint1
 }
 
 /**
- * @brief Get the font entry for the given font id (sparse font array support)
- *
- * @param font_id font ID (from @ref nbgl_font_id_e)
- * @param unicode_characters (output) if found, is used to store a pointer on the unicode characters array
- * @param unicode_bitmap (output) if found, is used to store a pointer on the characters bitmaps
-
- * @return the found font structure or NULL if not found
- */
-const nbgl_font_unicode_t* nbgl_getUnicodeFont(nbgl_font_id_e fontId,
-                                                 nbgl_font_unicode_character_t **unicode_characters,
-                                                 uint8_t **unicode_bitmap) {
-  if (font_unicode && font_unicode->font_id == fontId) {
-    return font_unicode;
-  }
-#if defined(HAVE_LANGUAGE_PACK)
-  // Be sure we need to change font
-  const uint8_t *ptr = (const uint8_t *)language_pack;
-  const nbgl_font_unicode_t *font = (const void *)(PIC(ptr + PIC(language_pack)->fonts_offset));
-  *unicode_characters = (nbgl_font_unicode_character_t *)PIC(ptr + PIC(language_pack)->characters_offset);
-  *unicode_bitmap = (uint8_t *)(PIC(ptr + PIC(language_pack)->bitmaps_offset));
-
-  for (uint32_t i=0; i < PIC(language_pack)->nb_fonts; i++) {
-    if (PIC(font)->font_id == fontId) {
-      // Update all other global variables
-      return PIC(font);
-    }
-    // Update all pointers for next font
-    font++;
-    // Point to the last character to compute next Bitmap offset
-    *unicode_characters = *unicode_characters + PIC(language_pack)->nb_characters-1;
-    uint32_t offset = (PIC(*unicode_characters))->bitmap_offset;
-    offset += (PIC(*unicode_characters))->bitmap_byte_count;
-    *unicode_bitmap = *unicode_bitmap + offset;
-    *unicode_characters = *unicode_characters+1;
-  }
-#else //defined(HAVE_LANGUAGE_PACK)
-  UNUSED(unicode_characters);
-  UNUSED(unicode_bitmap);
-#endif //defined(HAVE_LANGUAGE_PACK)
-  // id not found
-  return NULL;
-}
-
-/**
  * @brief Modifies the given text to wrap it on the given max width (in pixels), in the given nbLines
  *        If possible,
  *
@@ -693,8 +667,6 @@ const nbgl_font_unicode_t* nbgl_getUnicodeFont(nbgl_font_id_e fontId,
  */
 void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint8_t nbLines) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters=NULL;
-  uint8_t *unicodeBitmap;
   uint16_t textLen = nbgl_getTextLength(text);
   uint16_t width = 0;
   uint8_t currentNbLines = 1;
@@ -702,7 +674,9 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t ma
   uint32_t lenAtLastSpace = 0;
   char *prevText = NULL;
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_getUnicodeFont(fontId);
+#endif
 
   while (*text) {
     nbgl_font_character_t *character;
@@ -724,12 +698,16 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t ma
     }
 
     if (is_unicode) {
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
       // if not printable, go to next char
       if (!unicodeCharacter) {
         continue;
       }
       char_width = unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+      continue;
+#endif // HAVE_UNICODE_SUPPORT
     }
     else {
       // skip not printable char
@@ -778,21 +756,60 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t ma
   }
 }
 
+#ifdef HAVE_UNICODE_SUPPORT
+/**
+ * @brief Get the font entry for the given font id (sparse font array support)
+ *
+ * @param font_id font ID (from @ref nbgl_font_id_e)
+
+ * @return the found unicode context structure or NULL if not found
+ */
+nbgl_unicode_ctx_t* nbgl_getUnicodeFont(nbgl_font_id_e fontId) {
+  if ((unicodeCtx.font != NULL) && (unicodeCtx.font->font_id == fontId)) {
+    return &unicodeCtx;
+  }
+#if defined(HAVE_LANGUAGE_PACK)
+  // Be sure we need to change font
+  const uint8_t *ptr = (const uint8_t *)language_pack;
+  const nbgl_font_unicode_t *font = (const void *)(ptr + language_pack->fonts_offset);
+  unicodeCtx.characters = (nbgl_font_unicode_character_t *)(ptr + language_pack->characters_offset);
+  unicodeCtx.bitmap = (uint8_t *)(ptr + language_pack->bitmaps_offset);
+
+  for (uint32_t i=0; i < language_pack->nb_fonts; i++) {
+    if (font->font_id == fontId) {
+      // Update all other global variables
+      unicodeCtx.font = font;
+      return &unicodeCtx;
+    }
+    // Update all pointers for next font
+    font++;
+    // Point to the last character to compute next Bitmap offset
+    unicodeCtx.characters = unicodeCtx.characters + language_pack->nb_characters-1;
+    uint32_t offset = unicodeCtx.characters->bitmap_offset;
+    offset += unicodeCtx.characters->bitmap_byte_count;
+    unicodeCtx.bitmap = unicodeCtx.bitmap + offset;
+    unicodeCtx.characters = unicodeCtx.characters+1;
+  }
+#endif //defined(HAVE_LANGUAGE_PACK)
+  // id not found
+  return NULL;
+}
 
 /**
  * @brief Get the unicode character object matching the given unicode (a unicode character is encoded on max of 3 chars)
  * in the current language
  *
- * @param unicode the unicode of the character
- * @param unicode_characters a pointer on the array of characters to search in
+ * @param unicode the unicode value of the character
 
  * @return the found character or NULL if not found
  */
-const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unicode,
-                                                           nbgl_font_unicode_character_t *unicode_characters) {
+const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unicode) {
 #if defined(HAVE_LANGUAGE_PACK)
-  const nbgl_font_unicode_character_t *characters = PIC(unicode_characters);
-  uint32_t n = PIC(language_pack)->nb_characters;
+  const nbgl_font_unicode_character_t *characters = unicodeCtx.characters;
+  uint32_t n = language_pack->nb_characters;
+  if (characters == NULL) {
+    return NULL;
+  }
   // For the moment, let just parse the full array, but at the end let use
   // binary search as data are sorted by unicode value !
   for (unsigned i=0; i < n; i++, characters++) {
@@ -805,9 +822,22 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
   --characters;
   return (PIC(characters));
 #else //defined(HAVE_LANGUAGE_PACK)
-  UNUSED(unicode_characters);
   UNUSED(unicode);
   // id not found
   return NULL;
 #endif //defined(HAVE_LANGUAGE_PACK)
 }
+
+#ifdef HAVE_LANGUAGE_PACK
+/**
+ * @brief Function to be called when a change on the current language pack is notified by the OS,
+ * to be sure that the current unicodeCtx variable will be set again at next @ref nbgl_getUnicodeFont() call
+ *
+ */
+void nbgl_refreshUnicodeFont(void) {
+  unicodeCtx.font = NULL;
+  unicodeCtx.characters = NULL;
+}
+#endif // HAVE_LANGUAGE_PACK
+
+#endif // HAVE_UNICODE_SUPPORT

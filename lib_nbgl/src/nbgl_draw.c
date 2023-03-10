@@ -374,12 +374,12 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
   int16_t x = area->x0;
   nbgl_area_t rectArea;
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  nbgl_font_unicode_character_t *unicodeCharacters;
-  uint8_t *unicodeBitmap;
 
   LOG_DEBUG(DRAW_LOGGER,"nbgl_drawText: x0 = %d, y0 = %d, w = %d, h = %d, fontColor = %d, backgroundColor=%d, text = %s\n",area->x0, area->y0, area->width,area->height,fontColor,area->backgroundColor, text);
 
-  nbgl_getUnicodeFont(fontId,&unicodeCharacters,&unicodeBitmap);
+#ifdef HAVE_UNICODE_SUPPORT
+  nbgl_unicode_ctx_t *unicode_ctx = nbgl_getUnicodeFont(fontId);
+#endif // HAVE_UNICODE_SUPPORT
 
   rectArea.height = font->char_height;
   rectArea.backgroundColor = area->backgroundColor;
@@ -395,16 +395,20 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
     unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
 
     if (is_unicode) {
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode,unicodeCharacters);
+#ifdef HAVE_UNICODE_SUPPORT
+      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
       // if not supported char, go to next one
       if (unicodeCharacter == NULL) {
         continue;
       }
       char_width = unicodeCharacter->char_width;
 #if defined(HAVE_LANGUAGE_PACK)
-      char_buffer = PIC(unicodeBitmap);
-      char_buffer+= PIC(unicodeCharacter)->bitmap_offset;
+      char_buffer = (uint8_t*)unicode_ctx->bitmap;
+      char_buffer+= unicodeCharacter->bitmap_offset;
 #endif //defined(HAVE_LANGUAGE_PACK)
+#else // HAVE_UNICODE_SUPPORT
+      continue;
+#endif // HAVE_UNICODE_SUPPORT
     }
     else {
       // if not supported char, go to next one

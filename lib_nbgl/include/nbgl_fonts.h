@@ -96,6 +96,11 @@ typedef enum {
   BAGL_FONT_LAST // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE CHECKS
 } nbgl_font_id_e;
 
+typedef struct nbgl_unicode_ctx_s {
+  const nbgl_font_unicode_t *font;
+  const nbgl_font_unicode_character_t *characters;
+  const uint8_t *bitmap;
+} nbgl_unicode_ctx_t;
 
 /**********************
  * GLOBAL PROTOTYPES
@@ -119,11 +124,13 @@ bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16
 void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint8_t nbLines);
 
 uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *text_length, bool *is_unicode);
-const nbgl_font_unicode_t* nbgl_getUnicodeFont(nbgl_font_id_e font_id,
-                                                 nbgl_font_unicode_character_t **unicode_characters,
-                                                 uint8_t **unicode_bitmap);
-const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unicode,
-                                                           nbgl_font_unicode_character_t *unicode_characters);
+#ifdef HAVE_UNICODE_SUPPORT
+nbgl_unicode_ctx_t* nbgl_getUnicodeFont(nbgl_font_id_e font_id);
+const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unicode);
+#ifdef HAVE_LANGUAGE_PACK
+void nbgl_refreshUnicodeFont(void);
+#endif
+#endif // HAVE_UNICODE_SUPPORT
 
 /**********************
  *      MACROS
