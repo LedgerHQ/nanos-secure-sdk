@@ -733,6 +733,8 @@ void io_seproxyhal_display_icon(const bagl_component_t* icon_component, const ba
     io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 1);
     io_seproxyhal_spi_send((const uint8_t *) PIC(icon_details->colors), h);
     io_seproxyhal_spi_send((const uint8_t *) PIC(icon_details->bitmap), w);
+#else // !HAVE_SE_SCREEN || (HAVE_SE_SCREEN && HAVE_PRINTF)
+    (void) icon_component;
 #endif // !HAVE_SE_SCREEN || (HAVE_SE_SCREEN && HAVE_PRINTF)
 #endif // !SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
   }
