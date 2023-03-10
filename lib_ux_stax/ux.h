@@ -126,7 +126,8 @@ void io_seproxyhal_power_off(void);
 
 #if defined(HAVE_LANGUAGE_PACK)
 const char *get_ux_loc_string(UX_LOC_STRINGS_INDEX index);
-void select_language(uint16_t language);
+void bolos_ux_select_language(uint16_t language);
+void bolos_ux_refresh_language(void);
 
 typedef struct ux_loc_language_pack_infos {
   unsigned char available;

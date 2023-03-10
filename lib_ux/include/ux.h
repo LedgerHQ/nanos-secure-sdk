@@ -107,7 +107,8 @@ const char *get_string_buffer(unsigned char id);
 const char *get_ux_loc_string(UX_LOC_STRINGS_INDEX index);
 #endif //defined(HAVE_INDEXED_STRINGS)
 #if defined(HAVE_LANGUAGE_PACK)
-void select_language(uint16_t language);
+void bolos_ux_select_language(uint16_t language);
+void bolos_ux_refresh_language(void);
 
 typedef struct ux_loc_language_pack_infos {
   unsigned char available;

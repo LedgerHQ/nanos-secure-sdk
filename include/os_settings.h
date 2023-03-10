@@ -129,8 +129,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_SETTINGS) void os_setting_set(unsigned
 void os_setting_update(void);
 
 // Prototypes for language helper functions
-unsigned int get_os_language(void);
-void set_os_language(unsigned int language);
+unsigned int os_setting_get_language(void);
+void os_setting_set_language(unsigned int language);
 #endif //HAVE_LANGUAGE_PACK
 
 unsigned int os_setting_get_default_device_name(unsigned char* buffer, unsigned int maxlength);
