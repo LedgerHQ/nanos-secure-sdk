@@ -960,8 +960,8 @@ idx_ok:
                            (context_length - ((const void *)ellipsis_2_start-(const void *)context) ),
                            context_encoding);
         }
-#else // HAVE_BAGL_ELLIPSIS
-        pos = pos;
+#else
+        (void) pos;
 #endif // HAVE_BAGL_ELLIPSIS
       }
       break;

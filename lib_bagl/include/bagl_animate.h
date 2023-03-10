@@ -1,6 +1,8 @@
 #ifndef BAGL_ANIMATE_H_
 # define BAGL_ANIMATE_H_
 
+#ifdef HAVE_SE_SCREEN
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -112,5 +114,7 @@ void bagl_animation_init(bagl_anim_t *anim,
  * Has to be called for each step of the animation.
  */
 void bagl_animation_step(bagl_anim_t *anim);
+
+#endif /* HAVE_SE_SCREEN */
 
 #endif /* !BAGL_ANIMATE_H_ */
