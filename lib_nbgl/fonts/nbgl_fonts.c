@@ -48,6 +48,9 @@ extern const LANGUAGE_PACK *language_pack;
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_regular_32.inc"
+#include "nbgl_font_inter_regular_24_1bpp.inc"
+#include "nbgl_font_inter_semibold_24_1bpp.inc"
+#include "nbgl_font_inter_regular_32_1bpp.inc"
 
 const nbgl_font_t* const C_nbgl_fonts[] = {
 

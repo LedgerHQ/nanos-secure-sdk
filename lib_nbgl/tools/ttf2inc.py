@@ -252,10 +252,12 @@ class TTF2INC (object):
             os.path.basename(self.font_name))[0]
         self.basename = self.basename.replace("-","_")
         self.basename += f"_{self.font_size}px"
+        if self.bpp != 4:
+            self.basename += f"_{self.bpp}bpp"
         # If characters are using Unicode, update basename:
         if self.unicode_needed:
             self.basename += "_unicode"
-        # Build the destination directory name, based on font+size[+unicode]:
+        # Build the destination directory name, based on font+size[+unicode]+bpp:
         self.directory = f"nbgl_font_{self.basename}"
         # Create that directory if it doesn't exist:
         if not self.args.no_write and not os.path.exists(self.directory):
@@ -279,8 +281,13 @@ class TTF2INC (object):
         filename = f"nbgl_font_{self.basename}_{unicode_value}"
         fullpath = os.path.join(self.directory, filename)
 
-        # STEP 1: Generate the .gif file if it doesn't exist:
-        if not os.path.exists(fullpath + ".bmp") or self.args.overwrite:
+        # STEP 1: Generate the .gif/.bmp file if it doesn't exist:
+        found_file = None
+        for ext in [".bmp", ".gif"]:
+            if os.path.exists(fullpath + ext):
+                found_file = fullpath + ext
+
+        if (not found_file) or self.args.overwrite:
             # Generate and save the .GIF picture
             # Create a B&W Image with that size
             # get potential offsets to apply for this char
@@ -319,7 +326,7 @@ class TTF2INC (object):
             # We will load the .GIF picture:
             if self.args.verbose:
                 sys.stdout.write(f"Loading {fullpath}.gif\n")
-            img = Image.open(fullpath + ".bmp")
+            img = Image.open(found_file)
             img = img.convert('L')
 
         return img
@@ -472,6 +479,9 @@ class TTF2INC (object):
 
         font_id += f"_{self.font_size}px"
 
+        if self.bpp != 4:
+            font_id += f"_{self.bpp}bpp"
+
         return font_id
 
     # -------------------------------------------------------------------------
@@ -484,7 +494,10 @@ class TTF2INC (object):
             "BAGL_FONT_INTER_REGULAR_24px": 0,
             "BAGL_FONT_INTER_SEMIBOLD_24px": 1,
             "BAGL_FONT_INTER_REGULAR_32px": 2,
-            "BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px": 3
+            "BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px": 3,
+            "BAGL_FONT_INTER_REGULAR_24px_1bpp": 4,
+            "BAGL_FONT_INTER_SEMIBOLD_24px_1bpp": 5,
+            "BAGL_FONT_INTER_SEMIBOLD_32px_1bpp": 6,
         }
         font_id_name = self.get_font_id_name()
         if font_id_name in font_ids.keys():
