@@ -1,8 +1,6 @@
 #ifndef BAGL_ANIMATE_H_
 # define BAGL_ANIMATE_H_
 
-#ifdef HAVE_SE_SCREEN
-
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -101,6 +99,8 @@ typedef struct bagl_anim_s {
 
   };
 } bagl_anim_t;
+
+#ifdef HAVE_SE_SCREEN
 
 /**
  * Initialize a label animation.
