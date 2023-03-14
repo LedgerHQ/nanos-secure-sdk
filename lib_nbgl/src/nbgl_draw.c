@@ -466,13 +466,12 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     rectArea.height = (char_y_max - char_y_min);
     rectArea.width = (char_x_max -char_x_min);
 
-    if (rectArea.bpp == NBGL_BPP_4) {
-      // 4BPP fonts are RLE encoded
-      nbgl_frontDrawImageRle(&rectArea, char_buffer, char_byte_cnt, fontColor);
-    } else {
+    // The font BAGL_FONT_INTER_SEMIBOLD_24px_1bpp is not compressed
+    if (fontId==BAGL_FONT_INTER_SEMIBOLD_24px_1bpp) {
       nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
+    } else {
+      nbgl_frontDrawImageRle(&rectArea, char_buffer, char_byte_cnt, fontColor);
     }
-
     x+=char_width;
   }
 }

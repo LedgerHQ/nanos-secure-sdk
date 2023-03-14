@@ -1459,7 +1459,7 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
  __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_REGULAR_32PX = {
   9753, // bitmap len
   BAGL_FONT_INTER_REGULAR_32px, // font id
-  NBGL_BPP_4, // bpp
+  (uint8_t) NBGL_BPP_4, // bpp
   32, // font height in pixels
   25, // baseline height in pixels
   40, // line height in pixels
