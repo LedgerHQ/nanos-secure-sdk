@@ -854,7 +854,7 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapHMALPHAMONO
  __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontHMALPHAMONO_MEDIUM_32PX = {
   5597, // bitmap len
   BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px, // font id
-  NBGL_BPP_4, // bpp
+  (uint8_t) NBGL_BPP_4, // bpp
   32, // font height in pixels
   20, // baseline height in pixels
   40, // line height in pixels

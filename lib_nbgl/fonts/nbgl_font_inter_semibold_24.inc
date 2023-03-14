@@ -1131,7 +1131,7 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_SEMIB
  __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_SEMIBOLD_24PX = {
   7122, // bitmap len
   BAGL_FONT_INTER_SEMIBOLD_24px, // font id
-  NBGL_BPP_4, // bpp
+  (uint8_t) NBGL_BPP_4, // bpp
   24, // font height in pixels
   19, // baseline height in pixels
   32, // line height in pixels
