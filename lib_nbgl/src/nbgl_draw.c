@@ -359,7 +359,6 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area, nbgl_radius_t radiusI
   }
 }
 
-
 /**
  * @brief Return the size of the bitmap associated to the input font and character
  *
@@ -382,7 +381,6 @@ static uint16_t get_bitmap_byte_cnt(const nbgl_font_t *font, uint8_t charId) {
   }
   return 0;
 }
-
 
 /**
  * @brief This function draws the given single-line text, with the given parameters.
@@ -420,6 +418,7 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     uint8_t char_x_max = 0;
     uint8_t char_y_max = 0;
     uint8_t char_byte_cnt = 0;
+    uint8_t encoding = 0;
 
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
 
@@ -439,6 +438,7 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
       char_x_max = unicodeCharacter->x_max;
       char_y_max = unicodeCharacter->y_max;
       char_byte_cnt =  unicodeCharacter->bitmap_byte_count;
+      encoding = unicodeCharacter->encoding;
 #endif //defined(HAVE_LANGUAGE_PACK)
 #else // HAVE_UNICODE_SUPPORT
       continue;
@@ -452,11 +452,12 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
       character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
       char_buffer = (uint8_t *)PIC(&font->bitmap[character->bitmap_offset]);
       char_width = character->char_width;
+      encoding = character->encoding;
 
       char_x_min = character->x_min;
-      char_y_min = character->y_min;
-      char_x_max = character->x_max;
-      char_y_max = character->y_max;
+      char_y_min = character->y_min * 4;
+      char_x_max = character->char_width - character->width_diff;
+      char_y_max = char_y_min + (character->real_height + 1) * 4;
       char_byte_cnt = get_bitmap_byte_cnt(font, unicode);
     }
 
@@ -466,11 +467,15 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     rectArea.height = (char_y_max - char_y_min);
     rectArea.width = (char_x_max -char_x_min);
 
-    // The font BAGL_FONT_INTER_SEMIBOLD_24px_1bpp is not compressed
-    if (fontId==BAGL_FONT_INTER_SEMIBOLD_24px_1bpp) {
-      nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
-    } else {
-      nbgl_frontDrawImageRle(&rectArea, char_buffer, char_byte_cnt, fontColor);
+    if (char_byte_cnt) {
+      switch(encoding) {
+        case 0:
+          nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
+          break;
+        case 1:
+          nbgl_frontDrawImageRle(&rectArea, char_buffer, char_byte_cnt, fontColor);
+          break;
+      }
     }
     x+=char_width;
   }
