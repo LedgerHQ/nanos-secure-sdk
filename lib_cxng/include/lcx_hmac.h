@@ -42,8 +42,8 @@
  * @brief HMAC context, abstract type
  */
 typedef struct {
-  uint8_t   key[128];       ///< Key
   cx_md_t   hash_id;        ///< Hash algorithm
+  uint8_t   key[128];       ///< Key
   cx_hash_t hash_ctx;       ///< Hash context
 } cx_hmac_t;
 
@@ -54,6 +54,7 @@ typedef struct {
  * @brief HMAC context, concrete type for RIPEMD160
  */
 typedef struct {
+  cx_md_t        hash_id;   ///< Hash algorithm
   uint8_t        key[128];  ///< Key
   cx_ripemd160_t hash_ctx;  ///< Hash context
 } cx_hmac_ripemd160_t;
@@ -117,6 +118,7 @@ static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const uns
  * @brief HMAC context, concrete type for SHA-224/SHA-256
  */
 typedef struct {
+  cx_md_t     hash_id;   ///< Hash algorithm
   uint8_t     key[128];  ///< Key
   cx_sha256_t hash_ctx;  ///< Hash context
 } cx_hmac_sha256_t;
@@ -226,6 +228,7 @@ size_t cx_hmac_sha256(const uint8_t *key, size_t key_len, const uint8_t *in, siz
  * @brief HMAC context, concrete type for SHA-384/SHA-512
  */
 typedef struct {
+  cx_md_t     hash_id;   ///< Hash algorithm
   uint8_t     key[128];  ///< Key
   cx_sha512_t hash_ctx;  ///< Hash context
 } cx_hmac_sha512_t;
