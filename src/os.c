@@ -21,6 +21,7 @@
 #include "os_helpers.h"
 #include "os_io.h"
 #include "os_utils.h"
+#include "os.h"
 #include <string.h>
 
 // apdu buffer must hold a complete apdu to avoid troubles

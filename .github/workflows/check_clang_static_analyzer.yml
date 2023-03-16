@@ -13,11 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - name: nanos
-          - name: nanox
-          - name: nanos2
-          - name: stax
+        target: [nanos, nanox, nanos2]
+        debug: [0, 1]
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
@@ -36,9 +33,11 @@ jobs:
 
       - name: Build with Clang Static Analyzer
         run: |
-          TARGET=${{ matrix.target.name }} \
+          TARGET=${{ matrix.target }} \
           BOLOS_SDK=sdk \
-          scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
+          scan-build --use-cc=clang -analyze-headers -enable-checker security \
+            -enable-checker unix -enable-checker valist -o scan-build --status-bugs \
+            make default DEBUG=${{ matrix.debug }}
 
       - name: Upload scan result
         uses: actions/upload-artifact@v3
