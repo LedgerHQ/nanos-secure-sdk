@@ -163,7 +163,7 @@ class Rle4bpp():
         bpp = 4
         pixels = cls.image_to_pixels(img, bpp)
         occurrences = cls.pixels_to_occurrences(pixels)
-        return cls.occurrences_to_rle(occurrences, bpp)
+        return 1, cls.occurrences_to_rle(occurrences, bpp)
 
 # -----------------------------------------------------------------------------
 class Rle1bpp():
@@ -342,7 +342,7 @@ class Rle1bpp():
         pairs2 = cls.decode_pass2(encoded_data)
         assert pairs == pairs2
 
-        return encoded_data
+        return 1, encoded_data
 
 # -----------------------------------------------------------------------------
 class TTF2INC (object):
@@ -835,18 +835,19 @@ if __name__ == "__main__":
                         y_max = height
 
                     # STEP 3: Get bitmap data based on .gif content:
-                    # Is this font compressed?
+                    image_data = ttf.image_to_packed_buffer(img, ttf.bpp)
+                    encoding = 0
+                    # Do we want to compress this font?
                     if ttf.rle:
                         if ttf.bpp == 4:
-                            image_data = Rle4bpp.rle_4bpp(img)
+                            method, compressed_data = Rle4bpp.rle_4bpp(img)
                         else:
-                            image_data = Rle1bpp.rle_1bpp(img)
-                        # For now all characters are encoded the same way
-                        encoding = 1
-                    else:
-                        image_data = ttf.image_to_packed_buffer(img, ttf.bpp)
-                        # No encoding for this font
-                        encoding = 0
+                            method, compressed_data = Rle1bpp.rle_1bpp(img)
+
+                        # Is compressed size really better?
+                        if len(compressed_data) < len(image_data):
+                            image_data = compressed_data
+                            encoding = method
 
                     # Store the information to process it later:
                     char_info[char] = {"bitmap": image_data,
@@ -965,19 +966,90 @@ if __name__ == "__main__":
                         unicode = f"0x{ord(char):06X}"
                         ttf_info_dictionary["nbgl_font_unicode_character"].append({
                             "char_unicode": ord(char),
-                            "char_width": width,
                             "bitmap_byte_count": size,
                             "bitmap_offset": offset,
+                            "char_width": width,
                             "x_min": x_min,
                             "y_min": y_min,
                             "x_max": x_max,
                             "y_max": y_max,
                             "encoding": encoding
                         })
-                        inc.write(f"  {{ 0x{ord(char):06X}, {width:3}, {size:3}"
-                                  f", {offset:4}, {x_min}, {y_min}, {x_max}, {y_max} }}, //unicode {unicode}\n")
+                        inc.write(f"  {{ 0x{ord(char):06X}, {size:3}, {offset:4}, {width:3}, "
+                                  f"{x_min}, {y_min}, {x_max}, {y_max}, {encoding} }}, //unicode {unicode}\n")
                     else:
-                        inc.write(f"  {{ {offset:4}, {width:3}, {x_min}, {y_min}, {x_max}, {y_max} }},"
+                        # We'll use bitfieds to store x_min x_max y_min y_max
+                        # => we need to change a little bit the meaning:
+                        # - y_min = Y offset in pixels*4 (ie 3=>12)
+                        y_min_mod4 = y_min // 4
+                        # width_diff is Real width diff: x_max=width-width_diff
+                        if bitmap_len == 0:
+                            width_diff = 0
+                        else:
+                            width_diff = width - x_max
+                        # real_height is (height/4)-1 => (y_max-y_min) / 4 - 1
+                        real_height = (y_max // 4) - (y_min_mod4)
+                        # If height is 0, it means there is nothing to draw...
+                        if real_height:
+                            real_height -= 1
+                        # Here is the struct we'll use
+                        # typedef struct {
+                        # uint32_t encoding:1;
+                        # uint32_t bitmap_offset:14;
+                        # uint32_t char_width:5;
+                        # uint32_t x_min:3;
+                        # uint32_t y_min:3;
+                        # uint32_t width_diff:3;
+                        # uint32_t real_height:3;
+                        # } nbgl_font_character_t;
+                        # Check values does not exceed bitfield capabilities
+                        val = ord(char)
+                        if encoding >= pow(2, 1):
+                            sys.stderr.write(f"encoding for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(encoding={encoding})!\n")
+                            return 2
+
+                        if offset >= pow(2, 14):
+                            sys.stderr.write(f"offset for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(offset={offset})!\n")
+                            return 3
+
+                        if width >= pow(2, 5):
+                            sys.stderr.write(f"width value for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(width={width})!\n")
+                            return 4
+
+                        if x_min >= pow(2, 3):
+                            sys.stderr.write(f"x_min value for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(x_min={x_min})!\n")
+                            return 5
+
+                        if y_min_mod4 >= pow(2, 3):
+                            sys.stderr.write(f"y_min value for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(y_min={y_min_mod4})!\n")
+                            return 6
+
+                        if width_diff >= pow(2, 3):
+                            sys.stderr.write(f"width_diff for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(width_diff={width_diff})!\n")
+                            sys.stderr.write(f"File: {inc_filename}")
+                            return 7
+
+                        if real_height >= pow(2, 3):
+                            sys.stderr.write(f"real_height for char 0x{val:X}"\
+                                             f"({char}) need too much bits "\
+                                             f"(real_height={real_height})!\n")
+                            return 8
+
+                        inc.write(f"  {{ {encoding:1}, {offset:4}, {width:3},"\
+                                  f"{x_min}, {y_min_mod4}, {width_diff}, "\
+                                  f"{real_height} }},"\
                                   f" //asciii 0x{ord(char):04X}\n")
                 inc.write("};\n")
 
