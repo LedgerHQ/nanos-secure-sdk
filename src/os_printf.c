@@ -19,15 +19,11 @@
 #include <stdarg.h>
 #include <string.h>
 #include "decorators.h"
+#include "os_math.h"
 
 #if defined(HAVE_BOLOS)
 # include "bolos_target.h"
-# include "os_math.h"
 #endif // HAVE_BOLOS
-
-#if !defined(MIN)
-# define MIN(x,y) ((x)<(y)?(x):(y))
-#endif // MIN
 
 #if defined(HAVE_PRINTF) || defined(HAVE_SPRINTF)
 
