@@ -517,6 +517,7 @@ enum generic_identifiers {
 #define SWO_SEC_STA_0A                    (ERR_SEC_STA + ERR_GEN_ID_0A)    // 0x590A
 #define SWO_SEC_STA_0B                    (ERR_SEC_STA + ERR_GEN_ID_0B)    // 0x590B
 #define SWO_SEC_STA_0C                    (ERR_SEC_STA + ERR_GEN_ID_0C)    // 0x590C
+#define SWO_SEC_STA_0D                    (ERR_SEC_STA + ERR_GEN_ID_0D)    // 0x590D
 
 /**
  * APDU-related issues are categorized into:
