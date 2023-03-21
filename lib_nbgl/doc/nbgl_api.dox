@@ -64,8 +64,7 @@ For example:
         .alignmentMarginY = 20,                   // Vertical margin (see layout & alignment)
         .alignment = TOP_LEFT,                    // Type of alignment (see layout & alignment)
         .alignTo = NULL,                          // Alignment reference, if NULL, use parent (see layout & alignment)
-        .touchMask = (1<<VALUE_CHANGED),          // Types of touchscreen events that we want to receive
-        .touchCallback = (nbgl_touchCallback_t)&touchCallback // Callback to be called on touchscreen events.
+        .touchMask = (1<<VALUE_CHANGED)           // Types of touchscreen events that we want to receive
         };
 @endcode
 
@@ -102,7 +101,7 @@ For example, with a static allocation of objects (not recommended, see @ref nbgl
         /*....*/
     };
     // allocate screen 0 for 2 children
-    nbgl_screenSet(&screenChildren, 2, NULL);
+    nbgl_screenSet(&screenChildren, 2, NULL, &touchCallback);
     // set children of screen
     screenChildren[0] = (nbgl_obj_t*)&backButton;
     screenChildren[1] = (nbgl_obj_t*)&container;
@@ -116,7 +115,7 @@ The same example with dynamic  allocation of objects:
     uint8_t layer = 0;
 
     /* allocate layer 0 for 2 children (it also releases any objects/containers allocated previously in layer 0) */
-    nbgl_screenSet(&screenChildren, 2, NULL);
+    nbgl_screenSet(&screenChildren, 2, NULL, &touchCallback);
 
     /* allocate backButton dynamically */
     nbgl_button_t *backButton = nbgl_objPoolGet(BUTTON, layer);

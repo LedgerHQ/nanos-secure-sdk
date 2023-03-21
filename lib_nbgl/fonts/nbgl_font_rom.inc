@@ -20,7 +20,6 @@
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_regular_32.inc"
-#include "nbgl_font_hmalpha_mono_medium_32_1bpp.inc"
 #include "nbgl_font_inter_regular_24_1bpp.inc"
 #include "nbgl_font_inter_semibold_24_1bpp.inc"
 #include "nbgl_font_inter_regular_32_1bpp.inc"

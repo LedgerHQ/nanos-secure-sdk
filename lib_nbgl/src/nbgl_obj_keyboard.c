@@ -127,103 +127,6 @@ static uint8_t getKeyboardIndex(nbgl_keyboard_t *keyboard, nbgl_touchStatePositi
   return i;
 }
 
-static void keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
-  uint8_t firstIndex, lastIndex;
-  nbgl_touchStatePosition_t *firstPosition, *lastPosition;
-  nbgl_keyboard_t *keyboard = (nbgl_keyboard_t *)obj;
-
-  LOG_DEBUG(MISC_LOGGER,"keyboardTouchCallback(): eventType = %d\n",eventType);
-  if (eventType != TOUCHED) {
-    return;
-  }
-  if (nbgl_touchGetTouchedPosition(obj,&firstPosition,&lastPosition) == false) {
-    return;
-  }
-  // modify positions with keyboard position
-  firstPosition->x -= obj->x0;
-  firstPosition->y -= obj->y0;
-  lastPosition->x -= obj->x0;
-  lastPosition->y -= obj->y0;
-
-  firstIndex = getKeyboardIndex(keyboard,firstPosition);
-  if (firstIndex > SPECIAL_KEYS_INDEX)
-    return;
-  lastIndex = getKeyboardIndex(keyboard,lastPosition);
-  if (lastIndex > SPECIAL_KEYS_INDEX)
-    return;
-  // if position of finger has moved durinng press to another "key", drop it
-  if (lastIndex != firstIndex)
-    return;
-
-
-  if (keyboard->mode == MODE_LETTERS) {
-    keyboardCase_t cur_casing = keyboard->casing;
-    // if the casing mode was upper (not-locked), go back to lower case
-    if ((keyboard->casing == UPPER_CASE)&&(firstIndex != SHIFT_KEY_INDEX)) {
-      keyboard->casing = LOWER_CASE;
-      // just redraw, refresh will be done by client (user of keyboard)
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-      keyboard->needsRefresh = true;
-    }
-    if ((firstIndex<26)&&((keyboard->keyMask&(1<<firstIndex))==0)) {
-      keyboard->callback((cur_casing != LOWER_CASE)?kbd_chars_upper[firstIndex]:kbd_chars[firstIndex]);
-    }
-    else if (firstIndex==SHIFT_KEY_INDEX) {
-      switch (keyboard->casing) {
-        case LOWER_CASE:
-          keyboard->casing = UPPER_CASE;
-          break;
-        case UPPER_CASE:
-          keyboard->casing = LOCKED_UPPER_CASE;
-          break;
-        case LOCKED_UPPER_CASE:
-          keyboard->casing = LOWER_CASE;
-          break;
-      }
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
-    }
-    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
-      keyboard->mode = MODE_DIGITS;
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-    }
-  }
-  else if (keyboard->mode == MODE_DIGITS) {
-    if (firstIndex<26) {
-      keyboard->callback(kbd_digits[firstIndex]);
-    }
-    else if (firstIndex==SPECIAL_KEYS_INDEX) {
-      keyboard->mode = MODE_SPECIAL;
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
-    }
-    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
-      keyboard->mode = MODE_LETTERS;
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-    }
-  }
-  else if (keyboard->mode == MODE_SPECIAL) {
-    if (firstIndex<26) {
-      keyboard->callback(kbd_specials[firstIndex]);
-    }
-    else if (firstIndex==SPECIAL_KEYS_INDEX) {
-      keyboard->mode = MODE_DIGITS;
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
-    }
-    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
-      keyboard->mode = MODE_LETTERS;
-      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
-    }
-  }
-  if (firstIndex == BACKSPACE_KEY_INDEX) { // backspace
-    keyboard->callback(BACKSPACE_KEY);
-  }
-  else if ((firstIndex == SPACE_KEY_INDEX)&&((keyboard->keyMask&(1<<SPACE_KEY_INDEX))==0)) { // space
-    keyboard->callback(' ');
-  }
-}
-
 // draw parts common to all modes of keyboard
 static void keyboardDrawCommonLines(nbgl_keyboard_t *keyboard) {
   nbgl_area_t rectArea;
@@ -557,13 +460,116 @@ static void keyboardDraw(nbgl_keyboard_t *keyboard) {
  **********************/
 
 /**
+ * @brief function to be called when the keyboard object is touched
+ *
+ * @param obj touched object (keyboard)
+ * @param eventType type of touch (only TOUCHED is accepted)
+ * @return none
+ */
+void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
+  uint8_t firstIndex, lastIndex;
+  nbgl_touchStatePosition_t *firstPosition, *lastPosition;
+  nbgl_keyboard_t *keyboard = (nbgl_keyboard_t *)obj;
+
+  LOG_DEBUG(MISC_LOGGER,"keyboardTouchCallback(): eventType = %d\n",eventType);
+  if (eventType != TOUCHED) {
+    return;
+  }
+  if (nbgl_touchGetTouchedPosition(obj,&firstPosition,&lastPosition) == false) {
+    return;
+  }
+  // modify positions with keyboard position
+  firstPosition->x -= obj->x0;
+  firstPosition->y -= obj->y0;
+  lastPosition->x -= obj->x0;
+  lastPosition->y -= obj->y0;
+
+  firstIndex = getKeyboardIndex(keyboard,firstPosition);
+  if (firstIndex > SPECIAL_KEYS_INDEX)
+    return;
+  lastIndex = getKeyboardIndex(keyboard,lastPosition);
+  if (lastIndex > SPECIAL_KEYS_INDEX)
+    return;
+  // if position of finger has moved durinng press to another "key", drop it
+  if (lastIndex != firstIndex)
+    return;
+
+
+  if (keyboard->mode == MODE_LETTERS) {
+    keyboardCase_t cur_casing = keyboard->casing;
+    // if the casing mode was upper (not-locked), go back to lower case
+    if ((keyboard->casing == UPPER_CASE)&&(firstIndex != SHIFT_KEY_INDEX)) {
+      keyboard->casing = LOWER_CASE;
+      // just redraw, refresh will be done by client (user of keyboard)
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      keyboard->needsRefresh = true;
+    }
+    if ((firstIndex<26)&&((keyboard->keyMask&(1<<firstIndex))==0)) {
+      keyboard->callback((cur_casing != LOWER_CASE)?kbd_chars_upper[firstIndex]:kbd_chars[firstIndex]);
+    }
+    else if (firstIndex==SHIFT_KEY_INDEX) {
+      switch (keyboard->casing) {
+        case LOWER_CASE:
+          keyboard->casing = UPPER_CASE;
+          break;
+        case UPPER_CASE:
+          keyboard->casing = LOCKED_UPPER_CASE;
+          break;
+        case LOCKED_UPPER_CASE:
+          keyboard->casing = LOWER_CASE;
+          break;
+      }
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+    }
+    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
+      keyboard->mode = MODE_DIGITS;
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+    }
+  }
+  else if (keyboard->mode == MODE_DIGITS) {
+    if (firstIndex<26) {
+      keyboard->callback(kbd_digits[firstIndex]);
+    }
+    else if (firstIndex==SPECIAL_KEYS_INDEX) {
+      keyboard->mode = MODE_SPECIAL;
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+    }
+    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
+      keyboard->mode = MODE_LETTERS;
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+    }
+  }
+  else if (keyboard->mode == MODE_SPECIAL) {
+    if (firstIndex<26) {
+      keyboard->callback(kbd_specials[firstIndex]);
+    }
+    else if (firstIndex==SPECIAL_KEYS_INDEX) {
+      keyboard->mode = MODE_DIGITS;
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+    }
+    else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
+      keyboard->mode = MODE_LETTERS;
+      nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+    }
+  }
+  if (firstIndex == BACKSPACE_KEY_INDEX) { // backspace
+    keyboard->callback(BACKSPACE_KEY);
+  }
+  else if ((firstIndex == SPACE_KEY_INDEX)&&((keyboard->keyMask&(1<<SPACE_KEY_INDEX))==0)) { // space
+    keyboard->callback(' ');
+  }
+}
+
+/**
  * @brief This function draws a keyboard object
  *
  * @param kbd the object to be drawned
  */
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd) {
   kbd->touchMask = (1 << TOUCHED);
-  kbd->touchCallback = (nbgl_touchCallback_t)&keyboardTouchCallback;
   kbd->needsRefresh = false;
 
   keyboardDraw(kbd);

@@ -48,13 +48,31 @@ static nbgl_touchStatePosition_t firstTouchedPosition,lastTouchedPosition;
  * @param eventType type of touchscreen event
  */
 static void applytouchStatePosition(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
+  nbgl_screen_t *screen = (nbgl_screen_t*)nbgl_screenGetTop();
   LOG_DEBUG(TOUCH_LOGGER,"Apply event %d on object of type %d\n",eventType,obj->type);
   if (!obj) {
     return;
   }
   /* the first action is the one provided by the application */
-  if (((obj->touchMask&(1<<eventType)) != 0) && (obj->touchCallback != NULL)) {
-    ((nbgl_touchCallback_t)PIC(obj->touchCallback))((void *)obj,eventType);
+  if ((obj->touchMask & (1<<eventType)) != 0) {
+    // for some specific objects, call directly a specific callback
+    switch (obj->type) {
+#ifdef NBGL_KEYBOARD
+    case KEYBOARD:
+      nbgl_keyboardTouchCallback(obj,eventType);
+      break;
+#endif // NBGL_KEYBOARD
+#ifdef NBGL_KEYPAD
+    case KEYPAD:
+      nbgl_keypadTouchCallback(obj,eventType);
+      break;
+#endif // NBGL_KEYPAD
+    default:
+      if (screen->touchCallback != NULL)
+        ((nbgl_touchCallback_t)PIC(screen->touchCallback))((void *)obj, eventType);
+      break;
+    }
+
   }
 }
 

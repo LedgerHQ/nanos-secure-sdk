@@ -195,7 +195,6 @@ typedef struct PACKED__ nbgl_obj_s {
     int16_t alignmentMarginX; ///< horizontal margin when aligning
     int16_t alignmentMarginY; ///< vertical margin when aligning
     uint8_t touchMask; ///< bit mask to tell engine which touch events are handled by this object
-    nbgl_touchCallback_t touchCallback; ///< function to be called on events defined in @ref touchMask
 } nbgl_obj_t;
 
 /**
@@ -457,13 +456,15 @@ void nbgl_containerPoolRelease(uint8_t layer);
 nbgl_obj_t** nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer);
 uint8_t nbgl_containerPoolGetNbUsed(uint8_t layer);
 
-nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, bool withExitKey, nbgl_touchCallback_t callback, uint8_t layer);
-uint8_t nbgl_navigationGetActivePage(void);
-nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon, nbgl_touchCallback_t callback, bool separationLine, uint8_t layer);
+nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, bool withExitKey, uint8_t layer);
+void nbgl_navigationCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, uint8_t nbPages, uint8_t *activePage);
+nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon, bool separationLine, uint8_t layer);
 
 // for internal use
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd);
 void nbgl_objDrawKeypad(nbgl_keypad_t *kbd);
+void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType);
+void nbgl_keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType);
 
 /**********************
  *      MACROS

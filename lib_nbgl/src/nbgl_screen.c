@@ -97,10 +97,14 @@ uint8_t nbgl_screenGetCurrentStackSize(void) {
  * @param screenIndex index of the screen in the stack. 0 is the usual value, except for modal windows
  * @param children an array of nbgl_obj_t*
  * @param nbChildren number of elements in children array
+ * @param ticker configuration of ticker
+ * @param callback callback called when any touchable object of the screen is touched (except keyboard/keypad)
  *
  * @return >= 0 if OK
  */
-static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t nbChildren, nbgl_screenTickerConfiguration_t *ticker) {
+static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t nbChildren,
+                            nbgl_screenTickerConfiguration_t *ticker,
+                            nbgl_touchCallback_t callback) {
   if (screenIndex >= SCREEN_STACK_SIZE) {
     LOG_WARN(SCREEN_LOGGER,"nbgl_screenSetAt(): forbidden screenIndex (%d)\n",screenIndex);
     return -1;
@@ -117,6 +121,7 @@ static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t
   screenStack[screenIndex].layout = VERTICAL;
   screenStack[screenIndex].children = *children;
   screenStack[screenIndex].nbChildren = nbChildren;
+  screenStack[screenIndex].touchCallback = callback;
   if (ticker != NULL) {
     screenStack[screenIndex].tickerCallback = (nbgl_tickerCallback_t)PIC(ticker->tickerCallback);
     screenStack[screenIndex].tickerIntervale = ticker->tickerIntervale;
@@ -135,10 +140,13 @@ static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t
  * @param elements an pointer on an array of nbgl_obj_t* to get as children of the screen, it will be allocated by the function
  * @param nbElements number of elements in elements array
  * @param ticker if not NULL, configures the potential ticker to be used as a periodic timer
+ * @param callback callback called when any touchable object of the screen is touched (except keyboard/keypad) (can be NULL)
  *
  * @return >= 0 if OK
  */
-int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTickerConfiguration_t *ticker) {
+int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements,
+                   nbgl_screenTickerConfiguration_t *ticker,
+                   nbgl_touchCallback_t callback) {
   // if no screen, consider it as a first fake push
   if (nbScreensOnStack == 0) {
     nbScreensOnStack++;
@@ -148,7 +156,7 @@ int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTicker
   nbgl_objPoolRelease(0);
   nbgl_containerPoolRelease(0);
   // always use the first layer (background) for user application
-  return nbgl_screenSetAt(0, elements,  nbElements, ticker);
+  return nbgl_screenSetAt(0, elements,  nbElements, ticker, callback);
 }
 
 /**
@@ -217,10 +225,13 @@ nbgl_obj_t** nbgl_screenGetElements(uint8_t screenIndex) {
  * @param elements (output) an array of nbgl_obj_t** to get
  * @param nbElements number of elements to get in <b>elements</b> array
  * @param ticker if not NULL, configures the potential ticker to be used as a periodic timer
+ * @param callback callback called when any touchable object of the screen is touched (except keyboard/keypad) (can be NULL)
  *
  * @return current screen index, or < 0 if error
  */
-int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTickerConfiguration_t *ticker) {
+int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements,
+                    nbgl_screenTickerConfiguration_t *ticker,
+                    nbgl_touchCallback_t callback) {
   uint8_t screenIndex;
   if (nbScreensOnStack >= SCREEN_STACK_SIZE) {
     LOG_WARN(SCREEN_LOGGER,"nbgl_screenPush(): already in highest index in the stack(%d)\n",nbScreensOnStack-1);
@@ -258,7 +269,7 @@ int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTicke
       LOG_WARN(SCREEN_LOGGER,"nbgl_screenPush(): corruption in stack\n");
     }
   }
-  if (nbgl_screenSetAt(screenIndex, elements,  nbElements, ticker) >= 0) {
+  if (nbgl_screenSetAt(screenIndex, elements,  nbElements, ticker, callback) >= 0) {
     nbScreensOnStack++;
     LOG_DEBUG(SCREEN_LOGGER,"nbgl_screenPush(): screen %d is now top of stack\n",screenIndex);
     return screenIndex;

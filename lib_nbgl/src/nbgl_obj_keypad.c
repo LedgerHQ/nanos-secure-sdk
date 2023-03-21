@@ -48,6 +48,7 @@
 /**********************
  *  STATIC FUNCTIONS
  **********************/
+
 static uint8_t getKeypadIndex(uint16_t x, uint16_t y) {
   uint8_t i=0;
   // get index of key pressed
@@ -76,56 +77,6 @@ static uint8_t getKeypadIndex(uint16_t x, uint16_t y) {
     }
   }
   return i;
-}
-
-static void keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
-  uint8_t firstIndex, lastIndex;
-  nbgl_touchStatePosition_t *firstPosition, *lastPosition;
-  nbgl_keypad_t *keypad = (nbgl_keypad_t *)obj;
-
-  LOG_DEBUG(MISC_LOGGER,"keypadTouchCallback(): eventType = %d\n",eventType);
-  if ((eventType != TOUCHED) && (eventType != TOUCH_PRESSED)) {
-    return;
-  }
-  if (nbgl_touchGetTouchedPosition(obj,&firstPosition,&lastPosition) == false) {
-    return;
-  }
-
-  // use positions relative to keypad position
-  firstIndex = getKeypadIndex(firstPosition->x - obj->x0, firstPosition->y - obj->y0);
-  if (firstIndex > VALIDATE_KEY_INDEX)
-    return;
-  lastIndex = getKeypadIndex(lastPosition->x - obj->x0, lastPosition->y - obj->y0);
-  if (lastIndex > VALIDATE_KEY_INDEX)
-    return;
-
-  // if position of finger has moved during press to another "key", drop it
-  if (lastIndex != firstIndex)
-    return;
-
-  if ((firstIndex<10)&&(keypad->enableDigits)) {
-    // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
-    if (eventType == TOUCHED)
-      keypad->callback(GET_DIGIT_INDEX(keypad,firstIndex) + 0x30);
-#ifdef HAVE_PIEZO_SOUND
-    else
-      io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
-#endif // HAVE_PIEZO_SOUND
-  }
-  if ((firstIndex == BACKSPACE_KEY_INDEX)&&(keypad->enableBackspace)) { // backspace
-    // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
-    if (eventType == TOUCHED)
-      keypad->callback(BACKSPACE_KEY);
-#ifdef HAVE_PIEZO_SOUND
-    else
-      io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
-#endif // HAVE_PIEZO_SOUND
-  }
-  else if ((firstIndex == VALIDATE_KEY_INDEX)&&(keypad->enableValidate)) { // validate
-    // only call callback if event is TOUCHED
-    if (eventType == TOUCHED)
-      keypad->callback(VALIDATE_KEY);
-  }
 }
 
 static void keypadDrawGrid(nbgl_keypad_t *keypad) {
@@ -263,6 +214,59 @@ static void keypadDraw(nbgl_keypad_t *keypad) {
  **********************/
 
 /**
+ * @brief function to be called when the keypad object is touched
+ *
+ * @param obj touched object (keypad)
+ * @param eventType type of touch (only TOUCHED is accepted)
+ * @return none
+ */
+void nbgl_keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
+  uint8_t firstIndex, lastIndex;
+  nbgl_touchStatePosition_t *firstPosition, *lastPosition;
+  nbgl_keypad_t *keypad = (nbgl_keypad_t *)obj;
+
+  LOG_DEBUG(MISC_LOGGER,"nbgl_keypadTouchCallback(): eventType = %d\n",eventType);
+  if ((eventType != TOUCHED) && (eventType != TOUCH_PRESSED)) {
+    return;
+  }
+  if (nbgl_touchGetTouchedPosition(obj,&firstPosition,&lastPosition) == false) {
+    return;
+  }
+
+  // use positions relative to keypad position
+  firstIndex = getKeypadIndex(firstPosition->x - obj->x0, firstPosition->y - obj->y0);
+  if (firstIndex > VALIDATE_KEY_INDEX)
+    return;
+  lastIndex = getKeypadIndex(lastPosition->x - obj->x0, lastPosition->y - obj->y0);
+  if (lastIndex > VALIDATE_KEY_INDEX)
+    return;
+
+  // if position of finger has moved during press to another "key", drop it
+  if (lastIndex != firstIndex)
+    return;
+
+  if ((firstIndex<10)&&(keypad->enableDigits)) {
+    // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
+    if (eventType == TOUCHED)
+      keypad->callback(GET_DIGIT_INDEX(keypad,firstIndex) + 0x30);
+    else
+      io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
+  }
+  if ((firstIndex == BACKSPACE_KEY_INDEX)&&(keypad->enableBackspace)) { // backspace
+    // only call callback if event is TOUCHED, otherwise play tune on touch event (and not on release)
+    if (eventType == TOUCHED)
+      keypad->callback(BACKSPACE_KEY);
+    else
+      io_seproxyhal_play_tune(TUNE_TAP_CASUAL);
+  }
+  else if ((firstIndex == VALIDATE_KEY_INDEX)&&(keypad->enableValidate)) { // validate
+    // only call callback if event is TOUCHED
+    if (eventType == TOUCHED)
+      keypad->callback(VALIDATE_KEY);
+  }
+}
+
+/**
  * @brief This function draws a keypad object
  *
  * @param kpd keypad object to draw
@@ -270,7 +274,6 @@ static void keypadDraw(nbgl_keypad_t *keypad) {
  */
 void nbgl_objDrawKeypad(nbgl_keypad_t *kpd) {
   kpd->touchMask = (1 << TOUCHED) | (1 << TOUCH_PRESSED);
-  kpd->touchCallback = (nbgl_touchCallback_t)&keypadTouchCallback;
 
   // if the object has not been already used, prepare indexes of digits
   if (kpd->digitIndexes[0] == 0) {
@@ -281,7 +284,7 @@ void nbgl_objDrawKeypad(nbgl_keypad_t *kpd) {
       // modern version of the Fisher-Yates shuffle
       for (i=0;i<9;i++) {
         // pick a random number k in [i:9] intervale
-        uint32_t j = cx_rng_u32_range(i, 9);
+        uint32_t j = cx_rng_u32_range(i, 10);
         uint8_t tmp = shuffledDigits[j];
 
         // exchange shuffledDigits[i] and shuffledDigits[j]

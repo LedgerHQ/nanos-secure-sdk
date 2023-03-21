@@ -30,17 +30,8 @@ enum {
 };
 
 /**********************
- *  STATIC PROTOTYPES
- **********************/
-
-/**********************
  *  STATIC VARIABLES
  **********************/
-// Be careful, no nav is allowed in Modals
-static nbgl_touchCallback_t navCallback = NULL;
-static nbgl_container_t *navContainer;
-static uint8_t navNbPages; ///< number of pages.
-static uint8_t navActivePage; ///< index of active page (from 0 to nbPages-1).
 
 /**********************
  *      VARIABLES
@@ -50,71 +41,66 @@ static uint8_t navActivePage; ///< index of active page (from 0 to nbPages-1).
  *  STATIC PROTOTYPES
  **********************/
 
+static void configButtons(nbgl_container_t *navContainer, uint8_t navNbPages, uint8_t navActivePage) {
+  nbgl_button_t *buttonPrevious = (nbgl_button_t *)navContainer->children[PREVIOUS_PAGE_INDEX];
+  nbgl_button_t *buttonNext = (nbgl_button_t *)navContainer->children[NEXT_PAGE_INDEX];
+
+  buttonPrevious->foregroundColor = (navActivePage == 0) ? LIGHT_GRAY : BLACK;
+  buttonNext->foregroundColor = (navActivePage == (navNbPages-1)) ? LIGHT_GRAY : BLACK;
+}
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
 
-static void configButtons(void) {
-  nbgl_button_t *buttonPrevious = (nbgl_button_t *)navContainer->children[PREVIOUS_PAGE_INDEX];
-  nbgl_button_t *buttonNext = (nbgl_button_t *)navContainer->children[NEXT_PAGE_INDEX];
+/**
+ * @brief function to be called when any of the controls in navigation bar is touched
+ *
+ * @param obj touched object (button)
+ * @param eventType type of touch (only TOUCHED is accepted)
+ * @param nbPages number of pages for navigation (if < 2, no navigation keys)
+ * @param activePage current active page
+ * @return none
+ */
+void nbgl_navigationCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, uint8_t nbPages, uint8_t *activePage) {
+  nbgl_container_t *navContainer;
 
-  if (navActivePage == 0) {
-    // only modify left button if not used for exit
-    buttonPrevious->foregroundColor = LIGHT_GRAY;
-  }
-  else {
-    buttonPrevious->foregroundColor = BLACK;
-  }
-  if (navActivePage == (navNbPages-1)) {
-    buttonNext->foregroundColor = LIGHT_GRAY;
-  }
-  else {
-    buttonNext->foregroundColor = BLACK;
-  }
-}
-
-static void navTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   if (eventType != TOUCHED) {
     return;
   }
+  navContainer = (nbgl_container_t *)obj->parent;
+
   if (obj == navContainer->children[EXIT_BUTTON_INDEX]) {
     // fake page when Quit button is touched
-    navActivePage = EXIT_PAGE;
-    navCallback((nbgl_obj_t *)navContainer,VALUE_CHANGED);
+    *activePage = EXIT_PAGE;
   }
   else if (obj == navContainer->children[PREVIOUS_PAGE_INDEX]) {
-    if (navActivePage > 0) {
-      navActivePage--;
-      configButtons();
-      navCallback((nbgl_obj_t *)navContainer,VALUE_CHANGED);
+    if (*activePage > 0) {
+      *activePage = *activePage - 1;
+      configButtons(navContainer, nbPages, *activePage);
     }
   }
   else if (obj == navContainer->children[NEXT_PAGE_INDEX]) {
-    if (navActivePage < (navNbPages-1)) {
-      navActivePage++;
-      configButtons();
-      navCallback((nbgl_obj_t *)navContainer,VALUE_CHANGED);
+    if (*activePage < (nbPages-1)) {
+      *activePage = *activePage + 1;
+      configButtons(navContainer, nbPages, *activePage);
     }
   }
 }
 
 /**
- * @brief This function creates a full navigation bar "object", with button and returns it as a container
- *
- * @note Be careful, no navigation is allowed in modal if already used under it
+ * @brief This function creates a full navigation bar "object", with buttons and returns it as a container
  *
  * @param nbPages max number of pages for navigation (if < 2, no navigation keys)
  * @param activePage active page at start-up in [0-(nbPages-1)]
  * @param withExitKey if set to true, on page 0 the left key is replaced by a exit key
- * @param callback the callback called when an navigation button is pressed
  * @param layer layer (screen) to create the navigation bar in
+ *
  * @return the created navigation bar container object
  */
-nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, bool withExitKey, nbgl_touchCallback_t callback, uint8_t layer) {
+nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, bool withExitKey, uint8_t layer) {
   nbgl_button_t *button;
-
-  navNbPages = nbPages;
-  navActivePage = activePage;
+  nbgl_container_t *navContainer;
 
   navContainer = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER, layer);
   navContainer->width = SCREEN_WIDTH - 2*BORDER_MARGIN;
@@ -141,7 +127,6 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
     button->alignment = (nbPages > 1) ? MID_LEFT:CENTER;
     button->alignTo = NULL;
     button->touchMask = (1<<TOUCHED);
-    button->touchCallback = (nbgl_touchCallback_t)&navTouchCallback;
     navContainer->children[EXIT_BUTTON_INDEX] = (nbgl_obj_t*)button;
   }
   if (nbPages > 1) {
@@ -168,7 +153,6 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
 
     }
     button->touchMask = (1<<TOUCHED);
-    button->touchCallback = (nbgl_touchCallback_t)&navTouchCallback;
     navContainer->children[PREVIOUS_PAGE_INDEX] = (nbgl_obj_t*)button;
 
     // create next page button
@@ -188,21 +172,10 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
     button->alignment = MID_RIGHT;
     button->alignTo = navContainer->children[PREVIOUS_PAGE_INDEX];
     button->touchMask = (1<<TOUCHED);
-    button->touchCallback = (nbgl_touchCallback_t)&navTouchCallback;
     navContainer->children[NEXT_PAGE_INDEX] = (nbgl_obj_t*)button;
 
-    configButtons();
+    configButtons(navContainer, nbPages, activePage);
   }
 
-  navCallback = callback;
   return navContainer;
-}
-
-/**
- * @brief get the active page of the given navigation container
- *
- * @return active page
- */
-uint8_t nbgl_navigationGetActivePage(void) {
-  return navActivePage;
 }
