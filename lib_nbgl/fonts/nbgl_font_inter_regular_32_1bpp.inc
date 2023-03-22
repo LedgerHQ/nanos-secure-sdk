@@ -80,11 +80,11 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   0x00, 0x00, 0x00, 0x78,
 //ascii 0x0030
   0x00, 0x7F, 0xF0, 0x00, 0x1F, 0xFF, 0xC0, 0x07,
-  0xFF, 0xFF, 0x00, 0xFC, 0x01, 0xF8, 0x0F, 0x00,
-  0x07, 0x81, 0xE0, 0x00, 0x3C, 0x1C, 0x00, 0x01,
-  0xC1, 0xC0, 0x00, 0x1C, 0x1C, 0x00, 0x01, 0xC1,
-  0xC0, 0x00, 0x1C, 0x1E, 0x00, 0x03, 0xC0, 0xF0,
-  0x00, 0x78, 0x0F, 0xC0, 0x1F, 0x80, 0x7F, 0xFF,
+  0xFF, 0xFF, 0x00, 0xFC, 0x01, 0xF8, 0x0F, 0xE0,
+  0x07, 0x81, 0xFF, 0x00, 0x3C, 0x1C, 0x7C, 0x01,
+  0xC1, 0xC1, 0xF0, 0x1C, 0x1C, 0x07, 0xC1, 0xC1,
+  0xC0, 0x1F, 0x1C, 0x1E, 0x00, 0x7F, 0xC0, 0xF0,
+  0x01, 0xF8, 0x0F, 0xC0, 0x1F, 0x80, 0x7F, 0xFF,
   0xF0, 0x01, 0xFF, 0xFC, 0x00, 0x07, 0xFF, 0x00,
 //ascii 0x0031
   0x1F, 0xFF, 0xFF, 0xC1, 0xFF, 0xFF, 0xFC, 0x1F,
@@ -266,8 +266,11 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   0x00, 0x1F, 0xFF, 0xFF, 0xC1, 0xFF, 0xFF, 0xFC,
   0x1F, 0xFF, 0xFF, 0xC0,
 //ascii 0x0049
-  0x1F, 0xFF, 0xFF, 0xC1, 0xFF, 0xFF, 0xFC, 0x1F,
-  0xFF, 0xFF, 0xC0,
+  0x1C, 0x00, 0x01, 0xC1, 0xC0, 0x00, 0x1C, 0x1C,
+  0x00, 0x01, 0xC1, 0xC0, 0x00, 0x1C, 0x1F, 0xFF,
+  0xFF, 0xC1, 0xFF, 0xFF, 0xFC, 0x1F, 0xFF, 0xFF,
+  0xC1, 0xC0, 0x00, 0x1C, 0x1C, 0x00, 0x01, 0xC1,
+  0xC0, 0x00, 0x1C, 0x1C, 0x00, 0x01, 0xC0,
 //ascii 0x004A
   0x1F, 0xFF, 0xFE, 0x01, 0xFF, 0xFF, 0xF0, 0x1F,
   0xFF, 0xFF, 0x80, 0x00, 0x00, 0x38, 0x00, 0x00,
@@ -517,8 +520,9 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   0xFF, 0xFC, 0x1F, 0xFF, 0xFF, 0xC1, 0xFF, 0xFF,
   0xFC,
 //ascii 0x006C
-  0x1F, 0xFF, 0xFF, 0xC1, 0xFF, 0xFF, 0xFC, 0x1F,
-  0xFF, 0xFF, 0xC0,
+  0x00, 0x00, 0x01, 0xC0, 0x00, 0x00, 0x1C, 0x00,
+  0x00, 0x01, 0xC1, 0xFF, 0xFF, 0xFC, 0x1F, 0xFF,
+  0xFF, 0xC1, 0xFF, 0xFF, 0xF8,
 //ascii 0x006D
   0x0F, 0xFF, 0xC1, 0xFF, 0xFC, 0x3F, 0xFF, 0xC7,
   0x80, 0x00, 0x70, 0x00, 0x06, 0x00, 0x00, 0x60,
@@ -670,66 +674,66 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   { 1508,  18, 3, 0, 16, 28 }, //asciii 0x0046
   { 1554,  23, 2, 0, 21, 28 }, //asciii 0x0047
   { 1621,  23, 3, 0, 20, 28 }, //asciii 0x0048
-  { 1681,   9, 3, 0, 6, 28 }, //asciii 0x0049
-  { 1692,  17, 1, 0, 14, 28 }, //asciii 0x004A
-  { 1738,  20, 3, 0, 19, 28 }, //asciii 0x004B
-  { 1794,  17, 3, 0, 16, 28 }, //asciii 0x004C
-  { 1840,  27, 3, 0, 24, 28 }, //asciii 0x004D
-  { 1914,  23, 2, 0, 21, 28 }, //asciii 0x004E
-  { 1981,  24, 2, 0, 22, 28 }, //asciii 0x004F
-  { 2051,  20, 3, 0, 18, 28 }, //asciii 0x0050
-  { 2104,  24, 2, 0, 22, 28 }, //asciii 0x0051
-  { 2174,  20, 3, 0, 19, 28 }, //asciii 0x0052
-  { 2230,  20, 2, 0, 19, 28 }, //asciii 0x0053
-  { 2290,  20, 1, 0, 18, 28 }, //asciii 0x0054
-  { 2350,  23, 3, 0, 20, 28 }, //asciii 0x0055
-  { 2410,  21, 1, 0, 20, 28 }, //asciii 0x0056
-  { 2477,  29, 1, 0, 28, 28 }, //asciii 0x0057
-  { 2572,  20, 1, 0, 19, 28 }, //asciii 0x0058
-  { 2635,  21, 1, 0, 20, 28 }, //asciii 0x0059
-  { 2702,  19, 2, 0, 18, 28 }, //asciii 0x005A
-  { 2758,  12, 4, 0, 11, 32 }, //asciii 0x005B
-  { 2786,   9, 1, 0, 8, 32 }, //asciii 0x005C
-  { 2814,  11, 1, 0, 8, 32 }, //asciii 0x005D
-  { 2842,  15, 1, 4, 14, 16 }, //asciii 0x005E
-  { 2862,  16, 0, 24, 13, 28 }, //asciii 0x005F
-  { 2869,  13, 5, 0, 8, 8 }, //asciii 0x0060
-  { 2872,  18, 2, 8, 16, 28 }, //asciii 0x0061
-  { 2907,  20, 3, 0, 19, 28 }, //asciii 0x0062
-  { 2963,  17, 2, 8, 15, 28 }, //asciii 0x0063
-  { 2996,  20, 2, 0, 18, 28 }, //asciii 0x0064
-  { 3052,  19, 2, 8, 17, 28 }, //asciii 0x0065
-  { 3090,  11, 1, 0, 10, 28 }, //asciii 0x0066
-  { 3122,  20, 2, 8, 18, 32 }, //asciii 0x0067
-  { 3170,  18, 2, 0, 16, 28 }, //asciii 0x0068
-  { 3219,   7, 2, 0, 5, 28 }, //asciii 0x0069
-  { 3230,   8, 0, 0, 5, 32 }, //asciii 0x006A
-  { 3250,  17, 2, 0, 16, 28 }, //asciii 0x006B
-  { 3299,   7, 2, 0, 5, 28 }, //asciii 0x006C
-  { 3310,  27, 2, 8, 25, 28 }, //asciii 0x006D
-  { 3368,  18, 2, 8, 16, 28 }, //asciii 0x006E
-  { 3403,  20, 2, 8, 18, 28 }, //asciii 0x006F
-  { 3443,  20, 2, 8, 18, 32 }, //asciii 0x0070
-  { 3491,  20, 2, 8, 18, 32 }, //asciii 0x0071
-  { 3539,  12, 2, 8, 11, 28 }, //asciii 0x0072
-  { 3562,  16, 2, 8, 15, 28 }, //asciii 0x0073
-  { 3595,  11, 1, 4, 10, 28 }, //asciii 0x0074
-  { 3622,  18, 2, 8, 16, 28 }, //asciii 0x0075
-  { 3657,  17, 1, 8, 16, 28 }, //asciii 0x0076
-  { 3695,  25, 1, 8, 24, 28 }, //asciii 0x0077
-  { 3753,  17, 2, 8, 15, 28 }, //asciii 0x0078
-  { 3786,  17, 1, 8, 16, 32 }, //asciii 0x0079
-  { 3831,  17, 2, 8, 15, 28 }, //asciii 0x007A
-  { 3864,  11, 1, 0, 10, 32 }, //asciii 0x007B
-  { 3900,  10, 4, 0, 6, 32 }, //asciii 0x007C
-  { 3908,  11, 1, 0, 10, 32 }, //asciii 0x007D
-  { 3944,  20, 3, 12, 18, 20 }, //asciii 0x007E
+  { 1681,  15, 2, 0, 13, 28 }, //asciii 0x0049
+  { 1720,  17, 1, 0, 14, 28 }, //asciii 0x004A
+  { 1766,  20, 3, 0, 19, 28 }, //asciii 0x004B
+  { 1822,  17, 3, 0, 16, 28 }, //asciii 0x004C
+  { 1868,  27, 3, 0, 24, 28 }, //asciii 0x004D
+  { 1942,  23, 2, 0, 21, 28 }, //asciii 0x004E
+  { 2009,  24, 2, 0, 22, 28 }, //asciii 0x004F
+  { 2079,  20, 3, 0, 18, 28 }, //asciii 0x0050
+  { 2132,  24, 2, 0, 22, 28 }, //asciii 0x0051
+  { 2202,  20, 3, 0, 19, 28 }, //asciii 0x0052
+  { 2258,  20, 2, 0, 19, 28 }, //asciii 0x0053
+  { 2318,  20, 1, 0, 18, 28 }, //asciii 0x0054
+  { 2378,  23, 3, 0, 20, 28 }, //asciii 0x0055
+  { 2438,  21, 1, 0, 20, 28 }, //asciii 0x0056
+  { 2505,  29, 1, 0, 28, 28 }, //asciii 0x0057
+  { 2600,  20, 1, 0, 19, 28 }, //asciii 0x0058
+  { 2663,  21, 1, 0, 20, 28 }, //asciii 0x0059
+  { 2730,  19, 2, 0, 18, 28 }, //asciii 0x005A
+  { 2786,  12, 4, 0, 11, 32 }, //asciii 0x005B
+  { 2814,   9, 1, 0, 8, 32 }, //asciii 0x005C
+  { 2842,  11, 1, 0, 8, 32 }, //asciii 0x005D
+  { 2870,  15, 1, 4, 14, 16 }, //asciii 0x005E
+  { 2890,  16, 0, 24, 13, 28 }, //asciii 0x005F
+  { 2897,  13, 5, 0, 8, 8 }, //asciii 0x0060
+  { 2900,  18, 2, 8, 16, 28 }, //asciii 0x0061
+  { 2935,  20, 3, 0, 19, 28 }, //asciii 0x0062
+  { 2991,  17, 2, 8, 15, 28 }, //asciii 0x0063
+  { 3024,  20, 2, 0, 18, 28 }, //asciii 0x0064
+  { 3080,  19, 2, 8, 17, 28 }, //asciii 0x0065
+  { 3118,  11, 1, 0, 10, 28 }, //asciii 0x0066
+  { 3150,  20, 2, 8, 18, 32 }, //asciii 0x0067
+  { 3198,  18, 2, 0, 16, 28 }, //asciii 0x0068
+  { 3247,   7, 2, 0, 5, 28 }, //asciii 0x0069
+  { 3258,   8, 0, 0, 5, 32 }, //asciii 0x006A
+  { 3278,  17, 2, 0, 16, 28 }, //asciii 0x006B
+  { 3327,  10, 3, 0, 9, 28 }, //asciii 0x006C
+  { 3348,  27, 2, 8, 25, 28 }, //asciii 0x006D
+  { 3406,  18, 2, 8, 16, 28 }, //asciii 0x006E
+  { 3441,  20, 2, 8, 18, 28 }, //asciii 0x006F
+  { 3481,  20, 2, 8, 18, 32 }, //asciii 0x0070
+  { 3529,  20, 2, 8, 18, 32 }, //asciii 0x0071
+  { 3577,  12, 2, 8, 11, 28 }, //asciii 0x0072
+  { 3600,  16, 2, 8, 15, 28 }, //asciii 0x0073
+  { 3633,  11, 1, 4, 10, 28 }, //asciii 0x0074
+  { 3660,  18, 2, 8, 16, 28 }, //asciii 0x0075
+  { 3695,  17, 1, 8, 16, 28 }, //asciii 0x0076
+  { 3733,  25, 1, 8, 24, 28 }, //asciii 0x0077
+  { 3791,  17, 2, 8, 15, 28 }, //asciii 0x0078
+  { 3824,  17, 1, 8, 16, 32 }, //asciii 0x0079
+  { 3869,  17, 2, 8, 15, 28 }, //asciii 0x007A
+  { 3902,  11, 1, 0, 10, 32 }, //asciii 0x007B
+  { 3938,  10, 4, 0, 6, 32 }, //asciii 0x007C
+  { 3946,  11, 1, 0, 10, 32 }, //asciii 0x007D
+  { 3982,  20, 3, 12, 18, 20 }, //asciii 0x007E
 };
 
  __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_REGULAR_32PX_1BPP = {
-  3959, // bitmap len
+  3997, // bitmap len
   BAGL_FONT_INTER_REGULAR_32px_1bpp, // font id
-  NBGL_BPP_1, // bpp
+  (uint8_t) NBGL_BPP_1, // bpp
   32, // font height in pixels
   25, // baseline height in pixels
   40, // line height in pixels
