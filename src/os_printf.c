@@ -976,9 +976,7 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
-#if !defined(__clang__)
                     FALL_THROUGH;
-#endif // !defined(__clang__)
                 case 'x':
                 case 'p':
                 {
