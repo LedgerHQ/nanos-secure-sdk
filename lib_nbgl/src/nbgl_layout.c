@@ -1912,7 +1912,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed) {
   textArea->textColor = BLACK;
   textArea->text = (char*)PIC(text);
   textArea->textAlignment = CENTER;
-  textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+  textArea->fontId = BAGL_FONT_INTER_REGULAR_24px_1bpp;
   textArea->alignmentMarginY = 36;
   textArea->alignTo = (nbgl_obj_t*)spinner;
   textArea->alignment = BOTTOM_MIDDLE;
@@ -2074,7 +2074,7 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons
     choiceButtons[i]->width = (SCREEN_WIDTH-2*BORDER_MARGIN-8)/2;
     choiceButtons[i]->height = 64;
     choiceButtons[i]->radius = RADIUS_32_PIXELS;
-    choiceButtons[i]->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+    choiceButtons[i]->fontId = BAGL_FONT_INTER_SEMIBOLD_24px_1bpp;
     choiceButtons[i]->icon = NULL;
     if ((i%2) == 0) {
       choiceButtons[i]->alignmentMarginX = BORDER_MARGIN;
@@ -2190,7 +2190,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
     snprintf(numText,sizeof(numText),"%d.",number);
     textArea->text = numText;
     textArea->textAlignment = MID_LEFT;
-    textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+    textArea->fontId = BAGL_FONT_INTER_REGULAR_32px_1bpp;
     textArea->alignmentMarginY = 12;
     textArea->alignTo = (nbgl_obj_t*)line;
     textArea->alignment = TOP_LEFT;
@@ -2205,7 +2205,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
   textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
   textArea->text = text;
   textArea->textAlignment = MID_LEFT;
-  textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+  textArea->fontId = BAGL_FONT_INTER_REGULAR_32px_1bpp;
   textArea->alignmentMarginY = 12;
   textArea->alignTo = (nbgl_obj_t*)line;
   textArea->alignment = TOP_MIDDLE;
@@ -2313,7 +2313,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *t
     button->innerColor = LIGHT_GRAY;
   }
   button->text = PIC(text);
-  button->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
+  button->fontId = BAGL_FONT_INTER_SEMIBOLD_24px_1bpp;
   button->width = GET_AVAILABLE_WIDTH(layoutInt);
   button->height = BUTTON_DIAMETER;
   button->radius = BUTTON_RADIUS;

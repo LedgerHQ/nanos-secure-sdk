@@ -17,6 +17,7 @@
 #include "nbgl_fonts.h"
 #include "nbgl_touch.h"
 #include "glyphs.h"
+#include "os_io.h"
 
 /*********************
  *      DEFINES
@@ -525,6 +526,7 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { //switch to digits
       keyboard->mode = MODE_DIGITS;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
   }
   else if (keyboard->mode == MODE_DIGITS) {
@@ -539,6 +541,7 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
       keyboard->mode = MODE_LETTERS;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
   }
   else if (keyboard->mode == MODE_SPECIAL) {
@@ -553,6 +556,7 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     else if (firstIndex == DIGITS_SWITCH_KEY_INDEX) { // switch to letters
       keyboard->mode = MODE_LETTERS;
       nbgl_redrawObject((nbgl_obj_t *)keyboard,NULL,false);
+      nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
     }
   }
   if (firstIndex == BACKSPACE_KEY_INDEX) { // backspace
@@ -573,5 +577,8 @@ void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd) {
   kbd->needsRefresh = false;
 
   keyboardDraw(kbd);
+
+  // If a keyboard in the screen, exclude only top border from touch, to avoid missing touch on left keys
+  touch_exclude_borders(TOP_BORDER);
 }
 #endif // NBGL_KEYBOARD

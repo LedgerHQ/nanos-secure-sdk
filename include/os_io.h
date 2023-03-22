@@ -73,10 +73,16 @@ typedef struct io_touch_info_s {
     uint8_t h;
 } io_touch_info_t;
 
+// bitfield for exclusion borders, for touch_exclude_borders() (if a bit is set, means that pixels on this border are not taken into account)
+#define LEFT_BORDER   1
+#define RIGHT_BORDER  2
+#define TOP_BORDER    4
+#define BOTTOM_BORDER 8
 
 #ifdef HAVE_SE_TOUCH
 SYSCALL void touch_get_last_info(io_touch_info_t *info);
 SYSCALL void touch_set_state(bool enable);
+SYSCALL uint8_t touch_exclude_borders(uint8_t excluded_borders);
 #ifdef HAVE_TOUCH_DEBUG
 SYSCALL void touch_read_sensitivity(uint8_t *sensi_data);
 #endif

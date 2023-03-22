@@ -1808,6 +1808,11 @@ void touch_set_state(bool enable) {
   SVC_Call(SYSCALL_touch_set_state_ID, parameters);
 }
 
+uint8_t touch_exclude_borders(uint8_t excluded_borders) {
+  unsigned int parameters[1] = {(unsigned int) excluded_borders};
+  return (uint8_t)SVC_Call(SYSCALL_touch_exclude_borders_ID, parameters);
+}
+
 #ifdef HAVE_TOUCH_DEBUG
 void touch_read_sensitivity(uint8_t *sensi_data) {
   unsigned int parameters[1] = {(unsigned int) sensi_data};

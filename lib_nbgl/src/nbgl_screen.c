@@ -9,6 +9,7 @@
 #include "nbgl_screen.h"
 #include "nbgl_debug.h"
 #include "os_pic.h"
+#include "os_io.h"
 
 /*********************
  *      DEFINES
@@ -64,6 +65,12 @@ void nbgl_screenRedraw(void) {
     return;
   }
   LOG_DEBUG(SCREEN_LOGGER,"nbgl_screenRedraw(): nbScreensOnStack = %d\n",nbScreensOnStack);
+#ifdef HAVE_SE_TOUCH
+  // by default, exclude left & top borders from touch
+  // if any sub-object is a keyboard, this will be modified when drawing it
+  touch_exclude_borders(TOP_BORDER | LEFT_BORDER);
+#endif // HAVE_SE_TOUCH
+
   nbgl_screen_reinit();
   nbgl_redrawObject((nbgl_obj_t *)topOfStack, NULL, true);
 }
