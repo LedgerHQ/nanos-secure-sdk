@@ -646,21 +646,37 @@ static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValueList_t *
 
   *tooLongToFit = false;
   while (nbPairsInPage < nbPairs) {
+    char *item;
     char *value;
-
+    nbgl_layoutTagValue_t* callback_result;
+    nbgl_font_id_e value_font;
+    // margin between pairs
     if (nbPairsInPage>0)
-      currentHeight += 12; // margin between pairs
-    currentHeight += 32; // tag height
-    currentHeight += 4; // space between tag and value
-
+      currentHeight += 12;
+    // fetch tag/value pair strings.
     if (tagValueList->pairs != NULL) {
       value = tagValueList->pairs[startIndex+nbPairsInPage].value;
+      item = tagValueList->pairs[startIndex+nbPairsInPage].item;
     }
     else {
-      value = tagValueList->callback(startIndex+nbPairsInPage)->value;
+      callback_result = tagValueList->callback(startIndex+nbPairsInPage);
+      value = callback_result->value;
+      item = callback_result->item;
     }
-    currentHeight += nbgl_getTextHeightInWidth(BAGL_FONT_INTER_REGULAR_32px,
-                                value,SCREEN_WIDTH-2*BORDER_MARGIN, tagValueList->wrapping); // value height
+    // tag height
+    currentHeight += nbgl_getTextHeightInWidth(BAGL_FONT_INTER_REGULAR_24px,
+                                item,SCREEN_WIDTH-2*BORDER_MARGIN, tagValueList->wrapping);
+    // space between tag and value
+    currentHeight += 4;
+    // set value font
+    if (tagValueList->smallCaseForValue) {
+     value_font = BAGL_FONT_INTER_REGULAR_24px;
+    } else {
+     value_font = BAGL_FONT_INTER_REGULAR_32px;
+    }
+    // value height
+    currentHeight += nbgl_getTextHeightInWidth(value_font,
+                                value,SCREEN_WIDTH-2*BORDER_MARGIN, tagValueList->wrapping);
     if (currentHeight >= TAG_VALUE_AREA_HEIGHT)
       break;
     nbPairsInPage++;
