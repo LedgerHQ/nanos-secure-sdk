@@ -119,8 +119,8 @@ const nbgl_font_t *nbgl_getFont(nbgl_font_id_e fontId) {
  * @param is_unicode (out) set to true if it's a real unicode (not ASCII)
  * @return unicode (or ascii-7) value of the found character
  */
-uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *textLen, bool *is_unicode) {
-  uint8_t *txt = *text;
+uint32_t nbgl_popUnicodeChar(const uint8_t **text, uint16_t *textLen, bool *is_unicode) {
+  const uint8_t *txt = *text;
   uint8_t cur_char = *txt++;
   uint32_t unicode;
 
@@ -190,7 +190,7 @@ static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool break
       line_width=0;
       text++;
     }
-    unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
     maxLen--;
 
     if (is_unicode) {
@@ -271,7 +271,7 @@ uint16_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
   nbgl_getUnicodeFont(fontId);
 #endif // HAVE_UNICODE_SUPPORT
 
-  unicode = nbgl_popUnicodeChar((uint8_t**)&text, &textLen, &is_unicode);
+  unicode = nbgl_popUnicodeChar((const uint8_t**)&text, &textLen, &is_unicode);
 
   if (is_unicode) {
 #ifdef HAVE_UNICODE_SUPPORT
@@ -391,7 +391,7 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
     bool is_unicode;
     uint16_t curTextLen = textLen;
 
-    unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
     // if \n, reset width
     if (unicode == '\n') {
       *len += curTextLen-textLen;
@@ -466,7 +466,7 @@ bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16
     bool is_unicode;
     uint16_t curTextLen = textLen;
 
-    unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
     // if \n, reset width
     if (unicode == '\n') {
       *len += curTextLen-textLen;
@@ -574,9 +574,9 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
   uint16_t width=0;
   uint16_t nbLines=1;
   uint16_t textLen = strlen(text);
-  char *lastSpace = NULL;
+  const char *lastSpace = NULL;
   uint32_t lenAtLastSpace = 0;
-  char *prevText = NULL;
+  const char *prevText = NULL;
 
 #ifdef HAVE_UNICODE_SUPPORT
   nbgl_getUnicodeFont(fontId);
@@ -589,8 +589,8 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
     bool is_unicode;
 
     // memorize the last char
-    prevText = (char *)text;
-    unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    prevText = text;
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
 
     // if \n, increment the number of lines
     if (unicode == '\n') {
@@ -668,7 +668,7 @@ uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint1
  * @param nbLines (input) If the text doesn't fit in this number of lines, the last chars will be replaced by ...
  *
  */
-void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint8_t nbLines) {
+void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char* text, uint16_t maxWidth, uint8_t nbLines) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
   uint16_t textLen = nbgl_getTextLength(text);
   uint16_t width = 0;
@@ -690,8 +690,8 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t ma
 
     // memorize the two last chars
     prevPrevText = prevText;
-    prevText = (char *)text;
-    unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    prevText = text;
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
     // if \n, reset width
     if (unicode == '\n') {
       width = 0;

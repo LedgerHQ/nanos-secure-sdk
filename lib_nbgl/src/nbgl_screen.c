@@ -110,7 +110,7 @@ uint8_t nbgl_screenGetCurrentStackSize(void) {
  * @return >= 0 if OK
  */
 static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t nbChildren,
-                            nbgl_screenTickerConfiguration_t *ticker,
+                            const nbgl_screenTickerConfiguration_t *ticker,
                             nbgl_touchCallback_t callback) {
   if (screenIndex >= SCREEN_STACK_SIZE) {
     LOG_WARN(SCREEN_LOGGER,"nbgl_screenSetAt(): forbidden screenIndex (%d)\n",screenIndex);
@@ -152,7 +152,7 @@ static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t
  * @return >= 0 if OK
  */
 int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements,
-                   nbgl_screenTickerConfiguration_t *ticker,
+                   const nbgl_screenTickerConfiguration_t *ticker,
                    nbgl_touchCallback_t callback) {
   // if no screen, consider it as a first fake push
   if (nbScreensOnStack == 0) {
@@ -200,7 +200,7 @@ int nbgl_screenUpdateBackgroundColor(uint8_t screenIndex, color_t color) {
  *
  * @return >= 0 if OK
  */
-int nbgl_screenUpdateTicker(uint8_t screenIndex, nbgl_screenTickerConfiguration_t *ticker) {
+int nbgl_screenUpdateTicker(uint8_t screenIndex, const nbgl_screenTickerConfiguration_t *ticker) {
   if (ticker != NULL) {
     screenStack[screenIndex].tickerCallback = (nbgl_tickerCallback_t)PIC(ticker->tickerCallback);
     screenStack[screenIndex].tickerIntervale = ticker->tickerIntervale;
@@ -237,7 +237,7 @@ nbgl_obj_t** nbgl_screenGetElements(uint8_t screenIndex) {
  * @return current screen index, or < 0 if error
  */
 int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements,
-                    nbgl_screenTickerConfiguration_t *ticker,
+                    const nbgl_screenTickerConfiguration_t *ticker,
                     nbgl_touchCallback_t callback) {
   uint8_t screenIndex;
   if (nbScreensOnStack >= SCREEN_STACK_SIZE) {

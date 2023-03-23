@@ -70,7 +70,7 @@ typedef struct {
 typedef struct nbgl_layoutDescription_s {
     bool modal; ///< if true, puts the layout on top of screen stack (modal). Otherwise puts on background (for apps)
     bool withLeftBorder; ///< if true, draws a light gray left border on the whole height of the screen
-    char *tapActionText; ///< Light gray text used when main container is "tapable"
+    const char *tapActionText; ///< Light gray text used when main container is "tapable"
     uint8_t tapActionToken; ///< the token that will be used as argument of the onActionCallback when main container is "tapped"
     tune_index_e tapTuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when tapping on main container
     nbgl_layoutTouchCallback_t onActionCallback; ///< the callback to be called on any action on the layout
@@ -84,9 +84,9 @@ typedef struct nbgl_layoutDescription_s {
  */
 typedef struct {
     const nbgl_icon_details_t *iconLeft; ///< a buffer containing the 1BPP icon for icon on left (can be NULL)
-    char *text; ///< text (can be NULL)
+    const char *text; ///< text (can be NULL)
     const nbgl_icon_details_t *iconRight; ///< a buffer containing the 1BPP icon for icon 2 (can be NULL). Dimensions must be the same as iconLeft
-    char *subText; ///< sub text (can be NULL)
+    const char *subText; ///< sub text (can be NULL)
     uint8_t token; ///< the token that will be used as argument of the callback
     bool inactive; ///< if set to true, the bar is grayed-out and cannot be touched
     bool centered; ///< if set to true, the text is centered horizontaly in the bar
@@ -99,8 +99,8 @@ typedef struct {
  *
  */
 typedef struct {
-    char *text; ///< main text for the switch
-    char *subText; ///< description under main text (NULL terminated, single line, may be null)
+    const char *text; ///< main text for the switch
+    const char *subText; ///< description under main text (NULL terminated, single line, may be null)
     nbgl_state_t initState; ///< initial state of the switch
     uint8_t token; ///< the token that will be used as argument of the callback
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played
@@ -113,7 +113,7 @@ typedef struct {
  */
 typedef struct {
     union {
-        char **names; ///< array of strings giving the choices (nbChoices)
+        const char * const *names; ///< array of strings giving the choices (nbChoices)
 #if defined(HAVE_LANGUAGE_PACK)
         UX_LOC_STRINGS_INDEX *nameIds; ///< array of string Ids giving the choices (nbChoices)
 #endif // HAVE_LANGUAGE_PACK
@@ -129,8 +129,8 @@ typedef struct {
  * @brief This structure contains a  [tag,value] pair
  */
 typedef struct {
-    char *item; ///< string giving the tag name
-    char *value; ///< string giving the value name
+    const char *item; ///< string giving the tag name
+    const char *value; ///< string giving the value name
     const nbgl_icon_details_t *valueIcon; ///< a buffer containing the 32px 1BPP icon for icon on right of value (can be NULL)
 } nbgl_layoutTagValue_t;
 
@@ -174,9 +174,9 @@ typedef enum  {
  *
  */
 typedef struct {
-    char *text1; ///< first text (can be null)
-    char *text2; ///< second text (can be null)
-    char *text3; ///< third text (can be null)
+    const char *text1; ///< first text (can be null)
+    const char *text2; ///< second text (can be null)
+    const char *text3; ///< third text (can be null)
     const nbgl_icon_details_t *icon; ///< a buffer containing the 1BPP icon
     bool onTop; ///< if set to true, align only horizontaly
     nbgl_centeredInfoStyle_t style; ///< style to apply to this info
@@ -189,9 +189,9 @@ typedef struct {
  *
  */
 typedef struct {
-    char *url; ///< URL for QR code
-    char *text1; ///< first text (can be null)
-    char *text2; ///< second text (can be null)
+    const char *url; ///< URL for QR code
+    const char *text1; ///< first text (can be null)
+    const char *text2; ///< second text (can be null)
     bool largeText1; ///< if set to true, use 32px font for text1
 } nbgl_layoutQRCode_t;
 
@@ -211,8 +211,8 @@ typedef enum {
  * @note the pair of button is automatically put on bottom of screen
  */
 typedef struct {
-    char *topText; ///< up-button text (index 0)
-    char *bottomText; ///< bottom-button text (index 1)
+    const char *topText; ///< up-button text (index 0)
+    const char *bottomText; ///< bottom-button text (index 1)
     uint8_t token; ///< the token that will be used as argument of the callback
     nbgl_layoutChoiceButtonsStyle_t style; ///< the style of the pair
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played
@@ -233,7 +233,7 @@ typedef enum {
  * @brief This structure contains info to build a single button
  */
 typedef struct {
-    char *text; ///< button text
+    const char *text; ///< button text
     const nbgl_icon_details_t *icon; ///< a buffer containing the 1BPP icon for button1
     uint8_t token; ///< the token that will be used as argument of the callback
     nbgl_layoutButtonStyle_t style;
@@ -248,8 +248,8 @@ typedef struct {
  */
 typedef struct {
     uint8_t percentage; ///< percentage of completion, from 0 to 100.
-    char *text; ///< text in black, on top of progress bar
-    char *subText; ///< text in gray, under progress bar
+    const char *text; ///< text in black, on top of progress bar
+    const char *subText; ///< text in gray, under progress bar
 } nbgl_layoutProgressBar_t;
 
 
@@ -268,44 +268,44 @@ typedef struct {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-nbgl_layout_t *nbgl_layoutGet(nbgl_layoutDescription_t *description);
+nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description);
 
 int nbgl_layoutAddTopRightButton(nbgl_layout_t *layout, const nbgl_icon_details_t *icon, uint8_t token, tune_index_e tuneId);
-int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, nbgl_layoutBar_t *barLayout);
-int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayout);
-int nbgl_layoutAddText(nbgl_layout_t *layout, char *text, char *subText);
-int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, nbgl_layoutRadioChoice_t *choices);
-int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t *info);
-int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info);
-int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_t *info);
-int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t *list);
-int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *barLayout);
-int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, char *text);
+int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *barLayout);
+int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switchLayout);
+int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subText);
+int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoice_t *choices);
+int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredInfo_t *info);
+int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info);
+int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceButtons_t *info);
+int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueList_t *list);
+int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBar_t *barLayout);
+int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text);
 int nbgl_layoutAddSeparationLine(nbgl_layout_t *layout);
 
-int nbgl_layoutAddButton(nbgl_layout_t *layout, nbgl_layoutButton_t *buttonInfo);
-int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, char *text, uint8_t token, tune_index_e tuneId);
-int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_index_e tuneId);
-int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t leftToken, char *rightText, uint8_t rightToken, tune_index_e tuneId);
-int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, nbgl_layoutNavigationBar_t *info);
+int nbgl_layoutAddButton(nbgl_layout_t *layout, const nbgl_layoutButton_t *buttonInfo);
+int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, const char *text, uint8_t token, tune_index_e tuneId);
+int nbgl_layoutAddFooter(nbgl_layout_t *layout, const char *text, uint8_t token, tune_index_e tuneId);
+int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, const char *leftText, uint8_t leftToken, const char *rightText, uint8_t rightToken, tune_index_e tuneId);
+int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigationBar_t *info);
 int nbgl_layoutAddBottomButton(nbgl_layout_t *layout, const nbgl_icon_details_t *icon, uint8_t token, bool separationLine, tune_index_e tuneId);
 int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, uint8_t nbPages, bool withBack, uint8_t backToken, tune_index_e tuneId);
-int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed);
+int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed);
 
 #ifdef NBGL_KEYBOARD
 /* layout objects for page with keyboard */
-int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo);
+int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, const nbgl_layoutKbd_t *kbdInfo);
 int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask, bool updateCasing, keyboardCase_t casing);
 bool nbgl_layoutKeyboardNeedsRefresh(nbgl_layout_t *layout, uint8_t index);
 int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons,
-                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
+                                    const char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
                                     int firstButtonToken, tune_index_e tuneId);
 int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uint8_t nbUsedButtons,
-                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]);
-int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY, int token);
-int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, char *text, bool grayedOut);
-int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *text, int token, tune_index_e tuneId);
-int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, char *text);
+                                    const char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]);
+int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, const char *text, bool grayedOut, int offsetY, int token);
+int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, const char *text, bool grayedOut);
+int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, const char *text, int token, tune_index_e tuneId);
+int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, const char *text);
 #endif // NBGL_KEYBOARD
 
 #ifdef NBGL_KEYPAD

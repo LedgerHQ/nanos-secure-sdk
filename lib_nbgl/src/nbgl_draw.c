@@ -153,7 +153,7 @@ static void draw_circle_helper(int x_center, int y_center, nbgl_radius_t radiusI
  * @param radiusIndex radius size
  * @param innerColor color to use for inside the rectangle
  */
-void nbgl_drawRoundedRect(nbgl_area_t *area, nbgl_radius_t radiusIndex, color_t innerColor) {
+void nbgl_drawRoundedRect(const nbgl_area_t *area, nbgl_radius_t radiusIndex, color_t innerColor) {
   nbgl_area_t rectArea;
   uint8_t radius;
 
@@ -234,7 +234,7 @@ void nbgl_drawRoundedRect(nbgl_area_t *area, nbgl_radius_t radiusIndex, color_t 
  * @param innerColor color to use for inside the rectangle
  * @param borderColor color to use for the border
  */
-void nbgl_drawRoundedBorderedRect(nbgl_area_t *area, nbgl_radius_t radiusIndex, uint8_t stroke,
+void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area, nbgl_radius_t radiusIndex, uint8_t stroke,
                                   color_t innerColor, color_t borderColor) {
   uint8_t maskTop, maskBottom;
   uint8_t radius;
@@ -393,7 +393,7 @@ static uint16_t get_bitmap_byte_cnt(const nbgl_font_t *font, uint8_t charId) {
  * @param fontId font to be used
  * @param fontColor color to use for font
  */
-void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_font_id_e fontId, color_t fontColor) {
+void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_font_id_e fontId, color_t fontColor) {
   // text is a series of characters, each character being a bitmap
   // we need to align bitmaps on width multiple of 4 limitation.
   int16_t x = area->x0;
@@ -421,7 +421,7 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
     uint8_t char_y_max = 0;
     uint8_t char_byte_cnt = 0;
 
-    unicode = nbgl_popUnicodeChar((uint8_t **)&text, &textLen, &is_unicode);
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
 
     if (is_unicode) {
 #ifdef HAVE_UNICODE_SUPPORT
@@ -478,7 +478,7 @@ void nbgl_drawText(nbgl_area_t *area, const char* text, uint16_t textLen, nbgl_f
 }
 
 #ifdef NBGL_QRCODE
-static void nbgl_frontDrawQrInternal(nbgl_area_t *area, color_t foregroundColor)
+static void nbgl_frontDrawQrInternal(const nbgl_area_t *area, color_t foregroundColor)
 {
   int size = qrcodegen_getSize(qrcode);
   uint16_t idx = 0;
@@ -541,7 +541,7 @@ static void nbgl_frontDrawQrInternal(nbgl_area_t *area, color_t foregroundColor)
  * @param text text to encode
  * @param foregroundColor color to be applied to the 1's in QR code
  */
-void nbgl_drawQrCode(nbgl_area_t *area, uint8_t version, const char *text, color_t foregroundColor)
+void nbgl_drawQrCode(const nbgl_area_t *area, uint8_t version, const char *text, color_t foregroundColor)
 {
 
   bool ok = qrcodegen_encodeText(text, tempBuffer, qrcode, qrcodegen_Ecc_LOW,

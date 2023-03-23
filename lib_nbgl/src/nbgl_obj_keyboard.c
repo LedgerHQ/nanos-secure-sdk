@@ -271,12 +271,12 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
 static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   uint8_t i;
   nbgl_area_t rectArea;
-  char *keys;
+  const char *keys;
 
   if (keyboard->casing != LOWER_CASE)
-    keys = (char *)kbd_chars_upper;
+    keys = kbd_chars_upper;
   else
-    keys = (char *)kbd_chars;
+    keys = kbd_chars;
 
   rectArea.backgroundColor = keyboard->backgroundColor;
   rectArea.y0 = keyboard->y0 + LETTER_OFFSET_Y;
@@ -376,12 +376,12 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
 static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   uint8_t i;
   nbgl_area_t rectArea;
-  char *keys;
+  const char *keys;
 
   if (keyboard->mode == MODE_DIGITS)
-    keys = (char *)kbd_digits;
+    keys = kbd_digits;
   else
-    keys = (char *)kbd_specials;
+    keys = kbd_specials;
 
   rectArea.backgroundColor = keyboard->backgroundColor;
   rectArea.y0 = keyboard->y0 + LETTER_OFFSET_Y;

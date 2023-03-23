@@ -31,7 +31,7 @@
 static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
   if (content->title != NULL) {
     nbgl_layoutBar_t bar;
-    bar.text = (char*)content->title;
+    bar.text = content->title;
     bar.subText = NULL;
     bar.iconRight = NULL;
     bar.iconLeft = content->isTouchableTitle? &C_leftArrow32px:NULL;
@@ -54,7 +54,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       centeredInfo.offsetY = -32;
       centeredInfo.onTop = false;
       nbgl_layoutAddCenteredInfo(layout,&centeredInfo);
-      nbgl_layoutAddLongPressButton(layout,(char*)content->infoLongPress.longPressText,content->infoLongPress.longPressToken,content->infoLongPress.tuneId);
+      nbgl_layoutAddLongPressButton(layout,content->infoLongPress.longPressText,content->infoLongPress.longPressToken,content->infoLongPress.tuneId);
       break;
     }
     case INFO_BUTTON:
@@ -75,7 +75,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       buttonInfo.icon = NULL;
       buttonInfo.onBottom = true;
       buttonInfo.style = BLACK_BACKGROUND;
-      buttonInfo.text = (char*)content->infoButton.buttonText;
+      buttonInfo.text = content->infoButton.buttonText;
       buttonInfo.token = content->infoButton.buttonToken;
       buttonInfo.tuneId = content->infoButton.tuneId;
       nbgl_layoutAddButton(layout,&buttonInfo);
@@ -101,7 +101,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
         buttonInfo.fittingContent = true;
         buttonInfo.icon = content->tagValueDetails.detailsButtonIcon;
         buttonInfo.style = WHITE_BACKGROUND;
-        buttonInfo.text = (char*)content->tagValueDetails.detailsButtonText;
+        buttonInfo.text = content->tagValueDetails.detailsButtonText;
         buttonInfo.token = content->tagValueDetails.detailsButtonToken;
         buttonInfo.tuneId = content->tagValueDetails.tuneId;
         buttonInfo.onBottom = false;
@@ -120,7 +120,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
         buttonInfo.fittingContent = true;
         buttonInfo.icon = content->tagValueConfirm.detailsButtonIcon;
         buttonInfo.style = WHITE_BACKGROUND;
-        buttonInfo.text = (char*)content->tagValueConfirm.detailsButtonText;
+        buttonInfo.text = content->tagValueConfirm.detailsButtonText;
         buttonInfo.token = content->tagValueConfirm.detailsButtonToken;
         buttonInfo.tuneId = content->tagValueConfirm.tuneId;
         buttonInfo.onBottom = false;
@@ -130,7 +130,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
         buttonInfo.fittingContent = false;
         buttonInfo.icon = NULL;
         buttonInfo.style = BLACK_BACKGROUND;
-        buttonInfo.text = (char*)content->tagValueConfirm.confirmationText;
+        buttonInfo.text = content->tagValueConfirm.confirmationText;
         buttonInfo.token = content->tagValueConfirm.confirmationToken;
         buttonInfo.tuneId = content->tagValueConfirm.tuneId;
         buttonInfo.onBottom = true;
@@ -151,7 +151,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
     {
       uint8_t i;
       for (i=0;i<content->infosList.nbInfos;i++) {
-        nbgl_layoutAddText(layout,(char*)content->infosList.infoTypes[i],(char*)content->infosList.infoContents[i]);
+        nbgl_layoutAddText(layout,content->infosList.infoTypes[i],content->infosList.infoContents[i]);
         nbgl_layoutAddSeparationLine(layout);
       }
       break;
@@ -164,7 +164,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       uint8_t i;
       for (i=0;i<content->barsList.nbBars;i++) {
         nbgl_layoutBar_t bar;
-        bar.text = (char*)content->barsList.barTexts[i];
+        bar.text = content->barsList.barTexts[i];
         bar.subText = NULL;
         bar.iconRight = &C_Next32px;
         bar.iconLeft = NULL;
@@ -192,11 +192,11 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
  * @param tapActionToken token passed to onActionCallback, on a tap event
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken) {
+nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
   nbgl_layoutCenteredInfo_t centeredInfo = {
-    .text1 = (char*)text,
+    .text1 = text,
     .text2 = NULL,
     .text3 = NULL,
     .style = LEDGER_INFO,
@@ -244,7 +244,7 @@ nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, c
   layoutDescription.ticker.tickerCallback = NULL;
   layout = nbgl_layoutGet(&layoutDescription);
 
-  nbgl_layoutAddSpinner(layout, (char*)text, false);
+  nbgl_layoutAddSpinner(layout, text, false);
 
   nbgl_layoutDraw(layout);
 
@@ -260,7 +260,7 @@ nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, c
  * @param info structure describing the centered info and other controls of this page
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, nbgl_pageInfoDescription_t *info) {
+nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_screenTickerConfiguration_t *ticker, const nbgl_pageInfoDescription_t *info) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
@@ -268,7 +268,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
   layoutDescription.withLeftBorder = true;
 
   layoutDescription.onActionCallback = onActionCallback;
-  layoutDescription.tapActionText = (char*)info->tapActionText;
+  layoutDescription.tapActionText = info->tapActionText;
   layoutDescription.tapActionToken = info->tapActionToken;
   layoutDescription.tapTuneId = info->tuneId;
 
@@ -291,7 +291,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
       .icon = NULL,
       .onBottom = false,
       .style = BLACK_BACKGROUND,
-      .text  = (char*)info->actionButtonText,
+      .text  = info->actionButtonText,
       .token = info->bottomButtonsToken,
       .tuneId = info->tuneId
     };
@@ -299,7 +299,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
   }
 
   if (info->footerText != NULL) {
-    nbgl_layoutAddFooter(layout, (char*)PIC(info->footerText), info->footerToken, info->tuneId);
+    nbgl_layoutAddFooter(layout, PIC(info->footerText), info->footerToken, info->tuneId);
   }
   if (info->topRightStyle != NO_BUTTON_STYLE) {
     const nbgl_icon_details_t *icon;
@@ -317,7 +317,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
     // if action button and QUIT_APP_TEXT bottom button, use a pair of choice buttons
     if ((info->actionButtonText != NULL)) {
       nbgl_layoutChoiceButtons_t buttonsInfo = {
-        .topText = (char*)info->actionButtonText,
+        .topText = info->actionButtonText,
         .bottomText = "Quit app",
         .token = info->bottomButtonsToken,
         .style = BOTH_ROUNDED_STYLE,
@@ -362,7 +362,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
  * @param info structure describing the centered info and other controls of this page
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageConfirmationDescription_t *info) {
+nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_pageConfirmationDescription_t *info) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
@@ -377,7 +377,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   if (info->cancelText == NULL) {
     nbgl_layoutButton_t buttonInfo = {
       .style = BLACK_BACKGROUND,
-      .text = (char*)info->confirmationText,
+      .text = info->confirmationText,
       .icon = NULL,
       .token = info->confirmationToken,
       .fittingContent = false,
@@ -389,9 +389,9 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
   }
   else {
     nbgl_layoutChoiceButtons_t buttonsInfo = {
-      .bottomText = (char*)PIC(info->cancelText),
+      .bottomText = PIC(info->cancelText),
       .token = info->confirmationToken,
-      .topText = (char*)PIC(info->confirmationText),
+      .topText = PIC(info->confirmationText),
       .style = ROUNDED_AND_FOOTER_STYLE,
       .tuneId = info->tuneId
     };
@@ -416,7 +416,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
  * @return the page context (or NULL if error)
  */
 nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
-                                            nbgl_pageNavigationInfo_t *nav,
+                                            const nbgl_pageNavigationInfo_t *nav,
                                             nbgl_pageContent_t* content,
                                             bool modal) {
   nbgl_layoutDescription_t layoutDescription;
@@ -428,7 +428,7 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
   layoutDescription.ticker.tickerCallback = NULL;
 
   if ((nav != NULL) && (nav->navType == NAV_WITH_TAP)) {
-    layoutDescription.tapActionText = (char*)nav->navWithTap.nextPageText;
+    layoutDescription.tapActionText = nav->navWithTap.nextPageText;
     layoutDescription.tapActionToken = nav->navWithTap.nextPageToken;
     layoutDescription.tapTuneId = nav->tuneId;
   }
@@ -440,9 +440,9 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
   if (nav != NULL) {
     if (nav->navType == NAV_WITH_TAP) {
       if (nav->navWithTap.skipText == NULL)
-        nbgl_layoutAddFooter(layout, (char*)nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
+        nbgl_layoutAddFooter(layout, nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
       else
-        nbgl_layoutAddSplitFooter(layout, (char*)nav->navWithTap.quitText, nav->quitToken, (char*)nav->navWithTap.skipText, nav->navWithTap.skipToken, nav->tuneId);
+        nbgl_layoutAddSplitFooter(layout, nav->navWithTap.quitText, nav->quitToken, nav->navWithTap.skipText, nav->navWithTap.skipToken, nav->tuneId);
       if (nav->progressIndicator)
         nbgl_layoutAddProgressIndicator(layout, nav->activePage, nav->nbPages, nav->navWithTap.backButton, nav->navWithTap.backToken, nav->tuneId);
     }
@@ -476,7 +476,7 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
  * @return the page context (or NULL if error)
  */
 nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCallback,
-                                         nbgl_pageNavigationInfo_t *nav,
+                                         const nbgl_pageNavigationInfo_t *nav,
                                          nbgl_pageContent_t* content) {
   return nbgl_pageDrawGenericContentExt(onActionCallback,nav,content,false);
 }

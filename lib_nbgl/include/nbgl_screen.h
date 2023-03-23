@@ -72,13 +72,13 @@ nbgl_obj_t *nbgl_screenGetTop(void);
 uint8_t nbgl_screenGetCurrentStackSize(void);
 bool nbgl_screenContainsObj(nbgl_obj_t *obj);
 
-int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTickerConfiguration_t *ticker, nbgl_touchCallback_t touchCallback);
+int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements, const nbgl_screenTickerConfiguration_t *ticker, nbgl_touchCallback_t touchCallback);
 int nbgl_screenUpdateNbElements(uint8_t screenIndex, uint8_t nbElements);
 int nbgl_screenUpdateBackgroundColor(uint8_t screenIndex, color_t color);
-int nbgl_screenUpdateTicker(uint8_t screenIndex, nbgl_screenTickerConfiguration_t *ticker);
+int nbgl_screenUpdateTicker(uint8_t screenIndex, const nbgl_screenTickerConfiguration_t *ticker);
 nbgl_obj_t **nbgl_screenGetElements(uint8_t screenIndex);
 int nbgl_screenRelease(void);
-int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements, nbgl_screenTickerConfiguration_t *ticker, nbgl_touchCallback_t touchCallback);
+int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements, const nbgl_screenTickerConfiguration_t *ticker, nbgl_touchCallback_t touchCallback);
 int nbgl_screenPop(uint8_t screenIndex);
 int nbgl_screenReset(void);
 void nbgl_screenHandler(uint32_t intervaleMs);
