@@ -111,6 +111,10 @@ static nbgl_layoutInternal_t gLayout[NB_MAX_LAYOUTS] = {0};
 static nbgl_button_t *choiceButtons[NB_MAX_SUGGESTION_BUTTONS];
 #endif // NBGL_KEYBOARD
 
+#ifdef NBGL_KEYBOARD
+static char numText[5];
+#endif
+
 /**********************
  *  STATIC PROTOTYPES
  **********************/
@@ -2172,7 +2176,6 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
   nbgl_text_area_t *textArea;
   nbgl_line_t *line;
   layoutObj_t *obj;
-  static char numText[5];
 
   LOG_DEBUG(LAYOUT_LOGGER,"nbgl_layoutAddEnteredText():\n");
   if (layout == NULL)
@@ -2275,7 +2278,8 @@ int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numb
   if (numbered) {
     // it is the previously created object
     textArea = (nbgl_text_area_t*)layoutInt->container->children[index-1];
-    snprintf(textArea->text,5,"%d.",number);
+    snprintf(numText,sizeof(numText),"%d.",number);
+    textArea->text = numText;
     nbgl_redrawObject((nbgl_obj_t*)textArea,NULL,false);
   }
   // if the text doesn't fit, indicate it by returning 1 instead of 0, for different refresh
