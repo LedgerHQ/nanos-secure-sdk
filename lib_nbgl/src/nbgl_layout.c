@@ -410,7 +410,7 @@ static void addObjectToLayout(nbgl_layoutInternal_t *layout, nbgl_obj_t* obj) {
  * @param description description of layout
  * @return a pointer to the corresponding layout
  */
-nbgl_layout_t *nbgl_layoutGet(nbgl_layoutDescription_t *description) {
+nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description) {
   nbgl_layoutInternal_t *layout = NULL;
 
   // find an empty layout in the proper "layer"
@@ -525,7 +525,7 @@ int nbgl_layoutAddTopRightButton(nbgl_layout_t *layout, const nbgl_icon_details_
  * @param info structure giving the description of the navigation bar
  * @return >= 0 if OK
  */
-int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, nbgl_layoutNavigationBar_t *info) {
+int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigationBar_t *info) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   layoutObj_t *obj;
 
@@ -601,7 +601,7 @@ int nbgl_layoutAddBottomButton(nbgl_layout_t *layout, const nbgl_icon_details_t 
  * @param barLayout the properties of the bar
  * @return >= 0 if OK
  */
-int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, nbgl_layoutBar_t *barLayout) {
+int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *barLayout) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   layoutObj_t *obj;
   nbgl_text_area_t *textArea;
@@ -719,7 +719,7 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, nbgl_layoutBar_t *barLayou
  * @param switchLayout description of the parameters of the switch
  * @return >= 0 if OK
  */
-int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayout) {
+int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switchLayout) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   layoutObj_t *obj;
   nbgl_text_area_t *textArea;
@@ -795,7 +795,7 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayou
  * @param subText description under main text (NULL terminated, single line, may be null)
  * @return >= 0 if OK
  */
-int nbgl_layoutAddText(nbgl_layout_t *layout, char *text, char *subText) {
+int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subText) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_container_t *container;
   nbgl_text_area_t *textArea;
@@ -869,7 +869,7 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, char *text, char *subText) {
  * @param text text to be displayed (auto-wrap)
  * @return >= 0 if OK
  */
-int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, char *text) {
+int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
 
@@ -902,7 +902,7 @@ int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, char *text) {
  * @param choices structure giving the list of choices and the current selected one
  * @return >= 0 if OK
  */
-int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, nbgl_layoutRadioChoice_t *choices) {
+int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoice_t *choices) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   layoutObj_t *obj;
   uint8_t i;
@@ -995,7 +995,7 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, nbgl_layoutRadioChoice_t *c
  * @param info structure giving the description of buttons (texts, icons, layout)
  * @return >= 0 if OK
  */
-int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t *info) {
+int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredInfo_t *info) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_container_t *container;
   nbgl_text_area_t *textArea=NULL;
@@ -1181,7 +1181,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
  * @param info structure giving the description of buttons (texts, icons, layout)
  * @return >= 0 if OK
  */
-int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
+int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_container_t *container;
   nbgl_text_area_t *textArea=NULL;
@@ -1280,7 +1280,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
  * @param info structure giving the description of buttons (texts, icons, layout)
  * @return >= 0 if OK
  */
-int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_t *info) {
+int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceButtons_t *info) {
   layoutObj_t *obj;
   nbgl_button_t *topButton, *bottomButton;
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
@@ -1357,7 +1357,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, nbgl_layoutChoiceButtons_
  * @param list structure giving the list of [tag,value] pairs
  * @return >= 0 if OK
  */
-int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t *list) {
+int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueList_t *list) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *itemTextArea;
   nbgl_text_area_t *valueTextArea;
@@ -1477,7 +1477,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, nbgl_layoutTagValueList_t 
  * @param barLayout structure giving the description of progress bar
  * @return >= 0 if OK
  */
-int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, nbgl_layoutProgressBar_t *barLayout) {
+int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBar_t *barLayout) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_progress_bar_t *progress;
 
@@ -1556,7 +1556,7 @@ int nbgl_layoutAddSeparationLine(nbgl_layout_t *layout) {
  * @param buttonInfo structure giving the description of button (text, icon, layout)
  * @return >= 0 if OK
  */
-int nbgl_layoutAddButton(nbgl_layout_t *layout, nbgl_layoutButton_t *buttonInfo) {
+int nbgl_layoutAddButton(nbgl_layout_t *layout, const nbgl_layoutButton_t *buttonInfo) {
   layoutObj_t *obj;
   nbgl_button_t *button;
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
@@ -1629,7 +1629,7 @@ int nbgl_layoutAddButton(nbgl_layout_t *layout, nbgl_layoutButton_t *buttonInfo)
  * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when button is long pressed
  * @return >= 0 if OK
  */
-int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, char *text, uint8_t token, tune_index_e tuneId) {
+int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, const char *text, uint8_t token, tune_index_e tuneId) {
   layoutObj_t *obj;
   nbgl_button_t *button;
   nbgl_text_area_t *textArea;
@@ -1708,7 +1708,7 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, char *text, uint8_t tok
  * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when button is long pressed
  * @return >= 0 if OK
  */
-int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_index_e tuneId) {
+int nbgl_layoutAddFooter(nbgl_layout_t *layout, const char *text, uint8_t token, tune_index_e tuneId) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   layoutObj_t *obj;
   nbgl_text_area_t *textArea;
@@ -1756,7 +1756,7 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout, char *text, uint8_t token, tune_
  * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when button is long pressed
  * @return >= 0 if OK
  */
-int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, char *leftText, uint8_t leftToken, char *rightText, uint8_t rightToken, tune_index_e tuneId) {
+int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout, const char *leftText, uint8_t leftToken, const char *rightText, uint8_t rightToken, tune_index_e tuneId) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   layoutObj_t *obj;
   nbgl_text_area_t *textArea;
@@ -1898,7 +1898,7 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout, uint8_t activePage, u
  * @param fixed if set to true, the spinner won't spin and be entirely black
  * @return >= 0 if OK
  */
-int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed) {
+int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
   nbgl_spinner_t *spinner;
@@ -1953,7 +1953,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, char *text, bool fixed) {
  * @param kbdInfo configuration of the keyboard to draw (including the callback when touched)
  * @return the index of keyboard, to use in @ref nbgl_layoutUpdateKeyboard()
  */
-int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, nbgl_layoutKbd_t *kbdInfo) {
+int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, const nbgl_layoutKbd_t *kbdInfo) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_keyboard_t *keyboard;
 
@@ -2050,7 +2050,7 @@ bool nbgl_layoutKeyboardNeedsRefresh(nbgl_layout_t *layout, uint8_t index) {
  * @return >= 0 if OK
  */
 int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons,
-                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
+                                    const char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS],
                                     int firstButtonToken, tune_index_e tuneId) {
   layoutObj_t *obj;
   nbgl_container_t *container;
@@ -2121,7 +2121,7 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout, uint8_t nbUsedButtons
  * @return >= 0 if OK
  */
 int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uint8_t nbUsedButtons,
-                                    char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]) {
+                                    const char *buttonTexts[NB_MAX_SUGGESTION_BUTTONS]) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_container_t *container;
 
@@ -2167,7 +2167,7 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout, uint8_t index, uin
  * @param token token provided in onActionCallback when this area is touched
  * @return >= 0 if OK
  */
-int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, char *text, bool grayedOut, int offsetY, int token) {
+int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t number, const char *text, bool grayedOut, int offsetY, int token) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
   nbgl_line_t *line;
@@ -2253,7 +2253,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
  * @return <0 if error, 0 if OK with text fitting the area, 1 of 0K with text
  * not fitting the area
  */
-int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, char *text, bool grayedOut) {
+int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numbered, uint8_t number, const char *text, bool grayedOut) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_text_area_t *textArea;
 
@@ -2295,7 +2295,7 @@ int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, bool numb
  * @param tuneId tune to play when button is pressed
  * @return >= 0 if OK
  */
-int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *text, int token, tune_index_e tuneId) {
+int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, const char *text, int token, tune_index_e tuneId) {
   layoutObj_t *obj;
   nbgl_button_t *button;
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
@@ -2343,7 +2343,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, char *t
  * @param text text of the button
 = * @return >= 0 if OK
  */
-int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, char *text) {
+int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout, uint8_t index, bool active, const char *text) {
   nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *)layout;
   nbgl_button_t *button;
 

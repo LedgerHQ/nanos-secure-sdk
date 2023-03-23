@@ -271,7 +271,7 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
 static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   uint8_t i;
   nbgl_area_t rectArea;
-  char *keys;
+  const char *keys;
 
   if (keyboard->casing != LOWER_CASE)
     keys = (char *)kbd_chars_upper;
@@ -376,7 +376,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
 static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   uint8_t i;
   nbgl_area_t rectArea;
-  char *keys;
+  const char *keys;
 
   if (keyboard->mode == MODE_DIGITS)
     keys = (char *)kbd_digits;

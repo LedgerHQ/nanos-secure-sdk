@@ -86,7 +86,7 @@ typedef struct nbgl_pageTagValueConfirm_s {
  * @brief This structure contains data to build a centered info + long press button page content
  */
 typedef struct nbgl_pageInfoLongPress_s {
-    char *text; ///< centered text in large case
+    const char *text; ///< centered text in large case
     const nbgl_icon_details_t *icon; ///< a buffer containing the 1BPP icon
     const char *longPressText; ///< text of the long press button
     uint8_t longPressToken; ///< the token used as argument of the onActionCallback when button is long pressed
@@ -97,7 +97,7 @@ typedef struct nbgl_pageInfoLongPress_s {
  * @brief This structure contains data to build a centered info + simple black button page content
  */
 typedef struct nbgl_pageInfoButton_s {
-    char *text; ///< centered text in large case
+    const char *text; ///< centered text in large case
     const nbgl_icon_details_t *icon; ///< a buffer containing the 1BPP icon
     const char *buttonText; ///< text of the long press button
     uint8_t buttonToken; ///< the token used as argument of the onActionCallback when button is long pressed
@@ -108,7 +108,7 @@ typedef struct nbgl_pageInfoButton_s {
  * @brief This structure contains data to build a @ref SWITCHES_LIST page content
  */
 typedef struct nbgl_pageSwitchesList_s {
-    nbgl_layoutSwitch_t *switches; ///< array of switches (nbSwitches items)
+    const nbgl_layoutSwitch_t *switches; ///< array of switches (nbSwitches items)
     uint8_t nbSwitches; ///< number of elements in switches and tokens array
 } nbgl_pageSwitchesList_t;
 
@@ -116,8 +116,8 @@ typedef struct nbgl_pageSwitchesList_s {
  * @brief This structure contains data to build a @ref INFOS_LIST page content
  */
 typedef struct nbgl_pageInfoList_s {
-    const char **infoTypes; ///< array of types of infos (in black/bold)
-    const char **infoContents; ///< array of contents of infos (in black)
+    const char * const *infoTypes; ///< array of types of infos (in black/bold)
+    const char * const *infoContents; ///< array of contents of infos (in black)
     uint8_t nbInfos; ///< number of elements in infoTypes and infoContents array
 } nbgl_pageInfoList_t;
 
@@ -125,8 +125,8 @@ typedef struct nbgl_pageInfoList_s {
  * @brief This structure contains data to build a @ref BARS_LIST page content
  */
 typedef struct nbgl_pageBarsList_s {
-    const char **barTexts; ///< array of texts for each bar (nbBars items, in black/bold)
-    uint8_t *tokens; ///< array of tokens, one for each bar (nbBars items)
+    const char * const *barTexts; ///< array of texts for each bar (nbBars items, in black/bold)
+    const uint8_t *tokens; ///< array of tokens, one for each bar (nbBars items)
     uint8_t nbBars; ///< number of elements in barTexts and tokens array
     tune_index_e tuneId; ///< if not @ref NBGL_NO_TUNE, a tune will be played when a bar is touched
 } nbgl_pageBarsList_t;
@@ -259,16 +259,16 @@ typedef struct nbgl_pageInfoDescription_s {
  * GLOBAL PROTOTYPES
  **********************/
 
-nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken);
+nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken);
 nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, const char* text);
-nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, nbgl_pageInfoDescription_t *info);
-nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageConfirmationDescription_t *info);
+nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_screenTickerConfiguration_t *ticker, const nbgl_pageInfoDescription_t *info);
+nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_pageConfirmationDescription_t *info);
 nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
-                                            nbgl_pageNavigationInfo_t *nav,
+                                            const nbgl_pageNavigationInfo_t *nav,
                                             nbgl_pageContent_t* content,
                                             bool modal);
 nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCallback,
-                        nbgl_pageNavigationInfo_t *nav,
+                        const nbgl_pageNavigationInfo_t *nav,
                         nbgl_pageContent_t* content);
 int nbgl_pageRelease(nbgl_page_t*);
 

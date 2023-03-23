@@ -252,7 +252,7 @@ static void draw_container(nbgl_container_t* obj, nbgl_obj_t *prevObj, bool comp
  */
 static void draw_button(nbgl_button_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
   uint16_t textWidth = 0;
-  char *text = NULL;
+  const char *text = NULL;
 
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);

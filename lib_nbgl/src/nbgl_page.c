@@ -192,7 +192,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
  * @param tapActionToken token passed to onActionCallback, on a tap event
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken) {
+nbgl_page_t* nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_screenTickerConfiguration_t *ticker, const char* text, int tapActionToken) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
   nbgl_layoutCenteredInfo_t centeredInfo = {
@@ -260,7 +260,7 @@ nbgl_page_t* nbgl_pageDrawSpinner(nbgl_layoutTouchCallback_t onActionCallback, c
  * @param info structure describing the centered info and other controls of this page
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl_screenTickerConfiguration_t *ticker, nbgl_pageInfoDescription_t *info) {
+nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_screenTickerConfiguration_t *ticker, const nbgl_pageInfoDescription_t *info) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
@@ -362,7 +362,7 @@ nbgl_page_t* nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t onActionCallback, nbgl
  * @param info structure describing the centered info and other controls of this page
  * @return the page context (or NULL if error)
  */
-nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, nbgl_pageConfirmationDescription_t *info) {
+nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallback, const nbgl_pageConfirmationDescription_t *info) {
   nbgl_layoutDescription_t layoutDescription;
   nbgl_layout_t *layout;
 
@@ -416,7 +416,7 @@ nbgl_page_t* nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t onActionCallba
  * @return the page context (or NULL if error)
  */
 nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionCallback,
-                                            nbgl_pageNavigationInfo_t *nav,
+                                            const nbgl_pageNavigationInfo_t *nav,
                                             nbgl_pageContent_t* content,
                                             bool modal) {
   nbgl_layoutDescription_t layoutDescription;
@@ -476,7 +476,7 @@ nbgl_page_t* nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t onActionC
  * @return the page context (or NULL if error)
  */
 nbgl_page_t* nbgl_pageDrawGenericContent(nbgl_layoutTouchCallback_t onActionCallback,
-                                         nbgl_pageNavigationInfo_t *nav,
+                                         const nbgl_pageNavigationInfo_t *nav,
                                          nbgl_pageContent_t* content) {
   return nbgl_pageDrawGenericContentExt(onActionCallback,nav,content,false);
 }

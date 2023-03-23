@@ -260,7 +260,7 @@ typedef struct PACKED__ nbgl_qrcode_s {
     struct nbgl_obj_s; // common part
     color_t foregroundColor; ///< color set to '1' bits, for 1PBB images. '0' are set to background color.
     nbgl_qrcode_version_t version; ///< requested version, if V10, size will be fixed to 228*228, if V4, size will be fixed to 132*132
-    char *text; ///< text single line (NULL terminated)
+    const char *text; ///< text single line (NULL terminated)
 } nbgl_qrcode_t;
 
 /**
@@ -332,7 +332,7 @@ typedef struct PACKED__ nbgl_button_s {
     nbgl_radius_t radius; ///< radius of the corners, must be a multiple of 4.
     nbgl_font_id_e fontId; ///< id of the font to use, if any
     bool localized; ///< if set to true, means the following 'text' field is considered as a
-    char *text; ///< single line UTF-8 text (NULL terminated)
+    const char *text; ///< single line UTF-8 text (NULL terminated)
 #if defined(HAVE_LANGUAGE_PACK)
     UX_LOC_STRINGS_INDEX textId; ///< id of the text single line UTF-8 text
 #endif // HAVE_LANGUAGE_PACK
@@ -355,7 +355,7 @@ typedef struct PACKED__ nbgl_text_area_s {
     bool autoHideLongLine; ///< if set to true, replace beginning of line by ... to keep it single line
     bool wrapping; ///< if set to true, break lines on ' ' when possible
     uint8_t nbMaxLines; ///< if >0, replace end (3 last chars) of line (nbMaxLines-1) by "..." and stop display here
-    char *text; ///< ASCII text to draw (NULL terminated). Can be NULL.
+    const char *text; ///< ASCII text to draw (NULL terminated). Can be NULL.
 #if defined(HAVE_LANGUAGE_PACK)
     UX_LOC_STRINGS_INDEX textId; ///< id of the  UTF-8 text
 #endif // HAVE_LANGUAGE_PACK

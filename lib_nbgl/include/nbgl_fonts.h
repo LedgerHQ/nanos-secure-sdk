@@ -137,7 +137,7 @@ bool nbgl_getTextMaxLenAndWidthFromEnd(nbgl_font_id_e fontId, const char* text, 
 bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t maxNbLines, uint16_t *len);
 void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char* text, uint16_t maxWidth, uint8_t nbLines);
 
-uint32_t nbgl_popUnicodeChar(uint8_t **text, uint16_t *text_length, bool *is_unicode);
+uint32_t nbgl_popUnicodeChar(const uint8_t **text, uint16_t *text_length, bool *is_unicode);
 #ifdef HAVE_UNICODE_SUPPORT
 nbgl_unicode_ctx_t* nbgl_getUnicodeFont(nbgl_font_id_e font_id);
 const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unicode);

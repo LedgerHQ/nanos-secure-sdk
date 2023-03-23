@@ -43,9 +43,9 @@ typedef struct DetailsContext_s {
   uint8_t nbPages;
   uint8_t currentPage;
   bool wrapping;
-  char *tag;
-  char *value;
-  char *nextPageStart;
+  const char *tag;
+  const char *value;
+  const char *nextPageStart;
 } DetailsContext_t;
 
 typedef struct StaticReviewContext_s {
@@ -57,9 +57,9 @@ typedef struct StaticReviewContext_s {
 } StaticReviewContext_t;
 
 typedef struct AddressConfirmationContext_s {
-  char *address;
+  const char *address;
   nbgl_layout_t modalLayout;
-  nbgl_layoutTagValueList_t *tagValueList;
+  const nbgl_layoutTagValueList_t *tagValueList;
 } AddressConfirmationContext_t;
 
 
@@ -84,7 +84,7 @@ static nbgl_page_t *pageContext;
 static nbgl_page_t *modalPageContext;
 
 // context for settings pages
-static char *settingsTitle;
+static const char *settingsTitle;
 static bool touchableTitle;
 static nbgl_pageNavigationInfo_t navInfo;
 static bool forwardNavOnly;
@@ -440,9 +440,9 @@ static void displayStaticReviewPage(uint8_t page, bool forceFullRefresh) {
 }
 
 // from the current details context, return a pointer on the details at the given page
-static char *getDetailsPageAt(uint8_t detailsPage) {
+static const char *getDetailsPageAt(uint8_t detailsPage) {
   uint8_t page = 0;
-  char *currentChar = detailsContext.value;
+  const char *currentChar = detailsContext.value;
   while (page<detailsPage) {
     uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, currentChar, SCREEN_WIDTH-2*BORDER_MARGIN, false);
     if (nbLines>NB_MAX_LINES_IN_DETAILS) {
@@ -646,7 +646,7 @@ static uint8_t getNbPairs(uint8_t page, bool *tooLongToFit) {
  * @return the number of tag/value pairs fitting in a page
  */
 uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
-                                                nbgl_layoutTagValueList_t *tagValueList,
+                                                const nbgl_layoutTagValueList_t *tagValueList,
                                                 uint8_t startIndex,
                                                 bool *tooLongToFit) {
   uint8_t nbPairsInPage = 0;
@@ -654,8 +654,8 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
 
   *tooLongToFit = false;
   while (nbPairsInPage < nbPairs) {
-    char *item;
-    char *value;
+    const char *item;
+    const char *value;
     nbgl_layoutTagValue_t* callback_result;
     nbgl_font_id_e value_font;
     // margin between pairs
@@ -702,7 +702,7 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
  * @param tagValueList list of tag/value pairs
  * @return the number of pages necessary to display the given list of tag/value pairs
  */
-uint8_t nbgl_useCaseGetNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList) {
+uint8_t nbgl_useCaseGetNbPagesForTagValueList(const nbgl_layoutTagValueList_t *tagValueList) {
   uint8_t nbPages = 0;
   uint8_t nbPairs = tagValueList->nbPairs;
   uint8_t nbPairsInPage;
@@ -732,7 +732,7 @@ uint8_t nbgl_useCaseGetNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValu
  * @param topRightCallback callback called when top-right button is touched
  * @param quitCallback callback called when quit button is touched
  */
-void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
+void nbgl_useCaseHome(const char *appName, const nbgl_icon_details_t *appIcon, const char *tagline, bool withSettings,
                       nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
   nbgl_useCaseHomeExt(appName, appIcon, tagline, withSettings, NULL, NULL,
                       topRightCallback, quitCallback);
@@ -751,8 +751,8 @@ void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *t
  * @param topRightCallback callback called when top-right button is touched
  * @param quitCallback callback called when quit button is touched
  */
-void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
-                         char *actionButtonText, nbgl_callback_t actionCallback,
+void nbgl_useCaseHomeExt(const char *appName, const nbgl_icon_details_t *appIcon, const char *tagline, bool withSettings,
+                         const char *actionButtonText, nbgl_callback_t actionCallback,
                          nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
   nbgl_pageInfoDescription_t info = {
     .centeredInfo.icon = appIcon,
@@ -806,9 +806,9 @@ void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char
  * @param topRightCallback callback called when top-right button is touched
  * @param quitCallback callback called when quit button is touched
  */
-void nbgl_useCasePlugInHome(char *plugInName, char *appName,
-                            const nbgl_icon_details_t *appIcon, char *tagline,
-                            char *subTagline, bool withSettings,
+void nbgl_useCasePlugInHome(const char *plugInName, const char *appName,
+                            const nbgl_icon_details_t *appIcon, const char *tagline,
+                            const char *subTagline, bool withSettings,
                             nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback) {
   nbgl_pageInfoDescription_t info = {
     .centeredInfo.icon = appIcon,
@@ -858,7 +858,7 @@ void nbgl_useCasePlugInHome(char *plugInName, char *appName,
  * @param navCallback callback called when navigation arrows are pressed
  * @param controlsCallback callback called when any controls in the settings (radios, switches) is called (the tokens must be >= @ref FIRST_USER_TOKEN)
  */
-void nbgl_useCaseSettings(char *title, uint8_t initPage, uint8_t nbPages, bool touchable,
+void nbgl_useCaseSettings(const char *title, uint8_t initPage, uint8_t nbPages, bool touchable,
                           nbgl_callback_t quitCallback, nbgl_navCallback_t navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback) {
   // memorize context
@@ -893,7 +893,7 @@ void nbgl_useCaseSettings(char *title, uint8_t initPage, uint8_t nbPages, bool t
  * @param isSuccess if true, message is drawn in a Ledger style (with corners)
  * @param quitCallback callback called when quit timer times out
  */
-void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallback) {
+void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t quitCallback) {
   nbgl_screenTickerConfiguration_t ticker = {
     .tickerCallback = &tickerCallback,
     .tickerIntervale = 0, // not periodic
@@ -940,7 +940,7 @@ void nbgl_useCaseStatus(char *message, bool isSuccess, nbgl_callback_t quitCallb
  * @param cancelText string to set in footer, to reject
  * @param callback callback called when button or footer is touched
  */
-void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *subMessage, char *confirmText, char *cancelText, nbgl_choiceCallback_t callback) {
+void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, const char *message, const char *subMessage, const char *confirmText, const char *cancelText, nbgl_choiceCallback_t callback) {
   nbgl_pageConfirmationDescription_t info = {
     .cancelText = cancelText,
     .centeredInfo.text1 = message,
@@ -970,7 +970,7 @@ void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, char *message, char *su
  * @param cancelText string to set in footer, to reject
  * @param callback callback called when confirmation button is touched
  */
-void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, char *cancelText, nbgl_callback_t callback) {
+void nbgl_useCaseConfirm(const char *message, const char *subMessage, const char *confirmText, const char *cancelText, nbgl_callback_t callback) {
   nbgl_pageConfirmationDescription_t info = {
     .cancelText = cancelText,
     .centeredInfo.text1 = message,
@@ -999,7 +999,7 @@ void nbgl_useCaseConfirm(char *message, char *subMessage, char *confirmText, cha
  * @param continueCallback callback called when main panel is touched
  * @param rejectCallback callback called when footer is touched
  */
-void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle, char *reviewSubTitle, char *rejectText,
+void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, const char *reviewTitle, const char *reviewSubTitle, const char *rejectText,
                              nbgl_callback_t continueCallback, nbgl_callback_t rejectCallback) {
   nbgl_pageInfoDescription_t info = {
     .centeredInfo.icon = icon,
@@ -1039,7 +1039,7 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, char *reviewTitle,
  * @param buttonCallback callback called when a potential button (details) in the content is touched
  * @param choiceCallback callback called when either long_press or footer is called (param is true for long press)
  */
-void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
+void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, const char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
                                nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback) {
   // memorize context
   onChoice = choiceCallback;
@@ -1071,7 +1071,7 @@ void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, char *rejectTe
  * @param navCallback callback called when navigation "tap to continue" is touched, to get the content of next page
  * @param choiceCallback callback called when either long_press or footer is called (param is true for long press)
  */
-void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
+void nbgl_useCaseForwardOnlyReview(const char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
                                    nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback) {
   // memorize context
   onChoice = choiceCallback;
@@ -1106,7 +1106,7 @@ void nbgl_useCaseForwardOnlyReview(char *rejectText, nbgl_layoutTouchCallback_t 
  * @param callback callback called when transaction is accepted (param is true) or rejected (param is false)
  */
 void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
-                              char *rejectText, nbgl_choiceCallback_t callback) {
+                              const char *rejectText, nbgl_choiceCallback_t callback) {
   // memorize context
   onChoice = callback;
   onNav = NULL;
@@ -1144,7 +1144,7 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
  * @param callback callback called when transaction is accepted (param is true) or rejected (param is false)
  */
 void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
-                                   char *rejectText, nbgl_choiceCallback_t callback) {
+                                   const char *rejectText, nbgl_choiceCallback_t callback) {
   // memorize context
   onChoice = callback;
   onNav = NULL;
@@ -1178,7 +1178,7 @@ void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl
  * @param value full value string, that will be split in multiple pages
  * @param wrapping if set to true, value text is wrapped on ' ' characters
  */
-void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping) {
+void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping) {
   uint16_t nbLines = nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, value, SCREEN_WIDTH-2*BORDER_MARGIN, wrapping);
 
   // initialize context
@@ -1210,7 +1210,7 @@ void nbgl_useCaseViewDetails(char *tag, char *value, bool wrapping) {
  * @param address address to confirm (NULL terminated string)
  * @param callback callback called when button or footer is touched (if true, button, if false footer)
   */
-void nbgl_useCaseAddressConfirmation(char *address, nbgl_choiceCallback_t callback) {
+void nbgl_useCaseAddressConfirmation(const char *address, nbgl_choiceCallback_t callback) {
   nbgl_useCaseAddressConfirmationExt(address, callback, NULL);
 }
 
@@ -1223,7 +1223,7 @@ void nbgl_useCaseAddressConfirmation(char *address, nbgl_choiceCallback_t callba
  * @param callback callback called when button or footer is touched (if true, button, if false footer)
  * @param tagValueList list of tag/value pairs (must fit in a single page, and be persistent because no copy)
   */
-void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t callback, nbgl_layoutTagValueList_t *tagValueList) {
+void nbgl_useCaseAddressConfirmationExt(const char *address, nbgl_choiceCallback_t callback, const nbgl_layoutTagValueList_t *tagValueList) {
   // save context
   onChoice = callback;
   addressConfirmationContext.address = address;
@@ -1249,7 +1249,7 @@ void nbgl_useCaseAddressConfirmationExt(char *address, nbgl_choiceCallback_t cal
  *
  * @param text text to use under spinner
  */
-void nbgl_useCaseSpinner(char* text) {
+void nbgl_useCaseSpinner(const char* text) {
   pageContext = nbgl_pageDrawSpinner(NULL, (const char*)text);
   nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }

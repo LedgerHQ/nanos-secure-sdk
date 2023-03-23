@@ -37,7 +37,7 @@ static void nbgl_serializeArea(nbgl_area_t *area, uint8_t *out, size_t *w_cnt, s
 
 // Serialization functions
 
-static void nbgl_serializeText(char* text, uint8_t *out, size_t *w_cnt, size_t max_len) {
+static void nbgl_serializeText(const char* text, uint8_t *out, size_t *w_cnt, size_t max_len) {
 	if (text == NULL) {
 		nbgl_appendU8('\0', out, w_cnt, max_len);
 		return;
