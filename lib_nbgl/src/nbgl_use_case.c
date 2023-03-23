@@ -189,9 +189,9 @@ static void pageCallback(int token, uint8_t index) {
 
     addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
     nbgl_layoutQRCode_t qrCode = {
-      .url = (char*)addressConfirmationContext.address,
+      .url = addressConfirmationContext.address,
       .text1 = NULL,
-      .text2 = (char*)addressConfirmationContext.address // display as gray text
+      .text2 = addressConfirmationContext.address // display as gray text
     };
     nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
 
@@ -533,7 +533,7 @@ static void displayAddressPage(uint8_t page, bool forceFullRefresh) {
   nbgl_pageContent_t content;
   nbgl_layoutTagValue_t tagValuePair = {
     .item = "Address",
-    .value = (char*)addressConfirmationContext.address
+    .value = addressConfirmationContext.address
   };
 
   content.type = TAG_VALUE_CONFIRM;

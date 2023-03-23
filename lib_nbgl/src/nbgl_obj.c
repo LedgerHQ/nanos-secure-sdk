@@ -279,7 +279,7 @@ static void draw_button(nbgl_button_t* obj, nbgl_obj_t *prevObj, bool computePos
   else {
     if (obj->localized == true) {
 #if defined(HAVE_LANGUAGE_PACK)
-      obj->text = (char*)get_ux_loc_string(obj->textId);
+      obj->text = get_ux_loc_string(obj->textId);
 #endif // HAVE_LANGUAGE_PACK
     }
   }
@@ -608,7 +608,7 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
   else {
     if (obj->localized == true) {
 #if defined(HAVE_LANGUAGE_PACK)
-      obj->text = (char*)get_ux_loc_string(obj->textId);
+      obj->text = get_ux_loc_string(obj->textId);
 #endif // HAVE_LANGUAGE_PACK
     }
   }

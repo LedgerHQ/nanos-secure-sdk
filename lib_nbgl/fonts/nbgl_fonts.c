@@ -589,7 +589,7 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
     bool is_unicode;
 
     // memorize the last char
-    prevText = (char *)text;
+    prevText = text;
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
 
     // if \n, increment the number of lines
@@ -690,7 +690,7 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char* text, uint16_t maxWidth
 
     // memorize the two last chars
     prevPrevText = prevText;
-    prevText = (char *)text;
+    prevText = text;
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
     // if \n, reset width
     if (unicode == '\n') {

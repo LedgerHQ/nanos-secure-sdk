@@ -1919,7 +1919,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed) {
   // create text area
   textArea = (nbgl_text_area_t*)nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
   textArea->textColor = BLACK;
-  textArea->text = (char*)PIC(text);
+  textArea->text = PIC(text);
   textArea->textAlignment = CENTER;
   textArea->fontId = BAGL_FONT_INTER_REGULAR_24px_1bpp;
   textArea->alignmentMarginY = 36;
