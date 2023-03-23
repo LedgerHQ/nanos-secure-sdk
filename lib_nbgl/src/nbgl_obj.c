@@ -527,7 +527,7 @@ static void draw_pageIndicator(nbgl_page_indicator_t* obj, nbgl_obj_t *prevObj, 
 
   if (obj->nbPages <= NB_MAX_PAGES_WITH_DASHES) {
     uint8_t i;
-#define INTER_DASHES 4 // pixels
+#define INTER_DASHES 10 // pixels
     // force height
     obj->height = 4;
 
@@ -568,7 +568,7 @@ static void draw_pageIndicator(nbgl_page_indicator_t* obj, nbgl_obj_t *prevObj, 
     if (computePosition) {
       compute_position((nbgl_obj_t *)obj,prevObj);
     }
-    LOG_DEBUG(OBJ_LOGGER,"draw_navigationBar(), x0 = %d, y0 = %d, page = %d/%d\n", obj->x0, obj->y0, obj->activePage, obj->nbPages);
+    LOG_DEBUG(OBJ_LOGGER,"draw_pageIndicator(), x0 = %d, y0 = %d, page = %d/%d\n", obj->x0, obj->y0, obj->activePage, obj->nbPages);
 
     // inherit background from parent
     obj->backgroundColor = obj->parent->backgroundColor;

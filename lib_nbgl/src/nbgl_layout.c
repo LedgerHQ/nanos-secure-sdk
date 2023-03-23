@@ -741,7 +741,6 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayou
   container->height = 2*BORDER_MARGIN;
   container->layout = VERTICAL;
   container->alignmentMarginX = BORDER_MARGIN;
-  container->alignTo = NULL;
   container->alignment = NO_ALIGNMENT;
   container->touchMask = (1<<TOUCHED);
 
@@ -750,10 +749,9 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayou
   textArea->text = PIC(switchLayout->text);
   textArea->textAlignment = MID_LEFT;
   textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
-  textArea->width = container->width-60; // the width icon has 60px width
+  textArea->width = container->width - 60; // the switch icon has 60px width
   textArea->height = nbgl_getTextHeight(BAGL_FONT_INTER_SEMIBOLD_24px,textArea->text);
   container->height += textArea->height;
-  textArea->style = NO_STYLE;
   textArea->alignment = TOP_LEFT;
   textArea->alignmentMarginY = BORDER_MARGIN;
   container->children[0] = (nbgl_obj_t*)textArea;
@@ -768,17 +766,15 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, nbgl_layoutSwitch_t *switchLayou
 
   if (switchLayout->subText != NULL) {
     subTextArea = (nbgl_text_area_t *)nbgl_objPoolGet(TEXT_AREA,layoutInt->layer);
-    subTextArea->textColor = DARK_GRAY;
+    subTextArea->textColor = BLACK;
     subTextArea->text = PIC(switchLayout->subText);
     subTextArea->textAlignment = MID_LEFT;
     subTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     subTextArea->width = container->width;
     subTextArea->height = nbgl_getTextHeight(BAGL_FONT_INTER_REGULAR_24px,subTextArea->text);
-    container->height += subTextArea->height+INTERNAL_SPACE;
-    subTextArea->style = NO_STYLE;
+    container->height += subTextArea->height + INNER_MARGIN;
     subTextArea->alignment = NO_ALIGNMENT;
-    subTextArea->alignmentMarginY = INTERNAL_SPACE;
-    subTextArea->alignTo = NULL;
+    subTextArea->alignmentMarginY = INNER_MARGIN;
     container->children[2] = (nbgl_obj_t*)subTextArea;
     container->nbChildren = 3;
   }
@@ -1059,7 +1055,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
     if (container->nbChildren>0) {
       textArea->alignment = BOTTOM_MIDDLE;
       textArea->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
-      textArea->alignmentMarginY = BORDER_MARGIN+8;
+      textArea->alignmentMarginY = BORDER_MARGIN+4;
     }
     else {
       textArea->alignment = TOP_MIDDLE;
@@ -1091,7 +1087,15 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, nbgl_layoutCenteredInfo_t 
     if (container->nbChildren>0) {
       textArea->alignment = BOTTOM_MIDDLE;
       textArea->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
-      textArea->alignmentMarginY = BORDER_MARGIN+8;
+      textArea->alignmentMarginY = BORDER_MARGIN;
+      if (info->text1 != NULL) {
+        // if previous element is text1, only space of 16 px
+        textArea->alignmentMarginY -= 4;
+      }
+      else {
+        // else if icon, space of 24 px
+        textArea->alignmentMarginY += 4;
+      }
     }
     else {
       textArea->alignment = TOP_MIDDLE;
@@ -1190,8 +1194,8 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
 
   container = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER,layoutInt->layer);
 
-  // get container children (max 4)
-  container->children = nbgl_containerPoolGet(4,layoutInt->layer);
+  // get container children (max 2 (QRCode + text1/text2))
+  container->children = nbgl_containerPoolGet(2, layoutInt->layer);
   container->nbChildren = 0;
 
   qrcode = (nbgl_qrcode_t *)nbgl_objPoolGet(QR_CODE,layoutInt->layer);
@@ -1223,7 +1227,6 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
     textArea->fontId = (info->largeText1 == true)? BAGL_FONT_INTER_REGULAR_32px : BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
     textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
-    textArea->style = NO_STYLE;
     textArea->alignment = BOTTOM_MIDDLE;
     textArea->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
     textArea->alignmentMarginY = 40;
@@ -1241,7 +1244,6 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
     textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
-    textArea->style = NO_STYLE;
     textArea->alignment = BOTTOM_MIDDLE;
     textArea->alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
     textArea->alignmentMarginY = 40;
@@ -1253,7 +1255,14 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, nbgl_layoutQRCode_t *info) {
   }
   container->height = fullHeight;
   container->layout = VERTICAL;
-  container->alignment = CENTER;
+  // center the QRCode only if it's the first (and probably only) child
+  if (layoutInt->container->nbChildren == 0) {
+    container->alignment = CENTER;
+  }
+  else {
+    container->alignment = BOTTOM_MIDDLE;
+    container->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
+  }
 
   container->width = GET_AVAILABLE_WIDTH(layoutInt);
 
