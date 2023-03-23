@@ -668,7 +668,7 @@ uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId, const char*text, uint1
  * @param nbLines (input) If the text doesn't fit in this number of lines, the last chars will be replaced by ...
  *
  */
-void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint8_t nbLines) {
+void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char* text, uint16_t maxWidth, uint8_t nbLines) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
   uint16_t textLen = nbgl_getTextLength(text);
   uint16_t width = 0;
