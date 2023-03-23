@@ -18,13 +18,6 @@
  *      DEFINES
  *********************/
 #define APP_DESCRIPTION_MAX_LEN 64
-// maximum number of lines for value field in details pages
-#define NB_MAX_LINES_IN_DETAILS  12
-// maximum number of lines for value field in review pages
-#define NB_MAX_LINES_IN_REVIEW    9
-
-// height available for tag/value pairs display
-#define TAG_VALUE_AREA_HEIGHT   400
 
 /**********************
  *      TYPEDEFS
@@ -639,8 +632,23 @@ static uint8_t getNbPairs(uint8_t page, bool *tooLongToFit) {
   return nbPairs+1;
 }
 
-// computes and returns the number of tag/values pairs displayable in a page, with the given list of tag/value pairs
-static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValueList_t *tagValueList, uint8_t startIndex, bool *tooLongToFit) {
+/**********************
+ *   GLOBAL FUNCTIONS
+ **********************/
+
+/**
+ * @brief computes the number of tag/values pairs displayable in a page, with the given list of tag/value pairs
+ *
+ * @param nbPairs number of tag/value pairs to use in \b tagValueList
+ * @param tagValueList list of tag/value pairs
+ * @param startIndex first index to consider in \b tagValueList
+ * @param tooLongToFit (output) set to true if even a single tag/value pair doesn't fit in a page
+ * @return the number of tag/value pairs fitting in a page
+ */
+uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
+                                                nbgl_layoutTagValueList_t *tagValueList,
+                                                uint8_t startIndex,
+                                                bool *tooLongToFit) {
   uint8_t nbPairsInPage = 0;
   uint16_t currentHeight = 12; // upper margin
 
@@ -670,9 +678,9 @@ static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValueList_t *
     currentHeight += 4;
     // set value font
     if (tagValueList->smallCaseForValue) {
-     value_font = BAGL_FONT_INTER_REGULAR_24px;
+      value_font = BAGL_FONT_INTER_REGULAR_24px;
     } else {
-     value_font = BAGL_FONT_INTER_REGULAR_32px;
+      value_font = BAGL_FONT_INTER_REGULAR_32px;
     }
     // value height
     currentHeight += nbgl_getTextHeightInWidth(value_font,
@@ -688,8 +696,13 @@ static uint8_t getNbTagValuesInPage(uint8_t nbPairs, nbgl_layoutTagValueList_t *
   return nbPairsInPage;
 }
 
-// computes and returns the number of pages necessary to display the given list of tag/value pairs
-static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList) {
+/**
+ * @brief  computes the number of pages necessary to display the given list of tag/value pairs
+ *
+ * @param tagValueList list of tag/value pairs
+ * @return the number of pages necessary to display the given list of tag/value pairs
+ */
+uint8_t nbgl_useCaseGetNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList) {
   uint8_t nbPages = 0;
   uint8_t nbPairs = tagValueList->nbPairs;
   uint8_t nbPairsInPage;
@@ -700,7 +713,7 @@ static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList
   while (i < tagValueList->nbPairs) {
     // upper margin
     currentHeight += 24;
-    nbPairsInPage = getNbTagValuesInPage(nbPairs, tagValueList, i, &tooLongToFit);
+    nbPairsInPage = nbgl_useCaseGetNbTagValuesInPage(nbPairs, tagValueList, i, &tooLongToFit);
     i += nbPairsInPage;
     setNbPairs(nbPages,nbPairsInPage,tooLongToFit);
     nbPairs -= nbPairsInPage;
@@ -708,10 +721,6 @@ static uint8_t getNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList
   }
   return nbPages;
 }
-
-/**********************
- *   GLOBAL FUNCTIONS
- **********************/
 
 /**
  * @brief draws the home page of an app (page on which we land when launching it from dashboard)
@@ -1110,7 +1119,7 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
   staticReviewContext.nbPairsInCurrentPage = 0;
 
   // compute number of pages & fill navigation structure
-  navInfo.nbPages = getNbPagesForTagValueList(tagValueList)+1;
+  navInfo.nbPages = nbgl_useCaseGetNbPagesForTagValueList(tagValueList)+1;
   navInfo.activePage = 0;
   navInfo.navType = NAV_WITH_TAP;
   navInfo.quitToken = REJECT_TOKEN;
@@ -1148,7 +1157,7 @@ void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl
   staticReviewContext.nbPairsInCurrentPage = 0;
 
   // compute number of pages & fill navigation structure
-  navInfo.nbPages = getNbPagesForTagValueList(tagValueList)+1;
+  navInfo.nbPages = nbgl_useCaseGetNbPagesForTagValueList(tagValueList)+1;
   navInfo.activePage = 0;
   navInfo.navType = NAV_WITH_TAP;
   navInfo.quitToken = REJECT_TOKEN;

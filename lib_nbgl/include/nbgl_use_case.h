@@ -32,6 +32,21 @@ extern "C" {
  */
 #define LAST_PAGE_FOR_REVIEW 0xFF
 
+/**
+ *  @brief maximum number of lines for value field in details pages
+ */
+#define NB_MAX_LINES_IN_DETAILS  12
+
+/**
+ *  @brief maximum number of lines for value field in review pages
+ */
+#define NB_MAX_LINES_IN_REVIEW    9
+
+/**
+ *  @brief height available for tag/value pairs display
+ */
+#define TAG_VALUE_AREA_HEIGHT   400
+
 /**********************
  *      MACROS
  **********************/
@@ -61,6 +76,15 @@ typedef void (*nbgl_choiceCallback_t)(bool confirm);
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
+
+// utils
+uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
+                                                nbgl_layoutTagValueList_t *tagValueList,
+                                                uint8_t startIndex,
+                                                bool *tooLongToFit);
+uint8_t nbgl_useCaseGetNbPagesForTagValueList(nbgl_layoutTagValueList_t *tagValueList);
+
+// use case drawing
 void nbgl_useCaseHome(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
                       nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback);
 void nbgl_useCaseHomeExt(char *appName, const nbgl_icon_details_t *appIcon, char *tagline, bool withSettings,
