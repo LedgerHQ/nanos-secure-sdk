@@ -69,9 +69,17 @@ prepare:
 BIN_TARGETS := bin/app.elf bin/app.apdu bin/app.sha256 bin/app.hex
 DBG_TARGETS := debug/app.map debug/app.asm
 
-default: $(BIN_TARGETS) $(DBG_TARGETS)
+prebuild: prepare $(APP_CUSTOM_PREBUILD_TARGETS) Makefile
 
-$(OBJ_DIR)/%.o: %.c $(GLYPH_DESTC) prepare Makefile
+glyphs_gen: $(GLYPH_DESTC)
+
+targets_gen: $(BIN_TARGETS) $(DBG_TARGETS)
+
+default: prebuild
+	$(MAKE) glyphs_gen
+	$(MAKE) targets_gen
+
+$(OBJ_DIR)/%.o: %.c
 	@echo "[CC]   $@"
 	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
