@@ -31,11 +31,6 @@
 #define OPAD 0x5cu
 
 static size_t cx_get_block_size(cx_md_t md) {
-#ifdef HAVE_RIPEMD160
-  if (md == DEPRECATED_2) {
-    return RIPEMD_BLOCK_SIZE;
-  }
-#endif
   const cx_hash_info_t *info = cx_hash_get_info(md);
   if (info == NULL) {
     return 0;
@@ -44,7 +39,7 @@ static size_t cx_get_block_size(cx_md_t md) {
 }
 
 static cx_md_t cx_get_algorithm(cx_hmac_t *ctx) {
-  return ctx->hash_id;
+  return ctx->hash_ctx.info->md_type;
 }
 
 static bool cx_is_allowed_digest(cx_md_t md_type) {
@@ -62,7 +57,7 @@ static bool cx_is_allowed_digest(cx_md_t md_type) {
     CX_SHA512,
 #endif
 #ifdef HAVE_RIPEMD160
-    DEPRECATED_2,
+    CX_RIPEMD160,
 #endif
   };
   for (unsigned int i = 0; i < sizeof(allowed_algorithms) / sizeof(allowed_algorithms[0]); i++) {
@@ -82,26 +77,15 @@ cx_err_t cx_hmac_init(cx_hmac_t *ctx, cx_md_t hash_id, const uint8_t *key, size_
     return CX_INVALID_PARAMETER;
   }
 
-  hash_ctx = &ctx->hash_ctx;
+  hash_ctx = &ctx->hash_ctx,
   memset(ctx, 0, sizeof(cx_hmac_t));
-  ctx->hash_id = hash_id;
   size_t block_size = cx_get_block_size(hash_id);
 
   if (key) {
     if (key_len > block_size) {
-#ifdef HAVE_RIPEMD160
-      if (hash_id == DEPRECATED_2) {
-        cx_ripemd160_init_no_throw(hash_ctx);
-        cx_ripemd160_update(hash_ctx, key, key_len);
-        cx_ripemd160_final(hash_ctx, ctx->key);
-      }
-      else
-#endif // HAVE_RIPEMD160
-      {
-        cx_hash_init(hash_ctx, hash_id);
-        cx_hash_update(hash_ctx, key, key_len);
-        cx_hash_final(hash_ctx, ctx->key);
-      }
+      cx_hash_init(hash_ctx, hash_id);
+      cx_hash_update(hash_ctx, key, key_len);
+      cx_hash_final(hash_ctx, ctx->key);
     } else {
       memcpy(ctx->key, key, key_len);
     }
@@ -111,18 +95,8 @@ cx_err_t cx_hmac_init(cx_hmac_t *ctx, cx_md_t hash_id, const uint8_t *key, size_
     }
   }
 
-#ifdef HAVE_RIPEMD160
-  if (hash_id == DEPRECATED_2) {
-    cx_ripemd160_init_no_throw(hash_ctx);
-    cx_ripemd160_update(hash_ctx, ctx->key, block_size);
-  }
-  else
-#endif // HAVE_RIPEMD160
-  {
-    cx_hash_init(hash_ctx, hash_id);
-    cx_hash_update(hash_ctx, ctx->key, block_size);
-  }
-
+  cx_hash_init(hash_ctx, hash_id);
+  cx_hash_update(hash_ctx, ctx->key, block_size);
   return CX_OK;
 }
 
@@ -130,11 +104,6 @@ cx_err_t cx_hmac_update(cx_hmac_t *ctx, const uint8_t *data, size_t data_len) {
   if (data_len == 0) {
     return CX_OK;
   }
-#ifdef HAVE_RIPEMD160
-  if (cx_get_algorithm(ctx) == DEPRECATED_2) {
-    return cx_ripemd160_update(&ctx->hash_ctx, data, data_len);
-  }
-#endif // HAVE_RIPEMD160
   return cx_hash_update(&ctx->hash_ctx, data, data_len);
 }
 
@@ -146,18 +115,9 @@ cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len) {
 
   cx_md_t hash_algorithm   = cx_get_algorithm(ctx);
   size_t  block_size       = cx_get_block_size(hash_algorithm);
+  size_t  hash_output_size = cx_hash_get_size(hash_ctx);
 
-  size_t  hash_output_size;
-#ifdef HAVE_RIPEMD160
-  if (hash_algorithm == DEPRECATED_2) {
-    hash_output_size = CX_RIPEMD160_SIZE;
-    cx_ripemd160_final(hash_ctx, inner_hash);
-  } else
-#endif // HAVE_RIPEMD160
-  {
-    hash_output_size = cx_hash_get_size(hash_ctx);
-    cx_hash_final(hash_ctx, inner_hash);
-  }
+  cx_hash_final(hash_ctx, inner_hash);
 
   // hash key xor 5c (and 36 to remove prepadding at init)
   memcpy(hkey, ctx->key, block_size);
@@ -165,20 +125,10 @@ cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len) {
     hkey[i] ^= OPAD ^ IPAD;
   }
 
-#ifdef HAVE_RIPEMD160
-  if (hash_algorithm == DEPRECATED_2) {
-    cx_ripemd160_init_no_throw(hash_ctx);
-    cx_ripemd160_update(hash_ctx, hkey, block_size);
-    cx_ripemd160_update(hash_ctx, inner_hash, hash_output_size);
-    cx_ripemd160_final(hash_ctx, hkey);
-} else
-#endif // HAVE_RIPEMD160
-  {
-    cx_hash_init(hash_ctx, hash_algorithm);
-    cx_hash_update(hash_ctx, hkey, block_size);
-    cx_hash_update(hash_ctx, inner_hash, hash_output_size);
-    cx_hash_final(hash_ctx, hkey);
-  }
+  cx_hash_init(hash_ctx, hash_algorithm);
+  cx_hash_update(hash_ctx, hkey, block_size);
+  cx_hash_update(hash_ctx, inner_hash, hash_output_size);
+  cx_hash_final(hash_ctx, hkey);
 
   // length result
   if (*out_len >= hash_output_size) {
@@ -212,7 +162,7 @@ cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key
 
 #ifdef HAVE_RIPEMD160
 cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_t *key, size_t key_len) {
-  return cx_hmac_init((cx_hmac_t *)hmac, DEPRECATED_2, key, key_len);
+  return cx_hmac_init((cx_hmac_t *)hmac, CX_RIPEMD160, key, key_len);
 }
 #endif
 

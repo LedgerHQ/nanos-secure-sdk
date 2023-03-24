@@ -86,6 +86,7 @@ cx_err_t cx_eddsa_get_public_key_internal(const cx_ecfp_private_key_t *pv_key,
   if (!(((h == NULL) && (h_len == 0)) || ((h_len) && (h_len >= size)))) {
     return CX_INVALID_PARAMETER;
   }
+
   switch (hashID) {
 #if defined(HAVE_SHA512)
   case CX_SHA512:
@@ -96,17 +97,13 @@ cx_err_t cx_eddsa_get_public_key_internal(const cx_ecfp_private_key_t *pv_key,
   case CX_KECCAK:
   case CX_SHA3:
 #endif // HAVE_SHA3
+
+#if defined(HAVE_BLAKE2)
+  case CX_BLAKE2B:
     if (cx_hash_init_ex(&G_cx.hash_ctx, hashID, size * 2) != CX_OK) {
       return CX_INVALID_PARAMETER;
     }
     break;
-
-#if defined(HAVE_BLAKE2)
-    case DEPRECATED_1:
-      if (cx_blake2b_init_no_throw((cx_blake2b_t*)&G_cx.hash_ctx, size * 2) != CX_OK) {
-        return CX_INVALID_PARAMETER;
-      }
-      break;
 #endif // HAVE_BLAKE2
 
   default:
@@ -246,7 +243,7 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
 # endif // HAVE_SHA3
 
 # if defined(HAVE_BLAKE2)
-  case DEPRECATED_1:
+  case CX_BLAKE2B:
 # endif // HAVE_BLAKE2
     break;
 #endif // (defined(HAVE_SHA3) || defined(HAVE_BLAKE2))
@@ -401,7 +398,7 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pu_key,
 # endif // HAVE_SHA3
 
 # if defined(HAVE_BLAKE2)
-  case DEPRECATED_1:
+  case CX_BLAKE2B:
 # endif // HAVE_BLAKE2
     break;
 #endif // (defined(HAVE_SHA3) || defined(HAVE_BLAKE2))

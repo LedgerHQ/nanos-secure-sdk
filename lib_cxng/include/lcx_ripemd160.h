@@ -34,7 +34,6 @@
 
 /** RIPEMD160 message digest size */
 #define CX_RIPEMD160_SIZE 20
-#define RIPEMD_BLOCK_SIZE 64
 
 /**
  * @brief RIPEMD-160 context.
@@ -67,10 +66,13 @@ cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
+ *
+ * @return          RIPEMD160 identifier.
  */
-static inline void cx_ripemd160_init ( cx_ripemd160_t * hash )
+static inline int cx_ripemd160_init ( cx_ripemd160_t * hash )
 {
   cx_ripemd160_init_no_throw(hash);
+  return CX_RIPEMD160;
 }
 
 /**
@@ -86,27 +88,7 @@ static inline void cx_ripemd160_init ( cx_ripemd160_t * hash )
  *
  * @return             Size of a Ripemd-160 digest, i.e. 20 bytes.
  */
-size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len,
-                         uint8_t *out, size_t out_len);
-
-/**
- * @brief Computes a Ripemd-160 digest.
- *
- * @param[in] mode     Indicate if it is the last digest.
- *
- * @param[in]  in      Input data.
- *
- * @param[in]  in_len  Length of the input data.
- *
- * @param[out] out     Buffer where to store the digest.
- *
- * @param[in]  out_len Length of the output.
- *
- * @return             Size of a Ripemd-160 digest, i.e. 20 bytes.
- */
-size_t cx_ripemd160(cx_ripemd160_t *hash, uint32_t mode,
-                    const uint8_t *in, size_t in_len,
-                    uint8_t *out, size_t out_len);
+size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 
 #endif
 
