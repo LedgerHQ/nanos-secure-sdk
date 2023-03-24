@@ -43,6 +43,13 @@ extern "C" {
 #define NB_MAX_LINES_IN_REVIEW    9
 
 /**
+ *  @brief maximum number of simultaneously displayed pairs in review pages.
+ *         Can be useful when using nbgl_useCaseStaticReview() with the
+ *         callback mechanism to retrieve the item/value pairs.
+ */
+#define NB_MAX_DISPLAYED_PAIRS_IN_REVIEW    4
+
+/**
  *  @brief height available for tag/value pairs display
  */
 #define TAG_VALUE_AREA_HEIGHT   400
