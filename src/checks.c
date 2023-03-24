@@ -151,7 +151,6 @@ void ui_audited_deinit(void) {}
 void check_audited_app(void) {
   unsigned char     data = BOLOS_FALSE;
   unsigned char*    buffer = &data;
-  unsigned int      slot;
   unsigned int      length = os_parse_bertlv((unsigned char*)(&_install_parameters),
                                              CHECK_NOT_AUDITED_MAX_LEN,
                                              NULL,
