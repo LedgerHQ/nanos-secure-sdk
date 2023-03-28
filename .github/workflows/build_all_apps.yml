@@ -1,0 +1,291 @@
+name: Build all apps on latest SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_stax:
+        type: boolean
+        required: false
+        default: false
+
+      sdk_branch:
+        type: string
+        required: false
+        default: ''
+  pull_request:
+
+
+env:
+    build_path_list: "
+{ \"app-acala\"            : \"./app\"            ,
+  \"app-astar\"            : \"./app\"            ,
+  \"app-axelar\"           : \"./app\"            ,
+  \"app-bifrost\"          : \"./app\"            ,
+  \"app-coti\"             : \"app\"              ,
+  \"app-casper\"           : \"./app\"            ,
+  \"app-centrifuge\"       : \"./app\"            ,
+  \"app-cosmos\"           : \"app\"              ,
+  \"app-crypto.org chain\" : \"./app\"            ,
+  \"app-dgld\"             : \"app\"              ,
+  \"app-decimal\"          : \"./app\"            ,
+  \"app-desmos\"           : \"./app\"            ,
+  \"app-dock\"             : \"./app\"            ,
+  \"app-edgeware\"         : \"./app\"            ,
+  \"app-filecoin\"         : \"app\"              ,
+  \"app-firmachain\"       : \"./app\"            ,
+  \"app-flow\"             : \"app\"              ,
+  \"app-genshiro\"         : \"./app\"            ,
+  \"app-iov\"              : \"app\"              ,
+  \"app-internetcomputer\" : \"./app\"            ,
+  \"app-karura\"           : \"./app\"            ,
+  \"app-kusama\"           : \"app\"              ,
+  \"app-medibloc\"         : \"./app\"            ,
+  \"app-near\"             : \"workdir/app-near\" ,
+  \"app-nodle\"            : \"./app\"            ,
+  \"app-parallel\"         : \"./app\"            ,
+  \"app-persistence\"      : \"./app\"            ,
+  \"app-phala\"            : \"./app\"            ,
+  \"app-polkadex\"         : \"./app\"            ,
+  \"app-polkadot\"         : \"app\"              ,
+  \"app-polymesh\"         : \"./app\"            ,
+  \"app-reef\"             : \"./app\"            ,
+  \"app-secret\"           : \"./app\"            ,
+  \"app-stacks\"           : \"./app\"            ,
+  \"app-statemine\"        : \"./app\"            ,
+  \"app-statemint\"        : \"./app\"            ,
+  \"app-thorchain\"        : \"./app\"            ,
+  \"app-xxnetwork\"        : \"./app\"            }
+  "
+    repo_list: '
+{\"repo_name\":[
+\"app-velas\",
+\"app-solana\",
+\"app-hedera\",
+\"app-iotex\",
+\"app-karura\",
+\"app-acala\",
+\"app-bitcoin-new\",
+\"app-ethereum\",
+\"app-mina\",
+\"app-tezos\",
+\"app-plugin-nested\",
+\"app-plugin-staderlabs\",
+\"app-plugin-lido\",
+\"app-plugin-paraswap\",
+\"app-plugin-1inch\",
+\"app-plugin-yearn\",
+\"app-plugin-quickswap\",
+\"app-plugin-cometh\",
+\"app-plugin-stakedao\",
+\"app-plugin-ricochet\",
+\"app-plugin-poap\",
+\"app-plugin-angle\",
+\"app-plugin-kiln\",
+\"app-plugin-alkemi\",
+\"app-plugin-nft\",
+\"app-plugin-harvest\",
+\"app-plugin-opensea-new\",
+\"app-plugin-rarible\",
+\"app-plugin-cbridge\",
+\"app-plugin-ribbon\",
+\"app-plugin-art-blocks\",
+\"app-plugin-boilerplate\",
+\"app-stellar\",
+\"app-exchange\",
+\"app-ssh-agent\",
+\"app-neo\",
+\"app-boilerplate\",
+\"app-xrp\",
+\"app-radix\",
+\"app-west\",
+\"app-waves\",
+\"app-recovery-check\",
+\"app-near\",
+\"app-lto\",
+\"app-lisk\",
+\"app-ergo\",
+\"app-nervos\",
+\"app-cardano\",
+\"app-everscale\",
+\"app-aptos\",
+\"app-kusama\",
+\"app-polymesh\",
+\"app-fio\",
+\"app-monero\",
+\"app-celo-spender\",
+\"app-cosmos\",
+\"app-blockstack\",
+\"app-statemint\",
+\"app-statemine\",
+\"app-polkadot\",
+\"app-zilliqa\",
+\"app-nem\",
+\"app-eos\",
+\"app-iota\",
+\"app-oasis\",
+\"app-u2f\",
+\"app-fantom\",
+\"app-multiversx\",
+\"app-terra\",
+\"app-symbol\",
+\"app-arweave\",
+\"app-ravencoin\",
+\"app-vechain\",
+\"app-avalanche-legacy\",
+\"app-decred\",
+\"app-cryptocom\",
+\"app-icp\",
+\"app-hive\",
+\"app-filecoin\",
+\"app-algorand\",
+\"app-dock\",
+\"app-plugin-opensea\",
+\"app-ton-new\",
+\"app-tron\",
+\"app-khala\",
+\"app-firmachain\",
+\"app-coti\",
+\"app-phala\",
+\"app-bitcoin\",
+\"app-bifrost-kusama\",
+\"app-flow\",
+\"app-bifrost-new\",
+\"app-bifrost\",
+\"app-constellation\",
+\"app-freeton\",
+\"app-aergo\",
+\"app-parallel\",
+\"app-thorchain\",
+\"app-centrifuge\",
+\"app-passwords\",
+\"app-nodle\",
+\"app-oxen\",
+\"app-navcoin\",
+\"app-astar\",
+\"app-helium\",
+\"app-casper\",
+\"app-shimmer\",
+\"app-plugin-compound\",
+\"app-polkadex\",
+\"app-xxnetwork\",
+\"app-decimal\",
+\"app-axelar\",
+\"app-aeternity\",
+\"app-secret\",
+\"app-desmos\",
+\"app-medibloc\",
+\"app-persistence\",
+\"app-platon\",
+\"app-elastos\",
+\"app-groestlcoin\",
+\"app-iota-legacy\",
+\"app-mimblewimblecoin\",
+\"app-genshiro\",
+\"app-particl\",
+\"app-ont\",
+\"app-harmony-one\",
+\"app-iov\",
+\"app-windows-hello\",
+\"app-hathor\",
+\"app-safecoin\",
+\"app-handshake\",
+\"app-conflux\",
+\"app-theta\",
+\"app-tendermint\",
+\"app-sia-x\",
+\"app-qrl\",
+\"app-nano\",
+\"app-nimiq\",
+\"app-kin-spl\",
+\"app-kin\",
+\"app-icx\",
+\"app-hycon\",
+\"app-fic\",
+\"app-factom\",
+\"app-binance\",
+\"app-ark\",
+\"app-ardor\",
+\"app-aion\",
+]}
+'
+# Failing apps
+#\"app-starknet\",
+#\"app-avalanche\",
+#\"app-kadena\",
+
+#\"app-panacea\",
+#\"app-insolar\",
+#\"app-dgld\",
+#\"app-sia\",
+#\"app-streaming\",
+#\"app-xinfin\",
+#\"app-woleet\",
+#\"app-reef\",
+#\"app-edgeware\",
+#\"app-celo-validator-signer\"
+#\"app-hodl\",
+#\"app-equilibrium\",
+#\"app-revealer\",
+#\"app-rise\",
+#\"app-neo3\",
+#\"app-keepass\",
+#\"app-bitsong\",
+
+jobs:
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: echo "matrix=${{  env.repo_list  }}" >> $GITHUB_OUTPUT
+
+  test-build:
+    name: Build for all targets
+    needs: [prepare-matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+
+    steps:
+      - name: Clone App
+        uses: actions/checkout@v3
+        with:
+          repository: LedgerHQ/${{ matrix.repo_name }}
+          submodules: true
+
+      - name: Build Path
+        run: |
+          build_path=$(echo '${{ env.build_path_list}}' |  sed -n 's/.*"${{ matrix.repo_name }}"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+          echo "build_path=$build_path" >> $GITHUB_ENV
+
+      - name: Clone SDK
+        uses: actions/checkout@v3
+        with:
+          path: sdk
+          ref: ${{ inputs.sdk_branch }}
+
+      - name: Build NanoS
+        run: |
+          [ -n '${{ env.build_path }}' ] && cd ${{ env.build_path }}
+          TARGET=nanos BOLOS_SDK=$GITHUB_WORKSPACE/sdk make
+
+      - name: Build NanoX
+        run: |
+          [ -n '${{ env.build_path }}' ] && cd ${{ env.build_path }}
+          TARGET=nanox BOLOS_SDK=$GITHUB_WORKSPACE/sdk make
+
+      - name: Build NanoS2
+        run: |
+          [ -n '${{ env.build_path }}' ] && cd ${{ env.build_path }}
+          TARGET=nanos2 BOLOS_SDK=$GITHUB_WORKSPACE/sdk make
+
+      - name: Build Stax
+        if: ${{ inputs.run_stax == true }}
+        run: |
+          [ -n '${{ env.build_path }}' ] && cd ${{ env.build_path }}
+          TARGET=stax BOLOS_SDK=$GITHUB_WORKSPACE/sdk make
