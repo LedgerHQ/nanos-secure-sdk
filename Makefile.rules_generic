@@ -79,7 +79,11 @@ default: prebuild
 	$(MAKE) glyphs_gen
 	$(MAKE) targets_gen
 
-$(OBJ_DIR)/%.o: %.c
+# Some apps use `bin/app.elf` as default makefile target instead of `default`.
+# Therefore we should keep for now the `prepare` dependency on next target
+# in order not to break these apps build...
+# At some point, this should be changed in the apps and removed from the SDK.
+$(OBJ_DIR)/%.o: %.c prepare
 	@echo "[CC]   $@"
 	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
