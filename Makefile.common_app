@@ -68,21 +68,15 @@ ifneq ($(DISABLE_COMMON_APP_DEFINES), 1)
     COMMON_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
     
     COMMON_SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+
+ifneq ($(TARGET_NAME), TARGET_STAX)
+    COMMON_APP_DEFINES += HAVE_UX_FLOW
 endif
 
-#####################################################################
-#                              UX                                   #
-#####################################################################
-ifneq ($(TARGET_NAME), TARGET_STAX)
-    COMMON_APP_DEFINES += HAVE_BAGL HAVE_UX_FLOW
-    COMMON_SDK_SOURCE_PATH += lib_ux
-    ifneq ($(TARGET_NAME),TARGET_NANOS)
-        COMMON_APP_DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=64
-        COMMON_APP_DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
-        COMMON_APP_DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-        COMMON_APP_DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-        COMMON_APP_DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-    endif
+endif
+
+ifeq ($(USE_COMMON_APP_FILES_IN_SDK), 1)
+COMMON_SDK_SOURCE_PATH += lib_standard_app
 endif
 
 #####################################################################
