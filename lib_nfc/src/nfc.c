@@ -168,7 +168,8 @@ uint16_t os_ndef_to_string(ndef_struct_t *ndef_message, char * out_string) {
     uint16_t tot_length = 0;
     uint16_t length_internal = 0;
     if (ndef_message->ndef_type == NFC_NDEF_TYPE_TEXT) {
-        if (strlen(ndef_message->text) > NFC_TEXT_MAX_LEN) {
+        tot_length += strlen(ndef_message->text);
+        if (tot_length > NFC_TEXT_MAX_LEN) {
           return 0;
         }
         strcpy(out_string, ndef_message->text);

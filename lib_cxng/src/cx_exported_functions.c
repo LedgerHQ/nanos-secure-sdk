@@ -11,7 +11,9 @@
 #include "cx_sha256.h"
 #include "cx_hmac.h"
 #include "cx_pbkdf2.h"
+#include "cx_blake2.h"
 #include "cx_eddsa.h"
+#include "cx_ripemd160.h"
 #include "cx_selftests.h"
 #include "cx_math.h"
 #include "cx_ecdsa.h"
@@ -19,6 +21,7 @@
 #include "cx_utils.h"
 #include "cx_ram.h"
 #include "cx_sha3.h"
+#include "cx_blake2b.h"
 
 unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_functions[] = {
   [_NR_cx_aes_dec_block] = (unsigned long)cx_aes_dec_block,
@@ -43,6 +46,12 @@ unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_fun
   [_NR_cx_aes_siv_update_aad] = (unsigned long)cx_aes_siv_update_aad,
   [_NR_cx_aes_siv_finish] = (unsigned long)cx_aes_siv_finish,
   [_NR_cx_aes_siv_update] = (unsigned long)cx_aes_siv_update,
+  [_NR_cx_blake2b] = (unsigned long)cx_blake2b,
+  [_NR_cx_blake2b_final] = (unsigned long)cx_blake2b_final,
+  [_NR_cx_blake2b_get_output_size] = (unsigned long)cx_blake2b_get_output_size,
+  [_NR_cx_blake2b_init2_no_throw] = (unsigned long)cx_blake2b_init2_no_throw,
+  [_NR_cx_blake2b_init_no_throw] = (unsigned long)cx_blake2b_init_no_throw,
+  [_NR_cx_blake2b_update] = (unsigned long)cx_blake2b_update,
   [_NR_cx_cipher_enc_dec] = (unsigned long)cx_cipher_enc_dec,
   [_NR_cx_cipher_finish] = (unsigned long)cx_cipher_finish,
   [_NR_cx_cipher_init] = (unsigned long)cx_cipher_init,
@@ -88,6 +97,7 @@ unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_fun
   [_NR_cx_hash_init] = (unsigned long)cx_hash_init,
   [_NR_cx_hash_init_ex] = (unsigned long)cx_hash_init_ex,
   [_NR_cx_hash_no_throw] = (unsigned long)cx_hash_no_throw,
+  [_NR_cx_hash_ripemd160] = (unsigned long)cx_hash_ripemd160,
   [_NR_cx_hash_sha256] = (unsigned long)cx_hash_sha256,
   [_NR_cx_hash_sha512] = (unsigned long)cx_hash_sha512,
   [_NR_cx_hash_update] = (unsigned long)cx_hash_update,
@@ -96,6 +106,7 @@ unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_fun
   [_NR_cx_hmac_final] = (unsigned long)cx_hmac_final,
   [_NR_cx_hmac_init] = (unsigned long)cx_hmac_init,
   [_NR_cx_hmac_no_throw] = (unsigned long)cx_hmac_no_throw,
+  [_NR_cx_hmac_ripemd160_init_no_throw] = (unsigned long)cx_hmac_ripemd160_init_no_throw,
   [_NR_cx_hmac_sha224_init] = (unsigned long)cx_hmac_sha224_init,
   [_NR_cx_hmac_sha256] = (unsigned long)cx_hmac_sha256,
   [_NR_cx_hmac_sha256_init_no_throw] = (unsigned long)cx_hmac_sha256_init_no_throw,
@@ -120,6 +131,9 @@ unsigned long __attribute((section ("._cx_exported_functions"))) cx_exported_fun
   [_NR_cx_memxor] = (unsigned long)cx_memxor,
   [_NR_cx_pbkdf2_hmac] = (unsigned long)cx_pbkdf2_hmac,
   [_NR_cx_pbkdf2_no_throw] = (unsigned long)cx_pbkdf2_no_throw,
+  [_NR_cx_ripemd160_final] = (unsigned long)cx_ripemd160_final,
+  [_NR_cx_ripemd160_init_no_throw] = (unsigned long)cx_ripemd160_init_no_throw,
+  [_NR_cx_ripemd160_update] = (unsigned long)cx_ripemd160_update,
   [_NR_cx_rng_no_throw] = (unsigned long)cx_rng_no_throw,
   [_NR_cx_rng_rfc6979] = (unsigned long)cx_rng_rfc6979,
   [_NR_cx_rng_rfc6979_init] = (unsigned long)cx_rng_rfc6979_init,

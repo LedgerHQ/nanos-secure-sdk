@@ -27,6 +27,20 @@
 
 #include <string.h>
 
+#define RIPEMD_BLOCK_SIZE 64
+
+const cx_hash_info_t cx_ripemd160_info = {
+    CX_RIPEMD160,
+    CX_RIPEMD160_SIZE,
+    RIPEMD_BLOCK_SIZE,
+    sizeof(cx_ripemd160_t),
+    (cx_err_t (*)(cx_hash_t *ctx))cx_ripemd160_init_no_throw,
+    (cx_err_t (*)(cx_hash_t *ctx, const uint8_t *data, size_t len))cx_ripemd160_update,
+    (cx_err_t (*)(cx_hash_t *ctx, uint8_t *digest))cx_ripemd160_final,
+    NULL,
+    NULL
+  };
+
 /* ----------------------------------------------------------------------- */
 /*                                                                         */
 /* ----------------------------------------------------------------------- */
@@ -105,6 +119,7 @@ static unsigned long int f5(uint32_t *BCD) {
 
 cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash) {
   memset(hash, 0, sizeof(cx_ripemd160_t));
+  hash->header.info = &cx_ripemd160_info;
   memmove(hash->acc, hzero, sizeof(hzero));
   return CX_OK;
 }
@@ -209,7 +224,7 @@ cx_err_t cx_ripemd160_update(cx_ripemd160_t *ctx, const uint8_t *data, size_t le
   uint8_t *    block;
   unsigned int blen;
 
-  block_size = RIPEMD_BLOCK_SIZE;
+  block_size = 64;
   block      = ctx->block;
   blen       = ctx->blen;
   ctx->blen  = 0;
@@ -257,16 +272,16 @@ cx_err_t cx_ripemd160_final(cx_ripemd160_t *ctx, uint8_t *digest) {
 
   // one more block?
   if (64 - blen < 8) {
-    memset(block + blen, 0, (RIPEMD_BLOCK_SIZE - blen));
+    memset(block + blen, 0, (64 - blen));
     cx_ripemd160_block(ctx);
     blen = 0;
   }
   // last block!
-  memset(block + blen, 0, (RIPEMD_BLOCK_SIZE - blen));
+  memset(block + blen, 0, (64 - blen));
 #ifdef ARCH_BIG_ENDIAN
-  (*(unsigned long int *)(&block[RIPEMD_BLOCK_SIZE - 8])) = cx_swap_uint32(bitlen);
+  (*(unsigned long int *)(&block[64 - 8])) = cx_swap_uint32(bitlen);
 #else
-  (*(uint64_t *)(&block[RIPEMD_BLOCK_SIZE - 8])) = bitlen;
+  (*(uint64_t *)(&block[64 - 8])) = bitlen;
 #endif
   cx_ripemd160_block(ctx);
   // provide result
@@ -277,23 +292,13 @@ cx_err_t cx_ripemd160_final(cx_ripemd160_t *ctx, uint8_t *digest) {
   return CX_OK;
 }
 
-size_t cx_ripemd160(cx_ripemd160_t *hash, uint32_t mode,
-                    const uint8_t *in, size_t in_len,
-                    uint8_t *out, size_t out_len) {
-  cx_ripemd160_update(hash, in, in_len);
-  if (mode & CX_LAST) {
-    if (out_len < CX_RIPEMD160_SIZE) {
-      return INVALID_PARAMETER;
-    }
-    cx_ripemd160_final(hash, out);
+size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len) {
+  if (out_len < CX_RIPEMD160_SIZE) {
+    return 0;
   }
-  return CX_RIPEMD160_SIZE;
-}
-
-size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len,
-                         uint8_t *out, size_t out_len) {
   cx_ripemd160_init_no_throw(&G_cx.ripemd160);
-  cx_ripemd160(&G_cx.ripemd160, CX_LAST, in, in_len, out, out_len);
+  cx_ripemd160_update(&G_cx.ripemd160, in, in_len);
+  cx_ripemd160_final(&G_cx.ripemd160, out);
   explicit_bzero(&G_cx.ripemd160, sizeof(cx_ripemd160_t));
   return CX_RIPEMD160_SIZE;
 }

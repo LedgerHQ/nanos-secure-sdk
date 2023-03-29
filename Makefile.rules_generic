@@ -69,9 +69,21 @@ prepare:
 BIN_TARGETS := bin/app.elf bin/app.apdu bin/app.sha256 bin/app.hex
 DBG_TARGETS := debug/app.map debug/app.asm
 
-default: $(BIN_TARGETS) $(DBG_TARGETS)
+prebuild: prepare $(APP_CUSTOM_PREBUILD_TARGETS) Makefile
 
-$(OBJ_DIR)/%.o: %.c $(GLYPH_DESTC) prepare Makefile
+glyphs_gen: $(GLYPH_DESTC)
+
+targets_gen: $(BIN_TARGETS) $(DBG_TARGETS)
+
+default: prebuild
+	$(MAKE) glyphs_gen
+	$(MAKE) targets_gen
+
+# Some apps use `bin/app.elf` as default makefile target instead of `default`.
+# Therefore we should keep for now the `prepare` dependency on next target
+# in order not to break these apps build...
+# At some point, this should be changed in the apps and removed from the SDK.
+$(OBJ_DIR)/%.o: %.c prepare
 	@echo "[CC]   $@"
 	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 

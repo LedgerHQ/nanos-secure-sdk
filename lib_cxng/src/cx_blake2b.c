@@ -31,6 +31,18 @@
 #endif
 #endif
 
+const cx_hash_info_t cx_blake2b_info = {
+  CX_BLAKE2B,
+  0,
+  BLAKE2B_BLOCKBYTES,
+  sizeof(cx_blake2b_t),
+  NULL,
+  (cx_err_t (*)(cx_hash_t *ctx, const uint8_t *data, size_t len))cx_blake2b_update,
+  (cx_err_t (*)(cx_hash_t *ctx, uint8_t *digest))cx_blake2b_final,
+  (cx_err_t(*)(cx_hash_t *ctx, size_t output_size))cx_blake2b_init_no_throw,
+  (size_t(*)(const cx_hash_t *ctx))cx_blake2b_get_output_size
+};
+
 cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t size) {
   return cx_blake2b_init2_no_throw(hash, size, NULL, 0, NULL, 0);
 }
@@ -57,6 +69,7 @@ cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
 
   size              = size / 8;
   hash->output_size = size;
+  hash->header.info = &cx_blake2b_info;
 
   if (blake2b_init(&hash->ctx, size, salt, salt_len, perso, perso_len) < 0) {
     goto err;

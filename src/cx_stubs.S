@@ -38,6 +38,12 @@ CX_TRAMPOLINE _NR_cx_aes_siv_start                         cx_aes_siv_start
 CX_TRAMPOLINE _NR_cx_aes_siv_update_aad                    cx_aes_siv_update_aad
 CX_TRAMPOLINE _NR_cx_aes_siv_finish                        cx_aes_siv_finish
 CX_TRAMPOLINE _NR_cx_aes_siv_update                        cx_aes_siv_update
+CX_TRAMPOLINE _NR_cx_blake2b                               cx_blake2b
+CX_TRAMPOLINE _NR_cx_blake2b_final                         cx_blake2b_final
+CX_TRAMPOLINE _NR_cx_blake2b_get_output_size               cx_blake2b_get_output_size
+CX_TRAMPOLINE _NR_cx_blake2b_init2_no_throw                cx_blake2b_init2_no_throw
+CX_TRAMPOLINE _NR_cx_blake2b_init_no_throw                 cx_blake2b_init_no_throw
+CX_TRAMPOLINE _NR_cx_blake2b_update                        cx_blake2b_update
 CX_TRAMPOLINE _NR_cx_cipher_enc_dec                        cx_cipher_enc_dec
 CX_TRAMPOLINE _NR_cx_cipher_finish                         cx_cipher_finish
 CX_TRAMPOLINE _NR_cx_cipher_init                           cx_cipher_init
@@ -83,6 +89,7 @@ CX_TRAMPOLINE _NR_cx_hash_get_size                         cx_hash_get_size
 CX_TRAMPOLINE _NR_cx_hash_init                             cx_hash_init
 CX_TRAMPOLINE _NR_cx_hash_init_ex                          cx_hash_init_ex
 CX_TRAMPOLINE _NR_cx_hash_no_throw                         cx_hash_no_throw
+CX_TRAMPOLINE _NR_cx_hash_ripemd160                        cx_hash_ripemd160
 CX_TRAMPOLINE _NR_cx_hash_sha256                           cx_hash_sha256
 CX_TRAMPOLINE _NR_cx_hash_sha512                           cx_hash_sha512
 CX_TRAMPOLINE _NR_cx_hash_update                           cx_hash_update
@@ -91,6 +98,7 @@ CX_TRAMPOLINE _NR_cx_hkdf_extract                          cx_hkdf_extract
 CX_TRAMPOLINE _NR_cx_hmac_final                            cx_hmac_final
 CX_TRAMPOLINE _NR_cx_hmac_init                             cx_hmac_init
 CX_TRAMPOLINE _NR_cx_hmac_no_throw                         cx_hmac_no_throw
+CX_TRAMPOLINE _NR_cx_hmac_ripemd160_init_no_throw          cx_hmac_ripemd160_init_no_throw
 CX_TRAMPOLINE _NR_cx_hmac_sha224_init                      cx_hmac_sha224_init
 CX_TRAMPOLINE _NR_cx_hmac_sha256                           cx_hmac_sha256
 CX_TRAMPOLINE _NR_cx_hmac_sha256_init_no_throw             cx_hmac_sha256_init_no_throw
@@ -115,6 +123,9 @@ CX_TRAMPOLINE _NR_cx_math_sub_no_throw                     cx_math_sub_no_throw
 CX_TRAMPOLINE _NR_cx_memxor                                cx_memxor
 CX_TRAMPOLINE _NR_cx_pbkdf2_hmac                           cx_pbkdf2_hmac
 CX_TRAMPOLINE _NR_cx_pbkdf2_no_throw                       cx_pbkdf2_no_throw
+CX_TRAMPOLINE _NR_cx_ripemd160_final                       cx_ripemd160_final
+CX_TRAMPOLINE _NR_cx_ripemd160_init_no_throw               cx_ripemd160_init_no_throw
+CX_TRAMPOLINE _NR_cx_ripemd160_update                      cx_ripemd160_update
 CX_TRAMPOLINE _NR_cx_rng_no_throw                          cx_rng_no_throw
 CX_TRAMPOLINE _NR_cx_rng_rfc6979                           cx_rng_rfc6979
 CX_TRAMPOLINE _NR_cx_rng_rfc6979_init                      cx_rng_rfc6979_init

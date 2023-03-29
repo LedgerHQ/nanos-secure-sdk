@@ -16,7 +16,6 @@
 *  limitations under the License.
 ********************************************************************************/
 
-
 /**
  * @file    lcx_hmac.h
  * @brief   HMAC (Keyed-Hash Message Authentication Code)
@@ -42,7 +41,6 @@
  * @brief HMAC context, abstract type
  */
 typedef struct {
-  cx_md_t   hash_id;        ///< Hash algorithm
   uint8_t   key[128];       ///< Key
   cx_hash_t hash_ctx;       ///< Hash context
 } cx_hmac_t;
@@ -54,7 +52,6 @@ typedef struct {
  * @brief HMAC context, concrete type for RIPEMD160
  */
 typedef struct {
-  cx_md_t        hash_id;   ///< Hash algorithm
   uint8_t        key[128];  ///< Key
   cx_ripemd160_t hash_ctx;  ///< Hash context
 } cx_hmac_ripemd160_t;
@@ -100,15 +97,14 @@ cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_
  * @param [in] key_len Length of the key.
  *                     The key length shall be less than 64 bytes.
  *
- * @return             RIPEMD160 identifier (deprecated).
- *
+ * @return             RIPEMD160 identifier.
  *
  * @throws             CX_INVALID_PARAMETER
  */
 static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const unsigned char * key, unsigned int key_len )
 {
   CX_THROW(cx_hmac_ripemd160_init_no_throw(hmac, key, key_len));
-  return DEPRECATED_2;
+  return CX_RIPEMD160;
 }
 #endif
 
@@ -118,7 +114,6 @@ static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const uns
  * @brief HMAC context, concrete type for SHA-224/SHA-256
  */
 typedef struct {
-  cx_md_t     hash_id;   ///< Hash algorithm
   uint8_t     key[128];  ///< Key
   cx_sha256_t hash_ctx;  ///< Hash context
 } cx_hmac_sha256_t;
@@ -228,7 +223,6 @@ size_t cx_hmac_sha256(const uint8_t *key, size_t key_len, const uint8_t *in, siz
  * @brief HMAC context, concrete type for SHA-384/SHA-512
  */
 typedef struct {
-  cx_md_t     hash_id;   ///< Hash algorithm
   uint8_t     key[128];  ///< Key
   cx_sha512_t hash_ctx;  ///< Hash context
 } cx_hmac_sha512_t;
@@ -406,7 +400,7 @@ static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char
 {
   CX_THROW(cx_hmac_no_throw(hmac, mode, in, len, mac, mac_len));
 
-  switch (hmac->hash_id) {
+  switch (hmac->hash_ctx.info->md_type) {
 #ifdef HAVE_SHA224
   case CX_SHA224: return CX_SHA224_SIZE;
 #endif
@@ -420,7 +414,7 @@ static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char
   case CX_SHA512: return CX_SHA512_SIZE;
 #endif
 #ifdef HAVE_RIPEMD160
-  case DEPRECATED_2: return CX_RIPEMD160_SIZE;
+  case CX_RIPEMD160: return CX_RIPEMD160_SIZE;
 #endif
   default:
     CX_THROW(CX_INVALID_PARAMETER);
