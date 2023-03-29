@@ -15,29 +15,29 @@
 #  limitations under the License.
 #*******************************************************************************
 
-COMMON_APP_FLAGS = 0x000
+STANDARD_APP_FLAGS = 0x000
 
 #####################################################################
 #                            BLUETOOTH                              #
 #####################################################################
 ifeq ($(ENABLE_BLUETOOTH), 1)
-    COMMON_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
-    COMMON_APP_DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-    COMMON_SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
+    STANDARD_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+    STANDARD_APP_DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+    STANDARD_SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
 endif
 
 #####################################################################
 #                               DEBUG                               #
 #####################################################################
 ifneq ($(DEBUG), 0)
-    COMMON_APP_DEFINES += HAVE_PRINTF
+    STANDARD_APP_DEFINES += HAVE_PRINTF
     ifeq ($(TARGET_NAME),TARGET_NANOS)
-        COMMON_APP_DEFINES += PRINTF=screen_printf
+        STANDARD_APP_DEFINES += PRINTF=screen_printf
     else
-        COMMON_APP_DEFINES += PRINTF=mcu_usb_printf
+        STANDARD_APP_DEFINES += PRINTF=mcu_usb_printf
     endif
 else
-        COMMON_APP_DEFINES += PRINTF\(...\)=
+        STANDARD_APP_DEFINES += PRINTF\(...\)=
 endif
 
 #####################################################################
@@ -45,51 +45,51 @@ endif
 #####################################################################
 ifneq ($(DISABLE_DEFAULT_IO_SEPROXY_BUFFER_SIZE), 1)
     ifeq ($(TARGET_NAME), TARGET_NANOS)
-        COMMON_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
+        STANDARD_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
     else
-        COMMON_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
+        STANDARD_APP_DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
     endif
 endif
 
 #####################################################################
-#                          COMMON DEFINES                           #
+#                          STANDARD DEFINES                         #
 #####################################################################
-COMMON_APP_DEFINES += $(DEFINES_LIB)
-COMMON_APP_DEFINES += APPNAME=\"$(APPNAME)\"
-COMMON_APP_DEFINES += APPVERSION=\"$(APPVERSION)\"
-COMMON_APP_DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
-COMMON_APP_DEFINES += OS_IO_SEPROXYHAL
+STANDARD_APP_DEFINES += $(DEFINES_LIB)
+STANDARD_APP_DEFINES += APPNAME=\"$(APPNAME)\"
+STANDARD_APP_DEFINES += APPVERSION=\"$(APPVERSION)\"
+STANDARD_APP_DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
+STANDARD_APP_DEFINES += OS_IO_SEPROXYHAL
 
-ifneq ($(DISABLE_COMMON_APP_DEFINES), 1)
-    COMMON_APP_DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
-    COMMON_APP_DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-    COMMON_APP_DEFINES += USB_SEGMENT_SIZE=64
-    COMMON_APP_DEFINES += BLE_SEGMENT_SIZE=32
-    COMMON_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
-    
-    COMMON_SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
+ifneq ($(DISABLE_STANDARD_APP_DEFINES), 1)
+    STANDARD_APP_DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
+    STANDARD_APP_DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
+    STANDARD_APP_DEFINES += USB_SEGMENT_SIZE=64
+    STANDARD_APP_DEFINES += BLE_SEGMENT_SIZE=32
+    STANDARD_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
+
+    STANDARD_SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
 ifneq ($(TARGET_NAME), TARGET_STAX)
-    COMMON_APP_DEFINES += HAVE_UX_FLOW
+    STANDARD_APP_DEFINES += HAVE_UX_FLOW
 endif
 
 endif
 
-ifeq ($(USE_COMMON_APP_FILES_IN_SDK), 1)
-COMMON_SDK_SOURCE_PATH += lib_standard_app
+ifeq ($(USE_STANDARD_APP_FILES_IN_SDK), 1)
+STANDARD_SDK_SOURCE_PATH += lib_standard_app
 endif
 
 #####################################################################
 #                              NBGL                                 #
 #####################################################################
 ifeq ($(ENABLE_NBGL_QRCODE), 1)
-    COMMON_APP_DEFINES += NBGL_QRCODE
+    STANDARD_APP_DEFINES += NBGL_QRCODE
 endif
 
 ifeq ($(ENABLE_NBGL_KEYBOARD), 1)
-    COMMON_APP_DEFINES += NBGL_KEYBOARD
+    STANDARD_APP_DEFINES += NBGL_KEYBOARD
 endif
 
 ifeq ($(ENABLE_NBGL_KEYPAD), 1)
-    COMMON_APP_DEFINES += NBGL_KEYPAD
+    STANDARD_APP_DEFINES += NBGL_KEYPAD
 endif
