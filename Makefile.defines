@@ -90,7 +90,21 @@ CFLAGS   += $(OPTI_LVL) $(DBG_LVL)
 CFLAGS   += -fomit-frame-pointer -momit-leaf-frame-pointer
 CFLAGS   += -mcpu=cortex-m0plus -mthumb
 CFLAGS   += -fno-common -mtune=cortex-m0plus -mlittle-endian
-CFLAGS   += -std=gnu99 -Werror=int-to-pointer-cast -Wall -Wextra -Wno-main
+CFLAGS   += -std=gnu99
+
+CFLAGS   += -Wall -Wextra
+CFLAGS   += -Wno-main
+CFLAGS   += -Werror=int-to-pointer-cast
+
+# Additional Clang warnings
+CFLAGS   += -Wno-error=int-conversion -Wimplicit-fallthrough
+CFLAGS   += -Wvla -Wundef -Wshadow -Wformat=2 -Wformat-security -Wwrite-strings
+
+ENABLE_SDK_WERROR ?= 0
+ifneq ($(ENABLE_SDK_WERROR),0)
+    CFLAGS   += -Werror
+endif
+
 CFLAGS   += -fdata-sections -ffunction-sections -funsigned-char -fshort-enums
 CFLAGS   += -mno-unaligned-access
 CFLAGS   +=  --target=armv6m-none-eabi
