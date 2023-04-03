@@ -63,24 +63,29 @@ clean:
 clean_target:
 	rm -fr $(TARGET_BUILD_DIR)
 
+BUILD_DEPENDENCIES  = $(GLYPH_DESTH) $(GLYPH_DESTC) Makefile
+BUILD_DEPENDENCIES += $(APP_CUSTOM_BUILD_DEPENDENCIES)
+
 prepare:
 	$(L)echo Prepare directories
 	@mkdir -p $(BIN_DIR) $(OBJ_DIR) $(DBG_DIR) $(DEP_DIR) $(GEN_SRC_DIR) bin debug
+
+$(BUILD_DEPENDENCIES): prepare
 
 BIN_TARGETS := bin/app.elf bin/app.apdu bin/app.sha256 bin/app.hex
 DBG_TARGETS := debug/app.map debug/app.asm
 
 default: $(BIN_TARGETS) $(DBG_TARGETS)
 
-$(OBJ_DIR)/%.o: %.c $(GLYPH_DESTC) prepare Makefile
+$(OBJ_DIR)/%.o: %.c $(BUILD_DEPENDENCIES) prepare
 	@echo "[CC]   $@"
 	$(L)$(call cc_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
-$(OBJ_DIR)/%.o: %.s
+$(OBJ_DIR)/%.o: %.s $(BUILD_DEPENDENCIES) prepare
 	@echo "[AS]   $@"
 	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
-$(OBJ_DIR)/%.o: %.S
+$(OBJ_DIR)/%.o: %.S $(BUILD_DEPENDENCIES) prepare
 	@echo "[AS]   $@"
 	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
@@ -91,7 +96,12 @@ $(info Using custom link script: $(SCRIPT_LD))
 endif
 LDFLAGS  += -T$(SCRIPT_LD)
 
-$(BIN_DIR)/app.elf: $(OBJECT_FILES) $(SCRIPT_LD)
+$(LINK_DEPENDENCIES): prepare
+
+LINK_DEPENDENCIES  = $(OBJECT_FILES) $(SCRIPT_LD) Makefile
+LINK_DEPENDENCIES += $(APP_CUSTOM_LINK_DEPENDENCIES)
+
+$(BIN_DIR)/app.elf: $(LINK_DEPENDENCIES)
 	@echo "[LINK] $(BIN_DIR)/app.elf"
 	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$(BIN_DIR)/app.elf)
 	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S $(BIN_DIR)/app.elf $(BIN_DIR)/app.hex

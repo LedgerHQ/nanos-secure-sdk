@@ -572,7 +572,7 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
     //
     // Check the arguments.
     //
-    if(str == NULL ||str_size < 2) {
+    if(str == NULL ||str_size < 1) {
       return 0;
     }
 
@@ -580,6 +580,12 @@ int snprintf(char * str, size_t str_size, const char * format, ...)
     memset(str, 0, str_size);
     str_size--;
 
+    //
+    // Check if there is still space left for data in the buffer.
+    //
+    if(str_size < 1) {
+      return 0;
+    }
 
     //
     // Start the varargs processing.
@@ -970,9 +976,7 @@ s_pad:
                 //
                 case 'X':
                     ulCap = 1;
-#if !defined(__clang__)
                     __attribute__((fallthrough));
-#endif // !defined(__clang__)
                 case 'x':
                 case 'p':
                 {
