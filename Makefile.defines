@@ -120,8 +120,8 @@ CFLAGS   += -Werror=int-to-pointer-cast
 CFLAGS   += -Wno-error=int-conversion -Wimplicit-fallthrough
 CFLAGS   += -Wvla -Wundef -Wshadow -Wformat=2 -Wformat-security -Wwrite-strings
 
-WERROR ?= 0
-ifneq ($(WERROR),0)
+ENABLE_SDK_WERROR ?= 0
+ifneq ($(ENABLE_SDK_WERROR),0)
     CFLAGS   += -Werror
 endif
 
