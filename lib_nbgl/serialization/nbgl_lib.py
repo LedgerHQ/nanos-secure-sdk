@@ -94,7 +94,7 @@ class NbglAlignment(IntEnum):
 class NbglFontId(IntEnum):
     BAGL_FONT_INTER_REGULAR_24px = 0,
     BAGL_FONT_INTER_SEMIBOLD_24px = 1,
-    BAGL_FONT_INTER_REGULAR_32px = 2,
+    BAGL_FONT_INTER_MEDIUM_32px = 2,
     BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px = 3
 
 

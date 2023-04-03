@@ -380,8 +380,16 @@ class TTF2INC (object):
         self.crop = self.configMain.getboolean('crop',False)
         self.rle = self.configMain.getboolean('rle',True)
         self.bpp = self.configMain.getint('bpp',1)
+
+        # Lookup font file among ttf and otf files
+        font_file = None
+        for ext in [".ttf", ".otf"]:
+            font_file = os.path.join(os.path.dirname(args.init_file), self.font_name) + ext
+            if os.path.exists(font_file):
+                break
+
         try:
-            self.font = ImageFont.truetype(os.path.join(os.path.dirname(args.init_file),self.font_name)+'.otf', self.font_size-1)
+            self.font = ImageFont.truetype(font_file, self.font_size-1)
         except (BaseException, Exception) as error:
             sys.stderr.write(f"Error with font {self.font_name}: {error}\n")
             sys.exit(-1)
@@ -653,6 +661,8 @@ class TTF2INC (object):
                 font_id += "_SEMIBOLD"
             elif "light" in font_name:
                 font_id += "_LIGHT"
+            elif "medium" in font_name:
+                font_id += "_MEDIUM"
         elif "hma" in font_name:
             font_id += "_HM_ALPHA_MONO_MEDIUM"
         else:
@@ -674,7 +684,7 @@ class TTF2INC (object):
         font_ids={
             "BAGL_FONT_INTER_REGULAR_24px": 0,
             "BAGL_FONT_INTER_SEMIBOLD_24px": 1,
-            "BAGL_FONT_INTER_REGULAR_32px": 2,
+            "BAGL_FONT_INTER_MEDIUM_32px": 2,
             "BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px": 3,
             "BAGL_FONT_INTER_REGULAR_24px_1bpp": 4,
             "BAGL_FONT_INTER_SEMIBOLD_24px_1bpp": 5,

@@ -888,7 +888,7 @@ int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text) {
   textArea->textColor = BLACK;
   textArea->text = PIC(text);
   textArea->textAlignment = MID_LEFT;
-  textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+  textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
   textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
   textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
   textArea->style = NO_STYLE;
@@ -1044,7 +1044,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
     else if ((info->style == LARGE_CASE_INFO) ||
              (info->style == LARGE_CASE_BOLD_INFO) ||
              (info->style == PLUGIN_INFO)) {
-      textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+      textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
     }
     else {
       textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
@@ -1231,7 +1231,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
     textArea->textColor = BLACK;
     textArea->text = PIC(info->text1);
     textArea->textAlignment = CENTER;
-    textArea->fontId = (info->largeText1 == true)? BAGL_FONT_INTER_REGULAR_32px : BAGL_FONT_INTER_REGULAR_24px;
+    textArea->fontId = (info->largeText1 == true)? BAGL_FONT_INTER_MEDIUM_32px : BAGL_FONT_INTER_REGULAR_24px;
     textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
     textArea->height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->width,false);
     textArea->alignment = BOTTOM_MIDDLE;
@@ -1420,7 +1420,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueL
     if (list->smallCaseForValue) {
       valueTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     } else {
-      valueTextArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+      valueTextArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
     }
     if (pair->valueIcon == NULL) {
       valueTextArea->width = usableWidth;
@@ -1678,7 +1678,7 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, const char *text, uint8
   textArea->textColor = BLACK;
   textArea->text = PIC(text);
   textArea->textAlignment = MID_LEFT;
-  textArea->fontId = BAGL_FONT_INTER_REGULAR_32px;
+  textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
   textArea->width = container->width - 3 * BORDER_MARGIN - button->width;
   textArea->height = nbgl_getTextHeight(textArea->fontId,textArea->text);
   textArea->style = NO_STYLE;
@@ -2205,7 +2205,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
     snprintf(numText,sizeof(numText),"%d.",number);
     textArea->text = numText;
     textArea->textAlignment = MID_LEFT;
-    textArea->fontId = BAGL_FONT_INTER_REGULAR_32px_1bpp;
+    textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px_1bpp;
     textArea->alignmentMarginY = 12;
     textArea->alignTo = (nbgl_obj_t*)line;
     textArea->alignment = TOP_LEFT;
@@ -2220,7 +2220,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, bool numbered, uint8_t numb
   textArea->textColor = grayedOut ? LIGHT_GRAY:BLACK;
   textArea->text = text;
   textArea->textAlignment = MID_LEFT;
-  textArea->fontId = BAGL_FONT_INTER_REGULAR_32px_1bpp;
+  textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px_1bpp;
   textArea->alignmentMarginY = 12;
   textArea->alignTo = (nbgl_obj_t*)line;
   textArea->alignment = TOP_MIDDLE;

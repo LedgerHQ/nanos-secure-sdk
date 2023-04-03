@@ -1,6 +1,6 @@
 #include "nbgl_fonts.h"
 
-__attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGULAR_32PX_1BPP[] = {
+__attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_MEDIUM_32PX_1BPP[] = {
 //ascii 0x0020
 //ascii 0x0021
   0x3F, 0x02, 0x33, 0x5F, 0x02, 0x33, 0x5F, 0x02,
@@ -479,7 +479,7 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   0x38, 0x70, 0x60, 0x60, 0x70, 0x3E, 0x1E,
 };
 
- __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_character_t charactersINTER_REGULAR_32PX_1BPP[95] = {
+ __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_character_t charactersINTER_MEDIUM_32PX_1BPP[95] = {
   { 0,    0,   9,0, 0, 0, 0 }, //asciii 0x0020
   { 1,    0,   9,3, 0, 3, 6 }, //asciii 0x0021
   { 1,   10,  13,2, 0, 3, 2 }, //asciii 0x0022
@@ -577,9 +577,9 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   { 0, 2694,  20,3, 3, 2, 1 }, //asciii 0x007E
 };
 
- __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_REGULAR_32PX_1BPP = {
+ __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_MEDIUM_32PX_1BPP = {
   2709, // bitmap len
-  BAGL_FONT_INTER_REGULAR_32px_1bpp, // font id
+  BAGL_FONT_INTER_MEDIUM_32px_1bpp, // font id
   (uint8_t) NBGL_BPP_1, // bpp
   32, // font height in pixels
   25, // baseline height in pixels
@@ -587,6 +587,6 @@ __attribute__ ((section("._nbgl_fonts_"))) const unsigned char bitmapINTER_REGUL
   0, // kerning - specific to the font
   0x20, // first character
   0x7E, // last character
-  charactersINTER_REGULAR_32PX_1BPP,
-  bitmapINTER_REGULAR_32PX_1BPP
+  charactersINTER_MEDIUM_32PX_1BPP,
+  bitmapINTER_MEDIUM_32PX_1BPP
 };

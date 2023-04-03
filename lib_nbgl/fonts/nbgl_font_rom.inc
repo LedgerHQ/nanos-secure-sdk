@@ -19,10 +19,10 @@
 #include "nbgl_font_hmalpha_mono_medium_32.inc"
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
-#include "nbgl_font_inter_regular_32.inc"
+#include "nbgl_font_inter_medium_32.inc"
 #include "nbgl_font_inter_regular_24_1bpp.inc"
 #include "nbgl_font_inter_semibold_24_1bpp.inc"
-#include "nbgl_font_inter_regular_32_1bpp.inc"
+#include "nbgl_font_inter_medium_32_1bpp.inc"
 #if (defined(HAVE_BOLOS) && !defined(BOLOS_OS_UPGRADER_APP))
 #if !defined(HAVE_LANGUAGE_PACK)
   #if (OS_LANGUAGE==LANG_ENGLISH)

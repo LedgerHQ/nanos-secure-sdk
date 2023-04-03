@@ -680,7 +680,7 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
     if (tagValueList->smallCaseForValue) {
       value_font = BAGL_FONT_INTER_REGULAR_24px;
     } else {
-      value_font = BAGL_FONT_INTER_REGULAR_32px;
+      value_font = BAGL_FONT_INTER_MEDIUM_32px;
     }
     // value height
     currentHeight += nbgl_getTextHeightInWidth(value_font,

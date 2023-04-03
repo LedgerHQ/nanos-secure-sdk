@@ -89,7 +89,7 @@ static void addContent(nbgl_pageContent_t* content, nbgl_layout_t *layout) {
       break;
     case TAG_VALUE_DETAILS:
     {
-      uint16_t nbLines = nbgl_getTextNbLinesInWidth(content->tagValueDetails.tagValueList.smallCaseForValue? BAGL_FONT_INTER_REGULAR_24px:BAGL_FONT_INTER_REGULAR_32px,
+      uint16_t nbLines = nbgl_getTextNbLinesInWidth(content->tagValueDetails.tagValueList.smallCaseForValue? BAGL_FONT_INTER_REGULAR_24px:BAGL_FONT_INTER_MEDIUM_32px,
                                                     content->tagValueDetails.tagValueList.pairs[0].value,
                                                     SCREEN_WIDTH-2*BORDER_MARGIN,
                                                     content->tagValueDetails.tagValueList.wrapping);
