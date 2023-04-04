@@ -457,7 +457,7 @@ nbgl_obj_t** nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer);
 uint8_t nbgl_containerPoolGetNbUsed(uint8_t layer);
 
 nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, bool withExitKey, uint8_t layer);
-void nbgl_navigationCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, uint8_t nbPages, uint8_t *activePage);
+bool nbgl_navigationCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, uint8_t nbPages, uint8_t *activePage);
 nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon, bool separationLine, uint8_t layer);
 
 // for internal use

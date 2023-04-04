@@ -178,7 +178,10 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   // case of navigation bar
   if ((obj->parent == (nbgl_obj_t *)layout->bottomContainer) &&
       (layout->bottomContainerUsage == PAGE_INDICATOR)) {
-    nbgl_navigationCallback(obj, eventType, layout->nbPages, &layout->activePage);
+    if (nbgl_navigationCallback(obj, eventType, layout->nbPages, &layout->activePage) == false) {
+      // navigation was impossible
+      return;
+    }
     layoutObj->index = layout->activePage;
   }
 
