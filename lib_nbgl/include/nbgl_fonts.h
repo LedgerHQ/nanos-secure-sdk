@@ -127,7 +127,7 @@ const nbgl_font_t *nbgl_getFont(nbgl_font_id_e fontId);
 uint16_t nbgl_getSingleLineTextWidth(nbgl_font_id_e fontId, const char* text);
 uint16_t nbgl_getSingleLineTextWidthInLen(nbgl_font_id_e fontId, const char* text, uint16_t maxLen);
 uint16_t nbgl_getTextWidth(nbgl_font_id_e fontId, const char* text);
-uint16_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text);
+uint8_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text);
 uint8_t nbgl_getFontHeight(nbgl_font_id_e fontId);
 uint8_t nbgl_getFontLineHeight(nbgl_font_id_e fontId);
 uint16_t nbgl_getTextNbLines(const char *text);
