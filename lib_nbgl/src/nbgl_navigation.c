@@ -60,32 +60,36 @@ static void configButtons(nbgl_container_t *navContainer, uint8_t navNbPages, ui
  * @param eventType type of touch (only TOUCHED is accepted)
  * @param nbPages number of pages for navigation (if < 2, no navigation keys)
  * @param activePage current active page
- * @return none
+ * @return true if actually navigated (page change)
  */
-void nbgl_navigationCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, uint8_t nbPages, uint8_t *activePage) {
+bool nbgl_navigationCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, uint8_t nbPages, uint8_t *activePage) {
   nbgl_container_t *navContainer;
 
   if (eventType != TOUCHED) {
-    return;
+    return false;
   }
   navContainer = (nbgl_container_t *)obj->parent;
 
   if (obj == navContainer->children[EXIT_BUTTON_INDEX]) {
     // fake page when Quit button is touched
     *activePage = EXIT_PAGE;
+    return true;
   }
   else if (obj == navContainer->children[PREVIOUS_PAGE_INDEX]) {
     if (*activePage > 0) {
       *activePage = *activePage - 1;
       configButtons(navContainer, nbPages, *activePage);
+      return true;
     }
   }
   else if (obj == navContainer->children[NEXT_PAGE_INDEX]) {
     if (*activePage < (nbPages-1)) {
       *activePage = *activePage + 1;
       configButtons(navContainer, nbPages, *activePage);
+      return true;
     }
   }
+  return false;
 }
 
 /**
