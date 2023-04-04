@@ -162,60 +162,78 @@ uint32_t nbgl_popUnicodeChar(const uint8_t **text, uint16_t *textLen, bool *is_u
   return unicode;
 }
 
+/**
+ * @brief return the width in pixels of the given char (unicode or not).
+ *
+ * @param fontId font ID
+ * @param unicode character
+ * @param is_unicode if true, is unicode
+ * @return the width in pixels of the char
+ */
+static uint8_t getCharWidth(const nbgl_font_t *font, uint32_t unicode, bool is_unicode) {
+  if (is_unicode) {
+#ifdef HAVE_UNICODE_SUPPORT
+    const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
+    if (!unicodeCharacter) {
+      return 0;
+    }
+    return unicodeCharacter->char_width;
+#else // HAVE_UNICODE_SUPPORT
+    return 0;
+#endif // HAVE_UNICODE_SUPPORT
+  }
+  else {
+    nbgl_font_character_t *character; // non-unicode char
+    if  ((unicode < font->first_char) || (unicode > font->last_char)) {
+      return 0;
+    }
+    character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
+    return character->char_width;
+  }
+}
+
+/**
+ * @brief return the max width in pixels of the given text until the first terminator (\n if breakOnLineEnd, or \0) is encountered,
+ * or maxLen bytes have been parsed.
+ *
+ * @param fontId font ID
+ * @param text text in UTF8
+ * @param breakOnLineEnd if true, \n is considered as an end of string
+ * @param maxLen max number of bytes to parse in text
+ * @return the width in pixels of the text
+ */
 static uint16_t getTextWidth(nbgl_font_id_e fontId, const char* text, bool breakOnLineEnd, uint16_t maxLen) {
   uint16_t line_width=0;
   uint16_t max_width=0;
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  uint16_t textLen = nbgl_getTextLength(text);
+  uint16_t textLen = MIN(strlen(text), maxLen);
 
 #ifdef HAVE_UNICODE_SUPPORT
   nbgl_getUnicodeFont(fontId);
 #endif // HAVE_UNICODE_SUPPORT
-  // end loop when a \0 is uncountered
-  while (*text) {
+  // end loop text len is NULL (max reached)
+  while (textLen) {
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
 
-    if (maxLen == 0)
-      break;
-    if (*text == '\n') {
+    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
+
+    if (unicode == '\n') {
       if (breakOnLineEnd)
         break;
-      // memorize max line width if greater than current
-      if (line_width>max_width) {
-        max_width = line_width;
-      }
       // reset line width for next line
       line_width=0;
-      text++;
-    }
-    unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
-    maxLen--;
-
-    if (is_unicode) {
-#ifdef HAVE_UNICODE_SUPPORT
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
-      if (!unicodeCharacter) {
-        continue;
-      }
-      char_width = unicodeCharacter->char_width;
-#else // HAVE_UNICODE_SUPPORT
       continue;
-#endif // HAVE_UNICODE_SUPPORT
     }
-    else {
-      nbgl_font_character_t *character; // non-unicode char
-      if  ((unicode < font->first_char) || (unicode > font->last_char)) {
-        continue;
-      }
-      character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-      char_width = character->char_width;
-    }
+
+    char_width = getCharWidth(font, unicode, is_unicode);
+
     line_width += char_width;
-  }
-  if (line_width>max_width) {
-    max_width = line_width;
+    // memorize max line width if greater than current
+    if (line_width>max_width) {
+      max_width = line_width;
+    }
   }
   return max_width;
 }
@@ -261,7 +279,7 @@ uint16_t nbgl_getTextWidth(nbgl_font_id_e fontId, const char* text) {
  * @param text UTF-8 character
  * @return the width in pixels of the character
  */
-uint16_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
+uint8_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
   uint32_t unicode;
   bool is_unicode;
@@ -273,25 +291,7 @@ uint16_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
 
   unicode = nbgl_popUnicodeChar((const uint8_t**)&text, &textLen, &is_unicode);
 
-  if (is_unicode) {
-#ifdef HAVE_UNICODE_SUPPORT
-    const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
-    if (!unicodeCharacter) {
-      return 0;
-    }
-    return unicodeCharacter->char_width;
-#else // HAVE_UNICODE_SUPPORT
-    return 0;
-#endif // HAVE_UNICODE_SUPPORT
-  }
-  else {
-    nbgl_font_character_t *bagl_character; // non-unicode char
-    if  ((unicode < font->first_char) || (unicode > font->last_char)) {
-      return 0;
-    }
-    bagl_character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-   return bagl_character->char_width;
-  }
+  return getCharWidth(font, unicode, is_unicode);
 }
 
 /**
@@ -346,11 +346,11 @@ uint16_t nbgl_getTextHeight(nbgl_font_id_e fontId, const char*text) {
 }
 
 /**
- * @brief return the number of chars of the given text, excluding final '\n' or '\0'
+ * @brief return the number of bytes of the given text, excluding final '\n' or '\0'
  * @note '\n' and '\0' are considered as end of string
  *
- * @param text text to get the number of lines from
- * @return the number of chars in the given text
+ * @param text text to get the number of bytes from
+ * @return the number of bytes in the given text
  */
 uint16_t nbgl_getTextLength(const char* text) {
   uint16_t nbChars=0;
@@ -362,10 +362,10 @@ uint16_t nbgl_getTextLength(const char* text) {
 }
 
 /**
- * @brief compute the max width of the longest line of the given text fitting in the maxWidth
+ * @brief compute the max width of the first line of the given text fitting in maxWidth
  *
  * @param fontId font ID
- * @param text input UTF-8 string, possibly multi-line
+ * @param text input UTF-8 string, possibly multi-line (but only first line, before \n, is used)
  * @param maxWidth maximum width in bytes, if text is greater than that the parsing is escaped
  * @param len (output) consumed bytes in text fitting in maxWidth
  * @param width (output) set to maximum width in pixels in text fitting in maxWidth
@@ -385,7 +385,6 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
   *width=0;
   *len=0;
   while (textLen) {
-    nbgl_font_character_t *character;
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
@@ -399,30 +398,14 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
       continue;
     }
 
-    if (is_unicode) {
-#ifdef HAVE_UNICODE_SUPPORT
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
-      // if not printable, go to next char
-      if (!unicodeCharacter) {
-        continue;
-      }
-      char_width = unicodeCharacter->char_width;
-#else // HAVE_UNICODE_SUPPORT
+    char_width = getCharWidth(font, unicode, is_unicode);
+    if (char_width == 0)
       continue;
-#endif // HAVE_UNICODE_SUPPORT
-    }
-    else {
-      // skip not printable char
-      if ((unicode < font->first_char) || (unicode > font->last_char)) {
-        continue;
-      }
-      // memorize cursors at last found space
-      if ((wrapping == true) && (unicode == ' ')) {
-        lenAtLastSpace = *len;
-        widthAtLastSpace = *width;
-      }
-      character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-      char_width = character->char_width;
+
+    // memorize cursors at last found sepator, when wrapping
+    if ((wrapping == true) && (unicode == ' ')) {
+      lenAtLastSpace = *len;
+      widthAtLastSpace = *width;
     }
     if ((*width+char_width) > maxWidth) {
       if ((wrapping == true)&&(widthAtLastSpace>0)) {
@@ -446,7 +429,7 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
  * @param maxNbLines maximum number of lines, if text is greater than that the parsing is escaped
  * @param len (output) consumed bytes in text fitting in maxWidth
  *
- * @return true if maxWidth is reached, false otherwise
+ * @return true if maxNbLines is reached, false otherwise
  *
  */
 bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t maxNbLines, uint16_t *len) {
@@ -460,57 +443,36 @@ bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16
 
   *len=0;
   while ((textLen)&&(maxNbLines>0)) {
-    nbgl_font_character_t *character;
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
     uint16_t curTextLen = textLen;
 
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
+    *len += curTextLen-textLen;
     // if \n, reset width
     if (unicode == '\n') {
-      *len += curTextLen-textLen;
       maxNbLines--;
       width = 0;
       continue;
     }
 
-    if (is_unicode) {
-#ifdef HAVE_UNICODE_SUPPORT
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
-      // if not printable, go to next char
-      if (!unicodeCharacter) {
-        continue;
-      }
-      char_width = unicodeCharacter->char_width;
-#else // HAVE_UNICODE_SUPPORT
+    char_width = getCharWidth(font, unicode, is_unicode);
+    if (char_width == 0)
       continue;
-#endif // HAVE_UNICODE_SUPPORT
-    }
-    else {
-      // skip not printable char
-      if ((unicode < font->first_char) || (unicode > font->last_char)) {
-        continue;
-      }
-      character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-      char_width = character->char_width;
-    }
+
     if ((width+char_width) > maxWidth) {
       width = 0;
       maxNbLines--;
       if (maxNbLines == 0) {
-        return true;
+        // remove last char nb_bytes
+        *len -= curTextLen-textLen;
+        break;
       }
     }
-    *len += curTextLen-textLen;
     width += char_width;
   }
-  if (maxNbLines == 0) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  return (maxNbLines == 0);
 }
 
 /**
@@ -583,7 +545,6 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
 #endif // HAVE_UNICODE_SUPPORT
   // end loop when a '\0' is uncountered
   while (textLen) {
-    nbgl_font_character_t *character;
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
@@ -600,30 +561,14 @@ uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uin
       continue;
     }
 
-    if (is_unicode) {
-#ifdef HAVE_UNICODE_SUPPORT
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
-      // if not printable, go to next char
-      if (!unicodeCharacter) {
-        continue;
-      }
-      char_width = unicodeCharacter->char_width;
-#else // HAVE_UNICODE_SUPPORT
+    char_width = getCharWidth(font, unicode, is_unicode);
+    if (char_width == 0)
       continue;
-#endif // HAVE_UNICODE_SUPPORT
-    }
-    else {
-      // if not printable, go to next char
-      if ((unicode < font->first_char) || (unicode > font->last_char)) {
-        continue;
-      }
-      // memorize cursors at last found space
-      if ((wrapping == true) && (unicode == ' ')) {
-        lastSpace = prevText;
-        lenAtLastSpace = textLen+1;
-      }
-      character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-      char_width = character->char_width;
+
+    // memorize cursors at last found space
+    if ((wrapping == true) && (unicode == ' ')) {
+      lastSpace = prevText;
+      lenAtLastSpace = textLen+1;
     }
     // if about to reach max len, increment the number of lines
     if ((width+char_width)>maxWidth) {
@@ -682,7 +627,6 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char* text, uint16_t maxWidth
 #endif
 
   while (*text) {
-    nbgl_font_character_t *character;
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
@@ -700,30 +644,14 @@ void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char* text, uint16_t maxWidth
       continue;
     }
 
-    if (is_unicode) {
-#ifdef HAVE_UNICODE_SUPPORT
-      const nbgl_font_unicode_character_t *unicodeCharacter = nbgl_getUnicodeFontCharacter(unicode);
-      // if not printable, go to next char
-      if (!unicodeCharacter) {
-        continue;
-      }
-      char_width = unicodeCharacter->char_width;
-#else // HAVE_UNICODE_SUPPORT
+    char_width = getCharWidth(font, unicode, is_unicode);
+    if (char_width == 0)
       continue;
-#endif // HAVE_UNICODE_SUPPORT
-    }
-    else {
-      // skip not printable char
-      if ((unicode < font->first_char) || (unicode > font->last_char)) {
-        continue;
-      }
-      // memorize cursors at last found space
-      if (unicode == ' ') {
-        lastSpace = prevText;
-        lenAtLastSpace = textLen+1;
-      }
-      character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-      char_width = character->char_width;
+
+    // memorize cursors at last found space
+    if (unicode == ' ') {
+      lastSpace = prevText;
+      lenAtLastSpace = textLen+1;
     }
     // if the width is about to overpass maxWidth, do something
     if ((width+char_width) > maxWidth) {
