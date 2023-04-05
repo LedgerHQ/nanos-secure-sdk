@@ -35,6 +35,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_conf.h"
+#include "os_io.h"
 
 /** @addtogroup STM32_USBD_DEVICE_LIBRARY
   * @{
@@ -165,7 +166,7 @@ typedef uint8_t  (*EP0_TxSent_t)       (struct _USBD_HandleTypeDef *pdev );
 typedef uint8_t  (*EP0_RxReady_t)      (struct _USBD_HandleTypeDef *pdev );  
 /* Class Specific Endpoints*/
 typedef uint8_t  (*DataIn_t)           (struct _USBD_HandleTypeDef *pdev , uint8_t epnum);   
-typedef uint8_t  (*DataOut_t)          (struct _USBD_HandleTypeDef *pdev , uint8_t epnum, uint8_t* pData); 
+typedef uint8_t  (*DataOut_t)          (struct _USBD_HandleTypeDef *pdev , uint8_t epnum, uint8_t* pData, apdu_buffer_t *); 
 typedef uint8_t  (*SOF_t)              (struct _USBD_HandleTypeDef *pdev); 
 typedef uint8_t  (*IsoINIncomplete_t)  (struct _USBD_HandleTypeDef *pdev , uint8_t epnum); 
 typedef uint8_t  (*IsoOUTIncomplete_t) (struct _USBD_HandleTypeDef *pdev , uint8_t epnum);   

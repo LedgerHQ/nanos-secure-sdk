@@ -26,7 +26,8 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
-#include "os.h"
+#include "os_io.h"
+#include "os_helpers.h"
 #include "usbd_core.h"
 #include "usbd_ioreq.h"
 
