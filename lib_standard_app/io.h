@@ -5,9 +5,17 @@
 #include "ux.h"
 #include "os_io_seproxyhal.h"
 
-#include "types.h"
 #include "buffer.h"
 #include "macros.h"
+
+/**
+ * Enumeration for the status of IO.
+ */
+typedef enum {
+    READY,     /// ready for new event
+    RECEIVED,  /// data received
+    WAITING    /// waiting
+} io_state_e;
 
 #ifdef HAVE_BAGL
 WEAK void io_seproxyhal_display(const bagl_element_t *element);
