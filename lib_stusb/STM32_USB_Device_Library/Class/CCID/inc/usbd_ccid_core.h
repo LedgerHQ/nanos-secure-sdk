@@ -30,6 +30,7 @@
 #define _USB_CCID_CORE_H_
 
 #include "os.h"
+#include "os_io.h"
 #include "os_io_seproxyhal.h"
 
 #ifdef HAVE_USB_CLASS_CCID
@@ -63,7 +64,8 @@ uint8_t  USBD_CCID_DataIn (USBD_HandleTypeDef  *pdev,
                               uint8_t epnum);
 
 uint8_t  USBD_CCID_DataOut (USBD_HandleTypeDef *pdev, 
-                              uint8_t epnum, uint8_t* buffer);
+                              uint8_t epnum, uint8_t* buffer, 
+                              apdu_buffer_t * apdu_buffer);
 
 #endif // HAVE_USB_CLASS_CCID
 

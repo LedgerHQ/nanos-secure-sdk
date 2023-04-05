@@ -40,6 +40,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_ccid_core.h"
+#include "os_io.h"
+#include <string.h>
 
 #ifdef HAVE_USB_CLASS_CCID
 
@@ -253,9 +255,17 @@ uint8_t  USBD_CCID_DataIn (USBD_HandleTypeDef  *pdev,
   * @retval status
   */
 uint8_t  USBD_CCID_DataOut (USBD_HandleTypeDef  *pdev, 
-                               uint8_t epnum, uint8_t* buffer)
+                               uint8_t epnum, uint8_t* buffer, 
+                               apdu_buffer_t * apdu_buffer)
 {
-  CCID_BulkMessage_Out(pdev , epnum, buffer, io_seproxyhal_get_ep_rx_size(CCID_BULK_OUT_EP));
+#ifndef HAVE_LOCAL_APDU_BUFFER
+  UNUSED(apdu_buffer);
+#endif
+  uint16_t rlen = io_seproxyhal_get_ep_rx_size(CCID_BULK_OUT_EP);
+  CCID_BulkMessage_Out(pdev , epnum, buffer, rlen);
+#ifdef HAVE_LOCAL_APDU_BUFFER
+  memcpy(apdu_buffer->buf, G_io_apdu_buffer, rlen);
+#endif
   return USBD_OK;
 }
 
