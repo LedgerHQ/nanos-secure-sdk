@@ -116,7 +116,7 @@ uint8_t *USBD_HID_GetReportDescriptor_impl(uint16_t *length);
 
 
 uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev, 
-                              uint8_t epnum, uint8_t* buffer);
+                              uint8_t epnum, uint8_t* buffer, apdu_buffer_t*);
 
 /**
   * @}

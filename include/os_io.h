@@ -19,6 +19,12 @@
 #else
 #define IO_APDU_BUFFER_SIZE IMPL_IO_APDU_BUFFER_SIZE
 #endif
+
+typedef struct apdu_buffer_s {
+  uint8_t * buf;
+  uint16_t len;
+} apdu_buffer_t;
+
 extern unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 
 // send tx_len bytes (atr or rapdu) and retrieve the length of the next command apdu (over the requested channel)
