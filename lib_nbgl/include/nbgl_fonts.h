@@ -30,13 +30,16 @@ extern "C" {
  * @brief structure defining an ASCII character (except the bitmap)
  *
  */
+// WARNING: please DON'T CHANGE the order/values of the fields below!
+// (otherwise python tools that generate data will need to be modified too)
 typedef struct {
-  uint16_t bitmap_offset;    ///< offset of this character in chars buffer
-  uint8_t char_width;        ///< width of character in pixels
-  uint8_t x_min;
-  uint8_t y_min;
-  uint8_t x_max;
-  uint8_t y_max;
+  uint32_t encoding:1;          // method used to encode bitmap data
+  uint32_t bitmap_offset:14;    // offset of this character in chars buffer
+  uint32_t char_width:5;        // width of character in pixels
+  uint32_t x_min:3;             // X offset in pixels
+  uint32_t y_min:3;             // Y offset in pixels*4 (ie 3=>12)
+  uint32_t width_diff:3;        // Real width diff: x_max = width - width_diff
+  uint32_t real_height:3;       // Height-1 in pixels*4 (ie 2=>3*4=12)
 } nbgl_font_character_t;
 
 /**
@@ -74,7 +77,7 @@ typedef struct {
   uint8_t y_min;
   uint8_t x_max;
   uint8_t y_max;
-  uint8_t pad0;
+  uint8_t encoding;         // method used to encode bitmap data
   uint8_t pad1;
   uint8_t pad2;
 } nbgl_font_unicode_character_t;
