@@ -534,7 +534,7 @@ void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceI
 #endif
 
 #ifdef HAVE_SE_TOUCH
-#ifdef HAVE_TOUCH_DEBUG
+#ifdef HAVE_TOUCH_READ_SENSI_SYSCALL
 void io_seproxyhal_touch_read_sensi(uint8_t * sensi_data) {
   touch_read_sensitivity(sensi_data);
 }

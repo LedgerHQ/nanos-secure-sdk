@@ -1813,7 +1813,7 @@ uint8_t touch_exclude_borders(uint8_t excluded_borders) {
   return (uint8_t)SVC_Call(SYSCALL_touch_exclude_borders_ID, parameters);
 }
 
-#ifdef HAVE_TOUCH_DEBUG
+#ifdef HAVE_TOUCH_READ_SENSI_SYSCALL
 void touch_read_sensitivity(uint8_t *sensi_data) {
   unsigned int parameters[1] = {(unsigned int) sensi_data};
   SVC_Call(SYSCALL_touch_read_sensi_ID, parameters);
