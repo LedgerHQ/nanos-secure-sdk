@@ -15,15 +15,16 @@
 #  limitations under the License.
 #*******************************************************************************
 
-STANDARD_APP_FLAGS = 0x000
-
 #####################################################################
 #                            BLUETOOTH                              #
 #####################################################################
 ifeq ($(ENABLE_BLUETOOTH), 1)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
     STANDARD_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
-    STANDARD_APP_DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-    STANDARD_SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
+	STANDARD_APP_DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
+    STANDARD_APP_DEFINES += BLE_SEGMENT_SIZE=32
+    SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
+endif
 endif
 
 #####################################################################
@@ -60,34 +61,98 @@ STANDARD_APP_DEFINES += APPVERSION=\"$(APPVERSION)\"
 STANDARD_APP_DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
 STANDARD_APP_DEFINES += OS_IO_SEPROXYHAL
 
-ifneq ($(DISABLE_STANDARD_APP_DEFINES), 1)
+ifeq ($(DISABLE_STANDARD_APP_DEFINES), 1)
+    DISABLE_STANDARD_SNPRINTF = 1
+    DISABLE_STANDARD_USB = 1
+    DISABLE_STANDARD_WEBUSB = 1
+    DISABLE_STANDARD_BAGL_UX_FLOW = 1
+endif
+
+ifneq ($(DISABLE_STANDARD_SNPRINTF), 1)
     STANDARD_APP_DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
+endif
+
+ifneq ($(DISABLE_STANDARD_USB), 1)
     STANDARD_APP_DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
     STANDARD_APP_DEFINES += USB_SEGMENT_SIZE=64
-    STANDARD_APP_DEFINES += BLE_SEGMENT_SIZE=32
-    STANDARD_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
+endif
 
+ifneq ($(DISABLE_STANDARD_WEBUSB), 1)
+    STANDARD_APP_DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
+endif
+
+ifneq ($(DISABLE_STANDARD_BAGL_UX_FLOW), 1)
 ifneq ($(TARGET_NAME), TARGET_STAX)
     STANDARD_APP_DEFINES += HAVE_UX_FLOW
 endif
-
 endif
 
-ifeq ($(USE_STANDARD_APP_FILES_IN_SDK), 1)
-STANDARD_SDK_SOURCE_PATH += lib_standard_app
+ifneq ($(DISABLE_STANDARD_APP_FILES), 1)
+SDK_SOURCE_PATH += lib_standard_app
 endif
 
 #####################################################################
 #                              NBGL                                 #
 #####################################################################
 ifeq ($(ENABLE_NBGL_QRCODE), 1)
+ifeq ($(TARGET_NAME), TARGET_STAX)
     STANDARD_APP_DEFINES += NBGL_QRCODE
+endif
 endif
 
 ifeq ($(ENABLE_NBGL_KEYBOARD), 1)
+ifeq ($(TARGET_NAME), TARGET_STAX)
     STANDARD_APP_DEFINES += NBGL_KEYBOARD
+endif
 endif
 
 ifeq ($(ENABLE_NBGL_KEYPAD), 1)
+ifeq ($(TARGET_NAME), TARGET_STAX)
     STANDARD_APP_DEFINES += NBGL_KEYPAD
 endif
+endif
+
+#####################################################################
+#                           APP_FLAGS                               #
+#####################################################################
+CUSTOM_APP_FLAGS ?= 0x000 # Can be personalized by the application
+STANDARD_APP_FLAGS ?= 0x000
+
+APP_FLAGS = $(shell echo $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
+
+APP_LOAD_PARAMS += --appFlags $(APP_FLAGS)
+
+APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
+
+CC      := $(CLANGPATH)clang
+AS      := $(GCCPATH)arm-none-eabi-gcc
+LD      := $(GCCPATH)arm-none-eabi-gcc
+LDLIBS  += -lm -lgcc -lc
+
+include $(BOLOS_SDK)/Makefile.glyphs
+
+load: all
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+
+load-offline: all
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
+
+delete:
+	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
+
+include $(BOLOS_SDK)/Makefile.rules
+
+# Prepare `listvariants` mandatory target.
+# This target output must contains:
+# - `VARIANTS` which is used as a marker for the tools parsing the output.
+# - <VARIANT_PARAM> which is the name of the parameter which should be set
+#   to specify the variant that should be build.
+# - <VARIANT_VALUES> a list of variant that can be build using this app code.
+#   * It must at least contains one value.
+#   * Values can be the app ticker or anything else but should be unique.
+#
+# Deployment scripts will use this Makefile target to retrieve the list of
+# available variants and then call `make -j <VARIANT_PARAM>=<VALUE>` for each
+# <VALUE> in <VARIANT_VALUES>.
+listvariants:
+	@echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)
