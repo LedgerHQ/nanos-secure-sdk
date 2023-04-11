@@ -26,12 +26,6 @@ else
 SDK_SOURCE_PATH += lib_bagl lib_ux
 endif
 
-ifneq ($(DISABLE_DEFAULT_SDK_LIB), 1)
-ifneq ($(strip $(filter HAVE_IO_USB, $(DEFINES))),)
-SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
-endif
-endif
-
 # adding the correct target header to sources
 SDK_SOURCE_PATH += target/$(TARGET)/include
 
