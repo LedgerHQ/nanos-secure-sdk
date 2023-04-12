@@ -13,6 +13,7 @@
 #include "nbgl_use_case.h"
 #include "glyphs.h"
 #include "os_pic.h"
+#include "os_helpers.h"
 
 /*********************
  *      DEFINES
