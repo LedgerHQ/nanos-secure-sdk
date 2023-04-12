@@ -1077,6 +1077,8 @@ void LEDGER_BLE_receive(void)
 			ledger_ble_data.connection.connection_handle = 0xFFFF;
 			ledger_ble_data.advertising_enabled          = 0;
 			ledger_ble_data.connection.encrypted         = 0;
+			ledger_ble_data.transfer_mode_enable         = 0;
+			G_io_app.transfer_mode                       = 0;
 			end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
 			if (G_io_seproxyhal_spi_buffer[9] != 0x28) { // Error code : Instant Passed
 				start_advertising();
