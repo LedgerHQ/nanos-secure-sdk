@@ -1105,21 +1105,23 @@ void nbgl_useCaseForwardOnlyReview(const char *rejectText, nbgl_layoutTouchCallb
  * @param rejectText text to use in footer
  * @param callback callback called when transaction is accepted (param is true) or rejected (param is false)
  */
-void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
-                              const char *rejectText, nbgl_choiceCallback_t callback) {
+void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList,
+                              const nbgl_pageInfoLongPress_t *infoLongPress,
+                              const char *rejectText,
+                              nbgl_choiceCallback_t callback) {
   // memorize context
   onChoice = callback;
   onNav = NULL;
   forwardNavOnly = false;
 
   staticReviewContext.withLongPress = true;
-  memcpy(&staticReviewContext.tagValueList,tagValueList,sizeof(nbgl_layoutTagValueList_t));
-  memcpy(&staticReviewContext.infoLongPress,infoLongPress,sizeof(nbgl_pageInfoLongPress_t));
+  memcpy(&staticReviewContext.tagValueList, tagValueList, sizeof(nbgl_layoutTagValueList_t));
+  memcpy(&staticReviewContext.infoLongPress, infoLongPress, sizeof(nbgl_pageInfoLongPress_t));
   staticReviewContext.currentPairIndex = 0;
   staticReviewContext.nbPairsInCurrentPage = 0;
 
   // compute number of pages & fill navigation structure
-  navInfo.nbPages = nbgl_useCaseGetNbPagesForTagValueList(tagValueList)+1;
+  navInfo.nbPages = nbgl_useCaseGetNbPagesForTagValueList(tagValueList) + 1;
   navInfo.activePage = 0;
   navInfo.navType = NAV_WITH_TAP;
   navInfo.quitToken = REJECT_TOKEN;
@@ -1143,8 +1145,10 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_page
  * @param rejectText text to use in footer
  * @param callback callback called when transaction is accepted (param is true) or rejected (param is false)
  */
-void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
-                                   const char *rejectText, nbgl_choiceCallback_t callback) {
+void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList,
+                                   const nbgl_pageInfoLongPress_t *infoLongPress,
+                                   const char *rejectText,
+                                   nbgl_choiceCallback_t callback) {
   // memorize context
   onChoice = callback;
   onNav = NULL;
@@ -1249,7 +1253,7 @@ void nbgl_useCaseAddressConfirmationExt(const char *address, nbgl_choiceCallback
  *
  * @param text text to use under spinner
  */
-void nbgl_useCaseSpinner(const char* text) {
+void nbgl_useCaseSpinner(const char *text) {
   pageContext = nbgl_pageDrawSpinner(NULL, (const char*)text);
   nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }

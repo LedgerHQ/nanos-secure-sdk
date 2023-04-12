@@ -113,14 +113,14 @@ void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, const char *re
                                nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback);
 void nbgl_useCaseForwardOnlyReview(const char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
                                    nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback);
-void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
+void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList, const nbgl_pageInfoLongPress_t *infoLongPress,
                               const char *rejectText, nbgl_choiceCallback_t callback);
-void nbgl_useCaseStaticReviewLight(nbgl_layoutTagValueList_t *tagValueList, nbgl_pageInfoLongPress_t *infoLongPress,
+void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList, const nbgl_pageInfoLongPress_t *infoLongPress,
                                    const char *rejectText, nbgl_choiceCallback_t callback);
 void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping);
 void nbgl_useCaseAddressConfirmation(const char *address, nbgl_choiceCallback_t callback);
 void nbgl_useCaseAddressConfirmationExt(const char *address, nbgl_choiceCallback_t callback, const nbgl_layoutTagValueList_t *tagValueList);
-void nbgl_useCaseSpinner(const char* text);
+void nbgl_useCaseSpinner(const char *text);
 
 #ifdef __cplusplus
 } /* extern "C" */
