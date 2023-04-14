@@ -120,6 +120,7 @@ typedef enum {
 typedef enum {
     NBGL_NO_COMPRESSION = 0, ///< no compression, raw data
     NBGL_GZLIB_COMPRESSION,  ///< gzlib compression
+    NBGL_RLE_COMPRESSION,    ///< RLE compression
     NB_NBGL_COMPRESSION      ///< Number of NBGL_COMPRESSION enums
 } nbgl_compression_t;
 
