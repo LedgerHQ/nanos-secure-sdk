@@ -15,8 +15,13 @@ import sys
 import traceback
 import gzip
 
+from enum import IntEnum
 from PIL import Image
 
+class NbglFileCompression(IntEnum):
+    NoCompression = 0
+    Gzlib = 1,
+    Rle = 2
 
 MAX_COLORS = 16
 
@@ -133,7 +138,7 @@ def image_to_packed_buffer(im, palette, bits_per_pixel):
 
     if toCompress(width,height):
         output_buffer = apply_compression(image_data)
-        return format_image(output_buffer, width, height, bits_per_pixel)
+        return format_image(output_buffer, width, height, bits_per_pixel, NbglFileCompression.Gzlib)
     else:
         return bytes(image_data)
 
@@ -157,16 +162,18 @@ def apply_compression(pixels_buffer) -> bytes:
     return bytearray(output_buffer)
 
 # returns a "image file" version of the given compressed buffer
-def format_image(output_buffer: bytearray, width: int, height: int, bpp: int) -> bytes:
+def format_image(output_buffer: bytearray, width: int, height: int,
+                 bpp: int, compression: NbglFileCompression) -> bytes:
     BPP_FORMATS = {
         1: 0,
         2: 1,
         4: 2
     }
 
-    result = [width&0xFF, width>>8, height&0xFF, height>>8,
-        (BPP_FORMATS[bpp]<<4) | 1, len(output_buffer)&0xFF, (len(output_buffer)>>8)&0xFF,
-        (len(output_buffer)>>16)&0xFF]
+    result = [width&0xFF, width>>8,
+              height&0xFF, height>>8,
+              (BPP_FORMATS[bpp]<<4) | compression,
+              len(output_buffer)&0xFF, (len(output_buffer)>>8)&0xFF, (len(output_buffer)>>16)&0xFF]
     result.extend(output_buffer)
     return bytearray(result)
 
@@ -265,7 +272,10 @@ def main():
                     image_data = image_to_packed_buffer(im, None, bits_per_pixel)
                 else:
                     image_data = image_to_packed_buffer(im, new_indices, bits_per_pixel)
-                print(binascii.hexlify(image_data).decode('utf-8'))
+
+                image_file = \
+                    format_image(image_data, width, height, bits_per_pixel, NbglFileCompression.NoCompression)
+                print(binascii.hexlify(image_file).decode('utf-8'))
                 continue
 
             else:
