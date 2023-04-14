@@ -408,7 +408,7 @@ static void draw_image(nbgl_image_t* obj, nbgl_obj_t *prevObj, bool computePosit
     colorMap = ((WHITE<<6)|(LIGHT_GRAY<<4)|(DARK_GRAY<<2)|BLACK);
   }
   else {
-    colorMap = INVALID_COLOR_MAP;
+    colorMap = obj->foregroundColor;
   }
   if (!iconDetails->isFile) {
     nbgl_frontDrawImage((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap, NO_TRANSFORMATION, colorMap);
