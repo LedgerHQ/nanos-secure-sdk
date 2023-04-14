@@ -40,7 +40,7 @@ struct ux_state_s {
 
   asynchmodal_end_callback_t asynchmodal_end_callback;
 
-  char string_buffer[128];
+  char string_buffer[520];
 };
 
 
