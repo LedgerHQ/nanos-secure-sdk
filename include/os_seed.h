@@ -111,12 +111,12 @@ SYSCALL                                       void           os_perso_derive_nod
  */
 static inline cx_err_t os_derive_bip32_with_seed_no_throw(unsigned int derivation_mode,
                                                           cx_curve_t curve,
-                                                          const uint32_t *path,
-                                                          size_t path_len,
-                                                          uint8_t raw_privkey[static 64],
-                                                          uint8_t *chain_code,
+                                                          const unsigned int *path,
+                                                          unsigned int path_len,
+                                                          unsigned char raw_privkey[static 64],
+                                                          unsigned char *chain_code,
                                                           unsigned char *seed,
-                                                          size_t seed_len) {
+                                                          unsigned int seed_len) {
     cx_err_t error = CX_OK;
 
     BEGIN_TRY {
@@ -160,10 +160,10 @@ static inline cx_err_t os_derive_bip32_with_seed_no_throw(unsigned int derivatio
  *                             - CX_INTERNAL_ERROR
  */
 static inline cx_err_t os_derive_bip32_no_throw(cx_curve_t curve,
-                                                const uint32_t *path,
-                                                size_t path_len,
-                                                uint8_t raw_privkey[static 64],
-                                                uint8_t *chain_code) {
+                                                const unsigned int *path,
+                                                unsigned int path_len,
+                                                unsigned char raw_privkey[static 64],
+                                                unsigned char *chain_code) {
     return os_derive_bip32_with_seed_no_throw(HDW_NORMAL,
                                               curve,
                                               path,
@@ -192,9 +192,9 @@ SYSCALL                                       void           os_perso_derive_eip
  *                             - CX_INTERNAL_ERROR
  */
 static inline cx_err_t os_derive_eip2333_no_throw(cx_curve_t curve,
-                                                  const uint32_t *path,
-                                                  size_t path_len,
-                                                  uint8_t raw_privkey[static 64]) {
+                                                  const unsigned int *path,
+                                                  unsigned int path_len,
+                                                  unsigned char raw_privkey[static 64]) {
     cx_err_t error = CX_OK;
 
     BEGIN_TRY {
