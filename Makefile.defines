@@ -135,6 +135,11 @@ else
 LDFLAGS  += -nostartfiles
 endif
 
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+DEFINES += HAVE_BAGL
+LDFLAGS  += -L$(BOLOS_SDK)/lib/
+endif
+
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 # Screen is directly connected to the SE
 DEFINES       += HAVE_SE_SCREEN

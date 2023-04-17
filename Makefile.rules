@@ -16,10 +16,8 @@
 #*******************************************************************************
 
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-SDK_SOURCE_PATH += lib_bagl
-else
-SDK_SOURCE_PATH += lib_ux
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
+SDK_SOURCE_PATH += lib_bagl lib_ux
 endif
 
 #include the lib_cxng definition by default if not asked otherwise
