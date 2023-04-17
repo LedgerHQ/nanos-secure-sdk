@@ -86,7 +86,133 @@ SYSCALL                                       void           os_perso_derive_nod
 SYSCALL                                       void           os_perso_derive_node_with_seed_key(unsigned int mode, cx_curve_t curve, const unsigned int* path PLENGTH(4 * (pathLength&0x0FFFFFFFu)), unsigned int pathLength, unsigned char *privateKey PLENGTH(64), unsigned char* chain PLENGTH(32), unsigned char* seed_key PLENGTH(seed_key_length), unsigned int seed_key_length);
 #define                                                      os_perso_derive_node_bip32_seed_key(mode, curve, path, pathLength, privateKey, chain, seed_key, seed_key_length) os_perso_derive_node_with_seed_key(mode, curve, path, pathLength, privateKey, chain, seed_key, seed_key_length)
 
+/**
+ * @brief   Gets the private key from the device seed using the specified bip32 path and seed key.
+ *
+ * @param[in]  derivation_mode Derivation mode, one of HDW_NORMAL / HDW_ED25519_SLIP10 / HDW_SLIP21.
+ *
+ * @param[in]  curve           Curve identifier.
+ *
+ * @param[in]  path            Bip32 path to use for derivation.
+ *
+ * @param[in]  path_len        Bip32 path length.
+ *
+ * @param[out] raw_privkey     Buffer where to store the private key.
+ *
+ * @param[out] chain_code      Buffer where to store the chain code. Can be NULL.
+ *
+ * @param[in]  seed            Seed key to use for derivation.
+ *
+ * @param[in]  seed_len        Seed key length.
+ *
+ * @return                     Error code:
+ *                             - CX_OK on success
+ *                             - CX_INTERNAL_ERROR
+ */
+static inline cx_err_t os_derive_bip32_with_seed_no_throw(unsigned int derivation_mode,
+                                                          cx_curve_t curve,
+                                                          const uint32_t *path,
+                                                          size_t path_len,
+                                                          uint8_t raw_privkey[static 64],
+                                                          uint8_t *chain_code,
+                                                          unsigned char *seed,
+                                                          size_t seed_len) {
+    cx_err_t error = CX_OK;
+
+    BEGIN_TRY {
+        TRY {
+            // Derive the seed with path
+            os_perso_derive_node_bip32_seed_key(derivation_mode,
+                                                curve,
+                                                path,
+                                                path_len,
+                                                raw_privkey,
+                                                chain_code,
+                                                seed,
+                                                seed_len);
+        }
+        CATCH_OTHER(e) {
+            error = e;
+        }
+        FINALLY {
+        }
+    }
+    END_TRY;
+
+    return error;
+}
+
+/**
+ * @brief   Gets the private key from the device seed using the specified bip32 path.
+ *
+ * @param[in]  curve           Curve identifier.
+ *
+ * @param[in]  path            Bip32 path to use for derivation.
+ *
+ * @param[in]  path_len        Bip32 path length.
+ *
+ * @param[out] raw_privkey     Buffer where to store the private key.
+ *
+ * @param[out] chain_code      Buffer where to store the chain code. Can be NULL.
+ *
+ * @return                     Error code:
+ *                             - CX_OK on success
+ *                             - CX_INTERNAL_ERROR
+ */
+static inline cx_err_t os_derive_bip32_no_throw(cx_curve_t curve,
+                                                const uint32_t *path,
+                                                size_t path_len,
+                                                uint8_t raw_privkey[static 64],
+                                                uint8_t *chain_code) {
+    return os_derive_bip32_with_seed_no_throw(HDW_NORMAL,
+                                              curve,
+                                              path,
+                                              path_len,
+                                              raw_privkey,
+                                              chain_code,
+                                              NULL,
+                                              0);
+}
+
 SYSCALL                                       void           os_perso_derive_eip2333(cx_curve_t curve, const unsigned int* path PLENGTH(4 * (pathLength&0x0FFFFFFFu)), unsigned int pathLength, unsigned char *privateKey PLENGTH(32));
+
+/**
+ * @brief   Gets the private key from the device seed using the specified eip2333 path.
+ *
+ * @param[in]  curve           Curve identifier.
+ *
+ * @param[in]  path            Eip2333 path to use for derivation.
+ *
+ * @param[in]  path_len        Eip2333 path length.
+ *
+ * @param[out] raw_privkey     Buffer where to store the private key.
+ *
+ * @return                     Error code:
+ *                             - CX_OK on success
+ *                             - CX_INTERNAL_ERROR
+ */
+static inline cx_err_t os_derive_eip2333_no_throw(cx_curve_t curve,
+                                                  const uint32_t *path,
+                                                  size_t path_len,
+                                                  uint8_t raw_privkey[static 64]) {
+    cx_err_t error = CX_OK;
+
+    BEGIN_TRY {
+        TRY {
+            // Derive the seed with path
+            os_perso_derive_eip2333(curve, path, path_len, raw_privkey);
+        }
+        CATCH_OTHER(e) {
+            error = e;
+        }
+        FINALLY {
+        }
+    }
+    END_TRY;
+
+    return error;
+}
+
 /**
  * Generate a seed based cookie
  * seed => derivation (path 0xda7aba5e/0xc1a551c5) => priv key =SECP256K1=> pubkey => sha512 => cookie
