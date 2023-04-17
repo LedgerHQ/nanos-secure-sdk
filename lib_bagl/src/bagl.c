@@ -797,6 +797,8 @@ idx_ok:
                                  (context_length - ((unsigned int)ellipsis_2_start-(unsigned int)context) ),
                                  context_encoding);
         }
+#else
+        (void) pos;
 #endif // HAVE_BAGL_ELLIPSIS
       }
       break;
