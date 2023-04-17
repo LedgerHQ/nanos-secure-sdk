@@ -913,6 +913,7 @@ void bagl_draw_glyph(const bagl_component_t* component, const bagl_icon_details_
     
 // --------------------------------------------------------------------------------------
 
+#ifdef HAVE_SE_SCREEN
 void bagl_animate(bagl_animated_t* anim, unsigned int timestamp_ms, unsigned int interval_ms) {
   // nothing to be animated right now (or no horizontal scrolling speed defined)
   if ((anim->next_ms != 0 && anim->next_ms > timestamp_ms) || anim->c.width == 0 || anim->c.icon_id == 0 || (anim->current_x & 0xF0000000)==0x40000000) {
@@ -1068,7 +1069,7 @@ void bagl_animate(bagl_animated_t* anim, unsigned int timestamp_ms, unsigned int
     }
   }
 }
-
+#endif /* HAVE_SE_SCREEN */
 // --------------------------------------------------------------------------------------
 
 void bagl_draw(const bagl_component_t* component) {
