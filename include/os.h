@@ -88,7 +88,7 @@
 void app_main(void);
 
 // os initialization function to be called by application entry point
-void os_boot();
+void os_boot(void);
 
 /**
  * Function takes 0 for first call. Returns 0 when timeout has occured. Returned
