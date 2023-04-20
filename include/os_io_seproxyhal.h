@@ -30,6 +30,10 @@
 #include "os_print.h"
 #include "os_types.h"
 
+#ifdef HAVE_NFC
+#include "nfc.h"
+#endif
+
 #ifdef HAVE_SERIALIZED_NBGL
 #include "nbgl_serialize.h"
 #endif
