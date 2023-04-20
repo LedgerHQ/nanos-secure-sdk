@@ -417,7 +417,7 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     uint8_t char_y_min = 0;
     uint8_t char_x_max = 0;
     uint8_t char_y_max = 0;
-    uint8_t char_byte_cnt = 0;
+    uint16_t char_byte_cnt = 0;
     uint8_t encoding = 0;
 
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
