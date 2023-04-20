@@ -28,6 +28,17 @@ endif
 endif
 
 #####################################################################
+#                               NFC                                 #
+#####################################################################
+ifeq ($(ENABLE_NFC), 1)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME), TARGET_STAX))
+    STANDARD_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+    DEFINES += HAVE_NFC
+    SDK_SOURCE_PATH += lib_nfc
+endif
+endif
+
+#####################################################################
 #                               DEBUG                               #
 #####################################################################
 ifneq ($(DEBUG), 0)
