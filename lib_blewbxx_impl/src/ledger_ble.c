@@ -510,6 +510,7 @@ static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length)
 				       ledger_protocol_data.rx_apdu_length);
 				G_io_app.apdu_length = ledger_protocol_data.rx_apdu_length;
 				G_io_app.apdu_state  = APDU_BLE;
+				G_io_app.apdu_media  = IO_APDU_MEDIA_BLE;
 				ledger_protocol_data.rx_apdu_length = 0;
 			}
 		}
@@ -533,7 +534,6 @@ static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length)
 				}
 			}
 		}
-		G_io_app.apdu_media = IO_APDU_MEDIA_BLE;
 	}
 	else if (  (opcode == 0xfc81)
 	         ||(opcode == 0xfc83)
