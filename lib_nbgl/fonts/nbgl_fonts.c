@@ -391,11 +391,10 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
     uint16_t curTextLen = textLen;
 
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
-    // if \n, reset width
+    // if \n, exit
     if (unicode == '\n') {
       *len += curTextLen-textLen;
-      *width = 0;
-      continue;
+      return;
     }
 
     char_width = getCharWidth(font, unicode, is_unicode);
@@ -434,7 +433,7 @@ void nbgl_getTextMaxLenAndWidth(nbgl_font_id_e fontId, const char* text, uint16_
  */
 bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, uint16_t maxNbLines, uint16_t *len) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  uint16_t textLen = nbgl_getTextLength(text);
+  uint16_t textLen = strlen(text);
   uint16_t width = 0;
 
 #ifdef HAVE_UNICODE_SUPPORT
@@ -529,6 +528,7 @@ bool nbgl_getTextMaxLenAndWidthFromEnd(nbgl_font_id_e fontId, const char* text, 
  * @param fontId font ID
  * @param text UTF-8 text to get the number of lines from
  * @param maxWidth maximum width in which the text must fit
+ * @param wrapping if true, lines are split on separators like spaces, \n...
  * @return the number of lines in the given text
  */
 uint16_t nbgl_getTextNbLinesInWidth(nbgl_font_id_e fontId, const char* text, uint16_t maxWidth, bool wrapping) {
