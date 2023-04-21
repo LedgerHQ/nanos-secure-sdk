@@ -896,6 +896,10 @@ int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text) {
   textArea->alignment = NO_ALIGNMENT;
   textArea->alignmentMarginX = BORDER_MARGIN;
   textArea->alignmentMarginY = BORDER_MARGIN;
+  // if first object of container, increase the margin from top
+  if (layoutInt->container->nbChildren == 0) {
+    textArea->alignmentMarginY += BORDER_MARGIN;
+  }
 
   // set this new obj as child of main container
   addObjectToLayout(layoutInt,(nbgl_obj_t*)textArea);
