@@ -728,7 +728,7 @@ uint8_t nbgl_useCaseGetNbPagesForTagValueList(const nbgl_layoutTagValueList_t *t
  *
  * @param appName app name
  * @param appIcon app icon
- * @param tagline text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
+ * @param tagline text under app name (if NULL, it will be "This app enables signing transactions on the <appName> network.")
  * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info" (i)
  * @param topRightCallback callback called when top-right button is touched
  * @param quitCallback callback called when quit button is touched
@@ -745,7 +745,7 @@ void nbgl_useCaseHome(const char *appName, const nbgl_icon_details_t *appIcon, c
  *
  * @param appName app name
  * @param appIcon app icon
- * @param tagline text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
+ * @param tagline text under app name (if NULL, it will be "This app enables signing transactions on the <appName> network.")
  * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info" (i)
  * @param actionButtonText if not NULL, text used for an action button (in black, on top of "Quit App" button)
  * @param actionCallback callback called when action button is touched (if actionButtonText is not NULL)
@@ -779,7 +779,7 @@ void nbgl_useCaseHomeExt(const char *appName, const nbgl_icon_details_t *appIcon
     onAction = actionCallback;
   }
   if (tagline == NULL) {
-    snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app confirms actions on\nthe %s network.", appName);
+    snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app enables signing\ntransactions on the %s\nnetwork.", appName);
     info.centeredInfo.text2 = appDescription;
   }
   else {
