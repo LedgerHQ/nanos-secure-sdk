@@ -65,7 +65,8 @@ This list the API_LEVEL branches with their purposed (corresponding OS) and stat
 | 6       | stax_1.0.0-rc10                                                                                               | :x:
 | 7 / 7.1 | stax_1.0.0-rc11 / stax_1.0.0-rc12                                                                             | :x:
 | 7.2 (not compatible due to font update) | stax_1.0.0-rc13 => stax_1.0.0-rc16                                            | :x:
-| 8       | stax_1.0.0                                                                                                    | :heavy_check_mark:
+| 8       | stax_1.0.0                                                                                                    | :x:
+| 9       | stax_1.1.0-rc1                                                                                                | :heavy_check_mark:
 
 ### Cherry-picking process:
 
