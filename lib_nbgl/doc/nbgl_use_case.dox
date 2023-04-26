@@ -38,20 +38,27 @@ In this example, a parsing the settings (single level) consists in 2 pages, and 
 
 A few APIs are available to draw typical Use-Cases, such as:
 
-- @ref nbgl_useCaseHome() to draw the home screen of an application
-- @ref nbgl_useCaseHomeExt() to draw an extended version of home screen of an application (with action button)
-- @ref nbgl_useCasePlugInHome() to draw an Pug-In version of home screen of an application
-- @ref nbgl_useCaseSettings() to draw a level of settings pages
-- @ref nbgl_useCaseConfirm() to draw a typical confirmation page, for example when rejecting a transaction
-- @ref nbgl_useCaseChoice() to draw a typical dual choice page
-- @ref nbgl_useCaseStatus() to draw a transient status page, without control, for example when a transaction is successfully signed
-- @ref nbgl_useCaseReviewStart() to draw the cover page of a review (initial page, without data)
-- @ref nbgl_useCaseRegularReview() to draw the pages of a regular review (all pages but the cover one)
-- @ref nbgl_useCaseForwardOnlyReview() to draw the pages of a forward-only review (without back key)
-- @ref nbgl_useCaseViewDetails() to draw the pages displaying the full value of a given long data of a review
-- @ref nbgl_useCaseAddressConfirmation() to draw an address confirmation page, with a possibility to see it as QR Code
-- @ref nbgl_useCaseAddressConfirmationExt() to draw an address confirmation page, with a possibility to see it as QR Code and some extra tag/value pairs
-- @ref nbgl_useCaseSpinner() to draw an infinite spinner page
+- for Home Screen:
+ - @ref nbgl_useCaseHome() to draw the home screen of an application (see @subpage use_case_home)
+ - @ref nbgl_useCaseHomeExt() to draw an extended version of home screen of an application (with action button) (see @subpage use_case_ext_home)
+ - @ref nbgl_useCasePlugInHome() to draw the home screen of a Plug-In application (see @subpage use_case_plugin_home)
+- for Settings:
+ - @ref nbgl_useCaseSettings() to draw a level of settings pages (see @subpage use_case_settings)
+- for Individual pages:
+ - @ref nbgl_useCaseConfirm() to draw a typical confirmation page, for example when rejecting a transaction (see @subpage use_case_confirm)
+ - @ref nbgl_useCaseChoice() to draw a typical dual choice page (see @subpage use_case_choice)
+ - @ref nbgl_useCaseStatus() to draw a transient status page, without control, for example when a transaction is successfully signed (see @subpage use_case_status)
+ - @ref nbgl_useCaseSpinner() to draw an infinite spinner page (see @subpage use_case_spinner)
+- for most used reviews:
+ - @ref nbgl_useCaseStaticReview() to draw the pages of a regular review, when all info are available from the beginning (see @subpage use_case_static_review)
+ - @ref nbgl_useCaseReviewStart() to draw the cover page of a review (initial page, without data) (see @subpage use_case_review_start)
+ - @ref nbgl_useCaseRegularReview() to draw the pages of a regular review (all pages but the cover one) (see @subpage use_case_regular_review)
+- for rare reviews:
+ - @ref nbgl_useCaseForwardOnlyReview() to draw the pages of a forward-only review (without back key) (see @subpage use_case_forward_only_review)
+ - @ref nbgl_useCaseViewDetails() to draw the pages displaying the full value of a given long data of a review (see @subpage use_case_details_view)
+- for address verification:
+ - @ref nbgl_useCaseAddressConfirmation() to draw an address confirmation page, with a possibility to see it as QR Code (see @subpage use_case_addr_confirm)
+ - @ref nbgl_useCaseAddressConfirmationExt() to draw an address confirmation page, with a possibility to see it as QR Code and some extra tag/value pairs (see @subpage use_case_addr_confirm_ext)
 
 @subsection use_case_home Home screen Use Case
 
@@ -156,8 +163,8 @@ void appMain(void) {
                          NULL, // will use the default tagline ("This app confirms actions for\n<plugInName>.")
                          NULL, // will use the default subTagline ("This app relies on\n<masterAppName>")
                          false, // use "info" type top-right icon
-                      myAppSettings,
-                      onQuit);
+                         myAppSettings,
+                         onQuit);
 }
 @endcode
 

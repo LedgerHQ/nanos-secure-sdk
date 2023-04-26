@@ -17,6 +17,8 @@ It is intended to replace existing BAGL/FLOW Graphical Engine (used on Nanos/Blu
 @section nbgl_drawing_api Screen drawing APIs
 
 @subsection nbgl_app_use_case_api_1 Application Use-cases API
+This is the most preferred API level to write an embedded Application.
+
 The @subpage nbgl_app_use_case page contains all information necessary to understand
 and use \b NBGL Application Use cases API
 
