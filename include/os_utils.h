@@ -102,3 +102,6 @@ void *os_memcpy(void *dest, const void *src, size_t n)
 int os_memcmp(const void *s1, const void *s2, size_t n)
     __attribute__((deprecated));
 void *os_memset(void *s, int c, size_t n) __attribute__((deprecated));
+
+// This call will reset the value of the entire BSS segment
+void os_explicit_zero_BSS_segment(void);

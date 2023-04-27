@@ -246,3 +246,12 @@ int os_memcmp(const void *s1, const void *s2, size_t n) {
 void *os_memset(void *s, int c, size_t n) {
   return memset(s, c, n);
 }
+
+// BSS start and end defines addresses
+extern void *_bss;
+extern void *_ebss;
+
+// This call will reset the value of the entire BSS segment
+void os_explicit_zero_BSS_segment(void) {
+  explicit_bzero(&_bss, ((uintptr_t)&_ebss) - ((uintptr_t)&_bss));
+}
