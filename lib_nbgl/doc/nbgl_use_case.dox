@@ -69,7 +69,7 @@ create such a page, the only configurable parameters being:
 
 - the application name
 - the application icon
-- the tagline, a text under app name (if NULL, it will be "This app confirms actions on the <appName> network.")
+- the tagline, a text under app name (if NULL, it will be "This app enables signing transactions on the <appName> network.")
 - the callbacks when touching *quit* or *top-right* buttons
 - the type of top-right button (info or settings)
 
