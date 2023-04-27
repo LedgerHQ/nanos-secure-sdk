@@ -993,8 +993,14 @@ uint8_t  USBD_U2F_DataIn_impl (USBD_HandleTypeDef *pdev,
 }
 
 uint8_t  USBD_U2F_DataOut_impl (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum, uint8_t* buffer)
+                              uint8_t epnum, uint8_t* buffer,
+                              __attribute__((unused)) apdu_buffer_t * apdu_buf)
 {
+
+#ifdef HAVE_LOCAL_APDU_BUFFER
+  #error "Feature not implemented"
+#endif
+
   switch (epnum) {
   // FIDO endpoint
   case (U2F_EPOUT_ADDR&0x7F):
