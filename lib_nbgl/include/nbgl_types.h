@@ -156,6 +156,20 @@ typedef enum {
    NB_REFRESH_MODES
 } nbgl_refresh_mode_t;
 
+
+/**
+ * @brief Available post-refresh power modes
+ *
+ * - Power off after a refresh allows to save power
+ * - Keep the screen powered on after a refresh allows to
+ *   achieve a faster following refresh.
+ */
+typedef enum nbgl_post_refresh_t {
+    POST_REFRESH_FORCE_POWER_OFF,  ///< Force screen power off after refresh
+    POST_REFRESH_FORCE_POWER_ON,   ///< Force screen power on after refresh
+    POST_REFRESH_KEEP_POWER_STATE, ///< Keep screen power state after refresh
+} nbgl_post_refresh_t;
+
 /**
  * @brief possible radius for objects
  *

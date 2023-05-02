@@ -105,11 +105,12 @@ void nbgl_frontDrawImageFile(nbgl_area_t *area, uint8_t *buffer,
   return;
 }
 
-void nbgl_frontRefreshArea(nbgl_area_t *area, nbgl_refresh_mode_t mode)
+void nbgl_frontRefreshArea(nbgl_area_t *area, nbgl_refresh_mode_t mode, nbgl_post_refresh_t post_refresh)
 {
-  unsigned int parameters[2];
+  unsigned int parameters[3];
   parameters[0] = (unsigned int)area;
   parameters[1] = (unsigned int)mode;
+  parameters[2] = (unsigned int)post_refresh;
   SVC_Call(SYSCALL_nbgl_front_refresh_area_ID, parameters);
   return;
 }
@@ -143,10 +144,11 @@ void nbgl_sideDrawImage(nbgl_area_t *area, uint8_t *buffer, nbgl_transformation_
   return;
 }
 
-void nbgl_sideRefreshArea(nbgl_area_t *area)
+void nbgl_sideRefreshArea(nbgl_area_t *area, nbgl_post_refresh_t post_refresh)
 {
-  unsigned int parameters[1];
+  unsigned int parameters[2];
   parameters[0] = (unsigned int)area;
+  parameters[1] = (unsigned int)post_refresh;
   SVC_Call(SYSCALL_nbgl_side_refresh_area_ID, parameters);
   return;
 }

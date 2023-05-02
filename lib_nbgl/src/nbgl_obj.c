@@ -1126,8 +1126,20 @@ void nbgl_refreshSpecial(nbgl_refresh_mode_t mode) {
   #ifdef HAVE_SERIALIZED_NBGL
   io_seproxyhal_send_nbgl_serialized(NBGL_REFRESH_AREA, (nbgl_obj_t *) &refreshArea);
   #endif
-  nbgl_frontRefreshArea(&refreshArea, mode);
+  nbgl_frontRefreshArea(&refreshArea, mode, POST_REFRESH_FORCE_POWER_OFF);
   LOG_DEBUG(OBJ_LOGGER,"nbgl_refreshSpecial(), x0,y0 = [%d, %d], w,h = [%d, %d]\n", refreshArea.x0, refreshArea.y0, refreshArea.width, refreshArea.height);
+  nbgl_refreshReset();
+}
+
+void nbgl_refreshSpecialWithPostRefresh(nbgl_refresh_mode_t mode, nbgl_post_refresh_t post_refresh) {
+  if ((refreshArea.width == 0) || (refreshArea.height == 0))
+    return;
+
+  #ifdef HAVE_SERIALIZED_NBGL
+  io_seproxyhal_send_nbgl_serialized(NBGL_REFRESH_AREA, (nbgl_obj_t *) &refreshArea);
+  #endif
+  nbgl_frontRefreshArea(&refreshArea, mode, post_refresh);
+  LOG_DEBUG(OBJ_LOGGER,"nbgl_refreshSpecialNoPoff(), x0,y0 = [%d, %d], w,h = [%d, %d]\n", refreshArea.x0, refreshArea.y0, refreshArea.width, refreshArea.height);
   nbgl_refreshReset();
 }
 

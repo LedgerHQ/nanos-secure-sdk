@@ -36,7 +36,7 @@ extern "C" {
 void nbgl_sideDrawRect(nbgl_area_t *area);
 void nbgl_sideDrawHorizontalLine(nbgl_area_t *area, uint8_t mask, color_t lineColor);
 void nbgl_sideDrawImage(nbgl_area_t *area, uint8_t* buffer, nbgl_transformation_t transformation, nbgl_color_map_t colorMap);
-void nbgl_sideRefreshArea(nbgl_area_t * area);
+void nbgl_sideRefreshArea(nbgl_area_t * area, nbgl_post_refresh_t post_refresh);
 
 /**********************
  *      VARIABLES
