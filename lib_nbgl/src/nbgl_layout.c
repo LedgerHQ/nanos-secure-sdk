@@ -121,11 +121,11 @@ static char numText[5];
  **********************/
 
 // Unit step in % of touchable progress bar
-#define HOLD_TO_APPROVE_STEP_PERCENT (17)
+#define HOLD_TO_APPROVE_STEP_PERCENT (10)
 // Duration in ms the user must hold the progress bar
 // to make it progress HOLD_TO_APPROVE_STEP_PERCENT %.
 // This duration must be higher than the screen refresh duration.
-#define HOLD_TO_APPROVE_STEP_DURATION_MS (400)
+#define HOLD_TO_APPROVE_STEP_DURATION_MS (150)
 
 static inline uint8_t get_hold_to_approve_percent(uint32_t touch_duration) {
         uint8_t current_step_nb = (touch_duration / HOLD_TO_APPROVE_STEP_DURATION_MS) + 1;
@@ -260,7 +260,7 @@ static void longTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, nbgl_
         nbgl_redrawObject((nbgl_obj_t *)progressBar,false,false);
         // Ensure progress bar is fully drawn
         // before calling the callback.
-        nbgl_refreshSpecial(BLACK_AND_WHITE_FAST_REFRESH);
+        nbgl_refreshSpecialWithPostRefresh(BLACK_AND_WHITE_FAST_REFRESH, POST_REFRESH_FORCE_POWER_ON);
       }
 
       if (trigger_callback) {
@@ -274,7 +274,7 @@ static void longTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, nbgl_
   else if ((eventType == TOUCH_RELEASED) || (eventType == OUT_OF_TOUCH)) {
     progressBar->state = 0;
     nbgl_redrawObject((nbgl_obj_t *)progressBar,false,false);
-    nbgl_refreshSpecial(BLACK_AND_WHITE_REFRESH);
+    nbgl_refreshSpecialWithPostRefresh(BLACK_AND_WHITE_REFRESH, POST_REFRESH_FORCE_POWER_OFF);
   }
 }
 
