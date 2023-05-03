@@ -20,7 +20,7 @@
 #####################################################################
 ifeq ($(ENABLE_BLUETOOTH), 1)
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
-    STANDARD_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+    HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
     DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
     DEFINES += BLE_SEGMENT_SIZE=32
     SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
@@ -32,7 +32,7 @@ endif
 #####################################################################
 ifeq ($(ENABLE_NFC), 1)
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME), TARGET_STAX))
-    STANDARD_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+    HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
     DEFINES += HAVE_NFC
     SDK_SOURCE_PATH += lib_nfc
 endif
@@ -125,21 +125,64 @@ endif
 endif
 
 #####################################################################
-#                           APP_FLAGS                               #
+#                          APP_LOAD_PARAMS                          #
 #####################################################################
 CUSTOM_APP_FLAGS ?= 0x000 # Can be personalized by the application
-STANDARD_APP_FLAGS ?= 0x000
+
+STANDARD_APP_FLAGS = 0x000
+
+# Following flags enables app permissions.
+# See SDK include/appflags.h for the purpose of each permission
+ifeq ($(HAVE_APPLICATION_FLAG_DERIVE_MASTER), 1)
+# APPLICATION_FLAG_DERIVE_MASTER 0x010
+STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x010)))
+endif
+ifeq ($(HAVE_APPLICATION_FLAG_GLOBAL_PIN), 1)
+# APPLICATION_FLAG_GLOBAL_PIN 0x040
+STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x040)))
+endif
+ifeq ($(HAVE_APPLICATION_FLAG_BOLOS_SETTINGS), 1)
+# APPLICATION_FLAG_BOLOS_SETTINGS 0x200
+STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x200)))
+endif
+ifeq ($(HAVE_APPLICATION_FLAG_LIBRARY), 1)
+# APPLICATION_FLAG_LIBRARY 0x800
+STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x800)))
+endif
 
 APP_FLAGS = $(shell echo $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
 
 APP_LOAD_PARAMS += --appFlags $(APP_FLAGS)
 
+APP_LOAD_PARAMS += $(foreach curve, $(CURVE_APP_LOAD_PARAMS), --curve $(curve))
+
+APP_LOAD_PARAMS += $(foreach path, $(PATH_APP_LOAD_PARAMS), --path $(path))
+
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
+#####################################################################
+#                         COMPILER SETTINGS                         #
+#####################################################################
 CC      := $(CLANGPATH)clang
 AS      := $(GCCPATH)arm-none-eabi-gcc
 LD      := $(GCCPATH)arm-none-eabi-gcc
 LDLIBS  += -lm -lgcc -lc
+
+#####################################################################
+#                               MISC                                #
+#####################################################################
+ifeq ($(TARGET_NAME), TARGET_NANOS)
+ICONNAME ?= $(ICON_NANOS)
+endif
+ifeq ($(TARGET_NAME), TARGET_NANOX)
+ICONNAME ?= $(ICON_NANOX)
+endif
+ifeq ($(TARGET_NAME), TARGET_NANOS2)
+ICONNAME ?= $(ICON_NANOSP)
+endif
+ifeq ($(TARGET_NAME),TARGET_STAX)
+ICONNAME ?= $(ICON_STAX)
+endif
 
 include $(BOLOS_SDK)/Makefile.glyphs
 
