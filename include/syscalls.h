@@ -299,7 +299,7 @@
 #define SYSCALL_nbgl_side_refresh_area_ID                                0x02fa0008
 #define SYSCALL_nbgl_get_font_ID                                         0x01fa000c
 #define SYSCALL_nbgl_screen_reinit_ID                                    0x00fa000d
-#define SYSCALL_nbgl_front_draw_img_rle_ID                               0x00fa000e
+#define SYSCALL_nbgl_front_draw_img_rle_ID                               0x04fa0010
 #endif
 
 #ifdef HAVE_BACKGROUND_IMG
