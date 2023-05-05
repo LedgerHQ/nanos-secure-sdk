@@ -165,6 +165,7 @@ static void longTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType, nbgl_
 static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   nbgl_layoutInternal_t *layout;
   layoutObj_t *layoutObj;
+  bool needRefresh = false;
 
   UNUSED(eventType);
 
@@ -194,7 +195,8 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     nbgl_switch_t *lSwitch = (nbgl_switch_t*)((nbgl_container_t*)obj)->children[1];
     lSwitch->state = (lSwitch->state == ON_STATE)?OFF_STATE:ON_STATE;
     nbgl_redrawObject((nbgl_obj_t *)lSwitch,false,false);
-    nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+    // refresh will be done after tune playback
+    needRefresh = true;
     // index is used for state
     layoutObj->index = lSwitch->state;
   }
@@ -222,6 +224,9 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
     }
 #endif // HAVE_PIEZO_SOUND
     layout->callback(layoutObj->token,layoutObj->index);
+    if (needRefresh) {
+      nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+    }
   }
 }
 
