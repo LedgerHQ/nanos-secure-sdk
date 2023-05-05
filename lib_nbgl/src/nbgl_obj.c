@@ -827,6 +827,7 @@ static void draw_keypad(nbgl_keypad_t* obj, nbgl_obj_t *prevObj, bool computePos
  */
 static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
   nbgl_area_t rectArea;
+  color_t foreColor;
 
   obj->width = 60;
   obj->height = 44;
@@ -838,6 +839,8 @@ static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computeP
 
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
+  // foreground color is the opposite of background one
+  foreColor = (obj->backgroundColor == WHITE) ? BLACK : WHITE;
 
   rectArea.bpp = NBGL_BPP_1;
   rectArea.backgroundColor = obj->backgroundColor;
@@ -848,19 +851,19 @@ static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computeP
     rectArea.y0 = obj->y0;
     rectArea.width = 20;
     rectArea.height = 4;
-    nbgl_frontDrawHorizontalLine(&rectArea, 0x7, BLACK); // top left
+    nbgl_frontDrawHorizontalLine(&rectArea, 0x7, foreColor); // top left
     rectArea.x0 = obj->x0+obj->width-rectArea.width;
-    nbgl_frontDrawHorizontalLine(&rectArea,0x7, BLACK); // top right
+    nbgl_frontDrawHorizontalLine(&rectArea,0x7, foreColor); // top right
     rectArea.y0 = obj->y0+obj->height-4;
-    nbgl_frontDrawHorizontalLine(&rectArea,0xE, BLACK); //bottom right
+    nbgl_frontDrawHorizontalLine(&rectArea,0xE, foreColor); //bottom right
     rectArea.x0 = obj->x0;
-    nbgl_frontDrawHorizontalLine(&rectArea,0xE, BLACK); // bottom left
+    nbgl_frontDrawHorizontalLine(&rectArea,0xE, foreColor); // bottom left
     // draw vertical segments
     rectArea.x0 = obj->x0;
     rectArea.y0 = obj->y0;
     rectArea.width = 3;
     rectArea.height = 12;
-    rectArea.backgroundColor = BLACK;
+    rectArea.backgroundColor = foreColor;
     nbgl_frontDrawRect(&rectArea); // top left
     rectArea.x0 = obj->x0+obj->width-rectArea.width;
     nbgl_frontDrawRect(&rectArea); // top right
@@ -876,10 +879,10 @@ static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computeP
     rectArea.y0 = obj->y0;
     rectArea.width = obj->width;
     rectArea.height = obj->height;
-    rectArea.backgroundColor = WHITE;
+    rectArea.backgroundColor = obj->backgroundColor;
     nbgl_frontDrawRect(&rectArea); // top left
 
-    // draw horizontal segment in BLACK
+    // draw horizontal segment in foreColor
     rectArea.width = 20;
     rectArea.height = 4;
     switch (obj->position) {
@@ -906,12 +909,12 @@ static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computeP
     default:
       return;
     }
-    nbgl_frontDrawHorizontalLine(&rectArea, mask, BLACK);
+    nbgl_frontDrawHorizontalLine(&rectArea, mask, foreColor);
 
-    // draw vertical segment in BLACK
+    // draw vertical segment in foreColor
     rectArea.width = 3;
     rectArea.height = 12;
-    rectArea.backgroundColor = BLACK;
+    rectArea.backgroundColor = foreColor;
     switch (obj->position) {
     case 0:// top left corner
       rectArea.x0 = obj->x0;
