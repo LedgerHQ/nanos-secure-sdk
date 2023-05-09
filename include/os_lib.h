@@ -13,4 +13,8 @@
  */
 SYSCALL void
 os_lib_call(unsigned int *call_parameters PLENGTH(3 * sizeof(unsigned int)));
+#ifdef HAVE_BOLOS
 SYSCALL void os_lib_end(void);
+#else
+SYSCALL void __attribute__((noreturn)) os_lib_end(void);
+#endif

@@ -168,5 +168,6 @@ objcopy_add_section_cmdline = echo $(1) > $(TMPFILE) && \
 # Run Clang Static Analyzer
 SCAN_BUILD ?= scan-build
 SCAN_BUILD_OUTPUT ?= $(CURDIR)/output-scan-build
+.PHONY: scan-build
 scan-build:
-	$(SCAN_BUILD) --use-cc=$(CC) -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o $(SCAN_BUILD_OUTPUT) $(MAKE) default
+	$(SCAN_BUILD) --use-cc=$(CC) -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist --status-bugs -o $(SCAN_BUILD_OUTPUT) $(MAKE)
