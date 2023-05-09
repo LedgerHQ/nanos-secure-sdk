@@ -18,7 +18,7 @@
 /*********************
  *      DEFINES
  *********************/
-#define APP_DESCRIPTION_MAX_LEN 64
+#define APP_DESCRIPTION_MAX_LEN 72
 
 /**********************
  *      TYPEDEFS
