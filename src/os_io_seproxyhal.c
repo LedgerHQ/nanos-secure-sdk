@@ -454,9 +454,9 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
     return;
   }
 
-  io_seproxyhal_general_status();
-  // wait for next event before continuing (likely a ticker event)
-  io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+  if (io_seproxyhal_spi_is_status_sent()) {
+      io_seproxyhal_spi_recv(G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+  }
 
   buffer[0] = SEPROXYHAL_TAG_PLAY_TUNE;
   buffer[1] = 0;
