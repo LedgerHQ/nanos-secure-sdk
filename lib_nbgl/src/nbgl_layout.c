@@ -1278,6 +1278,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
   }
   else {
     container->alignment = BOTTOM_MIDDLE;
+    container->alignmentMarginY = BORDER_MARGIN;
     container->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-1];
   }
 
