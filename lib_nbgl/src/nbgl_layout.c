@@ -1939,7 +1939,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed) {
   textArea->textColor = BLACK;
   textArea->text = PIC(text);
   textArea->textAlignment = CENTER;
-  textArea->fontId = BAGL_FONT_INTER_REGULAR_24px_1bpp;
+  textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
   textArea->alignmentMarginY = 36;
   textArea->alignTo = (nbgl_obj_t*)spinner;
   textArea->alignment = BOTTOM_MIDDLE;
