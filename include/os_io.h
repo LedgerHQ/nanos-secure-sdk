@@ -89,8 +89,9 @@ typedef struct io_touch_info_s {
 SYSCALL void touch_get_last_info(io_touch_info_t *info);
 SYSCALL void touch_set_state(bool enable);
 SYSCALL uint8_t touch_exclude_borders(uint8_t excluded_borders);
-#ifdef HAVE_TOUCH_READ_SENSI_SYSCALL
+#ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
 SYSCALL void touch_read_sensitivity(uint8_t *sensi_data);
+SYSCALL void touch_read_diff_data(uint8_t *diff_data);
 #endif
 #endif
 #endif // HAVE_SE_TOUCH
