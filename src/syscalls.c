@@ -1793,8 +1793,8 @@ uint8_t *fetch_background_img(bool allow_candidate) {
   return (uint8_t *) SVC_Call(SYSCALL_fetch_background_img, parameters);
 }
 
-bolos_err_t delete_background_img(bool force_skip_consent) {
-  uint8_t parameters[1] = {force_skip_consent};
+bolos_err_t delete_background_img(bool from_ux) {
+  uint8_t parameters[1] = {from_ux};
   return SVC_Call(SYSCALL_delete_background_img, parameters);
 }
 #endif

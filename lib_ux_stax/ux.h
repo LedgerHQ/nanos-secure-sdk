@@ -116,7 +116,7 @@ typedef struct ux_seph_s {
 
 #ifdef HAVE_BACKGROUND_IMG
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) uint8_t *fetch_background_img(bool allow_candidate);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_err_t delete_background_img(bool force_skip_consent);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_err_t delete_background_img(bool from_ux);
 #endif
 
 extern ux_seph_os_and_app_t G_ux_os;
