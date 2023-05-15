@@ -223,10 +223,10 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
       io_seproxyhal_play_tune(layoutObj->tuneId);
     }
 #endif // HAVE_PIEZO_SOUND
-    layout->callback(layoutObj->token,layoutObj->index);
     if (needRefresh) {
       nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
     }
+    layout->callback(layoutObj->token,layoutObj->index);
   }
 }
 
