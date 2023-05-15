@@ -447,6 +447,7 @@ bool nbgl_refreshIsNeeded(void);
 void nbgl_refreshReset(void);
 
 void nbgl_objInit(void);
+void nbgl_objAllowDrawing(bool enable);
 
 void nbgl_objPoolRelease(uint8_t layer);
 nbgl_obj_t* nbgl_objPoolGet(nbgl_obj_type_t type, uint8_t layer);
@@ -470,12 +471,6 @@ void nbgl_keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType);
 /**********************
  *      MACROS
  **********************/
-// a text cannot be in a address lower than 2000, so it should be an idea
-#ifdef __x86_64__
-#define IS_A_STRING(__text) ((uint64_t)(__text) > 2000)
-#else //__x86_64__
-#define IS_A_STRING(__text) ((uint32_t)obj->text > 2000)
-#endif //__x86_64__
 
 #ifdef __cplusplus
 } /* extern "C" */

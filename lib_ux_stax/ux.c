@@ -47,6 +47,8 @@ static bool ux_forward_event(bool ignoring_app_if_ux_busy) {
   }
 #endif // HAVE_BLE
   if (G_ux_params.len == BOLOS_UX_REDRAW) {
+    // enable drawing according to UX decision
+    nbgl_objAllowDrawing(true);
     nbgl_screenRedraw();
     nbgl_refresh();
   }
@@ -68,8 +70,12 @@ static bool ux_forward_event(bool ignoring_app_if_ux_busy) {
 static nbgl_touchStatePosition_t pos;
 
 void ux_process_finger_event(uint8_t seph_packet[]) {
+  bool displayEnabled = ux_forward_event(true);
+  // enable/disable drawing according to UX decision
+  nbgl_objAllowDrawing(displayEnabled);
+
   // if the event is not fully consumed by UX, use it for NBGL
-  if (ux_forward_event(true)) {
+  if (displayEnabled) {
     pos.state = (seph_packet[3] == SEPROXYHAL_TAG_FINGER_EVENT_TOUCH) ? PRESSED : RELEASED;
     pos.x = (seph_packet[4] << 8) + seph_packet[5];
     pos.y = (seph_packet[6] << 8) + seph_packet[7];
@@ -85,8 +91,16 @@ void ux_process_finger_event(uint8_t seph_packet[]) {
 void ux_process_ticker_event(void) {
   nbTicks++;
   // forward to UX
-  ux_forward_event(false);
+  bool displayEnabled = ux_forward_event(true);
+
+  // enable/disable drawing according to UX decision
+  nbgl_objAllowDrawing(displayEnabled);
+  // update ticker in NBGL
   nbgl_screenHandler(100);
+
+  if (!displayEnabled) {
+    return;
+  }
 
   // handle touch only if detected as pressed in last touch message
   if (pos.state == PRESSED) {

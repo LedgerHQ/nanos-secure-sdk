@@ -37,6 +37,9 @@ void extendRefreshArea(nbgl_obj_t *obj);
 // area to resfresh
 static nbgl_area_t refreshArea;
 
+// boolean used to enable/forbid drawing/refresh
+bool objDrawingDisabled;
+
 /**********************
  *      VARIABLES
  **********************/
@@ -222,6 +225,9 @@ static void compute_position(nbgl_obj_t* obj, nbgl_obj_t *prevObj) {
 static void draw_screen(nbgl_container_t *obj) {
   nbgl_area_t rectArea;
 
+  if (objDrawingDisabled) {
+    return;
+  }
   rectArea.backgroundColor = obj->backgroundColor;
   rectArea.x0 = obj->x0;
   rectArea.y0 = obj->y0;
@@ -233,6 +239,9 @@ static void draw_screen(nbgl_container_t *obj) {
 static void draw_container(nbgl_container_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   LOG_DEBUG(OBJ_LOGGER,"draw_container(), x0 = %d, y0 = %d, width = %d\n", obj->x0, obj->y0, obj->width);
   // inherit background from parent
@@ -256,6 +265,9 @@ static void draw_button(nbgl_button_t* obj, nbgl_obj_t *prevObj, bool computePos
 
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   LOG_DEBUG(OBJ_LOGGER,"draw_button(), x0 = %d, y0 = %d, width = %d, height = %d\n", obj->x0, obj->y0, obj->width, obj->height);
 
@@ -337,6 +349,9 @@ static void draw_line(nbgl_line_t* obj, nbgl_obj_t *prevObj, bool computePositio
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
   }
+  if (objDrawingDisabled) {
+    return;
+  }
   LOG_DEBUG(OBJ_LOGGER,"draw_line(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
@@ -398,6 +413,9 @@ static void draw_image(nbgl_image_t* obj, nbgl_obj_t *prevObj, bool computePosit
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
   }
+  if (objDrawingDisabled) {
+    return;
+  }
   LOG_DEBUG(OBJ_LOGGER,"draw_image(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
   // inherit background from parent
   obj->backgroundColor = obj->parent->backgroundColor;
@@ -427,6 +445,9 @@ static void draw_switch(nbgl_switch_t* obj, nbgl_obj_t *prevObj, bool computePos
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
   }
+  if (objDrawingDisabled) {
+    return;
+  }
   LOG_DEBUG(OBJ_LOGGER,"draw_switch(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
 
   // inherit background from parent
@@ -455,6 +476,9 @@ static void draw_radioButton(nbgl_radio_t* obj, nbgl_obj_t *prevObj, bool comput
   obj->height = 32;
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   LOG_DEBUG(OBJ_LOGGER,"draw_radioButton(), x0 = %d, y0 = %d, state = %d\n", obj->x0, obj->y0, obj->state);
 
@@ -488,6 +512,9 @@ static void draw_progressBar(nbgl_progress_bar_t* obj, nbgl_obj_t *prevObj, bool
 
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   LOG_DEBUG(OBJ_LOGGER,"draw_progressBar(), x0 = %d, y0 = %d, level = %d %%\n", obj->x0, obj->y0, obj->state);
 
@@ -534,6 +561,9 @@ static void draw_pageIndicator(nbgl_page_indicator_t* obj, nbgl_obj_t *prevObj, 
     if (computePosition) {
       compute_position((nbgl_obj_t *)obj,prevObj);
     }
+    if (objDrawingDisabled) {
+      return;
+    }
     LOG_DEBUG(OBJ_LOGGER,"draw_pageIndicator(), x0 = %d, y0 = %d, page = %d/%d\n", obj->x0, obj->y0, obj->activePage, obj->nbPages);
 
     // inherit background from parent
@@ -568,6 +598,9 @@ static void draw_pageIndicator(nbgl_page_indicator_t* obj, nbgl_obj_t *prevObj, 
     if (computePosition) {
       compute_position((nbgl_obj_t *)obj,prevObj);
     }
+    if (objDrawingDisabled) {
+      return;
+    }
     LOG_DEBUG(OBJ_LOGGER,"draw_pageIndicator(), x0 = %d, y0 = %d, page = %d/%d\n", obj->x0, obj->y0, obj->activePage, obj->nbPages);
 
     // inherit background from parent
@@ -600,6 +633,9 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
 
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   // get the text of the button from the callback if not NULL
   if (obj->onDrawCallback != NULL) {
@@ -749,6 +785,9 @@ static void draw_qrCode(nbgl_qrcode_t* obj, nbgl_obj_t *prevObj, bool computePos
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
   }
+  if (objDrawingDisabled) {
+    return;
+  }
   LOG_DEBUG(OBJ_LOGGER,"draw_qrCode(), x0 = %d, y0 = %d, width = %d, height = %d, text = %s\n", obj->x0, obj->y0, obj->width, obj->height, obj->text);
 
   // inherit background from parent
@@ -782,6 +821,9 @@ static void draw_keyboard(nbgl_keyboard_t* obj, nbgl_obj_t *prevObj, bool comput
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
   }
+  if (objDrawingDisabled) {
+    return;
+  }
   LOG_DEBUG(OBJ_LOGGER,"draw_keyboard(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
 
   // inherit background from parent
@@ -806,6 +848,9 @@ static void draw_keypad(nbgl_keypad_t* obj, nbgl_obj_t *prevObj, bool computePos
 
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   LOG_DEBUG(OBJ_LOGGER,"draw_keypad(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
 
@@ -834,6 +879,9 @@ static void draw_spinner(nbgl_spinner_t* obj, nbgl_obj_t *prevObj, bool computeP
 
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
+  }
+  if (objDrawingDisabled) {
+    return;
   }
   LOG_DEBUG(OBJ_LOGGER,"draw_spinner(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
 
@@ -953,6 +1001,9 @@ static void draw_image_file(nbgl_image_file_t* obj, nbgl_obj_t *prevObj, bool co
   if (computePosition) {
     compute_position((nbgl_obj_t *)obj,prevObj);
   }
+  if (objDrawingDisabled) {
+    return;
+  }
 
   LOG_DEBUG(OBJ_LOGGER,"draw_image_file(), x0 = %d, y0 = %d\n", obj->x0, obj->y0);
   nbgl_frontDrawImageFile((nbgl_area_t *)obj, (uint8_t*)obj->buffer, 0, ramBuffer);
@@ -1026,7 +1077,10 @@ static void draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePositi
   #ifdef HAVE_SERIALIZED_NBGL
   io_seproxyhal_send_nbgl_serialized(NBGL_DRAW_OBJ, obj);
   #endif
-  extendRefreshArea(obj);
+  if (!objDrawingDisabled) {
+    extendRefreshArea(obj);
+  }
+
 }
 
 /**
@@ -1172,4 +1226,13 @@ void nbgl_refreshReset(void) {
 void nbgl_objInit(void) {
   // init area to the smallest size
   nbgl_refreshReset();
+}
+
+/**
+ * @brief This functions enables or disables drawing/refresh for all further calls
+ *
+ * @param enable if true, enables drawing/refresh, otherwise disables
+ */
+void nbgl_objAllowDrawing(bool enable) {
+  objDrawingDisabled = !enable;
 }
