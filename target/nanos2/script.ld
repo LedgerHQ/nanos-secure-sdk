@@ -52,7 +52,9 @@ SECTIONS
     *(.boot*)
 
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
+    _code = .;
     *(.text*)
+    _ecode = .;
     *(.rodata)
     *(.rodata.[^N]*) /*.data.rel.ro* not here to detect invalid PIC usage */
     *(.rodata.N[^_]*)
