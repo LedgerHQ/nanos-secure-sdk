@@ -61,12 +61,13 @@ This list the API_LEVEL branches with their purposed (corresponding OS) and stat
 | 2       | nanox_2.2.0-pr1 <br/>  nanos+_1.2.0-pr1 <br/>                                                                 | :x:
 | 3       | stax_1.0.0-rc8                                                                                                | :x:
 | 4       | nanox_2.2.0-pr2 <br/> nanos+_1.2.0-pr2 <br/>                                                                  | :x:
-| 5       | stax_1.0.0-rc9 <br/> nanox_2.2.0-rc1 <br/> nanos+_1.2.0-rc1 <br/> nanox_2.2.0-pr3 <br/> nanox_2.2.0-rc2 <br/> nanox_2.2.0 | :heavy_check_mark:
+| 5       | stax_1.0.0-rc9 <br/> nanox_2.2.0-rc1 <br/> nanos+_1.2.0-rc1 <br/> nanox_2.2.0-pr3 <br/> nanox_2.2.0-rc2 <br/> nanox_2.2.0 <br/> nanox 2.2.1 | :heavy_check_mark:
 | 6       | stax_1.0.0-rc10                                                                                               | :x:
 | 7 / 7.1 | stax_1.0.0-rc11 / stax_1.0.0-rc12                                                                             | :x:
 | 7.2 (not compatible due to font update) | stax_1.0.0-rc13 => stax_1.0.0-rc16                                            | :x:
 | 8       | stax_1.0.0                                                                                                    | :x:
-| 9       | stax_1.1.0-rc1                                                                                                | :heavy_check_mark:
+| 9       | stax_1.1.0-rc1                                                                                                | :x:
+| 10      | stax_1.1.0                                                                                                    | :heavy_check_mark:
 
 ### Cherry-picking process:
 
