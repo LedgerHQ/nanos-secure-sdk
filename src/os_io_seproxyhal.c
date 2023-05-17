@@ -889,12 +889,13 @@ void io_seproxyhal_setup_ticker(unsigned int interval_ms) {
   io_seproxyhal_spi_send(buffer, 5);
 }
 
-static const unsigned char seph_io_device_off[] = {
-  SEPROXYHAL_TAG_DEVICE_OFF,
-  0,
-  0,
-};
-void io_seproxyhal_power_off(void) {
+void io_seproxyhal_power_off(bool criticalBattery) {
+  unsigned char seph_io_device_off[4] = {
+    SEPROXYHAL_TAG_DEVICE_OFF,
+    0,
+    1,
+    (char) criticalBattery,
+  };
   io_seproxyhal_spi_send(seph_io_device_off, sizeof(seph_io_device_off));
   for(;;);
 }

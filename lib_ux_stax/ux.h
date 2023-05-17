@@ -122,7 +122,7 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_err_t delete_background_img(
 extern ux_seph_os_and_app_t G_ux_os;
 
 void io_seproxyhal_request_mcu_status(void);
-void io_seproxyhal_power_off(void);
+void io_seproxyhal_power_off(bool criticalBattery);
 
 #if defined(HAVE_LANGUAGE_PACK)
 const char *get_ux_loc_string(UX_LOC_STRINGS_INDEX index);
