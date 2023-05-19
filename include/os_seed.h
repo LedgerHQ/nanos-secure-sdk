@@ -19,7 +19,6 @@
 
 typedef enum {
   SET_SEED = 0,
-  GET_SEED,
   SET_STATE,
   GET_STATE
 } os_action_t;
