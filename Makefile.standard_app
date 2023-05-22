@@ -160,6 +160,12 @@ APP_LOAD_PARAMS += $(foreach path, $(PATH_APP_LOAD_PARAMS), --path $(path))
 
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
+# Pending review flag
+ifeq ($(ENABLE_PENDING_REVIEW_SCREEN), 1)
+    APP_LOAD_PARAMS += --tlvraw 9F:01
+    DEFINES += HAVE_PENDING_REVIEW_SCREEN
+endif
+
 #####################################################################
 #                         COMPILER SETTINGS                         #
 #####################################################################
