@@ -139,7 +139,7 @@ ifeq ($(HAVE_APPLICATION_FLAG_LIBRARY), 1)
 STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x800)))
 endif
 
-APP_FLAGS = $(shell echo $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
+APP_FLAGS = $(shell printf '0x%x' $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
 
 APP_LOAD_PARAMS += --appFlags $(APP_FLAGS)
 
