@@ -23,17 +23,27 @@
 #include "offsets.h"
 
 bool apdu_parser(command_t *cmd, uint8_t *buf, size_t buf_len) {
-    // Check minimum length and Lc field of APDU command
-    if (buf_len < OFFSET_CDATA || buf_len - OFFSET_CDATA != buf[OFFSET_LC]) {
+    // Check minimum length, CLA / INS / P1 and P2 are mandatory
+    if (buf_len < OFFSET_LC) {
         return false;
+    }
+
+    if (buf_len == OFFSET_LC) {
+        // Lc field not specified, implies lc = 0
+        cmd->lc = 0;
+    } else {
+        // Lc field specified, check value against received length
+        cmd->lc = buf[OFFSET_LC];
+        if (buf_len - OFFSET_CDATA != cmd->lc) {
+            return false;
+        }
     }
 
     cmd->cla = buf[OFFSET_CLA];
     cmd->ins = buf[OFFSET_INS];
     cmd->p1 = buf[OFFSET_P1];
     cmd->p2 = buf[OFFSET_P2];
-    cmd->lc = buf[OFFSET_LC];
-    cmd->data = (buf[OFFSET_LC] > 0) ? buf + OFFSET_CDATA : NULL;
+    cmd->data = (cmd->lc > 0) ? buf + OFFSET_CDATA : NULL;
 
     return true;
 }

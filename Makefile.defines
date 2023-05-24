@@ -43,7 +43,8 @@ endif
 ifeq ($(SDK_HASH),)
 SDK_HASH := "None"
 endif
-# Expose SDK_VERSION and SDK_HASH to the app.
+# Expose API_LEVEL, SDK_VERSION and SDK_HASH to the app.
+DEFINES += API_LEVEL=$(API_LEVEL)
 DEFINES += SDK_VERSION=\"$(SDK_VERSION)\"
 DEFINES += SDK_HASH=\"$(SDK_HASH)\"
 
