@@ -14,15 +14,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #*******************************************************************************
-#allow for makefile override of the default placement for generated glyph header/c files
-ifeq ($(GLYPH_SRC_DIR),)
-GLYPH_SRC_DIR = $(GEN_SRC_DIR)
+# Don't allow anymore makefile override of the default placement for glyphs and
+# the generated glyph header/c files
+ifneq ($(GLYPH_SRC_DIR),)
+$(info GLYPH_SRC_DIR is not supported anymore as it is now automatically computed, please remove it from your Makefile)
 endif
+ifneq ($(GLYPH_PATH),)
+$(info Setting GLYPH_PATH is not supported anymore, please remove it from your Makefile)
+endif
+GLYPH_SRC_DIR = $(GEN_SRC_DIR)
+
 ifeq ($(BOLOS_SDK),)
 $(error BOLOS_SDK not set)
 endif
 
-GLYPH_FILES += $(foreach gp,$(GLYPH_PATH),$(addprefix $(gp)/,$(sort $(notdir $(shell find $(gp))))))
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_ux/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_ux/glyphs/))))
 GLYPH_DESTC := $(GLYPH_SRC_DIR)/glyphs.c

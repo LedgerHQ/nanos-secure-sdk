@@ -994,11 +994,18 @@ void os_lib_call ( unsigned int * call_parameters ) {
   return;
 }
 
-void os_lib_end ( void ) {
+void __attribute__((noreturn)) os_lib_end ( void ) {
   unsigned int parameters [2];
   parameters[1] = 0;
   SVC_Call(SYSCALL_os_lib_end_ID_IN, parameters);
-  return;
+
+  // The os_lib_end syscall should never return.
+  // Just in case, crash the device thanks to an undefined instruction.
+  // To avoid the __builtin_unreachable undefined behaviour
+  asm volatile ("udf #255");
+
+  // remove the warning caused by -Winvalid-noreturn
+  __builtin_unreachable();
 }
 
 unsigned int os_flags ( void ) {
@@ -1118,12 +1125,19 @@ void os_sched_exec ( unsigned int app_idx ) {
   return;
 }
 
-void os_sched_exit ( bolos_task_status_t exit_code ) {
+void __attribute__((noreturn)) os_sched_exit ( bolos_task_status_t exit_code ) {
   unsigned int parameters [2+1];
   parameters[0] = (unsigned int)exit_code;
   parameters[1] = 0;
   SVC_Call(SYSCALL_os_sched_exit_ID_IN, parameters);
-  return;
+
+  // The os_sched_exit syscall should never return.
+  // Just in case, crash the device thanks to an undefined instruction.
+  // To avoid the __builtin_unreachable undefined behaviour
+  asm volatile ("udf #255");
+
+  // remove the warning caused by -Winvalid-noreturn
+  __builtin_unreachable();
 }
 
 bolos_bool_t os_sched_is_running ( unsigned int task_idx ) {
