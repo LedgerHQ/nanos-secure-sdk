@@ -71,6 +71,7 @@ DEFINES += APPNAME=\"$(APPNAME)\"
 DEFINES += APPVERSION=\"$(APPVERSION)\"
 DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
 DEFINES += OS_IO_SEPROXYHAL
+DEFINES += IO_HID_EP_LENGTH=64
 
 ifeq ($(DISABLE_STANDARD_APP_DEFINES), 1)
     DISABLE_STANDARD_SNPRINTF = 1
@@ -84,7 +85,7 @@ ifneq ($(DISABLE_STANDARD_SNPRINTF), 1)
 endif
 
 ifneq ($(DISABLE_STANDARD_USB), 1)
-    DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
+    DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 HAVE_USB_APDU
     DEFINES += USB_SEGMENT_SIZE=64
     SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 endif
@@ -150,7 +151,7 @@ ifeq ($(HAVE_APPLICATION_FLAG_LIBRARY), 1)
 STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x800)))
 endif
 
-APP_FLAGS = $(shell echo $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
+APP_FLAGS = $(shell printf '0x%x' $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
 
 APP_LOAD_PARAMS += --appFlags $(APP_FLAGS)
 
@@ -159,6 +160,12 @@ APP_LOAD_PARAMS += $(foreach curve, $(CURVE_APP_LOAD_PARAMS), --curve $(curve))
 APP_LOAD_PARAMS += $(foreach path, $(PATH_APP_LOAD_PARAMS), --path $(path))
 
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
+
+# Pending review flag
+ifeq ($(ENABLE_PENDING_REVIEW_SCREEN), 1)
+    APP_LOAD_PARAMS += --tlvraw 9F:01
+    DEFINES += HAVE_PENDING_REVIEW_SCREEN
+endif
 
 #####################################################################
 #                         COMPILER SETTINGS                         #
