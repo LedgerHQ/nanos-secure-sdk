@@ -671,6 +671,7 @@ enum generic_identifiers {
 #define SWO_APD_DAT_2F                    (ERR_APD_DAT + ERR_GEN_ID_2F)    // 0x682F
 #define SWO_APD_DAT_30                    (ERR_APD_DAT + ERR_GEN_ID_30)    // 0x6830
 #define SWO_APD_DAT_31                    (ERR_APD_DAT + ERR_GEN_ID_31)    // 0x6831
+#define SWO_APD_DAT_32                    (ERR_APD_DAT + ERR_GEN_ID_32)    // 0x6832
 
 #define SWO_APD_STA_01                    (ERR_APD_STA + ERR_GEN_ID_01)    // 0x6601
 #define SWO_APD_STA_02                    (ERR_APD_STA + ERR_GEN_ID_02)    // 0x6602
