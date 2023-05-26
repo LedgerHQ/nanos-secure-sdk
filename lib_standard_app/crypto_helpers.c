@@ -58,6 +58,8 @@ end:
     explicit_bzero(&raw_privkey, sizeof(raw_privkey));
 
     if (error != CX_OK) {
+        // Make sure the caller doesn't use uninitialized data in case
+        // the return code is not checked.
         explicit_bzero(&privkey, sizeof(privkey));
     }
     return error;
@@ -100,6 +102,12 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_get_pubkey_256(
 
 end:
     explicit_bzero(&privkey, sizeof(privkey));
+
+    if (error != CX_OK) {
+        // Make sure the caller doesn't use uninitialized data in case
+        // the return code is not checked.
+        explicit_bzero(raw_pubkey, 65);
+    }
     return error;
 }
 
@@ -119,6 +127,7 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(
         size_t seed_len) {
     cx_err_t error = CX_OK;
     cx_ecfp_256_private_key_t privkey;
+    size_t buf_len = *sig_len;
 
     // Derive private key according to BIP32 path
     CX_CHECK(bip32_derive_with_seed_init_privkey_256(derivation_mode,
@@ -134,6 +143,12 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(
 
 end:
     explicit_bzero(&privkey, sizeof(privkey));
+
+    if (error != CX_OK) {
+        // Make sure the caller doesn't use uninitialized data in case
+        // the return code is not checked.
+        explicit_bzero(sig, buf_len);
+    }
     return error;
 }
 
@@ -152,6 +167,7 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(
     cx_err_t error = CX_OK;
     cx_ecfp_256_private_key_t privkey;
     size_t size;
+    size_t buf_len = *sig_len;
 
     if (sig_len == NULL) {
         error = CX_INVALID_PARAMETER_VALUE;
@@ -175,5 +191,11 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(
 
 end:
     explicit_bzero(&privkey, sizeof(privkey));
+
+    if (error != CX_OK) {
+        // Make sure the caller doesn't use uninitialized data in case
+        // the return code is not checked.
+        explicit_bzero(sig, buf_len);
+    }
     return error;
 }

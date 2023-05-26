@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string.h>
+
 #include "appflags.h"
 #include "decorators.h"
 #include "lcx_ecfp.h"
@@ -133,6 +135,10 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_with_seed_no_throw(
         }
         CATCH_OTHER(e) {
             error = e;
+
+            // Make sure the caller doesn't use uninitialized data in case
+            // the return code is not checked.
+            explicit_bzero(&raw_privkey, 64);
         }
         FINALLY {
         }
@@ -206,6 +212,10 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_eip2333_no_throw(
         }
         CATCH_OTHER(e) {
             error = e;
+
+            // Make sure the caller doesn't use uninitialized data in case
+            // the return code is not checked.
+            explicit_bzero(&raw_privkey, 64);
         }
         FINALLY {
         }
