@@ -21,14 +21,15 @@
 #include "cx.h"
 #include "os.h"
 
-cx_err_t bip32_derive_with_seed_init_privkey_256(unsigned int derivation_mode,
-                                                 cx_curve_t curve,
-                                                 const uint32_t *path,
-                                                 size_t path_len,
-                                                 cx_ecfp_256_private_key_t *privkey,
-                                                 uint8_t *chain_code,
-                                                 unsigned char *seed,
-                                                 size_t seed_len) {
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_init_privkey_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        cx_ecfp_256_private_key_t *privkey,
+        uint8_t *chain_code,
+        unsigned char *seed,
+        size_t seed_len) {
     cx_err_t error = CX_OK;
     uint8_t raw_privkey[64]; // Allocate 64 bytes to respect Syscall API but only 32 will be used
     size_t length;
@@ -62,15 +63,16 @@ end:
     return error;
 }
 
-cx_err_t bip32_derive_with_seed_get_pubkey_256(unsigned int derivation_mode,
-                                               cx_curve_t curve,
-                                               const uint32_t *path,
-                                               size_t path_len,
-                                               uint8_t raw_pubkey[static 65],
-                                               uint8_t *chain_code,
-                                               cx_md_t hashID,
-                                               unsigned char *seed,
-                                               size_t seed_len) {
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_get_pubkey_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        uint8_t raw_pubkey[static 65],
+        uint8_t *chain_code,
+        cx_md_t hashID,
+        unsigned char *seed,
+        size_t seed_len) {
     cx_err_t error = CX_OK;
 
     cx_ecfp_256_private_key_t privkey;
@@ -101,19 +103,20 @@ end:
     return error;
 }
 
-cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(unsigned int derivation_mode,
-                                                    cx_curve_t curve,
-                                                    const uint32_t *path,
-                                                    size_t path_len,
-                                                    uint32_t sign_mode,
-                                                    cx_md_t hashID,
-                                                    const uint8_t *hash,
-                                                    size_t hash_len,
-                                                    uint8_t *sig,
-                                                    size_t *sig_len,
-                                                    uint32_t *info,
-                                                    unsigned char *seed,
-                                                    size_t seed_len) {
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        uint32_t sign_mode,
+        cx_md_t hashID,
+        const uint8_t *hash,
+        size_t hash_len,
+        uint8_t *sig,
+        size_t *sig_len,
+        uint32_t *info,
+        unsigned char *seed,
+        size_t seed_len) {
     cx_err_t error = CX_OK;
     cx_ecfp_256_private_key_t privkey;
 
@@ -134,17 +137,18 @@ end:
     return error;
 }
 
-cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(unsigned int derivation_mode,
-                                                    cx_curve_t curve,
-                                                    const uint32_t *path,
-                                                    size_t path_len,
-                                                    cx_md_t hashID,
-                                                    const uint8_t *hash,
-                                                    size_t hash_len,
-                                                    uint8_t *sig,
-                                                    size_t *sig_len,
-                                                    unsigned char *seed,
-                                                    size_t seed_len) {
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        cx_md_t hashID,
+        const uint8_t *hash,
+        size_t hash_len,
+        uint8_t *sig,
+        size_t *sig_len,
+        unsigned char *seed,
+        size_t seed_len) {
     cx_err_t error = CX_OK;
     cx_ecfp_256_private_key_t privkey;
     size_t size;
