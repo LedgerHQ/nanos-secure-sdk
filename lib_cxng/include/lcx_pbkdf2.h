@@ -72,36 +72,10 @@ cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type,
                    size_t         outLength);
 
 /**
- * @brief   Computes a PBKDF2 bytes sequence.
- *
- * @details It computes the bytes sequence according to
- *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
- *          This function throws an exception if the computation doesn't succeed.
- *
- * @warning It is recommended to use #cx_pbkdf2_no_throw rather
- *          than this function.
- *
- * @param[in]  md_type     Message digest algorithm identifier.
- *
- * @param[in]  password    Password used as a base key to compute
- *                         the HMAC.
- *
- * @param[in]  passwordlen Length of the password i.e. the length
- *                         of the HMAC key.
- *
- * @param[in]  salt        Initial salt.
- *
- * @param[in]  saltlen     Length of the salt.
- *
- * @param[in]  iterations  Per block iteration.
- *
- * @param[out] out         Buffer where to store the output.
- *
- * @param[in]  outLength   Length of the output buffer.
- *
- * @throws                 CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_pbkdf2_no_throw
  */
-static inline void cx_pbkdf2 ( cx_md_t md_type, const unsigned char * password, unsigned short passwordlen, unsigned char * salt, unsigned short saltlen, unsigned int iterations, unsigned char * out, unsigned int outLength )
+DEPRECATED static inline void cx_pbkdf2 ( cx_md_t md_type, const unsigned char * password, unsigned short passwordlen, unsigned char * salt, unsigned short saltlen, unsigned int iterations, unsigned char * out, unsigned int outLength )
 {
   CX_THROW(cx_pbkdf2_no_throw(md_type, password, passwordlen, salt, saltlen, iterations, out, outLength));
 }

@@ -78,30 +78,10 @@ typedef struct {
 cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac, const uint8_t *key, size_t key_len);
 
 /**
- * @brief   Initializes a HMAC-RIPEMD160 context.
- *
- * @details This function throws an exception if the
- *          initialization fails.
- *
- * @warning It is recommended to use #cx_hmac_ripemd160_init_no_throw
- *          rather than this function.
- *
- * @param[out] hmac    Pointer to the HMAC context.
- *                     The context shall be in RAM.
- *
- * @param[in]  key     Pointer to the HMAC key value.
- *                     If a key has been set, passing
- *                     NULL pointer will reinitialize
- *                     the context with the previously set key.
- *
- * @param [in] key_len Length of the key.
- *                     The key length shall be less than 64 bytes.
- *
- * @return             RIPEMD160 identifier.
- *
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_hmac_ripemd160_init_no_throw
  */
-static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const unsigned char * key, unsigned int key_len )
+DEPRECATED static inline int cx_hmac_ripemd160_init ( cx_hmac_ripemd160_t * hmac, const unsigned char * key, unsigned int key_len )
 {
   CX_THROW(cx_hmac_ripemd160_init_no_throw(hmac, key, key_len));
   return CX_RIPEMD160;
@@ -165,30 +145,10 @@ cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac, const uint8_t *key, unsigne
 cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac, const uint8_t *key, size_t key_len);
 
 /**
- * @brief   Initializes a HMAC-SHA256 context.
- *
- * @details This function throws an exception if
- *          the initialization fails.
- *
- * @warning It is recommended to use #cx_hmac_sha256_init_no_throw
- *          rather than this function.
- *
- * @param[out] hmac    Pointer to the HMAC context.
- *                     The context shall be in RAM.
- *
- * @param[in]  key     Pointer to the HMAC key value.
- *                     If a key has been set, passing
- *                     NULL pointer will reinitialize
- *                     the context with the previously set key.
- *
- * @param [in] key_len Length of the key.
- *                     The key length shall be less than 64 bytes.
- *
- * @return             SHA256 identifier.
- *
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_hmac_sha256_init_no_throw
  */
-static inline int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, const unsigned char * key, unsigned int key_len )
+DEPRECATED static inline int cx_hmac_sha256_init ( cx_hmac_sha256_t * hmac, const unsigned char * key, unsigned int key_len )
 {
   CX_THROW(cx_hmac_sha256_init_no_throw(hmac, key, key_len));
   return CX_SHA256;
@@ -274,30 +234,10 @@ cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac, const uint8_t *key, unsigne
 cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key, size_t key_len);
 
 /**
- * @brief   Initializes a HMAC-SHA512 context.
- *
- * @details This function throws an exception if
- *          if the initialization fails.
- *
- * @warning It is recommended to use #cx_hmac_sha512_init_no_throw
- *          rather than this function.
- *
- * @param[out] hmac    Pointer to the context.
- *                     The context shall be in RAM.
- *
- * @param[in]  key     Pointer to the HMAC key value.
- *                     If a key has been set, passing
- *                     NULL pointer will reinitialize
- *                     the context with the previously set key.
- *
- * @param[in]  key_len Length of the key.
- *                     The key length shall be less than 128 bytes.
- *
- * @return             SHA512 identifier.
- *
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_hmac_sha512_init_no_throw
  */
-static inline int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, const unsigned char * key, unsigned int key_len )
+DEPRECATED static inline int cx_hmac_sha512_init ( cx_hmac_sha512_t * hmac, const unsigned char * key, unsigned int key_len )
 {
   CX_THROW(cx_hmac_sha512_init_no_throw(hmac, key, key_len));
   return CX_SHA512;
@@ -360,43 +300,10 @@ size_t cx_hmac_sha512(const uint8_t *key, size_t key_len, const uint8_t *in, siz
 cx_err_t cx_hmac_no_throw(cx_hmac_t *hmac, uint32_t mode, const uint8_t *in, size_t len, uint8_t *mac, size_t mac_len);
 
 /**
- * @brief   Computes a HMAC value according to the specified
- *          hash function.
- *
- * @details This function throws an exception
- *          if the computation doesn't succeed.
- *
- * @warning It is recommended to use #cx_hmac_no_throw rather than
- *          this function.
- *
- * @param[in]  hmac    Pointer to the HMAC context.
- *                     The context shall be initialized with
- *                     one of the initialization functions.
- *                     The context shall be in RAM.
- *                     The function shall be called with the cast
- *                     (cx_hmac_t *).
- *
- * @param[in]  mode    Crypto mode flags. Supported flags:
- *                       - CX_LAST
- *                       - CX_NO_REINIT
- *                     If CX_LAST is set and CX_NO_REINIT is not set, the context is
- *                     reinitialized.
- *
- * @param[in]  in      Input data to add to the context.
- *
- * @param[in]  len     Length of the input data.
- *
- * @param[out] mac     Pointer to the computed HMAC or NULL pointer (if CX_LAST is not set).
- *
- * @param[in]  mac_len Length of the output buffer if not NULL, 0 otherwise.
- *                     The buffer size must be larger
- *                     than the length of the HMAC value.
- *
- * @return             Identifier of the hash function.
- *
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_hmac_no_throw
  */
-static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char * in, unsigned int len, unsigned char * mac, unsigned int mac_len )
+DEPRECATED static inline int cx_hmac ( cx_hmac_t * hmac, uint32_t mode, const unsigned char * in, unsigned int len, unsigned char * mac, unsigned int mac_len )
 {
   CX_THROW(cx_hmac_no_throw(hmac, mode, in, len, mac, mac_len));
 
