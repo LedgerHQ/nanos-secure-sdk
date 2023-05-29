@@ -600,7 +600,7 @@ void io_seproxyhal_request_mcu_status(void);
  */
 void io_seproxyhal_display_bitmap(int x, int y, unsigned int w, unsigned int h, unsigned int* color_index, unsigned int bit_per_pixel, unsigned char* bitmap);
 
-void io_seproxyhal_power_off(void);
+void io_seproxyhal_power_off(bool criticalBattery);
 
 void io_seproxyhal_se_reset(void);
 

@@ -263,7 +263,7 @@ void io_start(void);
 #endif // HAVE_IO_TASK
 
 void io_seproxyhal_setup_ticker(unsigned int interval_ms);
-void io_seproxyhal_power_off(void);
+void io_seproxyhal_power_off(bool criticalBattery);
 void io_seproxyhal_se_reset(void);
 void io_seproxyhal_disable_io(void);
 
