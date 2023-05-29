@@ -81,24 +81,10 @@ typedef struct cx_blake2b_s cx_blake2b_t;
 cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
 
 /**
- * @brief   Initializes BLAKE2b message digest context.
- * 
- * @details This function throws an exception if the
- *          initialization fails.
- *
- * @warning It is recommended to use #cx_blake2b_init_no_throw
- *          rather than this function.
- *
- * @param[out] hash    Pointer to the BLAKE2b context to initialize.
- *                     The context shall be in RAM.
- *
- * @param[in]  out_len Digest size in bits.
- *
- * @return             BLAKE2b identifier.
- * 
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_blake2b_init_no_throw
  */
-static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
+DEPRECATED static inline int cx_blake2b_init ( cx_blake2b_t * hash, unsigned int out_len )
 {
   CX_THROW(cx_blake2b_init_no_throw(hash, out_len));
   return CX_BLAKE2B;
@@ -133,33 +119,10 @@ cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
                                     size_t        perso_len);
 
 /**
- * @brief   Initializes BLAKE2b message digest context with
- *          salt and personnalization string.
- * 
- * @details This function throws an exception if the initialization
- *          fails.
- *
- * @warning It is recommended to use #cx_blake2b_init2_no_throw
- *          rather than this function.
- * 
- * @param[out] hash     Pointer to the BLAKE2b context to initialize.
- *                      The context shall be in RAM.
- * 
- * @param[in] out_len   Digest size in bits.
- * 
- * @param[in] salt      Pointer to a salt (optional).
- * 
- * @param[in] salt_len  Length of the salt.
- * 
- * @param[in] perso     Pointer to a personalization string (optional).
- * 
- * @param[in] perso_len Length of the personalization string.
- * 
- * @return              BLAKE2b identifier.
- * 
- * @throws              CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_blake2b_init2_no_throw
  */
-static inline int cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len )
+DEPRECATED static inline int cx_blake2b_init2 ( cx_blake2b_t * hash, unsigned int out_len, unsigned char * salt, unsigned int salt_len, unsigned char * perso, unsigned int perso_len )
 {
   CX_THROW(cx_blake2b_init2_no_throw(hash, out_len, salt, salt_len, perso, perso_len));
   return CX_BLAKE2B;
