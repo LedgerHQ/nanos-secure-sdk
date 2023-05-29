@@ -66,27 +66,10 @@
 cx_err_t cx_des_init_key_no_throw(const uint8_t *rawkey, size_t key_len, cx_des_key_t *key);
 
 /**
- * @brief   Initializes a DES key.
- *
- * @details Once initialized, the key can be stored in non-volatile memory
- *          and directly used for any DES processing.
- *          This function throws an exception if the initialization
- *          fails.
- *
- * @warning It is recommended to use #cx_des_init_key_no_throw rather
- *          than this function.
- *
- * @param[in]  rawkey  Pointer to the supplied key.
- *
- * @param[in]  key_len Length of the key: 8, 16 or 24 octets.
- *
- * @param[out] key     Pointer to the key structure. This must not be NULL.
- *
- * @return             Length of the key.
- *
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_des_init_key_no_throw
  */
-static inline size_t cx_des_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_des_key_t * key )
+DEPRECATED static inline size_t cx_des_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_des_key_t * key )
 {
   CX_THROW(cx_des_init_key_no_throw(rawkey, key_len, key));
   return key_len;
@@ -144,54 +127,10 @@ cx_err_t cx_des_iv_no_throw(const cx_des_key_t *key,
                    size_t *            out_len);
 
 /**
- * @brief   Encrypts, decrypts, signs or verifies data with DES algorithm.
- *
- * @details This function throws an exception if the computation
- *          doesn't succeed.
- *
- * @warning It is recommended to use #cx_des_iv_no_throw rather
- *          than this function.
- *
- * @param[in] key    Pointer to the key initialized with
- *                   #cx_des_init_key_no_throw.
- *
- * @param[in] iv     Initialization vector.
- *
- * @param[in] iv_len Length of the initialization vector.
- *
- * @param[in] mode   Crypto mode flags.
- *                    Supported flags:
- *                     - CX_LAST
- *                     - CX_ENCRYPT
- *                     - CX_DECRYPT
- *                     - CX_SIGN
- *                     - CX_VERIFY
- *                     - CX_PAD_NONE
- *                     - CX_PAD_ISO9797M1
- *                     - CX_PAD_ISO9797M2
- *                     - CX_CHAIN_ECB
- *                     - CX_CHAIN_CBC
- *                     - CX_CHAIN_CTR
- *
- * @param[in] in     Input data.
- *
- * @param[in] in_len Length of the input data.
- *                    If CX_LAST is set, padding is automatically done according to the *mode*.
- *                    Otherwise, *in_len* shall be a multiple of DES_BLOCK_SIZE.
- *
- * @param[out] out   Output data according to the mode:
- *                     - encrypted/decrypted output data
- *                     - generated signature
- *                     - signature to be verified
- *
- * @param[in] out_len Length of the output data.
- *
- * @return            Length of the output.
- *
- * @throws            CX_INVALID_PARAMETER
- * @throws            INVALID_PARAMETER
+ * @deprecated
+ * See #cx_des_iv_no_throw
  */
-static inline size_t cx_des_iv ( const cx_des_key_t * key, uint32_t mode, unsigned char * iv, unsigned int iv_len, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
+DEPRECATED static inline size_t cx_des_iv ( const cx_des_key_t * key, uint32_t mode, unsigned char * iv, unsigned int iv_len, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
 {
   size_t out_len_ = out_len;
   CX_THROW(cx_des_iv_no_throw(key, mode, iv, iv_len, in, in_len, out, &out_len_));
@@ -239,49 +178,10 @@ static inline size_t cx_des_iv ( const cx_des_key_t * key, uint32_t mode, unsign
 cx_err_t cx_des_no_throw(const cx_des_key_t *key, uint32_t mode, const uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
 /**
- * @brief   Encrypts, decrypts, signs or verifies data with DES algorithm.
- *
- * @details This function throws an exception if the computation fails.
- *
- * @warning It is recommended to use #cx_des_no_throw rather than this
- *          function.
- *
- * @param[in] key    Pointer to the key initialized with
- *                   #cx_des_init_key_no_throw.
- *
- * @param[in] mode   Crypto mode flags.
- *                    Supported flags:
- *                     - CX_LAST
- *                     - CX_ENCRYPT
- *                     - CX_DECRYPT
- *                     - CX_SIGN
- *                     - CX_VERIFY
- *                     - CX_PAD_NONE
- *                     - CX_PAD_ISO9797M1
- *                     - CX_PAD_ISO9797M2
- *                     - CX_CHAIN_ECB
- *                     - CX_CHAIN_CBC
- *                     - CX_CHAIN_CTR
- *
- * @param[in] in     Input data.
- *
- * @param[in] in_len Length of the input data.
- *                    If CX_LAST is set, padding is automatically done according to the *mode*.
- *                    Otherwise, *in_len* shall be a multiple of DES_BLOCK_SIZE.
- *
- * @param[out] out   Output data according to the mode:
- *                     - encrypted/decrypted output data
- *                     - generated signature
- *                     - signature to be verified
- *
- * @param[in] out_len Length of the output data.
- *
- * @return            Length of the output.
- *
- * @throws            CX_INVALID_PARAMETER
- * @throws            INVALID_PARAMETER
+ * @deprecated
+ * See #cx_des_no_throw
  */
-static inline size_t cx_des ( const cx_des_key_t * key, uint32_t mode, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
+DEPRECATED static inline size_t cx_des ( const cx_des_key_t * key, uint32_t mode, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
 {
   size_t out_len_ = out_len;
   CX_THROW(cx_des_no_throw(key, mode, in, in_len, out, &out_len_));
