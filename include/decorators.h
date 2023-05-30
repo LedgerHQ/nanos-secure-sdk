@@ -58,3 +58,7 @@
     #define FALL_THROUGH ((void)0)
   #endif
 #endif
+
+#ifndef WARN_UNUSED_RESULT
+  #define WARN_UNUSED_RESULT __attribute__ ((warn_unused_result))
+#endif
