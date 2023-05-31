@@ -45,7 +45,7 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_words(
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_finalize(void);
 #if defined(HAVE_RECOVER)
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_master_seed(uint8_t* master_seed PLENGTH(length), size_t length, os_action_t action);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_protect_state(uint8_t* state, os_action_t action);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_recover_state(uint8_t* state, os_action_t action);
 #endif // HAVE_RECOVER
 
 // checked in the ux flow to avoid asking the pin for example
@@ -67,7 +67,7 @@ enum {
   ONBOARDING_STATUS_SAFETY_WARNINGS,
   ONBOARDING_STATUS_READY,
   ONBOARDING_STATUS_CHOOSE_NAME,
-  ONBOARDING_STATUS_PROTECT_RESTORE_SEED,
+  ONBOARDING_STATUS_RECOVER_RESTORE_SEED,
   ONBOARDING_STATUS_SETUP_CHOICE_RESTORE_SEED,
   ONBOARDING_STATUS_CHECKING
 };
