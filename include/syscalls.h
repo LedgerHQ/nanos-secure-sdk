@@ -134,7 +134,7 @@
 
 #ifdef HAVE_RECOVER
 #define SYSCALL_os_perso_master_seed_ID                            0x02000052
-#define SYSCALL_os_perso_protect_state_ID                          0x02000054
+#define SYSCALL_os_perso_recover_state_ID                          0x02000054
 #endif // HAVE_RECOVER
 
 #if defined(HAVE_SEED_COOKIE)

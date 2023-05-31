@@ -1039,11 +1039,11 @@ void os_perso_master_seed(uint8_t *master_seed, size_t length, os_action_t actio
   return;
 }
 
-void os_perso_protect_state(uint8_t *state, os_action_t action) {
+void os_perso_recover_state(uint8_t *state, os_action_t action) {
   unsigned int parameters[2];
   parameters[0] = (unsigned int)state;
   parameters[1] = (unsigned int)action;
-  SVC_Call(SYSCALL_os_perso_protect_state_ID, parameters);
+  SVC_Call(SYSCALL_os_perso_recover_state_ID, parameters);
   return;
 }
 
