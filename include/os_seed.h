@@ -43,10 +43,10 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char  os_perso_get_seed_a
 
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_words(const unsigned char* words PLENGTH(length), unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_finalize(void);
-#if defined(HAVE_PROTECT)
+#if defined(HAVE_RECOVER)
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_master_seed(uint8_t* master_seed PLENGTH(length), size_t length, os_action_t action);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_protect_state(uint8_t* state, os_action_t action);
-#endif // HAVE_PROTECT
+#endif // HAVE_RECOVER
 
 // checked in the ux flow to avoid asking the pin for example
 // NBA : could also be checked by applications running in insecure mode - thus unprivilegied
