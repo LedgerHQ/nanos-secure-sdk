@@ -132,10 +132,10 @@
 #define SYSCALL_os_perso_derive_node_with_seed_key_ID              0x080000a6
 #define SYSCALL_os_perso_derive_eip2333_ID                         0x040000a7
 
-#ifdef HAVE_PROTECT
+#ifdef HAVE_RECOVER
 #define SYSCALL_os_perso_master_seed_ID                            0x02000052
 #define SYSCALL_os_perso_protect_state_ID                          0x02000054
-#endif // HAVE_PROTECT
+#endif // HAVE_RECOVER
 
 #if defined(HAVE_SEED_COOKIE)
 #define SYSCALL_os_perso_seed_cookie_ID                            0x010000a8
