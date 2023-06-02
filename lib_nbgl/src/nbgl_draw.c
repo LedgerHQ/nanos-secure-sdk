@@ -419,6 +419,7 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     int16_t char_y_max;
     uint16_t char_byte_cnt;
     uint8_t encoding;
+    uint8_t nb_skipped_bytes;
 
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
 
@@ -437,12 +438,20 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
       char_x_max = char_width;
       char_y_max = unicode_ctx->font->height;
 
+      if (!unicode_ctx->font->crop) {
+        // Take in account the skipped bytes, if any
+        nb_skipped_bytes = (unicodeCharacter->x_min_offset & 7) << 3;
+        nb_skipped_bytes |= unicodeCharacter->y_min_offset & 7;
+        char_x_min = 0;
+        char_y_min = 0;
+      } else {
       nb_skipped_bytes = 0;
       char_x_min = (uint16_t)unicodeCharacter->x_min_offset;
       char_y_min = unicode_ctx->font->y_min;
       char_y_min += (uint16_t)unicodeCharacter->y_min_offset * 4;
       char_x_max -= (uint16_t)unicodeCharacter->x_max_offset;
       char_y_max -= (uint16_t)unicodeCharacter->y_max_offset * 4;
+      }
 
       char_byte_cnt = nbgl_getUnicodeFontCharacterByteCount();
       encoding = unicodeCharacter->encoding;
@@ -464,12 +473,20 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
       char_x_max = char_width;
       char_y_max = font->height;
 
+      if (!font->crop) {
+        // Take in account the skipped bytes, if any
+        nb_skipped_bytes = (character->x_min_offset & 7) << 3;
+        nb_skipped_bytes |= character->y_min_offset & 7;
+        char_x_min = 0;
+        char_y_min = 0;
+      } else {
       nb_skipped_bytes = 0;
       char_x_min = (uint16_t)character->x_min_offset;
       char_y_min = font->y_min;
       char_y_min += (uint16_t)character->y_min_offset * 4;
       char_x_max -= (uint16_t)character->x_max_offset;
       char_y_max -= (uint16_t)character->y_max_offset * 4;
+      }
 
       char_byte_cnt = get_bitmap_byte_cnt(font, unicode);
     }
@@ -486,7 +503,8 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
           nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
           break;
         case 1:
-          nbgl_frontDrawImageRle(&rectArea, char_buffer, char_byte_cnt, fontColor);
+          nbgl_frontDrawImageRle(
+            &rectArea, char_buffer, char_byte_cnt, fontColor, nb_skipped_bytes);
           break;
       }
     }

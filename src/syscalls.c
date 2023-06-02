@@ -82,13 +82,14 @@ void nbgl_frontDrawImage(nbgl_area_t *area, uint8_t *buffer, nbgl_transformation
   return;
 }
 
-void nbgl_frontDrawImageRle(nbgl_area_t *area, uint8_t *buffer, uint32_t buffer_len, color_t fore_color)
+void nbgl_frontDrawImageRle(nbgl_area_t *area, uint8_t *buffer, uint32_t buffer_len, color_t fore_color, uint8_t nb_skipped_bytes)
 {
-  unsigned int parameters[4];
+  unsigned int parameters[5];
   parameters[0] = (unsigned int)area;
   parameters[1] = (unsigned int)PIC(buffer);
   parameters[2] = (unsigned int)buffer_len;
   parameters[3] = (unsigned int)fore_color;
+  parameters[4] = (unsigned int)nb_skipped_bytes;
   SVC_Call(SYSCALL_nbgl_front_draw_img_rle_ID, parameters);
   return;
 }
