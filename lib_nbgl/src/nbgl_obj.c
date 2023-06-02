@@ -627,7 +627,7 @@ static void draw_pageIndicator(nbgl_page_indicator_t* obj, nbgl_obj_t *prevObj, 
  */
 static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
   nbgl_area_t rectArea;
-  uint16_t textWidth,fontHeight,lineHeight, textHeight;
+  uint16_t textWidth,fontHeight,lineHeight, textHeight, midHeight;
   uint8_t line,nbLines;
   const char *text;
 
@@ -727,6 +727,12 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
 
   textHeight = (nbLines-1)*lineHeight+fontHeight;
 
+  midHeight = (obj->height - textHeight)/2;
+  // Be sure midHeight is modulo 4
+  if (midHeight % 4) {
+    midHeight -= midHeight % 4;
+  }
+
   rectArea.backgroundColor = obj->backgroundColor;
   rectArea.height = fontHeight;
   // draw each line
@@ -746,7 +752,7 @@ static void draw_textArea(nbgl_text_area_t* obj, nbgl_obj_t *prevObj, bool compu
     else {
       LOG_FATAL(OBJ_LOGGER,"Forbidden obj->textAlignment = %d\n",obj->textAlignment);
     }
-    rectArea.y0 = obj->y0 + (obj->height - textHeight)/2 + line*lineHeight;
+    rectArea.y0 = obj->y0 + midHeight + line*lineHeight;
     rectArea.width = lineWidth;
 
     LOG_DEBUG(OBJ_LOGGER,"draw_textArea(), %s line %d, lineLen %d lineWidth = %d, obj->height = %d, textHeight = %d, obj->nbMaxLines = %d\n",text,  line,lineLen, lineWidth,obj->height, textHeight, obj->nbMaxLines);
