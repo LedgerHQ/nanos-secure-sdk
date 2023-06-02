@@ -177,7 +177,7 @@ static uint8_t getCharWidth(const nbgl_font_t *font, uint32_t unicode, bool is_u
     if (!unicodeCharacter) {
       return 0;
     }
-    return unicodeCharacter->char_width;
+    return unicodeCharacter->width;
 #else // HAVE_UNICODE_SUPPORT
     return 0;
 #endif // HAVE_UNICODE_SUPPORT
@@ -188,7 +188,7 @@ static uint8_t getCharWidth(const nbgl_font_t *font, uint32_t unicode, bool is_u
       return 0;
     }
     character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
-    return character->char_width;
+    return character->width;
   }
 }
 
@@ -302,7 +302,7 @@ uint8_t nbgl_getCharWidth(nbgl_font_id_e fontId, const char *text) {
  */
 uint8_t nbgl_getFontHeight(nbgl_font_id_e fontId) {
   const nbgl_font_t *font = nbgl_getFont(fontId);
-  return font->char_height;
+  return font->height;
 }
 
 /**
@@ -511,7 +511,7 @@ bool nbgl_getTextMaxLenAndWidthFromEnd(nbgl_font_id_e fontId, const char* text, 
       continue;
     }
     character = (nbgl_font_character_t *)PIC(&font->characters[cur_char-font->first_char]);
-    char_width = character->char_width;
+    char_width = character->width;
 
     if ((*width+char_width) > maxWidth) {
       return true;
@@ -712,14 +712,12 @@ nbgl_unicode_ctx_t* nbgl_getUnicodeFont(nbgl_font_id_e fontId) {
       unicodeCtx.font = font;
       return &unicodeCtx;
     }
+    // Compute next Bitmap offset
+    unicodeCtx.bitmap += font->bitmap_len;
+
     // Update all pointers for next font
+    unicodeCtx.characters += language_pack->nb_characters;
     font++;
-    // Point to the last character to compute next Bitmap offset
-    unicodeCtx.characters = unicodeCtx.characters + language_pack->nb_characters-1;
-    uint32_t offset = unicodeCtx.characters->bitmap_offset;
-    offset += unicodeCtx.characters->bitmap_byte_count;
-    unicodeCtx.bitmap = unicodeCtx.bitmap + offset;
-    unicodeCtx.characters = unicodeCtx.characters+1;
   }
 #endif //defined(HAVE_LANGUAGE_PACK)
   // id not found
@@ -743,20 +741,40 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
   }
   // For the moment, let just parse the full array, but at the end let use
   // binary search as data are sorted by unicode value !
-  for (unsigned i=0; i < n; i++, characters++) {
+  for (unsigned i=0; i < n-1; i++, characters++) {
     if ((PIC(characters))->char_unicode == unicode) {
+      // Compute & store the number of bytes used to display this caracter
+      unicodeCtx.unicode_character_byte_count = \
+        (PIC(characters+1))->bitmap_offset - (PIC(characters))->bitmap_offset;
       return (PIC(characters));
     }
   }
   // By default, let's use the last Unicode character, which should be the
   // 0x00FFFD one, used to replace unrecognized or unrepresentable character.
-  --characters;
+
+  // Compute & store the number of bytes used to display this caracter
+  unicodeCtx.unicode_character_byte_count = unicodeCtx.font->bitmap_len -  \
+    (PIC(characters))->bitmap_offset;
   return (PIC(characters));
 #else //defined(HAVE_LANGUAGE_PACK)
   UNUSED(unicode);
   // id not found
   return NULL;
 #endif //defined(HAVE_LANGUAGE_PACK)
+}
+
+/**
+ * @brief Get the bitmap byte count of the latest used unicode character.
+ * (the one returned by nbgl_getUnicodeFontCharacter)
+ *
+ * @return bitmap byte count of that character (0 for empty ones, ie space)
+ */
+uint32_t nbgl_getUnicodeFontCharacterByteCount(void) {
+#ifdef HAVE_LANGUAGE_PACK
+  return unicodeCtx.unicode_character_byte_count;
+#else //defined(HAVE_LANGUAGE_PACK)
+  return 0;
+#endif // HAVE_LANGUAGE_PACK
 }
 
 #ifdef HAVE_LANGUAGE_PACK

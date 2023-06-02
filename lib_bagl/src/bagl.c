@@ -96,6 +96,7 @@ unsigned int                    G_glyph_count;
 
 #if defined(HAVE_UNICODE_SUPPORT)
 static const bagl_font_unicode_t *font_unicode;
+static unsigned int unicode_byte_count;
 #endif //defined(HAVE_UNICODE_SUPPORT)
 
 #if defined(HAVE_LANGUAGE_PACK)
@@ -182,14 +183,12 @@ const bagl_font_unicode_t* bagl_get_font_unicode(unsigned int font_id) {
       // Update all other global variables
       return PIC_FONTU(font);
     }
+    // Compute next Bitmap offset
+    unicode_bitmap += PIC_FONTU(font)->bitmap_len;
+
     // Update all pointers for next font
+    unicode_characters += PIC_LANGU(language_pack)->nb_characters;
     ++font;
-    // Point to the last character to compute next Bitmap offset
-    unicode_characters += PIC_LANGU(language_pack)->nb_characters-1;
-    unsigned int offset = (PIC_CHARU(unicode_characters))->bitmap_offset;
-    offset += (PIC_CHARU(unicode_characters))->bitmap_byte_count;
-    unicode_bitmap += offset;
-    ++unicode_characters;
   }
 #else //defined(HAVE_LANGUAGE_PACK)
   font_id &= BAGL_FONT_ID_MASK;
@@ -216,14 +215,20 @@ const bagl_font_unicode_character_t *get_unicode_character(unsigned int unicode)
 #endif //defined(HAVE_LANGUAGE_PACK)
   // For the moment, let just parse the full array, but at the end let use
   // binary search as data are sorted by unicode value !
-  for (unsigned i=0; i < n; i++, characters++) {
+  for (unsigned i=0; i < n-1; i++, characters++) {
     if ((PIC_CHARU(characters))->char_unicode == unicode) {
+      // Compute the number of bytes used to display this character
+      unicode_byte_count = (PIC_CHARU(characters+1))->bitmap_offset - \
+        (PIC_CHARU(characters))->bitmap_offset;
       return (PIC_CHARU(characters));
     }
   }
   // By default, let's use the last Unicode character, which should be the
   // 0x00FFFD one, used to replace unrecognized or unrepresentable character.
-  --characters;
+
+  // Compute the number of bytes used to display this character
+  unicode_byte_count = font_unicode->bitmap_len - \
+    (PIC_CHARU(characters))->bitmap_offset;
   return (PIC_CHARU(characters));
 }
 
@@ -395,8 +400,9 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
     }
 #endif //defined(HAVE_UNICODE_SUPPORT)
 
-    unsigned char ch_height = font->char_height;
+    unsigned char ch_height = font->height;
     int ch_offset_x = 0;
+    int ch_x_max = 0;
     int ch_offset_y = 0;
     unsigned char ch_width = 0;
     uint16_t      ch_bits = 0;
@@ -423,8 +429,9 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
       if (unicode) {
         const bagl_font_unicode_character_t *character;
         character = get_unicode_character(unicode);
-        ch_width = character->char_width;
-        ch_bits = character->bitmap_byte_count * 8;
+        ch_width = character->width;
+        // Number of bits needed to display this character
+        ch_bits = unicode_byte_count * 8;
 
 #if defined(HAVE_LANGUAGE_PACK)
         ch_bitmap = PIC_BMPU(unicode_bitmap);
@@ -433,14 +440,13 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
 #endif //defined(HAVE_LANGUAGE_PACK)
         ch_bitmap += character->bitmap_offset;
 
-        // char_leftmost_x is usually a negative value or 0
-        ch_offset_x = (unsigned int)character->x_offset;
-        ch_offset_x += (int)font_unicode->char_leftmost_x;
-        ch_offset_y = (unsigned int)character->y_offset;
+        ch_offset_x = (uint16_t)character->x_min_offset;
+        ch_x_max = (uint16_t)character->x_max_offset;
+        ch_offset_y = (unsigned int)character->y_min_offset;
         // Take in account the difference of baseline with reference value
-        ch_offset_y -= (int)font_unicode->baseline_height - (int)FONT_BASELINE;
-        ch_width -= character->x_offset;
-        bpp = font_unicode->bpp;
+        ch_offset_y -= (int)font_unicode->baseline - (int)FONT_BASELINE;
+        ch_width -= character->x_min_offset;
+        ch_width -= ch_x_max;
       } else
 #endif //defined(HAVE_UNICODE_SUPPORT)
       {
@@ -452,10 +458,10 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
           const bagl_font_t *font_symbols = bagl_get_font((ch&0x20)?BAGL_FONT_SYMBOLS_1:BAGL_FONT_SYMBOLS_0);
           if (font_symbols != NULL) {
             ch_bitmap = &PIC_BMP(font_symbols->bitmap)[PIC_CHAR(font_symbols->characters)[ch & 0x1F].bitmap_offset];
-            ch_width = PIC_CHAR(font_symbols->characters)[ch & 0x1F].char_width;
-            ch_height = font_symbols->char_height;
+            ch_width = PIC_CHAR(font_symbols->characters)[ch & 0x1F].width;
+            ch_height = font_symbols->height;
             // align baselines
-            ch_y = y + font->baseline_height - font_symbols->baseline_height;
+            ch_y = y + font->baseline - font_symbols->baseline;
           }
         }
         ch_bits = bpp*ch_width*ch_height;
@@ -465,16 +471,24 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
       // retrieve the char bitmap
       ch -= font->first_char;
       ch_bitmap = &PIC_BMP(font->bitmap)[PIC_CHAR(font->characters)[ch].bitmap_offset];
-      ch_width = PIC_CHAR(font->characters)[ch].char_width;
-      ch_bits = PIC_CHAR(font->characters)[ch].bitmap_byte_count * 8;
 
-      // char_leftmost_x is usually a negative value or 0
-      ch_offset_x = (unsigned int)PIC_CHAR(font->characters)[ch].x_offset;
-      ch_offset_x += (int)font->char_leftmost_x;
-      ch_offset_y = (unsigned int)PIC_CHAR(font->characters)[ch].y_offset;
+      // Number of bits needed to display this character
+      if (ch == (unsigned int)(font->last_char - font->first_char)) {
+        ch_bits = font->bitmap_len - (uint16_t)(PIC_CHAR(font->characters)[ch].bitmap_offset);
+      } else {
+        ch_bits = PIC_CHAR(font->characters)[ch+1].bitmap_offset - PIC_CHAR(font->characters)[ch].bitmap_offset;
+      }
+      ch_bits *= 8;
+
+      ch_width = PIC_CHAR(font->characters)[ch].width;
+
+      ch_offset_x = (uint16_t)PIC_CHAR(font->characters)[ch].x_min_offset;
+      ch_x_max = PIC_CHAR(font->characters)[ch].x_max_offset;
+      ch_offset_y = (uint16_t)PIC_CHAR(font->characters)[ch].y_min_offset;
       // Take in account the difference of baseline with reference value
-      ch_offset_y -= (int)font->baseline_height - (int)FONT_BASELINE;
-      ch_width -= PIC_CHAR(font->characters)[ch].x_offset           ;
+      ch_offset_y -= (int)font->baseline - (int)FONT_BASELINE;
+      ch_width -= PIC_CHAR(font->characters)[ch].x_min_offset;
+      ch_width -= ch_x_max;
     }
 
     if (dont_draw) {
@@ -483,7 +497,7 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
         return xx;
       }
       // prepare for next char
-      xx += ch_offset_x + (int)ch_width;
+      xx += ch_offset_x + (int)ch_width + ch_x_max;
 
     } else {
       // go to next line if needed
@@ -509,14 +523,14 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
       */
 
       // chars are storred LSB to MSB in each char, packed chars. horizontal scan
-      if (ch_bitmap) {
+      if (ch_bitmap && ch_bits) {
         bagl_hal_draw_bitmap_within_rect(xx + ch_offset_x, ch_y + ch_offset_y, ch_width, ch_height, (1<<bpp), colors, bpp, ch_bitmap, ch_bits);
       }
       else {
         bagl_hal_draw_rect(bgcolor, xx, ch_y, ch_width, ch_height);
       }
       // prepare for next char
-      xx += ch_offset_x + (int)ch_width;
+      xx += ch_offset_x + (int)ch_width + ch_x_max;
     }
   }
 
@@ -716,7 +730,7 @@ idx_ok:
   if (type != BAGL_ICON) {
     const bagl_font_t* font = bagl_get_font(component->font_id);
     if (font) {
-      baseline = font->baseline_height;
+      baseline = font->baseline;
       height_to_draw = component->height;
 
       if (context && context_length) {

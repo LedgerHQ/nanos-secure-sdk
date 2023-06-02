@@ -39,7 +39,8 @@
 #define BAGL_FILL_CIRCLE_0_PI2 (BAGL_FILL_CIRCLE_5_OCTANT|BAGL_FILL_CIRCLE_6_OCTANT)
 #define BAGL_FILL_CIRCLE_PI2_PI (BAGL_FILL_CIRCLE_7_OCTANT|BAGL_FILL_CIRCLE_8_OCTANT)
 
-// Height & Baseline of regular & extrabold fonts (non unicode characters)
+// Height & Baseline of regular & extrabold 11 px fonts (non unicode characters)
+// (includes the 3 skipped lines - still for non unicode characters)
 #define FONT_HEIGHT   12
 #define FONT_BASELINE 9
 
@@ -135,29 +136,30 @@ extern const unsigned int C_glyph_count;
 // WARNING: please DON'T CHANGE the order of the fields below!
 // (otherwise python tools that generate data will need to be modified too)
 typedef struct {
-    uint32_t  char_width:4;
-    uint32_t  y_offset:4;
-    uint32_t  x_offset:3;   // Added to char_leftmost_x to allow neg values
-    uint32_t  bitmap_byte_count:5;
-    uint32_t  bitmap_offset:16;
+  uint32_t encoding:2;        //  method used to encode bitmap data
+  uint32_t bitmap_offset:12;  //  offset of this character in chars buffer
+  uint32_t width:5;           //  width of character in pixels
+  uint32_t x_min_offset:4;    //  x_min = x_min_offset
+  uint32_t y_min_offset:5;    //  Does already contain the nb of skipped lines
+  uint32_t x_max_offset:4;    //  x_max = width - x_max_offset
 } bagl_font_character_t;
 
 typedef struct {
-  unsigned int font_id; // to allow for sparse font embedding with a linear enum
-  unsigned char bpp; // for antialiased fonts
-  unsigned char char_height;
-  unsigned char baseline_height;
-  signed char char_leftmost_x;  // Most left X coordinate of any char in the font
-  unsigned short first_char;
-  unsigned short last_char;
+  uint16_t bitmap_len;        // Size in bytes of all characters bitmaps
+  uint8_t font_id;            // to allow for sparse font embedding with a linear enum
+  uint8_t bpp;                // for antialiased fonts (blue?)
+  uint8_t height;             // Does already contain the nb of skipped lines
+  uint8_t baseline;           // Does already contain the nb of skipped lines
+  uint8_t first_char;
+  uint8_t last_char;
   const bagl_font_character_t * const characters;
-  #define PIC_CHAR(x) ((const bagl_font_character_t *)PIC(x))
   unsigned char const * bitmap; // single bitmap for all chars of a font
-  #define PIC_BMP(x) ((unsigned char const*)PIC(x))
 } bagl_font_t;
 
 extern const bagl_font_t * const C_bagl_fonts [];
 #define PIC_FONT(x) ((bagl_font_t const *)PIC(x))
+#define PIC_CHAR(x) ((const bagl_font_character_t *)PIC(x))
+#define PIC_BMP(x) ((unsigned char const*)PIC(x))
 
 #if defined(HAVE_UNICODE_SUPPORT)
 
@@ -170,21 +172,18 @@ extern const bagl_font_t * const C_bagl_fonts [];
 // (otherwise python tools that generate data will need to be modified too)
 typedef struct {
   uint32_t  char_unicode:21;  // plane value from 0 to 16 then 16-bit code.
-  uint32_t  char_width:6;
-  uint32_t  x_offset:5;       // Added to char_leftmost_x to allow neg values
-  uint32_t  y_offset:6;
-  uint32_t  bitmap_byte_count:10;
-  uint32_t  bitmap_offset:16;
+  uint32_t  width:6;
+  uint32_t  x_min_offset:5;   //  x_min = x_min_offset
+  uint32_t  y_min_offset:6;   //  Does already contain the nb of skipped lines
+  uint32_t  x_max_offset:5;   //  x_max = width - x_max_offset
+  uint32_t  encoding:2;       //  method used to encode bitmap data
+  uint32_t  bitmap_offset:19;
 } bagl_font_unicode_character_t;
 
 typedef struct {
-  unsigned int font_id; // to allow for sparse font embedding with a linear enum
-  unsigned char bpp; // for antialiased fonts
-  unsigned char char_height;
-  unsigned char baseline_height;
-  signed char char_leftmost_x;  // Most left X coordinate of any char in the font
-  unsigned int first_unicode_char;
-  unsigned int last_unicode_char;
+  uint16_t  bitmap_len;       // Size in bytes of all characters bitmaps
+  uint8_t   font_id;
+  uint8_t   baseline;         // Does already contain the nb of skipped lines
 #if !defined(HAVE_LANGUAGE_PACK)
   // When using language packs, those 2 pointers does not exists
   const bagl_font_unicode_character_t * const characters;

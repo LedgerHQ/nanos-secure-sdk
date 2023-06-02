@@ -412,13 +412,13 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     uint8_t char_width;
     uint32_t unicode;
     bool is_unicode;
-    uint8_t *char_buffer=NULL;
-    uint8_t char_x_min = 0;
-    uint8_t char_y_min = 0;
-    uint8_t char_x_max = 0;
-    uint8_t char_y_max = 0;
-    uint16_t char_byte_cnt = 0;
-    uint8_t encoding = 0;
+    uint8_t *char_buffer;
+    int16_t char_x_min;
+    int16_t char_y_min;
+    int16_t char_x_max;
+    int16_t char_y_max;
+    uint16_t char_byte_cnt;
+    uint8_t encoding;
 
     unicode = nbgl_popUnicodeChar((const uint8_t **)&text, &textLen, &is_unicode);
 
@@ -429,15 +429,22 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
       if (unicodeCharacter == NULL) {
         continue;
       }
-      char_width = unicodeCharacter->char_width;
+      char_width = unicodeCharacter->width;
 #if defined(HAVE_LANGUAGE_PACK)
       char_buffer = (uint8_t*)unicode_ctx->bitmap;
       char_buffer+= unicodeCharacter->bitmap_offset;
-      char_x_min = unicodeCharacter->x_min;
-      char_y_min = unicodeCharacter->y_min;
-      char_x_max = unicodeCharacter->x_max;
-      char_y_max = unicodeCharacter->y_max;
-      char_byte_cnt =  unicodeCharacter->bitmap_byte_count;
+
+      char_x_max = char_width;
+      char_y_max = unicode_ctx->font->height;
+
+      nb_skipped_bytes = 0;
+      char_x_min = (uint16_t)unicodeCharacter->x_min_offset;
+      char_y_min = unicode_ctx->font->y_min;
+      char_y_min += (uint16_t)unicodeCharacter->y_min_offset * 4;
+      char_x_max -= (uint16_t)unicodeCharacter->x_max_offset;
+      char_y_max -= (uint16_t)unicodeCharacter->y_max_offset * 4;
+
+      char_byte_cnt = nbgl_getUnicodeFontCharacterByteCount();
       encoding = unicodeCharacter->encoding;
 #endif //defined(HAVE_LANGUAGE_PACK)
 #else // HAVE_UNICODE_SUPPORT
@@ -451,13 +458,19 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
       }
       character = (nbgl_font_character_t *)PIC(&font->characters[unicode-font->first_char]);
       char_buffer = (uint8_t *)PIC(&font->bitmap[character->bitmap_offset]);
-      char_width = character->char_width;
+      char_width = character->width;
       encoding = character->encoding;
 
-      char_x_min = character->x_min;
-      char_y_min = character->y_min * 4;
-      char_x_max = character->char_width - character->width_diff;
-      char_y_max = char_y_min + (character->real_height + 1) * 4;
+      char_x_max = char_width;
+      char_y_max = font->height;
+
+      nb_skipped_bytes = 0;
+      char_x_min = (uint16_t)character->x_min_offset;
+      char_y_min = font->y_min;
+      char_y_min += (uint16_t)character->y_min_offset * 4;
+      char_x_max -= (uint16_t)character->x_max_offset;
+      char_y_max -= (uint16_t)character->y_max_offset * 4;
+
       char_byte_cnt = get_bitmap_byte_cnt(font, unicode);
     }
 
