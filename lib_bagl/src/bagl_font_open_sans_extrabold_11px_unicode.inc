@@ -285,8 +285,8 @@ const unsigned char bitmapOPEN_SANS_EXTRABOLD_11PX_UNICODE[] = {
 };
 
 const bagl_font_unicode_character_t charactersOPEN_SANS_EXTRABOLD_11PX_UNICODE[125] = {
-  { 0x0000A1,   4,  1,  5, 1, 0,     0 }, //unicode 0x0000A1
-  { 0x0000BF,   7,  1,  5, 1, 0,     2 }, //unicode 0x0000BF
+  { 0x0000A1,   3,  0,  5, 1, 0,     0 }, //unicode 0x0000A1
+  { 0x0000BF,   6,  0,  5, 1, 0,     2 }, //unicode 0x0000BF
   { 0x0000C0,   8,  0,  0, 0, 0,     7 }, //unicode 0x0000C0
   { 0x0000C1,   8,  0,  0, 0, 0,    18 }, //unicode 0x0000C1
   { 0x0000C2,   8,  0,  0, 0, 0,    29 }, //unicode 0x0000C2
@@ -311,28 +311,28 @@ const bagl_font_unicode_character_t charactersOPEN_SANS_EXTRABOLD_11PX_UNICODE[1
   { 0x0000DB,   8,  1,  0, 1, 0,   190 }, //unicode 0x0000DB
   { 0x0000DC,   8,  1,  0, 1, 0,   199 }, //unicode 0x0000DC
   { 0x0000DF,   8,  1,  3, 0, 0,   208 }, //unicode 0x0000DF
-  { 0x0000E0,   8,  1,  2, 1, 0,   215 }, //unicode 0x0000E0
+  { 0x0000E0,   7,  0,  2, 1, 0,   215 }, //unicode 0x0000E0
   { 0x0000E1,   7,  0,  2, 1, 0,   222 }, //unicode 0x0000E1
-  { 0x0000E2,   8,  1,  2, 1, 0,   229 }, //unicode 0x0000E2
+  { 0x0000E2,   7,  0,  2, 1, 0,   229 }, //unicode 0x0000E2
   { 0x0000E3,   7,  0,  2, 1, 0,   236 }, //unicode 0x0000E3
   { 0x0000E4,   7,  0,  2, 1, 0,   243 }, //unicode 0x0000E4
   { 0x0000E6,  10,  0,  5, 0, 0,   250 }, //unicode 0x0000E6
-  { 0x0000E7,   7,  1,  5, 0, 0,   258 }, //unicode 0x0000E7
-  { 0x0000E8,   8,  1,  2, 0, 0,   265 }, //unicode 0x0000E8
-  { 0x0000E9,   8,  1,  2, 0, 0,   273 }, //unicode 0x0000E9
-  { 0x0000EA,   8,  1,  2, 0, 0,   281 }, //unicode 0x0000EA
-  { 0x0000EB,   8,  1,  2, 0, 0,   289 }, //unicode 0x0000EB
+  { 0x0000E7,   6,  0,  5, 0, 0,   258 }, //unicode 0x0000E7
+  { 0x0000E8,   7,  0,  2, 0, 0,   265 }, //unicode 0x0000E8
+  { 0x0000E9,   7,  0,  2, 0, 0,   273 }, //unicode 0x0000E9
+  { 0x0000EA,   7,  0,  2, 0, 0,   281 }, //unicode 0x0000EA
+  { 0x0000EB,   7,  0,  2, 0, 0,   289 }, //unicode 0x0000EB
   { 0x0000ED,   5,  1,  2, 1, 0,   297 }, //unicode 0x0000ED
   { 0x0000EE,   6,  0,  2, 1, 0,   301 }, //unicode 0x0000EE
   { 0x0000EF,   6,  2,  2, 1, 0,   307 }, //unicode 0x0000EF
   { 0x0000F1,   7,  1,  2, 1, 0,   311 }, //unicode 0x0000F1
   { 0x0000F3,   7,  0,  2, 0, 0,   317 }, //unicode 0x0000F3
-  { 0x0000F4,   8,  1,  2, 0, 0,   325 }, //unicode 0x0000F4
+  { 0x0000F4,   7,  0,  2, 0, 0,   325 }, //unicode 0x0000F4
   { 0x0000F5,   7,  0,  2, 0, 0,   333 }, //unicode 0x0000F5
   { 0x0000F6,   7,  0,  2, 0, 0,   341 }, //unicode 0x0000F6
   { 0x0000F9,   7,  1,  2, 1, 0,   349 }, //unicode 0x0000F9
   { 0x0000FA,   7,  1,  2, 1, 0,   355 }, //unicode 0x0000FA
-  { 0x0000FB,   8,  2,  2, 1, 0,   361 }, //unicode 0x0000FB
+  { 0x0000FB,   7,  1,  2, 1, 0,   361 }, //unicode 0x0000FB
   { 0x0000FC,   7,  1,  2, 1, 0,   367 }, //unicode 0x0000FC
   { 0x00011E,   8,  1,  0, 1, 0,   373 }, //unicode 0x00011E
   { 0x00011F,   7,  0,  2, 0, 0,   382 }, //unicode 0x00011F

@@ -375,7 +375,7 @@ const unsigned char bitmapOPEN_SANS_LIGHT_16PX_UNICODE[] = {
 };
 
 const bagl_font_unicode_character_t charactersOPEN_SANS_LIGHT_16PX_UNICODE[125] = {
-  { 0x0000A1,   5,  2,  7, 2, 0,     0 }, //unicode 0x0000A1
+  { 0x0000A1,   4,  1,  7, 2, 0,     0 }, //unicode 0x0000A1
   { 0x0000BF,   7,  1,  7, 1, 0,     2 }, //unicode 0x0000BF
   { 0x0000C0,  10,  0,  0, 0, 0,    10 }, //unicode 0x0000C0
   { 0x0000C1,  10,  0,  0, 0, 0,    30 }, //unicode 0x0000C1
@@ -385,7 +385,7 @@ const bagl_font_unicode_character_t charactersOPEN_SANS_LIGHT_16PX_UNICODE[125] 
   { 0x0000C6,  14,  0,  4, 2, 0,   107 }, //unicode 0x0000C6
   { 0x0000C7,  10,  1,  4, 1, 0,   125 }, //unicode 0x0000C7
   { 0x0000C8,   9,  2,  0, 1, 0,   141 }, //unicode 0x0000C8
-  { 0x0000C9,  10,  3,  1, 1, 0,   153 }, //unicode 0x0000C9
+  { 0x0000C9,   9,  2,  1, 1, 0,   153 }, //unicode 0x0000C9
   { 0x0000CA,   9,  2,  0, 1, 0,   165 }, //unicode 0x0000CA
   { 0x0000CB,   9,  2,  2, 1, 0,   177 }, //unicode 0x0000CB
   { 0x0000CD,   5,  2,  0, 1, 0,   188 }, //unicode 0x0000CD
@@ -401,28 +401,28 @@ const bagl_font_unicode_character_t charactersOPEN_SANS_LIGHT_16PX_UNICODE[125] 
   { 0x0000DB,  12,  2,  0, 2, 0,   328 }, //unicode 0x0000DB
   { 0x0000DC,  12,  2,  2, 2, 0,   344 }, //unicode 0x0000DC
   { 0x0000DF,   9,  1,  3, 1, 0,   358 }, //unicode 0x0000DF
-  { 0x0000E0,   9,  2,  3, 1, 0,   370 }, //unicode 0x0000E0
+  { 0x0000E0,   8,  1,  3, 1, 0,   370 }, //unicode 0x0000E0
   { 0x0000E1,   8,  1,  3, 1, 0,   380 }, //unicode 0x0000E1
-  { 0x0000E2,   9,  2,  3, 1, 0,   390 }, //unicode 0x0000E2
+  { 0x0000E2,   8,  1,  3, 1, 0,   390 }, //unicode 0x0000E2
   { 0x0000E3,   8,  1,  4, 1, 0,   400 }, //unicode 0x0000E3
   { 0x0000E4,   8,  1,  5, 1, 0,   409 }, //unicode 0x0000E4
   { 0x0000E6,  14,  1,  6, 1, 0,   418 }, //unicode 0x0000E6
   { 0x0000E7,   8,  1,  7, 1, 0,   432 }, //unicode 0x0000E7
-  { 0x0000E8,  10,  2,  3, 1, 0,   442 }, //unicode 0x0000E8
-  { 0x0000E9,  10,  2,  3, 1, 0,   454 }, //unicode 0x0000E9
-  { 0x0000EA,  10,  2,  3, 1, 0,   466 }, //unicode 0x0000EA
-  { 0x0000EB,  10,  2,  5, 1, 0,   478 }, //unicode 0x0000EB
+  { 0x0000E8,   9,  1,  3, 1, 0,   442 }, //unicode 0x0000E8
+  { 0x0000E9,   9,  1,  3, 1, 0,   454 }, //unicode 0x0000E9
+  { 0x0000EA,   9,  1,  3, 1, 0,   466 }, //unicode 0x0000EA
+  { 0x0000EB,   9,  1,  5, 1, 0,   478 }, //unicode 0x0000EB
   { 0x0000ED,   4,  1,  3, 1, 0,   488 }, //unicode 0x0000ED
   { 0x0000EE,   7,  1,  4, 1, 0,   492 }, //unicode 0x0000EE
-  { 0x0000EF,   6,  1,  5, 2, 0,   500 }, //unicode 0x0000EF
-  { 0x0000F1,  10,  2,  4, 1, 0,   504 }, //unicode 0x0000F1
+  { 0x0000EF,   5,  1,  5, 1, 0,   500 }, //unicode 0x0000EF
+  { 0x0000F1,   9,  1,  4, 1, 0,   504 }, //unicode 0x0000F1
   { 0x0000F3,   9,  1,  3, 1, 0,   515 }, //unicode 0x0000F3
   { 0x0000F4,   9,  1,  3, 1, 0,   527 }, //unicode 0x0000F4
   { 0x0000F5,   9,  1,  4, 1, 0,   539 }, //unicode 0x0000F5
   { 0x0000F6,   9,  1,  5, 1, 0,   550 }, //unicode 0x0000F6
-  { 0x0000F9,  10,  2,  3, 1, 0,   560 }, //unicode 0x0000F9
+  { 0x0000F9,   9,  1,  3, 1, 0,   560 }, //unicode 0x0000F9
   { 0x0000FA,   9,  1,  3, 1, 0,   572 }, //unicode 0x0000FA
-  { 0x0000FB,  10,  2,  3, 1, 0,   584 }, //unicode 0x0000FB
+  { 0x0000FB,   9,  1,  3, 1, 0,   584 }, //unicode 0x0000FB
   { 0x0000FC,   9,  1,  5, 1, 0,   596 }, //unicode 0x0000FC
   { 0x00011E,  12,  1,  1, 1, 0,   606 }, //unicode 0x00011E
   { 0x00011F,   9,  0,  4, 1, 0,   625 }, //unicode 0x00011F

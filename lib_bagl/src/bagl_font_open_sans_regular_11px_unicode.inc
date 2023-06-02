@@ -278,7 +278,7 @@ const unsigned char bitmapOPEN_SANS_REGULAR_11PX_UNICODE[] = {
 
 const bagl_font_unicode_character_t charactersOPEN_SANS_REGULAR_11PX_UNICODE[125] = {
   { 0x0000A1,   3,  1,  5, 1, 0,     0 }, //unicode 0x0000A1
-  { 0x0000BF,   6,  1,  5, 1, 0,     1 }, //unicode 0x0000BF
+  { 0x0000BF,   5,  0,  5, 1, 0,     1 }, //unicode 0x0000BF
   { 0x0000C0,   7,  0,  0, 0, 0,     5 }, //unicode 0x0000C0
   { 0x0000C1,   7,  0,  0, 0, 0,    15 }, //unicode 0x0000C1
   { 0x0000C2,   7,  0,  0, 0, 0,    25 }, //unicode 0x0000C2
@@ -303,17 +303,17 @@ const bagl_font_unicode_character_t charactersOPEN_SANS_REGULAR_11PX_UNICODE[125
   { 0x0000DB,   8,  1,  0, 1, 0,   170 }, //unicode 0x0000DB
   { 0x0000DC,   8,  1,  1, 1, 0,   179 }, //unicode 0x0000DC
   { 0x0000DF,   7,  1,  3, 1, 0,   187 }, //unicode 0x0000DF
-  { 0x0000E0,   7,  2,  2, 1, 0,   192 }, //unicode 0x0000E0
+  { 0x0000E0,   6,  1,  2, 1, 0,   192 }, //unicode 0x0000E0
   { 0x0000E1,   6,  1,  2, 1, 0,   197 }, //unicode 0x0000E1
-  { 0x0000E2,   7,  2,  2, 1, 0,   202 }, //unicode 0x0000E2
+  { 0x0000E2,   6,  1,  2, 1, 0,   202 }, //unicode 0x0000E2
   { 0x0000E3,   6,  1,  2, 1, 0,   207 }, //unicode 0x0000E3
   { 0x0000E4,   6,  1,  3, 1, 0,   212 }, //unicode 0x0000E4
   { 0x0000E6,   9,  0,  4, 1, 0,   216 }, //unicode 0x0000E6
   { 0x0000E7,   5,  1,  5, 0, 0,   222 }, //unicode 0x0000E7
-  { 0x0000E8,   7,  2,  2, 1, 0,   227 }, //unicode 0x0000E8
-  { 0x0000E9,   7,  2,  2, 1, 0,   232 }, //unicode 0x0000E9
+  { 0x0000E8,   6,  1,  2, 1, 0,   227 }, //unicode 0x0000E8
+  { 0x0000E9,   6,  1,  2, 1, 0,   232 }, //unicode 0x0000E9
   { 0x0000EA,   6,  1,  2, 1, 0,   237 }, //unicode 0x0000EA
-  { 0x0000EB,   7,  2,  3, 1, 0,   242 }, //unicode 0x0000EB
+  { 0x0000EB,   6,  1,  3, 1, 0,   242 }, //unicode 0x0000EB
   { 0x0000ED,   4,  1,  2, 1, 0,   246 }, //unicode 0x0000ED
   { 0x0000EE,   5,  0,  2, 2, 0,   249 }, //unicode 0x0000EE
   { 0x0000EF,   4,  0,  3, 1, 0,   253 }, //unicode 0x0000EF
