@@ -795,7 +795,7 @@ class TTF2INC:
             y_max_offset = self.height - info["bottom"]
             y_max_offset = y_max_offset // 4
 
-        # When crop is False, we may have some bytes to skip at begining
+        # When crop is False, we may have some bytes to skip at beginning
         if not self.crop:
             skipped_bytes = info["skipped"]
             self.check_max_bits(skipped_bytes, 6, char, "skipped bytes")
@@ -888,7 +888,7 @@ class TTF2INC:
             y_max_offset = self.height - info["bottom"]
             y_max_offset = y_max_offset // 4
 
-        # When crop is False, we may have some bytes to skip at begining
+        # When crop is False, we may have some bytes to skip at beginning
         if not self.crop:
             skipped_bytes = info["skipped"]
             self.check_max_bits(skipped_bytes, 6, char, "skipped bytes")

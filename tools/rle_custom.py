@@ -787,7 +787,7 @@ class RLECustomN (RLECustomBase):
                 infos.append(info)
                 repeat -= max_count
 
-            # Is it still interresting to use FILL commands?
+            # Is it still interesting to use FILL commands?
             if repeat >= threshold:
                 pixels = [value]
                 info = (self.CMD_FILL, repeat, pixels)
@@ -1102,11 +1102,11 @@ class RLECustom:
     @classmethod
     def encode(cls, packed_pixels, bpp, verbose=False):
         """
-        Try different encoding algoritms to compress 4 or 1BPP pixels.
+        Try different encoding algorithms to compress 4 or 1BPP pixels.
         Input:
         - array of packed pixels
         - number of bpp (1 or 4)
-        Output: Tupple containing:
+        Output: Tuple containing:
         - method used to encode data
         - bytes array containing encoded data
         """

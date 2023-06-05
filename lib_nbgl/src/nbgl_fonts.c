@@ -743,7 +743,7 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
   // binary search as data are sorted by unicode value !
   for (unsigned i=0; i < n-1; i++, characters++) {
     if ((PIC(characters))->char_unicode == unicode) {
-      // Compute & store the number of bytes used to display this caracter
+      // Compute & store the number of bytes used to display this character
       unicodeCtx.unicode_character_byte_count = \
         (PIC(characters+1))->bitmap_offset - (PIC(characters))->bitmap_offset;
       return (PIC(characters));
@@ -752,7 +752,7 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
   // By default, let's use the last Unicode character, which should be the
   // 0x00FFFD one, used to replace unrecognized or unrepresentable character.
 
-  // Compute & store the number of bytes used to display this caracter
+  // Compute & store the number of bytes used to display this character
   unicodeCtx.unicode_character_byte_count = unicodeCtx.font->bitmap_len -  \
     (PIC(characters))->bitmap_offset;
   return (PIC(characters));
