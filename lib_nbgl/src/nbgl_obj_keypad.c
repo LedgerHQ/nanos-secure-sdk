@@ -24,7 +24,7 @@
  *      DEFINES
  *********************/
 #define KEY_WIDTH            (SCREEN_WIDTH/3)
-#define DIGIT_OFFSET_Y       (((KEYPAD_KEY_HEIGHT-32)/2)%0xFFC)
+#define DIGIT_OFFSET_Y       (((KEYPAD_KEY_HEIGHT-48)/2)&0xFFC)
 
 #define BACKSPACE_KEY_INDEX  10
 #define VALIDATE_KEY_INDEX   11
