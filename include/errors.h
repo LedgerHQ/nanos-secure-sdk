@@ -350,6 +350,7 @@ enum generic_identifiers {
 #define SWO_SEC_APP_1E                    (ERR_SEC_APP + ERR_GEN_ID_1E)    // 0x511E
 #define SWO_SEC_APP_1F                    (ERR_SEC_APP + ERR_GEN_ID_1F)    // 0x511F
 #define SWO_SEC_APP_20                    (ERR_SEC_APP + ERR_GEN_ID_20)    // 0x5120
+#define SWO_SEC_APP_21                    (ERR_SEC_APP + ERR_GEN_ID_21)    // 0x5121
 
 #define SWO_SEC_CRC_01                    (ERR_SEC_CRC + ERR_GEN_ID_01)    // 0x5201
 #define SWO_SEC_CRC_02                    (ERR_SEC_CRC + ERR_GEN_ID_02)    // 0x5202
