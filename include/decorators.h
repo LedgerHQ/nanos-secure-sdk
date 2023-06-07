@@ -62,3 +62,7 @@
 #ifndef WARN_UNUSED_RESULT
   #define WARN_UNUSED_RESULT __attribute__ ((warn_unused_result))
 #endif
+
+#ifndef DEPRECATED
+  #define DEPRECATED __attribute__ ((deprecated))
+#endif
