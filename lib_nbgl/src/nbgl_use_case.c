@@ -18,8 +18,6 @@
 /*********************
  *      DEFINES
  *********************/
-#define APP_DESCRIPTION_MAX_LEN 72
-
 /**********************
  *      TYPEDEFS
  **********************/
@@ -779,11 +777,16 @@ void nbgl_useCaseHomeExt(const char *appName, const nbgl_icon_details_t *appIcon
     onAction = actionCallback;
   }
   if (tagline == NULL) {
-    snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app enables signing\ntransactions on the %s\nnetwork.", appName);
+      if (strlen(appName) > MAX_APP_NAME_FOR_SDK_TAGLINE) {
+          snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app enables signing\ntransactions on its network.");
+      }
+      else {
+          snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "%s %s\n%s", TAGLINE_PART1, appName, TAGLINE_PART2);
+      }
 
     // If there is more than 3 lines, it means the appName was split, so we put it on the next line
     if (nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px, appDescription, SCREEN_WIDTH-2*BORDER_MARGIN, false) > 3) {
-        snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "This app enables signing\ntransactions on the\n%s network.", appName);
+        snprintf(appDescription, APP_DESCRIPTION_MAX_LEN, "%s\n%s %s", TAGLINE_PART1, appName, TAGLINE_PART2);
     }
     info.centeredInfo.text2 = appDescription;
   }
