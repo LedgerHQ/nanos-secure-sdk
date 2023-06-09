@@ -28,30 +28,49 @@ typedef enum {
 /**
  * Set the persisted seed if none yet, else override the volatile seed (in RAM)
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_seed(unsigned int identity, unsigned int algorithm, unsigned char* seed PLENGTH(length), unsigned int length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_seed(
+    unsigned int        identity,
+    unsigned int        algorithm,
+    unsigned char *seed PLENGTH(length),
+    unsigned int        length);
 
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_derive_and_set_seed(unsigned char identity,
-                                                                                          const char* prefix PLENGTH(prefix_length), unsigned int prefix_length,
-                                                                                          const char* passphrase PLENGTH(passphrase_length), unsigned int passphrase_length,
-                                                                                          const char* words PLENGTH(words_length), unsigned int words_length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_set_seed(
+    unsigned char          identity,
+    const char *prefix     PLENGTH(prefix_length),
+    unsigned int           prefix_length,
+    const char *passphrase PLENGTH(passphrase_length),
+    unsigned int           passphrase_length,
+    const char *words      PLENGTH(words_length),
+    unsigned int           words_length);
 
 #if defined(HAVE_VAULT_RECOVERY_ALGO)
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_derive_and_prepare_seed(const char* words, unsigned int words_length, uint8_t *vault_recovery_work_buffer);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_derive_and_xor_seed(uint8_t *vault_recovery_work_buffer);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char  os_perso_get_seed_algorithm(void);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_prepare_seed(
+    const char * words,
+    unsigned int words_length,
+    uint8_t *vault_recovery_work_buffer);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_xor_seed(
+    uint8_t *vault_recovery_work_buffer);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char os_perso_get_seed_algorithm(void);
 #endif // HAVE_VAULT_RECOVERY_ALGO
 
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_set_words(const unsigned char* words PLENGTH(length), unsigned int length);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_finalize(void);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(
+    const unsigned char *words PLENGTH(length),
+    unsigned int               length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 #if defined(HAVE_RECOVER)
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_master_seed(uint8_t* master_seed PLENGTH(length), size_t length, os_action_t action);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void           os_perso_recover_state(uint8_t* state, os_action_t action);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_master_seed(
+    uint8_t *master_seed PLENGTH(length),
+    size_t               length,
+    os_action_t          action);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_recover_state(
+    uint8_t *state,
+    os_action_t action);
 #endif // HAVE_RECOVER
 
 // checked in the ux flow to avoid asking the pin for example
 // NBA : could also be checked by applications running in insecure mode - thus unprivilegied
 // @return BOLOS_UX_OK when perso is onboarded.
-SYSCALL                                       bolos_bool_t   os_perso_isonboarded(void);
+SYSCALL bolos_bool_t os_perso_isonboarded(void);
 
 enum {
   ONBOARDING_STATUS_WELCOME = 0,
@@ -70,10 +89,16 @@ enum {
   ONBOARDING_STATUS_RECOVER_RESTORE_SEED,
   ONBOARDING_STATUS_SETUP_CHOICE_RESTORE_SEED
 };
-SYSCALL                                       void os_perso_set_onboarding_status(unsigned int state, unsigned int count, unsigned int total);
+SYSCALL void os_perso_set_onboarding_status(unsigned int state,
+                                            unsigned int count,
+                                            unsigned int total);
 
 // derive the seed for the requested BIP32 path
-SYSCALL                                       void           os_perso_derive_node_bip32(cx_curve_t curve, const unsigned int* path PLENGTH(4 * (pathLength&0x0FFFFFFFu)), unsigned int pathLength, unsigned char *privateKey PLENGTH(64), unsigned char* chain PLENGTH(32));
+SYSCALL void os_perso_derive_node_bip32(cx_curve_t                curve,
+                                        const unsigned int *path  PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
+                                        unsigned int              pathLength,
+                                        unsigned char *privateKey PLENGTH(64),
+                                        unsigned char *chain      PLENGTH(32));
 
 #define HDW_NORMAL 0
 #define HDW_ED25519_SLIP10 1
@@ -81,11 +106,23 @@ SYSCALL                                       void           os_perso_derive_nod
 // this only supports derivation of the master node (level 1)
 // the beginning of the authorized path is to be provided in the authorized derivation tag of the registry
 // starting with a \x00
-// Note: for SLIP21, the path is a string and the pathLength is the number of chars including the starting \0 byte. However, firewall checks are processing a number of integers, therefore, take care not to locate the buffer too far in memory to pass the firewall check.
+// Note: for SLIP21, the path is a string and the pathLength is the number of chars including the starting \0 byte.
+// However, firewall checks are processing a number of integers, therefore, take care not to locate the buffer too far
+// in memory to pass the firewall check.
 #define HDW_SLIP21 2
-// derive the seed for the requested BIP32 path, with the custom provided seed_key for the sha512 hmac ("Bitcoin Seed", "Nist256p1 Seed", "ed25519 seed", ...)
-SYSCALL                                       void           os_perso_derive_node_with_seed_key(unsigned int mode, cx_curve_t curve, const unsigned int* path PLENGTH(4 * (pathLength&0x0FFFFFFFu)), unsigned int pathLength, unsigned char *privateKey PLENGTH(64), unsigned char* chain PLENGTH(32), unsigned char* seed_key PLENGTH(seed_key_length), unsigned int seed_key_length);
-#define                                                      os_perso_derive_node_bip32_seed_key(mode, curve, path, pathLength, privateKey, chain, seed_key, seed_key_length) os_perso_derive_node_with_seed_key(mode, curve, path, pathLength, privateKey, chain, seed_key, seed_key_length)
+
+// derive the seed for the requested BIP32 path, with the custom provided seed_key for the sha512 hmac ("Bitcoin Seed",
+// "Nist256p1 Seed", "ed25519 seed", ...)
+SYSCALL void os_perso_derive_node_with_seed_key(unsigned int              mode,
+                                                cx_curve_t                curve,
+                                                const unsigned int *path  PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
+                                                unsigned int              pathLength,
+                                                unsigned char *privateKey PLENGTH(64),
+                                                unsigned char *chain      PLENGTH(32),
+                                                unsigned char *seed_key   PLENGTH(seed_key_length),
+                                                unsigned int              seed_key_length);
+
+#define os_perso_derive_node_bip32_seed_key os_perso_derive_node_with_seed_key
 
 /**
  * @brief   Gets the private key from the device seed using the specified bip32 path and seed key.
@@ -111,14 +148,14 @@ SYSCALL                                       void           os_perso_derive_nod
  *                             - CX_INTERNAL_ERROR
  */
 WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_with_seed_no_throw(
-        unsigned int derivation_mode,
-        cx_curve_t curve,
-        const unsigned int *path,
-        unsigned int path_len,
-        unsigned char raw_privkey[static 64],
-        unsigned char *chain_code,
-        unsigned char *seed,
-        unsigned int seed_len) {
+    unsigned int        derivation_mode,
+    cx_curve_t          curve,
+    const unsigned int *path,
+    unsigned int        path_len,
+    unsigned char       raw_privkey[static 64],
+    unsigned char *     chain_code,
+    unsigned char *     seed,
+    unsigned int        seed_len) {
     cx_err_t error = CX_OK;
 
     BEGIN_TRY {
@@ -181,7 +218,11 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_no_throw(
                                               0);
 }
 
-SYSCALL                                       void           os_perso_derive_eip2333(cx_curve_t curve, const unsigned int* path PLENGTH(4 * (pathLength&0x0FFFFFFFu)), unsigned int pathLength, unsigned char *privateKey PLENGTH(32));
+SYSCALL void os_perso_derive_eip2333(
+    cx_curve_t                curve,
+    const unsigned int *path  PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
+    unsigned int              pathLength,
+    unsigned char *privateKey PLENGTH(32));
 
 /**
  * @brief   Gets the private key from the device seed using the specified eip2333 path.
@@ -233,5 +274,5 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_eip2333_no_throw(
 #if defined(HAVE_SEED_COOKIE)
 // seed_cookie length has to be CX_SHA512_SIZE.
 // return BOLOS_TRUE if the seed has been generated, return BOLOS_FALSE otherwise.
-SYSCALL                                       bolos_bool_t   os_perso_seed_cookie(unsigned char * seed_cookie PLENGTH(CX_SHA512_SIZE));
+SYSCALL bolos_bool_t os_perso_seed_cookie(unsigned char *seed_cookie PLENGTH(CX_SHA512_SIZE));
 #endif // HAVE_SEED_COOKIE
