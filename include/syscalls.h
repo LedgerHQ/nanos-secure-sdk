@@ -195,7 +195,7 @@
 #define SYSCALL_os_deny_protected_ram_ID                           0x00000093
 
 #ifdef HAVE_CUSTOM_CA_SETTINGS
-#define SYSCALL_os_bolos_custom_ca_get_info_ID                     0x02000CA0
+#define SYSCALL_os_bolos_custom_ca_get_info_ID                     0x01000CA0
 #define SYSCALL_os_bolos_custom_ca_revoke_ID                       0x00000CA1
 #endif // HAVE_CUSTOM_CA_SETTINGS
 
