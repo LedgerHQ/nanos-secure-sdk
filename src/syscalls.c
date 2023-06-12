@@ -166,6 +166,17 @@ unsigned int nbgl_screen_reinit(void)
   parameters[0] = 0;
   return SVC_Call(SYSCALL_nbgl_screen_reinit_ID, parameters);
 }
+
+#ifdef HAVE_DISPLAY_FAST_MODE
+void nbgl_screen_update_temperature(uint8_t temp_degrees)
+{
+  unsigned int parameters[1];
+  parameters[0] = (unsigned int) temp_degrees;
+  SVC_Call(SYSCALL_nbgl_screen_update_temperature_ID, parameters);
+  return;
+}
+#endif // HAVE_DISPLAY_FAST_MODE
+
 #endif
 
 void nvm_write ( void * dst_adr, void * src_adr, unsigned int src_len ) {
