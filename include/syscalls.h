@@ -297,6 +297,8 @@
 #define SYSCALL_nbgl_get_font_ID                                         0x01fa000c
 #define SYSCALL_nbgl_screen_reinit_ID                                    0x00fa000d
 #define SYSCALL_nbgl_front_draw_img_rle_ID                               0x05fa0010
+#ifdef HAVE_DISPLAY_FAST_MODE
+#define SYSCALL_nbgl_screen_update_temperature_ID                        0x01fa0011
 #endif
 
 #ifdef HAVE_BACKGROUND_IMG
