@@ -28,7 +28,7 @@ extern "C" {
 #define VALIDATE_KEY '\r'
 
 // for Keyboard
-#define KEYBOARD_KEY_HEIGHT         56
+#define KEYBOARD_KEY_HEIGHT         60
 
 // for Keypad
 #define KEYPAD_KEY_HEIGHT           104
@@ -37,7 +37,10 @@ extern "C" {
 #define EXIT_PAGE 0xFF
 
 // external margin in pixels
-#define BORDER_MARGIN 20
+#define BORDER_MARGIN 24
+
+// Back button header height
+#define BACK_BUTTON_HEADER_HEIGHT 88
 
 // common dimensions for buttons
 #define BUTTON_RADIUS RADIUS_40_PIXELS
