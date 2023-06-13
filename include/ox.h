@@ -30,7 +30,6 @@
 
 #include "decorators.h"
 #include "ox_aes.h"
-#include "ox_des.h"
 #include "ox_bn.h"
 #include "ox_bls.h"
 #include "ox_ec.h"

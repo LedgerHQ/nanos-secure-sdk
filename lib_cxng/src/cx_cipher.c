@@ -50,14 +50,6 @@ static const cx_cipher_info_t *cx_cipher_get_info(const cx_cipher_id_t type) {
     case CX_CIPHER_AES_256:
       return &cx_aes_256_info;
 #endif // HAVE_AES
-#ifdef HAVE_DES
-    case CX_CIPHER_DES_64:
-      return &cx_des_64_info;
-    case CX_CIPHER_3DES_128:
-      return &cx_3des_128_info;
-    case CX_CIPHER_3DES_192:
-      return &cx_3des_192_info;
-#endif // HAVE_DES
     default:
       return NULL;
   }

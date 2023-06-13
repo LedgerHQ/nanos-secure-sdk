@@ -34,17 +34,4 @@ cx_err_t cx_aes_block_hw(const uint8_t *inblock, uint8_t *outblock);
 void cx_aes_reset_hw(void);
 #endif // HAVE_AES
 
-/** HW support */
-#ifdef HAVE_DES
-#include "lcx_des.h"
-
-extern const cx_cipher_info_t cx_des_64_info;
-extern const cx_cipher_info_t cx_3des_128_info;
-extern const cx_cipher_info_t cx_3des_192_info;
-
-void cx_des_set_hw_key(const cx_des_key_t *keys, uint32_t mode);
-cx_err_t cx_des_hw_block(const uint8_t *inblock, uint8_t *outblock);
-void cx_des_reset_hw(void);
-#endif // HAVE_DES
-
 #endif /* CX_CIPHER_H */

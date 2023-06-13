@@ -98,11 +98,6 @@ cx_err_t cx_cmac_shift_and_xor(uint8_t *output,
       constant = CMAC_CONSTANT_R_128;
       break;
 #endif // HAVE_AES
-#ifdef HAVE_DES
-    case CX_DES_BLOCK_SIZE:
-      constant = CMAC_CONSTANT_R_64;
-      break;
-#endif // HAVE_DES
     default:
       return CX_INVALID_PARAMETER_VALUE;
   }
