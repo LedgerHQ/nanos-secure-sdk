@@ -1557,10 +1557,9 @@ unsigned int os_deny_protected_flash( void ) {
 }
 
 #ifdef HAVE_CUSTOM_CA_SETTINGS
-bolos_bool_t os_bolos_custom_ca_get_info(char* name, uint8_t* pubkey) {
+bolos_bool_t os_bolos_custom_ca_get_info(customca_data_t *custom_ca) {
   unsigned int parameters[2];
-  parameters[0] = (unsigned int) name;
-  parameters[1] = (unsigned int) pubkey;
+  parameters[0] = (unsigned int) custom_ca;
   bolos_bool_t ret = (bolos_bool_t) SVC_Call(SYSCALL_os_bolos_custom_ca_get_info_ID, parameters);
   return ret;
 }
