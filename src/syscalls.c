@@ -1822,14 +1822,11 @@ uint8_t touch_exclude_borders(uint8_t excluded_borders) {
 }
 
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
-void touch_read_sensitivity(uint8_t *sensi_data) {
-  unsigned int parameters[1] = {(unsigned int) sensi_data};
-  SVC_Call(SYSCALL_touch_read_sensi_ID, parameters);
-}
-
-void touch_read_diff_data(uint8_t *diff_data) {
-  unsigned int parameters[1] = {(unsigned int) diff_data};
-  SVC_Call(SYSCALL_touch_read_diff_data_ID, parameters);
+uint8_t touch_switch_debug_mode_and_read(io_touch_debug_mode_t mode, uint8_t *read_buffer) {
+    unsigned int parameters[2];
+    parameters[0] = (unsigned int) mode;
+    parameters[1] = (unsigned int) read_buffer;
+    return (uint8_t)SVC_Call(SYSCALL_touch_debug_ID, parameters);
 }
 #endif
 

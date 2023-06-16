@@ -501,12 +501,34 @@ void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceI
 
 #ifdef HAVE_SE_TOUCH
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
-void io_seproxyhal_touch_read_sensi(uint8_t * sensi_data) {
-  touch_read_sensitivity(sensi_data);
+/**
+ * @brief Set touch in read raw data mode and read raw data
+ *
+ * @param sensi_data Pointer to the buffer to store sensi data
+ * @return BOLOS_TRUE/BOLOS_FALSE
+ */
+bolos_bool_t io_seproxyhal_touch_debug_read_sensi(uint8_t * sensi_data) {
+  return touch_switch_debug_mode_and_read(TOUCH_DEBUG_READ_RAW_DATA, sensi_data);
 }
 
-void io_seproxyhal_touch_read_diff_data(uint8_t *diff_data) {
-  touch_read_diff_data(diff_data);
+/**
+ * @brief Set touch in read diff data mode and read diff data
+ *
+ * @param diff_data Pointer to the buffer to store diff data
+ * @return BOLOS_TRUE/BOLOS_FALSE
+ */
+bolos_bool_t io_seproxyhal_touch_debug_read_diff_data(uint8_t *diff_data) {
+  return touch_switch_debug_mode_and_read(TOUCH_DEBUG_READ_DIFF_DATA, diff_data);
+}
+
+/**
+ * @brief Set touch in read coordinates mode
+ *
+ * @param None
+ * @return BOLOS_TRUE/BOLOS_FALSE
+ */
+bolos_bool_t io_seproxyhal_touch_debug_end(void) {
+  return touch_switch_debug_mode_and_read(TOUCH_DEBUG_END, NULL);
 }
 #endif
 #endif
