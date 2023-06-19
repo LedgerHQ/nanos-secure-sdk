@@ -328,19 +328,27 @@ again:
                         break;
                       case 16: {
                         unsigned char nibble1, nibble2;
+                        unsigned int idx = 0;
                         for (ulCount = 0; ulCount < ulIdx; ulCount++) {
                           nibble1 = (pcStr[ulCount]>>4)&0xF;
                           nibble2 = pcStr[ulCount]&0xF;
                           switch(ulCap) {
                             case 0:
-                              mcu_usb_prints(&g_pcHex[nibble1], 1);
-                              mcu_usb_prints(&g_pcHex[nibble2], 1);
+                              pcBuf[idx++] = g_pcHex[nibble1];
+                              pcBuf[idx++] = g_pcHex[nibble2];
                               break;
                             case 1:
-                              mcu_usb_prints(&g_pcHex_cap[nibble1], 1);
-                              mcu_usb_prints(&g_pcHex_cap[nibble2], 1);
+                              pcBuf[idx++] = g_pcHex_cap[nibble1];
+                              pcBuf[idx++] = g_pcHex_cap[nibble2];
                               break;
                           }
+                          if (idx + 1 >= sizeof(pcBuf)) {
+                            mcu_usb_prints(pcBuf, idx);
+                            idx = 0;
+                          }
+                        }
+                        if (idx != 0) {
+                            mcu_usb_prints(pcBuf, idx);
                         }
                         break;
                       }
