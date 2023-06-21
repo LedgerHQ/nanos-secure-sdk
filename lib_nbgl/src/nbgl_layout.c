@@ -89,7 +89,7 @@ typedef struct nbgl_layoutInternal_s {
   nbgl_container_t *bottomContainer; // Used for navigation bar
   nbgl_text_area_t *tapText;
   nbgl_layoutTouchCallback_t callback; // user callback for all controls
-  // This is the pool of callback objects, usable by any layout
+  // This is the pool of callback objects, potentially used by this layout
   layoutObj_t callbackObjPool[LAYOUT_OBJ_POOL_LEN];
   // number of callback objects used by the whole layout in callbackObjPool
   uint8_t nbUsedCallbackObjs;
@@ -2486,8 +2486,14 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits) {
   // 12 pixels between each icon (knowing that the effective round are 18px large and the icon 24px)
   container->width = nbDigits*C_round_24px.width + (nbDigits+1)*12;
   container->height = 48;
-  // distance from digits to title is fixed to 20 px
-  container->alignmentMarginY = 20;
+  // distance from digits to title is fixed to 20 px, except if title is more than 1 line and a back key is present
+  if ((layoutInt->container->nbChildren != 3) || (layoutInt->container->children[1]->height == 32)) {
+    container->alignmentMarginY = 20;
+  }
+  else {
+    container->alignmentMarginY = 12;
+  }
+
   // item N-2 is the title
   container->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-2];
   container->alignment = BOTTOM_MIDDLE;
