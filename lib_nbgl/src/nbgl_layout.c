@@ -967,7 +967,7 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoic
     // init button for this choice
     button->activeColor = BLACK;
     button->borderColor = LIGHT_GRAY;
-    button->alignmentMarginX = INNER_MARGIN;
+    button->alignmentMarginX = INNER_MARGIN-4;
     button->alignTo = (nbgl_obj_t*)container;
     button->alignment = MID_RIGHT;
     button->state = OFF_STATE;
@@ -1231,6 +1231,7 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
   qrcode->text = PIC(info->url);
   qrcode->bpp = NBGL_BPP_1;
   qrcode->alignment = TOP_MIDDLE;
+  qrcode->alignmentMarginY = 24;
 
   fullHeight += qrcode->height;
   container->children[container->nbChildren] = (nbgl_obj_t*)qrcode;
@@ -1940,7 +1941,7 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed) {
   textArea->text = PIC(text);
   textArea->textAlignment = CENTER;
   textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
-  textArea->alignmentMarginY = 36;
+  textArea->alignmentMarginY = 20;
   textArea->alignTo = (nbgl_obj_t*)spinner;
   textArea->alignment = BOTTOM_MIDDLE;
   textArea->width = GET_AVAILABLE_WIDTH(layoutInt);
@@ -1981,7 +1982,7 @@ int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, const nbgl_layoutKbd_t *kbdInf
 
   // create keyboard
   keyboard = (nbgl_keyboard_t*)nbgl_objPoolGet(KEYBOARD, layoutInt->layer);
-  keyboard->alignmentMarginY = 60;
+  keyboard->alignmentMarginY = 64;
   keyboard->alignment = BOTTOM_MIDDLE;
   keyboard->borderColor = LIGHT_GRAY;
   keyboard->callback = PIC(kbdInfo->callback);
@@ -2327,7 +2328,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout, bool active, const c
   if (obj == NULL)
     return -1;
 
-  button->alignmentMarginY = BORDER_MARGIN+4;
+  button->alignmentMarginY = BORDER_MARGIN;
   button->alignment = TOP_MIDDLE;
   button->foregroundColor = WHITE;
   if (active) {
@@ -2485,8 +2486,8 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits) {
   // 12 pixels between each icon (knowing that the effective round are 18px large and the icon 24px)
   container->width = nbDigits*C_round_24px.width + (nbDigits+1)*12;
   container->height = 48;
-  // distance from digits to title is fixed to 24 px
-  container->alignmentMarginY = 24;
+  // distance from digits to title is fixed to 20 px
+  container->alignmentMarginY = 20;
   // item N-2 is the title
   container->alignTo = layoutInt->container->children[layoutInt->container->nbChildren-2];
   container->alignment = BOTTOM_MIDDLE;

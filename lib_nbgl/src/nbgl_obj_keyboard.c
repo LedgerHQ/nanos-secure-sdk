@@ -325,7 +325,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     rectArea.width = C_shift32px.width;
     rectArea.height = C_shift32px.height;
     rectArea.bpp = NBGL_BPP_1;
-    rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2;
+    rectArea.y0 = (keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
     rectArea.x0 = (SHIFT_KEY_WIDTH-rectArea.width)/2;
     rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
     nbgl_frontDrawImage(&rectArea,
@@ -351,7 +351,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   rectArea.height = C_backspace32px.height;
   rectArea.bpp = NBGL_BPP_1;
   rectArea.x0 = offsetX + 7*NORMAL_KEY_WIDTH;
-  rectArea.y0 = keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2;
+  rectArea.y0 = (keyboard->y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
   if (!keyboard->lettersOnly) {
     rectArea.x0 += (BACKSPACE_KEY_WIDTH_FULL-rectArea.width)/2;
   }
