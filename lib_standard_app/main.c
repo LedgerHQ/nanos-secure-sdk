@@ -26,15 +26,8 @@ bolos_ux_params_t G_ux_params;
 /**
  * Exit the application and go back to the dashboard.
  */
-WEAK void app_exit() {
-    BEGIN_TRY_L(exit) {
-        TRY_L(exit) {
-            os_sched_exit(-1);
-        }
-        FINALLY_L(exit) {
-        }
-    }
-    END_TRY_L(exit);
+WEAK void __attribute__((noreturn)) app_exit(void) {
+    os_sched_exit(-1);
 }
 
 /**
