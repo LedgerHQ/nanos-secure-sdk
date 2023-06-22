@@ -26,15 +26,8 @@ bolos_ux_params_t G_ux_params;
 /**
  * Exit the application and go back to the dashboard.
  */
-WEAK void app_exit() {
-    BEGIN_TRY_L(exit) {
-        TRY_L(exit) {
-            os_sched_exit(-1);
-        }
-        FINALLY_L(exit) {
-        }
-    }
-    END_TRY_L(exit);
+WEAK void __attribute__((noreturn)) app_exit(void) {
+    os_sched_exit(-1);
 }
 
 /**
@@ -45,40 +38,31 @@ WEAK __attribute__((section(".boot"))) int main() {
 
     os_boot();
 
-    for (;;) {
-        // Initialize the UX system
-        UX_INIT();
+    BEGIN_TRY {
+        TRY {
+            UX_INIT();
 
-        BEGIN_TRY {
-            TRY {
-                io_seproxyhal_init();
+            io_seproxyhal_init();
 
-#ifdef HAVE_BLE
-                G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif // HAVE_BLE
-                USB_power(0);
-                USB_power(1);
+            USB_power(0);
+            USB_power(1);
 
 #ifdef HAVE_BLE
-                BLE_power(0, NULL);
-                BLE_power(1, NULL);
+            BLE_power(0, NULL);
+            BLE_power(1, NULL);
 #endif // HAVE_BLE
-                app_main();
-            }
-            CATCH(EXCEPTION_IO_RESET) {
-                CLOSE_TRY;
-                continue;
-            }
-            CATCH_ALL {
-                CLOSE_TRY;
-                break;
-            }
-            FINALLY {
-            }
+
+            app_main();
         }
-        END_TRY;
+        CATCH_OTHER(e) {
+            PRINTF("Exiting following exception: %d\n", e);
+        }
+        FINALLY {
+        }
     }
+    END_TRY;
 
+    // Exit the application and go back to the dashboard.
     app_exit();
 
     return 0;
