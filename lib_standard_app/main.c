@@ -44,9 +44,6 @@ WEAK __attribute__((section(".boot"))) int main() {
 
             io_seproxyhal_init();
 
-#ifdef HAVE_BLE
-            G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif // HAVE_BLE
             USB_power(0);
             USB_power(1);
 
