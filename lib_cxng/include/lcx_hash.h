@@ -142,37 +142,10 @@ size_t cx_hash_get_size(const cx_hash_t *ctx);
 cx_err_t cx_hash_no_throw(cx_hash_t *hash, uint32_t mode, const uint8_t *in, size_t len, uint8_t *out, size_t out_len);
 
 /**
- * @brief   Hash data according to the specified algorithm.
- * 
- * @details This function throws an exception if the computation
- *          doesn't succeed.
- *
- * @param[in]  hash    Pointer to the hash context.
- *                     Shall be in RAM.
- *                     Should be called with a cast.
- *
- * @param[in]  mode    Crypto flag. Supported flag: CX_LAST. If set:
- *                       - the structure is not modified after finishing
- *                       - if out is not NULL, the message digest is stored in out
- *                       - the context is NOT automatically re-initialized.
- *
- * @param[in]  in      Input data to be hashed.
- *
- * @param[in]  len     Length of the input data.
- *
- * @param[out] out     Buffer where to store the message digest:
- *                       - NULL (ignored) if CX_LAST is NOT set
- *                       - message digest if CX_LAST is set
- *
- * @param[out] out_len The size of the output buffer or 0 if out is NULL.
- *                     If buffer is too small to store the hash a exception is returned.
- *
- * @return             Length of the digest.
- * 
- * @throws             INVALID_PARAMETER
- * @throws             CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_hash_no_throw
  */
-static inline int cx_hash ( cx_hash_t * hash, int mode, const unsigned char * in, unsigned int len, unsigned char * out, unsigned int out_len )
+DEPRECATED static inline int cx_hash ( cx_hash_t * hash, int mode, const unsigned char * in, unsigned int len, unsigned char * out, unsigned int out_len )
 {
   CX_THROW(cx_hash_no_throw(hash, mode, in, len, out, out_len));
   return cx_hash_get_size(hash);

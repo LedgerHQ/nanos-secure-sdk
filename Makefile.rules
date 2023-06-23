@@ -20,6 +20,9 @@ ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NA
 SDK_SOURCE_PATH += lib_bagl lib_ux
 endif
 
+# Expose all SDK header files with their full relative path to the SDK root folder
+INCLUDES_PATH  += ${BOLOS_SDK}
+
 #include the lib_cxng definition by default if not asked otherwise
 ifeq ($(NO_CXNG),)
 INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/include

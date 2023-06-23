@@ -75,20 +75,10 @@ typedef struct cx_groestl_s cx_groestl_t;
   cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
 
 /**
- * @brief   Initialize a GROESTL224 context.
- * 
- * @details This function throws an exception if the
- *          initialization fails.
- *
- * @param[out] hash Pointer to the context to init.
- * 
- * @param[in]  size Length of the digest.
- *
- * @return          GROESTL identifier.
- * 
- * @throws          CX_INVALID_PARAMETER
+ * @deprecated
+ * See #cx_groestl_init_no_throw
  */
-static inline int cx_groestl_init ( cx_groestl_t * hash, unsigned int size )
+DEPRECATED static inline int cx_groestl_init ( cx_groestl_t * hash, unsigned int size )
 {
   CX_THROW(cx_groestl_init_no_throw(hash, size));
   return CX_GROESTL;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string.h>
+
 #include "appflags.h"
 #include "decorators.h"
 #include "lcx_ecfp.h"
@@ -55,6 +57,10 @@ SYSCALL void os_perso_set_onboarding_status(unsigned int kind,
                                             unsigned int isConfirming);
 
 // derive the seed for the requested BIP32 path
+// Deprecated : see "os_derive_bip32_no_throw"
+#ifndef HAVE_BOLOS
+DEPRECATED
+#endif
 SYSCALL void os_perso_derive_node_bip32(
     cx_curve_t curve,
     const unsigned int *path PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
@@ -75,6 +81,10 @@ SYSCALL void os_perso_derive_node_bip32(
 // derive the seed for the requested BIP32 path, with the custom provided
 // seed_key for the sha512 hmac ("Bitcoin Seed", "Nist256p1 Seed", "ed25519
 // seed", ...)
+// Deprecated : see "os_derive_bip32_with_seed_no_throw"
+#ifndef HAVE_BOLOS
+DEPRECATED
+#endif
 SYSCALL void os_perso_derive_node_with_seed_key(
     unsigned int mode, cx_curve_t curve,
     const unsigned int *path PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
@@ -112,18 +122,22 @@ SYSCALL void os_perso_derive_node_with_seed_key(
  *                             - CX_OK on success
  *                             - CX_INTERNAL_ERROR
  */
-static inline cx_err_t os_derive_bip32_with_seed_no_throw(unsigned int derivation_mode,
-                                                          cx_curve_t curve,
-                                                          const uint32_t *path,
-                                                          size_t path_len,
-                                                          uint8_t raw_privkey[static 64],
-                                                          uint8_t *chain_code,
-                                                          unsigned char *seed,
-                                                          size_t seed_len) {
+WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_with_seed_no_throw(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const unsigned int *path,
+        unsigned int path_len,
+        unsigned char raw_privkey[static 64],
+        unsigned char *chain_code,
+        unsigned char *seed,
+        unsigned int seed_len) {
     cx_err_t error = CX_OK;
 
     BEGIN_TRY {
         TRY {
+            // ignore the deprecated warning, pragma to remove when the "no throw" OS function will be available
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             // Derive the seed with path
             os_perso_derive_node_bip32_seed_key(derivation_mode,
                                                 curve,
@@ -133,9 +147,14 @@ static inline cx_err_t os_derive_bip32_with_seed_no_throw(unsigned int derivatio
                                                 chain_code,
                                                 seed,
                                                 seed_len);
+            #pragma GCC diagnostic pop
         }
         CATCH_OTHER(e) {
             error = e;
+
+            // Make sure the caller doesn't use uninitialized data in case
+            // the return code is not checked.
+            explicit_bzero(&raw_privkey, 64);
         }
         FINALLY {
         }
@@ -162,11 +181,12 @@ static inline cx_err_t os_derive_bip32_with_seed_no_throw(unsigned int derivatio
  *                             - CX_OK on success
  *                             - CX_INTERNAL_ERROR
  */
-static inline cx_err_t os_derive_bip32_no_throw(cx_curve_t curve,
-                                                const uint32_t *path,
-                                                size_t path_len,
-                                                uint8_t raw_privkey[static 64],
-                                                uint8_t *chain_code) {
+WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_no_throw(
+        cx_curve_t curve,
+        const unsigned int *path,
+        unsigned int path_len,
+        unsigned char raw_privkey[static 64],
+        unsigned char *chain_code) {
     return os_derive_bip32_with_seed_no_throw(HDW_NORMAL,
                                               curve,
                                               path,
@@ -177,6 +197,10 @@ static inline cx_err_t os_derive_bip32_no_throw(cx_curve_t curve,
                                               0);
 }
 
+// Deprecated : see "os_derive_eip2333_no_throw"
+#ifndef HAVE_BOLOS
+DEPRECATED
+#endif
 SYSCALL void os_perso_derive_eip2333(
     cx_curve_t curve,
     const unsigned int *path PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
@@ -197,19 +221,28 @@ SYSCALL void os_perso_derive_eip2333(
  *                             - CX_OK on success
  *                             - CX_INTERNAL_ERROR
  */
-static inline cx_err_t os_derive_eip2333_no_throw(cx_curve_t curve,
-                                                  const uint32_t *path,
-                                                  size_t path_len,
-                                                  uint8_t raw_privkey[static 64]) {
+WARN_UNUSED_RESULT static inline cx_err_t os_derive_eip2333_no_throw(
+        cx_curve_t curve,
+        const unsigned int *path,
+        unsigned int path_len,
+        unsigned char raw_privkey[static 64]) {
     cx_err_t error = CX_OK;
 
     BEGIN_TRY {
         TRY {
+            // ignore the deprecated warning, pragma to remove when the "no throw" OS function will be available
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             // Derive the seed with path
             os_perso_derive_eip2333(curve, path, path_len, raw_privkey);
+            #pragma GCC diagnostic pop
         }
         CATCH_OTHER(e) {
             error = e;
+
+            // Make sure the caller doesn't use uninitialized data in case
+            // the return code is not checked.
+            explicit_bzero(&raw_privkey, 64);
         }
         FINALLY {
         }

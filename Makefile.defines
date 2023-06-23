@@ -137,6 +137,8 @@ endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += HAVE_BAGL
+DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=32
+
 LDFLAGS  += -L$(BOLOS_SDK)/lib/
 endif
 
@@ -151,9 +153,6 @@ DEFINES       += HAVE_FONTS
 # already defined within apps
 # DEFINES       += HAVE_BLE
 DEFINES       += HAVE_BATTERY
-else
-DEFINES       += HAVE_SEED_COOKIE
-DEFINES       += BAGL_WIDTH=128 BAGL_HEIGHT=32
 endif
 
 # include builtin CX libs options

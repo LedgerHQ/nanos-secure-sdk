@@ -87,49 +87,10 @@ cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
                        uint32_t *                   info);
 
 /**
- * @brief   Sign a message digest according to ECDSA specification.
- * 
- * @details This functions throws an exception if the signature
- *          doesn't succeed.
- *
- * @param[in]  pvkey    Private key.
- *                      Shall be initialized with #cx_ecfp_init_private_key_no_throw.
- *
- * @param[in]  mode     Crypto mode flags.
- *                      Supported flags:
- *                        - CX_RND_TRNG
- *                        - CX_RND_RFC6979
- *
- * @param[in]  hashID   Message digest algorithm identifer.
- *                      This parameter is mandatory with the flag CX_RND_RFC6979.
- *
- * @param[in]  hash     Digest of the message to be signed.
- *                      The length of *hash* must be shorter than the group order size.
- *                      Otherwise it is truncated.
- *
- * @param[in]  hash_len Length of the digest in octets.
- *
- * @param[out] sig      Buffer where to store the signature.
- *                      The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 || Ls || s**
- * 
- * @param[in]  sig_len  Length of the buffer in octets.
- *
- * @param[out] info     Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when computing **[k].G**.
- *
- * @return              Length of the signature.
- * 
- * @throws              CX_EC_INVALID_CURVE
- * @throws              CX_INVALID_PARAMETER
- * @throws              CX_INTERNAL_ERROR
- * @throws              CX_NOT_UNLOCKED
- * @throws              CX_INVALID_PARAMETER_SIZE
- * @throws              CX_MEMORY_FULL
- * @throws              CX_NOT_LOCKED
- * @throws              CX_EC_INVALID_POINT
- * @throws              CX_EC_INFINITE_POINT
- * @throws              CX_INVALID_PARAMETER_VALUE
+ * @deprecated
+ * See #cx_ecdsa_sign_no_throw
  */
-static inline int cx_ecdsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len, unsigned int * info )
+DEPRECATED static inline int cx_ecdsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, unsigned char * sig, unsigned int sig_len, unsigned int * info )
 {
   size_t sig_len_ = sig_len;
   uint32_t info_;
