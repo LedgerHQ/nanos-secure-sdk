@@ -21,8 +21,13 @@
 #include "io.h"
 #include "write.h"
 
+#ifdef HAVE_SWAP
+#include "swap.h"
+#endif
+
 // TODO: Temporary workaround, at some point all status words should be defined by the SDK and
 // removed from the application
+#define SW_OK                    0x9000
 #define SW_WRONG_RESPONSE_LENGTH 0xB000
 
 uint8_t G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
@@ -165,6 +170,19 @@ WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw) {
 
     write_u16_be(G_io_apdu_buffer, G_output_len, sw);
     G_output_len += 2;
+
+#ifdef HAVE_SWAP
+    // If we are in swap mode and have validated a TX, we send it and immediately quit
+    if (G_called_from_swap && G_swap_response_ready) {
+        PRINTF("Swap answer is processed. Send it\n");
+        if (io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, G_output_len) == 0) {
+            swap_finalize_exchange_sign_transaction(sw == SW_OK);
+        } else {
+            PRINTF("Unrecoverable\n");
+            os_sched_exit(-1);
+        }
+    }
+#endif // HAVE_SWAP
 
     switch (G_io_state) {
         case READY:
