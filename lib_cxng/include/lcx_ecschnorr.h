@@ -80,54 +80,10 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
                            size_t *                     sig_len);
 
 /**
- * @brief   Signs a digest message according to the given mode.
- * 
- * @details This function throws an exception if the computation
- *          doesn't succeed.
- *
- * @warning It is recommended to use #cx_ecschnorr_sign_no_throw
- *          rather than this function.
- *
- * @param[in]  pvkey   Pointer to the private key initialized with 
- *                     #cx_ecfp_init_private_key_no_throw beforehand.
- *
- * @param[in]  mode    Mode. Supported flag:
- *                       - CX_ECSCHNORR_XY
- *                       - CX_ECSCHNORR_ISO14888_X
- *                       - CX_ECSCHNORR_BSI03111
- *                       - CX_ECSCHNORR_LIBSECP
- *                       - CX_ECSCHNORR_Z
- *                       - CX_ECSCHNORR_BIP0340
- *
- * @param[in]  hashID  Message digest algorithm identifier.
- *                     This parameter is mandatory when
- *                     using the CX_RND_RFC6979 
- *                     pseudorandom number generator.
- *
- * @param[in]  msg     Input data to sign.
- *
- * @param[in]  msg_len Length of input data.
- *
- * @param[out] sig     ECSchnorr signature encoded in TLV: **30 || L || 02 || Lr || r || 02 || Ls || s**.
- *                     This parameter holds the auxiliary random data when CX_ECSCHNORR_BIP0340 is used.
- *
- * @param[in]  sig_len Length of the signature.
- * 
- * @param[in]  info    Additional information. This parameter is not used.
- *
- * @return             Length of the signature.
- * 
- * @throws             CX_EC_INVALID_CURVE
- * @throws             CX_INVALID_PARAMETER
- * @throws             CX_NOT_UNLOCKED
- * @throws             CX_INVALID_PARAMETER_SIZE
- * @throws             CX_NOT_LOCKED
- * @throws             CX_MEMORY_FULL
- * @throws             CX_EC_INVALID_POINT
- * @throws             CX_EC_INFINITE_POINT
- * @throws             CX_INVALID_PARAMETER_VALUE
+ * @deprecated
+ * See #cx_ecschnorr_sign_no_throw
  */
-static inline size_t cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, uint32_t mode, cx_md_t hashID, const unsigned char * msg, unsigned int msg_len, unsigned char * sig, size_t sig_len, unsigned int * info )
+DEPRECATED static inline size_t cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, uint32_t mode, cx_md_t hashID, const unsigned char * msg, unsigned int msg_len, unsigned char * sig, size_t sig_len, unsigned int * info )
 {
   UNUSED(info);
   CX_THROW(cx_ecschnorr_sign_no_throw(pvkey, mode, hashID, msg, msg_len, sig, &sig_len));
