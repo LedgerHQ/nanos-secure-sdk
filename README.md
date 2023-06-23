@@ -54,20 +54,22 @@ In short, to build an app for an OS, you should:
 ## About API_LEVEL branches
 
 This list the API_LEVEL branches with their purposed (corresponding OS) and state if they should still be patched or not (OS not “active” anymore).
+OS release candidates are only kept in the list when a corresponding OS release production might be released on the same API_LEVEL.
 
-| Name    | Related OS                                                                                                    | Active
-|---------|---------------------------------------------------------------------------------------------------------------|---------
-| 1       | nanox_2.1.0 <br/>  nanos+_1.1.0 <br/>                                                                         | :heavy_check_mark:
-| 2       | nanox_2.2.0-pr1 <br/>  nanos+_1.2.0-pr1 <br/>                                                                 | :x:
-| 3       | stax_1.0.0-rc8                                                                                                | :x:
-| 4       | nanox_2.2.0-pr2 <br/> nanos+_1.2.0-pr2 <br/>                                                                  | :x:
-| 5       | stax_1.0.0-rc9 <br/> nanox_2.2.0-rc1 <br/> nanos+_1.2.0-rc1 <br/> nanox_2.2.0-pr3 <br/> nanox_2.2.0-rc2 <br/> nanox_2.2.0 <br/> nanox 2.2.1 | :heavy_check_mark:
-| 6       | stax_1.0.0-rc10                                                                                               | :x:
-| 7 / 7.1 | stax_1.0.0-rc11 / stax_1.0.0-rc12                                                                             | :x:
-| 7.2 (not compatible due to font update) | stax_1.0.0-rc13 => stax_1.0.0-rc16                                            | :x:
-| 8       | stax_1.0.0                                                                                                    | :x:
-| 9       | stax_1.1.0-rc1                                                                                                | :x:
-| 10      | stax_1.1.0                                                                                                    | :heavy_check_mark:
+| Name    | Related OS                                                          | Active
+|---------|---------------------------------------------------------------------|---------
+| 1       | nanox_2.1.0 <br/> nanos+_1.1.0                                      | :heavy_check_mark:
+| 2       | only rc releases                                                    | :x:
+| 3       | only rc releases                                                    | :x:
+| 4       | only rc releases                                                    | :x:
+| 5       | nanox_2.2.0 <br/> nanox 2.2.1                                       | :heavy_check_mark:
+| 6       | only rc releases                                                    | :x:
+| 7 / 7.1 | only rc releases                                                    | :x:
+| 7.2     | only rc releases<br/> (not compatible due <br/> to font update)     | :x:
+| 8       | stax_1.0.0                                                          | :x:
+| 9       | only rc releases                                                    | :x:
+| 10      | stax_1.1.0 <br/> nanox_2.3.0-rc1                                    | :heavy_check_mark:
+| 11      | stax_1.2.0 <br/> stax_1.2.1                                         | :heavy_check_mark:
 
 ### Cherry-picking process:
 
