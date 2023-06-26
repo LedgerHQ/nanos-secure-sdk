@@ -126,9 +126,7 @@ bool buffer_read_varint(buffer_t *buffer, uint64_t *value) {
         return false;
     }
 
-    buffer_seek_cur(buffer, (size_t) length);
-
-    return true;
+    return buffer_seek_cur(buffer, (size_t) length);
 }
 
 bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len) {
