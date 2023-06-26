@@ -61,7 +61,7 @@ bool format_i64(char *dst, size_t dst_len, const int64_t value) {
 }
 
 bool format_u64(char *out, size_t outLen, uint64_t in) {
-    uint8_t i = 0;
+    size_t i = 0;
 
     if (outLen == 0) {
         return false;
