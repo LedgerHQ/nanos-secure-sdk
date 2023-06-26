@@ -137,7 +137,12 @@ void ui_audited_choice(bool choice) {
 
 void ui_audited_init(void) {
   auditChoiceMade = false;
-  nbgl_useCaseChoice(NULL, "Pending Ledger review", "This app has not been reviewed\nby Ledger.", "Run", "Exit", ui_audited_choice);
+  nbgl_useCaseChoice(&C_warning64px,
+                     "Pending Ledger review",
+                     "This app has not been\nreviewed by Ledger",
+                     "Open",
+                     "Don't open",
+                     ui_audited_choice);
 }
 
 void ui_audited_deinit(void) {}
