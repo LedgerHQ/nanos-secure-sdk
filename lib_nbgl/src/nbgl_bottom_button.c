@@ -56,8 +56,8 @@ nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon, boo
   nbgl_container_t *container;
 
   container = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER, layer);
-  container->width = SCREEN_WIDTH;
-  container->height = BUTTON_DIAMETER+2*BORDER_MARGIN;
+  container->area.width = SCREEN_WIDTH;
+  container->area.height = BUTTON_DIAMETER+2*BORDER_MARGIN;
   container->layout = HORIZONTAL ;
   container->nbChildren = NB_MAX_CHILDREN;
   container->children = (nbgl_obj_t**)nbgl_containerPoolGet(container->nbChildren, layer);
@@ -66,8 +66,8 @@ nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon, boo
   button = (nbgl_button_t*)nbgl_objPoolGet(BUTTON,layer);
   button->innerColor = WHITE;
   button->borderColor = LIGHT_GRAY;
-  button->width = BUTTON_DIAMETER;
-  button->height = BUTTON_DIAMETER;
+  button->area.width = BUTTON_DIAMETER;
+  button->area.height = BUTTON_DIAMETER;
   button->radius = BUTTON_RADIUS;
   button->icon = icon;
   button->alignment = CENTER;
@@ -79,8 +79,8 @@ nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon, boo
     // create horizontal line
     line = (nbgl_line_t*)nbgl_objPoolGet(LINE,0);
     line->lineColor = LIGHT_GRAY;
-    line->width = SCREEN_WIDTH;
-    line->height = 4;
+    line->area.width = SCREEN_WIDTH;
+    line->area.height = 4;
     line->direction = HORIZONTAL;
     line->thickness = 1;
     line->alignmentMarginY = BORDER_MARGIN-4;

@@ -107,8 +107,8 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
   nbgl_container_t *navContainer;
 
   navContainer = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER, layer);
-  navContainer->width = SCREEN_WIDTH - 2*BORDER_MARGIN;
-  navContainer->height = BUTTON_DIAMETER+2*BORDER_MARGIN;
+  navContainer->area.width = SCREEN_WIDTH - 2*BORDER_MARGIN;
+  navContainer->area.height = BUTTON_DIAMETER+2*BORDER_MARGIN;
   navContainer->layout = HORIZONTAL ;
   navContainer->nbChildren = NB_MAX_CHILDREN;
   navContainer->children = (nbgl_obj_t**)nbgl_containerPoolGet(navContainer->nbChildren, layer);
@@ -120,8 +120,8 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
     button = (nbgl_button_t*)nbgl_objPoolGet(BUTTON,layer);
     button->innerColor = WHITE;
     button->borderColor = LIGHT_GRAY;
-    button->width = BUTTON_DIAMETER;
-    button->height = BUTTON_DIAMETER;
+    button->area.width = BUTTON_DIAMETER;
+    button->area.height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = &C_cross32px;
@@ -137,10 +137,10 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
     button = (nbgl_button_t*)nbgl_objPoolGet(BUTTON,layer);
     button->innerColor = WHITE;
     button->borderColor = LIGHT_GRAY;
-    button->width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
+    button->area.width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
     if (!withExitKey)
-      button->width += BUTTON_DIAMETER/2;
-    button->height = BUTTON_DIAMETER;
+      button->area.width += BUTTON_DIAMETER/2;
+    button->area.height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = &C_leftArrow32px;
@@ -164,10 +164,10 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
     button->innerColor = WHITE;
     button->borderColor = LIGHT_GRAY;
     button->foregroundColor = BLACK;
-    button->width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
+    button->area.width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
     if (!withExitKey)
-      button->width += BUTTON_DIAMETER/2;
-    button->height = BUTTON_DIAMETER;
+      button->area.width += BUTTON_DIAMETER/2;
+    button->area.height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = &C_rightArrow32px;

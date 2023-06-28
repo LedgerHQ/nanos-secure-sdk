@@ -188,7 +188,7 @@ typedef void (*nbgl_touchCallback_t)(void *obj, nbgl_touchType_t eventType) ;
  * @note this type must never be instantiated
  */
 typedef struct PACKED__ nbgl_obj_s {
-    struct nbgl_area_s ; ///< absolute position, backGround color and size of the object. DO NOT MOVE THIS FIELD
+    nbgl_area_t area; ///< absolute position, backGround color and size of the object. DO NOT MOVE THIS FIELD
     nbgl_obj_type_t type; ///< type of the graphical object, must be explicitly set
     int16_t rel_x0; ///< horizontal position of top-left corner relative to parent's top-left corner
     int16_t rel_y0; ///< vertical position of top-left corner relative to parent's top-left corner, must be multiple of 4

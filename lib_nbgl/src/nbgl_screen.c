@@ -118,11 +118,11 @@ static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t
   }
   *children = nbgl_containerPoolGet(nbChildren,screenIndex);
   screenStack[screenIndex].type = SCREEN;
-  screenStack[screenIndex].backgroundColor = WHITE;
-  screenStack[screenIndex].height = SCREEN_HEIGHT;
-  screenStack[screenIndex].width = SCREEN_WIDTH;
-  screenStack[screenIndex].x0 = 0;
-  screenStack[screenIndex].y0 = 0;
+  screenStack[screenIndex].area.backgroundColor = WHITE;
+  screenStack[screenIndex].area.height = SCREEN_HEIGHT;
+  screenStack[screenIndex].area.width = SCREEN_WIDTH;
+  screenStack[screenIndex].area.x0 = 0;
+  screenStack[screenIndex].area.y0 = 0;
   screenStack[screenIndex].rel_x0 = 0;
   screenStack[screenIndex].rel_y0 = 0;
   screenStack[screenIndex].layout = VERTICAL;
@@ -188,7 +188,7 @@ int nbgl_screenUpdateNbElements(uint8_t screenIndex, uint8_t nbElements) {
  * @return >= 0 if OK
  */
 int nbgl_screenUpdateBackgroundColor(uint8_t screenIndex, color_t color) {
-  screenStack[screenIndex].backgroundColor = color;
+  screenStack[screenIndex].area.backgroundColor = color;
   return 0;
 }
 
