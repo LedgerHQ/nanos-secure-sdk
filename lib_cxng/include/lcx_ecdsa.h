@@ -104,9 +104,9 @@ DEPRECATED static inline int cx_ecdsa_sign ( const cx_ecfp_private_key_t * pvkey
 
 /**
  * @brief   Verify an ECDSA signature according to ECDSA specification.
- * 
- * @param[in] pukey    Private key initialized with #cx_ecfp_init_public_key_no_throw.
- * 
+ *
+ * @param[in] pukey    Public key initialized with #cx_ecfp_init_public_key_no_throw.
+ *
  * @param[in] hash     Digest of the message to be verified.
  *                     The length of *hash* must be smaller than the group order size.
  *                     Otherwise it is truncated.
@@ -127,9 +127,9 @@ bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
 
 /**
  * @brief   Verify an ECDSA signature according to ECDSA specification.
- * 
- * @param[in] pukey    Private key initialized with #cx_ecfp_init_public_key_no_throw.
- * 
+ *
+ * @param[in] pukey    Public key initialized with #cx_ecfp_init_public_key_no_throw.
+ *
  * @param[in] mode     ECDSA mode. This parameter is not used.
  * 
  * @param[in] hashID   Message digest algorithm identifer.
