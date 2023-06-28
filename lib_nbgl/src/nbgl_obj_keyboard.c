@@ -133,18 +133,18 @@ static void keyboardDrawCommonLines(nbgl_keyboard_t *keyboard) {
   nbgl_area_t rectArea;
 
   // clean full area
-  rectArea.backgroundColor = keyboard->area.backgroundColor;
-  rectArea.x0 = keyboard->area.x0;
-  rectArea.y0 = keyboard->area.y0;
-  rectArea.width = keyboard->area.width;
-  rectArea.height = keyboard->area.height;
+  rectArea.backgroundColor = keyboard->obj.area.backgroundColor;
+  rectArea.x0 = keyboard->obj.area.x0;
+  rectArea.y0 = keyboard->obj.area.y0;
+  rectArea.width = keyboard->obj.area.width;
+  rectArea.height = keyboard->obj.area.height;
   nbgl_frontDrawRect(&rectArea);
 
   /// draw horizontal lines
-  rectArea.backgroundColor = keyboard->area.backgroundColor;
-  rectArea.x0 = keyboard->area.x0;
-  rectArea.y0 = keyboard->area.y0;
-  rectArea.width = keyboard->area.width;
+  rectArea.backgroundColor = keyboard->obj.area.backgroundColor;
+  rectArea.x0 = keyboard->obj.area.x0;
+  rectArea.y0 = keyboard->obj.area.y0;
+  rectArea.width = keyboard->obj.area.width;
   rectArea.height = 4;
   nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor); // 1st line (top)
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
@@ -159,8 +159,8 @@ static void keyboardDrawCommonLines(nbgl_keyboard_t *keyboard) {
   }
   /// then draw vertical lines
   rectArea.backgroundColor = keyboard->borderColor;
-  rectArea.x0 = keyboard->area.x0;
-  rectArea.y0 = keyboard->area.y0;
+  rectArea.x0 = keyboard->obj.area.x0;
+  rectArea.y0 = keyboard->obj.area.y0;
   rectArea.width = 1;
   rectArea.height = KEYBOARD_KEY_HEIGHT*3;
   if (!keyboard->lettersOnly)
@@ -179,8 +179,8 @@ static void keyboardDrawLetterGrid(nbgl_keyboard_t *keyboard) {
 
   // then all vertical lines separating keys
   rectArea.backgroundColor = keyboard->borderColor;
-  rectArea.x0 = keyboard->area.x0;
-  rectArea.y0 = keyboard->area.y0;
+  rectArea.x0 = keyboard->obj.area.x0;
+  rectArea.y0 = keyboard->obj.area.y0;
   rectArea.width = 1;
   rectArea.height = KEYBOARD_KEY_HEIGHT;
   // First row of keys: 10 letters (qwertyuiop)
@@ -190,7 +190,7 @@ static void keyboardDrawLetterGrid(nbgl_keyboard_t *keyboard) {
   }
 
   // Second row: 9 letters (asdfghjkl)
-  rectArea.x0 = keyboard->area.x0+SECOND_LINE_OFFSET;
+  rectArea.x0 = keyboard->obj.area.x0+SECOND_LINE_OFFSET;
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   nbgl_frontDrawRect(&rectArea);
   for (i=10;i<19;i++) {
@@ -201,7 +201,7 @@ static void keyboardDrawLetterGrid(nbgl_keyboard_t *keyboard) {
   // Third row: 7 letters (zxcvbnm) and backspace in letters only mode
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   if (!keyboard->lettersOnly) {
-    rectArea.x0 = keyboard->area.x0+SHIFT_KEY_WIDTH;
+    rectArea.x0 = keyboard->obj.area.x0+SHIFT_KEY_WIDTH;
   }
   else {
     rectArea.x0 = NORMAL_KEY_WIDTH;
@@ -219,7 +219,7 @@ static void keyboardDrawLetterGrid(nbgl_keyboard_t *keyboard) {
   // 4th row, only in Full mode
   if (!keyboard->lettersOnly) {
     rectArea.y0 += KEYBOARD_KEY_HEIGHT;
-    rectArea.x0 = keyboard->area.x0+SWITCH_KEY_WIDTH;
+    rectArea.x0 = keyboard->obj.area.x0+SWITCH_KEY_WIDTH;
     nbgl_frontDrawRect(&rectArea);
   }
 }
@@ -234,8 +234,8 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
 
   // then all vertical lines separating keys
   rectArea.backgroundColor = keyboard->borderColor;
-  rectArea.x0 = keyboard->area.x0;
-  rectArea.y0 = keyboard->area.y0;
+  rectArea.x0 = keyboard->obj.area.x0;
+  rectArea.y0 = keyboard->obj.area.y0;
   rectArea.width = 1;
   rectArea.height = KEYBOARD_KEY_HEIGHT;
   // First row of keys: 10 keys so 9 separations
@@ -245,7 +245,7 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
   }
 
   // Second row: 9 keys
-  rectArea.x0 = keyboard->area.x0+SECOND_LINE_OFFSET;
+  rectArea.x0 = keyboard->obj.area.x0+SECOND_LINE_OFFSET;
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   nbgl_frontDrawRect(&rectArea);
   for (i=10;i<19;i++) {
@@ -253,7 +253,7 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
     nbgl_frontDrawRect(&rectArea);
   }
   // Third row: Special char key, 5 keys and backspace
-  rectArea.x0 = keyboard->area.x0+SPECIAL_CHARS_KEY_WIDTH;
+  rectArea.x0 = keyboard->obj.area.x0+SPECIAL_CHARS_KEY_WIDTH;
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   nbgl_frontDrawRect(&rectArea);
   for (i=0;i<5;i++) {
@@ -263,7 +263,7 @@ static void keyboardDrawDigitsGrid(nbgl_keyboard_t *keyboard) {
 
   // 4th row, switch to letters and space
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
-  rectArea.x0 = keyboard->area.x0+SWITCH_KEY_WIDTH;
+  rectArea.x0 = keyboard->obj.area.x0+SWITCH_KEY_WIDTH;
   nbgl_frontDrawRect(&rectArea);
 }
 
@@ -278,15 +278,15 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   else
     keys = kbd_chars;
 
-  rectArea.backgroundColor = keyboard->area.backgroundColor;
-  rectArea.y0 = keyboard->area.y0 + LETTER_OFFSET_Y;
+  rectArea.backgroundColor = keyboard->obj.area.backgroundColor;
+  rectArea.y0 = keyboard->obj.area.y0 + LETTER_OFFSET_Y;
   rectArea.width = 1;
   rectArea.height = KEYBOARD_KEY_HEIGHT*3;
-  rectArea.x0 = keyboard->area.x0;
+  rectArea.x0 = keyboard->obj.area.x0;
 
   // First row of keys: 10 letters (qwertyuiop)
   for (i=0;i<10;i++) {
-    rectArea.x0 = keyboard->area.x0 + i*NORMAL_KEY_WIDTH;
+    rectArea.x0 = keyboard->obj.area.x0 + i*NORMAL_KEY_WIDTH;
 
     rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i],
@@ -296,7 +296,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   // Second row: 9 letters (asdfghjkl)
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   for (i=10;i<19;i++) {
-    rectArea.x0 = keyboard->area.x0 + SECOND_LINE_OFFSET + (i-10)*NORMAL_KEY_WIDTH;
+    rectArea.x0 = keyboard->obj.area.x0 + SECOND_LINE_OFFSET + (i-10)*NORMAL_KEY_WIDTH;
     rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i],
                   1, BAGL_FONT_INTER_REGULAR_24px_1bpp,
@@ -310,7 +310,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     rectArea.width = SHIFT_KEY_WIDTH-1;
     rectArea.height = KEYBOARD_KEY_HEIGHT;
     rectArea.bpp = NBGL_BPP_1;
-    rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2;
+    rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2;
     rectArea.x0 = 1;
     rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
     nbgl_frontDrawRect(&rectArea);
@@ -318,14 +318,14 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     rectArea.width = SHIFT_KEY_WIDTH-1;
     rectArea.height = 4;
     rectArea.x0 = 1;
-    rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2;
+    rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2;
     rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
     nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);
     // draw Shift key
     rectArea.width = C_shift32px.width;
     rectArea.height = C_shift32px.height;
     rectArea.bpp = NBGL_BPP_1;
-    rectArea.y0 = (keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
+    rectArea.y0 = (keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
     rectArea.x0 = (SHIFT_KEY_WIDTH-rectArea.width)/2;
     rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
     nbgl_frontDrawImage(&rectArea,
@@ -333,12 +333,12 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
                         NO_TRANSFORMATION,
                         (keyboard->casing != LOWER_CASE)?WHITE:BLACK);
     rectArea.backgroundColor = WHITE;
-    offsetX = keyboard->area.x0 + SHIFT_KEY_WIDTH;
+    offsetX = keyboard->obj.area.x0 + SHIFT_KEY_WIDTH;
   }
   else {
     offsetX = 0;
   }
-  rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
+  rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
   for (i=19;i<26;i++) {
     rectArea.x0 = offsetX + (i-19)*NORMAL_KEY_WIDTH;
     rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
@@ -351,7 +351,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   rectArea.height = C_backspace32px.height;
   rectArea.bpp = NBGL_BPP_1;
   rectArea.x0 = offsetX + 7*NORMAL_KEY_WIDTH;
-  rectArea.y0 = (keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
+  rectArea.y0 = (keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
   if (!keyboard->lettersOnly) {
     rectArea.x0 += (BACKSPACE_KEY_WIDTH_FULL-rectArea.width)/2;
   }
@@ -363,7 +363,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   // 4th row, only in Full mode
   if (!keyboard->lettersOnly) {
     rectArea.x0 = (SWITCH_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,".?123"))/2;
-    rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*3 + LETTER_OFFSET_Y;
+    rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*3 + LETTER_OFFSET_Y;
     nbgl_drawText(&rectArea, ".?123", 5, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
 
     rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-C_space32px.width)/2;
@@ -383,22 +383,22 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   else
     keys = kbd_specials;
 
-  rectArea.backgroundColor = keyboard->area.backgroundColor;
-  rectArea.y0 = keyboard->area.y0 + LETTER_OFFSET_Y;
+  rectArea.backgroundColor = keyboard->obj.area.backgroundColor;
+  rectArea.y0 = keyboard->obj.area.y0 + LETTER_OFFSET_Y;
   rectArea.width = 1;
   rectArea.height = KEYBOARD_KEY_HEIGHT*3;
-  rectArea.x0 = keyboard->area.x0;
+  rectArea.x0 = keyboard->obj.area.x0;
 
   // First row of keys: 10 digits (1234567890)
   for (i=0;i<10;i++) {
-    rectArea.x0 = keyboard->area.x0 + i*NORMAL_KEY_WIDTH;
+    rectArea.x0 = keyboard->obj.area.x0 + i*NORMAL_KEY_WIDTH;
     rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
   // Second row: 9 keys ()
   rectArea.y0 += KEYBOARD_KEY_HEIGHT;
   for (i=10;i<19;i++) {
-    rectArea.x0 = keyboard->area.x0 + (i-10)*NORMAL_KEY_WIDTH + SECOND_LINE_OFFSET;
+    rectArea.x0 = keyboard->obj.area.x0 + (i-10)*NORMAL_KEY_WIDTH + SECOND_LINE_OFFSET;
     rectArea.x0 += (NORMAL_KEY_WIDTH-nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,&keys[i]))/2;
     nbgl_drawText(&rectArea, &keys[i], 1, BAGL_FONT_INTER_REGULAR_24px_1bpp, (keyboard->keyMask&(1<<i))? WHITE:BLACK);
   }
@@ -407,12 +407,12 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   // draw "#+=" key
   if (keyboard->mode == MODE_DIGITS) {
     rectArea.x0 = (SPECIAL_CHARS_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"#+="))/2;
-    rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
+    rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
     nbgl_drawText(&rectArea, "#+=", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
   }
   else {
     rectArea.x0 = (SPECIAL_CHARS_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"123"))/2;
-    rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
+    rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + LETTER_OFFSET_Y;
     nbgl_drawText(&rectArea, "123", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
   }
 
@@ -426,13 +426,13 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard) {
   rectArea.height = C_backspace32px.height;
   rectArea.bpp = NBGL_BPP_1;
   rectArea.x0 = SPECIAL_CHARS_KEY_WIDTH + 5*NORMAL_KEY_WIDTH;
-  rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2;
+  rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2;
   rectArea.x0 += (BACKSPACE_KEY_WIDTH_DIGITS-rectArea.width)/2;
   nbgl_frontDrawImage(&rectArea,(uint8_t*)C_backspace32px.bitmap,NO_TRANSFORMATION,BLACK);
 
   // 4th row
   rectArea.x0 = (SWITCH_KEY_WIDTH-nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px_1bpp,"ABC"))/2;
-  rectArea.y0 = keyboard->area.y0 + KEYBOARD_KEY_HEIGHT*3 + LETTER_OFFSET_Y;
+  rectArea.y0 = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*3 + LETTER_OFFSET_Y;
   nbgl_drawText(&rectArea, "ABC", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
 
   rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-C_space32px.width)/2;
@@ -573,7 +573,7 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
  * @param kbd the object to be drawned
  */
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd) {
-  kbd->touchMask = (1 << TOUCHED);
+  kbd->obj.touchMask = (1 << TOUCHED);
   kbd->needsRefresh = false;
 
   keyboardDraw(kbd);
