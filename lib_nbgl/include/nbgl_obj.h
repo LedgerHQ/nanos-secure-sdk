@@ -178,17 +178,13 @@ typedef struct {
  */
 typedef void (*nbgl_touchCallback_t)(void *obj, nbgl_touchType_t eventType) ;
 
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmicrosoft-anon-tag"
-#endif // __clang__
 /**
  * @brief Common structure for all graphical objects
  *
  * @note this type must never be instantiated
  */
 typedef struct PACKED__ nbgl_obj_s {
-    struct nbgl_area_s ; ///< absolute position, backGround color and size of the object. DO NOT MOVE THIS FIELD
+    nbgl_area_t area; ///< absolute position, backGround color and size of the object. DO NOT MOVE THIS FIELD
     nbgl_obj_type_t type; ///< type of the graphical object, must be explicitly set
     int16_t rel_x0; ///< horizontal position of top-left corner relative to parent's top-left corner
     int16_t rel_y0; ///< vertical position of top-left corner relative to parent's top-left corner, must be multiple of 4
@@ -207,7 +203,7 @@ typedef struct PACKED__ nbgl_obj_s {
  *
  */
 typedef struct PACKED__ nbgl_container_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     nbgl_direction_t layout; ///< layout of children inside this object
     uint8_t nbChildren;
     bool forceClean; ///< if set to true, a paint will be done with background color
@@ -219,7 +215,7 @@ typedef struct PACKED__ nbgl_container_s {
  *
  */
 typedef struct PACKED__ nbgl_line_s {
-    struct nbgl_obj_s; ///<  common part
+    nbgl_obj_t obj; ///<  common part
     nbgl_direction_t direction; ///< direction of the line, e.g @ref VERTICAL or @ref HORIZONTAL
     color_t lineColor; ///< color of the line
     uint8_t thickness; ///< thickness of the line in pixel, maybe different from height for horizontal line
@@ -238,7 +234,7 @@ typedef nbgl_icon_details_t* (*onImageDrawCallback_t)(uint8_t token);
  *
  */
 typedef struct PACKED__ nbgl_image_s {
-    struct nbgl_obj_s; // common part
+    nbgl_obj_t obj; // common part
     color_t foregroundColor; ///< color set to '1' bits, for 1PBB images. '0' are set to background color.
     const nbgl_icon_details_t *buffer; ///< buffer containing bitmap, with exact same size as object (width*height*bpp/8 bytes)
     onImageDrawCallback_t onDrawCallback; ///< function called if buffer is NULL, with above token as parameter. Can be NULL
@@ -251,7 +247,7 @@ typedef struct PACKED__ nbgl_image_s {
  *
  */
 typedef struct PACKED__ nbgl_image_file_s {
-    struct nbgl_obj_s; // common part
+    nbgl_obj_t obj; // common part
     const uint8_t *buffer; ///< buffer containing image file
 } nbgl_image_file_t;
 
@@ -260,7 +256,7 @@ typedef struct PACKED__ nbgl_image_file_s {
  *
  */
 typedef struct PACKED__ nbgl_qrcode_s {
-    struct nbgl_obj_s; // common part
+    nbgl_obj_t obj; // common part
     color_t foregroundColor; ///< color set to '1' bits, for 1PBB images. '0' are set to background color.
     nbgl_qrcode_version_t version; ///< requested version, if V10, size will be fixed to 228*228, if V4, size will be fixed to 132*132
     const char *text; ///< text single line (NULL terminated)
@@ -273,7 +269,7 @@ typedef struct PACKED__ nbgl_qrcode_s {
  *
  */
 typedef struct PACKED__ nbgl_radio_s {
-    struct nbgl_obj_s; // common part
+    nbgl_obj_t obj; // common part
     color_t activeColor; ///< color set to to inner circle, when active.
     color_t borderColor; ///< color set to border.
     nbgl_state_t state; ///< state of the radio button. Active is when state == @ref ON_STATE
@@ -284,7 +280,7 @@ typedef struct PACKED__ nbgl_radio_s {
  *
  */
 typedef struct PACKED__ nbgl_switch_s {
-    struct nbgl_obj_s; // common part
+    nbgl_obj_t obj; // common part
     color_t onColor; ///< color set to border and knob, when ON (knob on the right).
     color_t offColor; ///< color set to border and knob, when OFF (knob on the left).
     nbgl_state_t state; ///< state of the switch.
@@ -295,7 +291,7 @@ typedef struct PACKED__ nbgl_switch_s {
  * @note if withBorder, the stroke of the border is fixed (3 pixels)
  */
 typedef struct PACKED__ nbgl_progress_bar_s {
-    struct nbgl_obj_s; // common part
+    nbgl_obj_t obj; // common part
     bool withBorder; ///< if set to true, a border in black surround the whole object
     uint8_t state; ///< state of the progress, in % (from 0 to 100).
     color_t foregroundColor; ///< color of the inner progress bar and border (if applicable)
@@ -309,7 +305,7 @@ typedef struct PACKED__ nbgl_progress_bar_s {
  * @note height is fixed
  */
 typedef struct PACKED__ nbgl_navigation_bar_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     uint8_t nbPages; ///< number of pages.
     uint8_t activePage; ///< index of active page (from 0 to nbPages-1).
 } nbgl_page_indicator_t;
@@ -328,7 +324,7 @@ typedef char* (*onTextDrawCallback_t)(uint8_t token);
  *
  */
 typedef struct PACKED__ nbgl_button_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     color_t innerColor; ///< color set inside of the button
     color_t borderColor; ///< color set to button's border
     color_t foregroundColor; ///< color set to '1' bits in icon, and text. '0' are set to innerColor color.
@@ -349,7 +345,7 @@ typedef struct PACKED__ nbgl_button_s {
  *
  */
 typedef struct PACKED__ nbgl_text_area_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     color_t textColor; ///< color set to '1' bits in text. '0' are set to backgroundColor color.
     nbgl_aligment_t textAlignment; ///< alignment of text within the area
     nbgl_style_t style; ///< to define the style of border
@@ -371,7 +367,7 @@ typedef struct PACKED__ nbgl_text_area_s {
  *
  */
 typedef struct PACKED__ nbgl_spinner_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     uint8_t position; ///< position of the spinner (from 0 to 3). If set to 0xFF, the spinner is entirely black
 } nbgl_spinner_t;
 
@@ -407,7 +403,7 @@ typedef enum {
  *
  */
 typedef struct PACKED__ nbgl_keyboard_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     color_t textColor; ///< color set to letters.
     color_t borderColor; ///< color set to key borders
     bool lettersOnly; ///< if true, only display letter keys and Backspace
@@ -424,7 +420,7 @@ typedef struct PACKED__ nbgl_keyboard_s {
  *
  */
 typedef struct PACKED__ nbgl_keypad_s {
-    struct nbgl_obj_s; ///< common part
+    nbgl_obj_t obj; ///< common part
     color_t textColor; ///< color set to digits.
     color_t borderColor; ///< color set to key borders
     bool enableBackspace; ///< if true, Backspace key is enabled
@@ -434,9 +430,6 @@ typedef struct PACKED__ nbgl_keypad_s {
     uint8_t digitIndexes[5]; ///< array of digits indexes, 4 bits per digit
     keyboardCallback_t callback; ///< function called when an active key is pressed
 } nbgl_keypad_t;
-#ifdef __clang__
-#pragma GCC diagnostic pop
-#endif // __clang__
 
 /**********************
  * GLOBAL PROTOTYPES

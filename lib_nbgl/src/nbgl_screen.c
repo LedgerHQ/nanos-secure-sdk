@@ -91,7 +91,7 @@ nbgl_obj_t *nbgl_screenGetTop(void) {
  * @return the number of used screens on stack
  */
 uint8_t nbgl_screenGetCurrentStackSize(void) {
-  if ((nbScreensOnStack == 1) && (screenStack[0].nbChildren == 0))
+  if ((nbScreensOnStack == 1) && (screenStack[0].container.nbChildren == 0))
     return 0;
   return nbScreensOnStack;
 }
@@ -117,25 +117,25 @@ static int nbgl_screenSetAt(uint8_t screenIndex, nbgl_obj_t*** children, uint8_t
     return -1;
   }
   *children = nbgl_containerPoolGet(nbChildren,screenIndex);
-  screenStack[screenIndex].type = SCREEN;
-  screenStack[screenIndex].backgroundColor = WHITE;
-  screenStack[screenIndex].height = SCREEN_HEIGHT;
-  screenStack[screenIndex].width = SCREEN_WIDTH;
-  screenStack[screenIndex].x0 = 0;
-  screenStack[screenIndex].y0 = 0;
-  screenStack[screenIndex].rel_x0 = 0;
-  screenStack[screenIndex].rel_y0 = 0;
-  screenStack[screenIndex].layout = VERTICAL;
-  screenStack[screenIndex].children = *children;
-  screenStack[screenIndex].nbChildren = nbChildren;
+  screenStack[screenIndex].container.obj.type = SCREEN;
+  screenStack[screenIndex].container.obj.area.backgroundColor = WHITE;
+  screenStack[screenIndex].container.obj.area.height = SCREEN_HEIGHT;
+  screenStack[screenIndex].container.obj.area.width = SCREEN_WIDTH;
+  screenStack[screenIndex].container.obj.area.x0 = 0;
+  screenStack[screenIndex].container.obj.area.y0 = 0;
+  screenStack[screenIndex].container.obj.rel_x0 = 0;
+  screenStack[screenIndex].container.obj.rel_y0 = 0;
+  screenStack[screenIndex].container.layout = VERTICAL;
+  screenStack[screenIndex].container.children = *children;
+  screenStack[screenIndex].container.nbChildren = nbChildren;
   screenStack[screenIndex].touchCallback = callback;
   if (ticker != NULL) {
-    screenStack[screenIndex].tickerCallback = (nbgl_tickerCallback_t)PIC(ticker->tickerCallback);
-    screenStack[screenIndex].tickerIntervale = ticker->tickerIntervale;
-    screenStack[screenIndex].tickerValue = ticker->tickerValue;
+    screenStack[screenIndex].ticker.tickerCallback = (nbgl_tickerCallback_t)PIC(ticker->tickerCallback);
+    screenStack[screenIndex].ticker.tickerIntervale = ticker->tickerIntervale;
+    screenStack[screenIndex].ticker.tickerValue = ticker->tickerValue;
   }
   else {
-    screenStack[screenIndex].tickerCallback = NULL;
+    screenStack[screenIndex].ticker.tickerCallback = NULL;
   }
   return 0;
 }
@@ -175,7 +175,7 @@ int nbgl_screenSet(nbgl_obj_t*** elements, uint8_t nbElements,
  * @return >= 0 if OK
  */
 int nbgl_screenUpdateNbElements(uint8_t screenIndex, uint8_t nbElements) {
-  screenStack[screenIndex].nbChildren = nbElements;
+  screenStack[screenIndex].container.nbChildren = nbElements;
   return 0;
 }
 
@@ -188,7 +188,7 @@ int nbgl_screenUpdateNbElements(uint8_t screenIndex, uint8_t nbElements) {
  * @return >= 0 if OK
  */
 int nbgl_screenUpdateBackgroundColor(uint8_t screenIndex, color_t color) {
-  screenStack[screenIndex].backgroundColor = color;
+  screenStack[screenIndex].container.obj.area.backgroundColor = color;
   return 0;
 }
 
@@ -202,12 +202,12 @@ int nbgl_screenUpdateBackgroundColor(uint8_t screenIndex, color_t color) {
  */
 int nbgl_screenUpdateTicker(uint8_t screenIndex, const nbgl_screenTickerConfiguration_t *ticker) {
   if (ticker != NULL) {
-    screenStack[screenIndex].tickerCallback = (nbgl_tickerCallback_t)PIC(ticker->tickerCallback);
-    screenStack[screenIndex].tickerIntervale = ticker->tickerIntervale;
-    screenStack[screenIndex].tickerValue = ticker->tickerValue;
+    screenStack[screenIndex].ticker.tickerCallback = (nbgl_tickerCallback_t)PIC(ticker->tickerCallback);
+    screenStack[screenIndex].ticker.tickerIntervale = ticker->tickerIntervale;
+    screenStack[screenIndex].ticker.tickerValue = ticker->tickerValue;
   }
   else {
-    screenStack[screenIndex].tickerCallback = NULL;
+    screenStack[screenIndex].ticker.tickerCallback = NULL;
   }
   return 0;
 }
@@ -221,7 +221,7 @@ int nbgl_screenUpdateTicker(uint8_t screenIndex, const nbgl_screenTickerConfigur
  * @return array of elements (children) of the screen
  */
 nbgl_obj_t** nbgl_screenGetElements(uint8_t screenIndex) {
-  return screenStack[screenIndex].children;
+  return screenStack[screenIndex].container.children;
 }
 
 /**
@@ -252,7 +252,7 @@ int nbgl_screenPush(nbgl_obj_t*** elements, uint8_t nbElements,
     // link top of stack to background (even if empty)
     topOfStack->previous = &screenStack[0];
     screenStack[0].next = topOfStack;
-    screenStack[0].nbChildren = 0;
+    screenStack[0].container.nbChildren = 0;
     // count empty background as an active screen
     nbScreensOnStack++;
   }
@@ -321,8 +321,8 @@ int nbgl_screenPop(uint8_t screenIndex) {
   // free slot
   screenStack[screenIndex].previous = NULL;
   screenStack[screenIndex].next = NULL;
-  screenStack[screenIndex].nbChildren = 0;
-  screenStack[screenIndex].children = NULL;
+  screenStack[screenIndex].container.nbChildren = 0;
+  screenStack[screenIndex].container.children = NULL;
   // release used objects and containers
   nbgl_objPoolRelease(screenIndex);
   nbgl_containerPoolRelease(screenIndex);
@@ -359,13 +359,13 @@ void nbgl_screenHandler(uint32_t intervaleMs) {
   if (nbScreensOnStack == 0)
     return;
   // call ticker callback of top of stack if active and not expired yet (for a non periodic)
-  if ((topOfStack->tickerCallback != NULL) &&
-      (topOfStack->tickerValue != 0)) {
-    topOfStack->tickerValue -= MIN(topOfStack->tickerValue, intervaleMs);
-    if (topOfStack->tickerValue == 0) {
+  if ((topOfStack->ticker.tickerCallback != NULL) &&
+      (topOfStack->ticker.tickerValue != 0)) {
+    topOfStack->ticker.tickerValue -= MIN(topOfStack->ticker.tickerValue, intervaleMs);
+    if (topOfStack->ticker.tickerValue == 0) {
       // rearm if intervale is not null, and call the registered function
-      topOfStack->tickerValue = topOfStack->tickerIntervale;
-      topOfStack->tickerCallback();
+      topOfStack->ticker.tickerValue = topOfStack->ticker.tickerIntervale;
+      topOfStack->ticker.tickerCallback();
     }
   }
 }

@@ -92,8 +92,8 @@ static nbgl_obj_t * getTouchedObject(nbgl_obj_t *obj, nbgl_touchStatePosition_t 
   /* check coordinates
      no need to go further if the touched point is not within the object
      And because the children are also within the object, no need to check them either */
-  if ((event->x < obj->x0) || (event->x > (obj->x0+obj->width)) ||
-      (event->y < obj->y0) || (event->y > (obj->y0+obj->height))) {
+  if ((event->x < obj->area.x0) || (event->x > (obj->area.x0+obj->area.width)) ||
+      (event->y < obj->area.y0) || (event->y > (obj->area.y0+obj->area.height))) {
     return NULL;
   }
   if ((obj->type == SCREEN) ||

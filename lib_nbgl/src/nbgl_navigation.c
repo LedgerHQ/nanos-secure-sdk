@@ -107,56 +107,56 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
   nbgl_container_t *navContainer;
 
   navContainer = (nbgl_container_t *)nbgl_objPoolGet(CONTAINER, layer);
-  navContainer->width = SCREEN_WIDTH - 2*BORDER_MARGIN;
-  navContainer->height = BUTTON_DIAMETER+2*BORDER_MARGIN;
+  navContainer->obj.area.width = SCREEN_WIDTH - 2*BORDER_MARGIN;
+  navContainer->obj.area.height = BUTTON_DIAMETER+2*BORDER_MARGIN;
   navContainer->layout = HORIZONTAL ;
   navContainer->nbChildren = NB_MAX_CHILDREN;
   navContainer->children = (nbgl_obj_t**)nbgl_containerPoolGet(navContainer->nbChildren, layer);
-  navContainer->alignmentMarginX = 0;
-  navContainer->alignmentMarginY = 0;
-  navContainer->alignment = NO_ALIGNMENT;
+  navContainer->obj.alignmentMarginX = 0;
+  navContainer->obj.alignmentMarginY = 0;
+  navContainer->obj.alignment = NO_ALIGNMENT;
 
   if (withExitKey) {
     button = (nbgl_button_t*)nbgl_objPoolGet(BUTTON,layer);
     button->innerColor = WHITE;
     button->borderColor = LIGHT_GRAY;
-    button->width = BUTTON_DIAMETER;
-    button->height = BUTTON_DIAMETER;
+    button->obj.area.width = BUTTON_DIAMETER;
+    button->obj.area.height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = &C_cross32px;
-    button->alignmentMarginX = 0;
-    button->alignmentMarginY = 0;
+    button->obj.alignmentMarginX = 0;
+    button->obj.alignmentMarginY = 0;
 
-    button->alignment = (nbPages > 1) ? MID_LEFT:CENTER;
-    button->alignTo = NULL;
-    button->touchMask = (1<<TOUCHED);
+    button->obj.alignment = (nbPages > 1) ? MID_LEFT:CENTER;
+    button->obj.alignTo = NULL;
+    button->obj.touchMask = (1<<TOUCHED);
     navContainer->children[EXIT_BUTTON_INDEX] = (nbgl_obj_t*)button;
   }
   if (nbPages > 1) {
     button = (nbgl_button_t*)nbgl_objPoolGet(BUTTON,layer);
     button->innerColor = WHITE;
     button->borderColor = LIGHT_GRAY;
-    button->width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
+    button->obj.area.width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
     if (!withExitKey)
-      button->width += BUTTON_DIAMETER/2;
-    button->height = BUTTON_DIAMETER;
+      button->obj.area.width += BUTTON_DIAMETER/2;
+    button->obj.area.height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = &C_leftArrow32px;
-    button->alignmentMarginY = 0;
+    button->obj.alignmentMarginY = 0;
     if (withExitKey) {
-      button->alignmentMarginX = INTERNAL_SMALL_MARGIN;
-      button->alignment = MID_RIGHT;
-      button->alignTo = navContainer->children[EXIT_BUTTON_INDEX];
+      button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
+      button->obj.alignment = MID_RIGHT;
+      button->obj.alignTo = navContainer->children[EXIT_BUTTON_INDEX];
     }
     else {
-      button->alignmentMarginX = 0;
-      button->alignment = MID_LEFT;
-      button->alignTo = NULL;
+      button->obj.alignmentMarginX = 0;
+      button->obj.alignment = MID_LEFT;
+      button->obj.alignTo = NULL;
 
     }
-    button->touchMask = (1<<TOUCHED);
+    button->obj.touchMask = (1<<TOUCHED);
     navContainer->children[PREVIOUS_PAGE_INDEX] = (nbgl_obj_t*)button;
 
     // create next page button
@@ -164,18 +164,18 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages, uint8_t activePage, b
     button->innerColor = WHITE;
     button->borderColor = LIGHT_GRAY;
     button->foregroundColor = BLACK;
-    button->width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
+    button->obj.area.width = (SCREEN_WIDTH - (2*BORDER_MARGIN+2*INTERNAL_SMALL_MARGIN+BUTTON_DIAMETER))/2;
     if (!withExitKey)
-      button->width += BUTTON_DIAMETER/2;
-    button->height = BUTTON_DIAMETER;
+      button->obj.area.width += BUTTON_DIAMETER/2;
+    button->obj.area.height = BUTTON_DIAMETER;
     button->radius = BUTTON_RADIUS;
     button->text = NULL;
     button->icon = &C_rightArrow32px;
-    button->alignmentMarginX = INTERNAL_SMALL_MARGIN;
-    button->alignmentMarginY = 0;
-    button->alignment = MID_RIGHT;
-    button->alignTo = navContainer->children[PREVIOUS_PAGE_INDEX];
-    button->touchMask = (1<<TOUCHED);
+    button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
+    button->obj.alignmentMarginY = 0;
+    button->obj.alignment = MID_RIGHT;
+    button->obj.alignTo = navContainer->children[PREVIOUS_PAGE_INDEX];
+    button->obj.touchMask = (1<<TOUCHED);
     navContainer->children[NEXT_PAGE_INDEX] = (nbgl_obj_t*)button;
 
     configButtons(navContainer, nbPages, activePage);
