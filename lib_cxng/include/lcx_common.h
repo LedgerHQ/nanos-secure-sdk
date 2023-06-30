@@ -78,22 +78,22 @@ typedef uint64_t uint64bits_t;
  * | 11:9           | 0000011000000000  | CX_RND_RFC6979                | Random from RFC6979                        |                       |
  * | 11:9           | 0000010000000000  | CX_RND_TRNG                   | Random from a PRNG                         |                       |
  * | 11:9           | 0000001000000000  | CX_RND_PRNG                   | Random from a TRNG                         |                       |
- * | 8:6            | 0000000100000000  | CX_CHAIN_OFB                  | Output feedback mode                       | AES/DES               |
- * | 8:6            | 0000000011000000  | CX_CHAIN_CFB                  | Cipher feedback mode                       | AES/DES               |
- * | 8:6            | 0000000010000000  | CX_CHAIN_CTR                  | Counter mode                               | AES/DES               |
- * | 8:6            | 0000000001000000  | CX_CHAIN_CBC                  | Cipher block chaining mode                 | AES/DES               |
+ * | 8:6            | 0000000100000000  | CX_CHAIN_OFB                  | Output feedback mode                       | AES                   |
+ * | 8:6            | 0000000011000000  | CX_CHAIN_CFB                  | Cipher feedback mode                       | AES                   |
+ * | 8:6            | 0000000010000000  | CX_CHAIN_CTR                  | Counter mode                               | AES                   |
+ * | 8:6            | 0000000001000000  | CX_CHAIN_CBC                  | Cipher block chaining mode                 | AES                   |
  * | 8:6            | 0000000001000000  | CX_NO_CANONICAL               | Do not compute a canonical signature       | ECDSA/EDDSA/ECSCHNORR |
- * | 8:6            | 0000000000000000  | CX_CHAIN_ECB                  | Electronic codebook mode                   | AES/DES               |
+ * | 8:6            | 0000000000000000  | CX_CHAIN_ECB                  | Electronic codebook mode                   | AES                   |
  * | 5:3            | 0000000010100000  | CX_PAD_PKCS1_OAEP             | PKCS1_OAEP padding                         |                       |
  * | 5:3            | 0000000010000000  | CX_PAD_PKCS1_PSS              | PKCS1_PSS padding                          |                       |
  * | 5:3            | 0000000001100000  | CX_PAD_PKCS1_1o5              | PKCS1-v1_5 padding                         |                       |
  * | 5:3            | 0000000001000000  | CX_PAD_ISO9797M2              | ISO9797 padding, method 2                  |                       |
  * | 5:3            | 0000000000100000  | CX_PAD_ISO9797M1              | ISO9797 padding, method 1                  |                       |
  * | 5:3            | 0000000000000000  | CX_PAD_NONE                   | No padding                                 |                       |
- * | 2:1            | 0000000000000110  | CX_SIGN                       | Signature                                  | AES/DES               |
- * | 2:1            | 0000000000000100  | CX_ENCRYPT                    | Encryption                                 | AES/DES               |
- * | 2:1            | 0000000000000010  | CX_VERIFY                     | Signature verification                     | AES/DES               |
- * | 2:1            | 0000000000000000  | CX_DECRYPT                    | Decryption                                 | AES/DES               |
+ * | 2:1            | 0000000000000110  | CX_SIGN                       | Signature                                  | AES                   |
+ * | 2:1            | 0000000000000100  | CX_ENCRYPT                    | Encryption                                 | AES                   |
+ * | 2:1            | 0000000000000010  | CX_VERIFY                     | Signature verification                     | AES                   |
+ * | 2:1            | 0000000000000000  | CX_DECRYPT                    | Decryption                                 | AES                   |
  * | 0              | 0000000000000001  | CX_LAST                       | Last block                                 |                       |
  */
 #define CX_FLAG
@@ -129,7 +129,7 @@ typedef uint64_t uint64bits_t;
 #define CX_PAD_PKCS1_OAEP (5 << 3)
 
 /**
- * Bit 8:6 DES/AES chaining
+ * Bit 8:6 AES chaining
  */
 #define CX_MASK_CHAIN (7 << 6)
 #define CX_CHAIN_ECB (0 << 6)

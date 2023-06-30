@@ -43,11 +43,6 @@
 #define _NR_cx_crc16_update                          0x27
 #define _NR_cx_crc32                                 0x28
 #define _NR_cx_decode_coord                          0x29
-#define _NR_cx_des_dec_block                         0x2a
-#define _NR_cx_des_enc_block                         0x2b
-#define _NR_cx_des_init_key_no_throw                 0x2c
-#define _NR_cx_des_iv_no_throw                       0x2d
-#define _NR_cx_des_no_throw                          0x2e
 #define _NR_cx_ecdh_no_throw                         0x2f
 #define _NR_cx_ecdsa_sign_no_throw                   0x30
 #define _NR_cx_ecdsa_verify_no_throw                 0x31

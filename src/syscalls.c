@@ -7,7 +7,6 @@
 #include "bolos_target.h"
 #include "exceptions.h"
 #include "lcx_aes.h"
-#include "lcx_des.h"
 #include "lcx_eddsa.h"
 #include "lcx_wrappers.h"
 #include "cx_errors.h"
@@ -204,26 +203,6 @@ cx_err_t cx_aes_block_hw ( const unsigned char * inblock, unsigned char * outblo
   parameters[0] = (unsigned int)inblock;
   parameters[1] = (unsigned int)outblock;
   return SVC_cx_call(SYSCALL_cx_aes_block_hw_ID, parameters);
-}
-
-cx_err_t cx_des_set_key_hw ( const cx_des_key_t * keys, uint32_t mode ) {
-  unsigned int parameters[2];
-  parameters[0] = (unsigned int)keys;
-  parameters[1] = (unsigned int)mode;
-  return SVC_cx_call(SYSCALL_cx_des_set_key_hw_ID, parameters);
-}
-
-void cx_des_reset_hw ( void ) {
-  unsigned int parameters[2];
-  parameters[1] = 0;
-  SVC_cx_call(SYSCALL_cx_des_reset_hw_ID, parameters);
-}
-
-void cx_des_block_hw ( const unsigned char * inblock, unsigned char * outblock ) {
-  unsigned int parameters[2];
-  parameters[0] = (unsigned int)inblock;
-  parameters[1] = (unsigned int)outblock;
-  SVC_cx_call(SYSCALL_cx_des_block_hw_ID, parameters);
 }
 
 cx_err_t cx_bn_lock ( size_t word_nbytes, uint32_t flags ) {

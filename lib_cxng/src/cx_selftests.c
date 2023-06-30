@@ -27,7 +27,6 @@
 enum test_id {
   CX_TEST_MATHM_ID,
 
-  CX_TEST_DES_ID,
   CX_TEST_AES_ID,
 
   CX_TEST_RIPEMD160_ID,

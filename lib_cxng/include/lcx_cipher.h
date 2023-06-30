@@ -5,7 +5,7 @@
  * @brief   API for block ciphers.
  *
  * This file contains the functions which enable to use standard block ciphers
- * like AES, DES and 3-DES for encryption and decryption in a specific mode of
+ * like AES for encryption and decryption in a specific mode of
  * operation.
  */
 #pragma once
@@ -13,7 +13,6 @@
 #include "lcx_wrappers.h"
 #include "lcx_common.h"
 #include "lcx_aes.h"
-#include "lcx_des.h"
 #include <stddef.h>
 
 /** Maximum length of the initialization vector in bytes */
@@ -39,9 +38,6 @@ typedef enum {
     CX_CIPHER_AES_128,     ///< AES with a 128-bit key
     CX_CIPHER_AES_192,     ///< AES with a 192-bit key
     CX_CIPHER_AES_256,     ///< AES with a 256-bit key
-    CX_CIPHER_DES_64,      ///< DES with a 64-bit key
-    CX_CIPHER_3DES_128,    ///< 3DES with two keys
-    CX_CIPHER_3DES_192,    ///< 3DES with three keys
 } cx_cipher_id_t ;
 
 /** Generic key structure */
@@ -114,9 +110,6 @@ cx_err_t cx_cipher_init(cx_cipher_context_t *ctx);
  *                 - CX_CIPHER_AES_128
  *                 - CX_CIPHER_AES_192
  *                 - CX_CIPHER_AES_256
- *                 - CX_CIPHER_DES_64
- *                 - CX_CIPHER_3DES_128
- *                 - CX_CIPHER_3DES_192
  *
  * @param[in] mode Mode of operation:
  *                 - ECB

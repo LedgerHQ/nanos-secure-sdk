@@ -10,9 +10,6 @@
 #define SYSCALL_cx_aes_set_key_hw_ID                               0x020000b2
 #define SYSCALL_cx_aes_reset_hw_ID                                 0x000000b3
 #define SYSCALL_cx_aes_block_hw_ID                                 0x020000b4
-#define SYSCALL_cx_des_set_key_hw_ID                               0x020000af
-#define SYSCALL_cx_des_reset_hw_ID                                 0x000000b0
-#define SYSCALL_cx_des_block_hw_ID                                 0x020000b1
 #define SYSCALL_cx_bn_lock_ID                                      0x02000112
 #define SYSCALL_cx_bn_unlock_ID                                    0x000000b6
 #define SYSCALL_cx_bn_is_locked_ID                                 0x000000b7

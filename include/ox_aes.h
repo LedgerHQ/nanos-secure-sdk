@@ -43,7 +43,7 @@
  * implementation of elliptic curves.
  *
  * Here is a non-exhaustive list of supported algorithms:
- * - AES and DES in different modes
+ * - AES in various modes
  * - ECDSA with a random or deterministic nonce
  * - EDDSA
  * - ECDH

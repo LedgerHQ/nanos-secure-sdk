@@ -46,11 +46,6 @@ cx_crc16
 cx_crc16_update
 cx_crc32
 cx_decode_coord
-cx_des_dec_block
-cx_des_enc_block
-cx_des_init_key_no_throw
-cx_des_iv_no_throw
-cx_des_no_throw
 cx_ecdh_no_throw
 cx_ecdsa_sign_no_throw
 cx_ecdsa_verify_no_throw

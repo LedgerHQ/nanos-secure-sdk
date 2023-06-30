@@ -58,11 +58,6 @@ CX_TRAMPOLINE _NR_cx_crc16                                 cx_crc16
 CX_TRAMPOLINE _NR_cx_crc16_update                          cx_crc16_update
 CX_TRAMPOLINE _NR_cx_crc32                                 cx_crc32
 CX_TRAMPOLINE _NR_cx_decode_coord                          cx_decode_coord
-CX_TRAMPOLINE _NR_cx_des_dec_block                         cx_des_dec_block
-CX_TRAMPOLINE _NR_cx_des_enc_block                         cx_des_enc_block
-CX_TRAMPOLINE _NR_cx_des_init_key_no_throw                 cx_des_init_key_no_throw
-CX_TRAMPOLINE _NR_cx_des_iv_no_throw                       cx_des_iv_no_throw
-CX_TRAMPOLINE _NR_cx_des_no_throw                          cx_des_no_throw
 CX_TRAMPOLINE _NR_cx_ecdh_no_throw                         cx_ecdh_no_throw
 CX_TRAMPOLINE _NR_cx_ecdsa_sign_no_throw                   cx_ecdsa_sign_no_throw
 CX_TRAMPOLINE _NR_cx_ecdsa_verify_no_throw                 cx_ecdsa_verify_no_throw
