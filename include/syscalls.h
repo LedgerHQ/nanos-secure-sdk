@@ -193,6 +193,7 @@
 #ifdef HAVE_CUSTOM_CA_SETTINGS
 #define SYSCALL_os_bolos_custom_ca_get_info_ID                     0x01000CA0
 #define SYSCALL_os_bolos_custom_ca_revoke_ID                       0x00000CA1
+#define SYSCALL_os_bolos_endorsement_revoke_ID                     0x010001ED
 #endif // HAVE_CUSTOM_CA_SETTINGS
 
 #ifndef HAVE_BOLOS_NO_CUSTOMCA

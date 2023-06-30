@@ -1561,6 +1561,13 @@ void os_bolos_custom_ca_revoke(void) {
   SVC_Call(SYSCALL_os_bolos_custom_ca_revoke_ID, parameters);
   return;
 }
+
+bolos_bool_t os_bolos_endorsement_revoke(uint8_t slot) {
+  unsigned int parameters[1];
+  parameters[0] = (unsigned int) slot;
+  bolos_bool_t ret = SVC_Call(SYSCALL_os_bolos_endorsement_revoke_ID, parameters);
+  return ret;
+}
 #endif //HAVE_CUSTOM_CA_SETTINGS
 
 #ifdef HAVE_MCU_SERIAL_STORAGE
