@@ -734,7 +734,7 @@ nbgl_unicode_ctx_t* nbgl_getUnicodeFont(nbgl_font_id_e fontId) {
  */
 const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unicode) {
 #if defined(HAVE_LANGUAGE_PACK)
-  const nbgl_font_unicode_character_t *characters = unicodeCtx.characters;
+  const nbgl_font_unicode_character_t *characters = (const nbgl_font_unicode_character_t *)PIC(unicodeCtx.characters);
   uint32_t n = language_pack->nb_characters;
   if (characters == NULL) {
     return NULL;
@@ -742,11 +742,11 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
   // For the moment, let just parse the full array, but at the end let use
   // binary search as data are sorted by unicode value !
   for (unsigned i=0; i < n-1; i++, characters++) {
-    if ((PIC(characters))->char_unicode == unicode) {
+    if (characters->char_unicode == unicode) {
       // Compute & store the number of bytes used to display this character
       unicodeCtx.unicode_character_byte_count = \
-        (PIC(characters+1))->bitmap_offset - (PIC(characters))->bitmap_offset;
-      return (PIC(characters));
+        (characters+1)->bitmap_offset - characters->bitmap_offset;
+      return characters;
     }
   }
   // By default, let's use the last Unicode character, which should be the
@@ -754,8 +754,8 @@ const nbgl_font_unicode_character_t *nbgl_getUnicodeFontCharacter(uint32_t unico
 
   // Compute & store the number of bytes used to display this character
   unicodeCtx.unicode_character_byte_count = unicodeCtx.font->bitmap_len -  \
-    (PIC(characters))->bitmap_offset;
-  return (PIC(characters));
+    characters->bitmap_offset;
+  return characters;
 #else //defined(HAVE_LANGUAGE_PACK)
   UNUSED(unicode);
   // id not found
