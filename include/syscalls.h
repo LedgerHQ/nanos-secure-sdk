@@ -190,11 +190,14 @@
 #define SYSCALL_os_allow_protected_ram_ID                          0x00000092
 #define SYSCALL_os_deny_protected_ram_ID                           0x00000093
 
-#ifdef HAVE_CUSTOM_CA_SETTINGS
+#ifdef HAVE_CUSTOM_CA_DETAILS_IN_SETTINGS
 #define SYSCALL_os_bolos_custom_ca_get_info_ID                     0x01000CA0
 #define SYSCALL_os_bolos_custom_ca_revoke_ID                       0x00000CA1
+#endif // HAVE_CUSTOM_CA_DETAILS_IN_SETTINGS
+
+#ifdef HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 #define SYSCALL_os_bolos_endorsement_revoke_ID                     0x010001ED
-#endif // HAVE_CUSTOM_CA_SETTINGS
+#endif
 
 #ifndef HAVE_BOLOS_NO_CUSTOMCA
 #define SYSCALL_os_customca_verify_ID                              0x03000090
@@ -218,9 +221,9 @@
 #define SYSCALL_os_aem_is_pin_validated_ID                         0x00000147
 #endif // HAVE_AEM_PIN
 
-#if (defined(HAVE_BOLOS_NOTWIPED_ENDORSEMENT) && defined(HAVE_ENDORSEMENTS_DISPLAY))
+#ifdef HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 #define SYSCALL_os_endorsement_get_metadata_ID                     0x02000138
-#endif // (defined(HAVE_BOLOS_NOTWIPED_ENDORSEMENT) && defined(HAVE_ENDORSEMENTS_DISPLAY))
+#endif // HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 
 #if defined(HAVE_VAULT_RECOVERY_ALGO)
 #define SYSCALL_os_perso_derive_and_prepare_seed_ID                0x02000137
