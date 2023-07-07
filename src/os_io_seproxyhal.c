@@ -1414,7 +1414,7 @@ reply_apdu:
 
       // An apdu has been received asynchronously.
       if (G_io_app.apdu_state != APDU_IDLE && G_io_app.apdu_length > 0) {
-        if (os_perso_isonboarded() == BOLOS_TRUE && os_global_pin_is_validated() != BOLOS_TRUE) {
+        if (os_perso_is_pin_set() == BOLOS_TRUE && os_global_pin_is_validated() != BOLOS_TRUE) {
           tx_len = 0;
           G_io_apdu_buffer[(tx_len)++] = (SWO_SEC_PIN_15 >> 8) & 0xFF;
           G_io_apdu_buffer[(tx_len)++] = (SWO_SEC_PIN_15) & 0xFF;
