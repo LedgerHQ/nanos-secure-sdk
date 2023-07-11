@@ -1,0 +1,10 @@
+/** @page standard_app_mainpage Standard Application Framework
+
+@section mainpage_intro Introduction
+
+This page describes a framework of utilities to be used with a standard application. It includes the \b main() entry point,
+and many helpers like APDU parser skeleton, IO parser, and standard crypto (like derivation) and buffer management.
+
+@note TO BE COMPLETED
+
+*/

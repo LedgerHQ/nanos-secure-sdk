@@ -1,0 +1,10 @@
+/** @page usb_mainpage USB Core library
+
+@section mainpage_intro Introduction
+
+This page describes the core part of the USB Stack (only available on \b NanoX and \b Stax products).
+It also contains the mid-level API of the HID and CCID classes (see also @ref usb_impl_mainpage).
+
+@note TO BE COMPLETED
+
+*/

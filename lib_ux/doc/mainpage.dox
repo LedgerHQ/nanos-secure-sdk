@@ -1,0 +1,10 @@
+/** @page ux_mainpage User Experience (graphical) library for Nanos
+
+@section mainpage_intro Introduction
+
+This page describes the UX (User eXperience) library, available on \b NanoS, \b NanoS+ and \b NanoX products.
+This library offers API to draw steps and flows, respectively as arrays of BAGL objects or of UX Steps.
+
+@note TO BE COMPLETED
+
+*/

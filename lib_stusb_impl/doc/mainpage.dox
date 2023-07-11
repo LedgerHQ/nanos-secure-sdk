@@ -1,0 +1,10 @@
+/** @page usb_impl_mainpage USB Classes library
+
+@section mainpage_intro Introduction
+
+This page describes the API of the HID and CCID classes (see also @ref usb_mainpage), and
+the mid-level API of the U2F protocol offered on \b NanoX and \b Stax products.
+
+@note TO BE COMPLETED
+
+*/
