@@ -95,6 +95,8 @@ SECTIONS
 
   } > DISCARD /*> SRAM AT>FLASH = 0x00 */
 
+  ASSERT( (_edata - _data) <= 0, ".data section must be empty" )
+
   .bss :
   {
     /**

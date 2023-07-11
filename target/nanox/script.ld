@@ -96,6 +96,8 @@ SECTIONS
 
   } > DISCARD /*> SRAM AT>FLASH = 0x00 */
 
+  ASSERT( (_edata - _data) <= 0, ".data section must be empty" )
+
   /* The .init_array is initialized with functions with the constructor
    * attribute. Discard this section since there's no loader. */
   /DISCARD/ : {
