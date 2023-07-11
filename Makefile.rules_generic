@@ -89,7 +89,13 @@ $(OBJ_DIR)/%.o: %.S $(BUILD_DEPENDENCIES) prepare
 	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
 ifeq ($(SCRIPT_LD),)
-SCRIPT_LD:=$(BOLOS_SDK)/target/$(TARGET)/script.ld
+LDFLAGS += -L$(BOLOS_SDK)/target/$(TARGET)
+ifeq ($(IS_PLUGIN),)
+SCRIPT_LD := $(BOLOS_SDK)/target/$(TARGET)/script.ld
+else
+SCRIPT_LD := $(BOLOS_SDK)/target/$(TARGET)/plugin_script.ld
+$(info Using plugin link script: $(SCRIPT_LD))
+endif
 else
 $(info Using custom link script: $(SCRIPT_LD))
 endif
