@@ -116,7 +116,7 @@ static uint8_t getKeyboardIndex(nbgl_keyboard_t *keyboard, nbgl_touchStatePositi
       }
     }
   }
-  else if (position->y < (4*KEYBOARD_KEY_HEIGHT)) {
+  else if (!keyboard->lettersOnly && (position->y < (4*KEYBOARD_KEY_HEIGHT))) {
     // 4th row
     if (position->x<SWITCH_KEY_WIDTH) {
       i = DIGITS_SWITCH_KEY_INDEX;
@@ -494,7 +494,6 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType) {
   // if position of finger has moved durinng press to another "key", drop it
   if (lastIndex != firstIndex)
     return;
-
 
   if (keyboard->mode == MODE_LETTERS) {
     keyboardCase_t cur_casing = keyboard->casing;
