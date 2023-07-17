@@ -598,7 +598,7 @@ static void displaySkipWarning(void) {
   nbgl_pageConfirmationDescription_t info = {
     .cancelText = "Go back to review",
     .centeredInfo.text1 = "Skip message review?",
-    .centeredInfo.text2 = "You can skip directly to signing\nif you're sure you don't need to\nreview all the fields.",
+    .centeredInfo.text2 = "Skip only if you trust the\nsource. If you skip, you won't\nbe able to review it again.",
     .centeredInfo.text3 = NULL,
     .centeredInfo.style = LARGE_CASE_INFO,
     .centeredInfo.icon = &C_warning64px,
