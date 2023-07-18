@@ -289,7 +289,7 @@ static void displaySettingsPage(uint8_t page, bool forceFullRefresh) {
 
 // function used to display the current page in review
 static void displayReviewPage(uint8_t page, bool forceFullRefresh) {
-  nbgl_pageContent_t content;
+  nbgl_pageContent_t content = {0};
 
   // ensure the page is valid
   if ((navInfo.nbPages != 0) && (page >= (navInfo.nbPages))) {
