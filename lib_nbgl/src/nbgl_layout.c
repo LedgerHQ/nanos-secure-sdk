@@ -120,12 +120,17 @@ static char numText[5];
  *  STATIC PROTOTYPES
  **********************/
 
+#ifdef HAVE_DISPLAY_FAST_MODE
 // Unit step in % of touchable progress bar
 #define HOLD_TO_APPROVE_STEP_PERCENT (10)
 // Duration in ms the user must hold the progress bar
 // to make it progress HOLD_TO_APPROVE_STEP_PERCENT %.
 // This duration must be higher than the screen refresh duration.
 #define HOLD_TO_APPROVE_STEP_DURATION_MS (150)
+#else
+#define HOLD_TO_APPROVE_STEP_PERCENT (17)
+#define HOLD_TO_APPROVE_STEP_DURATION_MS (400)
+#endif // HAVE_DISPLAY_FAST_MODE
 
 static inline uint8_t get_hold_to_approve_percent(uint32_t touch_duration) {
         uint8_t current_step_nb = (touch_duration / HOLD_TO_APPROVE_STEP_DURATION_MS) + 1;
