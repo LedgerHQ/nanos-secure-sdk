@@ -106,7 +106,11 @@
 #define SEPROXYHAL_TAG_NFC_APDU_EVENT              0x1C
 #endif
 
-#define SEPH_PROTOCOL_EVT_POWER_BUTTON_EVENT       0x1B //
+#define SEPH_PROTOCOL_EVT_POWER_BUTTON_EVENT           0x1B
+
+#ifdef HAVE_QI_FLASH
+#define SEPROXYHAL_TAG_STATUS_EVENT_QI_FLASH_CHECKSUM  0x1D
+#endif
 
 // COMMANDS
 #ifdef HAVE_SEPROXYHAL_MCU
@@ -194,6 +198,10 @@
 #ifdef HAVE_PIEZO_SOUND
 #define SEPROXYHAL_TAG_PLAY_TUNE                   0x56
 #endif // HAVE_PIEZO_SOUND
+
+#ifdef HAVE_QI_FLASH
+#define SEPROXYHAL_TAG_QI_FLASH                    0x58
+#endif
 
 #ifdef HAVE_SHIP_MODE
 #define SEPH_PROTOCOL_CMD_SET_SHIP_MODE            0x57
