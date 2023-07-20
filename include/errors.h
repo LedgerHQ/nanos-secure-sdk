@@ -123,7 +123,11 @@ enum generic_identifiers {
   ERR_GEN_ID_35,
   ERR_GEN_ID_36,
   ERR_GEN_ID_37,
-  ERR_GEN_ID_38
+  ERR_GEN_ID_38,
+  ERR_GEN_ID_39,
+  ERR_GEN_ID_3A,
+  ERR_GEN_ID_3B,
+  ERR_GEN_ID_3C
 };
 
 /**
@@ -622,6 +626,7 @@ enum generic_identifiers {
 #define SWO_APD_LEN_2F                    (ERR_APD_LEN + ERR_GEN_ID_2F)    // 0x672F
 #define SWO_APD_LEN_30                    (ERR_APD_LEN + ERR_GEN_ID_30)    // 0x6730
 #define SWO_APD_LEN_31                    (ERR_APD_LEN + ERR_GEN_ID_31)    // 0x6731
+#define SWO_APD_LEN_32                    (ERR_APD_LEN + ERR_GEN_ID_32)    // 0x6732
 
 #define SWO_APD_DAT_01                    (ERR_APD_DAT + ERR_GEN_ID_01)    // 0x6801
 #define SWO_APD_DAT_02                    (ERR_APD_DAT + ERR_GEN_ID_02)    // 0x6802
@@ -731,6 +736,10 @@ enum generic_identifiers {
 #define SWO_APD_STA_36                    (ERR_APD_STA + ERR_GEN_ID_36)    // 0x6636
 #define SWO_APD_STA_37                    (ERR_APD_STA + ERR_GEN_ID_37)    // 0x6637
 #define SWO_APD_STA_38                    (ERR_APD_STA + ERR_GEN_ID_38)    // 0x6638
+#define SWO_APD_STA_39                    (ERR_APD_STA + ERR_GEN_ID_39)    // 0x6639
+#define SWO_APD_STA_3A                    (ERR_APD_STA + ERR_GEN_ID_3A)    // 0x663A
+#define SWO_APD_STA_3B                    (ERR_APD_STA + ERR_GEN_ID_3B)    // 0x663B
+#define SWO_APD_STA_3C                    (ERR_APD_STA + ERR_GEN_ID_3C)    // 0x663C
 
 /**
  * The process is successful.
