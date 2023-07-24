@@ -480,12 +480,12 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
         char_x_min = 0;
         char_y_min = 0;
       } else {
-      nb_skipped_bytes = 0;
-      char_x_min = (uint16_t)character->x_min_offset;
-      char_y_min = font->y_min;
-      char_y_min += (uint16_t)character->y_min_offset * 4;
-      char_x_max -= (uint16_t)character->x_max_offset;
-      char_y_max -= (uint16_t)character->y_max_offset * 4;
+        nb_skipped_bytes = 0;
+        char_x_min = (uint16_t)character->x_min_offset;
+        char_y_min = font->y_min;
+        char_y_min += (uint16_t)character->y_min_offset * 4;
+        char_x_max -= (uint16_t)character->x_max_offset;
+        char_y_max -= (uint16_t)character->y_max_offset * 4;
       }
 
       char_byte_cnt = get_bitmap_byte_cnt(font, unicode);

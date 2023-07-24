@@ -1,0 +1,19 @@
+/** @page ble_mainpage BlueTooth Low-Energy Stack
+
+@section mainpage_intro Introduction
+
+This page describes the API of BLE (BlueTooth Low-Energy) Stack provided in \b NanoX and \b Stax products.
+
+@note TO BE COMPLETED
+
+@section initialization_api Initialization
+
+@ref LEDGER_BLE_init() function is used to initialize the BLE Stack. It must be called during IO
+initialization of an application, if BLE is used.
+
+
+@section activation_of_ble Activation of BLE
+
+BLE can be enabled by compiling the application with \b HAVE_BLE flag (only available on \b NanoX and \b Stax products).
+
+*/

@@ -17,3 +17,4 @@ lib_bagl/src/bagl_font_open_sans_regular_11px_unicode.inc
 lib_nbgl/build
 TAGS
 unit-tests/lib_*/build/
+build

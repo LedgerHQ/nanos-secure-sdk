@@ -1,0 +1,56 @@
+/** @mainpage Embedded SDK
+
+@section mainpage_intro Introduction
+
+This documentation describes the different interfaces of Embedded SDK,
+for Nano S, Nano X, Nano S+ and Stax applications development.
+
+@section ble_presentation BlueTooth Low-Energy Interface
+
+The @subpage ble_mainpage page contains all information necessary to interact with BLE stack.
+
+@section cxng_presentation Cryptographic Library
+
+The @subpage cxng_mainpage page contains all information necessary to understand Cryptographic Library
+
+@section nbgl_presentation Screen drawing API (Stax only)
+
+The @subpage nbgl_mainpage page contains all information necessary to understand the Graphical Library for
+\b Stax applications development.
+
+@section nfc_presentation NFC Interface
+
+The @subpage nfc_mainpage page contains all information necessary to interact with NFC stack.
+
+@section standard_app_presentation Standard Application Framework
+
+The @subpage standard_app_mainpage page contains all information necessary to use the Standard Application framework.
+
+@section usb_presentation USB
+
+@subsection usb_core_presentation USB Core
+
+The @subpage usb_mainpage page contains all information necessary to use the USB Core.
+
+@subsection usb_impl_presentation USB Classes API
+
+The @subpage usb_impl_mainpage page contains all information necessary to use the USB Classes API.
+
+@subsection u2f_presentation U2F (Universal 2nd Factor) API
+
+The @subpage u2f_mainpage page contains all information necessary to use the U2F API.
+
+@section ux_presentation User eXperience
+
+@subsection ux_nanos_presentation User eXperience on Nanos
+
+The @subpage ux_mainpage page contains all information necessary to user the User eXperience (and partially Graphical Library) for
+\b Nanos applications development.
+
+@subsection ux_stax_presentation User eXperience on Stax
+
+The @subpage ux_stax_mainpage page contains all information necessary to user the User eXperience for
+\b Stax applications development.
+
+
+*/
