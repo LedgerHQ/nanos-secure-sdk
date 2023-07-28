@@ -177,6 +177,15 @@ void nbgl_screen_update_temperature(uint8_t temp_degrees)
 }
 #endif // HAVE_DISPLAY_FAST_MODE
 
+#ifdef HAVE_CONFIGURABLE_DISPLAY_FAST_MODE
+void nbgl_screen_config_fast_mode(uint8_t fast_mode_setting)
+{
+  unsigned int parameters[1];
+  parameters[0] = (unsigned int) fast_mode_setting;
+  SVC_Call(SYSCALL_nbgl_screen_config_fast_mode_ID, parameters);
+}
+#endif // HAVE_CONFIGURABLE_DISPLAY_FAST_MODE
+
 #endif
 
 void nvm_write ( void * dst_adr, void * src_adr, unsigned int src_len ) {

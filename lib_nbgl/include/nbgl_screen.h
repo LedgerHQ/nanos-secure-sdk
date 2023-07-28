@@ -60,7 +60,14 @@ typedef struct PACKED__ nbgl_screen_s {
  **********************/
 
 unsigned int nbgl_screen_reinit(void);
+
+#ifdef HAVE_DISPLAY_FAST_MODE
 void nbgl_screen_update_temperature(uint8_t temp_degrees);
+#endif // HAVE_DISPLAY_FAST_MODE
+
+#ifdef HAVE_CONFIGURABLE_DISPLAY_FAST_MODE
+void nbgl_screen_config_fast_mode(uint8_t fast_mode_setting);
+#endif // HAVE_CONFIGURABLE_DISPLAY_FAST_MODE
 
 void nbgl_screenRedraw(void);
 nbgl_obj_t *nbgl_screenGetTop(void);
