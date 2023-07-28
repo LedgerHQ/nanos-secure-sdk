@@ -777,6 +777,7 @@ class TTF2INC:
         """
         encoding = info["encoding"]
         bitmap_offset = info["offset"]
+        bitmap_byte_count = info["size"]
         width = info["width"]
 
         # If it's an empty box, just put everything at 0
@@ -817,6 +818,19 @@ class TTF2INC:
                   f"{x_min_offset}, {y_min_offset}, "
                   f"{x_max_offset}, {y_max_offset} }},"
                   f" //asciii 0x{ord(char):04X}\n")
+
+        self.ttf_info_dictionary["nbgl_font_character"].append({
+            "encoding": encoding,
+            "bitmap_offset": bitmap_offset,
+            "width": width,
+            "x_min_offset": x_min_offset,
+            "y_min_offset": y_min_offset,
+            "x_max_offset": x_max_offset,
+            "y_max_offset": y_max_offset,
+            # Additional fields used for speculos OCR
+            "char": ord(char),
+            "bitmap_byte_count": bitmap_byte_count
+        })
 
     # -------------------------------------------------------------------------
     def save_nbgl_font_unicode(self, inc, crop, suffix):
@@ -918,7 +932,9 @@ class TTF2INC:
             "y_min_offset": y_min_offset,
             "x_max_offset": x_max_offset,
             "y_max_offset": y_max_offset,
-            "encoding": encoding
+            "encoding": encoding,
+            # Additional field used for speculos OCR
+            "char": ord(char),
         })
         inc.write(f"  {{ 0x{ord(char):06X}, {bitmap_byte_count:3},"
                   f" {bitmap_offset:5}, {width:2},"
@@ -983,10 +999,12 @@ class TTF2INC:
             x_min_offset = 0
             y_min_offset = 0
             x_max_offset = 0
+            y_max_offset = 0
         else:
             x_min_offset = info["left"]
             x_max_offset = width - info["right"]
             y_min_offset = info["top"] - self.char_topmost_y
+            y_max_offset = self.height - info["bottom"]
 
         offset = info["offset"]
         encoding = info["encoding"]
@@ -1002,6 +1020,19 @@ class TTF2INC:
         inc.write(f"  {{ {encoding:1}, {offset:5}, {width:2},"
                   f"{x_min_offset}, {y_min_offset}, {x_max_offset} }},"
                   f" //asciii 0x{ord(char):04X}\n")
+
+        self.ttf_info_dictionary["bagl_font_character"].append({
+            "encoding": encoding,
+            "bitmap_offset": offset,
+            "width": width,
+            "x_min_offset": x_min_offset,
+            "y_min_offset": y_min_offset,
+            "x_max_offset": x_max_offset,
+            "y_max_offset": y_max_offset,
+            # Additional fields used for speculos OCR
+            "char": ord(char),
+            "bitmap_byte_count": info["size"]
+        })
 
     # -------------------------------------------------------------------------
     def save_bagl_font_unicode(self, inc, suffix):
@@ -1079,8 +1110,11 @@ class TTF2INC:
             "x_min_offset": x_min_offset,
             "x_max_offset": x_max_offset,
             "y_min_offset": y_min_offset,
+            "encoding": encoding,
             "bitmap_offset": offset,
-            "encoding": encoding
+            # Additional fields used for speculos OCR
+            "char": ord(char),
+            "bitmap_byte_count": info["size"]
         })
 
         inc.write(f"  {{ 0x{ord(char):06X}, {width:3}, "\
@@ -1299,11 +1333,8 @@ if __name__ == "__main__":
             # Force .inc extension for inc_filename
             inc_filename = change_ext(inc_filename, ".inc")
 
-            # Build the corresponding .json file, if we need to
-            if ttf.unicode_needed:
-                inc_json = change_ext(inc_filename, ".json")
-            else:
-                inc_json = None
+            # Build the corresponding .json file
+            inc_json = change_ext(inc_filename, ".json")
 
             if args.suffix:
                 suffix = args.suffix
@@ -1377,8 +1408,10 @@ if __name__ == "__main__":
                 # Write the array containing information about characters:
                 if ttf.unicode_needed:
                     typedef = f"{ttf.font_prefix}unicode_character_t"
+                    ttf.ttf_info_dictionary[f"{ttf.font_prefix}unicode_character"]= []
                 else:
                     typedef = f"{ttf.font_prefix}character_t"
+                    ttf.ttf_info_dictionary[f"{ttf.font_prefix}character"]= []
 
                 inc.write("\n")
                 if ttf.nbgl:
@@ -1386,8 +1419,6 @@ if __name__ == "__main__":
                 inc.write(
                     f"const {typedef} characters{ttf.basename.upper()}"
                     f"{suffix}[{len(ttf.char_info)}] = {{\n")
-
-                ttf.ttf_info_dictionary[f"{ttf.font_prefix}unicode_character"]= []
 
                 # Save each character info into the .inc file
                 for char, info in sorted(ttf.char_info.items()):
@@ -1444,13 +1475,12 @@ if __name__ == "__main__":
 
                 inc.write("};\n")
 
-            # Do we need to generate a JSON file with unicode related info?
-            if ttf.unicode_needed:
-                ttf_info_list.append(ttf.ttf_info_dictionary)
-                with open(inc_json, "w") as json_file:
-                    json.dump(ttf_info_list, json_file)
-                    # Be sure there is a newline at the end of the file
-                    json_file.write("\n")
+            # Generate a JSON file with all font related info?
+            ttf_info_list.append(ttf.ttf_info_dictionary)
+            with open(inc_json, "w") as json_file:
+                json.dump(ttf_info_list, json_file, indent=2)
+                # Be sure there is a newline at the end of the file
+                json_file.write("\n")
 
         return 0
 

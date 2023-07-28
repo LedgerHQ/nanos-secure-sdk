@@ -523,7 +523,7 @@ int bagl_draw_string(unsigned short font_id, unsigned int fgcolor, unsigned int 
       */
 
       // chars are storred LSB to MSB in each char, packed chars. horizontal scan
-      if (ch_bitmap && ch_bits) {
+      if (ch_bitmap) {
         bagl_hal_draw_bitmap_within_rect(xx + ch_offset_x, ch_y + ch_offset_y, ch_width, ch_height, (1<<bpp), colors, bpp, ch_bitmap, ch_bits);
       }
       else {
