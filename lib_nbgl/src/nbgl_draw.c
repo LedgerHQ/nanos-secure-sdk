@@ -445,12 +445,12 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
         char_x_min = 0;
         char_y_min = 0;
       } else {
-      nb_skipped_bytes = 0;
-      char_x_min = (uint16_t)unicodeCharacter->x_min_offset;
-      char_y_min = unicode_ctx->font->y_min;
-      char_y_min += (uint16_t)unicodeCharacter->y_min_offset * 4;
-      char_x_max -= (uint16_t)unicodeCharacter->x_max_offset;
-      char_y_max -= (uint16_t)unicodeCharacter->y_max_offset * 4;
+        nb_skipped_bytes = 0;
+        char_x_min = (uint16_t)unicodeCharacter->x_min_offset;
+        char_y_min = unicode_ctx->font->y_min;
+        char_y_min += (uint16_t)unicodeCharacter->y_min_offset * 4;
+        char_x_max -= (uint16_t)unicodeCharacter->x_max_offset;
+        char_y_max -= (uint16_t)unicodeCharacter->y_max_offset * 4;
       }
 
       char_byte_cnt = nbgl_getUnicodeFontCharacterByteCount();
@@ -480,12 +480,12 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
         char_x_min = 0;
         char_y_min = 0;
       } else {
-      nb_skipped_bytes = 0;
-      char_x_min = (uint16_t)character->x_min_offset;
-      char_y_min = font->y_min;
-      char_y_min += (uint16_t)character->y_min_offset * 4;
-      char_x_max -= (uint16_t)character->x_max_offset;
-      char_y_max -= (uint16_t)character->y_max_offset * 4;
+        nb_skipped_bytes = 0;
+        char_x_min = (uint16_t)character->x_min_offset;
+        char_y_min = font->y_min;
+        char_y_min += (uint16_t)character->y_min_offset * 4;
+        char_x_max -= (uint16_t)character->x_max_offset;
+        char_y_max -= (uint16_t)character->y_max_offset * 4;
       }
 
       char_byte_cnt = get_bitmap_byte_cnt(font, unicode);
@@ -497,16 +497,13 @@ void nbgl_drawText(const nbgl_area_t *area, const char* text, uint16_t textLen, 
     rectArea.height = (char_y_max - char_y_min);
     rectArea.width = (char_x_max -char_x_min);
 
-    if (char_byte_cnt) {
-      switch(encoding) {
-        case 0:
-          nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
-          break;
-        case 1:
-          nbgl_frontDrawImageRle(
-            &rectArea, char_buffer, char_byte_cnt, fontColor, nb_skipped_bytes);
-          break;
-      }
+    // If char_byte_cnt = 0, call nbgl_frontDrawImageRle to let speculos notice
+    // a space character was 'displayed'
+    if (!char_byte_cnt || encoding == 1) {
+      nbgl_frontDrawImageRle(
+        &rectArea, char_buffer, char_byte_cnt, fontColor, nb_skipped_bytes);
+    } else {
+      nbgl_frontDrawImage(&rectArea, char_buffer, NO_TRANSFORMATION, fontColor);
     }
     x+=char_width;
   }
