@@ -1563,14 +1563,12 @@ void os_bolos_custom_ca_revoke(void) {
 }
 #endif //HAVE_CUSTOM_CA_DETAILS_IN_SETTINGS
 
-#ifdef HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 bolos_bool_t os_bolos_endorsement_revoke(uint8_t slot) {
   unsigned int parameters[1];
   parameters[0] = (unsigned int) slot;
   bolos_bool_t ret = SVC_Call(SYSCALL_os_bolos_endorsement_revoke_ID, parameters);
   return ret;
 }
-#endif
 
 #ifdef HAVE_MCU_SERIAL_STORAGE
 unsigned int os_seph_serial ( unsigned char * serial, unsigned int maxlength ) {
@@ -1771,14 +1769,12 @@ bolos_bool_t os_aem_is_pin_validated ( void ) {
 }
 #endif // HAVE_AEM_PIN
 
-#ifdef HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 unsigned int os_endorsement_get_metadata ( unsigned char index, unsigned char * buffer ) {
   unsigned int parameters[2];
   parameters[0] = (unsigned int)index;
   parameters[1] = (unsigned int)buffer;
   return (unsigned int) SVC_Call(SYSCALL_os_endorsement_get_metadata_ID, parameters);
 }
-#endif // HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 
 #if defined(HAVE_LANGUAGE_PACK)
 void list_language_packs(UX_LOC_LANGUAGE_PACK_INFO *packs) {

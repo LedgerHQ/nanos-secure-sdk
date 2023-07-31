@@ -16,6 +16,4 @@ SYSCALL unsigned int os_endorsement_key1_get_app_secret(unsigned char* buffer PL
 SYSCALL unsigned int os_endorsement_key1_sign_data(unsigned char* src PLENGTH(srcLength), unsigned int srcLength, unsigned char* signature PLENGTH(ENDORSEMENT_MAX_ASN1_LENGTH));
 SYSCALL unsigned int os_endorsement_key2_derive_sign_data(unsigned char* src PLENGTH(srcLength), unsigned int srcLength, unsigned char* signature PLENGTH(ENDORSEMENT_MAX_ASN1_LENGTH));
 
-#ifdef HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
 SYSCALL unsigned int os_endorsement_get_metadata(unsigned char index, unsigned char* buffer PLENGTH(8));
-#endif // HAVE_ENDORSEMENT_DETAILS_IN_SETTINGS
