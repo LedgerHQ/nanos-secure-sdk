@@ -99,7 +99,10 @@ ifneq ($(DISABLE_STANDARD_USB), 1)
 endif
 
 ifneq ($(DISABLE_STANDARD_WEBUSB), 1)
-    DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
+    APP_WEBUSB_URL ?= ""
+    WEBUSB_URL_SIZE_B = $(shell echo -n $(APP_WEBUSB_URL) | wc -c)
+    WEBUSB_URL=$(shell echo -n $(APP_WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
+    DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(WEBUSB_URL_SIZE_B) WEBUSB_URL=$(WEBUSB_URL)
 endif
 
 ifneq ($(DISABLE_STANDARD_BAGL_UX_FLOW), 1)
