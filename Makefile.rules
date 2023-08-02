@@ -24,7 +24,6 @@ else ifeq ($(TARGET_NAME),TARGET_STAX)
 ifeq ($(NO_UI), 0)
 SDK_SOURCE_PATH += lib_nbgl lib_ux_stax
 endif
-SDK_SOURCE_PATH += qrcode lib_nfc
 endif
 
 # adding the correct target header to sources
