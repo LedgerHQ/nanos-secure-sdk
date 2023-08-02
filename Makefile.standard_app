@@ -131,6 +131,7 @@ endif
 ifeq ($(ENABLE_NBGL_QRCODE), 1)
 ifeq ($(TARGET_NAME), TARGET_STAX)
     DEFINES += NBGL_QRCODE
+    SDK_SOURCE_PATH += qrcode
 endif
 endif
 
