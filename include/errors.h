@@ -127,7 +127,8 @@ enum generic_identifiers {
   ERR_GEN_ID_39,
   ERR_GEN_ID_3A,
   ERR_GEN_ID_3B,
-  ERR_GEN_ID_3C
+  ERR_GEN_ID_3C,
+  ERR_GEN_ID_3D
 };
 
 /**
@@ -740,6 +741,7 @@ enum generic_identifiers {
 #define SWO_APD_STA_3A                    (ERR_APD_STA + ERR_GEN_ID_3A)    // 0x663A
 #define SWO_APD_STA_3B                    (ERR_APD_STA + ERR_GEN_ID_3B)    // 0x663B
 #define SWO_APD_STA_3C                    (ERR_APD_STA + ERR_GEN_ID_3C)    // 0x663C
+#define SWO_APD_STA_3D                    (ERR_APD_STA + ERR_GEN_ID_3D)    // 0x663D
 
 /**
  * The process is successful.
