@@ -14,7 +14,9 @@
 #include "nbgl_fonts.h"
 #include "nbgl_debug.h"
 #include "nbgl_side.h"
+#ifdef NBGL_QRCODE
 #include "qrcodegen.h"
+#endif
 #include "glyphs.h"
 #include "os_pic.h"
 #include "os_utils.h"
@@ -32,11 +34,13 @@
 /**********************
  *      TYPEDEFS
  **********************/
+#ifdef NBGL_QRCODE
 typedef struct {
   uint8_t qrcode[qrcodegen_BUFFER_LEN_MAX];
 	uint8_t tempBuffer[qrcodegen_BUFFER_LEN_MAX];
   uint8_t QrDrawBuffer[QR_PIXEL_WIDTH_HEIGHT * QR_PIXEL_WIDTH_HEIGHT * QR_MAX_PIX_SIZE / 8];
 } QrCodeBuffer_t;
+#endif
 
 #define qrcode ((QrCodeBuffer_t*)ramBuffer)->qrcode
 #define tempBuffer ((QrCodeBuffer_t*)ramBuffer)->tempBuffer
