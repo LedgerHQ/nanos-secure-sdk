@@ -17,9 +17,13 @@
 
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
+ifeq ($(NO_UI), 0)
 SDK_SOURCE_PATH += lib_bagl lib_ux
+endif
 else ifeq ($(TARGET_NAME),TARGET_STAX)
-SDK_SOURCE_PATH += lib_nbgl lib_ux_stax qrcode lib_nfc
+ifeq ($(NO_UI), 0)
+SDK_SOURCE_PATH += lib_nbgl lib_ux_stax
+endif
 endif
 
 # adding the correct target header to sources
