@@ -34,8 +34,6 @@
  */
 #define ERR_IOL_RANGE                     0x1000
 
-#define ERR_APP_APD_RANGE                 0x6000
-
 // Generic subcategories.
 #define ERR_GEN_SUB_01                    0x0100
 #define ERR_GEN_SUB_02                    0x0200
@@ -50,7 +48,7 @@
 #define ERR_GEN_SUB_0E                    0x0E00
 
 // Generic identifiers.
-enum app_generic_identifiers {
+enum sdk_generic_identifiers {
   ERR_GEN_ID_01 = 0x01,
   ERR_GEN_ID_02,
   ERR_GEN_ID_03,
@@ -125,16 +123,7 @@ enum app_generic_identifiers {
 # define SWO_IOL_BLE_0C                   (ERR_IOL_BLE + ERR_GEN_ID_0C)    // 0x150C
 #endif // HAVE_BLE
 
-#define ERR_APP_APD_CLA                   (ERR_APP_APD_RANGE + ERR_GEN_SUB_0E) // 0x6E00
-#define ERR_APP_APD_INS                   (ERR_APP_APD_RANGE + ERR_GEN_SUB_0D) // 0x6D00
-#define ERR_APP_APD_HDR                   (ERR_APP_APD_RANGE + ERR_GEN_SUB_05) // 0x6500
-#define ERR_APP_APD_STA                   (ERR_APP_APD_RANGE + ERR_GEN_SUB_06) // 0x6600
-#define ERR_APP_APD_LEN                   (ERR_APP_APD_RANGE + ERR_GEN_SUB_07) // 0x6700
-#define ERR_APP_APD_DAT                   (ERR_APP_APD_RANGE + ERR_GEN_SUB_08) // 0x6800
-
-#ifndef SWO_SEC_PIN_15
 #define SWO_SEC_PIN_15                    0x5515
-#endif
 
 /**
  * The process is successful.
