@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Secure firmware
-*   (c) 2016, 2017, 2018, 2019 Ledger
+*   Ledger - Secure firmware
+*   (c) 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -94,6 +94,8 @@ SECTIONS
     _edata = .;
 
   } > DISCARD /*> SRAM AT>FLASH = 0x00 */
+
+  ASSERT( (_edata - _data) <= 0, ".data section must be empty" )
 
   .bss :
   {
