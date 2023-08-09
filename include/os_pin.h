@@ -34,7 +34,7 @@ SYSCALL PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_retri
  * @return BOLOS_TRUE if the CRC of N_secure_element_nvram_user_sensitive_data
  * is correct and if a PIN value has been written
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+SYSCALL
 bolos_bool_t   os_perso_is_pin_set(void);
 
 
