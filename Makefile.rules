@@ -20,8 +20,6 @@ ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NA
 SDK_SOURCE_PATH += lib_bagl lib_ux
 else ifeq ($(TARGET_NAME),TARGET_STAX)
 SDK_SOURCE_PATH += lib_nbgl lib_ux_stax qrcode lib_nfc
-CFLAGS += -fms-extensions
-CFLAGS += -Wno-microsoft-anon-tag
 endif
 
 # adding the correct target header to sources
