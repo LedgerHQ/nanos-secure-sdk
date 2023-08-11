@@ -153,7 +153,6 @@
 #define SYSCALL_os_registry_count_ID                               0x0000005f
 #define SYSCALL_os_registry_get_ID                                 0x02000122
 #define SYSCALL_os_ux_ID                                           0x01000064
-#define SYSCALL_os_ux_result_ID                                    0x01000065
 #define SYSCALL_os_lib_call_ID                                     0x01000067
 #define SYSCALL_os_lib_end_ID                                      0x00000068
 #define SYSCALL_os_flags_ID                                        0x0000006a
