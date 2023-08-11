@@ -17,10 +17,10 @@
 # Don't allow anymore makefile override of the default placement for glyphs and
 # the generated glyph header/c files
 ifneq ($(GLYPH_SRC_DIR),)
-$(info GLYPH_SRC_DIR is not supported anymore as it is now automatically computed, please remove it from your Makefile)
+$(warn GLYPH_SRC_DIR is not supported anymore as it is now automatically computed, please remove it from your Makefile)
 endif
 ifneq ($(GLYPH_PATH),)
-$(info Setting GLYPH_PATH is not supported anymore, please remove it from your Makefile)
+$(warn Setting GLYPH_PATH is not supported anymore, please remove it from your Makefile)
 endif
 GLYPH_SRC_DIR = $(GEN_SRC_DIR)
 
