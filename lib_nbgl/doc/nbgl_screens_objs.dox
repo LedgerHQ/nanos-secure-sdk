@@ -46,7 +46,7 @@ Because these two types of dynamic data are released by layer (= screen), the la
 
 @subsection nbgl_objs_mngt_api API
 
-The API to get a single graphic object of the given \b type from pool, for the given \blayer is
+The API to get a single graphic object of the given \b type from pool, for the given \b layer is
 
 - nbgl_obj_t* @ref nbgl_objPoolGet(nbgl_obj_type_t type, uint8_t layer)
 
