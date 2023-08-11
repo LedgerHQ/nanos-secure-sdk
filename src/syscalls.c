@@ -1252,14 +1252,6 @@ unsigned int os_ux ( bolos_ux_params_t * params ) {
   parameters[1] = 0;
   return (unsigned int) SVC_Call(SYSCALL_os_ux_ID, parameters);
 }
-
-void os_ux_result ( bolos_ux_params_t * params ) {
-  unsigned int parameters[2];
-  parameters[0] = (unsigned int)params;
-  parameters[1] = 0;
-  SVC_Call(SYSCALL_os_ux_result_ID, parameters);
-  return;
-}
 #endif // !defined(APP_UX)
 
 void os_lib_call ( unsigned int * call_parameters ) {
