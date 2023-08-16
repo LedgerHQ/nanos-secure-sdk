@@ -122,6 +122,7 @@
 
 #define USBD_LANGID_STRING            0x409
 
+// clang-format off
 #ifdef HAVE_VID_PID_PROBER
 #define USBD_VID                      0x2581
 #define USBD_PID                      0xf1d1
@@ -760,7 +761,7 @@ static uint8_t const USBD_DeviceDesc[]= {
   USBD_IDX_SERIAL_STR,        /* Index of serial number string */
   1                           /* bNumConfigurations */
 }; /* USB_DeviceDescriptor */
-
+// clang-format on
 
 /**
   * @brief  Returns the device descriptor.
@@ -1187,6 +1188,7 @@ unsigned char const C_webusb_url_descriptor[] = {
 
 #define WINUSB_VENDOR_CODE 0x77
 
+// clang-format off
 unsigned char const C_usb_bos[] = {
     USB_DT_BOS_SIZE, // bLength (5)
     USB_DT_BOS, // bDescriptorType
@@ -1226,6 +1228,7 @@ unsigned char const C_usb_bos[] = {
     WINUSB_VENDOR_CODE, // Vendor-assigned bMS_VendorCode
     0x00               // Doesn’t support alternate enumeration
 };
+// clang-format on
 
 #endif // HAVE_WEBUSB
 
@@ -1297,6 +1300,7 @@ static USBD_ClassTypeDef const USBD_HID =
 
 #ifdef HAVE_WEBUSB
 
+// clang-format off
 static const unsigned char C_winusb_string_descriptor[] = {
   // bLength
   0x12,
@@ -1305,6 +1309,7 @@ static const unsigned char C_winusb_string_descriptor[] = {
   // wData
   'M', 0x00, 'S', 0x00, 'F', 0x00, 'T', 0x00, '1', 0x00, '0', 0x00, '0', 0x00, WINUSB_VENDOR_CODE, 0x00, // MSFT100<VCODE>
 };
+// clang-format on
 
 // Microsoft OS 2.0 descriptor wIndex values
 #define MS_OS_20_DESCRIPTOR_INDEX 0x07
@@ -1315,6 +1320,7 @@ static const unsigned char C_winusb_string_descriptor[] = {
 #define MS_OS_20_FEATURE_COMPATIBLE_ID 0x03
 #define MS_OS_20_FEATURE_REG_PROPERTY 0x04
 
+// clang-format off
 static const unsigned char C_winusb_request_descriptor[] = {
     // Microsoft OS 2.0 descriptor set header (table 10)
     0x0A,
@@ -1407,6 +1413,7 @@ static const unsigned char C_winusb_guid[] = {
   '4', 0x00, '6', 0x00, '7', 0x00, '6', 0x00, '5', 0x00, '7', 0x00,
   '2', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00 // propertyData, double unicode nul terminated
 };
+// clang-format on
 
 // upon unsupported request, check for webusb request
 void USBD_CtlError( USBD_HandleTypeDef *pdev , USBD_SetupReqTypedef *req) {

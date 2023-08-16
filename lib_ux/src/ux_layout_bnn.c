@@ -26,6 +26,7 @@
  * 4 text lines
  */
 
+// clang-format off
 const bagl_element_t ux_layout_bnn_elements[] = {
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, .text=NULL},
@@ -37,6 +38,7 @@ const bagl_element_t ux_layout_bnn_elements[] = {
   {{BAGL_LABELINE                       , 0x11,   6,  36, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL},
   {{BAGL_LABELINE                       , 0x12,   6,  52, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL},
 };
+// clang-format on
 
 void ux_layout_bnn_init(unsigned int stack_slot) {
   ux_stack_init(stack_slot);

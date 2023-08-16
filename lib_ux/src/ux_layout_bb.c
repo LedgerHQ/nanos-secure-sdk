@@ -26,6 +26,7 @@
  * 2 bold text lines
  */
 
+// clang-format off
 const bagl_element_t ux_layout_bb_elements[] = {
 #if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
   // erase
@@ -51,6 +52,7 @@ const bagl_element_t ux_layout_bb_elements[] = {
   #error "BAGL_WIDTH/BAGL_HEIGHT not defined"
 #endif
 };
+// clang-format on
 
 void ux_layout_bb_init_common(unsigned int stack_slot) {
   ux_stack_init(stack_slot);

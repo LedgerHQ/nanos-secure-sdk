@@ -22,6 +22,7 @@
 
 #ifdef HAVE_UX_FLOW
 
+// clang-format off
 const bagl_element_t ux_layout_pn_elements[] = {
 #if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
   // erase
@@ -46,6 +47,7 @@ const bagl_element_t ux_layout_pn_elements[] = {
   #error "BAGL_WIDTH/BAGL_HEIGHT not defined"
 #endif
 };
+// clang-format on
 
 const bagl_element_t* ux_layout_pb_prepro(const bagl_element_t* element);
 

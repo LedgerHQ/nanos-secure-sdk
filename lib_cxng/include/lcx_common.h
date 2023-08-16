@@ -59,6 +59,7 @@ typedef struct uint64_s uint64bits_t;
 typedef uint64_t uint64bits_t;
 #endif
 
+// clang-format off
 /**
  * @brief   Cryptography flags
  * @details Some functions take **logical or** of various flags.
@@ -96,6 +97,7 @@ typedef uint64_t uint64bits_t;
  * | 2:1            | 0000000000000000  | CX_DECRYPT                    | Decryption                                 | AES/DES               |
  * | 0              | 0000000000000001  | CX_LAST                       | Last block                                 |                       |
  */
+// clang-format on
 #define CX_FLAG
 
 /**
