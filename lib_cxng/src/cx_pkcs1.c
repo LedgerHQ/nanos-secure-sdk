@@ -33,6 +33,7 @@
 /*                                                                         */
 /* ----------------------------------------------------------------------- */
 
+// clang-format off
 #if defined(HAVE_SHA224)
 /* sha224 OID */
 const uint8_t C_cx_oid_sha224[CX_OID_SHA224_LENGTH] = {0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01,
@@ -68,6 +69,7 @@ const uint8_t C_cx_oid_sha3_512[CX_OID_SHA3_512_LENGTH]
                                                     = {0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01,
                                                        0x65, 0x03, 0x04, 0x02, 0x0a, 0x05, 0x00, 0x04, 0x40};
 #endif // HAVE_SHA3
+// clang-format on
 
 size_t cx_pkcs1_get_hash_len(cx_md_t hID) {
   switch (hID) {
