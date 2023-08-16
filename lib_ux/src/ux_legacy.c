@@ -27,6 +27,7 @@
 ux_menu_state_t ux_menu;
 ux_turner_state_t ux_turner;
 
+// clang-format off
 const bagl_element_t ux_menu_elements[] = {
   // erase
   {{BAGL_RECTANGLE                      , 0x80,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, .text=NULL},
@@ -50,6 +51,7 @@ const bagl_element_t ux_menu_elements[] = {
   {{BAGL_LABELINE                       , 0x22,  14,  26, 100,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_EXTRABOLD_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL },
 
 };
+// clang-format on
 
 const ux_menu_entry_t* ux_menu_get_entry (unsigned int entry_idx) {
   if (ux_menu.menu_iterator) {
@@ -260,6 +262,7 @@ void ux_menu_display(unsigned int current_entry,
 }
 
 
+// clang-format off
 const bagl_element_t ux_turner_elements[] = {
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, .text=NULL},
@@ -278,6 +281,7 @@ const bagl_element_t ux_turner_elements[] = {
   {{BAGL_LABELINE                       , 0x06,   0,  26, 128,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL },
 
 };
+// clang-format on
 
 const bagl_element_t* ux_turner_element_preprocessor(const bagl_element_t* element) {
   //todo avoid center alignment when text_x or icon_x AND text_x are not 0

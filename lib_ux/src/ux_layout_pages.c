@@ -33,6 +33,7 @@
 
 #ifdef HAVE_BOLOS
 
+// clang-format off
 static const bagl_element_t ux_layout_pages_elements[] = {
 #if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 // Default Layout for LNX/LNS+:
@@ -87,6 +88,7 @@ static const bagl_element_t ux_layout_pages_elements[] = {
   {{BAGL_LABELINE                       , 0x11,   6,  26, 116,  32, 0, 0, 0        , 0xFFFFFF, 0x000000, BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL},
 #endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 };
+// clang-format on
 
 // Height & Baseline of regular & extrabold fonts:
 #define FONT_HEIGHT   12

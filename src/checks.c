@@ -49,6 +49,7 @@ static unsigned int ui_audited_elements_button(unsigned int button_mask, unsigne
 }
 
 // This array is to be displayed under specific circumstances, right at the launch of an application.
+// clang-format off
 const bagl_element_t ui_audited_elements[] = {
 #if (BAGL_WIDTH==128 && BAGL_HEIGHT==32)
   // Erasure of the whole screen,
@@ -86,6 +87,7 @@ const bagl_element_t ui_audited_elements[] = {
 #error "BAGL_WIDTH/BAGL_HEIGHT not defined"
 #endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 };
+// clang-format on
 
 // This function is called at the end of the seph initialization.
 // It checks the install parameters of the application to be run, and if this area contains the

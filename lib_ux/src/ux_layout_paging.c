@@ -37,6 +37,7 @@
 #define LINE_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px
 
 #if (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
+// clang-format off
 static const bagl_element_t ux_layout_paging_elements[] = {
   // erase
   {{BAGL_RECTANGLE                      , 0x00,   0,   0, 128,  64, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0}, .text=NULL},
@@ -49,6 +50,7 @@ static const bagl_element_t ux_layout_paging_elements[] = {
   {{BAGL_LABELINE                       , 0x12,   (128-PIXEL_PER_LINE)/2,  43, PIXEL_PER_LINE,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, LINE_FONT|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL},
   {{BAGL_LABELINE                       , 0x13,   (128-PIXEL_PER_LINE)/2,  57, PIXEL_PER_LINE,  12, 0, 0, 0        , 0xFFFFFF, 0x000000, LINE_FONT|BAGL_FONT_ALIGNMENT_CENTER, 0  }, .text=NULL},
 };
+// clang-format on
 #endif // (BAGL_WIDTH==128 && BAGL_HEIGHT==64)
 
 const bagl_element_t* ux_layout_paging_prepro_common(const bagl_element_t* element,
