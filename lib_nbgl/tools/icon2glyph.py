@@ -243,7 +243,9 @@ def print_glyphfile_top(add_include: bool):
         """\
 #ifdef HAVE_NBGL
 #include \"nbgl_types.h\"
-#endif // HAVE_NBGL
+#else
+#include <stdint.h>
+#endif
 """)
 
 
