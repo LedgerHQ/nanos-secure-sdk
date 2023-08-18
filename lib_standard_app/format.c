@@ -61,7 +61,7 @@ bool format_i64(char *dst, size_t dst_len, const int64_t value) {
 }
 
 bool format_u64(char *out, size_t outLen, uint64_t in) {
-    uint8_t i = 0;
+    size_t i = 0;
 
     if (outLen == 0) {
         return false;
@@ -126,6 +126,24 @@ bool format_fpu64(char *dst, size_t dst_len, const uint64_t value, uint8_t decim
         strncpy(dst + shift + 1, buffer + shift, decimals);
     }
 
+    return true;
+}
+
+bool format_fpu64_trimmed(char *dst, size_t dst_len, const uint64_t value, uint8_t decimals) {
+    if (!format_fpu64(dst, dst_len, value, decimals)) {
+        return false;
+    }
+
+    size_t len = strlen(dst);
+
+    while (len > 0 && (dst[len - 1] == '0' || dst[len - 1] == '.')) {
+        if (dst[len - 1] == '.') {
+            dst[len - 1] = '\0';
+            return true;
+        }
+        len--;
+    }
+    dst[len] = '\0';
     return true;
 }
 

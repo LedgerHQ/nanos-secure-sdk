@@ -55,12 +55,12 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_init_privkey_256(
     CX_CHECK(cx_ecfp_init_private_key_no_throw(curve, raw_privkey, length, privkey));
 
 end:
-    explicit_bzero(&raw_privkey, sizeof(raw_privkey));
+    explicit_bzero(raw_privkey, sizeof(raw_privkey));
 
     if (error != CX_OK) {
         // Make sure the caller doesn't use uninitialized data in case
         // the return code is not checked.
-        explicit_bzero(&privkey, sizeof(privkey));
+        explicit_bzero(privkey, sizeof(cx_ecfp_256_private_key_t));
     }
     return error;
 }

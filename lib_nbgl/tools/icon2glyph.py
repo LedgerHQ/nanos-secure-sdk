@@ -195,7 +195,9 @@ def main():
     if args.glyphcfile or args.glyphcheader:
         print("""#ifdef HAVE_NBGL
 #include \"nbgl_types.h\"
-#endif // HAVE_NBGL
+#else
+#include <stdint.h>
+#endif
 """)
 
     colors_array = {}
