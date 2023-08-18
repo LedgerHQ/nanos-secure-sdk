@@ -82,6 +82,32 @@ static void test_format_fpu64(void **state) {
     assert_false(format_fpu64(temp2, sizeof(temp2) - 20, amount, 18));
 }
 
+static void test_format_fpu64_trimmed(void **state) {
+    (void) state;
+
+    char temp[22] = {0};
+
+    uint64_t amount = 100000000ull;  // satoshi
+    memset(temp, 0, sizeof(temp));
+    assert_true(format_fpu64_trimmed(temp, sizeof(temp), amount, 8));
+    assert_string_equal(temp, "1");  // BTC
+
+    amount = 24964823ull;  // satoshi
+    memset(temp, 0, sizeof(temp));
+    assert_true(format_fpu64_trimmed(temp, sizeof(temp), amount, 8));
+    assert_string_equal(temp, "0.24964823");  // BTC
+
+    amount = 100ull;  // satoshi
+    memset(temp, 0, sizeof(temp));
+    assert_true(format_fpu64_trimmed(temp, sizeof(temp), amount, 8));
+    assert_string_equal(temp, "0.000001");  // BTC
+
+    amount = 1000000000ull;  // satoshi
+    memset(temp, 0, sizeof(temp));
+    assert_true(format_fpu64_trimmed(temp, sizeof(temp), amount, 8));
+    assert_string_equal(temp, "10");  // BTC
+}
+
 static void test_format_hex(void **state) {
     (void) state;
 
@@ -99,6 +125,7 @@ int main() {
     const struct CMUnitTest tests[] = {cmocka_unit_test(test_format_i64),
                                        cmocka_unit_test(test_format_u64),
                                        cmocka_unit_test(test_format_fpu64),
+                                       cmocka_unit_test(test_format_fpu64_trimmed),
                                        cmocka_unit_test(test_format_hex)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);
