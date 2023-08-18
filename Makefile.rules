@@ -17,7 +17,9 @@
 
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
+ifeq ($(NO_UI), 0)
 SDK_SOURCE_PATH += lib_bagl lib_ux
+endif
 endif
 
 # Expose all SDK header files with their full relative path to the SDK root folder

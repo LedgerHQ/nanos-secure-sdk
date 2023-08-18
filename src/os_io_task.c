@@ -33,22 +33,26 @@ void io_start(void) {
 void bolos_init_ios(void) {
 #endif // HAVE_IO_TASK
 
-  // os_allow_protected_ram();
-  // unsigned int feat = G_os.seproxyhal_features;
-  // os_deny_protected_ram();
-
+#ifdef OS_IO_SEPROXYHAL
   io_seproxyhal_init();
+#endif
 
+#ifdef HAVE_IO_USB
   USB_power(0);
+#endif
 
 #ifdef HAVE_BLE
   memset(&G_io_asynch_ux_callback, 0, sizeof(G_io_asynch_ux_callback));
   LEDGER_BLE_init();
 #endif // HAVE_BLE
 
+#ifdef OS_IO_SEPROXYHAL
   io_seproxyhal_init();
+#endif
 
+#ifdef HAVE_IO_USB
   USB_power(1);
+#endif
 }
 
 

@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Secure firmware
-*   (c) 2016, 2017, 2018, 2019, 2020 Ledger
+*   Ledger - Secure firmware
+*   (c) 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -58,7 +58,9 @@ SECTIONS
     *(.boot*)
 
     /* place the other code and rodata defined BUT nvram variables that are displaced in a r/w area */
+    _code = .;
     *(.text*)
+    _ecode = .;
     *(.rodata)
     *(.rodata.[^N]*) /*.data.rel.ro* not here to detect invalid PIC usage */
     *(.rodata.N[^_]*)
@@ -98,6 +100,7 @@ SECTIONS
 
   } > DISCARD /*> SRAM AT>FLASH = 0x00 */
 
+  ASSERT( (_edata - _data) <= 0, ".data section must be empty" )
 
   /*
    * Here is the 1K for global var of libcxng

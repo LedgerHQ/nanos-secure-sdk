@@ -135,11 +135,12 @@ else
 LDFLAGS  += -nostartfiles
 endif
 
+NO_UI ?= 0
+ifeq ($(NO_UI), 0)
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += HAVE_BAGL
 DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=32
-
-LDFLAGS  += -L$(BOLOS_SDK)/lib/
+endif
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
