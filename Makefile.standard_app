@@ -91,11 +91,12 @@ ifneq ($(DISABLE_STANDARD_SNPRINTF), 1)
     DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
 endif
 
-ifneq ($(TARGET_NAME),TARGET_NANOS)
+ifneq ($(DEBUG), 0)
     # Since the PRINTF implementation uses the USB code
-    ifneq ($(DEBUG), 0)
+    ifneq ($(TARGET_NAME),TARGET_NANOS)
         DISABLE_STANDARD_USB = 0
     endif
+    DISABLE_SEPROXYHAL = 0
 endif
 
 ifneq ($(DISABLE_STANDARD_USB), 1)
