@@ -690,6 +690,7 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
     else {
       textArea->textAlignment = CENTER;
     }
+    textArea->wrapping = true;
     container->children[container->nbChildren] = (nbgl_obj_t*)textArea;
     container->nbChildren++;
   }
@@ -714,11 +715,12 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
     textArea->text = PIC(barLayout->subText);
     textArea->textAlignment = MID_LEFT;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
-    textArea->obj.area.height = nbgl_getTextHeight(textArea->fontId,textArea->text);
     textArea->style = NO_STYLE;
+    textArea->wrapping = true;
     textArea->obj.alignment = BOTTOM_LEFT;
     textArea->obj.alignmentMarginY = BORDER_MARGIN;
     textArea->obj.area.width = container->obj.area.width;
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
     container->children[container->nbChildren] = (nbgl_obj_t*)textArea;
     container->nbChildren++;
     container->obj.area.height += textArea->obj.area.height+16;
@@ -788,8 +790,9 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switc
     subTextArea->text = PIC(switchLayout->subText);
     subTextArea->textAlignment = MID_LEFT;
     subTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    subTextArea->wrapping = true;
     subTextArea->obj.area.width = container->obj.area.width;
-    subTextArea->obj.area.height = nbgl_getTextHeight(BAGL_FONT_INTER_REGULAR_24px, subTextArea->text);
+    subTextArea->obj.area.height = nbgl_getTextHeightInWidth(subTextArea->fontId, subTextArea->text, subTextArea->obj.area.width, subTextArea->wrapping);
     container->obj.area.height += subTextArea->obj.area.height + INNER_MARGIN;
     subTextArea->obj.alignment = NO_ALIGNMENT;
     subTextArea->obj.alignmentMarginY = INNER_MARGIN;
@@ -841,11 +844,12 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
     textArea->text = PIC(text);
     textArea->textAlignment = MID_LEFT;
     textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
-    textArea->obj.area.height = nbgl_getTextHeight(textArea->fontId,textArea->text);
     textArea->style = NO_STYLE;
+    textArea->wrapping = true;
     textArea->obj.alignment = NO_ALIGNMENT;
     textArea->obj.alignmentMarginY = BORDER_MARGIN;
     textArea->obj.area.width = container->obj.area.width;
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
     fullHeight += textArea->obj.area.height;
     container->children[0] = (nbgl_obj_t*)textArea;
   }
@@ -855,6 +859,7 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
     subTextArea->text = PIC(subText);
     subTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
     subTextArea->style = NO_STYLE;
+    subTextArea->wrapping = true;
     subTextArea->obj.area.width = container->obj.area.width;
     subTextArea->obj.area.height = nbgl_getTextHeightInWidth(subTextArea->fontId,subTextArea->text,subTextArea->obj.area.width,false);
     subTextArea->textAlignment = MID_LEFT;
@@ -901,7 +906,8 @@ int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text) {
   textArea->textAlignment = MID_LEFT;
   textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
   textArea->obj.area.width = AVAILABLE_WIDTH;
-  textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->obj.area.width,false);
+  textArea->wrapping = true;
+  textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
   textArea->style = NO_STYLE;
   textArea->obj.alignment = NO_ALIGNMENT;
   textArea->obj.alignmentMarginX = BORDER_MARGIN;
@@ -1064,8 +1070,9 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
     else {
       textArea->fontId = BAGL_FONT_INTER_SEMIBOLD_24px;
     }
+    textArea->wrapping = true;
     textArea->obj.area.width = AVAILABLE_WIDTH;
-    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->obj.area.width,false);
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
 
     if (info->style == LEDGER_INFO) {
       textArea->style = LEDGER_BORDER;
@@ -1102,8 +1109,9 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
     textArea->text = PIC(info->text2);
     textArea->textAlignment = CENTER;
     textArea->fontId = (info->style != LARGE_CASE_BOLD_INFO) ? BAGL_FONT_INTER_REGULAR_24px: BAGL_FONT_INTER_SEMIBOLD_24px;
+    textArea->wrapping = true;
     textArea->obj.area.width = AVAILABLE_WIDTH;
-    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->obj.area.width,false);
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
 
     textArea->style = NO_STYLE;
     if (container->nbChildren>0) {
@@ -1156,8 +1164,9 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
     textArea->text = PIC(info->text3);
     textArea->textAlignment = CENTER;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    textArea->wrapping = true;
     textArea->obj.area.width = AVAILABLE_WIDTH;
-    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->obj.area.width,false);
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
     textArea->style = NO_STYLE;
     if (container->nbChildren>0) {
       textArea->obj.alignment = BOTTOM_MIDDLE;
@@ -1248,8 +1257,9 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
     textArea->text = PIC(info->text1);
     textArea->textAlignment = CENTER;
     textArea->fontId = (info->largeText1 == true)? BAGL_FONT_INTER_MEDIUM_32px : BAGL_FONT_INTER_REGULAR_24px;
+    textArea->wrapping = true;
     textArea->obj.area.width = AVAILABLE_WIDTH;
-    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId,textArea->text,textArea->obj.area.width,false);
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
     textArea->obj.alignment = BOTTOM_MIDDLE;
     textArea->obj.alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
     textArea->obj.alignmentMarginY = 40;
@@ -1265,8 +1275,9 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
     textArea->text = PIC(info->text2);
     textArea->textAlignment = CENTER;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    textArea->wrapping = true;
     textArea->obj.area.width = AVAILABLE_WIDTH;
-    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, false);
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
     textArea->obj.alignment = BOTTOM_MIDDLE;
     textArea->obj.alignTo = (nbgl_obj_t*)container->children[container->nbChildren-1];
     textArea->obj.alignmentMarginY = 40;
@@ -1418,8 +1429,9 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueL
     itemTextArea->text = PIC(pair->item);
     itemTextArea->textAlignment = MID_LEFT;
     itemTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    itemTextArea->wrapping = true;
     itemTextArea->obj.area.width = usableWidth;
-    itemTextArea->obj.area.height = nbgl_getTextHeightInWidth(itemTextArea->fontId,itemTextArea->text,usableWidth,false);
+    itemTextArea->obj.area.height = nbgl_getTextHeightInWidth(itemTextArea->fontId, itemTextArea->text, usableWidth, itemTextArea->wrapping);
     itemTextArea->style = NO_STYLE;
     itemTextArea->obj.alignment = NO_ALIGNMENT;
     itemTextArea->obj.alignmentMarginX = 0;
@@ -1516,8 +1528,9 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBa
     textArea->text = PIC(barLayout->text);
     textArea->textAlignment = MID_LEFT;
     textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    textArea->wrapping = true;
     textArea->obj.area.width = AVAILABLE_WIDTH;
-    textArea->obj.area.height = nbgl_getTextHeight(textArea->fontId,textArea->text);
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
     textArea->style = NO_STYLE;
     textArea->obj.alignment = NO_ALIGNMENT;
     textArea->obj.alignmentMarginX = BORDER_MARGIN;
@@ -1543,8 +1556,9 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBa
     subTextArea->text = PIC(barLayout->subText);
     subTextArea->textAlignment = MID_LEFT;
     subTextArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+    subTextArea->wrapping = true;
     subTextArea->obj.area.width = AVAILABLE_WIDTH;
-    subTextArea->obj.area.height = nbgl_getTextHeight(subTextArea->fontId,subTextArea->text);
+    subTextArea->obj.area.height = nbgl_getTextHeightInWidth(subTextArea->fontId, subTextArea->text, subTextArea->obj.area.width, subTextArea->wrapping);
     subTextArea->style = NO_STYLE;
     subTextArea->obj.alignment = NO_ALIGNMENT;
     subTextArea->obj.alignmentMarginX = BORDER_MARGIN;
@@ -1696,8 +1710,9 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout, const char *text, uint8
   textArea->text = PIC(text);
   textArea->textAlignment = MID_LEFT;
   textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
+  textArea->wrapping = true;
   textArea->obj.area.width = container->obj.area.width - 3 * BORDER_MARGIN - button->obj.area.width;
-  textArea->obj.area.height = nbgl_getTextHeight(textArea->fontId,textArea->text);
+  textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
   textArea->style = NO_STYLE;
   textArea->obj.alignment = MID_LEFT;
   textArea->obj.alignmentMarginX = BORDER_MARGIN;
@@ -1946,11 +1961,12 @@ int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed) {
   textArea->text = PIC(text);
   textArea->textAlignment = CENTER;
   textArea->fontId = BAGL_FONT_INTER_REGULAR_24px;
+  textArea->wrapping = true;
   textArea->obj.alignmentMarginY = 20;
   textArea->obj.alignTo = (nbgl_obj_t*)spinner;
   textArea->obj.alignment = BOTTOM_MIDDLE;
   textArea->obj.area.width = AVAILABLE_WIDTH;
-  textArea->obj.area.height = nbgl_getFontLineHeight(textArea->fontId);
+  textArea->obj.area.height = nbgl_getTextHeightInWidth(textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
   textArea->style = NO_STYLE;
 
   // set this new spinner as child of the container
