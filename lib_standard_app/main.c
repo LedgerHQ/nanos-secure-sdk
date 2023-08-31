@@ -94,9 +94,6 @@ static void standalone_app_main(void) {
 
 #ifdef HAVE_SWAP
 static void library_app_main(libargs_t *args) {
-    G_called_from_swap = true;
-    G_swap_response_ready = false;
-
     BEGIN_TRY {
         TRY {
             PRINTF("Inside library\n");
@@ -107,7 +104,7 @@ static void library_app_main(libargs_t *args) {
                     // BSS data.
                     bool success = swap_copy_transaction_parameters(args->create_transaction);
                     if (success) {
-                        // BSS was wiped, so init these global again
+                        // BSS was wiped, we can now init these globals
                         G_called_from_swap = true;
                         G_swap_response_ready = false;
 
