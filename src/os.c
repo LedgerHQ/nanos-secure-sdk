@@ -81,12 +81,29 @@ char os_secure_memcmp(const void *src1, const void* src2, size_t length) {
 }
 
 #ifndef HAVE_BOLOS
+#define MAIN_LINKER_SCRIPT_LOCATION 0xC0DE0000
+int main(void);
+
+// This function can be used to declare a callback to THROW in the application
+__attribute((weak)) void app_throw_info(unsigned int exception, unsigned int lr_val) {
+  UNUSED(exception);
+  UNUSED(lr_val);
+}
+
 void os_longjmp(unsigned int exception) {
-#ifdef HAVE_PRINTF
   unsigned int lr_val;
   __asm volatile("mov %0, lr" :"=r"(lr_val));
+
+  // Compute location before relocation (sort of anti PIC)
+  lr_val = lr_val - (unsigned int)main + MAIN_LINKER_SCRIPT_LOCATION;
+
+#ifdef HAVE_PRINTF
   PRINTF("exception[%d]: LR=0x%08X\n", exception, lr_val);
 #endif // HAVE_PRINTF
+
+  // Send to the app the info of exception and LR for debug purpose
+  app_throw_info(exception, lr_val);
+
   longjmp(try_context_get()->jmp_buf, exception);
 }
 #endif // HAVE_BOLOS

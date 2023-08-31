@@ -19,6 +19,7 @@
 
 #include "os.h"
 #include "io.h"
+#include "debug.h"
 
 #ifdef HAVE_SWAP
 #include "swap.h"
@@ -62,6 +63,25 @@ static void standalone_app_main(void) {
         }
         CATCH_OTHER(e) {
             PRINTF("Exiting following exception: %d\n", e);
+
+#ifdef HAVE_DEBUG_THROWS
+            // Disable USB and BLE, the app have crashed and is going to be exited
+            // This is necessary to avoid device freeze while displaying throw error
+            // in a specific case:
+            // - the app receives an APDU
+            // - the app throws before replying
+            // - the app displays the error on screen
+            // - the user unplug the NanoX instead of confirming the screen
+            // - the NanoX goes on battery power and display the lock screen
+            // - the user plug the NanoX instead of entering its pin
+            // - the device is frozen, battery should be removed
+            USB_power(0);
+#ifdef HAVE_BLE
+            BLE_power(0, NULL);
+#endif
+            // Display crash info on screen for debug purpose
+            debug_display_throw_error(e);
+#endif
         }
         FINALLY {
         }
