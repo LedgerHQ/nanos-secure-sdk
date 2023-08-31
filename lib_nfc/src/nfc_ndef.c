@@ -1,5 +1,6 @@
 #ifdef HAVE_NFC
-#include "nfc.h"
+#ifdef HAVE_NDEF_SUPPORT
+#include "nfc_ndef.h"
 #include "string.h"
 #include "os_apdu.h"
 
@@ -194,4 +195,5 @@ uint16_t os_ndef_to_string(ndef_struct_t *ndef_message, char * out_string) {
     }
     return tot_length;
 }
-#endif
+#endif // HAVE_NDEF_SUPPORT
+#endif // HAVE_NFC

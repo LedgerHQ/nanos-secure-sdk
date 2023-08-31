@@ -467,8 +467,11 @@ void io_seproxyhal_play_tune(tune_index_e tune_index) {
 #endif // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
-#include "nfc.h"
+#ifdef HAVE_NDEF_SUPPORT
+    #include "nfc_ndef.h"
+#endif
 
+#ifdef HAVE_NDEF_SUPPORT
 /**
  * @brief Send a SEPH message to MCU to init NFC
  *
@@ -497,7 +500,18 @@ void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceI
   io_seproxyhal_spi_send(buffer, 5);
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, total_length-2);
 }
-#endif
+#else // ! HAVE_NDEF_SUPPORT
+void io_seproxyhal_nfc_init(bool forceInit) {
+  uint8_t buffer[4];
+  uint8_t is_nfc_enabled = forceInit?1:(os_setting_get(OS_SETTING_FEATURES, NULL, 0)&OS_SETTING_FEATURES_NFC_ENABLED);
+  buffer[0] = SEPROXYHAL_TAG_NFC_INIT;
+  buffer[1] = 0;
+  buffer[2] = 1;
+  buffer[3] = is_nfc_enabled;
+  io_seproxyhal_spi_send(buffer, 4);
+}
+#endif // HAVE_NDEF_SUPPORT
+#endif // HAVE_NFC
 
 #ifdef HAVE_SE_TOUCH
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL

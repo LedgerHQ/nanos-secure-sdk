@@ -31,7 +31,9 @@
 #include "os_types.h"
 
 #ifdef HAVE_NFC
-#include "nfc.h"
+#ifdef HAVE_NDEF_SUPPORT
+#include "nfc_ndef.h"
+#endif
 #endif
 
 #ifdef HAVE_SERIALIZED_NBGL
@@ -126,7 +128,11 @@ void io_seproxyhal_send_nbgl_serialized(nbgl_serialized_event_type_e event, nbgl
 void io_set_timeout(unsigned int timeout);
 
 #ifdef HAVE_NFC
+#ifdef HAVE_NDEF_SUPPORT
 void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceInit);
+#else // ! HAVE_NDEF_SUPPORT
+void io_seproxyhal_nfc_init(bool forceInit);
+#endif // HAVE_NDEF_SUPPORT
 #endif
 
 #ifdef HAVE_SE_TOUCH
