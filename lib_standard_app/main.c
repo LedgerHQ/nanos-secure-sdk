@@ -23,6 +23,10 @@
 
 #ifdef HAVE_SWAP
 #include "swap.h"
+
+#ifdef HAVE_NBGL
+#include "nbgl_use_case.h"
+#endif // HAVE_NBGL
 #endif // HAVE_SWAP
 
 ux_state_t G_ux;
@@ -109,6 +113,10 @@ static void library_app_main(libargs_t *args) {
                         G_swap_response_ready = false;
 
                         common_app_init();
+
+#ifdef HAVE_NBGL
+                        nbgl_useCaseSpinner("Signing");
+#endif // HAVE_NBGL
 
                         app_main();
                     }
