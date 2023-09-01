@@ -19,9 +19,14 @@
 
 #include "os.h"
 #include "io.h"
+#include "debug.h"
 
 #ifdef HAVE_SWAP
 #include "swap.h"
+
+#ifdef HAVE_NBGL
+#include "nbgl_use_case.h"
+#endif // HAVE_NBGL
 #endif // HAVE_SWAP
 
 ux_state_t G_ux;
@@ -62,6 +67,25 @@ static void standalone_app_main(void) {
         }
         CATCH_OTHER(e) {
             PRINTF("Exiting following exception: %d\n", e);
+
+#ifdef HAVE_DEBUG_THROWS
+            // Disable USB and BLE, the app have crashed and is going to be exited
+            // This is necessary to avoid device freeze while displaying throw error
+            // in a specific case:
+            // - the app receives an APDU
+            // - the app throws before replying
+            // - the app displays the error on screen
+            // - the user unplug the NanoX instead of confirming the screen
+            // - the NanoX goes on battery power and display the lock screen
+            // - the user plug the NanoX instead of entering its pin
+            // - the device is frozen, battery should be removed
+            USB_power(0);
+#ifdef HAVE_BLE
+            BLE_power(0, NULL);
+#endif
+            // Display crash info on screen for debug purpose
+            debug_display_throw_error(e);
+#endif
         }
         FINALLY {
         }
@@ -74,9 +98,6 @@ static void standalone_app_main(void) {
 
 #ifdef HAVE_SWAP
 static void library_app_main(libargs_t *args) {
-    G_called_from_swap = true;
-    G_swap_response_ready = false;
-
     BEGIN_TRY {
         TRY {
             PRINTF("Inside library\n");
@@ -87,11 +108,15 @@ static void library_app_main(libargs_t *args) {
                     // BSS data.
                     bool success = swap_copy_transaction_parameters(args->create_transaction);
                     if (success) {
-                        // BSS was wiped, so init these global again
+                        // BSS was wiped, we can now init these globals
                         G_called_from_swap = true;
                         G_swap_response_ready = false;
 
                         common_app_init();
+
+#ifdef HAVE_NBGL
+                        nbgl_useCaseSpinner("Signing");
+#endif // HAVE_NBGL
 
                         app_main();
                     }
