@@ -945,8 +945,8 @@ void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t qui
  * @param icon icon to set in center of page
  * @param message string to set in center of page (32px)
  * @param subMessage string to set under message (24px) (can be NULL)
- * @param confirmText string to set in button, to confirm
- * @param cancelText string to set in footer, to reject
+ * @param confirmText string to set in button, to confirm (cannot be NULL)
+ * @param cancelText string to set in footer, to reject (cannot be NULL)
  * @param callback callback called when button or footer is touched
  */
 void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, const char *message, const char *subMessage, const char *confirmText, const char *cancelText, nbgl_choiceCallback_t callback) {
@@ -963,6 +963,10 @@ void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, const char *message, co
     .tuneId = TUNE_TAP_CASUAL,
     .modal = false
   };
+  // check params
+  if ((confirmText == NULL) || (cancelText == NULL)) {
+    return;
+  }
   onChoice = callback;
   pageContext = nbgl_pageDrawConfirmation(&pageCallback, &info);
   nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
