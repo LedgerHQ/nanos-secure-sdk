@@ -211,23 +211,22 @@ def compute_app_icon_data(im: Image, bpp) -> Tuple[bool, bytes]:
     return is_file, image_data
 
 
-def compute_regular_icon_data(im: Image, bpp) -> Tuple[bool, bytes]:
+def compute_regular_icon_data(no_comp: bool, im: Image, bpp) -> Tuple[bool, bytes]:
     """
     Process image as regular icon:
     - Regular icon are image file only if compressed
     - Compression is limited to images bigger than 64x64
     """
     width, height = im.size
-    # We do not compress regular icon smaller than 64x64 because
-    # these smaller images are the one being transformed through
-    # symmetry. And the symmetry is not implemented for compressed
-    # icons (yet).
-    if (width >= 64) and (height >= 64):
+
+    if not no_comp:
         compression, image_data = compress(im, bpp)
         if compression != NbglFileCompression.NoCompression:
             is_file = True
             image_data = convert_to_image_file(
                 image_data, width, height, bpp, compression)
+        else:
+            is_file = False
     else:
         is_file = False
         image_data = image_to_packed_buffer(im, bpp)
@@ -284,7 +283,11 @@ def print_glyphcheader_data(image_name, bpp, width, height, is_file, image_data)
 def main():
     parser = argparse.ArgumentParser(
         description='Generate source code for NBGL icons.')
-    parser.add_argument('image_file', help="Icons to process", nargs='+')
+    parser.add_argument('image_file', help="""
+                        Icons to process.
+                        Images that will be transformed through rotation or symmetry
+                        must be suffixed by '_nocomp' (example: image_nocomp.png)
+                        """, nargs='+')
     parser.add_argument('--hexbitmaponly', action='store_true')
     parser.add_argument('--glyphcheader', action='store_true')
     parser.add_argument('--glyphcfile', action='store_true')
@@ -319,7 +322,15 @@ def main():
             else:
                 # Prepare and print regular icon data
                 width, height = im.size
-                is_file, image_data = compute_regular_icon_data(im, bpp)
+
+                # Forbid compression if the image name ends with nocomp.
+                if image_name.endswith('_nocomp'):
+                    no_comp = True
+                    image_name = image_name[:-7] # Remove nocomp suffix
+                else:
+                    no_comp = False
+
+                is_file, image_data = compute_regular_icon_data(no_comp, im, bpp)
 
                 if args.glyphcfile:
                     print_glyphcfile_data(image_name, bpp, image_data)

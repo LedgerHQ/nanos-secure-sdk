@@ -328,10 +328,9 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     rectArea.y0 = (keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT*2 + (KEYBOARD_KEY_HEIGHT-rectArea.height)/2) & 0xFFC;
     rectArea.x0 = (SHIFT_KEY_WIDTH-rectArea.width)/2;
     rectArea.backgroundColor = (keyboard->casing != LOWER_CASE)?BLACK:WHITE;
-    nbgl_frontDrawImage(&rectArea,
-                        (keyboard->casing == LOCKED_UPPER_CASE)?(uint8_t*)C_shift_lock32px.bitmap:(uint8_t*)C_shift32px.bitmap,
-                        NO_TRANSFORMATION,
-                        (keyboard->casing != LOWER_CASE)?WHITE:BLACK);
+    nbgl_drawIcon(&rectArea,
+                         (keyboard->casing != LOWER_CASE)?WHITE:BLACK,
+                         (keyboard->casing != LOCKED_UPPER_CASE)?(&C_shift_lock32px):(&C_shift32px));
     rectArea.backgroundColor = WHITE;
     offsetX = keyboard->obj.area.x0 + SHIFT_KEY_WIDTH;
   }
@@ -358,7 +357,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
   else {
     rectArea.x0 += (BACKSPACE_KEY_WIDTH_LETTERS_ONLY-rectArea.width)/2;
   }
-  nbgl_frontDrawImage(&rectArea,(uint8_t*)C_backspace32px.bitmap,NO_TRANSFORMATION,BLACK);
+  nbgl_drawIcon(&rectArea, BLACK, &C_backspace32px);
 
   // 4th row, only in Full mode
   if (!keyboard->lettersOnly) {
@@ -367,7 +366,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard) {
     nbgl_drawText(&rectArea, ".?123", 5, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
 
     rectArea.x0 = SWITCH_KEY_WIDTH+(SPACE_KEY_WIDTH-C_space32px.width)/2;
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_space32px.bitmap, NO_TRANSFORMATION, (keyboard->keyMask&(1<<SPACE_KEY_INDEX))? WHITE:BLACK);
+    nbgl_drawIcon(&rectArea, (keyboard->keyMask&(1<<SPACE_KEY_INDEX))? WHITE:BLACK, &C_space32px);
   }
 
 }

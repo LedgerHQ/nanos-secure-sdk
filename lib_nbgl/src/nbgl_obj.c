@@ -332,8 +332,9 @@ static void draw_button(nbgl_button_t* obj, nbgl_obj_t *prevObj, bool computePos
     rectArea.y0 = iconY0;
     rectArea.width = obj->icon->width;
     rectArea.height = obj->icon->height;
-    rectArea.bpp = NBGL_BPP_1;
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)obj->icon->bitmap,NO_TRANSFORMATION, obj->foregroundColor);
+    rectArea.bpp = obj->icon->bpp;
+
+    nbgl_drawIcon(&rectArea, obj->foregroundColor, obj->icon);
   }
 }
 
@@ -428,12 +429,8 @@ static void draw_image(nbgl_image_t* obj, nbgl_obj_t *prevObj, bool computePosit
   else {
     colorMap = obj->foregroundColor;
   }
-  if (!iconDetails->isFile) {
-    nbgl_frontDrawImage((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap, NO_TRANSFORMATION, colorMap);
-  }
-  else {
-    nbgl_frontDrawImageFile((nbgl_area_t*)obj, (uint8_t*)iconDetails->bitmap, colorMap, ramBuffer);
-  }
+
+  nbgl_drawIcon((nbgl_area_t *) obj, colorMap, iconDetails);
 }
 
 static void draw_switch(nbgl_switch_t* obj, nbgl_obj_t *prevObj, bool computePosition) {
@@ -492,10 +489,10 @@ static void draw_radioButton(nbgl_radio_t* obj, nbgl_obj_t *prevObj, bool comput
   rectArea.backgroundColor = obj->obj.area.backgroundColor;
   rectArea.bpp = NBGL_BPP_1;
   if (obj->state == OFF_STATE) {
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_radio_inactive_32px.bitmap,NO_TRANSFORMATION,obj->borderColor);
+    nbgl_drawIcon(&rectArea, obj->borderColor, &C_radio_inactive_32px);
   }
   else {
-    nbgl_frontDrawImage(&rectArea,(uint8_t*)C_radio_active_32px.bitmap,NO_TRANSFORMATION,obj->activeColor);
+    nbgl_drawIcon(&rectArea, obj->activeColor, &C_radio_active_32px);
   }
 }
 
