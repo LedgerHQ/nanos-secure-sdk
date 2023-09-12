@@ -60,6 +60,22 @@ WEAK int io_recv_command(void);
  * Send APDU response (response data + status word) by filling
  * G_io_apdu_buffer.
  *
+ * @param[in] rdatalist
+ *   List of Buffers with APDU response data.
+ * @param[in] count
+ *   Count of the buffers providded in rdatalist.
+ * @param[in] sw
+ *   Status word of APDU response.
+ *
+ * @return zero or positive integer if success, -1 otherwise.
+ *
+ */
+WEAK int io_send_response_buffers(const buffer_t *rdatalist, size_t count, uint16_t sw);
+
+/**
+ * Send APDU response (response data + status word) by filling
+ * G_io_apdu_buffer.
+ *
  * @param[in] ptr
  *   Pointer to a buffer with APDU response data.
  * @param[in] size
@@ -70,7 +86,11 @@ WEAK int io_recv_command(void);
  * @return zero or positive integer if success, -1 otherwise.
  *
  */
-WEAK int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw);
+static inline int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw)
+{
+    return io_send_response_buffers(
+        &(const buffer_t){.ptr = ptr, .size = size, .offset = 0}, 1, sw);
+}
 
 /**
  * Send APDU response (response data + status word) by filling
@@ -84,7 +104,10 @@ WEAK int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw);
  * @return zero or positive integer if success, -1 otherwise.
  *
  */
-WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw);
+static inline int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
+{
+    return io_send_response_buffers(rdata, 1, sw);
+}
 
 /**
  * Send APDU response (only status word) by filling
@@ -96,4 +119,7 @@ WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw);
  * @return zero or positive integer if success, -1 otherwise.
  *
  */
-WEAK int io_send_sw(uint16_t sw);
+static inline int io_send_sw(uint16_t sw)
+{
+    return io_send_response_buffers(NULL, 0, sw);
+}
