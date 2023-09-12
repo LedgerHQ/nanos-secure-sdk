@@ -364,6 +364,24 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area, nbgl_radius_t radiusI
 }
 
 /**
+ * @brief Helper function to render an icon directly from its `nbgl_icon_details_t` structure.
+ *
+ * The icon is rendered whether it's an image file or not.
+ * No transformation is applied to the icon.
+ *
+ * @param area Area of drawing
+ * @param color_map Color map applied to icon
+ * @param icon Icon details structure to draw
+ */
+void nbgl_drawIcon(nbgl_area_t *area, nbgl_color_map_t color_map, const nbgl_icon_details_t *icon) {
+  if (icon->isFile) {
+    nbgl_frontDrawImageFile(area, icon->bitmap, color_map, ramBuffer);
+  } else {
+    nbgl_frontDrawImage(area, icon->bitmap, NO_TRANSFORMATION, color_map);
+  }
+}
+
+/**
  * @brief Return the size of the bitmap associated to the input font and character
  *
  * @param font pointer to the font infos

@@ -33,6 +33,8 @@
 #define GET_DIGIT_INDEX(_keypad, _digit) ((_digit&1)?(_keypad->digitIndexes[_digit>>1]>>4):(_keypad->digitIndexes[_digit>>1]&0xF))
 #define SET_DIGIT_INDEX(_keypad, _digit, _index) (_keypad->digitIndexes[_digit>>1] |= (_digit&1)?(_index<<4):_index)
 
+extern uint8_t ramBuffer[GZLIB_UNCOMPRESSED_CHUNK];
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -163,7 +165,11 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
   rectArea.bpp = NBGL_BPP_1;
   rectArea.x0 = keypad->obj.area.x0 + (KEY_WIDTH-rectArea.width)/2;
   rectArea.y0 = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT*3 + (KEYPAD_KEY_HEIGHT-rectArea.height)/2;
-  nbgl_frontDrawImage(&rectArea,(uint8_t*)C_backspace32px.bitmap,NO_TRANSFORMATION, keypad->enableBackspace?BLACK:WHITE);
+  #if GLYPH_backspace32px_ISFILE
+  nbgl_frontDrawImageFile(&rectArea,(uint8_t*)C_backspace32px.bitmap, keypad->enableBackspace?BLACK:WHITE, ramBuffer);
+  #else
+  nbgl_frontDrawImage(&rectArea,(uint8_t*)C_backspace32px.bitmap, NO_TRANSFORMATION, keypad->enableBackspace?BLACK:WHITE);
+  #endif
 
   // draw 0
   key_value = GET_DIGIT_INDEX(keypad,0)+0x30;
@@ -197,7 +203,11 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad) {
     rectArea.bpp = NBGL_BPP_1;
     rectArea.x0 = keypad->obj.area.x0 + 2*KEY_WIDTH + (KEY_WIDTH-rectArea.width)/2;
     rectArea.y0 = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT*3 + (KEYPAD_KEY_HEIGHT-rectArea.height)/2;
+#if GLYPH_check32px_ISFILE
+    nbgl_frontDrawImageFile(&rectArea,(uint8_t*)C_check32px.bitmap, WHITE, ramBuffer);
+#else
     nbgl_frontDrawImage(&rectArea,(uint8_t*)C_check32px.bitmap,NO_TRANSFORMATION, WHITE);
+#endif
   }
 }
 
