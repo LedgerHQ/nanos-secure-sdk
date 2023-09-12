@@ -153,25 +153,28 @@ WEAK int io_recv_command()
     return ret;
 }
 
-WEAK int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw)
-{
-    return io_send_response_buffer(&(const buffer_t){.ptr = ptr, .size = size, .offset = 0}, sw);
-}
-
-WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
+WEAK int io_send_response_buffers(const buffer_t *rdatalist, size_t count, uint16_t sw)
 {
     int ret = -1;
 
-    if (rdata != NULL) {
-        if (rdata->size - rdata->offset > IO_APDU_BUFFER_SIZE - 2 ||  //
-            !buffer_copy(rdata, G_io_apdu_buffer, sizeof(G_io_apdu_buffer))) {
-            return io_send_sw(SW_WRONG_RESPONSE_LENGTH);
+    G_output_len = 0;
+    if (rdatalist && count > 0) {
+        for (size_t i = 0; i < count; i++) {
+            const buffer_t *rdata = &rdatalist[i];
+
+            if (!buffer_copy(rdata,
+                             G_io_apdu_buffer + G_output_len,
+                             sizeof(G_io_apdu_buffer) - G_output_len - 2)) {
+                return io_send_sw(SW_WRONG_RESPONSE_LENGTH);
+            }
+            G_output_len += rdata->size - rdata->offset;
+            if (count > 1) {
+                PRINTF("<= FRAG (%u/%u) RData=%.*H\n", i + 1, count, rdata->size, rdata->ptr);
+            }
         }
-        G_output_len = rdata->size - rdata->offset;
-        PRINTF("<= SW=%04X | RData=%.*H\n", sw, rdata->size, rdata->ptr);
+        PRINTF("<= SW=%04X | RData=%.*H\n", sw, G_output_len, G_io_apdu_buffer);
     }
     else {
-        G_output_len = 0;
         PRINTF("<= SW=%04X | RData=\n", sw);
     }
 
@@ -208,9 +211,4 @@ WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
     }
 
     return ret;
-}
-
-WEAK int io_send_sw(uint16_t sw)
-{
-    return io_send_response_buffer(NULL, sw);
 }
