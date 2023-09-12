@@ -6,6 +6,7 @@
 /*********************
  *      INCLUDES
  *********************/
+#include <string.h>
 #include "nbgl_obj.h"
 #include "nbgl_draw.h"
 #include "nbgl_front.h"
@@ -704,7 +705,7 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
         rectArea.height          = obj->obj.area.height;
         rectArea.backgroundColor = obj->obj.area.backgroundColor;
         rectArea.bpp             = NBGL_BPP_1;
-        nbgl_drawText(&rectArea, navText, 9, BAGL_FONT_INTER_REGULAR_24px, DARK_GRAY);
+        nbgl_drawText(&rectArea, navText, strlen(navText), BAGL_FONT_INTER_REGULAR_24px, DARK_GRAY);
     }
 }
 

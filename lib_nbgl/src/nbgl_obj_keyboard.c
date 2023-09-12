@@ -638,6 +638,59 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
 }
 
 /**
+ * @brief This function gets the position (top-left corner) of the key at the
+ * given index. (to be used for Testing purpose)
+ *
+ * @param kbd the object to be drawned
+ * @param index ascii character (in lower-case)
+ * @param x [out] the top-left position
+ * @param y [out] the top-left position
+ * @return true if found, false otherwise
+ */
+bool nbgl_keyboardGetPosition(nbgl_keyboard_t *kbd, char index, uint16_t *x, uint16_t *y)
+{
+    uint8_t charIndex = 0;
+
+    while (charIndex < 26) {
+        if (index == kbd_chars[charIndex]) {
+            break;
+        }
+        charIndex++;
+    }
+
+    // if in first line
+    if (charIndex < FIRST_LINE_CHAR_COUNT) {
+        *x = kbd->obj.area.x0 + charIndex * NORMAL_KEY_WIDTH;
+        *y = kbd->obj.area.y0;
+    }
+    else if (charIndex < (FIRST_LINE_CHAR_COUNT + SECOND_LINE_CHAR_COUNT)) {
+        *x = kbd->obj.area.x0 + (charIndex - FIRST_LINE_CHAR_COUNT) * NORMAL_KEY_WIDTH
+             + SECOND_LINE_OFFSET;
+        *y = kbd->obj.area.y0 + KEYBOARD_KEY_HEIGHT;
+    }
+    else if (charIndex < sizeof(kbd_chars)) {
+        if (kbd->mode == MODE_LETTERS) {
+            *x = kbd->obj.area.x0
+                 + (charIndex - FIRST_LINE_CHAR_COUNT - SECOND_LINE_CHAR_COUNT) * NORMAL_KEY_WIDTH;
+            // shift does not exist in letters only mode
+            if (!kbd->lettersOnly) {
+                *x = *x + SHIFT_KEY_WIDTH;
+            }
+        }
+        else {
+            *x = kbd->obj.area.x0
+                 + (charIndex - FIRST_LINE_CHAR_COUNT - SECOND_LINE_CHAR_COUNT) * NORMAL_KEY_WIDTH
+                 + SPECIAL_CHARS_KEY_WIDTH;
+        }
+        *y = kbd->obj.area.y0 + 2 * KEYBOARD_KEY_HEIGHT;
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+/**
  * @brief This function draws a keyboard object
  *
  * @param kbd the object to be drawned
@@ -645,6 +698,7 @@ void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd)
 {
     kbd->obj.touchMask = (1 << TOUCHED);
+    kbd->obj.touchId   = KEYBOARD_ID;
     kbd->needsRefresh  = false;
 
     keyboardDraw(kbd);

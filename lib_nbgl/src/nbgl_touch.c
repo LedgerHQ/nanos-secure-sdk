@@ -169,6 +169,7 @@ void nbgl_touchHandler(nbgl_touchStatePosition_t *touchStatePosition, uint32_t c
                 applytouchStatePosition(lastPressedObj, OUT_OF_TOUCH);
             }
         }
+        // Released event has been handled, forget lastPressedObj
         lastPressedObj = NULL;
         lastState      = touchStatePosition->state;
         return;
@@ -240,4 +241,44 @@ uint32_t nbgl_touchGetTouchDuration(nbgl_obj_t *obj)
         return (lastCurrentTime - lastPressedTime);
     }
     return 0;
+}
+
+/**
+ * @brief if the given obj contains the coordinates of the given event, parse
+ * all its children with the same criterion.
+ * If no children or none concerned, check whether this object can process the event or not
+ *
+ * @param obj
+ * @param event
+ * @return the concerned object or NULL if not found
+ */
+nbgl_obj_t *nbgl_touchGetObjectFromId(nbgl_obj_t *obj, uint8_t id)
+{
+    if (obj == NULL) {
+        return NULL;
+    }
+    if ((obj->type == SCREEN) || (obj->type == CONTAINER)) {
+        nbgl_container_t *container = (nbgl_container_t *) obj;
+        // parse the children, if any
+        if (container->children != NULL) {
+            uint8_t i;
+            for (i = 0; i < container->nbChildren; i++) {
+                nbgl_obj_t *current = container->children[i];
+                if (current != NULL) {
+                    current = nbgl_touchGetObjectFromId(current, id);
+                    if (current != NULL) {
+                        return current;
+                    }
+                }
+            }
+        }
+    }
+    /* now see if the object is interested by touch events (any of them) */
+    if ((obj->touchMask != 0) && (obj->touchId == id)) {
+        LOG_DEBUG(TOUCH_LOGGER, "found %p: id = %d, type = %d \n", obj, obj->touchId, obj->type);
+        return obj;
+    }
+    else {
+        return NULL;
+    }
 }

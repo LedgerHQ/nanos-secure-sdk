@@ -192,7 +192,6 @@ typedef void (*nbgl_touchCallback_t)(void *obj, nbgl_touchType_t eventType);
 typedef struct PACKED__ nbgl_obj_s {
     nbgl_area_t area;  ///< absolute position, backGround color and size of the object. DO NOT MOVE
                        ///< THIS FIELD
-    nbgl_obj_type_t type;  ///< type of the graphical object, must be explicitly set
     int16_t
         rel_x0;  ///< horizontal position of top-left corner relative to parent's top-left corner
     int16_t rel_y0;  ///< vertical position of top-left corner relative to parent's top-left corner,
@@ -202,7 +201,10 @@ typedef struct PACKED__ nbgl_obj_s {
     nbgl_aligment_t    alignment;         ///< type of alignment
     int16_t            alignmentMarginX;  ///< horizontal margin when aligning
     int16_t            alignmentMarginY;  ///< vertical margin when aligning
+    nbgl_obj_type_t    type;              ///< type of the graphical object, must be explicitly set
     uint8_t touchMask;  ///< bit mask to tell engine which touch events are handled by this object
+    uint8_t touchId;    ///< a unique identifier (by screen) to be used by external test environment
+                        ///< (TTYT or Screenshots)
 } nbgl_obj_t;
 
 /**
@@ -457,6 +459,27 @@ typedef struct PACKED__ nbgl_keypad_s {
     keyboardCallback_t callback;         ///< function called when an active key is pressed
 } nbgl_keypad_t;
 
+/**
+ * @brief ids of touchable objects, for external stimulus (by Testing environment)
+ *
+ */
+enum {
+    BOTTOM_BUTTON_ID = 1,
+    LEFT_BUTTON_ID,
+    RIGHT_BUTTON_ID,
+    WHOLE_SCREEN_ID,
+    TOP_RIGHT_BUTTON_ID,
+    BACK_BUTTON_ID,
+    SINGLE_BUTTON_ID,
+    CHOICE_1_ID,
+    CHOICE_2_ID,
+    KEYPAD_ID,
+    KEYBOARD_ID,
+    ENTERED_TEXT_ID,
+    CONTROLS_ID,  // when multiple controls in the same pages (buttons, switches, radios)
+    NB_CONTROL_IDS
+};
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -491,15 +514,15 @@ bool              nbgl_navigationCallback(nbgl_obj_t      *obj,
                                           nbgl_touchType_t eventType,
                                           uint8_t          nbPages,
                                           uint8_t         *activePage);
-nbgl_container_t *nbgl_bottomButtonPopulate(const nbgl_icon_details_t *icon,
-                                            bool                       separationLine,
-                                            uint8_t                    layer);
 
 // for internal use
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd);
 void nbgl_objDrawKeypad(nbgl_keypad_t *kbd);
 void nbgl_keyboardTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType);
 void nbgl_keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType);
+
+bool nbgl_keyboardGetPosition(nbgl_keyboard_t *kbd, char index, uint16_t *x, uint16_t *y);
+bool nbgl_keypadGetPosition(nbgl_keypad_t *kbd, char index, uint16_t *x, uint16_t *y);
 
 /**********************
  *      MACROS

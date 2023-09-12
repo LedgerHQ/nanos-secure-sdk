@@ -31,11 +31,12 @@ extern "C" {
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
-void     nbgl_touchHandler(nbgl_touchStatePosition_t *touchEvent, uint32_t currentTimeMs);
-bool     nbgl_touchGetTouchedPosition(nbgl_obj_t                 *obj,
-                                      nbgl_touchStatePosition_t **firstPos,
-                                      nbgl_touchStatePosition_t **lastPos);
-uint32_t nbgl_touchGetTouchDuration(nbgl_obj_t *obj);
+void        nbgl_touchHandler(nbgl_touchStatePosition_t *touchEvent, uint32_t currentTimeMs);
+bool        nbgl_touchGetTouchedPosition(nbgl_obj_t                 *obj,
+                                         nbgl_touchStatePosition_t **firstPos,
+                                         nbgl_touchStatePosition_t **lastPos);
+uint32_t    nbgl_touchGetTouchDuration(nbgl_obj_t *obj);
+nbgl_obj_t *nbgl_touchGetObjectFromId(nbgl_obj_t *obj, uint8_t id);
 
 /**********************
  *      MACROS
