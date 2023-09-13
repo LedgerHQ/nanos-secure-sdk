@@ -8,7 +8,7 @@
 #define PIC(x) (x)
 #endif
 #ifndef PIC
-#define PIC(x) pic((void *)x)
+#define PIC(x) ((typeof(x)) pic((void *)x))
 void *pic(void *linked_address);
 void *pic_internal(void *link_address);
 #endif
