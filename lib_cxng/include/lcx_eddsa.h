@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    lcx_eddsa.h
@@ -72,29 +72,38 @@
  *                      - CX_INVALID_PARAMETER_VALUE
  */
 cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                       cx_md_t                      hashID,
-                       const uint8_t *              hash,
-                       size_t                       hash_len,
-                       uint8_t *                    sig,
-                       size_t                       sig_len);
+                                cx_md_t                      hashID,
+                                const uint8_t               *hash,
+                                size_t                       hash_len,
+                                uint8_t                     *sig,
+                                size_t                       sig_len);
 
 /**
  * @deprecated
  * See #cx_eddsa_sign_no_throw
  */
-DEPRECATED static inline size_t cx_eddsa_sign ( const cx_ecfp_private_key_t * pvkey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, unsigned char * sig, unsigned int sig_len, unsigned int * info )
+DEPRECATED static inline size_t cx_eddsa_sign(const cx_ecfp_private_key_t *pvkey,
+                                              int                          mode,
+                                              cx_md_t                      hashID,
+                                              const unsigned char         *hash,
+                                              unsigned int                 hash_len,
+                                              const unsigned char         *ctx,
+                                              unsigned int                 ctx_len,
+                                              unsigned char               *sig,
+                                              unsigned int                 sig_len,
+                                              unsigned int                *info)
 {
-  UNUSED(ctx);
-  UNUSED(ctx_len);
-  UNUSED(mode);
-  UNUSED(info);
+    UNUSED(ctx);
+    UNUSED(ctx_len);
+    UNUSED(mode);
+    UNUSED(info);
 
-  CX_THROW(cx_eddsa_sign_no_throw(pvkey, hashID, hash, hash_len, sig, sig_len));
+    CX_THROW(cx_eddsa_sign_no_throw(pvkey, hashID, hash, hash_len, sig, sig_len));
 
-  size_t size;
-  CX_THROW(cx_ecdomain_parameters_length(pvkey->curve, &size));
+    size_t size;
+    CX_THROW(cx_ecdomain_parameters_length(pvkey->curve, &size));
 
-  return 2 * size;
+    return 2 * size;
 }
 
 /**
@@ -123,11 +132,11 @@ DEPRECATED static inline size_t cx_eddsa_sign ( const cx_ecfp_private_key_t * pv
  * @return              1 if the signature is verified, otherwise 0.
  */
 bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
-                     cx_md_t                     hashID,
-                     const uint8_t *             hash,
-                     size_t                      hash_len,
-                     const uint8_t *             sig,
-                     size_t                      sig_len);
+                              cx_md_t                     hashID,
+                              const uint8_t              *hash,
+                              size_t                      hash_len,
+                              const uint8_t              *sig,
+                              size_t                      sig_len);
 
 /**
  * @brief   Verifies a signature.
@@ -162,15 +171,22 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
  *
  * @return              1 if the signature is verified, otherwise 0.
  */
-static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode, cx_md_t hashID, const unsigned char * hash, unsigned int hash_len, const unsigned char * ctx, unsigned int ctx_len, const unsigned char * sig, unsigned int sig_len )
+static inline int cx_eddsa_verify(const cx_ecfp_public_key_t *pukey,
+                                  int                         mode,
+                                  cx_md_t                     hashID,
+                                  const unsigned char        *hash,
+                                  unsigned int                hash_len,
+                                  const unsigned char        *ctx,
+                                  unsigned int                ctx_len,
+                                  const unsigned char        *sig,
+                                  unsigned int                sig_len)
 {
-  UNUSED(mode);
-  UNUSED(ctx);
-  UNUSED(ctx_len);
+    UNUSED(mode);
+    UNUSED(ctx);
+    UNUSED(ctx_len);
 
-  return cx_eddsa_verify_no_throw(pukey, hashID, hash, hash_len, sig, sig_len);
+    return cx_eddsa_verify_no_throw(pukey, hashID, hash, hash_len, sig, sig_len);
 }
-
 
 /**
  * @brief   Encodes the curve point coordinates.
@@ -182,9 +198,7 @@ static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode
  * @param[in]      sign  Sign of the x-coordinate.
  *
  */
-  void cx_encode_coord(uint8_t * coord,
-                            int len,
-                            int sign);
+void cx_encode_coord(uint8_t *coord, int len, int sign);
 
 /**
  * @brief   Decodes the curve point coordinates.
@@ -195,9 +209,8 @@ static inline int cx_eddsa_verify ( const cx_ecfp_public_key_t * pukey, int mode
  *
  * @return               Sign of the x-coordinate.
  */
-  int cx_decode_coord(uint8_t * coord,
-                        int len);
+int cx_decode_coord(uint8_t *coord, int len);
 
 #endif
 
-#endif // HAVE_EDDSA
+#endif  // HAVE_EDDSA
