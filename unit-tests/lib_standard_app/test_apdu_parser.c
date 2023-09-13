@@ -9,13 +9,14 @@
 
 #include "parser.h"
 
-static void test_apdu_parser(void **state) {
+static void test_apdu_parser(void **state)
+{
     (void) state;
-    uint8_t apdu_bad_min_len[] = {0xE0, 0x03, 0x00};   // less than 4 bytes
-    uint8_t apdu_bad_lc[] = {0xE0, 0x03, 0x00, 0x00, 0x01};  // Lc = 1 but no data
-    uint8_t apdu_no_lc[] = {0xE0, 0x03, 0x01, 0x02};
-    uint8_t apdu_no_data[] = {0xE0, 0x03, 0x01, 0x02, 0x00};
-    uint8_t apdu[] = {0xE0, 0x03, 0x01, 0x02, 0x05, 0x00, 0x01, 0x02, 0x03, 0x04};
+    uint8_t apdu_bad_min_len[] = {0xE0, 0x03, 0x00};              // less than 4 bytes
+    uint8_t apdu_bad_lc[]      = {0xE0, 0x03, 0x00, 0x00, 0x01};  // Lc = 1 but no data
+    uint8_t apdu_no_lc[]       = {0xE0, 0x03, 0x01, 0x02};
+    uint8_t apdu_no_data[]     = {0xE0, 0x03, 0x01, 0x02, 0x00};
+    uint8_t apdu[]             = {0xE0, 0x03, 0x01, 0x02, 0x05, 0x00, 0x01, 0x02, 0x03, 0x04};
 
     command_t cmd;
 
@@ -54,7 +55,8 @@ static void test_apdu_parser(void **state) {
     assert_memory_equal(cmd.data, ((uint8_t[]){0x00, 0x01, 0x02, 0x03, 0x04}), cmd.lc);
 }
 
-int main() {
+int main()
+{
     const struct CMUnitTest tests[] = {cmocka_unit_test(test_apdu_parser)};
 
     return cmocka_run_group_tests(tests, NULL, NULL);

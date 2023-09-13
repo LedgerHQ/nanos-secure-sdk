@@ -3,8 +3,8 @@
 #ifndef __groestl_ref_h
 #define __groestl_ref_h
 
-//#include <stdio.h>
-//#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 #define NEED_UINT_64T
 
 /* ****
@@ -153,29 +153,29 @@ typedef unsigned long long uint_64t;
 #if defined(DLL_EXPORT)
 #if defined(_MSC_VER) || defined(__INTEL_COMPILER)
 #define VOID_RETURN __declspec(dllexport) void __stdcall
-#define INT_RETURN __declspec(dllexport) int __stdcall
+#define INT_RETURN  __declspec(dllexport) int __stdcall
 #elif defined(__GNUC__)
 #define VOID_RETURN __declspec(__dllexport__) void
-#define INT_RETURN __declspec(__dllexport__) int
+#define INT_RETURN  __declspec(__dllexport__) int
 #else
 #error Use of the DLL is only available on the Microsoft, Intel and GCC compilers
 #endif
 #elif defined(DLL_IMPORT)
 #if defined(_MSC_VER) || defined(__INTEL_COMPILER)
 #define VOID_RETURN __declspec(dllimport) void __stdcall
-#define INT_RETURN __declspec(dllimport) int __stdcall
+#define INT_RETURN  __declspec(dllimport) int __stdcall
 #elif defined(__GNUC__)
 #define VOID_RETURN __declspec(__dllimport__) void
-#define INT_RETURN __declspec(__dllimport__) int
+#define INT_RETURN  __declspec(__dllimport__) int
 #else
 #error Use of the DLL is only available on the Microsoft, Intel and GCC compilers
 #endif
 #elif defined(__WATCOMC__)
 #define VOID_RETURN void __cdecl
-#define INT_RETURN int __cdecl
+#define INT_RETURN  int __cdecl
 #else
 #define VOID_RETURN void
-#define INT_RETURN int
+#define INT_RETURN  int
 #endif
 #endif
 
@@ -198,9 +198,9 @@ typedef unsigned long long uint_64t;
                                 pointed to by 'x' ('n' is a power of 2)
 */
 
-#define ALIGN_OFFSET(x, n) (((ptrint_t)(x)) & ((n)-1))
-#define ALIGN_FLOOR(x, n) ((uint_8t *)(x) - (((ptrint_t)(x)) & ((n)-1)))
-#define ALIGN_CEIL(x, n) ((uint_8t *)(x) + (-((ptrint_t)(x)) & ((n)-1)))
+#define ALIGN_OFFSET(x, n) (((ptrint_t) (x)) & ((n) -1))
+#define ALIGN_FLOOR(x, n)  ((uint_8t *) (x) - (((ptrint_t) (x)) & ((n) -1)))
+#define ALIGN_CEIL(x, n)   ((uint_8t *) (x) + (-((ptrint_t) (x)) & ((n) -1)))
 
 /*  These defines are used to declare buffers in a way that allows
     faster operations on longer variables to be used.  In all these
@@ -222,14 +222,14 @@ typedef unsigned long long uint_64t;
                                 variable of length 'size' bits
 */
 
-#define UI_TYPE(size) uint_##size##t
-#define UNIT_TYPEDEF(x, size) typedef UI_TYPE(size) x
+#define UI_TYPE(size)                uint_##size##t
+#define UNIT_TYPEDEF(x, size)        typedef UI_TYPE(size) x
 #define BUFR_TYPEDEF(x, size, bsize) typedef UI_TYPE(size) x[bsize / (size >> 3)]
-#define UNIT_CAST(x, size) ((UI_TYPE(size))(x))
-#define UPTR_CAST(x, size) ((UI_TYPE(size) *)(x))
+#define UNIT_CAST(x, size)           ((UI_TYPE(size))(x))
+#define UPTR_CAST(x, size)           ((UI_TYPE(size) *) (x))
 
 /* Added by Soeren S. Thomsen (begin) */
-#define u8 uint_8t
+#define u8  uint_8t
 #define u32 uint_32t
 #define u64 uint_64t
 /* (end) */
@@ -240,19 +240,24 @@ typedef unsigned long long uint_64t;
 //End of inline
 **** */
 
-#define ROWS 8
+#define ROWS           8
 #define LENGTHFIELDLEN ROWS
-#define COLS512 8
-#define COLS1024 16
-#define SIZE512 (ROWS * COLS512)
+#define COLS512        8
+#define COLS1024       16
+#define SIZE512        (ROWS * COLS512)
 // #define SIZE1024 (ROWS*COLS1024)
-#define ROUNDS512 10
-#define ROUNDS1024 14
+#define ROUNDS512      10
+#define ROUNDS1024     14
 
-typedef enum { P512 = 0, Q512 = 1, P1024 = 2, Q1024 = 3 } Variant;
+typedef enum {
+    P512  = 0,
+    Q512  = 1,
+    P1024 = 2,
+    Q1024 = 3
+} Variant;
 
-#define mul1(b) ((u8)(b))
-#define mul2(b) ((u8)((b) >> 7 ? ((b) << 1) ^ 0x1b : ((b) << 1)))
+#define mul1(b) ((u8) (b))
+#define mul2(b) ((u8) ((b) >> 7 ? ((b) << 1) ^ 0x1b : ((b) << 1)))
 #define mul3(b) (mul2(b) ^ mul1(b))
 #define mul4(b) mul2(mul2(b))
 #define mul5(b) (mul4(b) ^ mul1(b))
@@ -261,7 +266,11 @@ typedef enum { P512 = 0, Q512 = 1, P1024 = 2, Q1024 = 3 } Variant;
 
 /* NIST API begin */
 typedef unsigned long long DataLength;
-typedef enum { SUCCESS = 0, FAIL = 1, BAD_HASHLEN = 2 } HashReturn;
+typedef enum {
+    SUCCESS     = 0,
+    FAIL        = 1,
+    BAD_HASHLEN = 2
+} HashReturn;
 /* NIST API end */
 
 /* helper functions */
@@ -269,4 +278,4 @@ void PrintHash(BitSequence *, int);
 
 #endif /* __groestl_ref_h */
 
-#endif // HAVE_GROESTL
+#endif  // HAVE_GROESTL

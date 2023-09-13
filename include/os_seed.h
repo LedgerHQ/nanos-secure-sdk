@@ -11,28 +11,28 @@
 /* -                             SEED FEATURE                            - */
 /* ----------------------------------------------------------------------- */
 
-#define BOLOS_UX_ONBOARDING_ALGORITHM_BIP39                 1
-#define BOLOS_UX_ONBOARDING_ALGORITHM_ELECTRUM              2
+#define BOLOS_UX_ONBOARDING_ALGORITHM_BIP39    1
+#define BOLOS_UX_ONBOARDING_ALGORITHM_ELECTRUM 2
 #if defined(HAVE_VAULT_RECOVERY_ALGO)
-#define BOLOS_UX_ONBOARDING_ALGORITHM_BIP39_VAULT_REC_MSK   3
-#define BOLOS_VAULT_RECOVERY_WORK_BUFFER_SIZE               64
-#endif // HAVE_VAULT_RECOVERY_ALGO
-#define BOLOS_MASTER_SEED_LEN                               (32)
+#define BOLOS_UX_ONBOARDING_ALGORITHM_BIP39_VAULT_REC_MSK 3
+#define BOLOS_VAULT_RECOVERY_WORK_BUFFER_SIZE             64
+#endif  // HAVE_VAULT_RECOVERY_ALGO
+#define BOLOS_MASTER_SEED_LEN (32)
 
 typedef enum {
-  SET_SEED = 0,
-  SET_STATE,
-  GET_STATE
+    SET_SEED = 0,
+    SET_STATE,
+    GET_STATE
 } os_action_t;
 
 /**
  * Set the persisted seed if none yet, else override the volatile seed (in RAM)
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_seed(
-    unsigned int        identity,
-    unsigned int        algorithm,
-    unsigned char *seed PLENGTH(length),
-    unsigned int        length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_seed(unsigned int identity,
+                                                                     unsigned int algorithm,
+                                                                     unsigned char *seed
+                                                                                  PLENGTH(length),
+                                                                     unsigned int length);
 
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_set_seed(
     unsigned char          identity,
@@ -45,27 +45,27 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_set_seed(
 
 #if defined(HAVE_VAULT_RECOVERY_ALGO)
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_prepare_seed(
-    const char * words,
+    const char  *words,
     unsigned int words_length,
-    uint8_t *vault_recovery_work_buffer);
+    uint8_t     *vault_recovery_work_buffer);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_derive_and_xor_seed(
     uint8_t *vault_recovery_work_buffer);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) unsigned char os_perso_get_seed_algorithm(void);
-#endif // HAVE_VAULT_RECOVERY_ALGO
+SYSCALL       PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+unsigned char os_perso_get_seed_algorithm(void);
+#endif  // HAVE_VAULT_RECOVERY_ALGO
 
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(
-    const unsigned char *words PLENGTH(length),
-    unsigned int               length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_words(const unsigned char *words
+                                                                                   PLENGTH(length),
+                                                                      unsigned int length);
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_finalize(void);
 #if defined(HAVE_RECOVER)
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_master_seed(
-    uint8_t *master_seed PLENGTH(length),
-    size_t               length,
-    os_action_t          action);
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_recover_state(
-    uint8_t *state,
-    os_action_t action);
-#endif // HAVE_RECOVER
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_master_seed(uint8_t *master_seed
+                                                                                    PLENGTH(length),
+                                                                        size_t      length,
+                                                                        os_action_t action);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_recover_state(uint8_t    *state,
+                                                                          os_action_t action);
+#endif  // HAVE_RECOVER
 
 // checked in the ux flow to avoid asking the pin for example
 // NBA : could also be checked by applications running in insecure mode - thus unprivilegied
@@ -73,22 +73,22 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_recover_state(
 SYSCALL bolos_bool_t os_perso_isonboarded(void);
 
 enum {
-  ONBOARDING_STATUS_WELCOME = 0,
-  ONBOARDING_STATUS_WELCOME_STEP2,
-  ONBOARDING_STATUS_WELCOME_STEP5,
-  ONBOARDING_STATUS_WELCOME_STEP6,
-  ONBOARDING_STATUS_WELCOME_REMEMBER,
-  ONBOARDING_STATUS_SETUP_CHOICE,
-  ONBOARDING_STATUS_PIN,
-  ONBOARDING_STATUS_NEW_DEVICE,
-  ONBOARDING_STATUS_NEW_DEVICE_CONFIRMING,
-  ONBOARDING_STATUS_RESTORE_SEED,
-  ONBOARDING_STATUS_SAFETY_WARNINGS,
-  ONBOARDING_STATUS_READY,
-  ONBOARDING_STATUS_CHOOSE_NAME,
-  ONBOARDING_STATUS_RECOVER_RESTORE_SEED,
-  ONBOARDING_STATUS_SETUP_CHOICE_RESTORE_SEED,
-  ONBOARDING_STATUS_CHECKING
+    ONBOARDING_STATUS_WELCOME = 0,
+    ONBOARDING_STATUS_WELCOME_STEP2,
+    ONBOARDING_STATUS_WELCOME_STEP5,
+    ONBOARDING_STATUS_WELCOME_STEP6,
+    ONBOARDING_STATUS_WELCOME_REMEMBER,
+    ONBOARDING_STATUS_SETUP_CHOICE,
+    ONBOARDING_STATUS_PIN,
+    ONBOARDING_STATUS_NEW_DEVICE,
+    ONBOARDING_STATUS_NEW_DEVICE_CONFIRMING,
+    ONBOARDING_STATUS_RESTORE_SEED,
+    ONBOARDING_STATUS_SAFETY_WARNINGS,
+    ONBOARDING_STATUS_READY,
+    ONBOARDING_STATUS_CHOOSE_NAME,
+    ONBOARDING_STATUS_RECOVER_RESTORE_SEED,
+    ONBOARDING_STATUS_SETUP_CHOICE_RESTORE_SEED,
+    ONBOARDING_STATUS_CHECKING
 };
 SYSCALL void os_perso_set_onboarding_status(unsigned int state,
                                             unsigned int count,
@@ -99,32 +99,34 @@ SYSCALL void os_perso_set_onboarding_status(unsigned int state,
 #ifndef HAVE_BOLOS
 DEPRECATED
 #endif
-SYSCALL void os_perso_derive_node_bip32(cx_curve_t                curve,
-                                        const unsigned int *path  PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
-                                        unsigned int              pathLength,
+SYSCALL void os_perso_derive_node_bip32(cx_curve_t curve,
+                                        const unsigned int *path
+                                                     PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
+                                        unsigned int pathLength,
                                         unsigned char *privateKey PLENGTH(64),
                                         unsigned char *chain      PLENGTH(32));
 
-#define HDW_NORMAL 0
+#define HDW_NORMAL         0
 #define HDW_ED25519_SLIP10 1
 // symmetric key derivation according to SLIP-0021
 // this only supports derivation of the master node (level 1)
-// the beginning of the authorized path is to be provided in the authorized derivation tag of the registry
-// starting with a \x00
-// Note: for SLIP21, the path is a string and the pathLength is the number of chars including the starting \0 byte.
-// However, firewall checks are processing a number of integers, therefore, take care not to locate the buffer too far
-// in memory to pass the firewall check.
-#define HDW_SLIP21 2
+// the beginning of the authorized path is to be provided in the authorized derivation tag of the
+// registry starting with a \x00 Note: for SLIP21, the path is a string and the pathLength is the
+// number of chars including the starting \0 byte. However, firewall checks are processing a number
+// of integers, therefore, take care not to locate the buffer too far in memory to pass the firewall
+// check.
+#define HDW_SLIP21         2
 
-// derive the seed for the requested BIP32 path, with the custom provided seed_key for the sha512 hmac ("Bitcoin Seed",
-// "Nist256p1 Seed", "ed25519 seed", ...)
-// Deprecated : see "os_derive_bip32_with_seed_no_throw"
+// derive the seed for the requested BIP32 path, with the custom provided seed_key for the sha512
+// hmac ("Bitcoin Seed", "Nist256p1 Seed", "ed25519 seed", ...) Deprecated : see
+// "os_derive_bip32_with_seed_no_throw"
 #ifndef HAVE_BOLOS
 DEPRECATED
 #endif
-SYSCALL void os_perso_derive_node_with_seed_key(unsigned int              mode,
-                                                cx_curve_t                curve,
-                                                const unsigned int *path  PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
+SYSCALL void os_perso_derive_node_with_seed_key(unsigned int mode,
+                                                cx_curve_t   curve,
+                                                const unsigned int *path
+                                                    PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
                                                 unsigned int              pathLength,
                                                 unsigned char *privateKey PLENGTH(64),
                                                 unsigned char *chain      PLENGTH(32),
@@ -162,36 +164,33 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_with_seed_no_throw(
     const unsigned int *path,
     unsigned int        path_len,
     unsigned char       raw_privkey[static 64],
-    unsigned char *     chain_code,
-    unsigned char *     seed,
-    unsigned int        seed_len) {
+    unsigned char      *chain_code,
+    unsigned char      *seed,
+    unsigned int        seed_len)
+{
     cx_err_t error = CX_OK;
 
-    BEGIN_TRY {
-        TRY {
-            // ignore the deprecated warning, pragma to remove when the "no throw" OS function will be available
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    BEGIN_TRY
+    {
+        TRY
+        {
+// ignore the deprecated warning, pragma to remove when the "no throw" OS function will be available
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             // Derive the seed with path
-            os_perso_derive_node_bip32_seed_key(derivation_mode,
-                                                curve,
-                                                path,
-                                                path_len,
-                                                raw_privkey,
-                                                chain_code,
-                                                seed,
-                                                seed_len);
-            #pragma GCC diagnostic pop
+            os_perso_derive_node_bip32_seed_key(
+                derivation_mode, curve, path, path_len, raw_privkey, chain_code, seed, seed_len);
+#pragma GCC diagnostic pop
         }
-        CATCH_OTHER(e) {
+        CATCH_OTHER(e)
+        {
             error = e;
 
             // Make sure the caller doesn't use uninitialized data in case
             // the return code is not checked.
             explicit_bzero(raw_privkey, 64);
         }
-        FINALLY {
-        }
+        FINALLY {}
     }
     END_TRY;
 
@@ -216,30 +215,25 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_with_seed_no_throw(
  *                             - CX_INTERNAL_ERROR
  */
 WARN_UNUSED_RESULT static inline cx_err_t os_derive_bip32_no_throw(
-        cx_curve_t curve,
-        const unsigned int *path,
-        unsigned int path_len,
-        unsigned char raw_privkey[static 64],
-        unsigned char *chain_code) {
-    return os_derive_bip32_with_seed_no_throw(HDW_NORMAL,
-                                              curve,
-                                              path,
-                                              path_len,
-                                              raw_privkey,
-                                              chain_code,
-                                              NULL,
-                                              0);
+    cx_curve_t          curve,
+    const unsigned int *path,
+    unsigned int        path_len,
+    unsigned char       raw_privkey[static 64],
+    unsigned char      *chain_code)
+{
+    return os_derive_bip32_with_seed_no_throw(
+        HDW_NORMAL, curve, path, path_len, raw_privkey, chain_code, NULL, 0);
 }
 
 // Deprecated : see "os_derive_eip2333_no_throw"
 #ifndef HAVE_BOLOS
 DEPRECATED
 #endif
-SYSCALL void os_perso_derive_eip2333(
-    cx_curve_t                curve,
-    const unsigned int *path  PLENGTH(4 * (pathLength & 0x0FFFFFFFu)),
-    unsigned int              pathLength,
-    unsigned char *privateKey PLENGTH(32));
+SYSCALL void os_perso_derive_eip2333(cx_curve_t                curve,
+                                     const unsigned int *path  PLENGTH(4
+                                                                      * (pathLength & 0x0FFFFFFFu)),
+                                     unsigned int              pathLength,
+                                     unsigned char *privateKey PLENGTH(32));
 
 /**
  * @brief   Gets the private key from the device seed using the specified eip2333 path.
@@ -257,30 +251,33 @@ SYSCALL void os_perso_derive_eip2333(
  *                             - CX_INTERNAL_ERROR
  */
 WARN_UNUSED_RESULT static inline cx_err_t os_derive_eip2333_no_throw(
-        cx_curve_t curve,
-        const unsigned int *path,
-        unsigned int path_len,
-        unsigned char raw_privkey[static 64]) {
+    cx_curve_t          curve,
+    const unsigned int *path,
+    unsigned int        path_len,
+    unsigned char       raw_privkey[static 64])
+{
     cx_err_t error = CX_OK;
 
-    BEGIN_TRY {
-        TRY {
-            // ignore the deprecated warning, pragma to remove when the "no throw" OS function will be available
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    BEGIN_TRY
+    {
+        TRY
+        {
+// ignore the deprecated warning, pragma to remove when the "no throw" OS function will be available
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             // Derive the seed with path
             os_perso_derive_eip2333(curve, path, path_len, raw_privkey);
-            #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
         }
-        CATCH_OTHER(e) {
+        CATCH_OTHER(e)
+        {
             error = e;
 
             // Make sure the caller doesn't use uninitialized data in case
             // the return code is not checked.
             explicit_bzero(raw_privkey, 64);
         }
-        FINALLY {
-        }
+        FINALLY {}
     }
     END_TRY;
 
@@ -289,11 +286,12 @@ WARN_UNUSED_RESULT static inline cx_err_t os_derive_eip2333_no_throw(
 
 /**
  * Generate a seed based cookie
- * seed => derivation (path 0xda7aba5e/0xc1a551c5) => priv key =SECP256K1=> pubkey => sha512 => cookie
+ * seed => derivation (path 0xda7aba5e/0xc1a551c5) => priv key =SECP256K1=> pubkey => sha512 =>
+ * cookie
  */
 
 #if defined(HAVE_SEED_COOKIE)
 // seed_cookie length has to be CX_SHA512_SIZE.
 // return BOLOS_TRUE if the seed has been generated, return BOLOS_FALSE otherwise.
 SYSCALL bolos_bool_t os_perso_seed_cookie(unsigned char *seed_cookie PLENGTH(CX_SHA512_SIZE));
-#endif // HAVE_SEED_COOKIE
+#endif  // HAVE_SEED_COOKIE
