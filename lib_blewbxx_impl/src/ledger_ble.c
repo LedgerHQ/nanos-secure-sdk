@@ -159,17 +159,17 @@ typedef struct {
 /* Private functions prototypes ----------------------------------------------*/
 static void get_device_name(void);
 static void configure_advertising_mngr(uint16_t opcode);
-static void init_mngr(uint16_t opcode, uint8_t *buffer, uint16_t length);
-static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length);
-static void hci_evt_le_meta_evt(uint8_t *buffer, uint16_t length);
-static void hci_evt_vendor(uint8_t *buffer, uint16_t length);
+static void init_mngr(uint16_t opcode, const uint8_t *buffer, uint16_t length);
+static void hci_evt_cmd_complete(const uint8_t *buffer, uint16_t length);
+static void hci_evt_le_meta_evt(const uint8_t *buffer, uint16_t length);
+static void hci_evt_vendor(const uint8_t *buffer, uint16_t length);
 static void end_pairing_ux(uint8_t pairing_ok);
 static void ask_user_pairing_numeric_comparison(uint32_t code);
 static void rsp_user_pairing_numeric_comparison(unsigned int status);
 static void ask_user_pairing_passkey(void);
 static void rsp_user_pairing_passkey(unsigned int status);
-static void attribute_modified(uint8_t *buffer, uint16_t length);
-static void write_permit_request(uint8_t *buffer, uint16_t length);
+static void attribute_modified(const uint8_t *buffer, uint16_t length);
+static void write_permit_request(const uint8_t *buffer, uint16_t length);
 static void advertising_enable(uint8_t enable);
 static void start_advertising(void);
 static void notify_chunk(void);
@@ -291,7 +291,7 @@ static void configure_advertising_mngr(uint16_t opcode)
     }
 }
 
-static void init_mngr(uint16_t opcode, uint8_t *buffer, uint16_t length)
+static void init_mngr(uint16_t opcode, const uint8_t *buffer, uint16_t length)
 {
     UNUSED(length);
 
@@ -462,7 +462,7 @@ static void init_mngr(uint16_t opcode, uint8_t *buffer, uint16_t length)
     }
 }
 
-static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length)
+static void hci_evt_cmd_complete(const uint8_t *buffer, uint16_t length)
 {
     if (length < 3) {
         return;
@@ -564,7 +564,7 @@ static void hci_evt_cmd_complete(uint8_t *buffer, uint16_t length)
     }
 }
 
-static void hci_evt_le_meta_evt(uint8_t *buffer, uint16_t length)
+static void hci_evt_le_meta_evt(const uint8_t *buffer, uint16_t length)
 {
     if (!length) {
         return;
@@ -636,7 +636,7 @@ static void hci_evt_le_meta_evt(uint8_t *buffer, uint16_t length)
     }
 }
 
-static void hci_evt_vendor(uint8_t *buffer, uint16_t length)
+static void hci_evt_vendor(const uint8_t *buffer, uint16_t length)
 {
     if (length < 4) {
         return;
@@ -814,7 +814,7 @@ static void rsp_user_pairing_passkey(unsigned int status)
     }
 }
 
-static void attribute_modified(uint8_t *buffer, uint16_t length)
+static void attribute_modified(const uint8_t *buffer, uint16_t length)
 {
     if (length < 6) {
         return;
@@ -843,8 +843,6 @@ static void attribute_modified(uint8_t *buffer, uint16_t length)
              && (ledger_ble_data.notifications_enabled) && (ledger_ble_data.connection.encrypted)
              && (att_data_length)) {
         LOG_BLE("WRITE CMD %d\n", length - 4);
-        buffer[4] = 0xDE;
-        buffer[5] = 0xF1;
         LEDGER_PROTOCOL_rx(&buffer[4], length - 4);
 
         if (ledger_protocol_data.rx_apdu_status == APDU_STATUS_COMPLETE) {
@@ -891,7 +889,7 @@ static void attribute_modified(uint8_t *buffer, uint16_t length)
     }
 }
 
-static void write_permit_request(uint8_t *buffer, uint16_t length)
+static void write_permit_request(const uint8_t *buffer, uint16_t length)
 {
     if (length < 3) {
         return;
@@ -905,8 +903,6 @@ static void write_permit_request(uint8_t *buffer, uint16_t length)
     if ((att_handle == ledger_ble_data.ledger_gatt_write_characteristic_handle + 1)
         && (ledger_ble_data.notifications_enabled) && (ledger_ble_data.connection.encrypted)
         && (data_length)) {
-        buffer[1] = 0xDE;
-        buffer[2] = 0xF1;
         LEDGER_PROTOCOL_rx(&buffer[1], length - 1);
         aci_gatt_write_resp(ledger_ble_data.connection.connection_handle,
                             att_handle,
@@ -1030,7 +1026,7 @@ void LEDGER_BLE_init(void)
     init_mngr(0, NULL, 0);
 }
 
-void LEDGER_BLE_send(uint8_t *packet, uint16_t packet_length)
+void LEDGER_BLE_send(const uint8_t *packet, uint16_t packet_length)
 {
     if ((ledger_ble_data.transfer_mode_enable != 0) && (packet_length == 2)) {
         G_io_app.apdu_state         = APDU_IDLE;
@@ -1057,7 +1053,7 @@ void LEDGER_BLE_send(uint8_t *packet, uint16_t packet_length)
     }
 }
 
-void LEDGER_BLE_receive(void)
+void LEDGER_BLE_receive(const uint8_t *spi_buffer)
 {
     if (G_io_seproxyhal_spi_buffer[3] == HCI_EVENT_PKT_TYPE) {
         switch (G_io_seproxyhal_spi_buffer[4]) {

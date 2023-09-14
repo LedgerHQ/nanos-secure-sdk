@@ -30,7 +30,8 @@ enum {
 
 /* Exported types, structures, unions ----------------------------------------*/
 typedef struct ledger_protocol_s {
-    uint8_t *tx_apdu_buffer;
+    const uint8_t *tx_apdu_buffer;
+
     uint16_t tx_apdu_length;
     uint16_t tx_apdu_sequence_number;
     uint16_t tx_apdu_offset;
@@ -57,5 +58,5 @@ typedef struct ledger_protocol_s {
 
 /* Exported functions prototypes--------------------------------------------- */
 void LEDGER_PROTOCOL_init(ledger_protocol_t *data);
-void LEDGER_PROTOCOL_rx(uint8_t *buffer, uint16_t length);
-void LEDGER_PROTOCOL_tx(uint8_t *buffer, uint16_t length);
+void LEDGER_PROTOCOL_rx(const uint8_t *buffer, uint16_t length);
+void LEDGER_PROTOCOL_tx(const uint8_t *buffer, uint16_t length);
