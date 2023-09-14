@@ -279,7 +279,7 @@ unsigned int io_seproxyhal_handle_event(void)
 
 #ifdef HAVE_BLE
         case SEPROXYHAL_TAG_BLE_RECV_EVENT:
-            LEDGER_BLE_receive();
+            LEDGER_BLE_receive(G_io_seproxyhal_spi_buffer);
             return 1;
 #endif  // HAVE_BLE
 

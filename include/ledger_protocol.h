@@ -46,6 +46,8 @@ typedef struct ledger_protocol_s {
     uint16_t rx_apdu_length;
     uint16_t rx_apdu_offset;
 
+    uint8_t *rx_dst_buffer;
+
     uint16_t mtu;
     uint8_t  mtu_negotiated;
 } ledger_protocol_t;
