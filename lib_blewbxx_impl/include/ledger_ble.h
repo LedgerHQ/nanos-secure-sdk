@@ -37,6 +37,7 @@
 void LEDGER_BLE_init(void);
 void LEDGER_BLE_send(const uint8_t *packet, uint16_t packet_length);
 void LEDGER_BLE_receive(const uint8_t *spi_buffer);
+void LEDGER_BLE_set_recv_buffer(uint8_t *buffer, uint16_t buffer_length);
 void LEDGER_BLE_enable_advertising(uint8_t enable);
 void LEDGER_BLE_reset_pairings(void);
 void LEDGER_BLE_accept_pairing(uint8_t status);
