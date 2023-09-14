@@ -163,11 +163,13 @@ static void init_mngr(uint16_t opcode, const uint8_t *buffer, uint16_t length);
 static void hci_evt_cmd_complete(const uint8_t *buffer, uint16_t length);
 static void hci_evt_le_meta_evt(const uint8_t *buffer, uint16_t length);
 static void hci_evt_vendor(const uint8_t *buffer, uint16_t length);
+#ifdef HAVE_INAPP_BLE_PAIRING
 static void end_pairing_ux(uint8_t pairing_ok);
 static void ask_user_pairing_numeric_comparison(uint32_t code);
 static void rsp_user_pairing_numeric_comparison(unsigned int status);
 static void ask_user_pairing_passkey(void);
 static void rsp_user_pairing_passkey(unsigned int status);
+#endif  // HAVE_INAPP_BLE_PAIRING
 static void attribute_modified(const uint8_t *buffer, uint16_t length);
 static void write_permit_request(const uint8_t *buffer, uint16_t length);
 static void advertising_enable(uint8_t enable);
@@ -541,7 +543,9 @@ static void hci_evt_cmd_complete(const uint8_t *buffer, uint16_t length)
         if (ledger_ble_data.connection.connection_handle != 0xFFFF) {
             if (G_io_app.disabling_advertising) {
                 // Connected & ordered to disable ble, force disconnection
+#ifdef HAVE_INAPP_BLE_PAIRING
                 end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
+#endif  // HAVE_INAPP_BLE_PAIRING
                 LEDGER_BLE_init();
             }
         }
@@ -659,6 +663,7 @@ static void hci_evt_vendor(const uint8_t *buffer, uint16_t length)
     }
 
     switch (opcode) {
+#ifdef HAVE_INAPP_BLE_PAIRING
         case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
             LOG_BLE("PAIRING");
             switch (buffer[4]) {
@@ -698,6 +703,7 @@ static void hci_evt_vendor(const uint8_t *buffer, uint16_t length)
             LOG_BLE("NUMERIC COMP : %d\n", U4LE(buffer, 4));
             ask_user_pairing_numeric_comparison(U4LE(buffer, 4));
             break;
+#endif  // HAVE_INAPP_BLE_PAIRING
 
         case ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE:
             attribute_modified(&buffer[4], length - 4);
@@ -728,7 +734,9 @@ static void hci_evt_vendor(const uint8_t *buffer, uint16_t length)
 
         case ACI_GATT_PROC_TIMEOUT_VSEVT_CODE:
             LOG_BLE("PROCEDURE TIMEOUT\n");
+#ifdef HAVE_INAPP_BLE_PAIRING
             end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
+#endif  // HAVE_INAPP_BLE_PAIRING
             LEDGER_BLE_init();
             break;
 
@@ -738,6 +746,7 @@ static void hci_evt_vendor(const uint8_t *buffer, uint16_t length)
     }
 }
 
+#ifdef HAVE_INAPP_BLE_PAIRING
 static void end_pairing_ux(uint8_t pairing_ok)
 {
     bolos_ux_params_t ux_params;
@@ -812,6 +821,7 @@ static void rsp_user_pairing_passkey(unsigned int status)
     aci_gap_pass_key_resp(ledger_ble_data.connection.connection_handle,
                           ledger_ble_data.pairing_code);
 }
+#endif  // HAVE_INAPP_BLE_PAIRING
 
 static void attribute_modified(const uint8_t *buffer, uint16_t length)
 {
@@ -1054,7 +1064,9 @@ void LEDGER_BLE_receive(const uint8_t *spi_buffer)
                 ledger_ble_data.connection.encrypted         = 0;
                 ledger_ble_data.transfer_mode_enable         = 0;
                 G_io_app.transfer_mode                       = 0;
+#ifdef HAVE_INAPP_BLE_PAIRING
                 end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_FAILED);
+#endif                                        // HAVE_INAPP_BLE_PAIRING
                 if (spi_buffer[9] != 0x28) {  // Error code : Instant Passed
                     start_advertising();
                 }
