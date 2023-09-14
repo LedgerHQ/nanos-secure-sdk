@@ -37,17 +37,6 @@ static bool ux_forward_event(bool ignoring_app_if_ux_busy)
     G_ux_params.len   = 0;
     os_ux(&G_ux_params);
     G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX);
-#ifdef HAVE_BLE
-    if (G_ux.asynchmodal_end_callback
-        && (os_ux_get_status(BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST) != 0)) {
-        asynchmodal_end_callback_t cb = G_ux.asynchmodal_end_callback;
-        // reset G_ux.asynchmodal_end_callback for next time
-        G_ux.asynchmodal_end_callback = NULL;
-        cb(os_ux_get_status(BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST));
-        // for app to redraw/refresh itself
-        G_ux_params.len = BOLOS_UX_REDRAW;
-    }
-#endif  // HAVE_BLE
     if (G_ux_params.len == BOLOS_UX_REDRAW) {
         // enable drawing according to UX decision
         nbgl_objAllowDrawing(true);

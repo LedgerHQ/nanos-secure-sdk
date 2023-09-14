@@ -316,6 +316,7 @@ void io_seproxyhal_play_tune(tune_index_e tune_index);
 void io_seph_ble_enable(unsigned char enable);
 void io_seph_ble_clear_bond_db(void);
 void io_seph_ble_name_changed(void);
+void io_seph_ux_accept_pairing(unsigned char status);
 #endif  // HAVE_BLE
 void io_seph_ux_redisplay(void);
 
