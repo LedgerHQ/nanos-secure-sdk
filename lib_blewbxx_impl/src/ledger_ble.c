@@ -747,12 +747,16 @@ static void ask_user_pairing_numeric_comparison(uint32_t code)
     bolos_ux_params_t ux_params;
 
     ux_params.u.pairing_request.type             = BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST_NUMCOMP;
+    ux_params.ux_id                              = BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST;
+    ux_params.len                                = sizeof(ux_params.u.pairing_request);
+    ledger_ble_data.pairing_in_progress          = 1;
     ux_params.u.pairing_request.pairing_info_len = 6;
     SPRINTF(ux_params.u.pairing_request.pairing_info, "%06d", (unsigned int) code);
-    ux_params.ux_id                                  = BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST;
-    ux_params.len                                    = sizeof(ux_params.u.pairing_request);
+#ifdef TARGET_STAX
+    G_io_asynch_ux_callback.asynchmodal_end_callback = NULL;
+#else   // !TARGET_STAX
     G_io_asynch_ux_callback.asynchmodal_end_callback = rsp_user_pairing_numeric_comparison;
-    ledger_ble_data.pairing_in_progress              = 1;
+#endif  // !TARGET_STAX
     os_ux(&ux_params);
 }
 
@@ -779,28 +783,35 @@ static void ask_user_pairing_passkey(void)
 {
     bolos_ux_params_t ux_params;
 
-    ledger_ble_data.pairing_code                 = cx_rng_u32_range_func(0, 1000000, cx_rng_u32);
     ux_params.u.pairing_request.type             = BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST_PASSKEY;
+    ux_params.ux_id                              = BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST;
+    ux_params.len                                = sizeof(ux_params.u.pairing_request);
+    ledger_ble_data.pairing_in_progress          = 1;
+    ledger_ble_data.pairing_code                 = cx_rng_u32_range_func(0, 1000000, cx_rng_u32);
     ux_params.u.pairing_request.pairing_info_len = 6;
     SPRINTF(ux_params.u.pairing_request.pairing_info, "%06d", ledger_ble_data.pairing_code);
-    ux_params.ux_id                                  = BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST;
-    ux_params.len                                    = sizeof(ux_params.u.pairing_request);
+#ifdef TARGET_STAX
+    G_io_asynch_ux_callback.asynchmodal_end_callback = NULL;
+#else   // !TARGET_STAX
     G_io_asynch_ux_callback.asynchmodal_end_callback = rsp_user_pairing_passkey;
-    ledger_ble_data.pairing_in_progress              = 1;
+#endif  // !TARGET_STAX
     os_ux(&ux_params);
 }
 
 static void rsp_user_pairing_passkey(unsigned int status)
 {
-    if (status != BOLOS_UX_OK) {  // BLE_TODO
+    if (status == BOLOS_UX_OK) {
         end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_ACCEPT_PASSKEY);
         ledger_ble_data.pairing_code = cx_rng_u32_range_func(0, 1000000, cx_rng_u32);
+        aci_gap_pass_key_resp(ledger_ble_data.connection.connection_handle,
+                              ledger_ble_data.pairing_code);
+    }
+    else if (status == BOLOS_UX_IGNORE) {
+        ledger_ble_data.pairing_in_progress = 0;
     }
     else {
         end_pairing_ux(BOLOS_UX_ASYNCHMODAL_PAIRING_STATUS_CANCEL_PASSKEY);
     }
-    aci_gap_pass_key_resp(ledger_ble_data.connection.connection_handle,
-                          ledger_ble_data.pairing_code);
 }
 
 static void attribute_modified(uint8_t *buffer, uint16_t length)
@@ -1143,6 +1154,16 @@ void LEDGER_BLE_reset_pairings(void)
         else {
             aci_gap_clear_security_db();
         }
+    }
+}
+
+void LEDGER_BLE_accept_pairing(uint8_t status)
+{
+    if (ledger_ble_data.pairing_in_progress == 1) {
+        rsp_user_pairing_numeric_comparison(status);
+    }
+    else if (ledger_ble_data.pairing_in_progress == 2) {
+        rsp_user_pairing_passkey(status);
     }
 }
 
