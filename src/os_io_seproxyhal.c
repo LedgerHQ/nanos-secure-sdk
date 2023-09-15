@@ -307,6 +307,11 @@ unsigned int io_seproxyhal_handle_event(void) {
         G_io_app.name_changed = 1;
         io_seph_ble_enable(0);
         break;
+
+      case SEPROXYHAL_TAG_UX_CMD_ACCEPT_PAIRING:
+        LEDGER_BLE_accept_pairing(G_io_seproxyhal_spi_buffer[4]);
+        return 1;
+        break;
 #endif // HAVE_BLE
 
 #if !defined(HAVE_BOLOS) && defined(HAVE_BAGL)
@@ -314,7 +319,16 @@ unsigned int io_seproxyhal_handle_event(void) {
         ux_stack_redisplay();
         return 1;
         break;
-#endif // HAVE_BOLOS
+#endif  // HAVE_BOLOS && HAVE_BAGL
+
+#if !defined(HAVE_BOLOS) && defined(HAVE_NBGL)
+      case SEPROXYHAL_TAG_UX_CMD_REDISPLAY:
+        nbgl_objAllowDrawing(true);
+        nbgl_screenRedraw();
+        nbgl_refresh();
+        return 1;
+        break;
+#endif  // HAVE_BOLOS && HAVE_NBGL
 
       default:
         return io_event(CHANNEL_SPI);
@@ -1007,6 +1021,16 @@ void io_seph_ux_redisplay(void)
   G_io_seproxyhal_spi_buffer[2] = 1;
   G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_UX_CMD_REDISPLAY;
   io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
+}
+
+void io_seph_ux_accept_pairing(unsigned char status)
+{
+    G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_UX_CMD;
+    G_io_seproxyhal_spi_buffer[1] = 0;
+    G_io_seproxyhal_spi_buffer[2] = 2;
+    G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_UX_CMD_ACCEPT_PAIRING;
+    G_io_seproxyhal_spi_buffer[4] = status;
+    io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 5);
 }
 
 static const unsigned char seph_io_usb_disconnect[] = {
