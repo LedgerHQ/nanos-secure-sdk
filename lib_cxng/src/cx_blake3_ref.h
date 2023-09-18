@@ -10,93 +10,100 @@
 
 #define INLINE static inline __attribute__((always_inline))
 
-INLINE uint32_t load32(const void *src) {
+INLINE uint32_t load32(const void *src)
+{
 #if defined(NATIVE_LITTLE_ENDIAN)
-  uint32_t w;
-  memcpy(&w, src, sizeof w);
-  return w;
+    uint32_t w;
+    memcpy(&w, src, sizeof w);
+    return w;
 #else
-  const uint8_t *p = (const uint8_t *)src;
-  return ((uint32_t)(p[0]) << 0) | ((uint32_t)(p[1]) << 8) | ((uint32_t)(p[2]) << 16) | ((uint32_t)(p[3]) << 24);
+    const uint8_t *p = (const uint8_t *) src;
+    return ((uint32_t) (p[0]) << 0) | ((uint32_t) (p[1]) << 8) | ((uint32_t) (p[2]) << 16)
+           | ((uint32_t) (p[3]) << 24);
 #endif
 }
 
-INLINE uint32_t rotr32(uint32_t w, uint32_t c) {
-  return (w >> c) | (w << (32 - c));
+INLINE uint32_t rotr32(uint32_t w, uint32_t c)
+{
+    return (w >> c) | (w << (32 - c));
 }
 
-INLINE void load_key_words(const uint8_t key[BLAKE3_KEY_LEN],
-                           uint32_t key_words[8]) {
-  key_words[0] = load32(&key[0 * 4]);
-  key_words[1] = load32(&key[1 * 4]);
-  key_words[2] = load32(&key[2 * 4]);
-  key_words[3] = load32(&key[3 * 4]);
-  key_words[4] = load32(&key[4 * 4]);
-  key_words[5] = load32(&key[5 * 4]);
-  key_words[6] = load32(&key[6 * 4]);
-  key_words[7] = load32(&key[7 * 4]);
+INLINE void load_key_words(const uint8_t key[BLAKE3_KEY_LEN], uint32_t key_words[8])
+{
+    key_words[0] = load32(&key[0 * 4]);
+    key_words[1] = load32(&key[1 * 4]);
+    key_words[2] = load32(&key[2 * 4]);
+    key_words[3] = load32(&key[3 * 4]);
+    key_words[4] = load32(&key[4 * 4]);
+    key_words[5] = load32(&key[5 * 4]);
+    key_words[6] = load32(&key[6 * 4]);
+    key_words[7] = load32(&key[7 * 4]);
 }
 
-INLINE void store32(void *dst, uint32_t w) {
+INLINE void store32(void *dst, uint32_t w)
+{
 #if defined(NATIVE_LITTLE_ENDIAN)
-  memcpy(dst, &w, sizeof w);
+    memcpy(dst, &w, sizeof w);
 #else
-  uint8_t *p = (uint8_t *)dst;
-  p[0]       = (uint8_t)(w >> 0);
-  p[1]       = (uint8_t)(w >> 8);
-  p[2]       = (uint8_t)(w >> 16);
-  p[3]       = (uint8_t)(w >> 24);
+    uint8_t *p = (uint8_t *) dst;
+    p[0]       = (uint8_t) (w >> 0);
+    p[1]       = (uint8_t) (w >> 8);
+    p[2]       = (uint8_t) (w >> 16);
+    p[3]       = (uint8_t) (w >> 24);
 #endif
 }
 
-INLINE void store_cv_words(uint8_t bytes_out[32], uint32_t cv_words[8]) {
-  store32(&bytes_out[0 * 4], cv_words[0]);
-  store32(&bytes_out[1 * 4], cv_words[1]);
-  store32(&bytes_out[2 * 4], cv_words[2]);
-  store32(&bytes_out[3 * 4], cv_words[3]);
-  store32(&bytes_out[4 * 4], cv_words[4]);
-  store32(&bytes_out[5 * 4], cv_words[5]);
-  store32(&bytes_out[6 * 4], cv_words[6]);
-  store32(&bytes_out[7 * 4], cv_words[7]);
+INLINE void store_cv_words(uint8_t bytes_out[32], uint32_t cv_words[8])
+{
+    store32(&bytes_out[0 * 4], cv_words[0]);
+    store32(&bytes_out[1 * 4], cv_words[1]);
+    store32(&bytes_out[2 * 4], cv_words[2]);
+    store32(&bytes_out[3 * 4], cv_words[3]);
+    store32(&bytes_out[4 * 4], cv_words[4]);
+    store32(&bytes_out[5 * 4], cv_words[5]);
+    store32(&bytes_out[6 * 4], cv_words[6]);
+    store32(&bytes_out[7 * 4], cv_words[7]);
 }
 
-static unsigned int highest_one(uint64_t x) {
-  unsigned int c = 0;
-  if (x & 0xffffffff00000000ULL) {
-    x >>= 32;
-    c  += 32;
-  }
-  if (x & 0x00000000ffff0000ULL) {
-    x >>= 16;
-    c  += 16;
-  }
-  if (x & 0x000000000000ff00ULL) {
-    x >>= 8;
-    c  += 8;
-  }
-  if (x & 0x00000000000000f0ULL) {
-    x >>= 4;
-     c += 4;
-  }
-  if (x & 0x000000000000000cULL) {
-    x >>= 2;
-    c  += 2;
-  }
-  if (x & 0x0000000000000002ULL) {
-    c += 1;
-  }
+static unsigned int highest_one(uint64_t x)
+{
+    unsigned int c = 0;
+    if (x & 0xffffffff00000000ULL) {
+        x >>= 32;
+        c += 32;
+    }
+    if (x & 0x00000000ffff0000ULL) {
+        x >>= 16;
+        c += 16;
+    }
+    if (x & 0x000000000000ff00ULL) {
+        x >>= 8;
+        c += 8;
+    }
+    if (x & 0x00000000000000f0ULL) {
+        x >>= 4;
+        c += 4;
+    }
+    if (x & 0x000000000000000cULL) {
+        x >>= 2;
+        c += 2;
+    }
+    if (x & 0x0000000000000002ULL) {
+        c += 1;
+    }
 
-  return c;
+    return c;
 }
 
 // The Hamming weight of x, i.e. the number of 1 in the binary representation
-INLINE unsigned int hw(uint64_t x) {
-  unsigned int count = 0;
-  while (x) {
-    count += 1;
-    x     &= x - 1;
-  }
-  return count;
+INLINE unsigned int hw(uint64_t x)
+{
+    unsigned int count = 0;
+    while (x) {
+        count += 1;
+        x &= x - 1;
+    }
+    return count;
 }
 
 /**
@@ -133,7 +140,9 @@ void blake3_state_update(cx_blake3_state_t *chunk_state, const uint8_t *input, s
  *
  * @param[in] chunk_counter Number of already compressed chunks.
  */
-void blake3_state_reset(cx_blake3_state_t *chunk_state, const uint32_t *key, uint64_t chunk_counter);
+void blake3_state_reset(cx_blake3_state_t *chunk_state,
+                        const uint32_t    *key,
+                        uint64_t           chunk_counter);
 
 /**
  * @brief   Output the chunk state.
@@ -181,8 +190,12 @@ void blake3_output_chain(const cx_blake3_state_out_t *out, uint8_t *cv);
  *
  * @param[out] out           Output of the compression: the chaining value of a parent node.
  */
-void blake3_compress_subtree_to_parent(const uint8_t *input, size_t input_len, const uint32_t *key,
-                                       uint64_t chunk_counter, uint8_t flags, uint8_t *out);
+void blake3_compress_subtree_to_parent(const uint8_t  *input,
+                                       size_t          input_len,
+                                       const uint32_t *key,
+                                       uint64_t        chunk_counter,
+                                       uint8_t         flags,
+                                       uint8_t        *out);
 
 /**
  * @brief Merge the chaining values stack.
@@ -230,5 +243,5 @@ void blake3_output_root_bytes(const cx_blake3_state_out_t *chunk_out, uint8_t *o
  */
 void blake3_init_ctx(cx_blake3_t *hash, const uint32_t *key, uint8_t mode);
 
-#endif // CX_BLAKE3_REF_H
-#endif // HAVE_BLAKE3
+#endif  // CX_BLAKE3_REF_H
+#endif  // HAVE_BLAKE3

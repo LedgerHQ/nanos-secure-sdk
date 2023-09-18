@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    lcx_math.h
@@ -57,10 +57,11 @@ cx_err_t cx_math_cmp_no_throw(const uint8_t *a, const uint8_t *b, size_t length,
  * @deprecated
  * See #cx_math_cmp_no_throw
  */
-DEPRECATED static inline int32_t cx_math_cmp(const uint8_t *a, const uint8_t *b, size_t length) {
-  int diff;
-  CX_THROW(cx_math_cmp_no_throw(a, b, length, &diff));
-  return diff;
+DEPRECATED static inline int32_t cx_math_cmp(const uint8_t *a, const uint8_t *b, size_t length)
+{
+    int diff;
+    CX_THROW(cx_math_cmp_no_throw(a, b, length, &diff));
+    return diff;
 }
 
 /**
@@ -109,12 +110,13 @@ cx_err_t cx_math_add_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
  * @throws         CX_MEMORY_FULL
  * @throws         CX_INVALID_PARAMETER
  */
-static inline uint32_t cx_math_add(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len) {
-  cx_err_t error = cx_math_add_no_throw(r, a, b, len);
-  if (error && error != CX_CARRY) {
-    THROW(error);
-  }
-  return (error == CX_CARRY);
+static inline uint32_t cx_math_add(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len)
+{
+    cx_err_t error = cx_math_add_no_throw(r, a, b, len);
+    if (error && error != CX_CARRY) {
+        THROW(error);
+    }
+    return (error == CX_CARRY);
 }
 
 /**
@@ -163,12 +165,13 @@ cx_err_t cx_math_sub_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
  * @throws         CX_MEMORY_FULL
  * @throws         CX_INVALID_PARAMETER
  */
-static inline uint32_t cx_math_sub(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len) {
-  cx_err_t error = cx_math_sub_no_throw(r, a, b, len);
-  if (error && error != CX_CARRY) {
-    THROW(error);
-  }
-  return (error == CX_CARRY);
+static inline uint32_t cx_math_sub(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len)
+{
+    cx_err_t error = cx_math_sub_no_throw(r, a, b, len);
+    if (error && error != CX_CARRY) {
+        THROW(error);
+    }
+    return (error == CX_CARRY);
 }
 
 /**
@@ -196,8 +199,12 @@ cx_err_t cx_math_mult_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, s
  * @deprecated
  * See #cx_math_mult_no_throw
  */
-DEPRECATED static inline void cx_math_mult(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len) {
-  CX_THROW(cx_math_mult_no_throw(r, a, b, len));
+DEPRECATED static inline void cx_math_mult(uint8_t       *r,
+                                           const uint8_t *a,
+                                           const uint8_t *b,
+                                           size_t         len)
+{
+    CX_THROW(cx_math_mult_no_throw(r, a, b, len));
 }
 
 /**
@@ -224,14 +231,23 @@ DEPRECATED static inline void cx_math_mult(uint8_t *r, const uint8_t *a, const u
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_addm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
+cx_err_t cx_math_addm_no_throw(uint8_t       *r,
+                               const uint8_t *a,
+                               const uint8_t *b,
+                               const uint8_t *m,
+                               size_t         len);
 
 /**
  * @deprecated
  * See #cx_math_addm_no_throw
  */
-DEPRECATED static inline void cx_math_addm(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len) {
-  CX_THROW(cx_math_addm_no_throw(r, a, b, m, len));
+DEPRECATED static inline void cx_math_addm(uint8_t       *r,
+                                           const uint8_t *a,
+                                           const uint8_t *b,
+                                           const uint8_t *m,
+                                           size_t         len)
+{
+    CX_THROW(cx_math_addm_no_throw(r, a, b, m, len));
 }
 
 /**
@@ -258,14 +274,23 @@ DEPRECATED static inline void cx_math_addm(uint8_t *r, const uint8_t *a, const u
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_subm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
+cx_err_t cx_math_subm_no_throw(uint8_t       *r,
+                               const uint8_t *a,
+                               const uint8_t *b,
+                               const uint8_t *m,
+                               size_t         len);
 
 /**
  * @deprecated
  * See #cx_math_subm_no_throw
  */
-DEPRECATED static inline void cx_math_subm(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len) {
-  CX_THROW(cx_math_subm_no_throw(r, a, b, m, len));
+DEPRECATED static inline void cx_math_subm(uint8_t       *r,
+                                           const uint8_t *a,
+                                           const uint8_t *b,
+                                           const uint8_t *m,
+                                           size_t         len)
+{
+    CX_THROW(cx_math_subm_no_throw(r, a, b, m, len));
 }
 
 /**
@@ -292,14 +317,23 @@ DEPRECATED static inline void cx_math_subm(uint8_t *r, const uint8_t *a, const u
  *                 - CX_INVALID_PARAMETER
  *                 - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_math_multm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
+cx_err_t cx_math_multm_no_throw(uint8_t       *r,
+                                const uint8_t *a,
+                                const uint8_t *b,
+                                const uint8_t *m,
+                                size_t         len);
 
 /**
  * @deprecated
  * See #cx_math_multm_no_throw
  */
-DEPRECATED static inline void cx_math_multm(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len) {
-  CX_THROW(cx_math_multm_no_throw(r, a, b, m, len));
+DEPRECATED static inline void cx_math_multm(uint8_t       *r,
+                                            const uint8_t *a,
+                                            const uint8_t *b,
+                                            const uint8_t *m,
+                                            size_t         len)
+{
+    CX_THROW(cx_math_multm_no_throw(r, a, b, m, len));
 }
 
 /**
@@ -329,8 +363,9 @@ cx_err_t cx_math_modm_no_throw(uint8_t *v, size_t len_v, const uint8_t *m, size_
  * @deprecated
  * See #cx_math_modm_no_throw
  */
-DEPRECATED static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8_t *m, size_t len_m) {
-  CX_THROW(cx_math_modm_no_throw(v, len_v, m, len_m));
+DEPRECATED static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8_t *m, size_t len_m)
+{
+    CX_THROW(cx_math_modm_no_throw(v, len_v, m, len_m));
 }
 
 /**
@@ -358,14 +393,25 @@ DEPRECATED static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8
  *                   - CX_MEMORY_FULL
  *                   - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_powm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *e, size_t len_e, const uint8_t *m, size_t len);
+cx_err_t cx_math_powm_no_throw(uint8_t       *r,
+                               const uint8_t *a,
+                               const uint8_t *e,
+                               size_t         len_e,
+                               const uint8_t *m,
+                               size_t         len);
 
 /**
  * @deprecated
  * See #cx_math_powm_no_throw
  */
-DEPRECATED static inline void cx_math_powm(uint8_t *r, const uint8_t *a, const uint8_t *e, size_t len_e, const uint8_t *m, size_t len) {
-  CX_THROW(cx_math_powm_no_throw(r, a, e, len_e, m, len));
+DEPRECATED static inline void cx_math_powm(uint8_t       *r,
+                                           const uint8_t *a,
+                                           const uint8_t *e,
+                                           size_t         len_e,
+                                           const uint8_t *m,
+                                           size_t         len)
+{
+    CX_THROW(cx_math_powm_no_throw(r, a, e, len_e, m, len));
 }
 
 /**
@@ -395,8 +441,12 @@ cx_err_t cx_math_invprimem_no_throw(uint8_t *r, const uint8_t *a, const uint8_t 
  * @deprecated
  * See #cx_math_invprimem_no_throw
  */
-DEPRECATED static inline void cx_math_invprimem(uint8_t *r, const uint8_t *a, const uint8_t *m, size_t len) {
-  CX_THROW(cx_math_invprimem_no_throw(r, a, m, len));
+DEPRECATED static inline void cx_math_invprimem(uint8_t       *r,
+                                                const uint8_t *a,
+                                                const uint8_t *m,
+                                                size_t         len)
+{
+    CX_THROW(cx_math_invprimem_no_throw(r, a, m, len));
 }
 
 /**
@@ -427,8 +477,9 @@ cx_err_t cx_math_invintm_no_throw(uint8_t *r, uint32_t a, const uint8_t *m, size
  * @deprecated
  * See #cx_math_invintm_no_throw
  */
-DEPRECATED static inline void cx_math_invintm(uint8_t *r, uint32_t a, const uint8_t *m, size_t len) {
-  CX_THROW(cx_math_invintm_no_throw(r, a, m, len));
+DEPRECATED static inline void cx_math_invintm(uint8_t *r, uint32_t a, const uint8_t *m, size_t len)
+{
+    CX_THROW(cx_math_invintm_no_throw(r, a, m, len));
 }
 
 /**
@@ -456,10 +507,11 @@ cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
  * @deprecated
  * See #cx_math_is_prime_no_throw
  */
-DEPRECATED static inline bool cx_math_is_prime(const uint8_t *r, size_t len) {
-  bool prime;
-  CX_THROW(cx_math_is_prime_no_throw(r, len, &prime));
-  return prime;
+DEPRECATED static inline bool cx_math_is_prime(const uint8_t *r, size_t len)
+{
+    bool prime;
+    CX_THROW(cx_math_is_prime_no_throw(r, len, &prime));
+    return prime;
 }
 
 /**
@@ -485,8 +537,9 @@ cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
  * @deprecated
  * See #cx_math_next_prime_no_throw
  */
-DEPRECATED static inline void cx_math_next_prime(uint8_t *r, uint32_t len) {
-  CX_THROW(cx_math_next_prime_no_throw(r, len));
+DEPRECATED static inline void cx_math_next_prime(uint8_t *r, uint32_t len)
+{
+    CX_THROW(cx_math_next_prime_no_throw(r, len));
 }
 
 /**
@@ -498,16 +551,17 @@ DEPRECATED static inline void cx_math_next_prime(uint8_t *r, uint32_t len) {
  *
  * @return        1 if a is all zero, 0 otherwise.
  */
-static inline bool cx_math_is_zero(const uint8_t *a, size_t len) {
-  uint32_t i;
-  for (i=0; i<len; i++) {
-    if (a[i] != 0) {
-      return 0;
+static inline bool cx_math_is_zero(const uint8_t *a, size_t len)
+{
+    uint32_t i;
+    for (i = 0; i < len; i++) {
+        if (a[i] != 0) {
+            return 0;
+        }
     }
-  }
-  return 1;
+    return 1;
 }
 
-#endif // LCX_MATH_H
+#endif  // LCX_MATH_H
 
-#endif // HAVE_MATH
+#endif  // HAVE_MATH

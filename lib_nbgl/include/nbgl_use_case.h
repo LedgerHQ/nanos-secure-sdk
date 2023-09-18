@@ -21,38 +21,38 @@ extern "C" {
  *      DEFINES
  *********************/
 /**
- *  @brief when using controls in page content (@ref nbgl_pageContent_t), this is the first token value
- * usable for these controls
+ *  @brief when using controls in page content (@ref nbgl_pageContent_t), this is the first token
+ * value usable for these controls
  */
 #define FIRST_USER_TOKEN 20
 
 /**
- *  @brief value of page parameter used with navigation callback when "skip" button is touched, to display the long press button to confirm
- *         review.
+ *  @brief value of page parameter used with navigation callback when "skip" button is touched, to
+ * display the long press button to confirm review.
  */
 #define LAST_PAGE_FOR_REVIEW 0xFF
 
 /**
  *  @brief maximum number of lines for value field in details pages
  */
-#define NB_MAX_LINES_IN_DETAILS  12
+#define NB_MAX_LINES_IN_DETAILS 12
 
 /**
  *  @brief maximum number of lines for value field in review pages
  */
-#define NB_MAX_LINES_IN_REVIEW    9
+#define NB_MAX_LINES_IN_REVIEW 9
 
 /**
  *  @brief maximum number of simultaneously displayed pairs in review pages.
  *         Can be useful when using nbgl_useCaseStaticReview() with the
  *         callback mechanism to retrieve the item/value pairs.
  */
-#define NB_MAX_DISPLAYED_PAIRS_IN_REVIEW    4
+#define NB_MAX_DISPLAYED_PAIRS_IN_REVIEW 4
 
 /**
  *  @brief height available for tag/value pairs display
  */
-#define TAG_VALUE_AREA_HEIGHT   400
+#define TAG_VALUE_AREA_HEIGHT 400
 
 /**
  *  @brief Default strings used in the Home tagline
@@ -68,7 +68,8 @@ extern "C" {
 /**
  *  @brief Max supported length of appName used for the default Home tagline
  */
-#define MAX_APP_NAME_FOR_SDK_TAGLINE (APP_DESCRIPTION_MAX_LEN - 1 - (sizeof(TAGLINE_PART1) + sizeof(TAGLINE_PART2)))
+#define MAX_APP_NAME_FOR_SDK_TAGLINE \
+    (APP_DESCRIPTION_MAX_LEN - 1 - (sizeof(TAGLINE_PART1) + sizeof(TAGLINE_PART2)))
 
 /**********************
  *      MACROS
@@ -101,41 +102,83 @@ typedef void (*nbgl_choiceCallback_t)(bool confirm);
  **********************/
 
 // utils
-uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t nbPairs,
-                                                const nbgl_layoutTagValueList_t *tagValueList,
-                                                uint8_t startIndex,
-                                                bool *tooLongToFit);
+uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPairs,
+                                         const nbgl_layoutTagValueList_t *tagValueList,
+                                         uint8_t                          startIndex,
+                                         bool                            *tooLongToFit);
 uint8_t nbgl_useCaseGetNbPagesForTagValueList(const nbgl_layoutTagValueList_t *tagValueList);
 
 // use case drawing
-void nbgl_useCaseHome(const char *appName, const nbgl_icon_details_t *appIcon, const char *tagline, bool withSettings,
-                      nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback);
-void nbgl_useCaseHomeExt(const char *appName, const nbgl_icon_details_t *appIcon, const char *tagline, bool withSettings,
-                         const char *actionButtonText, nbgl_callback_t actionCallback,
-                         nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback);
-void nbgl_useCasePlugInHome(const char *plugInName, const char *appName,
-                            const nbgl_icon_details_t *appIcon, const char *tagline,
-                            const char *subTagline, bool withSettings,
-                            nbgl_callback_t topRightCallback, nbgl_callback_t quitCallback);
-void nbgl_useCaseSettings(const char *settingsTitle, uint8_t initPage, uint8_t nbPages, bool touchableTitle,
-                          nbgl_callback_t quitCallback, nbgl_navCallback_t navCallback,
+void nbgl_useCaseHome(const char                *appName,
+                      const nbgl_icon_details_t *appIcon,
+                      const char                *tagline,
+                      bool                       withSettings,
+                      nbgl_callback_t            topRightCallback,
+                      nbgl_callback_t            quitCallback);
+void nbgl_useCaseHomeExt(const char                *appName,
+                         const nbgl_icon_details_t *appIcon,
+                         const char                *tagline,
+                         bool                       withSettings,
+                         const char                *actionButtonText,
+                         nbgl_callback_t            actionCallback,
+                         nbgl_callback_t            topRightCallback,
+                         nbgl_callback_t            quitCallback);
+void nbgl_useCasePlugInHome(const char                *plugInName,
+                            const char                *appName,
+                            const nbgl_icon_details_t *appIcon,
+                            const char                *tagline,
+                            const char                *subTagline,
+                            bool                       withSettings,
+                            nbgl_callback_t            topRightCallback,
+                            nbgl_callback_t            quitCallback);
+void nbgl_useCaseSettings(const char                *settingsTitle,
+                          uint8_t                    initPage,
+                          uint8_t                    nbPages,
+                          bool                       touchableTitle,
+                          nbgl_callback_t            quitCallback,
+                          nbgl_navCallback_t         navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback);
-void nbgl_useCaseChoice(const nbgl_icon_details_t *icon, const char *message, const char *subMessage, const char *confirmText, const char *rejectString, nbgl_choiceCallback_t callback);
-void nbgl_useCaseConfirm(const char *message, const char *subMessage, const char *confirmText, const char *rejectText, nbgl_callback_t callback);
+void nbgl_useCaseChoice(const nbgl_icon_details_t *icon,
+                        const char                *message,
+                        const char                *subMessage,
+                        const char                *confirmText,
+                        const char                *rejectString,
+                        nbgl_choiceCallback_t      callback);
+void nbgl_useCaseConfirm(const char     *message,
+                         const char     *subMessage,
+                         const char     *confirmText,
+                         const char     *rejectText,
+                         nbgl_callback_t callback);
 void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t quitCallback);
-void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon, const char *reviewTitle, const char *reviewSubTitle, const char *rejectText,
-                             nbgl_callback_t continueCallback, nbgl_callback_t rejectCallback);
-void nbgl_useCaseRegularReview(uint8_t initPage, uint8_t nbPages, const char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
-                               nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback);
-void nbgl_useCaseForwardOnlyReview(const char *rejectText, nbgl_layoutTouchCallback_t buttonCallback,
-                                   nbgl_navCallback_t navCallback, nbgl_choiceCallback_t choiceCallback);
-void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList, const nbgl_pageInfoLongPress_t *infoLongPress,
-                              const char *rejectText, nbgl_choiceCallback_t callback);
-void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList, const nbgl_pageInfoLongPress_t *infoLongPress,
-                                   const char *rejectText, nbgl_choiceCallback_t callback);
+void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon,
+                             const char                *reviewTitle,
+                             const char                *reviewSubTitle,
+                             const char                *rejectText,
+                             nbgl_callback_t            continueCallback,
+                             nbgl_callback_t            rejectCallback);
+void nbgl_useCaseRegularReview(uint8_t                    initPage,
+                               uint8_t                    nbPages,
+                               const char                *rejectText,
+                               nbgl_layoutTouchCallback_t buttonCallback,
+                               nbgl_navCallback_t         navCallback,
+                               nbgl_choiceCallback_t      choiceCallback);
+void nbgl_useCaseForwardOnlyReview(const char                *rejectText,
+                                   nbgl_layoutTouchCallback_t buttonCallback,
+                                   nbgl_navCallback_t         navCallback,
+                                   nbgl_choiceCallback_t      choiceCallback);
+void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList,
+                              const nbgl_pageInfoLongPress_t  *infoLongPress,
+                              const char                      *rejectText,
+                              nbgl_choiceCallback_t            callback);
+void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList,
+                                   const nbgl_pageInfoLongPress_t  *infoLongPress,
+                                   const char                      *rejectText,
+                                   nbgl_choiceCallback_t            callback);
 void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping);
 void nbgl_useCaseAddressConfirmation(const char *address, nbgl_choiceCallback_t callback);
-void nbgl_useCaseAddressConfirmationExt(const char *address, nbgl_choiceCallback_t callback, const nbgl_layoutTagValueList_t *tagValueList);
+void nbgl_useCaseAddressConfirmationExt(const char                      *address,
+                                        nbgl_choiceCallback_t            callback,
+                                        const nbgl_layoutTagValueList_t *tagValueList);
 void nbgl_useCaseSpinner(const char *text);
 
 #ifdef __cplusplus
