@@ -8,11 +8,12 @@
 
 #include "buffer.h"
 
-static void test_buffer_can_read(void **state) {
+static void test_buffer_can_read(void **state)
+{
     (void) state;
 
-    uint8_t temp[20] = {0};
-    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+    uint8_t  temp[20] = {0};
+    buffer_t buf      = {.ptr = temp, .size = sizeof(temp), .offset = 0};
 
     assert_true(buffer_can_read(&buf, 20));
 
@@ -20,11 +21,12 @@ static void test_buffer_can_read(void **state) {
     assert_false(buffer_can_read(&buf, 1));
 }
 
-static void test_buffer_seek(void **state) {
+static void test_buffer_seek(void **state)
+{
     (void) state;
 
-    uint8_t temp[20] = {0};
-    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+    uint8_t  temp[20] = {0};
+    buffer_t buf      = {.ptr = temp, .size = sizeof(temp), .offset = 0};
 
     assert_true(buffer_can_read(&buf, 20));
 
@@ -41,7 +43,8 @@ static void test_buffer_seek(void **state) {
     assert_false(buffer_seek_set(&buf, 21));  // can't seek at offset 21
 }
 
-static void test_buffer_read(void **state) {
+static void test_buffer_read(void **state)
+{
     (void) state;
 
     // clang-format off
