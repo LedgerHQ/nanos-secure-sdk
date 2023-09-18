@@ -17,7 +17,6 @@
  ******************************************************************************
  */
 
-
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32_WPAN_COMMON_H
 #define __STM32_WPAN_COMMON_H
@@ -26,18 +25,19 @@
 extern "C" {
 #endif
 
-#if   defined ( __CC_ARM )
- #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
- #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
- #define __STATIC_INLINE  static __inline
-#elif defined ( __ICCARM__ )
- #define __ASM            __asm                                      /*!< asm keyword for IAR Compiler          */
- #define __INLINE         inline                                     /*!< inline keyword for IAR Compiler. Only available in High optimization mode! */
- #define __STATIC_INLINE  static inline
-#elif defined ( __GNUC__ )
- #define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
- #define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
- #define __STATIC_INLINE  static inline
+#if defined(__CC_ARM)
+#define __ASM           __asm    /*!< asm keyword for ARM Compiler          */
+#define __INLINE        __inline /*!< inline keyword for ARM Compiler       */
+#define __STATIC_INLINE static __inline
+#elif defined(__ICCARM__)
+#define __ASM __asm /*!< asm keyword for IAR Compiler          */
+#define __INLINE \
+    inline /*!< inline keyword for IAR Compiler. Only available in High optimization mode! */
+#define __STATIC_INLINE static inline
+#elif defined(__GNUC__)
+#define __ASM           __asm  /*!< asm keyword for GNU Compiler          */
+#define __INLINE        inline /*!< inline keyword for GNU Compiler       */
+#define __STATIC_INLINE static inline
 #endif
 
 #include <stdint.h>
@@ -47,96 +47,112 @@ extern "C" {
 #include <stdarg.h>
 #include "core_cmFunc.h"
 
-  /* -------------------------------- *
-   *  Basic definitions               *
-   * -------------------------------- */
+/* -------------------------------- *
+ *  Basic definitions               *
+ * -------------------------------- */
 
 #undef NULL
-#define NULL                    0U
+#define NULL 0U
 
 #undef FALSE
-#define FALSE                   0U
+#define FALSE 0U
 
 #undef TRUE
-#define TRUE                    (!0U)
+#define TRUE (!0U)
 
-  /* -------------------------------- *
-   *  Critical Section definition     *
-   * -------------------------------- */
+/* -------------------------------- *
+ *  Critical Section definition     *
+ * -------------------------------- */
 #undef BACKUP_PRIMASK
-#define BACKUP_PRIMASK()    uint32_t primask_bit= __get_PRIMASK()
+#define BACKUP_PRIMASK() uint32_t primask_bit = __get_PRIMASK()
 
 #undef DISABLE_IRQ
-#define DISABLE_IRQ()       __disable_irq()
+#define DISABLE_IRQ() __disable_irq()
 
 #undef RESTORE_PRIMASK
-#define RESTORE_PRIMASK()   __set_PRIMASK(primask_bit)
+#define RESTORE_PRIMASK() __set_PRIMASK(primask_bit)
 
-  /* -------------------------------- *
-   *  Macro delimiters                *
-   * -------------------------------- */
+/* -------------------------------- *
+ *  Macro delimiters                *
+ * -------------------------------- */
 #undef M_BEGIN
-#define M_BEGIN     do {
+#define M_BEGIN do {
+#undef M_END
+#define M_END \
+    }         \
+    while (0)
 
-#undef  M_END
-#define M_END       } while(0)
-
-  /* -------------------------------- *
-   *  Some useful macro definitions   *
-   * -------------------------------- */
+/* -------------------------------- *
+ *  Some useful macro definitions   *
+ * -------------------------------- */
 #undef MAX
-#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 #undef MIN
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 #undef MODINC
-#define MODINC( a, m )       M_BEGIN  (a)++;  if ((a)>=(m)) (a)=0;  M_END
+#define MODINC(a, m) \
+    M_BEGIN(a)++;    \
+    if ((a) >= (m))  \
+        (a) = 0;     \
+    M_END
 
 #undef MODDEC
-#define MODDEC( a, m )       M_BEGIN  if ((a)==0) (a)=(m);  (a)--;  M_END
+#define MODDEC(a, m)                \
+    M_BEGIN if ((a) == 0)(a) = (m); \
+    (a)--;                          \
+    M_END
 
 #undef MODADD
-#define MODADD( a, b, m )    M_BEGIN  (a)+=(b);  if ((a)>=(m)) (a)-=(m);  M_END
+#define MODADD(a, b, m) \
+    M_BEGIN(a) += (b);  \
+    if ((a) >= (m))     \
+        (a) -= (m);     \
+    M_END
 
 #undef MODSUB
-#define MODSUB( a, b, m )    MODADD( a, (m)-(b), m )
+#define MODSUB(a, b, m) MODADD(a, (m) - (b), m)
 
 #undef ALIGN
 #ifdef WIN32
 #define ALIGN(n)
 #else
-#define ALIGN(n)             __attribute__((aligned(n)))
+#define ALIGN(n) __attribute__((aligned(n)))
 #endif
 
 #undef PAUSE
-#define PAUSE( t )           M_BEGIN \
-                               volatile int _i; \
-                               for ( _i = t; _i > 0; _i -- ); \
-                             M_END
+#define PAUSE(t)               \
+    M_BEGIN                    \
+    volatile int _i;           \
+    for (_i = t; _i > 0; _i--) \
+        ;                      \
+    M_END
 #undef DIVF
-#define DIVF( x, y )         ((x)/(y))
+#define DIVF(x, y) ((x) / (y))
 
 #undef DIVC
-#define DIVC( x, y )         (((x)+(y)-1)/(y))
+#define DIVC(x, y) (((x) + (y) -1) / (y))
 
 #undef DIVR
-#define DIVR( x, y )         (((x)+((y)/2))/(y))
+#define DIVR(x, y) (((x) + ((y) / 2)) / (y))
 
 #undef SHRR
-#define SHRR( x, n )         ((((x)>>((n)-1))+1)>>1)
+#define SHRR(x, n) ((((x) >> ((n) -1)) + 1) >> 1)
 
 #undef BITN
-#define BITN( w, n )         (((w)[(n)/32] >> ((n)%32)) & 1)
+#define BITN(w, n) (((w)[(n) / 32] >> ((n) % 32)) & 1)
 
 #undef BITNSET
-#define BITNSET( w, n, b )   M_BEGIN (w)[(n)/32] |= ((U32)(b))<<((n)%32); M_END
+#define BITNSET(w, n, b)                               \
+    M_BEGIN(w)[(n) / 32] |= ((U32) (b)) << ((n) % 32); \
+    M_END
 
 /* -------------------------------- *
  *  Section attribute               *
  * -------------------------------- */
 #undef PLACE_IN_SECTION
-#define PLACE_IN_SECTION( __x__ )  __attribute__((section (__x__)))
+#define PLACE_IN_SECTION(__x__) __attribute__((section(__x__)))
 
 /* ----------------------------------- *
  *  Packed usage (compiler dependent)  *
@@ -144,21 +160,21 @@ extern "C" {
 #undef PACKED__
 #undef PACKED_STRUCT
 
-#if defined ( __CC_ARM )
-  #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050U)
-    #define PACKED__ __attribute__((packed))
-    #define PACKED_STRUCT struct PACKED__
-  #else
-    #define PACKED__(TYPE) __packed TYPE
-    #define PACKED_STRUCT PACKED__(struct)
-  #endif
-#elif defined   ( __GNUC__ )
-  #define PACKED__ __attribute__((packed))
-  #define PACKED_STRUCT struct PACKED__
-#elif defined (__ICCARM__)
-  #define PACKED_STRUCT __packed struct
+#if defined(__CC_ARM)
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050U)
+#define PACKED__      __attribute__((packed))
+#define PACKED_STRUCT struct PACKED__
+#else
+#define PACKED__(TYPE) __packed TYPE
+#define PACKED_STRUCT  PACKED__(struct)
+#endif
+#elif defined(__GNUC__)
+#define PACKED__      __attribute__((packed))
+#define PACKED_STRUCT struct PACKED__
+#elif defined(__ICCARM__)
+#define PACKED_STRUCT __packed struct
 #elif
-  #define PACKED_STRUCT __packed struct
+#define PACKED_STRUCT __packed struct
 #endif
 
 #ifdef __cplusplus

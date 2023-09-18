@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    ox_bn.h
@@ -41,10 +41,9 @@
  *
  * @details A BN size shall be a multiple of this.
  */
-#define CX_BN_WORD_ALIGNEMENT                   16
+#define CX_BN_WORD_ALIGNEMENT 16
 
 /* high level, public and common */
-
 
 /* ========================================================================= */
 /* ===                               TYPES                               === */
@@ -62,7 +61,6 @@ typedef struct {
     cx_bn_t n;  ///< @private Modulus
     cx_bn_t h;  ///< @private Second Montgomery constant
 } cx_bn_mont_ctx_t;
-
 
 /* ========================================================================= */
 /* ===                              CONFIG                               === */
@@ -141,7 +139,6 @@ cx_err_t cx_bn_locked(void);
  */
 SYSCALL cx_err_t cx_bn_alloc(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)), size_t nbytes);
 
-
 /**
  * @brief   Allocates memory for a new BN and
  *          initializes it with the specified value.
@@ -163,7 +160,10 @@ SYSCALL cx_err_t cx_bn_alloc(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)), size_t nbytes)
  *                         - CX_BN_MEMORY_FULL
  *                         - CX_BN_INVALID_PARAMETER_SIZE
  */
-SYSCALL cx_err_t cx_bn_alloc_init(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)),  size_t nbytes, const uint8_t *value PLENGTH(value_nbytes), size_t value_nbytes);
+SYSCALL cx_err_t cx_bn_alloc_init(cx_bn_t *x           PLENGTH(sizeof(cx_bn_t)),
+                                  size_t               nbytes,
+                                  const uint8_t *value PLENGTH(value_nbytes),
+                                  size_t               value_nbytes);
 
 /**
  * @brief   Releases a BN and gives back its attached memory to the system.
@@ -177,7 +177,6 @@ SYSCALL cx_err_t cx_bn_alloc_init(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)),  size_t n
  */
 SYSCALL cx_err_t cx_bn_destroy(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)));
 
-
 /**
  * @brief   Gets the size in bytes of a BN.
  *
@@ -190,7 +189,6 @@ SYSCALL cx_err_t cx_bn_destroy(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)));
  *                    - CX_BN_INVALID_PARAMETER
  */
 SYSCALL cx_err_t cx_bn_nbytes(const cx_bn_t x, size_t *nbytes);
-
 
 /* ========================================================================= */
 /* ===                                R/W                                === */
@@ -209,8 +207,9 @@ SYSCALL cx_err_t cx_bn_nbytes(const cx_bn_t x, size_t *nbytes);
  *                           - CX_BN_INVALID_PARAMETER_SIZE
  *                           - CX_BN_INVALID_PARAMETER_VALUE
  */
-SYSCALL cx_err_t cx_bn_init(cx_bn_t x, const uint8_t *value PLENGTH(value_nbytes), size_t value_nbytes);
-
+SYSCALL cx_err_t cx_bn_init(cx_bn_t              x,
+                            const uint8_t *value PLENGTH(value_nbytes),
+                            size_t               value_nbytes);
 
 /**
  * @brief   Generates a random number and
@@ -286,7 +285,6 @@ SYSCALL cx_err_t cx_bn_get_u32(const cx_bn_t x, uint32_t *n);
  *                     - CX_BN_INVALID_PARAMETER_VALUE
  */
 SYSCALL cx_err_t cx_bn_export(const cx_bn_t x, uint8_t *bytes PLENGTH(nbytes), size_t nbytes);
-
 
 /* ========================================================================= */
 /* ===                               TEST                                === */
@@ -505,7 +503,6 @@ SYSCALL cx_err_t cx_bn_cnt_bits(cx_bn_t n, uint32_t *nbits);
 /* ===                      NON MODULAR ARITHMETIC                       === */
 /* ========================================================================= */
 
-
 /**
  * @brief   Performs an addition **r = a + b**.
  *
@@ -561,8 +558,6 @@ SYSCALL cx_err_t cx_bn_sub(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *               - CX_INVALID_PARAMETER
  */
 SYSCALL cx_err_t cx_bn_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
-
-
 
 /* ========================================================================= */
 /* ===                     Z/pZ  MODULAR ARITHMETIC                      === */
@@ -724,7 +719,11 @@ SYSCALL cx_err_t cx_bn_mod_pow_bn(cx_bn_t r, const cx_bn_t a, const cx_bn_t e, c
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_pow(cx_bn_t r, const cx_bn_t a, const uint8_t *e PLENGTH(e_len), uint32_t e_len, const cx_bn_t n);
+SYSCALL cx_err_t cx_bn_mod_pow(cx_bn_t          r,
+                               const cx_bn_t    a,
+                               const uint8_t *e PLENGTH(e_len),
+                               uint32_t         e_len,
+                               const cx_bn_t    n);
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -752,8 +751,11 @@ SYSCALL cx_err_t cx_bn_mod_pow(cx_bn_t r, const cx_bn_t a, const uint8_t *e PLEN
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_pow2(cx_bn_t r, const cx_bn_t a, const uint8_t *e PLENGTH(e_len), uint32_t e_len, const cx_bn_t n);
-
+SYSCALL cx_err_t cx_bn_mod_pow2(cx_bn_t          r,
+                                const cx_bn_t    a,
+                                const uint8_t *e PLENGTH(e_len),
+                                uint32_t         e_len,
+                                const cx_bn_t    n);
 
 /**
  * @brief   Computes the modular inverse **r = a^(-1) mod n**,
@@ -799,9 +801,6 @@ SYSCALL cx_err_t cx_bn_mod_invert_nprime(cx_bn_t r, const cx_bn_t a, const cx_bn
  */
 SYSCALL cx_err_t cx_bn_mod_u32_invert(cx_bn_t r, uint32_t a, cx_bn_t n);
 
-
-
-
 /* ========================================================================= */
 /* ===                   MONTGOMERY  MODULAR ARITHMETIC                  === */
 /* ========================================================================= */
@@ -818,7 +817,8 @@ SYSCALL cx_err_t cx_bn_mod_u32_invert(cx_bn_t r, uint32_t a, cx_bn_t n);
  *                   - CX_NOT_LOCKED
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_alloc(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )),  size_t length);
+SYSCALL cx_err_t cx_mont_alloc(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
+                               size_t                length);
 
 /**
  * @brief   Initializes a Montgomery context with the modulus.
@@ -835,7 +835,8 @@ SYSCALL cx_err_t cx_mont_alloc(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_c
  *                - CX_INVALID_PARAMETER
  *                - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_init(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )), const cx_bn_t n);
+SYSCALL cx_err_t cx_mont_init(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
+                              const cx_bn_t         n);
 
 /**
  * @brief   Initializes a Montgomery context with the modulus and
@@ -857,7 +858,9 @@ SYSCALL cx_err_t cx_mont_init(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ct
  *                - CX_NOT_LOCKED
  *                - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_mont_init2(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )), const cx_bn_t n, const cx_bn_t h);
+SYSCALL cx_err_t cx_mont_init2(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
+                               const cx_bn_t         n,
+                               const cx_bn_t         h);
 
 /**
  * @brief   Computes the Montgomery representation of a BN value.
@@ -877,7 +880,10 @@ SYSCALL cx_err_t cx_mont_init2(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_c
  *                 - CX_INVALID_PARAMETER
  *                 - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_to_montgomery(cx_bn_t x, const cx_bn_t z, const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )));
+SYSCALL cx_err_t
+cx_mont_to_montgomery(cx_bn_t                     x,
+                      const cx_bn_t               z,
+                      const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Computes the normal representation of a BN value
@@ -899,8 +905,10 @@ SYSCALL cx_err_t cx_mont_to_montgomery(cx_bn_t x, const cx_bn_t z, const cx_bn_m
  *                 - CX_INVALID_PARAMETER
  *                 - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_from_montgomery(cx_bn_t z, const cx_bn_t x, const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )));
-
+SYSCALL cx_err_t
+cx_mont_from_montgomery(cx_bn_t                     z,
+                        const cx_bn_t               x,
+                        const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Performs a Montgomery multiplication.
@@ -921,7 +929,10 @@ SYSCALL cx_err_t cx_mont_from_montgomery(cx_bn_t z, const cx_bn_t x, const cx_bn
  *                 - CX_NOT_LOCKED
  *                 - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_mont_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )));
+SYSCALL cx_err_t cx_mont_mul(cx_bn_t                     r,
+                             const cx_bn_t               a,
+                             const cx_bn_t               b,
+                             const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -948,7 +959,11 @@ SYSCALL cx_err_t cx_mont_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, const 
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_pow(cx_bn_t r, const cx_bn_t a, const uint8_t *e PLENGTH(e_len), uint32_t e_len, const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )));
+SYSCALL cx_err_t cx_mont_pow(cx_bn_t                     r,
+                             const cx_bn_t               a,
+                             const uint8_t *e            PLENGTH(e_len),
+                             uint32_t                    e_len,
+                             const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -973,7 +988,10 @@ SYSCALL cx_err_t cx_mont_pow(cx_bn_t r, const cx_bn_t a, const uint8_t *e PLENGT
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_pow_bn(cx_bn_t r, const cx_bn_t a, const cx_bn_t e, const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )));
+SYSCALL cx_err_t cx_mont_pow_bn(cx_bn_t                     r,
+                                const cx_bn_t               a,
+                                const cx_bn_t               e,
+                                const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Computes the modular inverse **r = a^(-1) mod n** for
@@ -996,14 +1014,14 @@ SYSCALL cx_err_t cx_mont_pow_bn(cx_bn_t r, const cx_bn_t a, const cx_bn_t e, con
  *                 - CX_INVALID_PARAMETER
  *                 - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_invert_nprime(cx_bn_t r, const cx_bn_t a, const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t )));
-
-
+SYSCALL cx_err_t
+cx_mont_invert_nprime(cx_bn_t                     r,
+                      const cx_bn_t               a,
+                      const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /* ========================================================================= */
 /* ===                               PRIME                               === */
 /* ========================================================================= */
-
 
 /**
  * @brief   Tests whether a BN value is a probable prime.
@@ -1054,7 +1072,6 @@ SYSCALL cx_err_t cx_bn_next_prime(cx_bn_t n);
  */
 SYSCALL cx_err_t cx_bn_rng(cx_bn_t r, const cx_bn_t n);
 
-
 /**
  * @brief Performs a multiplication over GF(2^n).
  *
@@ -1076,7 +1093,10 @@ SYSCALL cx_err_t cx_bn_rng(cx_bn_t r, const cx_bn_t n);
  *                  - CX_INVALID_PARAMETER
  *                  - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_gf2_n_mul(cx_bn_t bn_r, const cx_bn_t bn_a, const cx_bn_t bn_b, const cx_bn_t bn_n, const cx_bn_t bn_h);
-
+SYSCALL cx_err_t cx_bn_gf2_n_mul(cx_bn_t       bn_r,
+                                 const cx_bn_t bn_a,
+                                 const cx_bn_t bn_b,
+                                 const cx_bn_t bn_n,
+                                 const cx_bn_t bn_h);
 
 #endif /* CX_BN_H */

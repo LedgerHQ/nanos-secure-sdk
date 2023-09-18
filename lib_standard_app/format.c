@@ -21,12 +21,13 @@
 
 #include "format.h"
 
-bool format_i64(char *dst, size_t dst_len, const int64_t value) {
+bool format_i64(char *dst, size_t dst_len, const int64_t value)
+{
     char temp[] = "-9223372036854775808";
 
-    char *ptr = temp;
-    int64_t num = value;
-    int sign = 1;
+    char   *ptr  = temp;
+    int64_t num  = value;
+    int     sign = 1;
 
     if (value < 0) {
         sign = -1;
@@ -39,7 +40,8 @@ bool format_i64(char *dst, size_t dst_len, const int64_t value) {
 
     if (value < 0) {
         *ptr++ = '-';
-    } else if (value == 0) {
+    }
+    else if (value == 0) {
         *ptr++ = '0';
     }
 
@@ -60,7 +62,8 @@ bool format_i64(char *dst, size_t dst_len, const int64_t value) {
     return true;
 }
 
-bool format_u64(char *out, size_t outLen, uint64_t in) {
+bool format_u64(char *out, size_t outLen, uint64_t in)
+{
     size_t i = 0;
 
     if (outLen == 0) {
@@ -76,16 +79,16 @@ bool format_u64(char *out, size_t outLen, uint64_t in) {
             return false;
         }
     }
-    out[i] = in + '0';
+    out[i]     = in + '0';
     out[i + 1] = '\0';
 
     uint8_t j = 0;
-    char tmp;
+    char    tmp;
 
     // revert the string
     while (j < i) {
         // swap out[j] and out[i]
-        tmp = out[j];
+        tmp    = out[j];
         out[j] = out[i];
         out[i] = tmp;
 
@@ -95,7 +98,8 @@ bool format_u64(char *out, size_t outLen, uint64_t in) {
     return true;
 }
 
-bool format_fpu64(char *dst, size_t dst_len, const uint64_t value, uint8_t decimals) {
+bool format_fpu64(char *dst, size_t dst_len, const uint64_t value, uint8_t decimals)
+{
     char buffer[21] = {0};
 
     if (!format_u64(buffer, sizeof(buffer), value)) {
@@ -115,7 +119,8 @@ bool format_fpu64(char *dst, size_t dst_len, const uint64_t value, uint8_t decim
         }
         dst_len -= 2 + decimals - digits;
         strncpy(dst, buffer, dst_len);
-    } else {
+    }
+    else {
         if (dst_len <= digits + 1 + decimals) {
             return false;
         }
@@ -129,7 +134,8 @@ bool format_fpu64(char *dst, size_t dst_len, const uint64_t value, uint8_t decim
     return true;
 }
 
-bool format_fpu64_trimmed(char *dst, size_t dst_len, const uint64_t value, uint8_t decimals) {
+bool format_fpu64_trimmed(char *dst, size_t dst_len, const uint64_t value, uint8_t decimals)
+{
     if (!format_fpu64(dst, dst_len, value, decimals)) {
         return false;
     }
@@ -147,22 +153,23 @@ bool format_fpu64_trimmed(char *dst, size_t dst_len, const uint64_t value, uint8
     return true;
 }
 
-int format_hex(const uint8_t *in, size_t in_len, char *out, size_t out_len) {
+int format_hex(const uint8_t *in, size_t in_len, char *out, size_t out_len)
+{
     if (out_len < 2 * in_len + 1) {
         return -1;
     }
 
-    const char hex[] = "0123456789ABCDEF";
-    size_t i = 0;
-    int written = 0;
+    const char hex[]   = "0123456789ABCDEF";
+    size_t     i       = 0;
+    int        written = 0;
 
     while (i < in_len && (i * 2 + (2 + 1)) <= out_len) {
         uint8_t high_nibble = (in[i] & 0xF0) >> 4;
-        *out = hex[high_nibble];
+        *out                = hex[high_nibble];
         out++;
 
         uint8_t low_nibble = in[i] & 0x0F;
-        *out = hex[low_nibble];
+        *out               = hex[low_nibble];
         out++;
 
         i++;

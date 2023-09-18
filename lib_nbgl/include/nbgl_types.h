@@ -24,76 +24,75 @@ extern "C" {
 /**
  * Width of the front screen in pixels
  */
-#define SCREEN_WIDTH        400
+#define SCREEN_WIDTH 400
 
 /**
  * Height of the front screen in pixels
  */
-#define SCREEN_HEIGHT       672
-
+#define SCREEN_HEIGHT 672
 
 /**
  * No transformation
  *
  */
-#define NO_TRANSFORMATION   0
+#define NO_TRANSFORMATION 0
 /**
  * Horizontal mirroring when rendering bitmap
  *
  */
-#define HORIZONTAL_MIRROR   0x1
+#define HORIZONTAL_MIRROR 0x1
 /**
  * Vertical mirroring when rendering bitmap
  *
  */
-#define VERTICAL_MIRROR     0x2
+#define VERTICAL_MIRROR   0x2
 
 /**
  * Both directions mirroring when rendering bitmap
  *
  */
-#define BOTH_MIRRORS     (HORIZONTAL_MIRROR|VERTICAL_MIRROR)
+#define BOTH_MIRRORS (HORIZONTAL_MIRROR | VERTICAL_MIRROR)
 
 /**
  * Rotation 90 degrees clockwise when rendering bitmap
  *
  */
-#define ROTATE_90_CLOCKWISE     0x4
+#define ROTATE_90_CLOCKWISE 0x4
 
 /**
  * Code to be used for color map when not used
  *
  */
-#define INVALID_COLOR_MAP   0x0
+#define INVALID_COLOR_MAP 0x0
 
 /**********************
  *      TYPEDEFS
  **********************/
 #ifndef MIN
-#define MIN(x,y) ((x)<(y)?(x):(y))
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
 #endif
 #ifndef MAX
-#define MAX(x,y) ((x)>(y)?(x):(y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 #endif
 
 #ifdef LINUX_SIMU
 #define PACKED__
-#else // LINUX_SIMU
+#else  // LINUX_SIMU
 #define PACKED__ __attribute__((packed))
-#endif// LINUX_SIMU
+#endif  // LINUX_SIMU
 #ifdef BICOLOR_MODE
 
 typedef enum {
-    BLACK=0,
-    DARK_GRAY=0,
-    LIGHT_GRAY=0,
-    WHITE=3
+    BLACK      = 0,
+    DARK_GRAY  = 0,
+    LIGHT_GRAY = 0,
+    WHITE      = 3
 } color_t;
 
 #else
 
 typedef enum {
-    BLACK=0,
+    BLACK = 0,
     DARK_GRAY,
     LIGHT_GRAY,
     WHITE,
@@ -107,10 +106,10 @@ typedef enum {
  *
  */
 typedef enum {
-    NBGL_BPP_1=0, ///< 1 bit per pixel
-    NBGL_BPP_2,   ///< 2 bits per pixel
-    NBGL_BPP_4,   ///< 4 bits per pixel
-    NB_NBGL_BPP,  ///< Number of NBGL_BPP enums
+    NBGL_BPP_1 = 0,  ///< 1 bit per pixel
+    NBGL_BPP_2,      ///< 2 bits per pixel
+    NBGL_BPP_4,      ///< 4 bits per pixel
+    NB_NBGL_BPP,     ///< Number of NBGL_BPP enums
 } nbgl_bpp_t;
 
 /**
@@ -118,9 +117,9 @@ typedef enum {
  *
  */
 typedef enum {
-    NBGL_NO_COMPRESSION = 0, ///< no compression, raw data
-    NBGL_GZLIB_COMPRESSION,  ///< gzlib compression
-    NB_NBGL_COMPRESSION      ///< Number of NBGL_COMPRESSION enums
+    NBGL_NO_COMPRESSION = 0,  ///< no compression, raw data
+    NBGL_GZLIB_COMPRESSION,   ///< gzlib compression
+    NB_NBGL_COMPRESSION       ///< Number of NBGL_COMPRESSION enums
 } nbgl_compression_t;
 
 /**
@@ -134,12 +133,12 @@ typedef enum {
  *
  */
 typedef struct PACKED__ nbgl_area_s {
-    uint16_t x0; ///< horizontal position of the upper left point of the area
-    uint16_t y0; ///< vertical position of the upper left point of the area
-    uint16_t width; ///< width of the area, in pixels
-    uint16_t height; ///< height of the area, in pixels
-    color_t backgroundColor; ///< color (usually background) to be applied
-    nbgl_bpp_t bpp; ///< bits per pixel for this area
+    uint16_t   x0;               ///< horizontal position of the upper left point of the area
+    uint16_t   y0;               ///< vertical position of the upper left point of the area
+    uint16_t   width;            ///< width of the area, in pixels
+    uint16_t   height;           ///< height of the area, in pixels
+    color_t    backgroundColor;  ///< color (usually background) to be applied
+    nbgl_bpp_t bpp;              ///< bits per pixel for this area
 } nbgl_area_t;
 
 /**
@@ -147,27 +146,27 @@ typedef struct PACKED__ nbgl_area_s {
  *
  */
 typedef enum {
-   FULL_COLOR_REFRESH,           ///< to be used for normal refresh
-   FULL_COLOR_PARTIAL_REFRESH,   ///< to be used for small partial refresh (radio buttons, switches)
-   FULL_COLOR_CLEAN_REFRESH,     ///< to be used for lock screen display (cleaner but longer refresh)
-   BLACK_AND_WHITE_REFRESH,      ///< to be used for pure B&W area, when contrast is important
-   BLACK_AND_WHITE_FAST_REFRESH, ///< to be used for pure B&W area, when contrast is not priority
-   NB_REFRESH_MODES
+    FULL_COLOR_REFRESH,          ///< to be used for normal refresh
+    FULL_COLOR_PARTIAL_REFRESH,  ///< to be used for small partial refresh (radio buttons, switches)
+    FULL_COLOR_CLEAN_REFRESH,  ///< to be used for lock screen display (cleaner but longer refresh)
+    BLACK_AND_WHITE_REFRESH,   ///< to be used for pure B&W area, when contrast is important
+    BLACK_AND_WHITE_FAST_REFRESH,  ///< to be used for pure B&W area, when contrast is not priority
+    NB_REFRESH_MODES
 } nbgl_refresh_mode_t;
 
 /**
  * @brief possible radius for objects
  *
  */
-typedef enum  {
-    RADIUS_4_PIXELS = 0,  ///< 4 pixels
-    RADIUS_8_PIXELS,      ///< 8 pixels
-    RADIUS_16_PIXELS,     ///< 16 pixels
-    RADIUS_20_PIXELS,     ///< 20 pixels
-    RADIUS_24_PIXELS,     ///< 24 pixels
-    RADIUS_32_PIXELS,     ///< 32 pixels
-    RADIUS_40_PIXELS,     ///< 40 pixels
-    RADIUS_48_PIXELS,     ///< 40 pixels
+typedef enum {
+    RADIUS_4_PIXELS = 0,     ///< 4 pixels
+    RADIUS_8_PIXELS,         ///< 8 pixels
+    RADIUS_16_PIXELS,        ///< 16 pixels
+    RADIUS_20_PIXELS,        ///< 20 pixels
+    RADIUS_24_PIXELS,        ///< 24 pixels
+    RADIUS_32_PIXELS,        ///< 32 pixels
+    RADIUS_40_PIXELS,        ///< 40 pixels
+    RADIUS_48_PIXELS,        ///< 40 pixels
     RADIUS_0_PIXELS = 0xFF,  ///< no radius (square angle)
 } nbgl_radius_t;
 
@@ -189,13 +188,12 @@ typedef uint8_t nbgl_color_map_t;
  *
  */
 typedef struct PACKED__ nbgl_icon_details_s {
-    uint16_t width;   ///< width of the icon, in pixels
-    uint16_t height;  ///< height of the icon, in pixels
-    nbgl_bpp_t bpp;   ///< bits per pixel for this area
-    bool isFile;      ///< if true, the bitmap buffer contains an image file
+    uint16_t       width;   ///< width of the icon, in pixels
+    uint16_t       height;  ///< height of the icon, in pixels
+    nbgl_bpp_t     bpp;     ///< bits per pixel for this area
+    bool           isFile;  ///< if true, the bitmap buffer contains an image file
     const uint8_t *bitmap;  ///< buffer containing pixel values
 } nbgl_icon_details_t;
-
 
 #ifdef __cplusplus
 } /* extern "C" */

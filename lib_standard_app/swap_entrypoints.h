@@ -28,12 +28,12 @@
 /* Check check_address_parameters_t.address_to_check against specified parameters.
  *
  * Must set params.result to 0 on error, 1 otherwise */
-void swap_handle_check_address(check_address_parameters_t* params);
+void swap_handle_check_address(check_address_parameters_t *params);
 
 /* Format printable amount including the ticker from specified parameters.
  *
  * Must set empty printable_amount on error, printable amount otherwise */
-void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params);
+void swap_handle_get_printable_amount(get_printable_amount_parameters_t *params);
 
 /* Backup up transaction parameters and wipe BSS to avoid collusion with
  * app-exchange BSS data.

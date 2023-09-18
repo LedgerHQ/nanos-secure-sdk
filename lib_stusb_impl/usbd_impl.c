@@ -1,49 +1,49 @@
 /**
-  ******************************************************************************
-  * @file    usbd_hid.c
-  * @author  MCD Application Team
-  * @version V2.2.0
-  * @date    13-June-2014
-  * @brief   This file provides the HID core functions.
-  *
-  * @verbatim
-  *
-  *          ===================================================================
-  *                                HID Class  Description
-  *          ===================================================================
-  *           This module manages the HID class V1.11 following the "Device Class Definition
-  *           for Human Interface Devices (HID) Version 1.11 Jun 27, 2001".
-  *           This driver implements the following aspects of the specification:
-  *             - The Boot Interface Subclass
-  *             - Usage Page : Generic Desktop
-  *             - Usage : Vendor
-  *             - Collection : Application
-  *
-  * @note     In HS mode and when the DMA is used, all variables and data structures
-  *           dealing with the DMA during the transaction process should be 32-bit aligned.
-  *
-  *
-  *  @endverbatim
-  *
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    usbd_hid.c
+ * @author  MCD Application Team
+ * @version V2.2.0
+ * @date    13-June-2014
+ * @brief   This file provides the HID core functions.
+ *
+ * @verbatim
+ *
+ *          ===================================================================
+ *                                HID Class  Description
+ *          ===================================================================
+ *           This module manages the HID class V1.11 following the "Device Class Definition
+ *           for Human Interface Devices (HID) Version 1.11 Jun 27, 2001".
+ *           This driver implements the following aspects of the specification:
+ *             - The Boot Interface Subclass
+ *             - Usage Page : Generic Desktop
+ *             - Usage : Vendor
+ *             - Collection : Application
+ *
+ * @note     In HS mode and when the DMA is used, all variables and data structures
+ *           dealing with the DMA during the transaction process should be 32-bit aligned.
+ *
+ *
+ *  @endverbatim
+ *
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
+ *
+ * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *        http://www.st.com/software_license_agreement_liberty_v2
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ******************************************************************************
+ */
 
 #include "os.h"
 #include "os_io_usb.h"
@@ -67,61 +67,57 @@
 #ifdef HAVE_IO_U2F
 #include "u2f_transport.h"
 #include "u2f_impl.h"
-#endif // HAVE_IO_U2F
+#endif  // HAVE_IO_U2F
 
 #ifdef HAVE_USB_CLASS_CCID
 #include "usbd_ccid_core.h"
-#endif // HAVE_USB_CLASS_CCID
-
+#endif  // HAVE_USB_CLASS_CCID
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
-  * @{
-  */
-
+ * @{
+ */
 
 /** @defgroup USBD_HID
-  * @brief usbd core module
-  * @{
-  */
+ * @brief usbd core module
+ * @{
+ */
 
 /** @defgroup USBD_HID_Private_TypesDefinitions
-  * @{
-  */
+ * @{
+ */
 /**
-  * @}
-  */
-
+ * @}
+ */
 
 /** @defgroup USBD_HID_Private_Defines
-  * @{
-  */
+ * @{
+ */
 
 /**
-  * @}
-  */
-
+ * @}
+ */
 
 /** @defgroup USBD_HID_Private_Macros
-  * @{
-  */
+ * @{
+ */
 /**
-  * @}
-  */
+ * @}
+ */
 /** @defgroup USBD_HID_Private_FunctionPrototypes
-  * @{
-  */
-
+ * @{
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
 
 /** @defgroup USBD_HID_Private_Variables
-  * @{
-  */
+ * @{
+ */
 
-#define USBD_LANGID_STRING            0x409
+#define USBD_LANGID_STRING 0x409
 
+// clang-format off
 #ifdef HAVE_VID_PID_PROBER
 #define USBD_VID                      0x2581
 #define USBD_PID                      0xf1d1
@@ -760,388 +756,364 @@ static uint8_t const USBD_DeviceDesc[]= {
   USBD_IDX_SERIAL_STR,        /* Index of serial number string */
   1                           /* bNumConfigurations */
 }; /* USB_DeviceDescriptor */
-
+// clang-format on
 
 /**
-  * @brief  Returns the device descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the device descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_DeviceDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USBD_DeviceDesc);
-  return (uint8_t*)USBD_DeviceDesc;
+    UNUSED(speed);
+    *length = sizeof(USBD_DeviceDesc);
+    return (uint8_t *) USBD_DeviceDesc;
 }
 
 /**
-  * @brief  Returns the LangID string descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the LangID string descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USBD_LangIDDesc);
-  return (uint8_t*)USBD_LangIDDesc;
+    UNUSED(speed);
+    *length = sizeof(USBD_LangIDDesc);
+    return (uint8_t *) USBD_LangIDDesc;
 }
 
 /**
-  * @brief  Returns the product string descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the product string descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USBD_PRODUCT_FS_STRING);
-  return (uint8_t*)USBD_PRODUCT_FS_STRING;
+    UNUSED(speed);
+    *length = sizeof(USBD_PRODUCT_FS_STRING);
+    return (uint8_t *) USBD_PRODUCT_FS_STRING;
 }
 
 /**
-  * @brief  Returns the manufacturer string descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the manufacturer string descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_ManufacturerStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USBD_MANUFACTURER_STRING);
-  return (uint8_t*)USBD_MANUFACTURER_STRING;
+    UNUSED(speed);
+    *length = sizeof(USBD_MANUFACTURER_STRING);
+    return (uint8_t *) USBD_MANUFACTURER_STRING;
 }
 
 /**
-  * @brief  Returns the serial number string descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the serial number string descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USB_SERIAL_STRING);
-  return (uint8_t*)USB_SERIAL_STRING;
+    UNUSED(speed);
+    *length = sizeof(USB_SERIAL_STRING);
+    return (uint8_t *) USB_SERIAL_STRING;
 }
 
 /**
-  * @brief  Returns the configuration string descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the configuration string descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USBD_CONFIGURATION_FS_STRING);
-  return (uint8_t*)USBD_CONFIGURATION_FS_STRING;
+    UNUSED(speed);
+    *length = sizeof(USBD_CONFIGURATION_FS_STRING);
+    return (uint8_t *) USBD_CONFIGURATION_FS_STRING;
 }
 
 /**
-  * @brief  Returns the interface string descriptor.
-  * @param  speed: Current device speed
-  * @param  length: Pointer to data length variable
-  * @retval Pointer to descriptor buffer
-  */
+ * @brief  Returns the interface string descriptor.
+ * @param  speed: Current device speed
+ * @param  length: Pointer to data length variable
+ * @retval Pointer to descriptor buffer
+ */
 static uint8_t *USBD_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
-  *length = sizeof(USBD_INTERFACE_FS_STRING);
-  return (uint8_t*)USBD_INTERFACE_FS_STRING;
+    UNUSED(speed);
+    *length = sizeof(USBD_INTERFACE_FS_STRING);
+    return (uint8_t *) USBD_INTERFACE_FS_STRING;
 }
 
 /**
-* @brief  DeviceQualifierDescriptor
-*         return Device Qualifier descriptor
-* @param  length : pointer data length
-* @retval pointer to descriptor buffer
-*/
-static uint8_t  *USBD_GetDeviceQualifierDesc_impl (uint16_t *length)
+ * @brief  DeviceQualifierDescriptor
+ *         return Device Qualifier descriptor
+ * @param  length : pointer data length
+ * @retval pointer to descriptor buffer
+ */
+static uint8_t *USBD_GetDeviceQualifierDesc_impl(uint16_t *length)
 {
-  *length = sizeof (USBD_DeviceQualifierDesc);
-  return (uint8_t*)USBD_DeviceQualifierDesc;
+    *length = sizeof(USBD_DeviceQualifierDesc);
+    return (uint8_t *) USBD_DeviceQualifierDesc;
 }
 
 /**
-  * @brief  USBD_CUSTOM_HID_GetCfgDesc
-  *         return configuration descriptor
-  * @param  speed : current device speed
-  * @param  length : pointer data length
-  * @retval pointer to descriptor buffer
-  */
-static uint8_t  *USBD_GetCfgDesc_impl (uint16_t *length)
+ * @brief  USBD_CUSTOM_HID_GetCfgDesc
+ *         return configuration descriptor
+ * @param  speed : current device speed
+ * @param  length : pointer data length
+ * @retval pointer to descriptor buffer
+ */
+static uint8_t *USBD_GetCfgDesc_impl(uint16_t *length)
 {
-  *length = sizeof (USBD_CfgDesc);
-  return (uint8_t*)USBD_CfgDesc;
+    *length = sizeof(USBD_CfgDesc);
+    return (uint8_t *) USBD_CfgDesc;
 }
 
-uint8_t* USBD_HID_GetHidDescriptor_impl(uint16_t* len) {
-  switch (USBD_Device.request.wIndex&0xFF) {
+uint8_t *USBD_HID_GetHidDescriptor_impl(uint16_t *len)
+{
+    switch (USBD_Device.request.wIndex & 0xFF) {
 #ifdef HAVE_IO_U2F
-    case U2F_INTF:
-      *len = sizeof(USBD_HID_Desc_fido);
-      return (uint8_t*)USBD_HID_Desc_fido;
-#endif // HAVE_IO_U2F
+        case U2F_INTF:
+            *len = sizeof(USBD_HID_Desc_fido);
+            return (uint8_t *) USBD_HID_Desc_fido;
+#endif  // HAVE_IO_U2F
 #ifndef HAVE_USB_HIDKBD
-    case HID_INTF:
-      *len = sizeof(USBD_HID_Desc);
-      return (uint8_t*)USBD_HID_Desc;
+        case HID_INTF:
+            *len = sizeof(USBD_HID_Desc);
+            return (uint8_t *) USBD_HID_Desc;
 #else
-    case HID_INTF:
-      *len = sizeof(USBD_HID_Desc_kbd);
-      return (uint8_t*)USBD_HID_Desc_kbd;
-#endif // HAVE_USB_HIDKBD
-  }
-  *len = 0;
-  return 0;
+        case HID_INTF:
+            *len = sizeof(USBD_HID_Desc_kbd);
+            return (uint8_t *) USBD_HID_Desc_kbd;
+#endif  // HAVE_USB_HIDKBD
+    }
+    *len = 0;
+    return 0;
 }
 
-uint8_t* USBD_HID_GetReportDescriptor_impl(uint16_t* len) {
-  switch (USBD_Device.request.wIndex&0xFF) {
+uint8_t *USBD_HID_GetReportDescriptor_impl(uint16_t *len)
+{
+    switch (USBD_Device.request.wIndex & 0xFF) {
 #ifdef HAVE_IO_U2F
-  case U2F_INTF:
+        case U2F_INTF:
 
-    // very dirty work due to lack of callback when USB_HID_Init is called
-    USBD_LL_OpenEP(&USBD_Device,
-                   U2F_EPIN_ADDR,
-                   USBD_EP_TYPE_INTR,
-                   U2F_EPIN_SIZE);
+            // very dirty work due to lack of callback when USB_HID_Init is called
+            USBD_LL_OpenEP(&USBD_Device, U2F_EPIN_ADDR, USBD_EP_TYPE_INTR, U2F_EPIN_SIZE);
 
-    USBD_LL_OpenEP(&USBD_Device,
-                   U2F_EPOUT_ADDR,
-                   USBD_EP_TYPE_INTR,
-                   U2F_EPOUT_SIZE);
+            USBD_LL_OpenEP(&USBD_Device, U2F_EPOUT_ADDR, USBD_EP_TYPE_INTR, U2F_EPOUT_SIZE);
+
+            /* Prepare Out endpoint to receive 1st packet */
+            USBD_LL_PrepareReceive(&USBD_Device, U2F_EPOUT_ADDR, U2F_EPOUT_SIZE);
+
+            *len = sizeof(HID_ReportDesc_fido);
+            return (uint8_t *) HID_ReportDesc_fido;
+#endif  // HAVE_IO_U2F
+#ifndef HAVE_USB_HIDKBD
+        case HID_INTF:
+            *len = sizeof(HID_ReportDesc);
+            return (uint8_t *) HID_ReportDesc;
+#else
+        case HID_INTF:
+            *len = sizeof(HID_ReportDesc_kbd);
+            return (uint8_t *) HID_ReportDesc_kbd;
+#endif  // HAVE_USB_HIDKBD
+    }
+    *len = 0;
+    return 0;
+}
+
+/**
+ * @}
+ */
+
+/**
+ * @brief  USBD_HID_DataOut
+ *         handle data OUT Stage
+ * @param  pdev: device instance
+ * @param  epnum: endpoint index
+ * @retval status
+ *
+ * This function is the default behavior for our implementation when data are sent over the out hid
+ * endpoint
+ */
+
+#ifdef HAVE_IO_U2F
+
+/**
+ * @brief  USBD_HID_Init
+ *         Initialize the HID interface
+ * @param  pdev: device instance
+ * @param  cfgidx: Configuration index
+ * @retval status
+ */
+uint8_t USBD_U2F_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
+{
+    UNUSED(cfgidx);
+
+    /* Open EP IN */
+    USBD_LL_OpenEP(pdev, U2F_EPIN_ADDR, USBD_EP_TYPE_INTR, U2F_EPIN_SIZE);
+
+    /* Open EP OUT */
+    USBD_LL_OpenEP(pdev, U2F_EPOUT_ADDR, USBD_EP_TYPE_INTR, U2F_EPOUT_SIZE);
 
     /* Prepare Out endpoint to receive 1st packet */
-    USBD_LL_PrepareReceive(&USBD_Device, U2F_EPOUT_ADDR, U2F_EPOUT_SIZE);
+    USBD_LL_PrepareReceive(pdev, U2F_EPOUT_ADDR, U2F_EPOUT_SIZE);
 
-
-    *len = sizeof(HID_ReportDesc_fido);
-    return (uint8_t*)HID_ReportDesc_fido;
-#endif // HAVE_IO_U2F
-#ifndef HAVE_USB_HIDKBD
-  case HID_INTF:
-    *len = sizeof(HID_ReportDesc);
-    return (uint8_t*)HID_ReportDesc;
-#else
-  case HID_INTF:
-    *len = sizeof(HID_ReportDesc_kbd);
-    return (uint8_t*)HID_ReportDesc_kbd;
-#endif // HAVE_USB_HIDKBD
-  }
-  *len = 0;
-  return 0;
+    return USBD_OK;
 }
 
-/**
-  * @}
-  */
-
-
-/**
-  * @brief  USBD_HID_DataOut
-  *         handle data OUT Stage
-  * @param  pdev: device instance
-  * @param  epnum: endpoint index
-  * @retval status
-  *
-  * This function is the default behavior for our implementation when data are sent over the out hid endpoint
-  */
-
-#ifdef HAVE_IO_U2F
-
-/**
-  * @brief  USBD_HID_Init
-  *         Initialize the HID interface
-  * @param  pdev: device instance
-  * @param  cfgidx: Configuration index
-  * @retval status
-  */
-uint8_t  USBD_U2F_Init (USBD_HandleTypeDef *pdev,
-                               uint8_t cfgidx)
+uint8_t USBD_U2F_DataIn_impl(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
-  UNUSED(cfgidx);
-
-  /* Open EP IN */
-  USBD_LL_OpenEP(pdev,
-                 U2F_EPIN_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 U2F_EPIN_SIZE);
-
-  /* Open EP OUT */
-  USBD_LL_OpenEP(pdev,
-                 U2F_EPOUT_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 U2F_EPOUT_SIZE);
-
-        /* Prepare Out endpoint to receive 1st packet */
-  USBD_LL_PrepareReceive(pdev, U2F_EPOUT_ADDR, U2F_EPOUT_SIZE);
-
-  return USBD_OK;
-}
-
-uint8_t  USBD_U2F_DataIn_impl (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum)
-{
-  UNUSED(pdev);
-  // only the data hid endpoint will receive data
-  switch (epnum) {
-  // FIDO endpoint
-  case (U2F_EPIN_ADDR&0x7F):
-    // advance the u2f sending machine state
-    u2f_transport_sent(&G_io_u2f, U2F_MEDIA_USB);
-    break;
-  }
-  return USBD_OK;
-}
-
-uint8_t  USBD_U2F_DataOut_impl (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum, uint8_t* buffer)
-{
-  switch (epnum) {
-  // FIDO endpoint
-  case (U2F_EPOUT_ADDR&0x7F):
-      USBD_LL_PrepareReceive(pdev, U2F_EPOUT_ADDR , U2F_EPOUT_SIZE);
-      u2f_transport_received(&G_io_u2f, buffer, io_seproxyhal_get_ep_rx_size(U2F_EPOUT_ADDR), U2F_MEDIA_USB);
-    break;
-  }
-
-  return USBD_OK;
-}
-#endif // HAVE_IO_U2F
-
-uint8_t  USBD_HID_DataIn_impl (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum)
-{
-  UNUSED(pdev);
-  switch (epnum) {
-    // HID gen endpoint
-    case (HID_EPIN_ADDR&0x7F):
-      io_usb_hid_sent(io_usb_send_apdu_data);
-      break;
-  }
-
-  return USBD_OK;
-}
-
-uint8_t  USBD_HID_DataOut_impl (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum, uint8_t* buffer)
-{
-  // only the data hid endpoint will receive data
-  switch (epnum) {
-
-  // HID gen endpoint
-  case (HID_EPOUT_ADDR&0x7F):
-    // prepare receiving the next chunk (masked time)
-    USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR , HID_EPOUT_SIZE);
-
-#ifndef HAVE_USB_HIDKBD
-    // avoid troubles when an apdu has not been replied yet
-    if (G_io_app.apdu_media == IO_APDU_MEDIA_NONE) {
-      // add to the hid transport
-      switch(io_usb_hid_receive(io_usb_send_apdu_data, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR))) {
-        default:
-          break;
-
-        case IO_USB_APDU_RECEIVED:
-          G_io_app.apdu_media = IO_APDU_MEDIA_USB_HID; // for application code
-          G_io_app.apdu_state = APDU_USB_HID; // for next call to io_exchange
-          G_io_app.apdu_length = G_io_usb_hid_total_length;
-          break;
-      }
+    UNUSED(pdev);
+    // only the data hid endpoint will receive data
+    switch (epnum) {
+        // FIDO endpoint
+        case (U2F_EPIN_ADDR & 0x7F):
+            // advance the u2f sending machine state
+            u2f_transport_sent(&G_io_u2f, U2F_MEDIA_USB);
+            break;
     }
-#endif // HAVE_USB_HIDKBD
-    break;
-  }
+    return USBD_OK;
+}
 
-  return USBD_OK;
+uint8_t USBD_U2F_DataOut_impl(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *buffer)
+{
+    switch (epnum) {
+        // FIDO endpoint
+        case (U2F_EPOUT_ADDR & 0x7F):
+            USBD_LL_PrepareReceive(pdev, U2F_EPOUT_ADDR, U2F_EPOUT_SIZE);
+            u2f_transport_received(
+                &G_io_u2f, buffer, io_seproxyhal_get_ep_rx_size(U2F_EPOUT_ADDR), U2F_MEDIA_USB);
+            break;
+    }
+
+    return USBD_OK;
+}
+#endif  // HAVE_IO_U2F
+
+uint8_t USBD_HID_DataIn_impl(USBD_HandleTypeDef *pdev, uint8_t epnum)
+{
+    UNUSED(pdev);
+    switch (epnum) {
+        // HID gen endpoint
+        case (HID_EPIN_ADDR & 0x7F):
+            io_usb_hid_sent(io_usb_send_apdu_data);
+            break;
+    }
+
+    return USBD_OK;
+}
+
+uint8_t USBD_HID_DataOut_impl(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *buffer)
+{
+    // only the data hid endpoint will receive data
+    switch (epnum) {
+        // HID gen endpoint
+        case (HID_EPOUT_ADDR & 0x7F):
+            // prepare receiving the next chunk (masked time)
+            USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, HID_EPOUT_SIZE);
+
+#ifndef HAVE_USB_HIDKBD
+            // avoid troubles when an apdu has not been replied yet
+            if (G_io_app.apdu_media == IO_APDU_MEDIA_NONE) {
+                // add to the hid transport
+                switch (io_usb_hid_receive(
+                    io_usb_send_apdu_data, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR))) {
+                    default:
+                        break;
+
+                    case IO_USB_APDU_RECEIVED:
+                        G_io_app.apdu_media  = IO_APDU_MEDIA_USB_HID;  // for application code
+                        G_io_app.apdu_state  = APDU_USB_HID;  // for next call to io_exchange
+                        G_io_app.apdu_length = G_io_usb_hid_total_length;
+                        break;
+                }
+            }
+#endif  // HAVE_USB_HIDKBD
+            break;
+    }
+
+    return USBD_OK;
 }
 
 #ifdef HAVE_WEBUSB
 
-uint8_t  USBD_WEBUSB_Init (USBD_HandleTypeDef *pdev,
-                               uint8_t cfgidx)
+uint8_t USBD_WEBUSB_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 {
-  UNUSED(cfgidx);
+    UNUSED(cfgidx);
 
-  /* Open EP IN */
-  USBD_LL_OpenEP(pdev,
-                 WEBUSB_EPIN_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 WEBUSB_EPIN_SIZE);
+    /* Open EP IN */
+    USBD_LL_OpenEP(pdev, WEBUSB_EPIN_ADDR, USBD_EP_TYPE_INTR, WEBUSB_EPIN_SIZE);
 
-  /* Open EP OUT */
-  USBD_LL_OpenEP(pdev,
-                 WEBUSB_EPOUT_ADDR,
-                 USBD_EP_TYPE_INTR,
-                 WEBUSB_EPOUT_SIZE);
+    /* Open EP OUT */
+    USBD_LL_OpenEP(pdev, WEBUSB_EPOUT_ADDR, USBD_EP_TYPE_INTR, WEBUSB_EPOUT_SIZE);
 
-        /* Prepare Out endpoint to receive 1st packet */
-  USBD_LL_PrepareReceive(pdev, WEBUSB_EPOUT_ADDR, WEBUSB_EPOUT_SIZE);
-
-  return USBD_OK;
-}
-
-uint8_t  USBD_WEBUSB_DeInit (USBD_HandleTypeDef *pdev,
-                                 uint8_t cfgidx) {
-  UNUSED(pdev);
-  UNUSED(cfgidx);
-  return USBD_OK;
-}
-
-uint8_t  USBD_WEBUSB_Setup (USBD_HandleTypeDef *pdev,
-                                USBD_SetupReqTypedef *req)
-{
-  UNUSED(pdev);
-  UNUSED(req);
-  return USBD_OK;
-}
-
-uint8_t  USBD_WEBUSB_DataIn (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum)
-{
-  UNUSED(pdev);
-  switch (epnum) {
-    // HID gen endpoint
-    case (WEBUSB_EPIN_ADDR&0x7F):
-      io_usb_hid_sent(io_usb_send_apdu_data_ep0x83);
-      break;
-  }
-  return USBD_OK;
-}
-
-uint8_t USBD_WEBUSB_DataOut (USBD_HandleTypeDef *pdev,
-                              uint8_t epnum, uint8_t* buffer)
-{
-  // only the data hid endpoint will receive data
-  switch (epnum) {
-
-  // HID gen endpoint
-  case (WEBUSB_EPOUT_ADDR&0x7F):
-    // prepare receiving the next chunk (masked time)
+    /* Prepare Out endpoint to receive 1st packet */
     USBD_LL_PrepareReceive(pdev, WEBUSB_EPOUT_ADDR, WEBUSB_EPOUT_SIZE);
 
-    // avoid troubles when an apdu has not been replied yet
-    if (G_io_app.apdu_media == IO_APDU_MEDIA_NONE) {
-      // add to the hid transport
-      switch(io_usb_hid_receive(io_usb_send_apdu_data_ep0x83, buffer, io_seproxyhal_get_ep_rx_size(WEBUSB_EPOUT_ADDR))) {
-        default:
-          break;
+    return USBD_OK;
+}
 
-        case IO_USB_APDU_RECEIVED:
-          G_io_app.apdu_media = IO_APDU_MEDIA_USB_WEBUSB; // for application code
-          G_io_app.apdu_state = APDU_USB_WEBUSB; // for next call to io_exchange
-          G_io_app.apdu_length = G_io_usb_hid_total_length;
-          break;
-      }
+uint8_t USBD_WEBUSB_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
+{
+    UNUSED(pdev);
+    UNUSED(cfgidx);
+    return USBD_OK;
+}
+
+uint8_t USBD_WEBUSB_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
+{
+    UNUSED(pdev);
+    UNUSED(req);
+    return USBD_OK;
+}
+
+uint8_t USBD_WEBUSB_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
+{
+    UNUSED(pdev);
+    switch (epnum) {
+        // HID gen endpoint
+        case (WEBUSB_EPIN_ADDR & 0x7F):
+            io_usb_hid_sent(io_usb_send_apdu_data_ep0x83);
+            break;
     }
-    break;
-  }
+    return USBD_OK;
+}
 
-  return USBD_OK;
+uint8_t USBD_WEBUSB_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *buffer)
+{
+    // only the data hid endpoint will receive data
+    switch (epnum) {
+        // HID gen endpoint
+        case (WEBUSB_EPOUT_ADDR & 0x7F):
+            // prepare receiving the next chunk (masked time)
+            USBD_LL_PrepareReceive(pdev, WEBUSB_EPOUT_ADDR, WEBUSB_EPOUT_SIZE);
+
+            // avoid troubles when an apdu has not been replied yet
+            if (G_io_app.apdu_media == IO_APDU_MEDIA_NONE) {
+                // add to the hid transport
+                switch (io_usb_hid_receive(io_usb_send_apdu_data_ep0x83,
+                                           buffer,
+                                           io_seproxyhal_get_ep_rx_size(WEBUSB_EPOUT_ADDR))) {
+                    default:
+                        break;
+
+                    case IO_USB_APDU_RECEIVED:
+                        G_io_app.apdu_media  = IO_APDU_MEDIA_USB_WEBUSB;  // for application code
+                        G_io_app.apdu_state  = APDU_USB_WEBUSB;  // for next call to io_exchange
+                        G_io_app.apdu_length = G_io_usb_hid_total_length;
+                        break;
+                }
+            }
+            break;
+    }
+
+    return USBD_OK;
 }
 
 // arbitrary vendor chosen
@@ -1150,43 +1122,44 @@ uint8_t USBD_WEBUSB_DataOut (USBD_HandleTypeDef *pdev,
 // from https://wicg.github.io/webusb/#webusb-platform-capability-descriptor
 // see also this (for endianness explanation)
 // https://github.com/WICG/webusb/issues/115#issuecomment-352206549
-#define WEBUSB_UUID 0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47,0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65
+#define WEBUSB_UUID \
+    0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47, 0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65
 
-#define WEBUSB_REQ_GET_URL             0x02
+#define WEBUSB_REQ_GET_URL 0x02
 
-#define WEBUSB_DT_DESCRIPTOR_SET_HEADER 0
+#define WEBUSB_DT_DESCRIPTOR_SET_HEADER       0
 #define WEBUSB_DT_CONFIGURATION_SUBSET_HEADER 1
-#define WEBUSB_DT_FUNCTION_SUBSET_HEADER 2
-#define WEBUSB_DT_URL 3
+#define WEBUSB_DT_FUNCTION_SUBSET_HEADER      2
+#define WEBUSB_DT_URL                         3
 
-#define WEBUSB_URL_SCHEME_HTTP 0
-#define WEBUSB_URL_SCHEME_HTTPS 1
+#define WEBUSB_URL_SCHEME_HTTP   0
+#define WEBUSB_URL_SCHEME_HTTPS  1
 #define WEBUSB_URL_SCHEME_CUSTOM 255
 
 unsigned char const C_webusb_url_descriptor[] = {
-  // bLength
-  3 + WEBUSB_URL_SIZE_B,
-  // bDescriptorType
-  WEBUSB_DT_URL,
-  // bScheme
-  WEBUSB_URL_SCHEME_HTTPS,
-  // URL
-  WEBUSB_URL
-};
+    // bLength
+    3 + WEBUSB_URL_SIZE_B,
+    // bDescriptorType
+    WEBUSB_DT_URL,
+    // bScheme
+    WEBUSB_URL_SCHEME_HTTPS,
+    // URL
+    WEBUSB_URL};
 
 /* USB 3.1 Descriptor Types - Table 9-6 */
-#define USB_DT_BOS            15
-#define USB_DT_DEVICE_CAPABILITY    16
+#define USB_DT_BOS               15
+#define USB_DT_DEVICE_CAPABILITY 16
 
 #define USB_DT_BOS_SIZE 5
 
 /* USB Device Capability Types - USB 3.1 Table 9-14 */
-#define USB_DC_PLATFORM         5
+#define USB_DC_PLATFORM 5
 
 #define MS_OS_20_DESCRIPTOR_LENGTH (0xb2)
 
 #define WINUSB_VENDOR_CODE 0x77
 
+// clang-format off
 unsigned char const C_usb_bos[] = {
     USB_DT_BOS_SIZE, // bLength (5)
     USB_DT_BOS, // bDescriptorType
@@ -1226,77 +1199,79 @@ unsigned char const C_usb_bos[] = {
     WINUSB_VENDOR_CODE, // Vendor-assigned bMS_VendorCode
     0x00               // Doesn’t support alternate enumeration
 };
+// clang-format on
 
-#endif // HAVE_WEBUSB
+#endif  // HAVE_WEBUSB
 
 static uint8_t *USBD_BOSDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  UNUSED(speed);
+    UNUSED(speed);
 #ifdef HAVE_WEBUSB
-  *length = sizeof(C_usb_bos);
-  return (uint8_t*)C_usb_bos;
+    *length = sizeof(C_usb_bos);
+    return (uint8_t *) C_usb_bos;
 #else
-  *length = 0;
-  return NULL;
+    *length = 0;
+    return NULL;
 #endif
 }
 
 /** @defgroup USBD_HID_Private_Functions
-  * @{
-  */
+ * @{
+ */
 
 // note: how core lib usb calls the hid class
 USBD_DescriptorsTypeDef const HID_Desc = {
-  USBD_DeviceDescriptor,
-  USBD_LangIDStrDescriptor,
-  USBD_ManufacturerStrDescriptor,
-  USBD_ProductStrDescriptor,
-  USBD_SerialStrDescriptor,
-  USBD_ConfigStrDescriptor,
-  USBD_InterfaceStrDescriptor,
-  USBD_BOSDescriptor,
+    USBD_DeviceDescriptor,
+    USBD_LangIDStrDescriptor,
+    USBD_ManufacturerStrDescriptor,
+    USBD_ProductStrDescriptor,
+    USBD_SerialStrDescriptor,
+    USBD_ConfigStrDescriptor,
+    USBD_InterfaceStrDescriptor,
+    USBD_BOSDescriptor,
 };
 
 #ifdef HAVE_IO_U2F
-static USBD_ClassTypeDef const USBD_U2F =
-{
-  USBD_U2F_Init,
-  USBD_HID_DeInit,
-  USBD_HID_Setup,
-  NULL, /*EP0_TxSent*/
-  NULL, /*EP0_RxReady*/ /* STATUS STAGE IN */
-  USBD_U2F_DataIn_impl, /*DataIn*/
-  USBD_U2F_DataOut_impl, /*DataOut*/
-  NULL, /*SOF */
-  NULL,
-  NULL,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetDeviceQualifierDesc_impl,
+static USBD_ClassTypeDef const USBD_U2F = {
+    USBD_U2F_Init,
+    USBD_HID_DeInit,
+    USBD_HID_Setup,
+    NULL, /*EP0_TxSent*/
+    NULL,
+    /*EP0_RxReady*/        /* STATUS STAGE IN */
+    USBD_U2F_DataIn_impl,  /*DataIn*/
+    USBD_U2F_DataOut_impl, /*DataOut*/
+    NULL,                  /*SOF */
+    NULL,
+    NULL,
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetDeviceQualifierDesc_impl,
 };
-#endif // HAVE_IO_U2F
+#endif  // HAVE_IO_U2F
 
-static USBD_ClassTypeDef const USBD_HID =
-{
-  USBD_HID_Init,
-  USBD_HID_DeInit,
-  USBD_HID_Setup,
-  NULL, /*EP0_TxSent*/
-  NULL, /*EP0_RxReady*/ /* STATUS STAGE IN */
-  USBD_HID_DataIn_impl, /*DataIn*/
-  USBD_HID_DataOut_impl, /*DataOut*/
-  NULL, /*SOF */
-  NULL,
-  NULL,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetDeviceQualifierDesc_impl,
+static USBD_ClassTypeDef const USBD_HID = {
+    USBD_HID_Init,
+    USBD_HID_DeInit,
+    USBD_HID_Setup,
+    NULL, /*EP0_TxSent*/
+    NULL,
+    /*EP0_RxReady*/        /* STATUS STAGE IN */
+    USBD_HID_DataIn_impl,  /*DataIn*/
+    USBD_HID_DataOut_impl, /*DataOut*/
+    NULL,                  /*SOF */
+    NULL,
+    NULL,
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetDeviceQualifierDesc_impl,
 };
 
 #ifdef HAVE_WEBUSB
 
+// clang-format off
 static const unsigned char C_winusb_string_descriptor[] = {
   // bLength
   0x12,
@@ -1305,16 +1280,18 @@ static const unsigned char C_winusb_string_descriptor[] = {
   // wData
   'M', 0x00, 'S', 0x00, 'F', 0x00, 'T', 0x00, '1', 0x00, '0', 0x00, '0', 0x00, WINUSB_VENDOR_CODE, 0x00, // MSFT100<VCODE>
 };
+// clang-format on
 
 // Microsoft OS 2.0 descriptor wIndex values
 #define MS_OS_20_DESCRIPTOR_INDEX 0x07
 
 // Microsoft OS 2.0 descriptor types
 #define MS_OS_20_SUBSET_HEADER_CONFIGURATION 0x01
-#define MS_OS_20_SUBSET_HEADER_FUNCTION 0x02
-#define MS_OS_20_FEATURE_COMPATIBLE_ID 0x03
-#define MS_OS_20_FEATURE_REG_PROPERTY 0x04
+#define MS_OS_20_SUBSET_HEADER_FUNCTION      0x02
+#define MS_OS_20_FEATURE_COMPATIBLE_ID       0x03
+#define MS_OS_20_FEATURE_REG_PROPERTY        0x04
 
+// clang-format off
 static const unsigned char C_winusb_request_descriptor[] = {
     // Microsoft OS 2.0 descriptor set header (table 10)
     0x0A,
@@ -1407,160 +1384,167 @@ static const unsigned char C_winusb_guid[] = {
   '4', 0x00, '6', 0x00, '7', 0x00, '6', 0x00, '5', 0x00, '7', 0x00,
   '2', 0x00, '}', 0x00, 0x00, 0x00, 0x00, 0x00 // propertyData, double unicode nul terminated
 };
+// clang-format on
 
 // upon unsupported request, check for webusb request
-void USBD_CtlError( USBD_HandleTypeDef *pdev , USBD_SetupReqTypedef *req) {
+void USBD_CtlError(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
+{
 #if WEBUSB_URL_SIZE_B > 0
-  if ((req->bmRequest & 0x80) && req->bRequest == WEBUSB_VENDOR_CODE && req->wIndex == WEBUSB_REQ_GET_URL
-    // HTTPS url
-    && req->wValue == 1) {
-    // return the URL descriptor
-    USBD_CtlSendData (pdev, (unsigned char*)C_webusb_url_descriptor, MIN(req->wLength, sizeof(C_webusb_url_descriptor)));
-  }
-  else
-#endif // WEBUSB_URL_SIZE_B
-    // SETUP (LE): 0x80 0x06 0x03 0x77 0x00 0x00 0xXX 0xXX
-    if ((req->bmRequest & 0x80)
-    && req->bRequest == USB_REQ_GET_DESCRIPTOR
-    && (req->wValue>>8) == USB_DESC_TYPE_STRING
-    && (req->wValue & 0xFF) == 0xEE) {
-    USBD_CtlSendData(pdev, (unsigned char*)C_winusb_string_descriptor, MIN(req->wLength, sizeof(C_winusb_string_descriptor)));
-  }
-  // SETUP (LE): 0x80 0x77 0x04 0x00 0x00 0x00 0xXX 0xXX
-  else if ((req->bmRequest & 0x80)
-    && req->bRequest == WINUSB_VENDOR_CODE
-    && req->wIndex == WINUSB_GET_COMPATIBLE_ID_FEATURE) {
-    USBD_CtlSendData(pdev, (unsigned char*)C_winusb_wcid, MIN(req->wLength, sizeof(C_winusb_wcid)));
-  }
-  // SETUP (LE): 0x80 0x77 0x05 0x00 0x00 0x00 0xXX 0xXX
-  else if ((req->bmRequest & 0x80)
-    && req->bRequest == WINUSB_VENDOR_CODE
-    && req->wIndex == WINUSB_GET_EXTENDED_PROPERTIES_OS_FEATURE
-  ) {
-    USBD_CtlSendData(pdev, (unsigned char*)C_winusb_guid, MIN(req->wLength, sizeof(C_winusb_guid)));
-  }
-  // Microsoft OS 2.0 Descriptors for Windows 8.1 and Windows 10
-  else if ((req->bmRequest & 0x80)
-      && req->bRequest == WINUSB_VENDOR_CODE
-      && req->wIndex == MS_OS_20_DESCRIPTOR_INDEX) {
-    USBD_CtlSendData(pdev, (unsigned char*)C_winusb_request_descriptor, MIN(req->wLength, sizeof(C_winusb_request_descriptor)));
-  }
-  else {
-    USBD_CtlStall(pdev);
-  }
+    if ((req->bmRequest & 0x80) && req->bRequest == WEBUSB_VENDOR_CODE
+        && req->wIndex == WEBUSB_REQ_GET_URL
+        // HTTPS url
+        && req->wValue == 1) {
+        // return the URL descriptor
+        USBD_CtlSendData(pdev,
+                         (unsigned char *) C_webusb_url_descriptor,
+                         MIN(req->wLength, sizeof(C_webusb_url_descriptor)));
+    }
+    else
+#endif  // WEBUSB_URL_SIZE_B
+        // SETUP (LE): 0x80 0x06 0x03 0x77 0x00 0x00 0xXX 0xXX
+        if ((req->bmRequest & 0x80) && req->bRequest == USB_REQ_GET_DESCRIPTOR
+            && (req->wValue >> 8) == USB_DESC_TYPE_STRING && (req->wValue & 0xFF) == 0xEE) {
+            USBD_CtlSendData(pdev,
+                             (unsigned char *) C_winusb_string_descriptor,
+                             MIN(req->wLength, sizeof(C_winusb_string_descriptor)));
+        }
+        // SETUP (LE): 0x80 0x77 0x04 0x00 0x00 0x00 0xXX 0xXX
+        else if ((req->bmRequest & 0x80) && req->bRequest == WINUSB_VENDOR_CODE
+                 && req->wIndex == WINUSB_GET_COMPATIBLE_ID_FEATURE) {
+            USBD_CtlSendData(
+                pdev, (unsigned char *) C_winusb_wcid, MIN(req->wLength, sizeof(C_winusb_wcid)));
+        }
+        // SETUP (LE): 0x80 0x77 0x05 0x00 0x00 0x00 0xXX 0xXX
+        else if ((req->bmRequest & 0x80) && req->bRequest == WINUSB_VENDOR_CODE
+                 && req->wIndex == WINUSB_GET_EXTENDED_PROPERTIES_OS_FEATURE) {
+            USBD_CtlSendData(
+                pdev, (unsigned char *) C_winusb_guid, MIN(req->wLength, sizeof(C_winusb_guid)));
+        }
+        // Microsoft OS 2.0 Descriptors for Windows 8.1 and Windows 10
+        else if ((req->bmRequest & 0x80) && req->bRequest == WINUSB_VENDOR_CODE
+                 && req->wIndex == MS_OS_20_DESCRIPTOR_INDEX) {
+            USBD_CtlSendData(pdev,
+                             (unsigned char *) C_winusb_request_descriptor,
+                             MIN(req->wLength, sizeof(C_winusb_request_descriptor)));
+        }
+        else {
+            USBD_CtlStall(pdev);
+        }
 }
 
-static const USBD_ClassTypeDef USBD_WEBUSB =
-{
-  USBD_WEBUSB_Init,
-  USBD_WEBUSB_DeInit,
-  USBD_WEBUSB_Setup,
-  NULL, /*EP0_TxSent*/
-  NULL, /*EP0_RxReady*/
-  USBD_WEBUSB_DataIn,
-  USBD_WEBUSB_DataOut,
-  NULL, /*SOF */
-  NULL, /*ISOIn*/
-  NULL, /*ISOOut*/
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetDeviceQualifierDesc_impl,
+static const USBD_ClassTypeDef USBD_WEBUSB = {
+    USBD_WEBUSB_Init,
+    USBD_WEBUSB_DeInit,
+    USBD_WEBUSB_Setup,
+    NULL, /*EP0_TxSent*/
+    NULL, /*EP0_RxReady*/
+    USBD_WEBUSB_DataIn,
+    USBD_WEBUSB_DataOut,
+    NULL, /*SOF */
+    NULL, /*ISOIn*/
+    NULL, /*ISOOut*/
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetDeviceQualifierDesc_impl,
 };
 
-#endif // HAVE_WEBUSB
+#endif  // HAVE_WEBUSB
 
 #ifdef HAVE_USB_CLASS_CCID
-static const USBD_ClassTypeDef USBD_CCID =
-{
-  USBD_CCID_Init,
-  USBD_CCID_DeInit,
-  USBD_CCID_Setup,
-  NULL, /*EP0_TxSent*/
-  NULL, /*EP0_RxReady*/
-  USBD_CCID_DataIn,
-  USBD_CCID_DataOut,
-  NULL, /*SOF */
-  NULL, /*ISOIn*/
-  NULL, /*ISOOut*/
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetCfgDesc_impl,
-  USBD_GetDeviceQualifierDesc_impl,
+static const USBD_ClassTypeDef USBD_CCID = {
+    USBD_CCID_Init,
+    USBD_CCID_DeInit,
+    USBD_CCID_Setup,
+    NULL, /*EP0_TxSent*/
+    NULL, /*EP0_RxReady*/
+    USBD_CCID_DataIn,
+    USBD_CCID_DataOut,
+    NULL, /*SOF */
+    NULL, /*ISOIn*/
+    NULL, /*ISOOut*/
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetCfgDesc_impl,
+    USBD_GetDeviceQualifierDesc_impl,
 };
 
-uint8_t SC_AnswerToReset (uint8_t voltage, uint8_t* atr_buffer) {
-  UNUSED(voltage);
-  // return the atr length
-  atr_buffer[0] = 0x3B;
-  atr_buffer[1] = 0;
-  return 2;
+uint8_t SC_AnswerToReset(uint8_t voltage, uint8_t *atr_buffer)
+{
+    UNUSED(voltage);
+    // return the atr length
+    atr_buffer[0] = 0x3B;
+    atr_buffer[1] = 0;
+    return 2;
 }
 
-void SC_Poweroff(void) {
-  // nothing to do ?
+void SC_Poweroff(void)
+{
+    // nothing to do ?
 }
 
-uint8_t SC_ExecuteEscape (uint8_t* escapePtr, uint32_t escapeLen,
-                          uint8_t* responseBuff,
-                          uint16_t* responseLen) {
-  UNUSED(escapePtr);
-  UNUSED(escapeLen);
-  UNUSED(responseBuff);
-  UNUSED(responseLen);
-  // nothing to do ?
-  return 0;
+uint8_t SC_ExecuteEscape(uint8_t  *escapePtr,
+                         uint32_t  escapeLen,
+                         uint8_t  *responseBuff,
+                         uint16_t *responseLen)
+{
+    UNUSED(escapePtr);
+    UNUSED(escapeLen);
+    UNUSED(responseBuff);
+    UNUSED(responseLen);
+    // nothing to do ?
+    return 0;
 }
-#endif // HAVE_USB_CLASS_CCID
+#endif  // HAVE_USB_CLASS_CCID
 
-void USB_power(unsigned char enabled) {
-  memset(&USBD_Device, 0, sizeof(USBD_Device));
-
-  // init timeouts and other global fields
-  memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
-  memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
-
-  if (enabled) {
+void USB_power(unsigned char enabled)
+{
     memset(&USBD_Device, 0, sizeof(USBD_Device));
-    /* Init Device Library */
-    USBD_Init(&USBD_Device, (USBD_DescriptorsTypeDef*)&HID_Desc, 0);
 
-    /* Register the HID class */
-    USBD_RegisterClassForInterface(HID_INTF,  &USBD_Device, (USBD_ClassTypeDef*)&USBD_HID);
+    // init timeouts and other global fields
+    memset(G_io_app.usb_ep_xfer_len, 0, sizeof(G_io_app.usb_ep_xfer_len));
+    memset(G_io_app.usb_ep_timeouts, 0, sizeof(G_io_app.usb_ep_timeouts));
+
+    if (enabled) {
+        memset(&USBD_Device, 0, sizeof(USBD_Device));
+        /* Init Device Library */
+        USBD_Init(&USBD_Device, (USBD_DescriptorsTypeDef *) &HID_Desc, 0);
+
+        /* Register the HID class */
+        USBD_RegisterClassForInterface(HID_INTF, &USBD_Device, (USBD_ClassTypeDef *) &USBD_HID);
 #ifdef HAVE_IO_U2F
-    USBD_RegisterClassForInterface(U2F_INTF,  &USBD_Device, (USBD_ClassTypeDef*)&USBD_U2F);
-    // initialize the U2F tunnel transport
-    u2f_transport_init(&G_io_u2f, G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
-#endif // HAVE_IO_U2F
+        USBD_RegisterClassForInterface(U2F_INTF, &USBD_Device, (USBD_ClassTypeDef *) &USBD_U2F);
+        // initialize the U2F tunnel transport
+        u2f_transport_init(&G_io_u2f, G_io_apdu_buffer, IO_APDU_BUFFER_SIZE);
+#endif  // HAVE_IO_U2F
 #ifdef HAVE_USB_CLASS_CCID
-    USBD_RegisterClassForInterface(CCID_INTF, &USBD_Device, (USBD_ClassTypeDef*)&USBD_CCID);
-#endif // HAVE_USB_CLASS_CCID
+        USBD_RegisterClassForInterface(CCID_INTF, &USBD_Device, (USBD_ClassTypeDef *) &USBD_CCID);
+#endif  // HAVE_USB_CLASS_CCID
 
 #ifdef HAVE_WEBUSB
-    USBD_RegisterClassForInterface(WEBUSB_INTF, &USBD_Device, (USBD_ClassTypeDef*)&USBD_WEBUSB);
-#endif // HAVE_WEBUSB
+        USBD_RegisterClassForInterface(
+            WEBUSB_INTF, &USBD_Device, (USBD_ClassTypeDef *) &USBD_WEBUSB);
+#endif  // HAVE_WEBUSB
 
-    /* Start Device Process */
-    USBD_Start(&USBD_Device);
-  }
-  else {
-    USBD_DeInit(&USBD_Device);
-  }
+        /* Start Device Process */
+        USBD_Start(&USBD_Device);
+    }
+    else {
+        USBD_DeInit(&USBD_Device);
+    }
 }
 
 #pragma GCC diagnostic pop
 /**
-  * @}
-  */
-
-
-/**
-  * @}
-  */
-
+ * @}
+ */
 
 /**
-  * @}
-  */
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
