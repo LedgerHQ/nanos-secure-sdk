@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    lcx_sha256.h
@@ -49,10 +49,10 @@
  * @brief SHA-224 and SHA-256 context
  */
 struct cx_sha256_s {
-  struct cx_hash_header_s header;  ///< @copydoc cx_ripemd160_s::header
-  size_t blen;                     ///< @copydoc cx_ripemd160_s::blen
-  uint8_t block[64];               ///< @copydoc cx_ripemd160_s::block
-  uint8_t acc[8 * 4];              ///< @copydoc cx_ripemd160_s::acc
+    struct cx_hash_header_s header;      ///< @copydoc cx_ripemd160_s::header
+    size_t                  blen;        ///< @copydoc cx_ripemd160_s::blen
+    uint8_t                 block[64];   ///< @copydoc cx_ripemd160_s::block
+    uint8_t                 acc[8 * 4];  ///< @copydoc cx_ripemd160_s::acc
 };
 /** Convenience type. See #cx_sha256_s. */
 typedef struct cx_sha256_s cx_sha256_t;
@@ -77,10 +77,10 @@ cx_err_t cx_sha224_init_no_throw(cx_sha256_t *hash);
  *
  * @return          SHA224 identifier.
  */
-static inline int cx_sha224_init ( cx_sha256_t * hash )
+static inline int cx_sha224_init(cx_sha256_t *hash)
 {
-  cx_sha224_init_no_throw(hash);
-  return CX_SHA224;
+    cx_sha224_init_no_throw(hash);
+    return CX_SHA224;
 }
 #endif
 
@@ -103,10 +103,10 @@ cx_err_t cx_sha256_init_no_throw(cx_sha256_t *hash);
  *
  * @return          SHA256 identifier.
  */
-static inline int cx_sha256_init ( cx_sha256_t * hash )
+static inline int cx_sha256_init(cx_sha256_t *hash)
 {
-  cx_sha256_init_no_throw(hash);
-  return CX_SHA256;
+    cx_sha256_init_no_throw(hash);
+    return CX_SHA256;
 }
 
 /**
@@ -117,13 +117,13 @@ static inline int cx_sha256_init ( cx_sha256_t * hash )
  * @param[in]  len     Length of the input data.
  *
  * @param[out] out     Buffer where to store the digest.
- * 
+ *
  * @param[in]  out_len Length of the output.
  *                     This is actually 256 bits.
  *
  */
-  size_t cx_hash_sha256(const uint8_t *in, size_t len, uint8_t *out, size_t out_len);
+size_t cx_hash_sha256(const uint8_t *in, size_t len, uint8_t *out, size_t out_len);
 
 #endif
 
-#endif // defined(HAVE_SHA256) || defined(HAVE_SHA224)
+#endif  // defined(HAVE_SHA256) || defined(HAVE_SHA224)
