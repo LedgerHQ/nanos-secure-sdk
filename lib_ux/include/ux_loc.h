@@ -1,37 +1,37 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #pragma once
 
 #if defined(HAVE_LANGUAGE_PACK)
 // Structure used for language packs:
 typedef struct language_pack {
-  uint32_t  target_id;            // 0x33000004:NanoX, 0x31100004:NanoS 1.5.x etc
-  uint16_t  language;             // Language contained in this pack (<NB_LANG)
-  uint16_t  nb_strings;           // MUST be the same than NB_BOLOS_UX_LOC_STRINGS
-  uint16_t  nb_fonts;             // Number of fonts
-  uint16_t  nb_characters;        // Number of unicode characters in each font
-  uint16_t  characters_offset;    // Offset to the characters x nb_fonts
-  uint16_t  fonts_offset;         // Offset to the bagl_font_unicode_t structures
-  uint16_t  bitmaps_offset;       // Offset to the bitmaps x nb_fonts
-  uint16_t  bolos_version_offset; // Offset to the Bolos version number string
-  uint16_t  pack_version_offset;  // Offset to the Language Pack version number string
-  uint16_t  offsets[];            // Offsets from the BEGINNING of the language pack
+    uint32_t target_id;             // 0x33000004:NanoX, 0x31100004:NanoS 1.5.x etc
+    uint16_t language;              // Language contained in this pack (<NB_LANG)
+    uint16_t nb_strings;            // MUST be the same than NB_BOLOS_UX_LOC_STRINGS
+    uint16_t nb_fonts;              // Number of fonts
+    uint16_t nb_characters;         // Number of unicode characters in each font
+    uint16_t characters_offset;     // Offset to the characters x nb_fonts
+    uint16_t fonts_offset;          // Offset to the bagl_font_unicode_t structures
+    uint16_t bitmaps_offset;        // Offset to the bitmaps x nb_fonts
+    uint16_t bolos_version_offset;  // Offset to the Bolos version number string
+    uint16_t pack_version_offset;   // Offset to the Language Pack version number string
+    uint16_t offsets[];             // Offsets from the BEGINNING of the language pack
 } LANGUAGE_PACK;
 
 // A language pack is a binary file containing:
@@ -49,7 +49,8 @@ typedef struct language_pack {
 - all strings, concatenated.
 
 NB:
-- there are 197 countries in the world, so 1 byte might be enough to store language information, unless we plan to integrate dialects (>7000) => use a u_int16_t;
+- there are 197 countries in the world, so 1 byte might be enough to store language information,
+unless we plan to integrate dialects (>7000) => use a u_int16_t;
 - we may store some CRC, to check language pack's integrity.
 */
-#endif //defined(HAVE_LANGUAGE_PACK)
+#endif  // defined(HAVE_LANGUAGE_PACK)

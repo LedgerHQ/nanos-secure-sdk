@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    lcx_groestl.h
@@ -32,20 +32,20 @@
 
 #include "lcx_wrappers.h"
 
-#define ROWS 8
+#define ROWS     8
 #define COLS1024 16
 #define SIZE1024 (ROWS * COLS1024)
 typedef unsigned char BitSequence;
 /**  @private Hash state */
 struct hashState_s {
-  uint8_t      chaining[ROWS][COLS1024]; ///< Actual state
-  uint64_t     block_counter;            ///< Block counter
-  unsigned int hashlen;                  ///< Output length
-  BitSequence  buffer[SIZE1024];         ///< Block buffer
-  unsigned int buf_ptr;                  ///< Buffer pointer
-  unsigned int columns;                  ///< Number of columns in a state
-  unsigned int rounds;                   ///< Number of rounds in P and Q
-  unsigned int statesize;                ///< Size of the state
+    uint8_t      chaining[ROWS][COLS1024];  ///< Actual state
+    uint64_t     block_counter;             ///< Block counter
+    unsigned int hashlen;                   ///< Output length
+    BitSequence  buffer[SIZE1024];          ///< Block buffer
+    unsigned int buf_ptr;                   ///< Buffer pointer
+    unsigned int columns;                   ///< Number of columns in a state
+    unsigned int rounds;                    ///< Number of rounds in P and Q
+    unsigned int statesize;                 ///< Size of the state
 };
 /** @private */
 typedef struct hashState_s hashState;
@@ -54,8 +54,8 @@ typedef struct hashState_s hashState;
  * @brief Groestl context
  */
 struct cx_groestl_s {
-  unsigned int output_size;             ///< Output digest size
-  struct hashState_s ctx;               ///< Hash state
+    unsigned int       output_size;  ///< Output digest size
+    struct hashState_s ctx;          ///< Hash state
 };
 /** Convenience type.*/
 typedef struct cx_groestl_s cx_groestl_t;
@@ -73,15 +73,15 @@ size_t cx_groestl_get_output_size(const cx_groestl_t *ctx);
  *                  - CX_OK on success
  *                  - CX_INVALID_PARAMETER
  */
-  cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
+cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
 
 /**
  * @deprecated
  * See #cx_groestl_init_no_throw
  */
-DEPRECATED static inline void cx_groestl_init ( cx_groestl_t * hash, unsigned int size )
+DEPRECATED static inline void cx_groestl_init(cx_groestl_t *hash, unsigned int size)
 {
-  CX_THROW(cx_groestl_init_no_throw(hash, size));
+    CX_THROW(cx_groestl_init_no_throw(hash, size));
 }
 
 /**
@@ -111,7 +111,12 @@ DEPRECATED static inline void cx_groestl_init ( cx_groestl_t * hash, unsigned in
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_groestl(cx_groestl_t *hash, uint32_t mode, const uint8_t *in, size_t len, uint8_t *out, size_t out_len);
+cx_err_t cx_groestl(cx_groestl_t  *hash,
+                    uint32_t       mode,
+                    const uint8_t *in,
+                    size_t         len,
+                    uint8_t       *out,
+                    size_t         out_len);
 
 /**
  * @brief   Adds more data to hash.
@@ -148,4 +153,4 @@ cx_err_t cx_groestl_final(cx_groestl_t *ctx, uint8_t *digest);
 
 #endif
 
-#endif // HAVE_GROESTL
+#endif  // HAVE_GROESTL

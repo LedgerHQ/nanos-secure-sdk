@@ -8,28 +8,26 @@
 
 #include "bip32.h"
 
-static void test_bip32_format(void **state) {
+static void test_bip32_format(void **state)
+{
     (void) state;
 
     char output[30];
     bool b = false;
 
-    b = bip32_path_format((const uint32_t[5]){0x8000002C, 0x80000000, 0x80000000, 0, 0},
-                          5,
-                          output,
-                          sizeof(output));
+    b = bip32_path_format(
+        (const uint32_t[5]){0x8000002C, 0x80000000, 0x80000000, 0, 0}, 5, output, sizeof(output));
     assert_true(b);
     assert_string_equal(output, "44'/0'/0'/0/0");
 
-    b = bip32_path_format((const uint32_t[5]){0x8000002C, 0x80000001, 0x80000000, 0, 0},
-                          5,
-                          output,
-                          sizeof(output));
+    b = bip32_path_format(
+        (const uint32_t[5]){0x8000002C, 0x80000001, 0x80000000, 0, 0}, 5, output, sizeof(output));
     assert_true(b);
     assert_string_equal(output, "44'/1'/0'/0/0");
 }
 
-static void test_bad_bip32_format(void **state) {
+static void test_bad_bip32_format(void **state)
+{
     (void) state;
 
     char output[30];
@@ -48,7 +46,8 @@ static void test_bad_bip32_format(void **state) {
     assert_false(b);
 }
 
-static void test_bip32_read(void **state) {
+static void test_bip32_read(void **state)
+{
     (void) state;
 
     // clang-format off
