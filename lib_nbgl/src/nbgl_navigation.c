@@ -140,6 +140,7 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
         button->obj.alignment                     = (nbPages > 1) ? MID_LEFT : CENTER;
         button->obj.alignTo                       = NULL;
         button->obj.touchMask                     = (1 << TOUCHED);
+        button->obj.touchId                       = BOTTOM_BUTTON_ID;
         navContainer->children[EXIT_BUTTON_INDEX] = (nbgl_obj_t *) button;
     }
     if (nbPages > 1) {
@@ -168,6 +169,7 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
             button->obj.alignTo          = NULL;
         }
         button->obj.touchMask                       = (1 << TOUCHED);
+        button->obj.touchId                         = LEFT_BUTTON_ID;
         navContainer->children[PREVIOUS_PAGE_INDEX] = (nbgl_obj_t *) button;
 
         // create next page button
@@ -190,6 +192,7 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
         button->obj.alignment                   = MID_RIGHT;
         button->obj.alignTo                     = navContainer->children[PREVIOUS_PAGE_INDEX];
         button->obj.touchMask                   = (1 << TOUCHED);
+        button->obj.touchId                     = RIGHT_BUTTON_ID;
         navContainer->children[NEXT_PAGE_INDEX] = (nbgl_obj_t *) button;
 
         configButtons(navContainer, nbPages, activePage);

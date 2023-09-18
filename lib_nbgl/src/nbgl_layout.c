@@ -120,6 +120,9 @@ static nbgl_button_t *choiceButtons[NB_MAX_SUGGESTION_BUTTONS];
 static char numText[5];
 #endif
 
+// numbers of touchable controls for the whole page
+static uint8_t nbTouchableControls = 0;
+
 /**********************
  *  STATIC PROTOTYPES
  **********************/
@@ -438,6 +441,60 @@ static nbgl_line_t *createLeftVerticalLine(uint8_t layer)
     return line;
 }
 
+/**
+ * @brief This function creates a bottom area with a centered button and a top line. Returns it as a
+ * container
+ *
+ * @param icon icon to place in centered button
+ * @param separationLine if set to true, adds a light gray separation line on top of the container
+ * @param layer screen layer to use
+ * @return the created container object
+ */
+static nbgl_container_t *createBottomButton(const nbgl_icon_details_t *icon,
+                                            bool                       separationLine,
+                                            uint8_t                    layer)
+{
+    nbgl_button_t    *button;
+    nbgl_container_t *container;
+
+    container                  = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layer);
+    container->obj.area.width  = SCREEN_WIDTH;
+    container->obj.area.height = BUTTON_DIAMETER + 2 * BORDER_MARGIN;
+    container->layout          = HORIZONTAL;
+    container->nbChildren      = 2;
+    container->children      = (nbgl_obj_t **) nbgl_containerPoolGet(container->nbChildren, layer);
+    container->obj.alignment = NO_ALIGNMENT;
+
+    button                  = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
+    button->innerColor      = WHITE;
+    button->borderColor     = LIGHT_GRAY;
+    button->obj.area.width  = BUTTON_DIAMETER;
+    button->obj.area.height = BUTTON_DIAMETER;
+    button->radius          = BUTTON_RADIUS;
+    button->icon            = icon;
+    button->obj.alignment   = CENTER;
+    button->obj.touchMask   = (1 << TOUCHED);
+    button->obj.touchId     = BOTTOM_BUTTON_ID;
+    container->children[0]  = (nbgl_obj_t *) button;
+
+    if (separationLine) {
+        nbgl_line_t *line;
+        // create horizontal line
+        line                       = (nbgl_line_t *) nbgl_objPoolGet(LINE, 0);
+        line->lineColor            = LIGHT_GRAY;
+        line->obj.area.width       = SCREEN_WIDTH;
+        line->obj.area.height      = 4;
+        line->direction            = HORIZONTAL;
+        line->thickness            = 1;
+        line->obj.alignmentMarginY = BORDER_MARGIN - 4;
+        line->obj.alignTo          = (nbgl_obj_t *) button;
+        line->obj.alignment        = TOP_MIDDLE;
+        container->children[1]     = (nbgl_obj_t *) line;
+    }
+
+    return container;
+}
+
 // function adding a layout object in the callbackObjPool array for the given layout, and
 // configuring it
 static layoutObj_t *addCallbackObj(nbgl_layoutInternal_t *layout,
@@ -506,6 +563,8 @@ nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description)
     // reset globals
     memset(layout, 0, sizeof(nbgl_layoutInternal_t));
 
+    nbTouchableControls = 0;
+
     layout->callback       = (nbgl_layoutTouchCallback_t) PIC(description->onActionCallback);
     layout->modal          = description->modal;
     layout->withLeftBorder = description->withLeftBorder;
@@ -540,6 +599,7 @@ nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description)
         obj->token                       = description->tapActionToken;
         obj->tuneId                      = description->tapTuneId;
         layout->container->obj.touchMask = (1 << TOUCHED);
+        layout->container->obj.touchId   = WHOLE_SCREEN_ID;
 
         // create 'tap to continue' text area
         layout->tapText                       = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, 0);
@@ -595,6 +655,7 @@ int nbgl_layoutAddTopRightButton(nbgl_layout_t             *layout,
     button->innerColor           = WHITE;
     button->borderColor          = LIGHT_GRAY;
     button->obj.touchMask        = (1 << TOUCHED);
+    button->obj.touchId          = TOP_RIGHT_BUTTON_ID;
     button->icon                 = PIC(icon);
     button->obj.alignment        = TOP_RIGHT;
 
@@ -674,7 +735,7 @@ int nbgl_layoutAddBottomButton(nbgl_layout_t             *layout,
         return -1;
     }
 
-    layoutInt->bottomContainer = nbgl_bottomButtonPopulate(icon, separationLine, layoutInt->layer);
+    layoutInt->bottomContainer = createBottomButton(icon, separationLine, layoutInt->layer);
     obj = addCallbackObj(layoutInt, (nbgl_obj_t *) layoutInt->bottomContainer, token, tuneId);
     if (obj == NULL) {
         return -1;
@@ -731,6 +792,8 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
     if ((barLayout->inactive != true)
         && ((barLayout->iconLeft != NULL) || (barLayout->iconRight != NULL))) {
         container->obj.touchMask = (1 << TOUCHED);
+        container->obj.touchId   = CONTROLS_ID + nbTouchableControls;
+        nbTouchableControls++;
     }
 
     if (barLayout->iconLeft != NULL) {
@@ -852,6 +915,8 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switc
     container->obj.alignmentMarginX = BORDER_MARGIN;
     container->obj.alignment        = NO_ALIGNMENT;
     container->obj.touchMask        = (1 << TOUCHED);
+    container->obj.touchId          = CONTROLS_ID + nbTouchableControls;
+    nbTouchableControls++;
 
     textArea                  = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
     textArea->textColor       = BLACK;
@@ -1096,6 +1161,8 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoic
         container->obj.alignTo          = (nbgl_obj_t *) NULL;
         // whole container should be touchable
         container->obj.touchMask = (1 << TOUCHED);
+        container->obj.touchId   = CONTROLS_ID + nbTouchableControls;
+        nbTouchableControls++;
 
         // highlight init choice
         if (i == choices->initChoice) {
@@ -1473,6 +1540,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceBu
     bottomButton->text            = PIC(info->bottomText);
     bottomButton->fontId          = BAGL_FONT_INTER_SEMIBOLD_24px;
     bottomButton->obj.touchMask   = (1 << TOUCHED);
+    bottomButton->obj.touchId     = CHOICE_2_ID;
     // set this new button as child of the container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) bottomButton);
 
@@ -1501,6 +1569,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceBu
     topButton->text            = PIC(info->topText);
     topButton->fontId          = BAGL_FONT_INTER_SEMIBOLD_24px;
     topButton->obj.touchMask   = (1 << TOUCHED);
+    topButton->obj.touchId     = CHOICE_1_ID;
     // set this new button as child of the container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) topButton);
 
@@ -1798,6 +1867,7 @@ int nbgl_layoutAddButton(nbgl_layout_t *layout, const nbgl_layoutButton_t *butto
     }
     button->obj.alignTo   = NULL;
     button->obj.touchMask = (1 << TOUCHED);
+    button->obj.touchId   = SINGLE_BUTTON_ID;
     // set this new button as child of the container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) button);
 
@@ -1932,6 +2002,7 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout,
     textArea->fontId                           = BAGL_FONT_INTER_SEMIBOLD_24px;
     textArea->textAlignment                    = CENTER;
     textArea->obj.touchMask                    = (1 << TOUCHED);
+    textArea->obj.touchId                      = BOTTOM_BUTTON_ID;
     layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t *) textArea;
     layoutInt->nbChildren++;
 
@@ -1990,6 +2061,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
     textArea->fontId                           = BAGL_FONT_INTER_SEMIBOLD_24px;
     textArea->textAlignment                    = CENTER;
     textArea->obj.touchMask                    = (1 << TOUCHED);
+    textArea->obj.touchId                      = BOTTOM_BUTTON_ID;
     layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t *) textArea;
     layoutInt->nbChildren++;
 
@@ -2008,6 +2080,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
     textArea->fontId                           = BAGL_FONT_INTER_SEMIBOLD_24px;
     textArea->textAlignment                    = CENTER;
     textArea->obj.touchMask                    = (1 << TOUCHED);
+    textArea->obj.touchId                      = RIGHT_BUTTON_ID;
     layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t *) textArea;
     layoutInt->nbChildren++;
 
@@ -2101,6 +2174,7 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
         button->text            = NULL;
         button->icon            = PIC(&C_leftArrow32px);
         button->obj.touchMask   = (1 << TOUCHED);
+        button->obj.touchId     = BACK_BUTTON_ID;
         container->children[1]  = (nbgl_obj_t *) button;
     }
 
@@ -2341,6 +2415,7 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
         }
         choiceButtons[i]->text          = buttonTexts[i];
         choiceButtons[i]->obj.touchMask = (1 << TOUCHED);
+        choiceButtons[i]->obj.touchId   = CONTROLS_ID + i;
         // some buttons may not be visible
         if (i < nbUsedButtons) {
             container->children[i] = (nbgl_obj_t *) choiceButtons[i];
@@ -2491,6 +2566,7 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout,
     }
     textArea->token         = token;
     textArea->obj.touchMask = (1 << TOUCHED);
+    textArea->obj.touchId   = ENTERED_TEXT_ID;
 
     // set this new text area as child of the container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) textArea);
@@ -2589,6 +2665,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout,
         button->innerColor    = BLACK;
         button->borderColor   = BLACK;
         button->obj.touchMask = (1 << TOUCHED);
+        button->obj.touchId   = BOTTOM_BUTTON_ID;
     }
     else {
         button->borderColor = LIGHT_GRAY;
@@ -2641,6 +2718,7 @@ int nbgl_layoutUpdateConfirmationButton(nbgl_layout_t *layout,
         button->innerColor    = BLACK;
         button->borderColor   = BLACK;
         button->obj.touchMask = (1 << TOUCHED);
+        button->obj.touchId   = BOTTOM_BUTTON_ID;
     }
     else {
         button->borderColor = LIGHT_GRAY;

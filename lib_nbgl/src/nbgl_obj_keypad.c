@@ -315,6 +315,49 @@ void nbgl_keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
 }
 
 /**
+ * @brief This function gets the position (top-left corner) of the key at the
+ * given index. (to be used for Testing purpose). Only works without shuffling
+ *
+ * @param kpd the object to be drawned
+ * @param index the char of the key
+ * @param x [out] the top-left position
+ * @param y [out] the top-left position
+ * @return true if found, false otherwise
+ */
+bool nbgl_keypadGetPosition(nbgl_keypad_t *kpd, char index, uint16_t *x, uint16_t *y)
+{
+    // if in first line
+    if ((index >= '1') && (index <= '3')) {
+        *x = kpd->obj.area.x0 + (index - '1') * KEY_WIDTH;
+        *y = kpd->obj.area.y0;
+    }
+    else if ((index >= '4') && (index <= '6')) {
+        *x = kpd->obj.area.x0 + (index - '4') * KEY_WIDTH;
+        *y = kpd->obj.area.y0 + KEYPAD_KEY_HEIGHT;
+    }
+    else if ((index >= '7') && (index <= '9')) {
+        *x = kpd->obj.area.x0 + (index - '7') * KEY_WIDTH;
+        *y = kpd->obj.area.y0 + (2 * KEYPAD_KEY_HEIGHT);
+    }
+    else if (index == BACKSPACE_KEY) {  // backspace
+        *x = kpd->obj.area.x0;
+        *y = kpd->obj.area.y0 + (3 * KEYPAD_KEY_HEIGHT);
+    }
+    else if (index == '0') {
+        *x = kpd->obj.area.x0 + KEY_WIDTH;
+        *y = kpd->obj.area.y0 + (3 * KEYPAD_KEY_HEIGHT);
+    }
+    else if (index == VALIDATE_KEY) {  // validate
+        *x = kpd->obj.area.x0 + (2 * KEY_WIDTH);
+        *y = kpd->obj.area.y0 + (3 * KEYPAD_KEY_HEIGHT);
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
+/**
  * @brief This function draws a keypad object
  *
  * @param kpd keypad object to draw
@@ -323,6 +366,7 @@ void nbgl_keypadTouchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
 void nbgl_objDrawKeypad(nbgl_keypad_t *kpd)
 {
     kpd->obj.touchMask = (1 << TOUCHED) | (1 << TOUCH_PRESSED);
+    kpd->obj.touchId   = KEYPAD_ID;
 
     // if the object has not been already used, prepare indexes of digits
     if (kpd->digitIndexes[0] == 0) {
