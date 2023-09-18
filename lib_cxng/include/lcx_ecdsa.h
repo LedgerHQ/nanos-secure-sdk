@@ -112,6 +112,57 @@ DEPRECATED static inline size_t cx_ecdsa_sign(const cx_ecfp_private_key_t *pvkey
 }
 
 /**
+ * @brief   Sign a message digest according to ECDSA specification
+ *
+ * @param[in]  pvkey    Private key.
+ *                      Shall be initialized with #cx_ecfp_init_private_key_no_throw.
+ *
+ * @param[in]  mode     Crypto mode flags.
+ *                      Supported flags:
+ *                        - CX_RND_TRNG
+ *                        - CX_RND_RFC6979
+ *
+ * @param[in]  hashID   Message digest algorithm identifier.
+ *                      This parameter is mandatory with the flag CX_RND_RFC6979.
+ *
+ * @param[in]  hash     Digest of the message to be signed.
+ *                      The length of *hash* must be shorter than the curve domain size.
+ *
+ * @param[in]  hash_len Length of the digest in octets.
+ *
+ * @param[in]  rs_len   Length of r and s buffer. 32 for usual curves.
+ *
+ * @param[out] sig_r    Buffer where to store the signature r value.
+ *
+ * @param[out] sig_s    Buffer where to store the signature s value.
+ *
+ * @param[out] info     Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when computing
+ * **[k].G**.
+ *
+ * @return              Error code:
+ *                      - CX_OK on success
+ *                      - CX_EC_INVALID_CURVE
+ *                      - CX_INVALID_PARAMETER
+ *                      - CX_INTERNAL_ERROR
+ *                      - CX_NOT_UNLOCKED
+ *                      - CX_INVALID_PARAMETER_SIZE
+ *                      - CX_MEMORY_FULL
+ *                      - CX_NOT_LOCKED
+ *                      - CX_EC_INVALID_POINT
+ *                      - CX_EC_INFINITE_POINT
+ *                      - CX_INVALID_PARAMETER_VALUE
+ */
+cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
+                                   uint32_t                     mode,
+                                   cx_md_t                      hashID,
+                                   const uint8_t               *hash,
+                                   size_t                       hash_len,
+                                   size_t                       rs_len,
+                                   uint8_t                     *sig_r,
+                                   uint8_t                     *sig_s,
+                                   uint32_t                    *info);
+
+/**
  * @brief   Verifies an ECDSA signature according to ECDSA specification.
  *
  * @param[in] pukey    Public key initialized with #cx_ecfp_init_public_key_no_throw.
