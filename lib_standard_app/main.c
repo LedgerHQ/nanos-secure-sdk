@@ -26,20 +26,22 @@
 
 #ifdef HAVE_NBGL
 #include "nbgl_use_case.h"
-#endif // HAVE_NBGL
-#endif // HAVE_SWAP
+#endif  // HAVE_NBGL
+#endif  // HAVE_SWAP
 
-ux_state_t G_ux;
+ux_state_t        G_ux;
 bolos_ux_params_t G_ux_params;
 
 /**
  * Exit the application and go back to the dashboard.
  */
-WEAK void __attribute__((noreturn)) app_exit(void) {
+WEAK void __attribute__((noreturn)) app_exit(void)
+{
     os_sched_exit(-1);
 }
 
-static void common_app_init(void) {
+static void common_app_init(void)
+{
     UX_INIT();
 
     io_seproxyhal_init();
@@ -50,22 +52,26 @@ static void common_app_init(void) {
 #ifdef HAVE_BLE
     BLE_power(0, NULL);
     BLE_power(1, NULL);
-#endif // HAVE_BLE
+#endif  // HAVE_BLE
 }
 
-static void standalone_app_main(void) {
+static void standalone_app_main(void)
+{
 #ifdef HAVE_SWAP
-    G_called_from_swap = false;
+    G_called_from_swap    = false;
     G_swap_response_ready = false;
-#endif // HAVE_SWAP
+#endif  // HAVE_SWAP
 
-    BEGIN_TRY {
-        TRY {
+    BEGIN_TRY
+    {
+        TRY
+        {
             common_app_init();
 
             app_main();
         }
-        CATCH_OTHER(e) {
+        CATCH_OTHER(e)
+        {
             PRINTF("Exiting following exception: %d\n", e);
 
 #ifdef HAVE_DEBUG_THROWS
@@ -87,8 +93,7 @@ static void standalone_app_main(void) {
             debug_display_throw_error(e);
 #endif
         }
-        FINALLY {
-        }
+        FINALLY {}
     }
     END_TRY;
 
@@ -97,26 +102,28 @@ static void standalone_app_main(void) {
 }
 
 #ifdef HAVE_SWAP
-static void library_app_main(libargs_t *args) {
-    BEGIN_TRY {
-        TRY {
+static void library_app_main(libargs_t *args)
+{
+    BEGIN_TRY
+    {
+        TRY
+        {
             PRINTF("Inside library\n");
             switch (args->command) {
-                case SIGN_TRANSACTION:
-                {
-                    // Backup up transaction parameters and wipe BSS to avoid collusion with app-exchange
-                    // BSS data.
+                case SIGN_TRANSACTION: {
+                    // Backup up transaction parameters and wipe BSS to avoid collusion with
+                    // app-exchange BSS data.
                     bool success = swap_copy_transaction_parameters(args->create_transaction);
                     if (success) {
                         // BSS was wiped, we can now init these globals
-                        G_called_from_swap = true;
+                        G_called_from_swap    = true;
                         G_swap_response_ready = false;
 
                         common_app_init();
 
 #ifdef HAVE_NBGL
                         nbgl_useCaseSpinner("Signing");
-#endif // HAVE_NBGL
+#endif  // HAVE_NBGL
 
                         app_main();
                     }
@@ -132,18 +139,21 @@ static void library_app_main(libargs_t *args) {
                     break;
             }
         }
-        CATCH_OTHER(e) {
+        CATCH_OTHER(e)
+        {
             PRINTF("Exiting following exception: %d\n", e);
         }
-        FINALLY {
+        FINALLY
+        {
             os_lib_end();
         }
     }
     END_TRY;
 }
-#endif // HAVE_SWAP
+#endif  // HAVE_SWAP
 
-__attribute__((section(".boot"))) int main(int arg0) {
+__attribute__((section(".boot"))) int main(int arg0)
+{
     // exit critical section
     __asm volatile("cpsie i");
 
@@ -160,11 +170,12 @@ __attribute__((section(".boot"))) int main(int arg0) {
         libargs_t *args = (libargs_t *) arg0;
         if (args->id == 0x100) {
             library_app_main(args);
-        } else {
+        }
+        else {
             app_exit();
         }
     }
-#endif // HAVE_SWAP
+#endif  // HAVE_SWAP
 
     return 0;
 }

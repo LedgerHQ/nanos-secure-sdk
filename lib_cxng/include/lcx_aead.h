@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    lcx_aead.h
@@ -45,17 +45,17 @@
 #include "lcx_chacha_poly.h"
 #endif
 
-#define GCM_MAX_IV_LENGTH    64
-#define MAX_TAG_LENGTH   16
+#define GCM_MAX_IV_LENGTH 64
+#define MAX_TAG_LENGTH    16
 
 /**
  * @brief Supported AEAD algorithms.
  */
 typedef enum {
-  CX_AEAD_AES128_GCM,       ///< AES-GCM with a 128-bit key
-  CX_AEAD_AES192_GCM,       ///< AES-GCM with a 192-bit key
-  CX_AEAD_AES256_GCM,       ///< AES-GCM with a 256-bit key
-  CX_AEAD_CHACHA20_POLY1305 ///< CHACHA20-POLY1305 with a 256-bit key
+    CX_AEAD_AES128_GCM,        ///< AES-GCM with a 128-bit key
+    CX_AEAD_AES192_GCM,        ///< AES-GCM with a 192-bit key
+    CX_AEAD_AES256_GCM,        ///< AES-GCM with a 256-bit key
+    CX_AEAD_CHACHA20_POLY1305  ///< CHACHA20-POLY1305 with a 256-bit key
 } cx_aead_type_t;
 
 /**
@@ -63,34 +63,54 @@ typedef enum {
  *
  */
 typedef struct {
-  void (*init)(void *ctx);                                                          ///< Initializes the context of the base algorithm
-  cx_err_t (*set_key)(void *ctx, const uint8_t *key, size_t key_len);               ///< Sets the key
-  cx_err_t (*start)(void *ctx, uint32_t mode, const uint8_t *iv, size_t iv_len);    ///< Sets the initialization vector
-  cx_err_t (*update_aad)(void *ctx, const uint8_t *aad, size_t aad_len);            ///< Processes the additional authenticated data
-  cx_err_t (*update)(void *ctx, const uint8_t *input, uint8_t *output, size_t len); ///< Processes the input data
-  cx_err_t (*finish)(void *ctx, uint8_t *tag, size_t tag_len);                      ///< Computes the message authenticated code
-  cx_err_t (*encrypt_and_tag)(void *ctx,
-                              const uint8_t *input, size_t len,
-                              const uint8_t *iv, size_t iv_len,
-                              const uint8_t *aad, size_t aad_len,
-                              uint8_t *output, uint8_t *tag, size_t tag_len);       ///< Encrypts the message and computes the MAC
+    void (*init)(void *ctx);  ///< Initializes the context of the base algorithm
+    cx_err_t (*set_key)(void *ctx, const uint8_t *key, size_t key_len);  ///< Sets the key
+    cx_err_t (*start)(void          *ctx,
+                      uint32_t       mode,
+                      const uint8_t *iv,
+                      size_t         iv_len);  ///< Sets the initialization vector
+    cx_err_t (*update_aad)(void          *ctx,
+                           const uint8_t *aad,
+                           size_t aad_len);  ///< Processes the additional authenticated data
+    cx_err_t (*update)(void          *ctx,
+                       const uint8_t *input,
+                       uint8_t       *output,
+                       size_t         len);  ///< Processes the input data
+    cx_err_t (*finish)(void    *ctx,
+                       uint8_t *tag,
+                       size_t   tag_len);  ///< Computes the message authenticated code
+    cx_err_t (*encrypt_and_tag)(void          *ctx,
+                                const uint8_t *input,
+                                size_t         len,
+                                const uint8_t *iv,
+                                size_t         iv_len,
+                                const uint8_t *aad,
+                                size_t         aad_len,
+                                uint8_t       *output,
+                                uint8_t       *tag,
+                                size_t tag_len);  ///< Encrypts the message and computes the MAC
 
-  cx_err_t (*auth_decrypt)(void *ctx,
-                           const uint8_t *input, size_t len,
-                           const uint8_t *iv, size_t iv_len,
-                           const uint8_t *aad, size_t aad_len,
-                           uint8_t *output, const uint8_t *tag, size_t tag_len);    ///< Decrypts the message and verifies the MAC
-  cx_err_t (*check_tag)(void *ctx, const uint8_t *tag, size_t tag_len);             ///< Checks the MAC
+    cx_err_t (*auth_decrypt)(void          *ctx,
+                             const uint8_t *input,
+                             size_t         len,
+                             const uint8_t *iv,
+                             size_t         iv_len,
+                             const uint8_t *aad,
+                             size_t         aad_len,
+                             uint8_t       *output,
+                             const uint8_t *tag,
+                             size_t tag_len);  ///< Decrypts the message and verifies the MAC
+    cx_err_t (*check_tag)(void *ctx, const uint8_t *tag, size_t tag_len);  ///< Checks the MAC
 } cx_aead_base_t;
 
 /**
  * @brief AEAD information.
  */
 typedef struct {
-  cx_aead_type_t        type;       ///< AEAD algorithm
-  size_t                key_bitlen; ///< Bit length of the key
-  size_t                block_size; ///< Block size
-  const cx_aead_base_t *func;       ///< Pointer to the generic functions
+    cx_aead_type_t        type;        ///< AEAD algorithm
+    size_t                key_bitlen;  ///< Bit length of the key
+    size_t                block_size;  ///< Block size
+    const cx_aead_base_t *func;        ///< Pointer to the generic functions
 } cx_aead_info_t;
 
 /**
@@ -98,9 +118,10 @@ typedef struct {
  */
 
 typedef struct {
-  const cx_aead_info_t *info;     ///< Pointer to the AEAD information
-  uint32_t              mode;     ///< Encrypt or decrypt
-  void                 *base_ctx; ///< Pointer to the context of the base algorithm: either AES-GCM or Chacha20-Poly1305
+    const cx_aead_info_t *info;  ///< Pointer to the AEAD information
+    uint32_t              mode;  ///< Encrypt or decrypt
+    void *base_ctx;  ///< Pointer to the context of the base algorithm: either AES-GCM or
+                     ///< Chacha20-Poly1305
 } cx_aead_context_t;
 
 /**
@@ -125,8 +146,8 @@ cx_err_t cx_aead_init(cx_aead_context_t *ctx);
 /**
  * @brief   AEAD set up.
  *
- * @details The AEAD context must be initialized. This initializes the specific AEAD algorithm context.
- *          Supported AEAD algorithms:
+ * @details The AEAD context must be initialized. This initializes the specific AEAD algorithm
+ * context. Supported AEAD algorithms:
  *            - AES-GCM
  *            - Chacha20-Poly1305
  *          This must be called after #cx_aead_init and before #cx_aead_set_key.
@@ -200,15 +221,19 @@ cx_err_t cx_aead_update_ad(cx_aead_context_t *ctx, const uint8_t *ad, size_t ad_
  *
  * @param[in]  in_len  Length of the input.
  *
- * @param[out] out     Buffer the output data. This must be able to hold at least in_len + block_size.
- *                     This must be not the same buffer as in.
+ * @param[out] out     Buffer the output data. This must be able to hold at least in_len +
+ * block_size. This must be not the same buffer as in.
  *
  * @param[out] out_len The length of the output data. This must not be NULL.
  *
  * @return             Error code.
  *
  */
-cx_err_t cx_aead_update(cx_aead_context_t *ctx, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
+cx_err_t cx_aead_update(cx_aead_context_t *ctx,
+                        uint8_t           *in,
+                        size_t             in_len,
+                        uint8_t           *out,
+                        size_t            *out_len);
 
 /**
  * @brief   Writes the tag of the AEAD cipher.
@@ -270,9 +295,17 @@ cx_err_t cx_aead_check_tag(cx_aead_context_t *ctx, const uint8_t *tag, size_t ta
  *
  * @return             Error code.
  */
-cx_err_t cx_aead_encrypt(cx_aead_context_t *ctx, const uint8_t *iv, size_t iv_len,
-                         const uint8_t *ad, size_t ad_len, uint8_t *in, size_t in_len,
-                         uint8_t *out, size_t *out_len, uint8_t *tag, size_t tag_len);
+cx_err_t cx_aead_encrypt(cx_aead_context_t *ctx,
+                         const uint8_t     *iv,
+                         size_t             iv_len,
+                         const uint8_t     *ad,
+                         size_t             ad_len,
+                         uint8_t           *in,
+                         size_t             in_len,
+                         uint8_t           *out,
+                         size_t            *out_len,
+                         uint8_t           *tag,
+                         size_t             tag_len);
 
 /**
  * @brief   All-in-one authenticated decryption.
@@ -305,9 +338,17 @@ cx_err_t cx_aead_encrypt(cx_aead_context_t *ctx, const uint8_t *iv, size_t iv_le
  *
  * @return             Error code.
  */
-cx_err_t cx_aead_decrypt(cx_aead_context_t *ctx, const uint8_t *iv, size_t iv_len,
-                         const uint8_t *ad, size_t ad_len, uint8_t *in, size_t in_len,
-                         uint8_t *out, size_t *out_len, const uint8_t *tag, size_t tag_len);
+cx_err_t cx_aead_decrypt(cx_aead_context_t *ctx,
+                         const uint8_t     *iv,
+                         size_t             iv_len,
+                         const uint8_t     *ad,
+                         size_t             ad_len,
+                         uint8_t           *in,
+                         size_t             in_len,
+                         uint8_t           *out,
+                         size_t            *out_len,
+                         const uint8_t     *tag,
+                         size_t             tag_len);
 
 #endif
-#endif // HAVE_AEAD
+#endif  // HAVE_AEAD
