@@ -19,7 +19,15 @@
 #ifndef OS_APILEVEL_H
 #define OS_APILEVEL_H
 
+#ifndef HAVE_BOLOS
+// Obsolete defines - shall not be used
+// Replaced by API_LEVEL mechanism enforced directly at app sideloading.
+// Hence the app can consider it runs on a OS which match the SDK the app has been built for.
+#define CX_APILEVEL        _Pragma("GCC warning \"Deprecated constant!\"") 12
+#define CX_COMPAT_APILEVEL _Pragma("GCC warning \"Deprecated constant!\"") 12
+#else
 #define CX_APILEVEL        12
 #define CX_COMPAT_APILEVEL 12
+#endif
 
 #endif  // OS_APILEVEL_H

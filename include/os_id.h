@@ -49,7 +49,10 @@ unsigned int os_get_sn(unsigned char *buffer);
 SYSCALL unsigned int get_api_level(void);
 
 #ifndef HAVE_BOLOS
-static inline void check_api_level(unsigned int apiLevel)
+// Obsolete function - shall not be used
+// Replaced by API_LEVEL mechanism enforced directly at app sideloading.
+// Hence the app can consider it runs on a OS which match the SDK the app has been built for.
+DEPRECATED static inline void check_api_level(unsigned int apiLevel)
 {
     if (apiLevel < get_api_level()) {
         os_sched_exit(-1);
