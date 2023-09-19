@@ -381,9 +381,6 @@ static const unsigned char seph_io_mcu_protect[] = {
 void io_seproxyhal_init(void)
 {
 #ifndef HAVE_BOLOS
-    // Enforce OS compatibility
-    check_api_level(CX_COMPAT_APILEVEL);
-
 #ifdef HAVE_MCU_PROTECT
     // engage RDP2 on MCU
     io_seproxyhal_spi_send(seph_io_mcu_protect, sizeof(seph_io_mcu_protect));
