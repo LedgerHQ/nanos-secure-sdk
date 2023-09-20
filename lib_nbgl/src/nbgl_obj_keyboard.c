@@ -480,7 +480,7 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard)
     rectArea.bpp    = NBGL_BPP_1;
     rectArea.x0     = SPECIAL_CHARS_KEY_WIDTH + 5 * NORMAL_KEY_WIDTH;
     rectArea.y0     = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT * 2
-                  + (KEYBOARD_KEY_HEIGHT - rectArea.height) / 2;
+                  + (((KEYBOARD_KEY_HEIGHT - rectArea.height) / 2) & 0xFFC);
     rectArea.x0 += (BACKSPACE_KEY_WIDTH_DIGITS - rectArea.width) / 2;
     nbgl_drawIcon(&rectArea, BLACK, &C_backspace32px);
 
