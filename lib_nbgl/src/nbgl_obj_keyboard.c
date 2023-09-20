@@ -384,7 +384,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard)
     else {
         rectArea.x0 += (BACKSPACE_KEY_WIDTH_LETTERS_ONLY - rectArea.width) / 2;
     }
-    nbgl_drawIcon(&rectArea, BLACK, &C_backspace32px);
+    nbgl_drawIcon(&rectArea, (keyboard->keyMask & (1 << 26)) ? WHITE : BLACK, &C_backspace32px);
 
     // 4th row, only in Full mode
     if (!keyboard->lettersOnly) {
