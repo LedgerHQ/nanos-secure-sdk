@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_EDDSA
-
 #ifndef CX_EDDSA_H
 #define CX_EDDSA_H
+
+#ifdef HAVE_EDDSA
 
 cx_err_t cx_eddsa_get_public_key_internal(const cx_ecfp_private_key_t *pv_key,
                                           cx_md_t                      hashID,
@@ -30,6 +30,6 @@ cx_err_t cx_eddsa_get_public_key_internal(const cx_ecfp_private_key_t *pv_key,
                                           size_t                       h_len,
                                           uint8_t                     *scal /*temp uint8[114]*/);
 
-#endif
+#endif  // HAVE_EDDSA
 
-#endif
+#endif  // CX_EDDSA_H

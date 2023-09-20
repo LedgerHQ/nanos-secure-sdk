@@ -36,10 +36,10 @@
  *   - SHA512
  */
 
-#ifdef HAVE_HASH
-
 #ifndef LCX_HASH_H
 #define LCX_HASH_H
+
+#ifdef HAVE_HASH
 
 #include "cx_errors.h"
 #include "lcx_wrappers.h"
@@ -235,6 +235,6 @@ cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
  */
 cx_err_t cx_hash_final(cx_hash_t *hash, uint8_t *digest);
 
-#endif
-
 #endif  // HAVE_HASH
+
+#endif  // LCX_HASH_H

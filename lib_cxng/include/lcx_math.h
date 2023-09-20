@@ -21,10 +21,10 @@
  * @brief   Basic arithmetic.
  */
 
-#ifdef HAVE_MATH
-
 #ifndef LCX_MATH_H
 #define LCX_MATH_H
+
+#ifdef HAVE_MATH
 
 #include "lcx_wrappers.h"
 #include "ox_bn.h"
@@ -562,6 +562,6 @@ static inline bool cx_math_is_zero(const uint8_t *a, size_t len)
     return 1;
 }
 
-#endif  // LCX_MATH_H
-
 #endif  // HAVE_MATH
+
+#endif  // LCX_MATH_H

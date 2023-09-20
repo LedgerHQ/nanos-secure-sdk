@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_PBKDF2
-
 #ifndef CX_PBKDF2_H
 #define CX_PBKDF2_H
+
+#ifdef HAVE_PBKDF2
 
 #include "lcx_hmac.h"
 
@@ -63,5 +63,6 @@ cx_err_t cx_pbkdf2_hmac(cx_md_t        md_type,
                         uint8_t       *key,
                         size_t         key_len);
 
-#endif  // CX_PBKDF2_H
 #endif  // HAVE_PBKDF2
+
+#endif  // CX_PBKDF2_H

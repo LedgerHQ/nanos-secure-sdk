@@ -28,10 +28,10 @@
  * </a> for more details.
  */
 
-#ifdef HAVE_AES
-
 #ifndef LCX_AES_H
 #define LCX_AES_H
+
+#ifdef HAVE_AES
 
 #include "cx_errors.h"
 #include "lcx_wrappers.h"
@@ -234,6 +234,6 @@ cx_err_t cx_aes_enc_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8
  */
 cx_err_t cx_aes_dec_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8_t *outblock);
 
-#endif
-
 #endif  // HAVE_AES
+
+#endif  // LCX_AES_H
