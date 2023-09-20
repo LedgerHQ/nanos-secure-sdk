@@ -1005,7 +1005,7 @@ void io_seproxyhal_setup_ticker(unsigned int interval_ms)
     buffer[1] = 0;
     buffer[2] = 2;
     buffer[3] = (interval_ms >> 8) & 0xff;
-    buffer[4] = (interval_ms) & 0xff;
+    buffer[4] = (interval_ms) &0xff;
     io_seproxyhal_spi_send(buffer, 5);
 }
 
@@ -1556,7 +1556,7 @@ reply_apdu:
                         && os_global_pin_is_validated() != BOLOS_TRUE) {
                         tx_len                       = 0;
                         G_io_apdu_buffer[(tx_len)++] = (SWO_SEC_PIN_15 >> 8) & 0xFF;
-                        G_io_apdu_buffer[(tx_len)++] = (SWO_SEC_PIN_15) & 0xFF;
+                        G_io_apdu_buffer[(tx_len)++] = (SWO_SEC_PIN_15) &0xFF;
                         channel &= ~IO_FLAGS;
                         goto reply_apdu;
                     }
