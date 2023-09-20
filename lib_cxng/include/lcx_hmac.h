@@ -24,10 +24,11 @@
  * which involves a hash function and a secret key. It enables
  * the verification of the integrity and the authenticity of a message.
  */
-#ifdef HAVE_HMAC
 
 #ifndef LCX_HMAC_H
 #define LCX_HMAC_H
+
+#ifdef HAVE_HMAC
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -416,6 +417,6 @@ cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
  */
 cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len);
 
-#endif
-
 #endif  // HAVE_HMAC
+
+#endif  // LCX_HMAC_H

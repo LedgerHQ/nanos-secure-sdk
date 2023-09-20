@@ -25,10 +25,10 @@
  * <a href="https://tools.ietf.org/html/rfc6979"> RFC6979 </a> for more details.
  */
 
-#ifdef HAVE_ECDSA
-
 #ifndef LCX_ECDSA_H
 #define LCX_ECDSA_H
+
+#ifdef HAVE_ECDSA
 
 #include "lcx_wrappers.h"
 #include "lcx_ecfp.h"
@@ -203,6 +203,6 @@ DEPRECATED static inline bool cx_ecdsa_verify(const cx_ecfp_public_key_t *pukey,
     return cx_ecdsa_verify_no_throw(pukey, hash, hash_len, sig, sig_len);
 }
 
-#endif
-
 #endif  // HAVE_ECDSA
+
+#endif  // LCX_ECDSA_H

@@ -31,10 +31,10 @@
  * @version 1.0
  **/
 
-#if defined(HAVE_AEAD)
-
 #ifndef LCX_AEAD_H
 #define LCX_AEAD_H
+
+#if defined(HAVE_AEAD)
 
 #include "cx_errors.h"
 #include <stddef.h>
@@ -350,5 +350,6 @@ cx_err_t cx_aead_decrypt(cx_aead_context_t *ctx,
                          const uint8_t     *tag,
                          size_t             tag_len);
 
-#endif
 #endif  // HAVE_AEAD
+
+#endif  // LCX_AED_H
