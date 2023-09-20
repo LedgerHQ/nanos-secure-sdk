@@ -23,9 +23,10 @@
  * Private and public keys initialization and key pair generation based on elliptic curves.
  */
 
-#ifdef HAVE_ECC
 #ifndef LCX_ECFP_H
 #define LCX_ECFP_H
+
+#ifdef HAVE_ECC
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -549,6 +550,6 @@ DEPRECATED static inline void cx_edward_decompress_point(cx_curve_t curve, uint8
 
 #endif  // HAVE_ECC_TWISTED_EDWARDS
 
-#endif
-
 #endif  // HAVE_ECC
+
+#endif  // LCX_ECFP_H

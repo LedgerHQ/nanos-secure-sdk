@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_BLAKE2
-
 #ifndef CX_BLAKE2B_H
 #define CX_BLAKE2B_H
+
+#ifdef HAVE_BLAKE2
 
 #include "lcx_wrappers.h"
 #include "lcx_blake2.h"
@@ -41,6 +41,6 @@ struct cx_xblake_s {
 };
 typedef struct cx_xblake_s cx_xblake_t;
 
-#endif  // CX_BLAKE2B_H
-
 #endif  // HAVE_BLAKE2
+
+#endif  // CX_BLAKE2B_H

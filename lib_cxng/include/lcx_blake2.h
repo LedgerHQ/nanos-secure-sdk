@@ -24,9 +24,10 @@
  * produces digests of any size between 1 and 64 bytes. It is specified at https://blake2.net.
  */
 
-#ifdef HAVE_BLAKE2
 #ifndef LCX_BLAKE2_H
 #define LCX_BLAKE2_H
+
+#ifdef HAVE_BLAKE2
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -133,6 +134,6 @@ DEPRECATED static inline int cx_blake2b_init2(cx_blake2b_t  *hash,
     return CX_BLAKE2B;
 }
 
-#endif
-
 #endif  // HAVE_BLAKE2
+
+#endif  // LCX_BLAKE2_H

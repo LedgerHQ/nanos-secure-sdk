@@ -12,10 +12,11 @@
    More information about the BLAKE2 hash function can be found at
    https://blake2.net.
 */
-#ifdef HAVE_BLAKE2
 
 #ifndef CX_BLAKE2_H
 #define CX_BLAKE2_H
+
+#ifdef HAVE_BLAKE2
 
 #include "lcx_blake2.h"
 #include <stddef.h>
@@ -213,6 +214,6 @@ int blake2(void *out, size_t outlen, const void *in, size_t inlen, const void *k
 }
 #endif
 
-#endif
-
 #endif  // HAVE_BLAKE2
+
+#endif  // CX_BLAKE2_H
