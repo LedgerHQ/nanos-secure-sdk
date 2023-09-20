@@ -4,6 +4,7 @@
  */
 
 #ifdef NBGL_USE_CASE
+#ifdef HAVE_SE_TOUCH
 /*********************
  *      INCLUDES
  *********************/
@@ -480,7 +481,8 @@ static const char *getDetailsPageAt(uint8_t detailsPage)
                                         currentChar,
                                         SCREEN_WIDTH - 2 * BORDER_MARGIN,
                                         NB_MAX_LINES_IN_DETAILS,
-                                        &len);
+                                        &len,
+                                        false);
             len -= 3;
             currentChar = currentChar + len;
         }
@@ -530,7 +532,8 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh)
                                     currentPair.value,
                                     SCREEN_WIDTH - 2 * BORDER_MARGIN,
                                     NB_MAX_LINES_IN_DETAILS,
-                                    &len);
+                                    &len,
+                                    false);
         len -= 3;
         // memorize next position to save processing
         detailsContext.nextPageStart = currentPair.value + len;
@@ -1428,4 +1431,5 @@ void nbgl_useCaseSpinner(const char *text)
     pageContext = nbgl_pageDrawSpinner(NULL, (const char *) text);
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
+#endif  // HAVE_SE_TOUCH
 #endif  // NBGL_USE_CASE

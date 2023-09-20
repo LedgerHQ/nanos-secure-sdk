@@ -13,13 +13,29 @@ and for code coverage generation:
 
 ## Overview
 
-In `unit-tests` folder, compile with
+### For Stax
+
+In `unit-tests` folder, compile with:
+
+```
+STAX=1 cmake -Bbuild -H. && make -C build
+```
+
+and run tests with:
+
+```
+CTEST_OUTPUT_ON_FAILURE=1 make -C build test
+```
+
+### For Nanos
+
+In `unit-tests` folder, compile with:
 
 ```
 cmake -Bbuild -H. && make -C build
 ```
 
-and run tests with
+and run tests with:
 
 ```
 CTEST_OUTPUT_ON_FAILURE=1 make -C build test

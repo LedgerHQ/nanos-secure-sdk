@@ -32,7 +32,7 @@ ifeq ($(shell $(CC) -v 2>&1 | grep clang),)
 $(error Compiler is not CLANG)
 endif
 
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2 TARGET_STAX))
+ifneq ($(TARGET_NAME),TARGET_NANOS)
 ifeq ($(shell $(LD) -v 2>&1 | grep clang),)
 LD := $(CC)
 ifneq ($(shell [ `$(CC) -v 2>&1 | grep -o "version .*" | cut -f2 -d' ' | cut -f1 -d'.'` -ge 7 ] && echo ok),ok)

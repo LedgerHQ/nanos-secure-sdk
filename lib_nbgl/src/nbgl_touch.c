@@ -3,6 +3,7 @@
  * Implementation of touchscreen management in new BAGL
  */
 
+#ifdef HAVE_SE_TOUCH
 /*********************
  *      INCLUDES
  *********************/
@@ -282,3 +283,4 @@ nbgl_obj_t *nbgl_touchGetObjectFromId(nbgl_obj_t *obj, uint8_t id)
         return NULL;
     }
 }
+#endif  // HAVE_SE_TOUCH

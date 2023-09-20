@@ -1,3 +1,4 @@
+#ifdef NBGL_PAGE
 /** @page nbgl_page Predefined pages API
 
 @section nbgl_page_intro Introduction
@@ -245,3 +246,4 @@ objects.
 
 
 */
+#endif // NBGL_PAGE

@@ -1,3 +1,4 @@
+#ifdef HAVE_SE_TOUCH
 /** @page nbgl_mainpage New BOLOS Graphic API
 
 @section mainpage_intro Introduction
@@ -57,3 +58,4 @@ Applications are free to define \b NBGL_KEYBOARD, \b NBGL_KEYPAD or \b NBGL_QRCO
 "rare" objects.
 
 */
+#endif // HAVE_SE_TOUCH

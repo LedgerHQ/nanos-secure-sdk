@@ -1,0 +1,65 @@
+#ifndef HAVE_SE_TOUCH
+/** @page nbgl_mainpage New BOLOS Graphic API
+
+@section mainpage_intro Introduction
+
+This documentation describes the different interfaces of <b>NBGL</b>, the library that
+is targeted to be integrated in Stax product.
+
+<b>NBGL Engine</b> is responsible for constructing screens and handling Touchscreen input.
+
+@section mainpage_overall_archi Overall architecture
+
+<b>NBGL Engine</b> is a library to be integrated in SDK.
+It is intended to replace existing BAGL/FLOW Graphical Engine (used on Nanos/Blue products)
+
+\image{inline} html NBGLArchi.png "caption" height=600
+
+@section nbgl_drawing_api Screen drawing APIs
+
+@subsection nbgl_app_use_case_api_1 Application Use-cases API
+This is the most preferred API level to write an embedded Application.
+
+The @subpage nbgl_app_use_case_nanos page contains all information necessary to understand
+and use \b NBGL Application Use cases API
+
+@subsection nbgl_flow_level_api_1 Flow API
+The @subpage nbgl_flow page contains all information necessary to understand
+and use \b NBGL Flow API, managing a scenario flow, made of one or several steps
+
+@subsection nbgl_step_level_api_1 Step API
+The @subpage nbgl_step page contains all information necessary to understand
+and use \b NBGL Step API, managing the page(s) of a scenario step
+
+@subsection nbgl_mid_level_api_1 Complex objects (layout) API
+The @subpage nbgl_layout page contains all information necessary to understand
+and use \b NBGL Mid-Level API, using complex objects
+
+@subsection nbgl_low_level_api_1 Low-Level API
+The @subpage nbgl_obj page contains all information necessary to understand
+and use \b NBGL Low-Level API
+
+@section nbgl_screen_objs Screen and objects management
+The @subpage nbgl_screens_and_objs page contains all information necessary to understand
+how \b NBGL manages the screens stack and the dynamically allocated objects
+
+@section nbgl_touch_api Touchscreen events management
+The @subpage nbgl_touchscreen page contains all information necessary to understand
+how \b NBGL manages the touchscreen events and how to receive and process these events.
+
+@section nbgl_building Compilation options
+In order to reduce the footprint (RAM+Flash), some features are only activated if some building options are defined.
+
+Define        | Meaning       | Default state
+------------- | ------------- | -------------
+\b NBGL_PAGE     | Activate High-Level API  | Active in SDK, not in OS
+\b NBGL_USE_CASE | Activate Use Case API    | Active in SDK, not in OS
+\b NBGL_KEYBOARD | Activate Keyboard object | Active in OS, not in SDK
+\b NBGL_KEYPAD   | Activate Keypad object   | Active in OS, not in SDK
+\b NBGL_QRCODE   | Activate QRCode object   | Active in OS, not in SDK
+
+Applications are free to define \b NBGL_KEYBOARD, \b NBGL_KEYPAD or \b NBGL_QRCODE in their own Makefile if they need to use these
+"rare" objects.
+
+*/
+#endif // HAVE_SE_TOUCH

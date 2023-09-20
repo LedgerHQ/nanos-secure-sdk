@@ -16,6 +16,11 @@ static uint8_t const C_leftArrow32px_bitmap[] = {
 };
 const nbgl_icon_details_t C_leftArrow32px = {32, 32, NBGL_BPP_1, true, C_leftArrow32px_bitmap};
 
+uint8_t nbgl_objPoolGetId(nbgl_obj_t *obj)
+{
+    return 0;
+}
+
 void print_hex(const char *name, uint8_t *buffer, size_t len)
 {
     printf("%s,", name);
@@ -253,9 +258,13 @@ void test_draw_nbgl_keyboard()
         .textColor   = WHITE,
         .borderColor = BLACK,
         .lettersOnly = true,
-        .casing      = 0,
-        .mode        = MODE_DIGITS,
-        .keyMask     = 0x12345678,
+#ifdef HAVE_SE_TOUCH
+        .casing = 0,
+        .mode   = MODE_DIGITS,
+#else   // HAVE_SE_TOUCH
+        .mode = MODE_UPPER_LETTERS,
+#endif  // HAVE_SE_TOUCH
+        .keyMask = 0x12345678,
     };
 
     SERIALIZE_AND_PRINT(&keyboard, NBGL_DRAW_OBJ);
@@ -272,12 +281,16 @@ void test_draw_nbgl_keypad()
                             .obj.area.x0              = 3,
                             .obj.area.y0              = 4,
 
-                            .textColor       = WHITE,
-                            .borderColor     = BLACK,
+#ifdef HAVE_SE_TOUCH
+                            .textColor   = WHITE,
+                            .borderColor = BLACK,
+#endif  // HAVE_SE_TOUCH
                             .enableBackspace = true,
                             .enableValidate  = false,
-                            .enableDigits    = true,
-                            .shuffled        = false};
+#ifdef HAVE_SE_TOUCH
+                            .enableDigits = true,
+#endif  // HAVE_SE_TOUCH
+                            .shuffled = false};
 
     SERIALIZE_AND_PRINT(&keypad, NBGL_DRAW_OBJ);
 }
@@ -330,20 +343,33 @@ void test_refresh_area()
 
 int main()
 {
+#ifdef HAVE_SE_TOUCH
+    printf("stax\n");
+#else   // HAVE_SE_TOUCH
+    printf("nano\n");
+#endif  // HAVE_SE_TOUCH
     test_draw_nbgl_screen();
     test_draw_nbgl_container();
+#ifdef HAVE_SE_TOUCH
     test_draw_nbgl_line();
+#endif  // HAVE_SE_TOUCH
     test_draw_nbgl_text_area();
+#ifdef HAVE_SE_TOUCH
     test_draw_nbgl_qr_code();
     test_draw_nbgl_radio();
     test_draw_nbgl_switch();
+#endif  // HAVE_SE_TOUCH
     test_draw_nbgl_progress_bar();
+#ifdef HAVE_SE_TOUCH
     test_draw_nbgl_page_indicator();
     test_draw_nbgl_button();
+#endif  // HAVE_SE_TOUCH
     test_draw_nbgl_image();
     test_draw_nbgl_keyboard();
     test_draw_nbgl_keypad();
+#ifdef HAVE_SE_TOUCH
     test_draw_nbgl_spinner();
+#endif  // HAVE_SE_TOUCH
     test_draw_nbgl_image_file();
     test_refresh_area();
 }

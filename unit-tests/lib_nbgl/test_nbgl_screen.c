@@ -13,11 +13,7 @@
 
 #define UNUSED(x) (void) x
 
-unsigned long gLogger = 0
-    //  | (1<<OBJ_LOGGER)
-    //  | (1<<OBJ_POOL_LOGGER)
-    //  | (1<<SCREEN_LOGGER)
-    ;
+unsigned long gLogger = 0;
 
 void mainExit(int exitCode)
 {
@@ -32,11 +28,6 @@ uint8_t touch_exclude_borders(uint8_t excluded_borders)
 unsigned int nbgl_screen_reinit(void)
 {
     return 0;
-}
-
-void *pic(void *addr)
-{
-    return addr;
 }
 
 void nbgl_redrawObject(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)

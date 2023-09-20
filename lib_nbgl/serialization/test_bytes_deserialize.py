@@ -6,19 +6,25 @@ import pytest
 def data_test():
     with open("data_test.txt", "r") as data_test_file:
         data_test = data_test_file.readlines()
-        data_test = list(map(lambda s: s.rstrip().split(','), data_test))
+        # first line is giving the HW: stax or nano
+        if data_test[0] == 'stax\n':
+            is_stax = True
+        else:
+            is_stax = False
+        data_test = list(map(lambda s: s.rstrip().split(','), data_test[1:]))
         data_test = {el[0]: el[1] for el in data_test}
-    return data_test
+    return (is_stax,data_test)
 
 
-def run_deserialize_nbgl(hex_str: str):
+def run_deserialize_nbgl(is_stax: bool, hex_str: str):
     bytes_in = bytes.fromhex(hex_str)
-    return deserialize_nbgl_bytes(bytes_in)
+    return deserialize_nbgl_bytes(is_stax, bytes_in)
 
 
 def test_draw_nbgl_screen(data_test):
-    serialized = data_test["test_draw_nbgl_screen"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_screen"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglScreen(
@@ -30,15 +36,17 @@ def test_draw_nbgl_screen(data_test):
                     x0=0,
                     y0=0
                 )
-            )
+            ),
+            id=0
         )
 
     assert deserialized == expected
 
 
 def test_draw_nbgl_container(data_test):
-    serialized = data_test["test_draw_nbgl_container"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_container"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglContainer(
@@ -53,15 +61,17 @@ def test_draw_nbgl_container(data_test):
                 layout=NbglDirection.VERTICAL,
                 nb_children=4,
                 force_clean=True
-            )
+            ),
+            id=1
         )
 
     assert deserialized == expected
 
 
 def test_draw_nbgl_text_area(data_test):
-    serialized = data_test["test_draw_nbgl_text_area"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_text_area"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     excepted = \
         NbglDrawObjectEvent(
             obj=NbglTextArea(
@@ -80,103 +90,123 @@ def test_draw_nbgl_text_area(data_test):
                 font_id=NbglFontId.BAGL_FONT_INTER_MEDIUM_32px,
                 localized=False,
                 auto_hide_long_line=True,
+                len=0,
                 text="arthur"
-            )
+            ),
+            id=1
         )
     assert deserialized == excepted
 
 
 def test_draw_nbgl_line(data_test):
-    serialized = data_test["test_draw_nbgl_line"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglLine(
-                area=NbglArea(
-                    bpp=NbglBpp.BPP_1,
-                    width=36,
-                    height=267,
-                    x0=0,
-                    y0=42,
-                    background_color=NbglColor.WHITE,
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_line"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglLine(
+                    area=NbglArea(
+                        bpp=NbglBpp.BPP_1,
+                        width=36,
+                        height=267,
+                        x0=0,
+                        y0=42,
+                        background_color=NbglColor.WHITE,
+                    ),
+                    direction=NbglDirection.HORIZONTAL,
+                    line_color=NbglColor.DARK_GRAY,
+                    thickness=4,
+                    offset=2
                 ),
-                direction=NbglDirection.HORIZONTAL,
-                line_color=NbglColor.DARK_GRAY,
-                thickness=4,
-                offset=2
+                id=1
             )
-        )
-    assert deserialized == expected
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_qr_code(data_test):
-    serialized = data_test["test_draw_nbgl_qr_code"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglQrCode(
-                area=NbglArea(
-                    background_color=NbglColor.DARK_GRAY,
-                    bpp=NbglBpp.BPP_2,
-                    height=55,
-                    width=66,
-                    x0=400,
-                    y0=300
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_qr_code"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglQrCode(
+                    area=NbglArea(
+                        background_color=NbglColor.DARK_GRAY,
+                        bpp=NbglBpp.BPP_2,
+                        height=55,
+                        width=66,
+                        x0=400,
+                        y0=300
+                    ),
+                    foreground_color=NbglColor.DARK_GRAY,
+                    text="fatstacks",
+                    version=NbglQrCodeVersion.QRCODE_V10
                 ),
-                foreground_color=NbglColor.DARK_GRAY,
-                text="fatstacks",
-                version=NbglQrCodeVersion.QRCODE_V10
-            ))
-    assert deserialized == expected
+                id=1
+            )
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_radio(data_test):
-    serialized = data_test["test_draw_nbgl_radio"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglRadioButton(
-                area=NbglArea(
-                    background_color=NbglColor.BLACK,
-                    bpp=NbglBpp.BPP_4,
-                    height=100,
-                    width=200,
-                    x0=123,
-                    y0=234
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_radio"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglRadioButton(
+                    area=NbglArea(
+                        background_color=NbglColor.BLACK,
+                        bpp=NbglBpp.BPP_4,
+                        height=100,
+                        width=200,
+                        x0=123,
+                        y0=234
+                    ),
+                    active_color=NbglColor.BLACK,
+                    border_color=NbglColor.DARK_GRAY,
+                    state=NbglState.ON_STATE
                 ),
-                active_color=NbglColor.BLACK,
-                border_color=NbglColor.DARK_GRAY,
-                state=NbglState.ON_STATE
+                id=1
             )
-        )
-    assert deserialized == expected
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_switch(data_test):
-    serialized = data_test["test_draw_nbgl_switch"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglSwitch(
-                area=NbglArea(
-                    background_color=NbglColor.LIGHT_GRAY,
-                    bpp=NbglBpp.BPP_1,
-                    height=333,
-                    width=89,
-                    x0=1,
-                    y0=10000
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_switch"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglSwitch(
+                    area=NbglArea(
+                        background_color=NbglColor.LIGHT_GRAY,
+                        bpp=NbglBpp.BPP_1,
+                        height=333,
+                        width=89,
+                        x0=1,
+                        y0=10000
+                    ),
+                    off_color=NbglColor.WHITE,
+                    on_color=NbglColor.BLACK,
+                    state=NbglState.OFF_STATE
                 ),
-                off_color=NbglColor.WHITE,
-                on_color=NbglColor.BLACK,
-                state=NbglState.OFF_STATE
+                id=1
             )
-        )
-    assert deserialized == expected
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_progress_bar(data_test):
-    serialized = data_test["test_draw_nbgl_progress_bar"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_progress_bar"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglProgressBar(
@@ -190,61 +220,71 @@ def test_draw_nbgl_progress_bar(data_test):
                 ),
                 with_border=True,
                 state=91
-            )
+            ),
+            id=1
         )
     assert deserialized == expected
 
 
 def test_draw_nbgl_page_indicator(data_test):
-    serialized = data_test["test_draw_nbgl_page_indicator"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglPageIndicator(
-                area=NbglArea(
-                    background_color=NbglColor.BLACK,
-                    bpp=NbglBpp.BPP_2,
-                    height=11,
-                    width=22,
-                    x0=33,
-                    y0=44
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_page_indicator"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglPageIndicator(
+                    area=NbglArea(
+                        background_color=NbglColor.BLACK,
+                        bpp=NbglBpp.BPP_2,
+                        height=11,
+                        width=22,
+                        x0=33,
+                        y0=44
+                    ),
+                    active_page=2,
+                    nb_pages=10
                 ),
-                active_page=2,
-                nb_pages=10
+                id=1
             )
-        )
-    assert deserialized == expected
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_button(data_test):
-    serialized = data_test["test_draw_nbgl_button"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglButton(
-                area=NbglArea(
-                    background_color=NbglColor.DARK_GRAY,
-                    bpp=NbglBpp.BPP_1,
-                    height=50,
-                    width=255,
-                    x0=500,
-                    y0=1000
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_button"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglButton(
+                    area=NbglArea(
+                        background_color=NbglColor.DARK_GRAY,
+                        bpp=NbglBpp.BPP_1,
+                        height=50,
+                        width=255,
+                        x0=500,
+                        y0=1000
+                    ),
+                    inner_color=NbglColor.WHITE,
+                    border_color=NbglColor.DARK_GRAY,
+                    foreground_color=NbglColor.LIGHT_GRAY,
+                    radius=NbglRadius.RADIUS_24_PIXELS,
+                    font_id=NbglFontId.BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
+                    text="Test button",
+                    localized=True
                 ),
-                inner_color=NbglColor.WHITE,
-                border_color=NbglColor.DARK_GRAY,
-                foreground_color=NbglColor.LIGHT_GRAY,
-                radius=NbglRadius.RADIUS_24_PIXELS,
-                font_id=NbglFontId.BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
-                text="Test button",
-                localized=True
+                id=1
             )
-        )
-    assert deserialized == expected
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_image(data_test):
-    serialized = data_test["test_draw_nbgl_image"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_image"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglImage(
@@ -261,14 +301,16 @@ def test_draw_nbgl_image(data_test):
                 bpp=0,
                 isFile=1,
                 foreground_color=NbglColor.DARK_GRAY
-            )
+            ),
+            id=1
         )
     assert deserialized == expected
 
 
 def test_draw_nbgl_keyboard(data_test):
-    serialized = data_test["test_draw_nbgl_keyboard"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_keyboard"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglKeyboard(
@@ -285,15 +327,18 @@ def test_draw_nbgl_keyboard(data_test):
                 letters_only=True,
                 upper_case=False,
                 mode=NbglKeyboardMode.MODE_DIGITS,
-                key_mask=0x12345678
-            )
+                key_mask=0x12345678,
+                selected_char_index=0
+            ),
+            id=1
         )
     assert deserialized == expected
 
 
 def test_draw_nbgl_keypad(data_test):
-    serialized = data_test["test_draw_nbgl_keypad"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_keypad"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglKeypad(
@@ -310,35 +355,42 @@ def test_draw_nbgl_keypad(data_test):
                 enable_backspace=True,
                 enable_validate=False,
                 enable_digits=True,
-                shuffled=False
-            )
+                shuffled=False,
+                selectedKey=0
+            ),
+            id=1
         )
     assert deserialized == expected
 
 
 def test_draw_nbgl_spinner(data_test):
-    serialized = data_test["test_draw_nbgl_spinner"]
-    deserialized = run_deserialize_nbgl(serialized)
-    expected = \
-        NbglDrawObjectEvent(
-            obj=NbglSpinner(
-                area=NbglArea(
-                    background_color=NbglColor.LIGHT_GRAY,
-                    bpp=NbglBpp.BPP_1,
-                    height=14,
-                    width=25,
-                    x0=12,
-                    y0=10,
+    is_stax = data_test[0]
+    if is_stax:
+        serialized = data_test[1]["test_draw_nbgl_spinner"]
+        deserialized = run_deserialize_nbgl(is_stax, serialized)
+        expected = \
+            NbglDrawObjectEvent(
+                obj=NbglSpinner(
+                    area=NbglArea(
+                        background_color=NbglColor.LIGHT_GRAY,
+                        bpp=NbglBpp.BPP_1,
+                        height=14,
+                        width=25,
+                        x0=12,
+                        y0=10,
+                    ),
+                    position=2
                 ),
-                position=2
+                id=1
             )
-        )
-    assert deserialized == expected
+        assert deserialized == expected
+    assert True
 
 
 def test_draw_nbgl_image_file(data_test):
-    serialized = data_test["test_draw_nbgl_image_file"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_draw_nbgl_image_file"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglDrawObjectEvent(
             obj=NbglImageFile(
@@ -350,14 +402,16 @@ def test_draw_nbgl_image_file(data_test):
                     x0=22,
                     y0=20,
                 ),
-            )
+            ),
+            id=1
         )
     assert deserialized == expected
 
 
 def test_refresh_area(data_test):
-    serialized = data_test["test_refresh_area"]
-    deserialized = run_deserialize_nbgl(serialized)
+    is_stax = data_test[0]
+    serialized = data_test[1]["test_refresh_area"]
+    deserialized = run_deserialize_nbgl(is_stax, serialized)
     expected = \
         NbglRefreshAreaEvent(
             area=NbglArea(

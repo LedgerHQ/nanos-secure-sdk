@@ -1,3 +1,4 @@
+#ifdef HAVE_SE_TOUCH
 /** @page nbgl_app_use_case Predefined Application Use-cases API
 
 @section nbgl_use_case_intro Introduction
@@ -872,3 +873,4 @@ So no need to call @ref nbgl_refresh().
 
 
 */
+#endif // HAVE_SE_TOUCH

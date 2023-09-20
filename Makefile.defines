@@ -30,6 +30,11 @@ ifeq ($(filter $(TARGET),$(TARGETS)),)
 $(error TARGET not set to a valid value (possible values: $(TARGETS)))
 endif
 
+# for Stax, NBGL must be used
+ifeq ($(TARGET),stax)
+USE_NBGL ?= 1
+endif
+
 API_LEVEL   := 0
 TARGET_PATH := $(BOLOS_SDK)/target/$(TARGET)
 TARGET_ID   := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
@@ -55,8 +60,13 @@ endif
 
 # Command to print ICONNAME hexadecimal bitmap on stdout
 # according to the hardware target.
-ifeq ($(TARGET_NAME),TARGET_STAX)
+ifneq ($(TARGET),nanos)
+#inverse B&W for non Stax
+ifneq ($(TARGET_NAME),TARGET_STAX)
+ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --reverse --hexbitmaponly $(ICONNAME)
+else
 ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --hexbitmaponly $(ICONNAME)
+endif
 else
 ICONHEX_CMD=python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)
 endif
@@ -187,13 +197,21 @@ DEFINES += NBGL_PAGE
 DEFINES += NBGL_USE_CASE
 #DEFINES += HAVE_DISPLAY_FAST_MODE
 else
-DEFINES += HAVE_BAGL
 DEFINES += BAGL_WIDTH=128
+ifdef USE_NBGL
+DEFINES += HAVE_NBGL
+DEFINES += NBGL_STEP
+DEFINES += NBGL_USE_CASE
+else
+DEFINES += HAVE_BAGL
+endif
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += BAGL_HEIGHT=32
 endif
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
+ifndef USE_NBGL
 DEFINES += HAVE_UX_FLOW
+endif
 DEFINES += BAGL_HEIGHT=64
 DEFINES += HAVE_BAGL_ELLIPSIS
 DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX

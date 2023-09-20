@@ -18,7 +18,8 @@ def test_json_deserialize_screen():
                     'bpp': 'BPP_4'
                 }
             }
-        }
+        },
+        'id':0
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -31,8 +32,8 @@ def test_json_deserialize_screen():
                     background_color=NbglColor.WHITE,
                     bpp=NbglBpp.BPP_4
                 )
-            )
-
+            ),
+            id=0
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -56,7 +57,8 @@ def test_json_deserialize_container():
                 'nb_children': 4,
                 'force_clean': True
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -72,8 +74,8 @@ def test_json_deserialize_container():
                 layout=NbglDirection.VERTICAL,
                 nb_children=4,
                 force_clean=True
-            )
-
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -99,7 +101,8 @@ def test_json_deserialize_line():
                 'thickness': 4,
                 'offset': 1
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -116,7 +119,8 @@ def test_json_deserialize_line():
                 line_color=NbglColor.WHITE,
                 thickness=4,
                 offset=1
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -141,7 +145,8 @@ def test_json_deserialize_radio_button():
                 'border_color': 'BLACK',
                 'state': 'OFF_STATE'
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -157,7 +162,8 @@ def test_json_deserialize_radio_button():
                 active_color=NbglColor.WHITE,
                 border_color=NbglColor.BLACK,
                 state=NbglState.OFF_STATE
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -182,7 +188,8 @@ def test_json_deserialize_switch():
                 'off_color': 'DARK_GRAY',
                 'state': 'ON_STATE'
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -198,7 +205,8 @@ def test_json_deserialize_switch():
                 on_color=NbglColor.BLACK,
                 off_color=NbglColor.DARK_GRAY,
                 state=NbglState.ON_STATE
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -222,7 +230,8 @@ def test_json_deserialize_progress_bar():
                 'with_border': True,
                 'state': 42
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -237,7 +246,8 @@ def test_json_deserialize_progress_bar():
                 ),
                 with_border=True,
                 state=42
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -261,7 +271,8 @@ def test_json_deserialize_page_indicator():
                 'active_page': 2,
                 'nb_pages': 10
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -276,7 +287,8 @@ def test_json_deserialize_page_indicator():
                 ),
                 active_page=2,
                 nb_pages=10
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -305,7 +317,8 @@ def test_json_deserialize_button():
                 'localized': True,
                 'text': 'Hello world'
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -325,7 +338,8 @@ def test_json_deserialize_button():
                 font_id=NbglFontId.BAGL_FONT_INTER_REGULAR_24px,
                 localized=True,
                 text="Hello world"
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -352,9 +366,11 @@ def test_json_deserialize_text_area():
                 'font_id': 'BAGL_FONT_INTER_SEMIBOLD_24px',
                 'localized': True,
                 'auto_hide_long_line': True,
+                'len': 0,
                 'text': 'Hello fatstacks'
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -373,8 +389,10 @@ def test_json_deserialize_text_area():
                 font_id=NbglFontId.BAGL_FONT_INTER_SEMIBOLD_24px,
                 localized=True,
                 auto_hide_long_line=True,
+                len=0,
                 text='Hello fatstacks'
-            )
+            ),
+            id=1
         )
     assert serialize_nbgl_json(deserialized) == serialized
     assert deserialized == deserialize_nbgl_json(serialized)
@@ -396,7 +414,8 @@ def test_json_deserialize_spinner():
                 },
                 'position': 3
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -410,7 +429,8 @@ def test_json_deserialize_spinner():
                     bpp=NbglBpp.BPP_2
                 ),
                 position=3
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -437,7 +457,8 @@ def test_json_deserialize_image():
                 'isFile':1,
                 'foreground_color': 'WHITE'
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -455,7 +476,8 @@ def test_json_deserialize_image():
                 bpp=2,
                 isFile=1,
                 foreground_color=NbglColor.WHITE
-            )
+            ),
+            id=1
         )
     assert serialize_nbgl_json(deserialized) == serialized
     assert deserialized == deserialize_nbgl_json(serialized)
@@ -476,7 +498,8 @@ def test_json_deserialize_image_file():
                     'bpp': 'BPP_2'
                 },
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -489,7 +512,8 @@ def test_json_deserialize_image_file():
                     background_color=NbglColor.BLACK,
                     bpp=NbglBpp.BPP_2
                 ),
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -514,7 +538,8 @@ def test_json_deserialize_qr_code():
                 'version': 'QRCODE_V10',
                 'text': 'Qr code text qr code'
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -530,7 +555,8 @@ def test_json_deserialize_qr_code():
                 foreground_color=NbglColor.LIGHT_GRAY,
                 version=NbglQrCodeVersion.QRCODE_V10,
                 text='Qr code text qr code'
-            )
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -556,9 +582,11 @@ def test_json_deserialize_keyboard():
                 'letters_only': False,
                 'upper_case': True,
                 'mode': 'MODE_SPECIAL',
-                'key_mask': 255
+                'key_mask': 255,
+                'selected_char_index':2
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -576,8 +604,10 @@ def test_json_deserialize_keyboard():
                 letters_only=False,
                 upper_case=True,
                 mode=NbglKeyboardMode.MODE_SPECIAL,
-                key_mask=255
-            )
+                key_mask=255,
+                selected_char_index=2
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
@@ -603,9 +633,11 @@ def test_json_deserialize_keypad():
                 'enable_backspace': True,
                 'enable_validate': False,
                 'enable_digits': True,
-                'shuffled': False
+                'shuffled': False,
+                'selectedKey': 0
             }
-        }
+        },
+        'id':1
     }
     deserialized = \
         NbglDrawObjectEvent(
@@ -623,8 +655,10 @@ def test_json_deserialize_keypad():
                 enable_backspace=True,
                 enable_validate=False,
                 enable_digits=True,
-                shuffled=False
-            )
+                shuffled=False,
+                selectedKey=0
+            ),
+            id=1
         )
 
     assert serialize_nbgl_json(deserialized) == serialized
