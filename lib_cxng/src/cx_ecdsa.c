@@ -45,9 +45,8 @@ static cx_err_t truernd(uint8_t *rnd, cx_curve_t cv)
     CX_CHECK(cx_bn_rand(t));
     CX_CHECK(cx_bn_reduce(r, t, n));
     CX_CHECK(cx_bn_export(r, rnd, domain_length));
-    cx_bn_unlock();
-
 end:
+    cx_bn_unlock();
     return error;
 }
 

@@ -30,9 +30,9 @@ cx_err_t cx_math_cmp_no_throw(const uint8_t *a, const uint8_t *b, size_t length,
     CX_CHECK(cx_bn_alloc_init(&bn_a, length, a, length));
     CX_CHECK(cx_bn_alloc_init(&bn_b, length, b, length));
     CX_CHECK(cx_bn_cmp(bn_a, bn_b, diff));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -47,9 +47,9 @@ cx_err_t cx_math_add_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
     CX_CHECK(cx_bn_alloc_init(&bn_b, len, b, len));
     CX_CHECK_IGNORE_CARRY(cx_bn_add(bn_r, bn_a, bn_b));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -64,9 +64,9 @@ cx_err_t cx_math_sub_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, si
     CX_CHECK(cx_bn_alloc_init(&bn_b, len, b, len));
     CX_CHECK_IGNORE_CARRY(cx_bn_sub(bn_r, bn_a, bn_b));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -81,9 +81,9 @@ cx_err_t cx_math_mult_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, s
     CX_CHECK(cx_bn_alloc_init(&bn_b, len, b, len));
     CX_CHECK(cx_bn_mul(bn_r, bn_a, bn_b));
     CX_CHECK(cx_bn_export(bn_r, r, 2 * len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -107,9 +107,9 @@ cx_err_t cx_math_addm_no_throw(uint8_t       *r,
     CX_CHECK(cx_bn_mod_sub(bn_r, bn_r, bn_a, bn_m));
 #endif  // ST33K1M5
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -129,9 +129,9 @@ cx_err_t cx_math_subm_no_throw(uint8_t       *r,
     CX_CHECK(cx_bn_alloc_init(&bn_m, len, m, len));
     CX_CHECK(cx_bn_mod_sub(bn_r, bn_a, bn_b, bn_m));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -151,9 +151,9 @@ cx_err_t cx_math_multm_no_throw(uint8_t       *r,
     CX_CHECK(cx_bn_alloc_init(&bn_m, len, m, len));
     CX_CHECK(cx_bn_mod_mul(bn_r, bn_a, bn_b, bn_m));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -168,9 +168,9 @@ cx_err_t cx_math_modm_no_throw(uint8_t *v, size_t len_v, const uint8_t *m, size_
     CX_CHECK(cx_bn_alloc_init(&bn_m, len_m, m, len_m));
     CX_CHECK(cx_bn_reduce(bn_r, bn_v, bn_m));
     CX_CHECK(cx_bn_export(bn_r, v, len_v));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -190,9 +190,9 @@ cx_err_t cx_math_powm_no_throw(uint8_t       *r,
     CX_CHECK(cx_bn_alloc(&bn_r, len));
     CX_CHECK(cx_bn_mod_pow2(bn_r, bn_a, e, len_e, bn_m));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -207,9 +207,9 @@ cx_err_t cx_math_invprimem_no_throw(uint8_t *r, const uint8_t *a, const uint8_t 
     CX_CHECK(cx_bn_alloc_init(&bn_m, len, m, len));
     CX_CHECK(cx_bn_mod_invert_nprime(bn_r, bn_a, bn_m));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -223,9 +223,9 @@ cx_err_t cx_math_invintm_no_throw(uint8_t *r, uint32_t a, const uint8_t *m, size
     CX_CHECK(cx_bn_alloc_init(&bn_m, len, m, len));
     CX_CHECK(cx_bn_mod_u32_invert(bn_r, a, bn_m));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -237,9 +237,9 @@ cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime)
     CX_CHECK(cx_bn_lock(len, 0));
     CX_CHECK(cx_bn_alloc_init(&bn_r, len, r, len));
     CX_CHECK(cx_bn_is_prime(bn_r, prime));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -252,9 +252,9 @@ cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len)
     CX_CHECK(cx_bn_alloc_init(&bn_r, len, r, len));
     CX_CHECK(cx_bn_next_prime(bn_r));
     CX_CHECK(cx_bn_export(bn_r, r, len));
-    cx_bn_unlock();
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
