@@ -480,9 +480,9 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard)
     rectArea.bpp    = NBGL_BPP_1;
     rectArea.x0     = SPECIAL_CHARS_KEY_WIDTH + 5 * NORMAL_KEY_WIDTH;
     rectArea.y0     = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT * 2
-                  + (KEYBOARD_KEY_HEIGHT - rectArea.height) / 2;
+                  + (((KEYBOARD_KEY_HEIGHT - rectArea.height) / 2) & 0xFFC);
     rectArea.x0 += (BACKSPACE_KEY_WIDTH_DIGITS - rectArea.width) / 2;
-    nbgl_frontDrawImage(&rectArea, (uint8_t *) C_backspace32px.bitmap, NO_TRANSFORMATION, BLACK);
+    nbgl_drawIcon(&rectArea, BLACK, &C_backspace32px);
 
     // 4th row
     rectArea.x0
@@ -491,10 +491,8 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard)
     nbgl_drawText(&rectArea, "ABC", 3, BAGL_FONT_INTER_REGULAR_24px_1bpp, BLACK);
 
     rectArea.x0 = SWITCH_KEY_WIDTH + (SPACE_KEY_WIDTH - C_space32px.width) / 2;
-    nbgl_frontDrawImage(&rectArea,
-                        (uint8_t *) C_space32px.bitmap,
-                        NO_TRANSFORMATION,
-                        (keyboard->keyMask & (1 << SPACE_KEY_INDEX)) ? WHITE : BLACK);
+    nbgl_drawIcon(
+        &rectArea, (keyboard->keyMask & (1 << SPACE_KEY_INDEX)) ? WHITE : BLACK, &C_space32px);
 }
 
 static void keyboardDraw(nbgl_keyboard_t *keyboard)
