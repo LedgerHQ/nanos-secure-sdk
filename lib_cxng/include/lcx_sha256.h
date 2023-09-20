@@ -27,10 +27,10 @@
  * for more details.
  */
 
-#if defined(HAVE_SHA256) || defined(HAVE_SHA224)
-
 #ifndef LCX_SHA256_H
 #define LCX_SHA256_H
+
+#if defined(HAVE_SHA256) || defined(HAVE_SHA224)
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -124,6 +124,6 @@ static inline int cx_sha256_init(cx_sha256_t *hash)
  */
 size_t cx_hash_sha256(const uint8_t *in, size_t len, uint8_t *out, size_t out_len);
 
-#endif
-
 #endif  // defined(HAVE_SHA256) || defined(HAVE_SHA224)
+
+#endif  // LCX_SHA256_H

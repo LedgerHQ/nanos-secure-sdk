@@ -30,10 +30,10 @@
  * @version 1.0
  **/
 
-#if defined(HAVE_AES) && defined(HAVE_AES_GCM)
-
 #ifndef LCX_AES_GCM_H
 #define LCX_AES_GCM_H
+
+#if defined(HAVE_AES) && defined(HAVE_AES_GCM)
 
 #include "ox.h"
 #include <stddef.h>
@@ -83,5 +83,7 @@ cx_err_t cx_aes_gcm_decrypt_and_auth(cx_aes_gcm_context_t *ctx,
                                      const uint8_t        *tag,
                                      size_t                tag_len);
 cx_err_t cx_aes_gcm_check_tag(cx_aes_gcm_context_t *ctx, const uint8_t *tag, size_t tag_len);
-#endif
+
 #endif  // HAVE_AES && HAVE_AES_GCM
+
+#endif  // LCX_AES_GCM_H

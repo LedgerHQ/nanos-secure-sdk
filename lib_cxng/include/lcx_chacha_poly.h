@@ -15,8 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#if defined(HAVE_CHACHA_POLY)
-#if defined(HAVE_POLY1305) && defined(HAVE_CHACHA)
 
 /**
  * @file    lcx_chacha_poly.h
@@ -30,6 +28,9 @@
 
 #ifndef LCX_CHACHA_POLY_H
 #define LCX_CHACHA_POLY_H
+
+#if defined(HAVE_CHACHA_POLY)
+#if defined(HAVE_POLY1305) && defined(HAVE_CHACHA)
 
 #include "lcx_chacha.h"
 #include "lcx_poly1305.h"
@@ -87,6 +88,6 @@ cx_err_t cx_chachapoly_decrypt_and_auth(cx_chachapoly_context_t *ctx,
 
 cx_err_t cx_chachapoly_check_tag(cx_chachapoly_context_t *ctx, const uint8_t *tag, size_t tag_len);
 
-#endif  /* LCX_CHACHA_POLY_H */
 #endif  // HAVE_POLY1305 && HAVE_CHACHA
 #endif  // HAVE_CHACHA_POLY
+#endif  /* LCX_CHACHA_POLY_H */

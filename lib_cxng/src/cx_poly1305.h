@@ -15,10 +15,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#if defined(HAVE_POLY1305)
 
 #ifndef CX_POLY1305_H
 #define CX_POLY1305_H
+
+#if defined(HAVE_POLY1305)
 
 #include "lcx_poly1305.h"
 #include "ox.h"
@@ -108,5 +109,6 @@ cx_err_t cx_poly1305_finish(cx_poly1305_context_t *ctx, uint8_t *tag);
  */
 cx_err_t cx_poly1305_mac(const uint8_t *key, const uint8_t *input, size_t in_len, uint8_t *tag);
 
-#endif  /* CX_POLY1305_H */
 #endif  // HAVE_POLY1305
+
+#endif  // CX_POLY1305_H
