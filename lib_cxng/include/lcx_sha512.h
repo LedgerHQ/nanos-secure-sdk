@@ -27,10 +27,10 @@
  * for more details.
  */
 
-#if defined(HAVE_SHA384) || defined(HAVE_SHA512)
-
 #ifndef LCX_SHA512_H
 #define LCX_SHA512_H
+
+#if defined(HAVE_SHA384) || defined(HAVE_SHA512)
 
 /** SHA-384 message digest size */
 #define CX_SHA384_SIZE 48
@@ -113,6 +113,6 @@ static inline int cx_sha512_init(cx_sha512_t *hash)
  */
 size_t cx_hash_sha512(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 
-#endif
-
 #endif  // defined(HAVE_SHA384) || defined(HAVE_SHA512)
+
+#endif  // LCX_SHA512_H

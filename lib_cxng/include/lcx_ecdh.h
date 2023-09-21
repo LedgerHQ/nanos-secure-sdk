@@ -25,10 +25,10 @@
  * are elements of a chosen elliptic curve.
  */
 
-#ifdef HAVE_ECDH
-
 #ifndef LCX_ECDH_H
 #define LCX_ECDH_H
+
+#ifdef HAVE_ECDH
 
 #if defined(HAVE_ECDH) || defined(HAVE_X25519) || defined(HAVE_X448)
 

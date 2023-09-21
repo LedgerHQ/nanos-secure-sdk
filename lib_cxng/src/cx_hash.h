@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_HASH
-
 #ifndef CX_HASH_H
 #define CX_HASH_H
+
+#ifdef HAVE_HASH
 
 #include "lcx_hash.h"
 #include <stddef.h>
@@ -52,6 +52,6 @@ const cx_hash_info_t *cx_hash_get_info(cx_md_t md_type);
  */
 void cx_hash_destroy(cx_hash_t *hash_ctx);
 
-#endif
-
 #endif  // HAVE_HASH
+
+#endif  // CX_HASH_H

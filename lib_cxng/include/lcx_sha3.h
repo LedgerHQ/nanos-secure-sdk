@@ -26,10 +26,10 @@
  * for more details.
  */
 
-#ifdef HAVE_SHA3
-
 #ifndef LCX_SHA3_H
 #define LCX_SHA3_H
+
+#ifdef HAVE_SHA3
 
 #include "lcx_common.h"
 #include "lcx_hash.h"
@@ -210,6 +210,6 @@ DEPRECATED static inline int cx_sha3_xof_init(cx_sha3_t   *hash,
     }
 }
 
-#endif
-
 #endif  // HAVE_SHA3
+
+#endif  // LCX_SHA3_H
