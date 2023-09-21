@@ -33,7 +33,6 @@ env:
   \"app-edgeware\"         : \"./app\"            ,
   \"app-filecoin\"         : \"app\"              ,
   \"app-firmachain\"       : \"./app\"            ,
-  \"app-flow\"             : \"app\"              ,
   \"app-genshiro\"         : \"./app\"            ,
   \"app-iov\"              : \"app\"              ,
   \"app-internetcomputer\" : \"./app\"            ,
