@@ -247,6 +247,113 @@ WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_ecdsa_sign_hash_256(cx_cu
 }
 
 /**
+ * @brief   Sign a hash with ecdsa using the device seed derived from the specified bip32 path and
+ * seed key.
+ *
+ * @param[in]  derivation_mode Derivation mode, one of HDW_NORMAL / HDW_ED25519_SLIP10 / HDW_SLIP21.
+ *
+ * @param[in]  curve           Curve identifier.
+ *
+ * @param[in]  path            Bip32 path to use for derivation.
+ *
+ * @param[in]  path_len        Bip32 path length.
+ *
+ * @param[in]  hashID          Message digest algorithm identifier.
+ *
+ * @param[in]  hash            Digest of the message to be signed.
+ *                             The length of *hash* must be shorter than the group order size.
+ *                             Otherwise it is truncated.
+ *
+ * @param[in]  hash_len        Length of the digest in octets.
+ *
+ * @param[out] sig_r               Buffer where to store the signature r value.
+ *
+ * @param[out] sig_s               Buffer where to store the signature s value.
+ *
+ * @param[out] info            Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when
+ * computing **[k].G**.
+ *
+ * @param[in]  seed            Seed key to use for derivation.
+ *
+ * @param[in]  seed_len        Seed key length.
+ *
+ * @return                     Error code:
+ *                             - CX_OK on success
+ *                             - CX_EC_INVALID_CURVE
+ *                             - CX_INTERNAL_ERROR
+ */
+WARN_UNUSED_RESULT cx_err_t
+bip32_derive_with_seed_ecdsa_sign_rs_hash_256(unsigned int    derivation_mode,
+                                              cx_curve_t      curve,
+                                              const uint32_t *path,
+                                              size_t          path_len,
+                                              uint32_t        sign_mode,
+                                              cx_md_t         hashID,
+                                              const uint8_t  *hash,
+                                              size_t          hash_len,
+                                              uint8_t         sig_r[static 32],
+                                              uint8_t         sig_s[static 32],
+                                              uint32_t       *info,
+                                              unsigned char  *seed,
+                                              size_t          seed_len);
+
+/**
+ * @brief   Sign a hash with ecdsa using the device seed derived from the specified bip32 path.
+ *
+ * @param[in]  curve           Curve identifier.
+ *
+ * @param[in]  path            Bip32 path to use for derivation.
+ *
+ * @param[in]  path_len        Bip32 path length.
+ *
+ * @param[in]  hashID          Message digest algorithm identifier.
+ *
+ * @param[in]  hash            Digest of the message to be signed.
+ *                             The length of *hash* must be shorter than the group order size.
+ *                             Otherwise it is truncated.
+ *
+ * @param[in]  hash_len        Length of the digest in octets.
+ *
+ * @param[out] sig_r           Buffer where to store the signature r value.
+ *
+ * @param[out] sig_s           Buffer where to store the signature s value.
+ *
+ * @param[out] info            Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when
+ * computing **[k].G**.
+ *
+ * @return                     Error code:
+ *                             - CX_OK on success
+ *                             - CX_EC_INVALID_CURVE
+ *                             - CX_INTERNAL_ERROR
+ */
+WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_ecdsa_sign_rs_hash_256(
+    cx_curve_t      curve,
+    const uint32_t *path,
+    size_t          path_len,
+    uint32_t        sign_mode,
+    cx_md_t         hashID,
+    const uint8_t  *hash,
+    size_t          hash_len,
+    uint8_t         sig_r[static 32],
+    uint8_t         sig_s[static 32],
+    uint32_t       *info)
+{
+    return bip32_derive_with_seed_ecdsa_sign_rs_hash_256(HDW_NORMAL,
+                                                         curve,
+                                                         path,
+                                                         path_len,
+                                                         sign_mode,
+                                                         hashID,
+                                                         hash,
+                                                         hash_len,
+                                                         sig_r,
+                                                         sig_s,
+                                                         info,
+                                                         NULL,
+                                                         0);
+}
+
+/**
  * @brief   Sign a hash with eddsa using the device seed derived from the specified bip32 path and
  * seed key.
  *

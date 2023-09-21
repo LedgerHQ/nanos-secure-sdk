@@ -136,6 +136,37 @@ end:
     return error;
 }
 
+WARN_UNUSED_RESULT cx_err_t
+bip32_derive_with_seed_ecdsa_sign_rs_hash_256(unsigned int    derivation_mode,
+                                              cx_curve_t      curve,
+                                              const uint32_t *path,
+                                              size_t          path_len,
+                                              uint32_t        sign_mode,
+                                              cx_md_t         hashID,
+                                              const uint8_t  *hash,
+                                              size_t          hash_len,
+                                              uint8_t         sig_r[static 32],
+                                              uint8_t         sig_s[static 32],
+                                              uint32_t       *info,
+                                              unsigned char  *seed,
+                                              size_t          seed_len)
+{
+    cx_err_t                  error = CX_OK;
+    cx_ecfp_256_private_key_t privkey;
+
+    // Derive private key according to BIP32 path
+    CX_CHECK(bip32_derive_with_seed_init_privkey_256(
+        derivation_mode, curve, path, path_len, &privkey, NULL, seed, seed_len));
+
+    CX_CHECK(cx_ecdsa_sign_rs_no_throw(
+        &privkey, sign_mode, hashID, hash, hash_len, 32, sig_r, sig_s, info));
+
+end:
+    explicit_bzero(&privkey, sizeof(privkey));
+
+    return error;
+}
+
 WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(unsigned int derivation_mode,
                                                                        cx_curve_t   curve,
                                                                        const uint32_t *path,
