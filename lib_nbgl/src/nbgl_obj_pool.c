@@ -199,6 +199,21 @@ nbgl_obj_t *nbgl_objPoolGetPrevious(nbgl_obj_t *obj, uint8_t layer)
 }
 
 /**
+ * @brief Gets a unique index for the given object, in the pool
+ * @param obj object to get id from
+ * @return an unique index of the object
+ */
+uint8_t nbgl_objPoolGetId(nbgl_obj_t *obj)
+{
+    uint8_t index;
+
+    // retrieve object index
+    index = (genericObj_t *) obj - objPool;
+
+    return index;
+}
+
+/**
  * @brief Gets nbObjects new graphic object from the pool, with the given type, for the given layer
  * (screen). The type field of the object is set.
  * @param type type of objects to get from the pool

@@ -497,6 +497,7 @@ void nbgl_objAllowDrawing(bool enable);
 void         nbgl_objPoolRelease(uint8_t layer);
 nbgl_obj_t  *nbgl_objPoolGet(nbgl_obj_type_t type, uint8_t layer);
 nbgl_obj_t  *nbgl_objPoolGetPrevious(nbgl_obj_t *obj, uint8_t layer);
+uint8_t      nbgl_objPoolGetId(nbgl_obj_t *obj);
 int          nbgl_objPoolGetArray(nbgl_obj_type_t type,
                                   uint8_t         nbObjs,
                                   uint8_t         layer,

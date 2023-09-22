@@ -56,22 +56,20 @@ class NbglKeyboardMode(IntEnum):
 class NbglObjType(IntEnum):
     SCREEN,         = 0,  # Main screen
     CONTAINER,      = 1,  # Empty container
-    PANEL,          = 2,  # Container with special border
-    IMAGE,          = 3,  # Bitmap (x and width must be multiple of 4)
-    LINE,           = 4,  # Vertical or Horizontal line
-    TEXT_AREA,      = 5,  # Area to contain text line(s)
-    BUTTON,         = 6,  # Rounded rectangle button with icon and/or text
-    SWITCH,         = 7,  # Switch to turn on/off something
-    PAGE_INDICATOR, = 8,  # horizontal bar to indicate navigation across pages
-    # horizontal bar to indicate progression of something (between 0% and 100%)
-    PROGRESS_BAR,   = 9,
-    RADIO_BUTTON,   = 10,  # Indicator to inform whether something is on or off
-    # Notification bar, to inform user about alarm... only for internal usage
-    QR_CODE,        = 11,  # QR Code
-    KEYBOARD,       = 12,  # Keyboard
-    KEYPAD,         = 13,  # Keypad
-    SPINNER,        = 14,  # Spinner
-    IMAGE_FILE = 15,  # Image file (with Ledger compression)
+    IMAGE,          = 2,  # Bitmap (x and width must be multiple of 4)
+    LINE,           = 3,  # Vertical or Horizontal line
+    TEXT_AREA,      = 4,  # Area to contain text line(s)
+    BUTTON,         = 5,  # Rounded rectangle button with icon and/or text
+    SWITCH,         = 6,  # Switch to turn on/off something
+    PAGE_INDICATOR, = 7,  # horizontal bar to indicate navigation across pages
+
+    PROGRESS_BAR,   = 8,  # horizontal bar to indicate progression of something (between 0% and 100%)
+    RADIO_BUTTON,   = 9,  # Indicator to inform whether something is on or off
+    QR_CODE,        = 10, # QR Code
+    KEYBOARD,       = 11, # Keyboard
+    KEYPAD,         = 12, # Keypad
+    SPINNER,        = 13, # Spinner
+    IMAGE_FILE      = 14, # Image file (with Ledger compression)
 
 
 class NbglAlignment(IntEnum):
@@ -96,6 +94,9 @@ class NbglFontId(IntEnum):
     BAGL_FONT_INTER_SEMIBOLD_24px = 1,
     BAGL_FONT_INTER_MEDIUM_32px = 2,
     BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px = 3
+    BAGL_FONT_INTER_REGULAR_24px_1bpp = 4
+    BAGL_FONT_INTER_SEMIBOLD_24px_1bpp = 5
+    BAGL_FONT_INTER_MEDIUM_32px_1bpp = 6
 
 
 class NbglStyle(IntEnum):
@@ -183,7 +184,7 @@ class NbglArea(NbglObj):
 
     @classmethod
     def from_bytes(cls, data: bytes):
-        x0, y0, width, height, color_n, bpp_n = struct.unpack('>HHHHBB', data)
+        x0, y0, width, height, color_n, bpp_n = struct.unpack('>HHHHBB', data[:10])
         color = NbglColor(color_n)
         bpp = NbglBpp(bpp_n)
         return cls(width, height, x0, y0, color, bpp)
@@ -191,6 +192,18 @@ class NbglArea(NbglObj):
     @staticmethod
     def size():
         return struct.calcsize('>HHHHBB')
+
+
+@dataclass
+class NbglScreen(NbglObj):
+    area: NbglArea
+
+    @classmethod
+    def from_bytes(cls, data: bytes):
+        area = NbglArea.from_bytes(data[0:NbglArea.size()])
+        return cls(
+            area=area
+        )
 
 
 @dataclass
@@ -405,14 +418,25 @@ class NbglSpinner(NbglObj):
 @dataclass
 class NbglImage(NbglObj):
     area: NbglArea
+    width: int
+    height: int
+    bpp: int
+    isFile: int
     foreground_color: NbglColor
 
     @classmethod
     def from_bytes(cls, data):
+
         area = NbglArea.from_bytes(data[0:NbglArea.size()])
-        foreground_color, = struct.unpack('>B', data[NbglArea.size():])
+
+        width,height,bpp,isFile,size, = struct.unpack('>HHBBI', data[NbglArea.size():NbglArea.size()+10])
+        foreground_color, = struct.unpack('>B', data[NbglArea.size()+10:])
         return cls(
             area=area,
+            width=width,
+            height=height,
+            bpp=bpp,
+            isFile=isFile,
             foreground_color=NbglColor(foreground_color)
         )
 
@@ -488,23 +512,28 @@ class NbglKeypad(NbglObj):
     border_color: NbglColor
     enable_backspace: bool
     enable_validate: bool
+    enable_digits: bool
+    shuffled:bool
 
     @classmethod
     def from_bytes(cls, data: bytes):
         area = NbglArea.from_bytes(data[0:NbglArea.size()])
-        text_color, border_color, enable_backspace, enable_validate = struct.unpack(
-            '>BBBB', data[NbglArea.size():])
+        text_color, border_color, enable_backspace, enable_validate, enable_digits, shuffled = \
+            struct.unpack('>BBBBBB', data[NbglArea.size():NbglArea.size()+6])
         return cls(
             area=area,
             text_color=NbglColor(text_color),
             border_color=NbglColor(border_color),
             enable_backspace=enable_backspace,
-            enable_validate=enable_validate
+            enable_validate=enable_validate,
+            enable_digits=enable_digits,
+            shuffled=shuffled
         )
 
 
 # Mapping of NbglObjType and their associated class.
 NBGL_OBJ_TYPES = {
+    NbglObjType.SCREEN: NbglScreen,
     NbglObjType.CONTAINER: NbglContainer,
     NbglObjType.LINE: NbglLine,
     NbglObjType.IMAGE: NbglImage,
@@ -549,11 +578,13 @@ class NbglDrawObjectEvent(NbglGenericJsonSerializable):
 
     @classmethod
     def from_bytes(cls, data: bytes):
-        obj_type = NbglObjType(data[0])
+        # the first byte is the object id
+        # the second one is the object type
+        obj_type = NbglObjType(data[1])
         class_type = NBGL_OBJ_TYPES[obj_type]
 
         return cls(
-            obj=class_type.from_bytes(data[1:])
+            obj=class_type.from_bytes(data[2:])
         )
 
     def to_json_dict(self) -> Dict:

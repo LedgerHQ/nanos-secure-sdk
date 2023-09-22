@@ -4,6 +4,17 @@
 #include "nbgl_types.h"
 #include "nbgl_serialize.h"
 #include "nbgl_obj.h"
+#include "nbgl_screen.h"
+
+static uint8_t const C_leftArrow32px_bitmap[] = {
+    0x20, 0x00, 0x20, 0x00, 0x02, 0x4d, 0x00, 0x00, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3,
+    0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0,
+    0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0xe3, 0xf0, 0x32, 0x93, 0x92,
+    0x64, 0x83, 0x84, 0x64, 0x73, 0x74, 0x84, 0x63, 0x64, 0xa4, 0x53, 0x54, 0xc4, 0x43, 0x44,
+    0xe4, 0x33, 0x34, 0xf0, 0x14, 0x23, 0x24, 0xf0, 0x34, 0x13, 0x14, 0xf0, 0x5b, 0xf0, 0x79,
+    0xf0, 0x97, 0xf0, 0xb5, 0xf0, 0xd3, 0xf0, 0xf1, 0xf0, 0x10,
+};
+const nbgl_icon_details_t C_leftArrow32px = {32, 32, NBGL_BPP_1, true, C_leftArrow32px_bitmap};
 
 void print_hex(const char *name, uint8_t *buffer, size_t len)
 {
@@ -25,16 +36,32 @@ void run_serialize_and_print(const char *name, nbgl_serialized_event_type_e even
 #define SERIALIZE_AND_PRINT(obj, event) \
     run_serialize_and_print(__FUNCTION__, event, (nbgl_obj_t *) obj)
 
+void test_draw_nbgl_screen()
+{
+    nbgl_screen_t screen = {
+        .container.obj.type = SCREEN,
+
+        .container.obj.area.backgroundColor = WHITE,
+        .container.obj.area.bpp             = NBGL_BPP_4,
+        .container.obj.area.height          = 670,
+        .container.obj.area.width           = 400,
+        .container.obj.area.x0              = 0,
+        .container.obj.area.y0              = 0,
+    };
+
+    SERIALIZE_AND_PRINT(&screen, NBGL_DRAW_OBJ);
+}
+
 void test_draw_nbgl_container()
 {
-    nbgl_container_t container = {.type = CONTAINER,
+    nbgl_container_t container = {.obj.type = CONTAINER,
 
-                                  .backgroundColor = DARK_GRAY,
-                                  .bpp             = NBGL_BPP_4,
-                                  .height          = 450,
-                                  .width           = 460,
-                                  .x0              = 56,
-                                  .y0              = 12,
+                                  .obj.area.backgroundColor = DARK_GRAY,
+                                  .obj.area.bpp             = NBGL_BPP_4,
+                                  .obj.area.height          = 450,
+                                  .obj.area.width           = 460,
+                                  .obj.area.x0              = 56,
+                                  .obj.area.y0              = 12,
 
                                   .layout     = VERTICAL,
                                   .nbChildren = 4,
@@ -45,14 +72,14 @@ void test_draw_nbgl_container()
 
 void test_draw_nbgl_text_area()
 {
-    nbgl_text_area_t text = {.type = TEXT_AREA,
+    nbgl_text_area_t text = {.obj.type = TEXT_AREA,
 
-                             .backgroundColor = DARK_GRAY,
-                             .bpp             = NBGL_BPP_4,
-                             .height          = 400,
-                             .width           = 360,
-                             .x0              = 12,
-                             .y0              = 256,
+                             .obj.area.backgroundColor = DARK_GRAY,
+                             .obj.area.bpp             = NBGL_BPP_4,
+                             .obj.area.height          = 400,
+                             .obj.area.width           = 360,
+                             .obj.area.x0              = 12,
+                             .obj.area.y0              = 256,
 
                              .textColor        = BLACK,
                              .textAlignment    = BOTTOM_RIGHT,
@@ -67,31 +94,31 @@ void test_draw_nbgl_text_area()
 
 void test_draw_nbgl_line()
 {
-    nbgl_line_t line = {.type            = LINE,
-                        .backgroundColor = WHITE,
-                        .bpp             = NBGL_BPP_1,
-                        .height          = 267,
-                        .width           = 36,
-                        .x0              = 0,
-                        .y0              = 42,
-                        .direction       = HORIZONTAL,
-                        .lineColor       = DARK_GRAY,
-                        .thickness       = 4,
-                        .offset          = 2};
+    nbgl_line_t line = {.obj.type                 = LINE,
+                        .obj.area.backgroundColor = WHITE,
+                        .obj.area.bpp             = NBGL_BPP_1,
+                        .obj.area.height          = 267,
+                        .obj.area.width           = 36,
+                        .obj.area.x0              = 0,
+                        .obj.area.y0              = 42,
+                        .direction                = HORIZONTAL,
+                        .lineColor                = DARK_GRAY,
+                        .thickness                = 4,
+                        .offset                   = 2};
 
     SERIALIZE_AND_PRINT(&line, NBGL_DRAW_OBJ);
 }
 
 void test_draw_nbgl_qr_code()
 {
-    nbgl_qrcode_t qr_code = {.type = QR_CODE,
+    nbgl_qrcode_t qr_code = {.obj.type = QR_CODE,
 
-                             .backgroundColor = DARK_GRAY,
-                             .bpp             = NBGL_BPP_2,
-                             .height          = 55,
-                             .width           = 66,
-                             .x0              = 400,
-                             .y0              = 300,
+                             .obj.area.backgroundColor = DARK_GRAY,
+                             .obj.area.bpp             = NBGL_BPP_2,
+                             .obj.area.height          = 55,
+                             .obj.area.width           = 66,
+                             .obj.area.x0              = 400,
+                             .obj.area.y0              = 300,
 
                              .foregroundColor = DARK_GRAY,
                              .text            = "fatstacks",
@@ -102,14 +129,14 @@ void test_draw_nbgl_qr_code()
 
 void test_draw_nbgl_radio()
 {
-    nbgl_radio_t radio = {.type = RADIO_BUTTON,
+    nbgl_radio_t radio = {.obj.type = RADIO_BUTTON,
 
-                          .backgroundColor = BLACK,
-                          .bpp             = NBGL_BPP_4,
-                          .height          = 100,
-                          .width           = 200,
-                          .x0              = 123,
-                          .y0              = 234,
+                          .obj.area.backgroundColor = BLACK,
+                          .obj.area.bpp             = NBGL_BPP_4,
+                          .obj.area.height          = 100,
+                          .obj.area.width           = 200,
+                          .obj.area.x0              = 123,
+                          .obj.area.y0              = 234,
 
                           .activeColor = BLACK,
                           .borderColor = DARK_GRAY,
@@ -120,14 +147,14 @@ void test_draw_nbgl_radio()
 
 void test_draw_nbgl_switch()
 {
-    nbgl_switch_t switch_obj = {.type = SWITCH,
+    nbgl_switch_t switch_obj = {.obj.type = SWITCH,
 
-                                .backgroundColor = LIGHT_GRAY,
-                                .bpp             = NBGL_BPP_1,
-                                .height          = 333,
-                                .width           = 89,
-                                .x0              = 1,
-                                .y0              = 10000,
+                                .obj.area.backgroundColor = LIGHT_GRAY,
+                                .obj.area.bpp             = NBGL_BPP_1,
+                                .obj.area.height          = 333,
+                                .obj.area.width           = 89,
+                                .obj.area.x0              = 1,
+                                .obj.area.y0              = 10000,
 
                                 .offColor = WHITE,
                                 .onColor  = BLACK,
@@ -138,14 +165,14 @@ void test_draw_nbgl_switch()
 
 void test_draw_nbgl_progress_bar()
 {
-    nbgl_progress_bar_t progress_bar = {.type = PROGRESS_BAR,
+    nbgl_progress_bar_t progress_bar = {.obj.type = PROGRESS_BAR,
 
-                                        .backgroundColor = BLACK,
-                                        .bpp             = NBGL_BPP_1,
-                                        .height          = 10000,
-                                        .width           = 11000,
-                                        .x0              = 12000,
-                                        .y0              = 13000,
+                                        .obj.area.backgroundColor = BLACK,
+                                        .obj.area.bpp             = NBGL_BPP_1,
+                                        .obj.area.height          = 10000,
+                                        .obj.area.width           = 11000,
+                                        .obj.area.x0              = 12000,
+                                        .obj.area.y0              = 13000,
 
                                         .withBorder = true,
                                         .state      = 91};
@@ -155,14 +182,14 @@ void test_draw_nbgl_progress_bar()
 
 void test_draw_nbgl_page_indicator()
 {
-    nbgl_page_indicator_t page_indicator = {.type = PAGE_INDICATOR,
+    nbgl_page_indicator_t page_indicator = {.obj.type = PAGE_INDICATOR,
 
-                                            .backgroundColor = BLACK,
-                                            .bpp             = NBGL_BPP_2,
-                                            .height          = 11,
-                                            .width           = 22,
-                                            .x0              = 33,
-                                            .y0              = 44,
+                                            .obj.area.backgroundColor = BLACK,
+                                            .obj.area.bpp             = NBGL_BPP_2,
+                                            .obj.area.height          = 11,
+                                            .obj.area.width           = 22,
+                                            .obj.area.x0              = 33,
+                                            .obj.area.y0              = 44,
 
                                             .activePage = 2,
                                             .nbPages    = 10};
@@ -173,14 +200,14 @@ void test_draw_nbgl_page_indicator()
 void test_draw_nbgl_button()
 {
     nbgl_button_t button = {
-        .type = BUTTON,
+        .obj.type = BUTTON,
 
-        .backgroundColor = DARK_GRAY,
-        .bpp             = NBGL_BPP_1,
-        .height          = 50,
-        .width           = 255,
-        .x0              = 500,
-        .y0              = 1000,
+        .obj.area.backgroundColor = DARK_GRAY,
+        .obj.area.bpp             = NBGL_BPP_1,
+        .obj.area.height          = 50,
+        .obj.area.width           = 255,
+        .obj.area.x0              = 500,
+        .obj.area.y0              = 1000,
 
         .innerColor      = WHITE,
         .borderColor     = DARK_GRAY,
@@ -196,16 +223,17 @@ void test_draw_nbgl_button()
 
 void test_draw_nbgl_image()
 {
-    nbgl_image_t image = {.type = IMAGE,
+    nbgl_image_t image = {.obj.type = IMAGE,
 
-                          .backgroundColor = WHITE,
-                          .bpp             = NBGL_BPP_2,
-                          .height          = 101,
-                          .width           = 201,
-                          .x0              = 124,
-                          .y0              = 235,
+                          .obj.area.backgroundColor = WHITE,
+                          .obj.area.bpp             = NBGL_BPP_1,
+                          .obj.area.height          = 32,
+                          .obj.area.width           = 32,
+                          .obj.area.x0              = 124,
+                          .obj.area.y0              = 235,
 
-                          .foregroundColor = DARK_GRAY};
+                          .foregroundColor = DARK_GRAY,
+                          .buffer          = &C_leftArrow32px};
 
     SERIALIZE_AND_PRINT(&image, NBGL_DRAW_OBJ);
 }
@@ -213,19 +241,19 @@ void test_draw_nbgl_image()
 void test_draw_nbgl_keyboard()
 {
     nbgl_keyboard_t keyboard = {
-        .type = KEYBOARD,
+        .obj.type = KEYBOARD,
 
-        .backgroundColor = LIGHT_GRAY,
-        .bpp             = NBGL_BPP_2,
-        .height          = 210,
-        .width           = 225,
-        .x0              = 332,
-        .y0              = 431,
+        .obj.area.backgroundColor = LIGHT_GRAY,
+        .obj.area.bpp             = NBGL_BPP_2,
+        .obj.area.height          = 210,
+        .obj.area.width           = 225,
+        .obj.area.x0              = 332,
+        .obj.area.y0              = 431,
 
         .textColor   = WHITE,
         .borderColor = BLACK,
         .lettersOnly = true,
-        .upperCase   = false,
+        .casing      = 0,
         .mode        = MODE_DIGITS,
         .keyMask     = 0x12345678,
     };
@@ -235,33 +263,35 @@ void test_draw_nbgl_keyboard()
 
 void test_draw_nbgl_keypad()
 {
-    nbgl_keypad_t keypad = {.type = KEYPAD,
+    nbgl_keypad_t keypad = {.obj.type = KEYPAD,
 
-                            .backgroundColor = WHITE,
-                            .bpp             = NBGL_BPP_4,
-                            .height          = 4,
-                            .width           = 4,
-                            .x0              = 3,
-                            .y0              = 4,
+                            .obj.area.backgroundColor = WHITE,
+                            .obj.area.bpp             = NBGL_BPP_4,
+                            .obj.area.height          = 4,
+                            .obj.area.width           = 4,
+                            .obj.area.x0              = 3,
+                            .obj.area.y0              = 4,
 
                             .textColor       = WHITE,
                             .borderColor     = BLACK,
                             .enableBackspace = true,
-                            .enableValidate  = false};
+                            .enableValidate  = false,
+                            .enableDigits    = true,
+                            .shuffled        = false};
 
     SERIALIZE_AND_PRINT(&keypad, NBGL_DRAW_OBJ);
 }
 
 void test_draw_nbgl_spinner()
 {
-    nbgl_spinner_t spinner = {.type = SPINNER,
+    nbgl_spinner_t spinner = {.obj.type = SPINNER,
 
-                              .backgroundColor = LIGHT_GRAY,
-                              .bpp             = NBGL_BPP_1,
-                              .height          = 14,
-                              .width           = 25,
-                              .x0              = 12,
-                              .y0              = 10,
+                              .obj.area.backgroundColor = LIGHT_GRAY,
+                              .obj.area.bpp             = NBGL_BPP_1,
+                              .obj.area.height          = 14,
+                              .obj.area.width           = 25,
+                              .obj.area.x0              = 12,
+                              .obj.area.y0              = 10,
 
                               .position = 2};
 
@@ -271,14 +301,14 @@ void test_draw_nbgl_spinner()
 void test_draw_nbgl_image_file()
 {
     nbgl_image_file_t image_file = {
-        .type = IMAGE_FILE,
+        .obj.type = IMAGE_FILE,
 
-        .backgroundColor = DARK_GRAY,
-        .bpp             = NBGL_BPP_4,
-        .height          = 24,
-        .width           = 35,
-        .x0              = 22,
-        .y0              = 20,
+        .obj.area.backgroundColor = DARK_GRAY,
+        .obj.area.bpp             = NBGL_BPP_4,
+        .obj.area.height          = 24,
+        .obj.area.width           = 35,
+        .obj.area.x0              = 22,
+        .obj.area.y0              = 20,
     };
 
     SERIALIZE_AND_PRINT(&image_file, NBGL_DRAW_OBJ);
@@ -300,6 +330,7 @@ void test_refresh_area()
 
 int main()
 {
+    test_draw_nbgl_screen();
     test_draw_nbgl_container();
     test_draw_nbgl_line();
     test_draw_nbgl_text_area();
