@@ -103,7 +103,7 @@ cx_err_t cx_math_addm_no_throw(uint8_t       *r,
     CX_CHECK(cx_bn_alloc_init(&bn_m, len, m, len));
     CX_CHECK(cx_bn_mod_add(bn_r, bn_a, bn_b, bn_m));
 #ifdef ST33K1M5
-    cx_bn_set_u32(bn_a, 0);
+    CX_CHECK(cx_bn_set_u32(bn_a, 0));
     CX_CHECK(cx_bn_mod_sub(bn_r, bn_r, bn_a, bn_m));
 #endif  // ST33K1M5
     CX_CHECK(cx_bn_export(bn_r, r, len));

@@ -87,7 +87,7 @@ static cx_err_t cx_poly1305_process(cx_poly1305_context_t *ctx,
         U4BE_ENCODE(buf + 4 + 1, 0, ctx->acc[2]);
         U4BE_ENCODE(buf + 8 + 1, 0, ctx->acc[1]);
         U4BE_ENCODE(buf + 12 + 1, 0, ctx->acc[0]);
-        cx_bn_init(acc, buf, sizeof(buf));
+        CX_CHECK(cx_bn_init(acc, buf, sizeof(buf)));
 
         /* Compute: acc += (padded) block as a 130-bit integer */
         CX_CHECK(cx_bn_add(acc, acc, d));
@@ -134,7 +134,7 @@ static cx_err_t cx_poly1305_compute_mac(cx_poly1305_context_t *ctx, uint8_t *tag
     U4BE_ENCODE(buf + 4 + 1, 0, ctx->acc[2]);
     U4BE_ENCODE(buf + 8 + 1, 0, ctx->acc[1]);
     U4BE_ENCODE(buf + 12 + 1, 0, ctx->acc[0]);
-    cx_bn_init(acc, buf, sizeof(buf));
+    CX_CHECK(cx_bn_init(acc, buf, sizeof(buf)));
 
     U4BE_ENCODE(buf, 0, ctx->s[3]);
     U4BE_ENCODE(buf + 4, 0, ctx->s[2]);

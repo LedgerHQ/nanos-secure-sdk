@@ -333,7 +333,7 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
     //-- r +
     CX_CHECK(cx_bn_init(bn_r, r, size));
     CX_CHECK(cx_bn_mod_add(bn_s, bn_s, bn_r, bn_n));
-    cx_bn_set_u32(bn_r, 0);
+    CX_CHECK(cx_bn_set_u32(bn_r, 0));
     CX_CHECK(cx_bn_mod_sub(bn_s, bn_s, bn_r, bn_n));
 
     //- encode
