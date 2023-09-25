@@ -58,17 +58,20 @@ typedef struct {
     };
 } cx_rnd_rfc6979_ctx_t;
 
-cx_err_t cx_rng_rfc6979_init(cx_rnd_rfc6979_ctx_t *rfc_ctx,
-                             cx_md_t               hash_id,
-                             const uint8_t        *x,
-                             size_t                x_len,
-                             const uint8_t        *h1,
-                             size_t                h1_len,
-                             const uint8_t        *q,
-                             size_t                q_len
-                             /*const uint8_t *additional_input, size_t additional_input_len*/);
+WARN_UNUSED_RESULT cx_err_t cx_rng_rfc6979_init(
+    cx_rnd_rfc6979_ctx_t *rfc_ctx,
+    cx_md_t               hash_id,
+    const uint8_t        *x,
+    size_t                x_len,
+    const uint8_t        *h1,
+    size_t                h1_len,
+    const uint8_t        *q,
+    size_t                q_len
+    /*const uint8_t *additional_input, size_t additional_input_len*/);
 
-cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx, uint8_t *out, size_t out_len);
+WARN_UNUSED_RESULT cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx,
+                                                uint8_t              *out,
+                                                size_t                out_len);
 
 #endif  // HAVE_RNG_RFC6979
 

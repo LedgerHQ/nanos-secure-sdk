@@ -37,12 +37,12 @@
 #define MAX_HASH_BLOCK_SIZE 128
 
 #ifdef HAVE_BLAKE2
-cx_err_t cx_blake2b(cx_hash_t     *hash,
-                    uint32_t       mode,
-                    const uint8_t *in,
-                    size_t         in_len,
-                    uint8_t       *out,
-                    size_t         out_len);
+WARN_UNUSED_RESULT cx_err_t cx_blake2b(cx_hash_t     *hash,
+                                       uint32_t       mode,
+                                       const uint8_t *in,
+                                       size_t         in_len,
+                                       uint8_t       *out,
+                                       size_t         out_len);
 #endif
 
 const cx_hash_info_t *cx_hash_get_info(cx_md_t md_type);
