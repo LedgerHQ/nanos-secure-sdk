@@ -470,7 +470,9 @@ size_t cx_hash_sha512(const uint8_t *in, size_t in_len, uint8_t *out, size_t out
         return 0;
     }
     cx_sha512_init_no_throw(&G_cx.sha512);
-    cx_sha512_update(&G_cx.sha512, in, in_len);
+    if (cx_sha512_update(&G_cx.sha512, in, in_len) != CX_OK) {
+        return 0;
+    }
     cx_sha512_final(&G_cx.sha512, out);
     explicit_bzero(&G_cx.sha512, sizeof(cx_sha512_t));
     return CX_SHA512_SIZE;
