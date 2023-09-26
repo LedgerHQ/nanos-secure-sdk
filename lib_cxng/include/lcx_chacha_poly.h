@@ -48,45 +48,53 @@ typedef struct {
 
 void cx_chachapoly_init(cx_chachapoly_context_t *ctx);
 
-cx_err_t cx_chachapoly_set_key(cx_chachapoly_context_t *ctx, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_set_key(cx_chachapoly_context_t *ctx,
+                                                  const uint8_t           *key,
+                                                  size_t                   key_len);
 
-cx_err_t cx_chachapoly_start(cx_chachapoly_context_t *ctx,
-                             uint32_t                 mode,
-                             const uint8_t           *iv,
-                             size_t                   iv_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_start(cx_chachapoly_context_t *ctx,
+                                                uint32_t                 mode,
+                                                const uint8_t           *iv,
+                                                size_t                   iv_len);
 
-cx_err_t cx_chachapoly_update_aad(cx_chachapoly_context_t *ctx, const uint8_t *aad, size_t aad_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_update_aad(cx_chachapoly_context_t *ctx,
+                                                     const uint8_t           *aad,
+                                                     size_t                   aad_len);
 
-cx_err_t cx_chachapoly_update(cx_chachapoly_context_t *ctx,
-                              const uint8_t           *input,
-                              uint8_t                 *output,
-                              size_t                   len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_update(cx_chachapoly_context_t *ctx,
+                                                 const uint8_t           *input,
+                                                 uint8_t                 *output,
+                                                 size_t                   len);
 
-cx_err_t cx_chachapoly_finish(cx_chachapoly_context_t *ctx, uint8_t *tag, size_t tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_finish(cx_chachapoly_context_t *ctx,
+                                                 uint8_t                 *tag,
+                                                 size_t                   tag_len);
 
-cx_err_t cx_chachapoly_encrypt_and_tag(cx_chachapoly_context_t *ctx,
-                                       const uint8_t           *input,
-                                       size_t                   len,
-                                       const uint8_t           *iv,
-                                       size_t                   iv_len,
-                                       const uint8_t           *aad,
-                                       size_t                   aad_len,
-                                       uint8_t                 *output,
-                                       uint8_t                 *tag,
-                                       size_t                   tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_encrypt_and_tag(cx_chachapoly_context_t *ctx,
+                                                          const uint8_t           *input,
+                                                          size_t                   len,
+                                                          const uint8_t           *iv,
+                                                          size_t                   iv_len,
+                                                          const uint8_t           *aad,
+                                                          size_t                   aad_len,
+                                                          uint8_t                 *output,
+                                                          uint8_t                 *tag,
+                                                          size_t                   tag_len);
 
-cx_err_t cx_chachapoly_decrypt_and_auth(cx_chachapoly_context_t *ctx,
-                                        const uint8_t           *input,
-                                        size_t                   len,
-                                        const uint8_t           *iv,
-                                        size_t                   iv_len,
-                                        const uint8_t           *aad,
-                                        size_t                   aad_len,
-                                        uint8_t                 *output,
-                                        const uint8_t           *tag,
-                                        size_t                   tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_decrypt_and_auth(cx_chachapoly_context_t *ctx,
+                                                           const uint8_t           *input,
+                                                           size_t                   len,
+                                                           const uint8_t           *iv,
+                                                           size_t                   iv_len,
+                                                           const uint8_t           *aad,
+                                                           size_t                   aad_len,
+                                                           uint8_t                 *output,
+                                                           const uint8_t           *tag,
+                                                           size_t                   tag_len);
 
-cx_err_t cx_chachapoly_check_tag(cx_chachapoly_context_t *ctx, const uint8_t *tag, size_t tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_chachapoly_check_tag(cx_chachapoly_context_t *ctx,
+                                                    const uint8_t           *tag,
+                                                    size_t                   tag_len);
 
 #endif  // HAVE_POLY1305 && HAVE_CHACHA
 #endif  // HAVE_CHACHA_POLY

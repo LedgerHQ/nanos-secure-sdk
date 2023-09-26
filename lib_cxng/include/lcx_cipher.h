@@ -105,7 +105,7 @@ typedef struct {
  *                - CX_OK on success
  *                - CX_INVALID_PARAMETER
  */
-cx_err_t cx_cipher_init(cx_cipher_context_t *ctx);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_init(cx_cipher_context_t *ctx);
 
 /**
  * @brief   Initialize and fill the context structure given the cipher info.
@@ -127,7 +127,9 @@ cx_err_t cx_cipher_init(cx_cipher_context_t *ctx);
  *                 - CX_INVALID_PARAMETER
  *                 - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_setup(cx_cipher_context_t *ctx, const cx_cipher_id_t type, uint32_t mode);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_setup(cx_cipher_context_t *ctx,
+                                            const cx_cipher_id_t type,
+                                            uint32_t             mode);
 
 /**
  * @brief   Set the key to use.
@@ -149,10 +151,10 @@ cx_err_t cx_cipher_setup(cx_cipher_context_t *ctx, const cx_cipher_id_t type, ui
  *                       - CX_INVALID_PARAMETER_SIZE
  *                       - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_setkey(cx_cipher_context_t *ctx,
-                          const uint8_t       *key,
-                          uint32_t             key_bitlen,
-                          uint32_t             operation);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_setkey(cx_cipher_context_t *ctx,
+                                             const uint8_t       *key,
+                                             uint32_t             key_bitlen,
+                                             uint32_t             operation);
 
 /**
  * @brief   Set the initialization vector.
@@ -171,7 +173,9 @@ cx_err_t cx_cipher_setkey(cx_cipher_context_t *ctx,
  *                   - CX_INVALID_PARAMETER
  *                   - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_setiv(cx_cipher_context_t *ctx, const uint8_t *iv, size_t iv_len);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_setiv(cx_cipher_context_t *ctx,
+                                            const uint8_t       *iv,
+                                            size_t               iv_len);
 
 /**
  * @brief   Set the padding type.
@@ -191,7 +195,7 @@ cx_err_t cx_cipher_setiv(cx_cipher_context_t *ctx, const uint8_t *iv, size_t iv_
  *                    - CX_INVALID_PARAMETER
  *                    - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_set_padding(cx_cipher_context_t *ctx, uint32_t padding);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_set_padding(cx_cipher_context_t *ctx, uint32_t padding);
 
 /**
  * @brief   Encrypt or decrypt with the given context.
@@ -220,11 +224,11 @@ cx_err_t cx_cipher_set_padding(cx_cipher_context_t *ctx, uint32_t padding);
  *                     - CX_INVALID_PARAMETER
  *                     - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_update(cx_cipher_context_t *ctx,
-                          const uint8_t       *input,
-                          size_t               in_len,
-                          uint8_t             *output,
-                          size_t              *out_len);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_update(cx_cipher_context_t *ctx,
+                                             const uint8_t       *input,
+                                             size_t               in_len,
+                                             uint8_t             *output,
+                                             size_t              *out_len);
 
 /**
  * @brief   Finalize the operation.
@@ -248,7 +252,9 @@ cx_err_t cx_cipher_update(cx_cipher_context_t *ctx,
  *                     - CX_INVALID_PARAMETER
  *                     - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_finish(cx_cipher_context_t *ctx, uint8_t *output, size_t *out_len);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_finish(cx_cipher_context_t *ctx,
+                                             uint8_t             *output,
+                                             size_t              *out_len);
 
 /**
  * @brief   All-in-one encryption or decryption.
@@ -278,13 +284,13 @@ cx_err_t cx_cipher_finish(cx_cipher_context_t *ctx, uint8_t *output, size_t *out
  *                     - CX_INVALID_PARAMETER
  *                     - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_cipher_enc_dec(cx_cipher_context_t *ctx,
-                           const uint8_t       *iv,
-                           size_t               iv_len,
-                           const uint8_t       *input,
-                           size_t               in_len,
-                           uint8_t             *output,
-                           size_t              *out_len);
+WARN_UNUSED_RESULT cx_err_t cx_cipher_enc_dec(cx_cipher_context_t *ctx,
+                                              const uint8_t       *iv,
+                                              size_t               iv_len,
+                                              const uint8_t       *input,
+                                              size_t               in_len,
+                                              uint8_t             *output,
+                                              size_t              *out_len);
 
 void cx_cipher_reset(cx_cipher_context_t *ctx);
 
