@@ -59,7 +59,7 @@ typedef struct cx_ripemd160_s cx_ripemd160_t;
  * @return          Error code:
  *                  - CX_OK on success
  */
-cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
+WARN_UNUSED_RESULT cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
 
 /**
  * @brief   Initializes a RIPEMD-160 context.
