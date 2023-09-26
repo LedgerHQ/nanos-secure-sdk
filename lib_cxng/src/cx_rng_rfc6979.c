@@ -165,39 +165,42 @@ static uint32_t cx_rfc6979_bitslength(const uint8_t *a, size_t a_len)
     return a_len;
 }
 
-static void cx_rfc6979_hmacVK(cx_rnd_rfc6979_ctx_t *rfc_ctx,
-                              int8_t                opt,
-                              const uint8_t        *x,
-                              size_t                x_len,
-                              const uint8_t        *h1,
-                              size_t                h1_len,
-                              /*const uint8_t *additional_input, size_t additional_input_len,*/
-                              uint8_t *out)
+static cx_err_t cx_rfc6979_hmacVK(cx_rnd_rfc6979_ctx_t *rfc_ctx,
+                                  int8_t                opt,
+                                  const uint8_t        *x,
+                                  size_t                x_len,
+                                  const uint8_t        *h1,
+                                  size_t                h1_len,
+                                  /*const uint8_t *additional_input, size_t additional_input_len,*/
+                                  uint8_t *out)
 {
-    size_t len;
+    size_t   len;
+    cx_err_t error;
 
     len = rfc_ctx->md_len;
-    cx_hmac_init(&rfc_ctx->hmac, rfc_ctx->hash_id, rfc_ctx->k, rfc_ctx->md_len);
+    CX_CHECK(cx_hmac_init(&rfc_ctx->hmac, rfc_ctx->hash_id, rfc_ctx->k, rfc_ctx->md_len));
     if (opt >= 0) {
         rfc_ctx->v[rfc_ctx->md_len] = opt;
         len++;
     }
-    cx_hmac_update(&rfc_ctx->hmac, rfc_ctx->v, len);
+    CX_CHECK(cx_hmac_update(&rfc_ctx->hmac, rfc_ctx->v, len));
     if (x) {
         cx_rfc6979_int2octets(rfc_ctx, x, x_len * 8, rfc_ctx->tmp);
-        cx_hmac_update(&rfc_ctx->hmac, rfc_ctx->tmp, rfc_ctx->r_len >> 3);
+        CX_CHECK(cx_hmac_update(&rfc_ctx->hmac, rfc_ctx->tmp, rfc_ctx->r_len >> 3));
     }
     if (h1) {
         cx_rfc6979_bits2octets(rfc_ctx, h1, h1_len * 8, rfc_ctx->tmp);
-        cx_hmac_update(&rfc_ctx->hmac, rfc_ctx->tmp, rfc_ctx->r_len >> 3);
+        CX_CHECK(cx_hmac_update(&rfc_ctx->hmac, rfc_ctx->tmp, rfc_ctx->r_len >> 3));
     }
     /*
     if (additional_input) {
-      cx_hmac_update(&rfc_ctx->hmac, additional_input, additional_input_len);
+      CX_CHECK(cx_hmac_update(&rfc_ctx->hmac, additional_input, additional_input_len));
     }
     */
     len = rfc_ctx->md_len;
-    cx_hmac_final(&rfc_ctx->hmac, out, &len);
+    CX_CHECK(cx_hmac_final(&rfc_ctx->hmac, out, &len));
+end:
+    return error;
 }
 
 cx_err_t cx_rng_rfc6979_init(cx_rnd_rfc6979_ctx_t *rfc_ctx,
@@ -210,6 +213,7 @@ cx_err_t cx_rng_rfc6979_init(cx_rnd_rfc6979_ctx_t *rfc_ctx,
                              size_t                q_len
                              /*const uint8_t *additional_input, size_t additional_input_len*/)
 {
+    cx_err_t              error;
     const cx_hash_info_t *hash_info = cx_hash_get_info(hash_id);
     if (hash_info == NULL || hash_info->output_size == 0) {
         return CX_INVALID_PARAMETER;
@@ -232,25 +236,30 @@ cx_err_t cx_rng_rfc6979_init(cx_rnd_rfc6979_ctx_t *rfc_ctx,
     memset(rfc_ctx->k, 0x00, rfc_ctx->md_len);
 
     // Step D:  K = HMAC (K, V || 0x00 || int2octets(x) || bits2octetc(h1) [ || additional_input])
-    cx_rfc6979_hmacVK(
-        rfc_ctx, 0, x, x_len, h1, h1_len, rfc_ctx->k /*,  additional_input, additional_input_len*/);
+    CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx,
+                               0,
+                               x,
+                               x_len,
+                               h1,
+                               h1_len,
+                               rfc_ctx->k /*,  additional_input, additional_input_len*/));
 
     // Step E: V = HMAC (K, V).
-    cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v);
+    CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v));
 
     // Step F:  K = HMAC (K, V || 0x01 || int2octets(x) || bits2octetc(h1) [ || additional_input])
-    cx_rfc6979_hmacVK(rfc_ctx,
-                      0x01,
-                      x,
-                      x_len,
-                      h1,
-                      h1_len,
-                      rfc_ctx->k /*,  additional_input, additional_input_len*/);
+    CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx,
+                               0x01,
+                               x,
+                               x_len,
+                               h1,
+                               h1_len,
+                               rfc_ctx->k /*,  additional_input, additional_input_len*/));
 
     // Step G:  V = HMAC (K, V).
-    cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v);
-
-    return CX_OK;
+    CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v));
+end:
+    return error;
 }
 
 cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx, uint8_t *out, size_t out_len)
