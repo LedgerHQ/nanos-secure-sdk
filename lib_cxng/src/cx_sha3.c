@@ -181,10 +181,9 @@ cx_err_t cx_sha3_init_no_throw(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)), size_
 
 cx_err_t cx_keccak_init_no_throw(cx_sha3_t *hash PLENGTH(sizeof(cx_sha3_t)), size_t size)
 {
-    if (!check_hash_out_size(size)) {
+    if (!check_hash_out_size(size) || cx_sha3_init_no_throw(hash, size) != CX_OK) {
         return CX_INVALID_PARAMETER;
     }
-    cx_sha3_init_no_throw(hash, size);
     hash->header.info = &cx_keccak_info;
     return CX_OK;
 }
