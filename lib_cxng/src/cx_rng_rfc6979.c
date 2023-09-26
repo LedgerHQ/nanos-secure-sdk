@@ -264,9 +264,10 @@ end:
 
 cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx, uint8_t *out, size_t out_len)
 {
-    size_t t_Blen;
-    size_t r_Blen;
-    bool   found;
+    size_t   t_Blen;
+    size_t   r_Blen;
+    bool     found;
+    cx_err_t error = CX_OK;
 
     if ((out_len * 8) < rfc_ctx->r_len) {
         return CX_INVALID_PARAMETER;
@@ -283,7 +284,7 @@ cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx, uint8_t *out, size_t
         //    V = HMAC (K, V).
         //    T = T || V
         while (t_Blen < r_Blen) {
-            cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v);
+            CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v));
             if (rfc_ctx->md_len > (r_Blen - t_Blen)) {
                 memcpy(out + t_Blen, rfc_ctx->v, r_Blen - t_Blen);
                 t_Blen = r_Blen;
@@ -302,12 +303,12 @@ cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx, uint8_t *out, size_t
 
         // STEP H3 bis:
         //  K = HMAC (K, V || 0).
-        cx_rfc6979_hmacVK(rfc_ctx, 0, NULL, 0, NULL, 0, rfc_ctx->k);
+        CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx, 0, NULL, 0, NULL, 0, rfc_ctx->k));
         //  V = HMAC (K, V).
-        cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v);
+        CX_CHECK(cx_rfc6979_hmacVK(rfc_ctx, -1, NULL, 0, NULL, 0, rfc_ctx->v));
     }
-
-    return CX_OK;
+end:
+    return error;
 }
 
 cx_err_t cx_rng_rfc6979(cx_md_t        hash_id,
