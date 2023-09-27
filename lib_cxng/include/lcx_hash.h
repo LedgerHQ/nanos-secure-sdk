@@ -143,6 +143,7 @@ size_t cx_hash_get_size(const cx_hash_t *ctx);
  *                     - INVALID_PARAMETER
  *                     - CX_INVALID_PARAMETER
  */
+// WARN_UNUSED_RESULT cx_err_t cx_hash_no_throw(cx_hash_t     *hash,
 cx_err_t cx_hash_no_throw(cx_hash_t     *hash,
                           uint32_t       mode,
                           const uint8_t *in,
@@ -177,7 +178,7 @@ DEPRECATED static inline size_t cx_hash(cx_hash_t           *hash,
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
+WARN_UNUSED_RESULT cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
 
 /**
  * @brief   Initializes a hash context.
@@ -199,7 +200,7 @@ cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
  *                         - CX_OK on success
  *                         - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
+WARN_UNUSED_RESULT cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
 
 /**
  * @brief   Adds more data to hash.
@@ -218,7 +219,7 @@ cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
+WARN_UNUSED_RESULT cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
 
 /**
  * @brief   Finalizes the hash.
@@ -233,7 +234,7 @@ cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
  * @return            Error code:
  *                    - CX_OK on success
  */
-cx_err_t cx_hash_final(cx_hash_t *hash, uint8_t *digest);
+WARN_UNUSED_RESULT cx_err_t cx_hash_final(cx_hash_t *hash, uint8_t *digest);
 
 #endif  // HAVE_HASH
 

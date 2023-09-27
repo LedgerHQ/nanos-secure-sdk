@@ -118,8 +118,8 @@ cx_err_t cx_eddsa_get_public_key_internal(const cx_ecfp_private_key_t *pv_key,
          * a 32/114 bytes large buffer, denoted h.  Only the lower [CME: first] 32/57 bytes are
          * used for generating the public key.
          */
-        cx_hash_update(&G_cx.hash_ctx, pv_key->d, pv_key->d_len);
-        cx_hash_final(&G_cx.hash_ctx, scal);
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, pv_key->d, pv_key->d_len));
+        CX_CHECK(cx_hash_final(&G_cx.hash_ctx, scal));
         cx_hash_destroy(&G_cx.hash_ctx);
         if (pv_key->curve == CX_CURVE_Ed25519) {
             /* 2. Prune the buffer: The lowest 3 bits of the first octet are
@@ -272,17 +272,17 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
     // compute r
     // - last size (32/57) bytes of H(sk), h,  as big endian bytes ordered. stored in r
     // - r = H(h,M) as little endian
-    cx_hash_init_ex(&G_cx.hash_ctx, hashID, hsize);
+    CX_CHECK(cx_hash_init_ex(&G_cx.hash_ctx, hashID, hsize));
 
     if (pv_key->curve == CX_CURVE_Ed448) {
-        cx_hash_update(&G_cx.hash_ctx, C_cx_siged448, sizeof(C_cx_siged448));
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, C_cx_siged448, sizeof(C_cx_siged448)));
         scal[0] = 0;  // no ph
         scal[1] = 0;  // no ctx
-        cx_hash_update(&G_cx.hash_ctx, scal, 2);
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, scal, 2));
     }
-    cx_hash_update(&G_cx.hash_ctx, r, size);
-    cx_hash_update(&G_cx.hash_ctx, hash, hash_len);
-    cx_hash_final(&G_cx.hash_ctx, scal);
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, r, size));
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, hash, hash_len));
+    CX_CHECK(cx_hash_final(&G_cx.hash_ctx, scal));
     cx_hash_destroy(&G_cx.hash_ctx);
     cx_encode_int(scal, hsize);
 
@@ -308,17 +308,17 @@ cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
     cx_encode_coord(sig + size, size, sign);
 
     // - compute H(R,A,M)
-    cx_hash_init_ex(&G_cx.hash_ctx, hashID, hsize);
+    CX_CHECK(cx_hash_init_ex(&G_cx.hash_ctx, hashID, hsize));
     if (pv_key->curve == CX_CURVE_Ed448) {
-        cx_hash_update(&G_cx.hash_ctx, C_cx_siged448, sizeof(C_cx_siged448));
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, C_cx_siged448, sizeof(C_cx_siged448)));
         scal[0] = 0;  // no ph
         scal[1] = 0;  // no ctx
-        cx_hash_update(&G_cx.hash_ctx, scal, 2);
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, scal, 2));
     }
-    cx_hash_update(&G_cx.hash_ctx, sig, size);
-    cx_hash_update(&G_cx.hash_ctx, sig + size, size);
-    cx_hash_update(&G_cx.hash_ctx, hash, hash_len);
-    cx_hash_final(&G_cx.hash_ctx, scal);
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, sig, size));
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, sig + size, size));
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, hash, hash_len));
+    CX_CHECK(cx_hash_final(&G_cx.hash_ctx, scal));
     cx_hash_destroy(&G_cx.hash_ctx);
     cx_encode_int(scal, hsize);
 
@@ -429,16 +429,16 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pu_key,
     CX_CHECK(cx_ecpoint_alloc(&Q, pu_key->curve));
 
     // Compute H(R || A || M),
-    cx_hash_init_ex(&G_cx.hash_ctx, hashID, hsize);
+    CX_CHECK(cx_hash_init_ex(&G_cx.hash_ctx, hashID, hsize));
     // -prefix for Ed448
     if (pu_key->curve == CX_CURVE_Ed448) {
-        cx_hash_update(&G_cx.hash_ctx, C_cx_siged448, sizeof(C_cx_siged448));
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, C_cx_siged448, sizeof(C_cx_siged448)));
         scal[0] = 0;  // no ph
         scal[1] = 0;  // no ctx
-        cx_hash_update(&G_cx.hash_ctx, scal, 2);
+        CX_CHECK(cx_hash_update(&G_cx.hash_ctx, scal, 2));
     }
     // -R
-    cx_hash_update(&G_cx.hash_ctx, sig, size);
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, sig, size));
     // -A, compress public key
     if (pu_key->W[0] == 0x04) {
         CX_CHECK(cx_ecpoint_init(&Q, &pu_key->W[1], size, &pu_key->W[1 + size], size));
@@ -448,10 +448,10 @@ bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pu_key,
     else {
         memmove(scal, &pu_key->W[1], size);
     }
-    cx_hash_update(&G_cx.hash_ctx, scal, size);
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, scal, size));
     // -M
-    cx_hash_update(&G_cx.hash_ctx, hash, hash_len);
-    cx_hash_final(&G_cx.hash_ctx, left);
+    CX_CHECK(cx_hash_update(&G_cx.hash_ctx, hash, hash_len));
+    CX_CHECK(cx_hash_final(&G_cx.hash_ctx, left));
     cx_hash_destroy(&G_cx.hash_ctx);
     cx_encode_int(left, hsize);
 
