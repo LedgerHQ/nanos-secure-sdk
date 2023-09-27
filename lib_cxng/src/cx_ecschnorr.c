@@ -100,11 +100,12 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
         // tag_hash = SHA256("BIP0340/aux")
         // SHA256(tag_hash || tag_hash || aux_rnd)
         cx_sha256_init_no_throw(&H);
-        cx_hash_no_throw((cx_hash_t *) &H, CX_LAST, BIP0340_aux, sizeof(BIP0340_aux), R, size);
+        CX_CHECK(
+            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST, BIP0340_aux, sizeof(BIP0340_aux), R, size));
         cx_sha256_init_no_throw(&H);
-        cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0);
-        cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0);
-        cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, sig, size, R, size);
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0));
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0));
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, sig, size, R, size));
         // t = d ^ SHA256(tag_hash || tag_hash || aux_rnd)
         CX_CHECK(cx_bn_init(bn_k, R, size));
         CX_CHECK(cx_bn_xor(bn_r, bn_d, bn_k));
@@ -112,14 +113,15 @@ cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pv_key,
         // tag_hash = SHA256("BIP0340/nonce")
         // SHA256(tag_hash || tag_hash || t || Qx || msg)
         cx_sha256_init_no_throw(&H);
-        cx_hash_no_throw((cx_hash_t *) &H, CX_LAST, BIP0340_nonce, sizeof(BIP0340_nonce), R, size);
+        CX_CHECK(cx_hash_no_throw(
+            (cx_hash_t *) &H, CX_LAST, BIP0340_nonce, sizeof(BIP0340_nonce), R, size));
         cx_sha256_init_no_throw(&H);
-        cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0);
-        cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0);
-        cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0);
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0));
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0));
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0));
         CX_CHECK(cx_ecpoint_export(&Q, P, size, NULL, 0));
-        cx_hash_no_throw((cx_hash_t *) &H, 0, P, size, NULL, 0);
-        cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, size, sig, size);
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, P, size, NULL, 0));
+        CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, size, sig, size));
     }
 
     // generate random
@@ -170,12 +172,13 @@ RETRY2:
             // 4. s = (k+r*pv_key.d)%n
             cx_sha256_init_no_throw(&H);
             CX_CHECK(cx_ecpoint_export(&Q, sig, size, NULL, 0));
-            cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0));
             if ((mode & CX_MASK_EC) == CX_ECSCHNORR_ISO14888_XY) {
                 CX_CHECK(cx_ecpoint_export(&Q, NULL, 0, sig, size));
-                cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0);
+                CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0));
             }
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, R, sizeof(R));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, R, sizeof(R)));
 
             CX_CHECK(cx_bn_init(bn_d, R, 32));
             CX_CHECK(cx_bn_reduce(bn_r, bn_d, bn_n));
@@ -204,9 +207,10 @@ RETRY2:
             // 3. s = (k-r*pv_key.d)%n
             // r = H((msg+xQ), and r%n != 0
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, msg, msg_len, NULL, 0);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, msg, msg_len, NULL, 0));
             CX_CHECK(cx_ecpoint_export(&Q, sig, size, NULL, 0));
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, sig, size, R, sizeof(R));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, sig, size, R, sizeof(R)));
 
             CX_CHECK(cx_bn_init(bn_d, R, CX_SHA256_SIZE));
             CX_CHECK(cx_bn_reduce(bn_r, bn_d, bn_n));
@@ -245,7 +249,7 @@ RETRY2:
             odd = sig[size - 1] & 1;
             CX_CHECK(cx_ecpoint_export(&Q, sig + 1, size, NULL, 0));
             sig[0] = odd ? 0x03 : 0x02;
-            cx_hash_no_throw((cx_hash_t *) &H, 0, sig, 1 + size, NULL, 0);  // Q
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, 1 + size, NULL, 0));  // Q
             // kpub
             CX_CHECK(cx_ecdomain_generator_bn(pv_key->curve, &Q));
             CX_CHECK(cx_ecpoint_rnd_fixed_scalarmul(&Q, pv_key->d, pv_key->d_len));
@@ -253,9 +257,10 @@ RETRY2:
             odd = sig[size - 1] & 1;
             CX_CHECK(cx_ecpoint_export(&Q, sig + 1, size, NULL, 0));
             sig[0] = odd ? 0x03 : 0x02;
-            cx_hash_no_throw((cx_hash_t *) &H, 0, sig, 1 + size, NULL, 0);  // Q
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, 1 + size, NULL, 0));  // Q
             // m
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, R, sizeof(R));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, R, sizeof(R)));
 
             // Compute the challenge r = H(Q, kpub, m)
             //[CME: mod n according to pdf/code, Q and kpub compressed "02|03 x" according to code)
@@ -304,9 +309,9 @@ RETRY2:
             }
             // h = Hash(r || m).
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0);
-            cx_hash_no_throw(
-                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, sig, sizeof(S));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, sig, sizeof(S)));
             // Reject nonce if h == 0 or h >= order.
             CX_CHECK(cx_bn_init(bn_r, sig, 32));
             CX_CHECK(cx_bn_cmp_u32(bn_r, 0, &diff));
@@ -344,14 +349,19 @@ RETRY2:
             // tag_hash = SHA256("BIP0340_challenge")
             // e = SHA256(tag_hash || tag_hash || Rx || Px || msg)
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw(
-                (cx_hash_t *) &H, CX_LAST, BIP0340_challenge, sizeof(BIP0340_challenge), sig, size);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H,
+                                      CX_LAST,
+                                      BIP0340_challenge,
+                                      sizeof(BIP0340_challenge),
+                                      sig,
+                                      size));
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, P, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, sig, size);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, R, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, P, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, sig, size));
 
             // e = e % n
             CX_CHECK(cx_bn_init(bn_s, sig, size));
@@ -495,12 +505,13 @@ bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pu_key,
             // 3.
             cx_sha256_init_no_throw(&H);
             CX_CHECK(cx_ecpoint_export(&R, x, size, NULL, 0));
-            cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0));
             if ((mode & CX_MASK_EC) == CX_ECSCHNORR_ISO14888_XY) {
                 CX_CHECK(cx_ecpoint_export(&R, NULL, 0, x, size));
-                cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0);
+                CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0));
             }
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, sizeof(x));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, sizeof(x)));
             // 4.
             CX_CHECK(cx_bn_init(bn_s, x, CX_SHA256_SIZE));
             CX_CHECK(cx_bn_cmp(bn_r, bn_s, &diff));
@@ -535,9 +546,10 @@ bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pu_key,
             CX_CHECK(cx_ecpoint_double_scalarmul_bn(&R, &P, &Q, bn_s, bn_r));
             // 3.
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, msg, msg_len, NULL, 0);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, msg, msg_len, NULL, 0));
             CX_CHECK(cx_ecpoint_export(&R, x, size, NULL, 0));
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, x, size, x, sizeof(x));
+            CX_CHECK(
+                cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, x, size, x, sizeof(x)));
             // 4.
             CX_CHECK(cx_bn_init(bn_s, x, CX_SHA256_SIZE));
             CX_CHECK(cx_bn_cmp(bn_r, bn_s, &diff));
@@ -583,14 +595,14 @@ bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pu_key,
             odd = x[size - 1] & 1;
             CX_CHECK(cx_ecpoint_export(&R, x + 1, size, NULL, 0));
             x[0] = odd ? 0x03 : 0x02;
-            cx_hash_no_throw((cx_hash_t *) &H, 0, x, 1 + size, NULL, 0);  // Q
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, 1 + size, NULL, 0));  // Q
             // kpub
             memmove(x + 1, &pu_key->W[1], size);
             x[0] = (pu_key->W[1 + 2 * size - 1] & 1) ? 0x03 : 0x02;
-            cx_hash_no_throw((cx_hash_t *) &H, 0, x, 1 + size, NULL, 0);  // kpub
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, 1 + size, NULL, 0));  // kpub
             // m
-            cx_hash_no_throw(
-                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, sizeof(x));  // m
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, sizeof(x)));  // m
 
             CX_CHECK(cx_bn_init(bn_d, x, CX_SHA256_SIZE));
             CX_CHECK(cx_bn_reduce(bn_s, bn_d, bn_n));
@@ -631,8 +643,9 @@ bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pu_key,
             // h = Hash(r||m), and h!=0, and h<order
             cx_sha256_init_no_throw(&H);
             CX_CHECK(cx_bn_export(bn_r, x, size));
-            cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, sizeof(x));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, sizeof(x)));
             CX_CHECK(cx_bn_init(bn_s, x, CX_SHA256_SIZE));
             CX_CHECK(cx_bn_cmp_u32(bn_s, 0, &diff));
             if (diff == 0) {
@@ -692,14 +705,15 @@ bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pu_key,
             // tag_hash = SHA256("BIP0340/challenge")
             // e = SHA256(tag_hash || tag_hash || r || pu_key || msg)
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw(
-                (cx_hash_t *) &H, CX_LAST, BIP0340_challenge, sizeof(BIP0340_challenge), x, size);
+            CX_CHECK(cx_hash_no_throw(
+                (cx_hash_t *) &H, CX_LAST, BIP0340_challenge, sizeof(BIP0340_challenge), x, size));
             cx_sha256_init_no_throw(&H);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, 0, &pu_key->W[1], size, NULL, 0);
-            cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, size);
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, x, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, sig, size, NULL, 0));
+            CX_CHECK(cx_hash_no_throw((cx_hash_t *) &H, 0, &pu_key->W[1], size, NULL, 0));
+            CX_CHECK(
+                cx_hash_no_throw((cx_hash_t *) &H, CX_LAST | CX_NO_REINIT, msg, msg_len, x, size));
 
             // e = e % n
             CX_CHECK(cx_bn_init(bn_x, x, size));
