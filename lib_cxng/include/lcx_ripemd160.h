@@ -71,7 +71,10 @@ WARN_UNUSED_RESULT cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
  */
 static inline int cx_ripemd160_init(cx_ripemd160_t *hash)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     cx_ripemd160_init_no_throw(hash);
+#pragma GCC diagnostic pop
     return CX_RIPEMD160;
 }
 
