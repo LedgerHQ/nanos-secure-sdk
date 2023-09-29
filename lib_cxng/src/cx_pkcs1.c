@@ -466,7 +466,7 @@ bool cx_pkcs1_emsa_pss_verify_with_salt_len(cx_md_t        hID,
         return false;
     }
 
-    if (cx_hash_init_ex(hash_ctx, hID, hLen) != CX_Ok
+    if (cx_hash_init_ex(hash_ctx, hID, hLen) != CX_OK
         || cx_hash_update(hash_ctx, C_cx_pss_zeros, 8) != CX_OK
         || cx_hash_update(hash_ctx, mHash, mHashLen) != CX_OK
         || cx_hash_update(hash_ctx, em + PSLen + 1, mSaltLen) != CX_OK
