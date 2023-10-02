@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 #include "ux.h"
 #include "os_utils.h"
@@ -54,20 +54,18 @@ const bagl_element_t ux_layout_bb_elements[] = {
 };
 // clang-format on
 
-void ux_layout_bb_init_common(unsigned int stack_slot)
-{
-    ux_stack_init(stack_slot);
-    G_ux.stack[stack_slot].element_arrays[0].element_array       = ux_layout_bb_elements;
-    G_ux.stack[stack_slot].element_arrays[0].element_array_count = ARRAYLEN(ux_layout_bb_elements);
-    G_ux.stack[stack_slot].element_arrays_count                  = 1;
-    G_ux.stack[stack_slot].button_push_callback                  = ux_flow_button_callback;
+void ux_layout_bb_init_common(unsigned int stack_slot) {
+  ux_stack_init(stack_slot);
+  G_ux.stack[stack_slot].element_arrays[0].element_array = ux_layout_bb_elements;
+  G_ux.stack[stack_slot].element_arrays[0].element_array_count = ARRAYLEN(ux_layout_bb_elements);
+  G_ux.stack[stack_slot].element_arrays_count = 1;
+  G_ux.stack[stack_slot].button_push_callback = ux_flow_button_callback;
 }
 
-void ux_layout_bb_init(unsigned int stack_slot)
-{
-    ux_layout_bb_init_common(stack_slot);
-    G_ux.stack[stack_slot].screen_before_element_display_callback = ux_layout_strings_prepro;
-    ux_stack_display(stack_slot);
+void ux_layout_bb_init(unsigned int stack_slot) {
+  ux_layout_bb_init_common(stack_slot);
+  G_ux.stack[stack_slot].screen_before_element_display_callback = ux_layout_strings_prepro;
+  ux_stack_display(stack_slot);
 }
 
-#endif  // HAVE_UX_FLOW
+#endif // HAVE_UX_FLOW

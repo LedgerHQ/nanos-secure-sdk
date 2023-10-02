@@ -23,8 +23,7 @@
 #include "bip32.h"
 #include "read.h"
 
-bool bip32_path_read(const uint8_t *in, size_t in_len, uint32_t *out, size_t out_len)
-{
+bool bip32_path_read(const uint8_t *in, size_t in_len, uint32_t *out, size_t out_len) {
     if (out_len == 0 || out_len > MAX_BIP32_PATH) {
         return false;
     }
@@ -42,8 +41,10 @@ bool bip32_path_read(const uint8_t *in, size_t in_len, uint32_t *out, size_t out
     return true;
 }
 
-bool bip32_path_format(const uint32_t *bip32_path, size_t bip32_path_len, char *out, size_t out_len)
-{
+bool bip32_path_format(const uint32_t *bip32_path,
+                       size_t bip32_path_len,
+                       char *out,
+                       size_t out_len) {
     if (bip32_path_len == 0 || bip32_path_len > MAX_BIP32_PATH) {
         return false;
     }

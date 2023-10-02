@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 /**
  * @file    lcx_pbkdf2.h
@@ -36,7 +36,7 @@
 
 /**
  * @brief   Computes a PBKDF2 bytes sequence.
- *
+ * 
  * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
  *
@@ -62,35 +62,27 @@
  *                         - CX_OK
  *                         - CX_INVALID_PARAMETER
  */
-cx_err_t cx_pbkdf2_no_throw(cx_md_t        md_type,
-                            const uint8_t *password,
-                            size_t         passwordlen,
-                            uint8_t       *salt,
-                            size_t         saltlen,
-                            uint32_t       iterations,
-                            uint8_t       *out,
-                            size_t         outLength);
+cx_err_t cx_pbkdf2_no_throw(cx_md_t md_type,
+                   const uint8_t *password,
+                   size_t         passwordlen,
+                   uint8_t *      salt,
+                   size_t         saltlen,
+                   uint32_t       iterations,
+                   uint8_t *      out,
+                   size_t         outLength);
 
 /**
  * @deprecated
  * See #cx_pbkdf2_no_throw
  */
-DEPRECATED static inline void cx_pbkdf2(cx_md_t              md_type,
-                                        const unsigned char *password,
-                                        unsigned short       passwordlen,
-                                        unsigned char       *salt,
-                                        unsigned short       saltlen,
-                                        unsigned int         iterations,
-                                        unsigned char       *out,
-                                        unsigned int         outLength)
+DEPRECATED static inline void cx_pbkdf2 ( cx_md_t md_type, const unsigned char * password, unsigned short passwordlen, unsigned char * salt, unsigned short saltlen, unsigned int iterations, unsigned char * out, unsigned int outLength )
 {
-    CX_THROW(cx_pbkdf2_no_throw(
-        md_type, password, passwordlen, salt, saltlen, iterations, out, outLength));
+  CX_THROW(cx_pbkdf2_no_throw(md_type, password, passwordlen, salt, saltlen, iterations, out, outLength));
 }
 
 /**
  * @brief   Computes a PBKDF2 bytes sequence with SHA512.
- *
+ * 
  * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898">  RFC 2898 </a>
  *          with SHA512 as the underlying hash function.
@@ -120,4 +112,4 @@ DEPRECATED static inline void cx_pbkdf2(cx_md_t              md_type,
 
 #endif  // LCX_PBKDF2_H
 
-#endif  // HAVE_PBKDF2
+#endif // HAVE_PBKDF2

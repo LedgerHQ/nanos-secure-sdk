@@ -22,8 +22,7 @@
 #include "write.h"
 #include "read.h"
 
-uint8_t varint_size(uint64_t value)
-{
+uint8_t varint_size(uint64_t value) {
     if (value <= 0xFC) {
         return 1;
     }
@@ -39,8 +38,7 @@ uint8_t varint_size(uint64_t value)
     return 9;  // <= UINT64_MAX
 }
 
-int varint_read(const uint8_t *in, size_t in_len, uint64_t *value)
-{
+int varint_read(const uint8_t *in, size_t in_len, uint64_t *value) {
     if (in_len < 1) {
         return -1;
     }
@@ -76,8 +74,7 @@ int varint_read(const uint8_t *in, size_t in_len, uint64_t *value)
     return 1;
 }
 
-int varint_write(uint8_t *out, size_t offset, uint64_t value)
-{
+int varint_write(uint8_t *out, size_t offset, uint64_t value) {
     uint8_t varint_len = varint_size(value);
 
     switch (varint_len) {

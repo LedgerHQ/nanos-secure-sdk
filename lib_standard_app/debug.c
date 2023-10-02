@@ -27,13 +27,15 @@
 #ifdef HAVE_DEBUG_THROWS
 static char errordata[20];
 
-WEAK void app_throw_info(unsigned int exception, unsigned int lr_val)
-{
-    snprintf(errordata, sizeof(errordata), "n%d, LR=0x%08X", exception, lr_val);
+WEAK void app_throw_info(unsigned int exception, unsigned int lr_val) {
+  snprintf(errordata,
+           sizeof(errordata),
+           "n%d, LR=0x%08X",
+           exception,
+           lr_val);
 }
 
-static void review_choice(bool confirm)
-{
+static void review_choice(bool confirm) {
     UNUSED(confirm);
     os_sched_exit(-1);
 }
@@ -43,14 +45,13 @@ UX_STEP_CB(ux_error,
            bnnn_paging,
            review_choice(true),
            {
-               .title = "App error",
-               .text  = errordata,
+              .title = "App error",
+              .text = errordata,
            });
 UX_FLOW(ux_error_flow, &ux_error);
 #endif
 
-WEAK void __attribute__((noreturn)) debug_display_throw_error(int exception)
-{
+WEAK void __attribute__((noreturn)) debug_display_throw_error(int exception) {
     UNUSED(exception);
 
 #ifdef HAVE_BAGL
@@ -58,8 +59,12 @@ WEAK void __attribute__((noreturn)) debug_display_throw_error(int exception)
 #endif
 
 #ifdef HAVE_NBGL
-    nbgl_useCaseChoice(
-        &C_round_warning_64px, "App error", errordata, "Exit app", "Exit app", review_choice);
+    nbgl_useCaseChoice(&C_round_warning_64px,
+                       "App error",
+                       errordata,
+                       "Exit app",
+                       "Exit app",
+                       review_choice);
 #endif
 
     // Block until the user approve and the app is quit

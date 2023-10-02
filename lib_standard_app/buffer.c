@@ -24,13 +24,11 @@
 #include "varint.h"
 #include "bip32.h"
 
-bool buffer_can_read(const buffer_t *buffer, size_t n)
-{
+bool buffer_can_read(const buffer_t *buffer, size_t n) {
     return buffer->size - buffer->offset >= n;
 }
 
-bool buffer_seek_set(buffer_t *buffer, size_t offset)
-{
+bool buffer_seek_set(buffer_t *buffer, size_t offset) {
     if (offset > buffer->size) {
         return false;
     }
@@ -40,8 +38,7 @@ bool buffer_seek_set(buffer_t *buffer, size_t offset)
     return true;
 }
 
-bool buffer_seek_cur(buffer_t *buffer, size_t offset)
-{
+bool buffer_seek_cur(buffer_t *buffer, size_t offset) {
     if (buffer->offset + offset < buffer->offset ||  // overflow
         buffer->offset + offset > buffer->size) {    // exceed buffer size
         return false;
@@ -52,8 +49,7 @@ bool buffer_seek_cur(buffer_t *buffer, size_t offset)
     return true;
 }
 
-bool buffer_seek_end(buffer_t *buffer, size_t offset)
-{
+bool buffer_seek_end(buffer_t *buffer, size_t offset) {
     if (offset > buffer->size) {
         return false;
     }
@@ -63,8 +59,7 @@ bool buffer_seek_end(buffer_t *buffer, size_t offset)
     return true;
 }
 
-bool buffer_read_u8(buffer_t *buffer, uint8_t *value)
-{
+bool buffer_read_u8(buffer_t *buffer, uint8_t *value) {
     if (!buffer_can_read(buffer, 1)) {
         *value = 0;
 
@@ -77,8 +72,7 @@ bool buffer_read_u8(buffer_t *buffer, uint8_t *value)
     return true;
 }
 
-bool buffer_read_u16(buffer_t *buffer, uint16_t *value, endianness_t endianness)
-{
+bool buffer_read_u16(buffer_t *buffer, uint16_t *value, endianness_t endianness) {
     if (!buffer_can_read(buffer, 2)) {
         *value = 0;
 
@@ -93,8 +87,7 @@ bool buffer_read_u16(buffer_t *buffer, uint16_t *value, endianness_t endianness)
     return true;
 }
 
-bool buffer_read_u32(buffer_t *buffer, uint32_t *value, endianness_t endianness)
-{
+bool buffer_read_u32(buffer_t *buffer, uint32_t *value, endianness_t endianness) {
     if (!buffer_can_read(buffer, 4)) {
         *value = 0;
 
@@ -109,8 +102,7 @@ bool buffer_read_u32(buffer_t *buffer, uint32_t *value, endianness_t endianness)
     return true;
 }
 
-bool buffer_read_u64(buffer_t *buffer, uint64_t *value, endianness_t endianness)
-{
+bool buffer_read_u64(buffer_t *buffer, uint64_t *value, endianness_t endianness) {
     if (!buffer_can_read(buffer, 8)) {
         *value = 0;
 
@@ -125,8 +117,7 @@ bool buffer_read_u64(buffer_t *buffer, uint64_t *value, endianness_t endianness)
     return true;
 }
 
-bool buffer_read_varint(buffer_t *buffer, uint64_t *value)
-{
+bool buffer_read_varint(buffer_t *buffer, uint64_t *value) {
     int length = varint_read(buffer->ptr + buffer->offset, buffer->size - buffer->offset, value);
 
     if (length < 0) {
@@ -138,10 +129,11 @@ bool buffer_read_varint(buffer_t *buffer, uint64_t *value)
     return buffer_seek_cur(buffer, (size_t) length);
 }
 
-bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len)
-{
-    if (!bip32_path_read(
-            buffer->ptr + buffer->offset, buffer->size - buffer->offset, out, out_len)) {
+bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len) {
+    if (!bip32_path_read(buffer->ptr + buffer->offset,
+                         buffer->size - buffer->offset,
+                         out,
+                         out_len)) {
         return false;
     }
 
@@ -150,8 +142,7 @@ bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len)
     return true;
 }
 
-bool buffer_copy(const buffer_t *buffer, uint8_t *out, size_t out_len)
-{
+bool buffer_copy(const buffer_t *buffer, uint8_t *out, size_t out_len) {
     if (buffer->size - buffer->offset > out_len) {
         return false;
     }
@@ -161,8 +152,7 @@ bool buffer_copy(const buffer_t *buffer, uint8_t *out, size_t out_len)
     return true;
 }
 
-bool buffer_move(buffer_t *buffer, uint8_t *out, size_t out_len)
-{
+bool buffer_move(buffer_t *buffer, uint8_t *out, size_t out_len) {
     if (!buffer_copy(buffer, out, out_len)) {
         return false;
     }

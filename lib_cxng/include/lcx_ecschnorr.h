@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 /**
  * @file    lcx_ecschnorr.h
@@ -34,7 +34,7 @@
 /**
  * @brief   Signs a digest message according to the given mode.
  *
- * @param[in]  pvkey   Pointer to the private key initialized with
+ * @param[in]  pvkey   Pointer to the private key initialized with 
  *                     #cx_ecfp_init_private_key_no_throw beforehand.
  *
  * @param[in]  mode    Mode. Supported flag:
@@ -47,15 +47,15 @@
  *
  * @param[in]  hashID  Message digest algorithm identifier.
  *                     This parameter is mandatory when
- *                     using the CX_RND_RFC6979
+ *                     using the CX_RND_RFC6979 
  *                     pseudorandom number generator.
  *
  * @param[in]  msg     Input data to sign.
  *
  * @param[in]  msg_len Length of input data.
  *
- * @param[out] sig     ECSchnorr signature encoded in TLV: **30 || L || 02 || Lr || r || 02 || Ls ||
- * s**. This parameter holds the auxiliary random data when CX_ECSCHNORR_BIP0340 is used.
+ * @param[out] sig     ECSchnorr signature encoded in TLV: **30 || L || 02 || Lr || r || 02 || Ls || s**.
+ *                     This parameter holds the auxiliary random data when CX_ECSCHNORR_BIP0340 is used.
  *
  * @param[in]  sig_len Length of the signature.
  *
@@ -72,35 +72,28 @@
  *                     - CX_INVALID_PARAMETER_VALUE
  */
 cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                    uint32_t                     mode,
-                                    cx_md_t                      hashID,
-                                    const uint8_t               *msg,
-                                    size_t                       msg_len,
-                                    uint8_t                     *sig,
-                                    size_t                      *sig_len);
+                           uint32_t                     mode,
+                           cx_md_t                      hashID,
+                           const uint8_t *              msg,
+                           size_t                       msg_len,
+                           uint8_t *                    sig,
+                           size_t *                     sig_len);
 
 /**
  * @deprecated
  * See #cx_ecschnorr_sign_no_throw
  */
-DEPRECATED static inline size_t cx_ecschnorr_sign(const cx_ecfp_private_key_t *pvkey,
-                                                  uint32_t                     mode,
-                                                  cx_md_t                      hashID,
-                                                  const unsigned char         *msg,
-                                                  unsigned int                 msg_len,
-                                                  unsigned char               *sig,
-                                                  size_t                       sig_len,
-                                                  unsigned int                *info)
+DEPRECATED static inline size_t cx_ecschnorr_sign ( const cx_ecfp_private_key_t * pvkey, uint32_t mode, cx_md_t hashID, const unsigned char * msg, unsigned int msg_len, unsigned char * sig, size_t sig_len, unsigned int * info )
 {
-    UNUSED(info);
-    CX_THROW(cx_ecschnorr_sign_no_throw(pvkey, mode, hashID, msg, msg_len, sig, &sig_len));
-    return sig_len;
+  UNUSED(info);
+  CX_THROW(cx_ecschnorr_sign_no_throw(pvkey, mode, hashID, msg, msg_len, sig, &sig_len));
+  return sig_len;
 }
 
 /**
  * @brief   Verifies a digest message signature according to the given mode.
- *
- * @param[in] pukey   Pointer to the public key initialized with
+ * 
+ * @param[in] pukey   Pointer to the public key initialized with 
  *                    #cx_ecfp_init_private_key_no_throw beforehand.
  *
  * @param[in] mode    Mode. Supported flag:
@@ -115,15 +108,15 @@ DEPRECATED static inline size_t cx_ecschnorr_sign(const cx_ecfp_private_key_t *p
  *                    compute the input data.
  *
  * @param[in] msg     Signed input data to verify the signature.
- *
+ *   
  *
  * @param[in] msg_len Length of the input data.
- *
+ *   
  *
  * @param[in] sig     ECSchnorr signature to verify encoded in
  *                    TLV: **30 || L || 02 || Lr || r || 02 || Ls || s**
- *
- *
+ *   
+ * 
  * @param[in] sig_len Length of the signature.
  *
  * @return            1 if signature is verified, 0 otherwise.
@@ -131,11 +124,11 @@ DEPRECATED static inline size_t cx_ecschnorr_sign(const cx_ecfp_private_key_t *p
 bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pukey,
                          uint32_t                    mode,
                          cx_md_t                     hashID,
-                         const uint8_t              *msg,
+                         const uint8_t *             msg,
                          size_t                      msg_len,
-                         const uint8_t              *sig,
+                         const uint8_t *             sig,
                          size_t                      sig_len);
 
 #endif
 
-#endif  // HAVE_ECSHCNORR
+#endif // HAVE_ECSHCNORR

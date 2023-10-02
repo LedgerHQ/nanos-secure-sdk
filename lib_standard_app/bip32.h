@@ -42,6 +42,6 @@ bool bip32_path_read(const uint8_t *in, size_t in_len, uint32_t *out, size_t out
  *
  */
 bool bip32_path_format(const uint32_t *bip32_path,
-                       size_t          bip32_path_len,
-                       char           *out,
-                       size_t          out_len);
+                       size_t bip32_path_len,
+                       char *out,
+                       size_t out_len);

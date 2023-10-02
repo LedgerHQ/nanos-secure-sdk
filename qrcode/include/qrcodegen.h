@@ -1,9 +1,9 @@
-/*
+/* 
  * QR Code generator library (C)
- *
+ * 
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -26,49 +26,53 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+
 /*---- Enumeration types and values ----*/
 
-/*
+/* 
  * Represents the error correction level used in a QR Code symbol.
  */
 enum qrcodegen_Ecc {
-    qrcodegen_Ecc_LOW = 0,
-    qrcodegen_Ecc_MEDIUM,
-    qrcodegen_Ecc_QUARTILE,
-    qrcodegen_Ecc_HIGH,
+	qrcodegen_Ecc_LOW = 0,
+	qrcodegen_Ecc_MEDIUM,
+	qrcodegen_Ecc_QUARTILE,
+	qrcodegen_Ecc_HIGH,
 };
 
-/*
+
+/* 
  * Represents the mask pattern used in a QR Code symbol.
  */
 enum qrcodegen_Mask {
-    qrcodegen_Mask_AUTO = -1,
-    qrcodegen_Mask_0    = 0,
-    qrcodegen_Mask_1,
-    qrcodegen_Mask_2,
-    qrcodegen_Mask_3,
-    qrcodegen_Mask_4,
-    qrcodegen_Mask_5,
-    qrcodegen_Mask_6,
-    qrcodegen_Mask_7,
+	qrcodegen_Mask_AUTO = -1,
+	qrcodegen_Mask_0 = 0,
+	qrcodegen_Mask_1,
+	qrcodegen_Mask_2,
+	qrcodegen_Mask_3,
+	qrcodegen_Mask_4,
+	qrcodegen_Mask_5,
+	qrcodegen_Mask_6,
+	qrcodegen_Mask_7,
 };
+
+
 
 /*---- Macro constants and functions ----*/
 
 // The minimum and maximum defined QR Code version numbers for Model 2.
-#define qrcodegen_VERSION_MIN 1
-#define qrcodegen_VERSION_MAX 40
+#define qrcodegen_VERSION_MIN  1
+#define qrcodegen_VERSION_MAX  40
 
-// Calculates the number of bytes needed to store any QR Code up to and including the given version
-// number, as a compile-time constant. For example, 'uint8_t
-// buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];' can store any single QR Code from version 1 to 25,
-// inclusive.
-#define qrcodegen_BUFFER_LEN_FOR_VERSION(n) \
-    ((((unsigned int) (n) *4UL + 17UL) * ((unsigned int) (n) *4UL + 17UL) + 7UL) / 8UL + 1UL)
+// Calculates the number of bytes needed to store any QR Code up to and including the given version number,
+// as a compile-time constant. For example, 'uint8_t buffer[qrcodegen_BUFFER_LEN_FOR_VERSION(25)];'
+// can store any single QR Code from version 1 to 25, inclusive.
+#define qrcodegen_BUFFER_LEN_FOR_VERSION(n)  ((((unsigned int)(n) * 4UL + 17UL) * ((unsigned int)(n) * 4UL + 17UL) + 7UL) / 8UL + 1UL)
 
 // The worst-case number of bytes needed to store one QR Code, up to and including
 // version 40. This value equals 3918, which is just under 4 kilobytes.
-#define qrcodegen_BUFFER_LEN_MAX qrcodegen_BUFFER_LEN_FOR_VERSION(qrcodegen_VERSION_MAX)
+#define qrcodegen_BUFFER_LEN_MAX  qrcodegen_BUFFER_LEN_FOR_VERSION(qrcodegen_VERSION_MAX)
+
+
 
 /*---- Functions to generate QR Codes ----*/
 
@@ -76,7 +80,7 @@ enum qrcodegen_Mask {
 extern "C" {
 #endif
 
-/*
+/* 
  * Encodes the given text string to a QR Code symbol, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
@@ -95,16 +99,11 @@ extern "C" {
  * - Please consult the QR Code specification for information on
  *   data capacities per version, ECC level, and text encoding mode.
  */
-bool qrcodegen_encodeText(const char         *text,
-                          uint8_t             tempBuffer[],
-                          uint8_t             qrcode[],
-                          enum qrcodegen_Ecc  ecl,
-                          int                 minVersion,
-                          int                 maxVersion,
-                          enum qrcodegen_Mask mask,
-                          bool                boostEcl);
+bool qrcodegen_encodeText(const char *text, uint8_t tempBuffer[], uint8_t qrcode[],
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
 
-/*
+
+/* 
  * Encodes the given binary data to a QR Code symbol, returning true if encoding succeeded.
  * If the data is too long to fit in any version in the given range
  * at the given ECC level, then false is returned.
@@ -122,21 +121,14 @@ bool qrcodegen_encodeText(const char         *text,
  * - Please consult the QR Code specification for information on
  *   data capacities per version, ECC level, and text encoding mode.
  */
-bool qrcodegen_encodeBinary(uint8_t const       data[],
-                            size_t              dataLen,
-                            uint8_t             temp[],
-                            size_t              tempLen,
-                            uint8_t             qrcode[],
-                            size_t              qrcodeLen,
-                            enum qrcodegen_Ecc  ecl,
-                            int                 minVersion,
-                            int                 maxVersion,
-                            enum qrcodegen_Mask mask,
-                            bool                boostEcl);
+bool qrcodegen_encodeBinary(uint8_t const data[], size_t dataLen, uint8_t temp[], size_t tempLen, uint8_t qrcode[], size_t qrcodeLen,
+	enum qrcodegen_Ecc ecl, int minVersion, int maxVersion, enum qrcodegen_Mask mask, bool boostEcl);
+
+
 
 /*---- Functions to extract raw data from QR Codes ----*/
 
-/*
+/* 
  * Returns the side length of the given QR Code, assuming that encoding succeeded.
  * The result is in the range [21, 177]. Note that the length of the array buffer
  * is related to the side length - every 'uint8_t qrcode[]' must have length at least
@@ -144,7 +136,8 @@ bool qrcodegen_encodeBinary(uint8_t const       data[],
  */
 int qrcodegen_getSize(const uint8_t qrcode[]);
 
-/*
+
+/* 
  * Returns the color of the module (pixel) at the given coordinates, which is either
  * false for white or true for black. The top left corner has the coordinates (x=0, y=0).
  * If the given coordinates are out of bounds, then false (white) is returned.

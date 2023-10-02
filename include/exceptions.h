@@ -11,115 +11,102 @@ typedef unsigned short exception_t;
 typedef struct try_context_s try_context_t;
 
 #if (defined(ST31) || defined(ST33) || defined(ST33K1M5)) && defined(__arm__)
-// #include <setjmp.h>
-//  GCC/LLVM declare way too big jmp context, reduce them to what is used on CM0+
+  //#include <setjmp.h>
+  // GCC/LLVM declare way too big jmp context, reduce them to what is used on CM0+
 
-// jmp context to backup (in increasing order address: r4, r5, r6, r7, r8, r9, r10, r11, SP,
-// setjmpcallPC)
-typedef unsigned int jmp_buf[10];
+  // jmp context to backup (in increasing order address: r4, r5, r6, r7, r8, r9, r10, r11, SP, setjmpcallPC)
+  typedef unsigned int jmp_buf[10];
 
-// borrowed from setjmp.h
+  // borrowed from setjmp.h
 
-#ifdef __GNUC__
-void longjmp(jmp_buf __jmpb, int __retval) __attribute__((__noreturn__));
-#else
-void longjmp(jmp_buf __jmpb, int __retval);
-#endif
-int setjmp(jmp_buf __jmpb);
+  #ifdef __GNUC__
+  void  longjmp(jmp_buf __jmpb, int __retval) __attribute__ ((__noreturn__));
+  #else
+  void  longjmp(jmp_buf __jmpb, int __retval);
+  #endif
+  int setjmp(jmp_buf __jmpb);
 #else
 #include <setjmp.h>
 #endif
 
 struct try_context_s {
-    jmp_buf jmp_buf;
+  jmp_buf jmp_buf;
 
-    // link to the previous jmp_buf context
-    try_context_t *previous;
+  // link to the previous jmp_buf context
+  try_context_t* previous;
 
-    // current exception
-    exception_t ex;
+  // current exception
+  exception_t ex;
 };
 
 // workaround to make sure defines are replaced by their value for example
-#define CPP_CONCAT(x, y)   CPP_CONCAT_x(x, y)
-#define CPP_CONCAT_x(x, y) x##y
+#define CPP_CONCAT(x, y) CPP_CONCAT_x(x,y)
+#define CPP_CONCAT_x(x, y) x ## y
 
-SUDOCALL try_context_t *try_context_get(void);
+SUDOCALL try_context_t* try_context_get(void);
 // set the new try context and retrieve the previous one
-// SECURITY NOTE: no PLENGTH(sizeof(try_context_t)) set because the value is never dereferenced
-// within the SUDOCALL.
+// SECURITY NOTE: no PLENGTH(sizeof(try_context_t)) set because the value is never dereferenced within the SUDOCALL.
 //                and is checked before being used in all SYSCALL that would use it.
-SUDOCALL try_context_t *try_context_set(try_context_t *context);
+SUDOCALL try_context_t* try_context_set(try_context_t *context);
 
 // -----------------------------------------------------------------------
 // - BEGIN TRY
 // -----------------------------------------------------------------------
 
-#define BEGIN_TRY_L(L) \
-    {                  \
-        try_context_t __try##L;
+#define BEGIN_TRY_L(L)                                                  \
+  {                                                                       \
+    try_context_t __try ## L;
+
 
 // -----------------------------------------------------------------------
 // - TRY
 // -----------------------------------------------------------------------
-#define TRY_L(L)                                                              \
-    /* previous exception context chain is saved within the setjmp r9 save */ \
-    __try                                                                     \
-        ##L.ex = setjmp(__try##L.jmp_buf);                                    \
-    if (__try##L.ex == 0) {                                                   \
-        __try                                                                 \
-            ##L.previous = try_context_set(&__try##L);
+#define TRY_L(L)                                                            \
+  /* previous exception context chain is saved within the setjmp r9 save */ \
+  __try ## L.ex = setjmp(__try ## L.jmp_buf);                               \
+  if (__try ## L.ex == 0) {                                                 \
+    __try ## L.previous = try_context_set(&__try ## L);
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH
 // -----------------------------------------------------------------------
-#define CATCH_L(L, x)              \
-    goto CPP_CONCAT(__FINALLY, L); \
-    }                              \
-    else if (__try##L.ex == x)     \
-    {                              \
-        __try                      \
-            ##L.ex = 0;            \
-        CLOSE_TRY_L(L);
+#define CATCH_L(L,x)                                                      \
+  goto CPP_CONCAT(__FINALLY,L);                                           \
+  } else if (__try ## L.ex == x) {                                        \
+    __try ## L.ex = 0;                                                    \
+    CLOSE_TRY_L(L);
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH OTHER
 // -----------------------------------------------------------------------
-#define CATCH_OTHER_L(L, e)        \
-    goto CPP_CONCAT(__FINALLY, L); \
-    }                              \
-    else                           \
-    {                              \
-        exception_t e;             \
-        e = __try##L.ex;           \
-        __try                      \
-            ##L.ex = 0;            \
-        CLOSE_TRY_L(L);
+#define CATCH_OTHER_L(L,e)                                                \
+  goto CPP_CONCAT(__FINALLY,L);                                           \
+  } else {                                                                \
+    exception_t e;                                                        \
+    e = __try ## L.ex;                                                    \
+    __try ## L.ex = 0;                                                    \
+    CLOSE_TRY_L(L);
 
 // -----------------------------------------------------------------------
 // - EXCEPTION CATCH ALL
 // -----------------------------------------------------------------------
-#define CATCH_ALL_L(L)             \
-    goto CPP_CONCAT(__FINALLY, L); \
-    }                              \
-    else                           \
-    {                              \
-        __try                      \
-            ##L.ex = 0;            \
-        CLOSE_TRY_L(L);
+#define CATCH_ALL_L(L)                                                    \
+  goto CPP_CONCAT(__FINALLY,L);                                           \
+  } else {                                                                \
+    __try ## L.ex = 0;                                                    \
+    CLOSE_TRY_L(L);
 
 // -----------------------------------------------------------------------
 // - FINALLY
 // -----------------------------------------------------------------------
-#define FINALLY_L(L)                                                                \
-    goto CPP_CONCAT(__FINALLY, L);                                                  \
-    }                                                                               \
-    CPP_CONCAT(__FINALLY, L)                                                        \
-        : /* has TRY clause ended without nested throw ? */                         \
-          if (try_context_get() == &__try##L)                                       \
-    {                                                                               \
-        /* restore previous context manually (as a throw would have when caught) */ \
-        CLOSE_TRY_L(L);                                                             \
+#define FINALLY_L(L)                                                      \
+  goto CPP_CONCAT(__FINALLY,L);                                           \
+  }                                                                       \
+  CPP_CONCAT(__FINALLY,L) :                                               \
+    /* has TRY clause ended without nested throw ? */                     \
+    if (try_context_get() == &__try ## L) {                               \
+      /* restore previous context manually (as a throw would have when caught) */     \
+      CLOSE_TRY_L(L);                              \
     }
 // -----------------------------------------------------------------------
 // - CLOSE TRY
@@ -127,19 +114,21 @@ SUDOCALL try_context_t *try_context_set(try_context_t *context);
 /**
  * Forced finally like clause.
  */
-#define CLOSE_TRY_L(L) try_context_set(__try##L.previous)
+#define CLOSE_TRY_L(L)                                                    \
+  try_context_set(__try ## L.previous)
+
 
 // -----------------------------------------------------------------------
 // - END TRY
 // -----------------------------------------------------------------------
-#define END_TRY_L(L)                                     \
-    /* nested throw not consumed ? (by CATCH* clause) */ \
-    if (__try##L.ex != 0) {                              \
-        /* rethrow */                                    \
-        THROW_L(L, __try##L.ex);                         \
-    }                                                    \
-    }                                                    \
-    _Static_assert(true, "")
+#define END_TRY_L(L)                                                      \
+    /* nested throw not consumed ? (by CATCH* clause) */                  \
+    if (__try ## L.ex != 0) {                                             \
+      /* rethrow */                                                       \
+      THROW_L(L, __try ## L.ex);                                          \
+    }                                                                     \
+  }                                                                       \
+  _Static_assert(true, "")
 
 // -----------------------------------------------------------------------
 // - EXCEPTION THROW
@@ -155,9 +144,9 @@ SUDOCALL try_context_t *try_context_set(try_context_t *context);
  opened BEGIN/END block.
  To detect those potential problems, here is a basic sed based script to
  narrow down the search to poentially suspicious cases.
- for i in `find . -name "*.c"`; do echo $i ; sed -n '/BEGIN_TRY/,/END_TRY/{ /goto/{=;H;g;p}
- ;/return/{=;H;g;p} ; /continue/{=;H;g;p} ; /break/{=;H;g;p} ; h }' $i ; done Run it on your source
- code if unsure. The rule of thumb to respect to decide whether or not to use the CLOSE_TRY
+ for i in `find . -name "*.c"`; do echo $i ; sed -n '/BEGIN_TRY/,/END_TRY/{ /goto/{=;H;g;p} ;/return/{=;H;g;p} ; /continue/{=;H;g;p} ; /break/{=;H;g;p} ; h }' $i ; done
+ Run it on your source code if unsure.
+ The rule of thumb to respect to decide whether or not to use the CLOSE_TRY
  statement is the following:
  Jumping out of a TRY/CATCH/CATCH_ALL/CATCH_OTHER clause is not closing the
  BEGIN/TRY block if the FINALLY is not executed wholy (jumping to a label
@@ -348,15 +337,16 @@ void os_longjmp(unsigned int exception) __attribute__((analyzer_noreturn));
 #else
 void os_longjmp(unsigned int exception) __attribute__((noreturn));
 #endif
-#define THROW_L(L, x) os_longjmp(x)
+#define THROW_L(L, x)                                                     \
+  os_longjmp(x)
 
 // Default macros when nesting is not used.
-#define THROW(x)       THROW_L(EX, x)
-#define BEGIN_TRY      BEGIN_TRY_L(EX)
-#define TRY            TRY_L(EX)
-#define CATCH(x)       CATCH_L(EX, x)
-#define CATCH_OTHER(e) CATCH_OTHER_L(EX, e)
-#define CATCH_ALL      CATCH_ALL_L(EX)
-#define FINALLY        FINALLY_L(EX)
-#define CLOSE_TRY      CLOSE_TRY_L(EX)
-#define END_TRY        END_TRY_L(EX)
+#define THROW(x)              THROW_L(EX,x)
+#define BEGIN_TRY             BEGIN_TRY_L(EX)
+#define TRY                   TRY_L(EX)
+#define CATCH(x)              CATCH_L(EX,x)
+#define CATCH_OTHER(e)        CATCH_OTHER_L(EX,e)
+#define CATCH_ALL             CATCH_ALL_L(EX)
+#define FINALLY               FINALLY_L(EX)
+#define CLOSE_TRY             CLOSE_TRY_L(EX)
+#define END_TRY               END_TRY_L(EX)

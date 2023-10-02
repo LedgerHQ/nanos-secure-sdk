@@ -29,15 +29,15 @@
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT cx_err_t
-bip32_derive_with_seed_init_privkey_256(unsigned int               derivation_mode,
-                                        cx_curve_t                 curve,
-                                        const uint32_t            *path,
-                                        size_t                     path_len,
-                                        cx_ecfp_256_private_key_t *privkey,
-                                        uint8_t                   *chain_code,
-                                        unsigned char             *seed,
-                                        size_t                     seed_len);
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_init_privkey_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        cx_ecfp_256_private_key_t *privkey,
+        uint8_t *chain_code,
+        unsigned char *seed,
+        size_t seed_len);
 
 /**
  * @brief   Gets the private key from the device seed using the specified bip32 path.
@@ -58,14 +58,19 @@ bip32_derive_with_seed_init_privkey_256(unsigned int               derivation_mo
  *                             - CX_INTERNAL_ERROR
  */
 WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_init_privkey_256(
-    cx_curve_t                 curve,
-    const uint32_t            *path,
-    size_t                     path_len,
-    cx_ecfp_256_private_key_t *privkey,
-    uint8_t                   *chain_code)
-{
-    return bip32_derive_with_seed_init_privkey_256(
-        HDW_NORMAL, curve, path, path_len, privkey, chain_code, NULL, 0);
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        cx_ecfp_256_private_key_t *privkey,
+        uint8_t *chain_code) {
+    return bip32_derive_with_seed_init_privkey_256(HDW_NORMAL,
+                                                   curve,
+                                                   path,
+                                                   path_len,
+                                                   privkey,
+                                                   chain_code,
+                                                   NULL,
+                                                   0);
 }
 
 /**
@@ -94,15 +99,16 @@ WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_init_privkey_256(
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_get_pubkey_256(unsigned int    derivation_mode,
-                                                                  cx_curve_t      curve,
-                                                                  const uint32_t *path,
-                                                                  size_t          path_len,
-                                                                  uint8_t  raw_pubkey[static 65],
-                                                                  uint8_t *chain_code,
-                                                                  cx_md_t  hashID,
-                                                                  unsigned char *seed,
-                                                                  size_t         seed_len);
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_get_pubkey_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        uint8_t raw_pubkey[static 65],
+        uint8_t *chain_code,
+        cx_md_t hashID,
+        unsigned char *seed,
+        size_t seed_len);
 
 /**
  * @brief   Gets the public key from the device seed using the specified bip32 path.
@@ -124,20 +130,26 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_get_pubkey_256(unsigned int  
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_get_pubkey_256(cx_curve_t      curve,
-                                                                      const uint32_t *path,
-                                                                      size_t          path_len,
-                                                                      uint8_t raw_pubkey[static 65],
-                                                                      uint8_t *chain_code,
-                                                                      cx_md_t  hashID)
-{
-    return bip32_derive_with_seed_get_pubkey_256(
-        HDW_NORMAL, curve, path, path_len, raw_pubkey, chain_code, hashID, NULL, 0);
+WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_get_pubkey_256(
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        uint8_t raw_pubkey[static 65],
+        uint8_t *chain_code,
+        cx_md_t hashID) {
+    return bip32_derive_with_seed_get_pubkey_256(HDW_NORMAL,
+                                                 curve,
+                                                 path,
+                                                 path_len,
+                                                 raw_pubkey,
+                                                 chain_code,
+                                                 hashID,
+                                                 NULL,
+                                                 0);
 }
 
 /**
- * @brief   Sign a hash with ecdsa using the device seed derived from the specified bip32 path and
- * seed key.
+ * @brief   Sign a hash with ecdsa using the device seed derived from the specified bip32 path and seed key.
  *
  * @param[in]  derivation_mode Derivation mode, one of HDW_NORMAL / HDW_ED25519_SLIP10 / HDW_SLIP21.
  *
@@ -156,13 +168,11 @@ WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_get_pubkey_256(cx_curve_t
  * @param[in]  hash_len        Length of the digest in octets.
  *
  * @param[out] sig             Buffer where to store the signature.
- *                             The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 ||
- * Ls || s**
+ *                             The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 || Ls || s**
  *
  * @param[in]  sig_len         Length of the signature buffer, updated with signature length.
  *
- * @param[out] info            Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when
- * computing **[k].G**.
+ * @param[out] info            Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when computing **[k].G**.
  *
  * @param[in]  seed            Seed key to use for derivation.
  *
@@ -173,19 +183,20 @@ WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_get_pubkey_256(cx_curve_t
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(unsigned int derivation_mode,
-                                                                       cx_curve_t   curve,
-                                                                       const uint32_t *path,
-                                                                       size_t          path_len,
-                                                                       uint32_t        sign_mode,
-                                                                       cx_md_t         hashID,
-                                                                       const uint8_t  *hash,
-                                                                       size_t          hash_len,
-                                                                       uint8_t        *sig,
-                                                                       size_t         *sig_len,
-                                                                       uint32_t       *info,
-                                                                       unsigned char  *seed,
-                                                                       size_t          seed_len);
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        uint32_t sign_mode,
+        cx_md_t hashID,
+        const uint8_t *hash,
+        size_t hash_len,
+        uint8_t *sig,
+        size_t *sig_len,
+        uint32_t *info,
+        unsigned char *seed,
+        size_t seed_len);
 
 /**
  * @brief   Sign a hash with ecdsa using the device seed derived from the specified bip32 path.
@@ -207,30 +218,28 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_ecdsa_sign_hash_256(unsigned 
  * @param[in]  hash_len        Length of the digest in octets.
  *
  * @param[out] sig             Buffer where to store the signature.
- *                             The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 ||
- * Ls || s**
+ *                             The signature is encoded in TLV:  **30 || L || 02 || Lr || r || 02 || Ls || s**
  *
  * @param[in]  sig_len         Length of the signature buffer, updated with signature length.
  *
- * @param[out] info            Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when
- * computing **[k].G**.
+ * @param[out] info            Set with CX_ECCINFO_PARITY_ODD if the y-coordinate is odd when computing **[k].G**.
  *
  * @return                     Error code:
  *                             - CX_OK on success
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_ecdsa_sign_hash_256(cx_curve_t      curve,
-                                                                           const uint32_t *path,
-                                                                           size_t          path_len,
-                                                                           uint32_t       sign_mode,
-                                                                           cx_md_t        hashID,
-                                                                           const uint8_t *hash,
-                                                                           size_t         hash_len,
-                                                                           uint8_t       *sig,
-                                                                           size_t        *sig_len,
-                                                                           uint32_t      *info)
-{
+WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_ecdsa_sign_hash_256(
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        uint32_t sign_mode,
+        cx_md_t hashID,
+        const uint8_t *hash,
+        size_t hash_len,
+        uint8_t *sig,
+        size_t *sig_len,
+        uint32_t *info) {
     return bip32_derive_with_seed_ecdsa_sign_hash_256(HDW_NORMAL,
                                                       curve,
                                                       path,
@@ -247,8 +256,7 @@ WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_ecdsa_sign_hash_256(cx_cu
 }
 
 /**
- * @brief   Sign a hash with eddsa using the device seed derived from the specified bip32 path and
- * seed key.
+ * @brief   Sign a hash with eddsa using the device seed derived from the specified bip32 path and seed key.
  *
  * @param[in]  derivation_mode Derivation mode, one of HDW_NORMAL / HDW_ED25519_SLIP10 / HDW_SLIP21.
  *
@@ -279,17 +287,18 @@ WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_ecdsa_sign_hash_256(cx_cu
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(unsigned int derivation_mode,
-                                                                       cx_curve_t   curve,
-                                                                       const uint32_t *path,
-                                                                       size_t          path_len,
-                                                                       cx_md_t         hashID,
-                                                                       const uint8_t  *hash,
-                                                                       size_t          hash_len,
-                                                                       uint8_t        *sig,
-                                                                       size_t         *sig_len,
-                                                                       unsigned char  *seed,
-                                                                       size_t          seed_len);
+WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(
+        unsigned int derivation_mode,
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        cx_md_t hashID,
+        const uint8_t *hash,
+        size_t hash_len,
+        uint8_t *sig,
+        size_t *sig_len,
+        unsigned char *seed,
+        size_t seed_len);
 
 /**
  * @brief   Sign a hash with eddsa using the device seed derived from the specified bip32 path.
@@ -317,15 +326,24 @@ WARN_UNUSED_RESULT cx_err_t bip32_derive_with_seed_eddsa_sign_hash_256(unsigned 
  *                             - CX_EC_INVALID_CURVE
  *                             - CX_INTERNAL_ERROR
  */
-WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_eddsa_sign_hash_256(cx_curve_t      curve,
-                                                                           const uint32_t *path,
-                                                                           size_t          path_len,
-                                                                           cx_md_t         hashID,
-                                                                           const uint8_t  *hash,
-                                                                           size_t          hash_len,
-                                                                           uint8_t        *sig,
-                                                                           size_t         *sig_len)
-{
-    return bip32_derive_with_seed_eddsa_sign_hash_256(
-        HDW_NORMAL, curve, path, path_len, hashID, hash, hash_len, sig, sig_len, NULL, 0);
+WARN_UNUSED_RESULT static inline cx_err_t bip32_derive_eddsa_sign_hash_256(
+        cx_curve_t curve,
+        const uint32_t *path,
+        size_t path_len,
+        cx_md_t hashID,
+        const uint8_t *hash,
+        size_t hash_len,
+        uint8_t *sig,
+        size_t *sig_len) {
+    return bip32_derive_with_seed_eddsa_sign_hash_256(HDW_NORMAL,
+                                                      curve,
+                                                      path,
+                                                      path_len,
+                                                      hashID,
+                                                      hash,
+                                                      hash_len,
+                                                      sig,
+                                                      sig_len,
+                                                      NULL,
+                                                      0);
 }
