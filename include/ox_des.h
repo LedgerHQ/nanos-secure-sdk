@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 /**
  * @file    ox_des.h
@@ -25,6 +25,7 @@
  * - Encrypt a 64-bit block
  * - Reset the DES context
  */
+
 
 #ifndef OX_DES_H
 #define OX_DES_H
@@ -45,8 +46,8 @@
  *           (triple DES with 3 keys) are supported.
  */
 struct cx_des_key_s {
-    uint8_t size;      ///< key size
-    uint8_t keys[24];  ///< key value
+  uint8_t size;      ///< key size
+  uint8_t keys[24];  ///< key value
 };
 /** Convenience type. See #cx_des_key_s. */
 typedef struct cx_des_key_s cx_des_key_t;
@@ -62,8 +63,7 @@ typedef struct cx_des_key_s cx_des_key_t;
  *                 - CX_OK on success
  *                 - INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_des_set_key_hw(const cx_des_key_t *keys PLENGTH(sizeof(cx_des_key_t)),
-                                   uint32_t                 mode);
+SYSCALL cx_err_t cx_des_set_key_hw(const cx_des_key_t *keys PLENGTH(sizeof(cx_des_key_t)), uint32_t mode);
 
 /**
  * @brief   Resets the DES context.
@@ -77,7 +77,7 @@ SYSCALL void cx_des_reset_hw(void);
  *
  * @param[out] outblock Buffer for the output.
  */
-SYSCALL void cx_des_block_hw(const unsigned char *inblock PLENGTH(8),
-                             unsigned char *outblock      PLENGTH(8));
+SYSCALL void cx_des_block_hw(const unsigned char *inblock PLENGTH(8), unsigned char  *outblock PLENGTH(8));
+
 
 #endif

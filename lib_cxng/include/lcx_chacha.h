@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 #if defined(HAVE_CHACHA)
 
 /**
@@ -41,10 +41,10 @@
  * @brief Chacha context
  */
 typedef struct {
-    uint32_t nrounds;    ///< Number of rounds: 8, 12 or 20
-    uint32_t state[16];  ///< Initial state array
-    uint32_t block[16];  ///< State array after block processing
-    uint32_t pos;        ///< Block count
+  uint32_t nrounds;    ///< Number of rounds: 8, 12 or 20
+  uint32_t state[16];  ///< Initial state array
+  uint32_t block[16];  ///< State array after block processing
+  uint32_t pos;        ///< Block count
 } cx_chacha_context_t;
 
 /**
@@ -122,10 +122,7 @@ cx_err_t cx_chacha_start(cx_chacha_context_t *ctx, const uint8_t *iv, size_t iv_
  *
  * @return       Error code
  */
-cx_err_t cx_chacha_update(cx_chacha_context_t *ctx,
-                          const uint8_t       *input,
-                          uint8_t             *output,
-                          size_t               len);
+cx_err_t cx_chacha_update(cx_chacha_context_t *ctx, const uint8_t *input, uint8_t *output, size_t len);
 
 /**
  * @brief Encrypt or decrypt data with Chacha and a given key and nonce.
@@ -150,14 +147,11 @@ cx_err_t cx_chacha_update(cx_chacha_context_t *ctx,
  *
  * @return        Error code.
  */
-cx_err_t cx_chacha_cipher(uint32_t       nrounds,
-                          const uint8_t *key,
-                          size_t         key_len,
-                          const uint8_t *iv,
-                          size_t         iv_len,
+cx_err_t cx_chacha_cipher(uint32_t nrounds,
+                          const uint8_t *key, size_t key_len,
+                          const uint8_t *iv, size_t iv_len,
                           const uint8_t *input,
-                          uint8_t       *output,
-                          size_t         len);
+                          uint8_t *output, size_t len);
 
-#endif  /* LCX_CHACHA_H */
-#endif  // HAVE_CHACHA
+#endif /* LCX_CHACHA_H */
+#endif // HAVE_CHACHA

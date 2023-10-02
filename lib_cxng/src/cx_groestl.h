@@ -14,6 +14,6 @@ struct cx_xgroestl_s {
 };
 typedef struct cx_xgroestl_s cx_xgroestl_t;
 
-#endif  // CX_GROESTL_H
+#endif // CX_GROESTL_H
 
-#endif  // HAVE_GROESTL
+#endif // HAVE_GROESTL

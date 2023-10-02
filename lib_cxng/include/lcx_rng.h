@@ -1,28 +1,28 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 /**
  * @file    lcx_rng.h
  * @brief   Random Number Generation
  *
- * Random numbers with different sizes can be generated: a 8-bit random number, a 32-bit random
- * number or a random number of arbitrary size. In this case, the number is returned as a buffer of
- * random bytes. The random number can also be generated within a specific range.
+ * Random numbers with different sizes can be generated: a 8-bit random number, a 32-bit random number
+ * or a random number of arbitrary size. In this case, the number is returned as a buffer of random bytes.
+ * The random number can also be generated within a specific range.
  */
 
 #ifdef HAVE_RNG
@@ -57,8 +57,8 @@ void cx_rng_no_throw(uint8_t *buffer, size_t len);
  */
 static inline unsigned char *cx_rng(uint8_t *buffer, size_t len)
 {
-    cx_rng_no_throw(buffer, len);
-    return buffer;
+  cx_rng_no_throw(buffer, len);
+  return buffer;
 }
 
 /**
@@ -66,11 +66,10 @@ static inline unsigned char *cx_rng(uint8_t *buffer, size_t len)
  *
  * @return  A 32-bit random number.
  */
-static inline uint32_t cx_rng_u32(void)
-{
-    uint32_t r;
-    cx_rng_no_throw((uint8_t *) &r, sizeof(uint32_t));
-    return r;
+static inline uint32_t cx_rng_u32(void) {
+  uint32_t r;
+  cx_rng_no_throw((uint8_t *)&r, sizeof(uint32_t));
+  return r;
 }
 
 /**
@@ -78,11 +77,10 @@ static inline uint32_t cx_rng_u32(void)
  *
  * @return  A 8-bit random number.
  */
-static inline uint8_t cx_rng_u8(void)
-{
-    uint8_t r;
-    cx_rng_no_throw((uint8_t *) &r, sizeof(uint8_t));
-    return r;
+static inline uint8_t cx_rng_u8(void) {
+  uint8_t r;
+  cx_rng_no_throw((uint8_t *)&r, sizeof(uint8_t));
+  return r;
 }
 
 typedef uint32_t (*cx_rng_u32_range_randfunc_t)(void);
@@ -116,9 +114,8 @@ uint32_t cx_rng_u32_range_func(uint32_t a, uint32_t b, cx_rng_u32_range_randfunc
  *
  * @return        A 32-bit random number.
  */
-static inline uint32_t cx_rng_u32_range(uint32_t a, uint32_t b)
-{
-    return cx_rng_u32_range_func(a, b, cx_rng_u32);
+static inline uint32_t cx_rng_u32_range(uint32_t a, uint32_t b) {
+  return cx_rng_u32_range_func(a, b, cx_rng_u32);
 }
 
 /**
@@ -147,16 +144,12 @@ static inline uint32_t cx_rng_u32_range(uint32_t a, uint32_t b)
  *                      - CX_OK on success
  *                      - CX_INVALID_PARAMETER
  */
-cx_err_t cx_rng_rfc6979(cx_md_t        hash_id,
-                        const uint8_t *x,
-                        size_t         x_len,
-                        const uint8_t *h1,
-                        size_t         h1_len,
-                        const uint8_t *q,
-                        size_t         q_len,
-                        uint8_t       *out,
-                        size_t         out_len);
+cx_err_t cx_rng_rfc6979(cx_md_t hash_id,
+                        const uint8_t *x, size_t x_len,
+                        const uint8_t *h1, size_t h1_len,
+                        const uint8_t *q, size_t q_len,
+                        uint8_t *out, size_t out_len) ;
 
-#endif  // LCX_RNG_H
+#endif // LCX_RNG_H
 
-#endif  // HAVE_RNG
+#endif // HAVE_RNG

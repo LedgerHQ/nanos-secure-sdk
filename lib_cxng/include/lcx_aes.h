@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 /**
  * @file    lcx_aes.h
@@ -56,16 +56,15 @@
  */
 cx_err_t cx_aes_init_key_no_throw(const uint8_t *rawkey, size_t key_len, cx_aes_key_t *key);
 
+
 /**
  * @deprecated
  * See #cx_aes_init_key_no_throw
  */
-DEPRECATED static inline size_t cx_aes_init_key(const unsigned char *rawkey,
-                                                unsigned int         key_len,
-                                                cx_aes_key_t        *key)
+DEPRECATED static inline size_t cx_aes_init_key ( const unsigned char * rawkey, unsigned int key_len, cx_aes_key_t * key )
 {
-    CX_THROW(cx_aes_init_key_no_throw(rawkey, key_len, key));
-    return key_len;
+  CX_THROW(cx_aes_init_key_no_throw(rawkey, key_len, key));
+  return key_len;
 }
 
 /**
@@ -114,29 +113,22 @@ DEPRECATED static inline size_t cx_aes_init_key(const unsigned char *rawkey,
  */
 cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
                             uint32_t            mode,
-                            const uint8_t      *iv,
+                            const uint8_t *     iv,
                             size_t              iv_len,
-                            const uint8_t      *in,
+                            const uint8_t *     in,
                             size_t              in_len,
-                            uint8_t            *out,
-                            size_t             *out_len);
+                            uint8_t *           out,
+                            size_t *            out_len);
 
 /**
  * @deprecated
  * See #cx_aes_iv_no_throw
  */
-DEPRECATED static inline size_t cx_aes_iv(const cx_aes_key_t  *key,
-                                          uint32_t             mode,
-                                          unsigned char       *iv,
-                                          unsigned int         iv_len,
-                                          const unsigned char *in,
-                                          unsigned int         in_len,
-                                          unsigned char       *out,
-                                          unsigned int         out_len)
+DEPRECATED static inline size_t cx_aes_iv ( const cx_aes_key_t * key, uint32_t mode, unsigned char * iv, unsigned int iv_len, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
 {
-    size_t out_len_ = out_len;
-    CX_THROW(cx_aes_iv_no_throw(key, mode, iv, iv_len, in, in_len, out, &out_len_));
-    return out_len_;
+  size_t out_len_ = out_len;
+  CX_THROW(cx_aes_iv_no_throw(key, mode, iv, iv_len, in, in_len, out, &out_len_));
+  return out_len_;
 }
 
 /**
@@ -179,27 +171,17 @@ DEPRECATED static inline size_t cx_aes_iv(const cx_aes_key_t  *key,
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_aes_no_throw(const cx_aes_key_t *key,
-                         uint32_t            mode,
-                         const uint8_t      *in,
-                         size_t              in_len,
-                         uint8_t            *out,
-                         size_t             *out_len);
+cx_err_t cx_aes_no_throw(const cx_aes_key_t *key, uint32_t mode, const uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
 /**
  * @deprecated
  * See #cx_aes_no_throw
  */
-DEPRECATED static inline size_t cx_aes(const cx_aes_key_t  *key,
-                                       uint32_t             mode,
-                                       const unsigned char *in,
-                                       unsigned int         in_len,
-                                       unsigned char       *out,
-                                       unsigned int         out_len)
+DEPRECATED static inline size_t cx_aes ( const cx_aes_key_t * key, uint32_t mode, const unsigned char * in, unsigned int in_len, unsigned char * out, unsigned int out_len )
 {
-    size_t out_len_ = out_len;
-    CX_THROW(cx_aes_no_throw(key, mode, in, in_len, out, &out_len_));
-    return out_len_;
+  size_t out_len_ = out_len;
+  CX_THROW(cx_aes_no_throw(key, mode, in, in_len, out, &out_len_));
+  return out_len_;
 }
 
 /**
@@ -236,4 +218,4 @@ cx_err_t cx_aes_dec_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8
 
 #endif
 
-#endif  // HAVE_AES
+#endif // HAVE_AES

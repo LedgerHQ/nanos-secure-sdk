@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-// #define WITH_STDIO 1
+//#define WITH_STDIO 1
 
 /*********************
  *      INCLUDES
@@ -51,40 +51,26 @@ extern unsigned long gLogger;
  **********************/
 #ifdef WITH_STDIO
 extern void mainExit(int exitCode);
-#define LOG_DEBUG(__logger, ...)       \
-    {                                  \
-        if (gLogger & (1 << __logger)) \
-            printf(__VA_ARGS__);       \
-    }
-#define LOG_WARN(__logger, ...) printf(__VA_ARGS__)
-#define LOG_FATAL(__logger, ...) \
-    {                            \
-        printf(__VA_ARGS__);     \
-        mainExit(-1);            \
-    }
+#define LOG_DEBUG(__logger,...) {\
+   if (gLogger&(1<<__logger)) printf(__VA_ARGS__); \
+}
+#define LOG_WARN(__logger,...) printf(__VA_ARGS__)
+#define LOG_FATAL(__logger,...) {printf(__VA_ARGS__);mainExit(-1);}
 
-#else  // WITH_STDIO
+#else // WITH_STDIO
 #ifdef NBGL_DEBUG
 #include <os.h>
-#define LOG_DEBUG(__logger, ...) \
-    do {                         \
-        PRINTF(__VA_ARGS__);     \
-    } while (0)
-#define LOG_WARN(__logger, ...) \
-    do {                        \
-        PRINTF(__VA_ARGS__);    \
-    } while (0)
-#define LOG_FATAL(__logger, ...) \
-    do {                         \
-        PRINTF(__VA_ARGS__);     \
-        halt();                  \
-    } while (0)
+#define LOG_DEBUG(__logger,...)  do { PRINTF(__VA_ARGS__);  } while(0)
+#define LOG_WARN(__logger,...) do { PRINTF(__VA_ARGS__); } while(0)
+#define LOG_FATAL(__logger,...) do { PRINTF(__VA_ARGS__); halt(); } while(0)
 #else
-#define LOG_DEBUG(__logger, ...)
-#define LOG_WARN(__logger, ...)
-#define LOG_FATAL(__logger, ...)
-#endif  // NBGL_DEBUG
-#endif  // WITH_STDIO
+#define LOG_DEBUG(__logger,...)
+#define LOG_WARN(__logger,...)
+#define LOG_FATAL(__logger,...)
+#endif // NBGL_DEBUG
+#endif // WITH_STDIO
+
+
 
 #ifdef __cplusplus
 } /* extern "C" */

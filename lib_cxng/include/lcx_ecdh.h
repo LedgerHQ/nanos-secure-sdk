@@ -1,20 +1,20 @@
 
 /*******************************************************************************
- *   Ledger Nano S - Secure firmware
- *   (c) 2022 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
+*   Ledger Nano S - Secure firmware
+*   (c) 2022 Ledger
+*
+*  Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+********************************************************************************/
 
 /**
  * @file    lcx_ecdh.h
@@ -73,37 +73,31 @@
  *                          - CX_EC_INFINITE_POINT
  */
 cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *pvkey,
-                          uint32_t                     mode,
-                          const uint8_t               *P,
-                          size_t                       P_len,
-                          uint8_t                     *secret,
-                          size_t                       secret_len);
+                 uint32_t                     mode,
+                 const uint8_t *              P,
+                 size_t                       P_len,
+                 uint8_t *                    secret,
+                 size_t                       secret_len);
 
 /**
  * @deprecated
  * See #cx_ecdh_no_throw
  */
-DEPRECATED static inline size_t cx_ecdh(const cx_ecfp_private_key_t *pvkey,
-                                        uint32_t                     mode,
-                                        const unsigned char         *P,
-                                        unsigned int                 P_len,
-                                        unsigned char               *secret,
-                                        unsigned int                 secret_len)
+DEPRECATED static inline size_t cx_ecdh ( const cx_ecfp_private_key_t * pvkey, uint32_t mode, const unsigned char * P, unsigned int P_len, unsigned char * secret, unsigned int secret_len )
 {
-    CX_THROW(cx_ecdh_no_throw(pvkey, mode, P, P_len, secret, secret_len));
+  CX_THROW(cx_ecdh_no_throw(pvkey, mode, P, P_len, secret, secret_len));
 
-    size_t size;
+  size_t size;
 
-    CX_THROW(cx_ecdomain_parameters_length(pvkey->curve, &size));
-    if ((mode & CX_MASK_EC) == CX_ECDH_POINT) {
-        return 1 + 2 * size;
-    }
-    else {
-        return size;
-    }
+  CX_THROW(cx_ecdomain_parameters_length(pvkey->curve, &size));
+  if ((mode & CX_MASK_EC) == CX_ECDH_POINT) {
+    return 1 + 2 * size;
+  } else {
+    return size;
+  }
 }
 
-#endif  // HAVE_ECDH
+#endif // HAVE_ECDH
 
 #if defined(HAVE_X25519)
 /**
@@ -133,7 +127,7 @@ DEPRECATED static inline size_t cx_ecdh(const cx_ecfp_private_key_t *pvkey,
  *                   - CX_INVALID_PARAMETER_VALUE
  */
 cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
-#endif  // HAVE_X25519
+#endif // HAVE_X25519
 
 #if defined(HAVE_X448)
 /**
@@ -163,10 +157,10 @@ cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
  *                   - CX_INVALID_PARAMETER_VALUE
  */
 cx_err_t cx_x448(uint8_t *u, const uint8_t *k, size_t k_len);
-#endif  // HAVE_X448
+#endif // HAVE_X448
 
-#endif  // HAVE_ECDH || HAVE_X25519 || HAVE_X448
+#endif // HAVE_ECDH || HAVE_X25519 || HAVE_X448
 
-#endif  // HAVE_ECDH
+#endif // HAVE_ECDH
 
-#endif  // LCX_ECDH_H
+#endif // LCX_ECDH_H

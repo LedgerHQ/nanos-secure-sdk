@@ -42,18 +42,18 @@ static uint32_t G_output_len = 0;
  */
 static io_state_e G_io_state = READY;
 
+
 #ifdef HAVE_BAGL
-WEAK void io_seproxyhal_display(const bagl_element_t *element)
-{
+WEAK void io_seproxyhal_display(const bagl_element_t *element) {
     io_seproxyhal_display_default(element);
 }
 #endif  // HAVE_BAGL
 
 // This function can be used to declare a callback to SEPROXYHAL_TAG_TICKER_EVENT in the application
-WEAK void app_ticker_event_callback(void) {}
+WEAK void app_ticker_event_callback(void) {
+}
 
-WEAK uint8_t io_event(uint8_t channel)
-{
+WEAK uint8_t io_event(uint8_t channel) {
     (void) channel;
 
     switch (G_io_seproxyhal_spi_buffer[0]) {
@@ -68,7 +68,7 @@ WEAK uint8_t io_event(uint8_t channel)
                   SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
                 THROW(EXCEPTION_IO_RESET);
             }
-            __attribute__((fallthrough));
+        __attribute__((fallthrough));
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
 #ifdef HAVE_BAGL
             UX_DISPLAYED_EVENT({});
@@ -98,8 +98,7 @@ WEAK uint8_t io_event(uint8_t channel)
     return 1;
 }
 
-WEAK uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len)
-{
+WEAK uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len) {
     switch (channel & ~(IO_FLAGS)) {
         case CHANNEL_KEYBOARD:
             break;
@@ -112,8 +111,7 @@ WEAK uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len)
                 }
 
                 return 0;
-            }
-            else {
+            } else {
                 return io_seproxyhal_spi_recv(G_io_apdu_buffer, sizeof(G_io_apdu_buffer), 0);
             }
         default:
@@ -123,43 +121,39 @@ WEAK uint16_t io_exchange_al(uint8_t channel, uint16_t tx_len)
     return 0;
 }
 
-WEAK void io_init()
-{
+WEAK void io_init() {
     // Reset length of APDU response
     G_output_len = 0;
-    G_io_state   = READY;
+    G_io_state = READY;
 }
 
-WEAK int io_recv_command()
-{
+WEAK int io_recv_command() {
     int ret = -1;
 
     switch (G_io_state) {
         case READY:
             G_io_state = RECEIVED;
-            ret        = io_exchange(CHANNEL_APDU, G_output_len);
+            ret = io_exchange(CHANNEL_APDU, G_output_len);
             break;
         case RECEIVED:
             G_io_state = WAITING;
-            ret        = io_exchange(CHANNEL_APDU | IO_ASYNCH_REPLY, G_output_len);
+            ret = io_exchange(CHANNEL_APDU | IO_ASYNCH_REPLY, G_output_len);
             G_io_state = RECEIVED;
             break;
         case WAITING:
             G_io_state = READY;
-            ret        = -1;
+            ret = -1;
             break;
     }
 
     return ret;
 }
 
-WEAK int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw)
-{
+WEAK int io_send_response_pointer(const uint8_t *ptr, size_t size, uint16_t sw) {
     return io_send_response_buffer(&(const buffer_t){.ptr = ptr, .size = size, .offset = 0}, sw);
 }
 
-WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
-{
+WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw) {
     int ret = -1;
 
     if (rdata != NULL) {
@@ -169,8 +163,7 @@ WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
         }
         G_output_len = rdata->size - rdata->offset;
         PRINTF("<= SW=%04X | RData=%.*H\n", sw, rdata->size, rdata->ptr);
-    }
-    else {
+    } else {
         G_output_len = 0;
         PRINTF("<= SW=%04X | RData=\n", sw);
     }
@@ -184,13 +177,12 @@ WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
         PRINTF("Swap answer is processed. Send it\n");
         if (io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, G_output_len) == 0) {
             swap_finalize_exchange_sign_transaction(sw == SW_OK);
-        }
-        else {
+        } else {
             PRINTF("Unrecoverable\n");
             os_sched_exit(-1);
         }
     }
-#endif  // HAVE_SWAP
+#endif // HAVE_SWAP
 
     switch (G_io_state) {
         case READY:
@@ -198,19 +190,18 @@ WEAK int io_send_response_buffer(const buffer_t *rdata, uint16_t sw)
             break;
         case RECEIVED:
             G_io_state = READY;
-            ret        = 0;
+            ret = 0;
             break;
         case WAITING:
-            ret          = io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, G_output_len);
+            ret = io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, G_output_len);
             G_output_len = 0;
-            G_io_state   = READY;
+            G_io_state = READY;
             break;
     }
 
     return ret;
 }
 
-WEAK int io_send_sw(uint16_t sw)
-{
+WEAK int io_send_sw(uint16_t sw) {
     return io_send_response_buffer(NULL, sw);
 }

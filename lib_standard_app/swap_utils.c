@@ -23,8 +23,7 @@
 volatile bool G_called_from_swap;
 volatile bool G_swap_response_ready;
 
-bool swap_str_to_u64(const uint8_t *src, size_t length, uint64_t *result)
-{
+bool swap_str_to_u64(const uint8_t* src, size_t length, uint64_t* result) {
     if (length > sizeof(uint64_t)) {
         return false;
     }
@@ -38,11 +37,10 @@ bool swap_str_to_u64(const uint8_t *src, size_t length, uint64_t *result)
 }
 
 bool swap_parse_config(const uint8_t *config,
-                       uint8_t        config_len,
-                       char          *ticker,
-                       uint8_t        ticker_buf_len,
-                       uint8_t       *decimals)
-{
+                       uint8_t config_len,
+                       char *ticker,
+                       uint8_t ticker_buf_len,
+                       uint8_t *decimals) {
     uint8_t ticker_len, offset = 0;
     if (config_len == 0 || config == NULL) {
         return false;
@@ -62,4 +60,4 @@ bool swap_parse_config(const uint8_t *config,
     return true;
 }
 
-#endif  // HAVE_SWAP
+#endif // HAVE_SWAP

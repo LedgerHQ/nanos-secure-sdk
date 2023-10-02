@@ -10,23 +10,23 @@
 #include "os_hal.h"
 
 #if defined(ST31)
-#include <core_sc000.h>
+  #include <core_sc000.h>
 #endif
 
 #if defined(ST33J2M0)
-#include <core_sc300.h>
+  #include <core_sc300.h>
 #endif
 
 #if defined(ST33K1M5)
-#include <core_cm35p.h>
+  #include <core_cm35p.h>
 #endif
 
 #if defined(X86)
-#define NATIVE_PRINT
-#include <setjmp.h>
-#include <stdio.h>
+  #define NATIVE_PRINT
+  #include <setjmp.h>
+  #include <stdio.h>
 #endif
 
-#endif  // HAVE_BOLOS
+#endif // HAVE_BOLOS
 
 #define WIDE

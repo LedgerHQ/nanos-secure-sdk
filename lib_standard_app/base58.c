@@ -42,9 +42,8 @@ char const BASE58_ALPHABET[] = {
     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'             //
 };
 
-int base58_decode(const char *in, size_t in_len, uint8_t *out, size_t out_len)
-{
-    uint8_t tmp[MAX_DEC_INPUT_SIZE]    = {0};
+int base58_decode(const char *in, size_t in_len, uint8_t *out, size_t out_len) {
+    uint8_t tmp[MAX_DEC_INPUT_SIZE] = {0};
     uint8_t buffer[MAX_DEC_INPUT_SIZE] = {0};
     uint8_t j;
     uint8_t start_at;
@@ -72,15 +71,15 @@ int base58_decode(const char *in, size_t in_len, uint8_t *out, size_t out_len)
         ++zero_count;
     }
 
-    j        = in_len;
+    j = in_len;
     start_at = zero_count;
     while (start_at < in_len) {
         uint16_t remainder = 0;
         for (uint8_t div_loop = start_at; div_loop < in_len; div_loop++) {
-            uint16_t digit256 = (uint16_t) (tmp[div_loop] & 0xFF);
-            uint16_t tmp_div  = remainder * 58 + digit256;
-            tmp[div_loop]     = (uint8_t) (tmp_div / 256);
-            remainder         = tmp_div % 256;
+            uint16_t digit256 = (uint16_t)(tmp[div_loop] & 0xFF);
+            uint16_t tmp_div = remainder * 58 + digit256;
+            tmp[div_loop] = (uint8_t)(tmp_div / 256);
+            remainder = tmp_div % 256;
         }
 
         if (tmp[start_at] == 0) {
@@ -105,13 +104,12 @@ int base58_decode(const char *in, size_t in_len, uint8_t *out, size_t out_len)
     return length;
 }
 
-int base58_encode(const uint8_t *in, size_t in_len, char *out, size_t out_len)
-{
+int base58_encode(const uint8_t *in, size_t in_len, char *out, size_t out_len) {
     uint8_t buffer[MAX_ENC_INPUT_SIZE * 138 / 100 + 1] = {0};
-    size_t  i, j;
-    size_t  stop_at;
-    size_t  zero_count = 0;
-    size_t  output_size;
+    size_t i, j;
+    size_t stop_at;
+    size_t zero_count = 0;
+    size_t output_size;
 
     if (in_len > MAX_ENC_INPUT_SIZE) {
         return -1;
@@ -122,7 +120,7 @@ int base58_encode(const uint8_t *in, size_t in_len, char *out, size_t out_len)
     }
 
     output_size = (in_len - zero_count) * 138 / 100 + 1;
-    stop_at     = output_size - 1;
+    stop_at = output_size - 1;
     for (size_t start_at = zero_count; start_at < in_len; start_at++) {
         int carry = in[start_at];
         for (j = output_size - 1; (int) j >= 0; j--) {

@@ -8,7 +8,10 @@
 #include <string.h>
 #include <stdint.h>
 
-cx_err_t cx_cmac_shift_and_xor(uint8_t *output, uint8_t *input, size_t block_size);
-#endif  // HAVE_CMAC
+
+cx_err_t cx_cmac_shift_and_xor(uint8_t *output,
+                               uint8_t *input,
+                               size_t block_size);
+#endif // HAVE_CMAC
 
 #endif /* CX_CMAC_H */

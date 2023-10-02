@@ -9,13 +9,12 @@
  */
 
 #include "exceptions.h"
-#include "os_helpers.h"  // for UNUSED
+#include "os_helpers.h" // for UNUSED
 
 /* used by wrappers */
-#define CX_THROW(call)         \
-    do {                       \
-        cx_err_t error = call; \
-        if (error) {           \
-            THROW(error);      \
-        }                      \
-    } while (0)
+#define CX_THROW(call)	do {                      \
+    cx_err_t error = call;                        \
+    if (error) {                                  \
+      THROW(error);                               \
+    }                                             \
+  } while (0)
