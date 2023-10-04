@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2021 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2021 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    ox_ec.h
@@ -110,147 +110,147 @@
 
 /** List of supported elliptic curves */
 enum cx_curve_e {
-  /** Undefined curve */
-  CX_CURVE_NONE,
+    /** Undefined curve */
+    CX_CURVE_NONE,
 
 #ifdef HAVE_ECC_WEIERSTRASS
-  /* ------------------------ */
-  /* --- Type Weierstrass --- */
-  /* ------------------------ */
-  /** Low limit (not included) of Weierstrass curve ID */
-  CX_CURVE_WEIERSTRASS_START = 0x20,
+    /* ------------------------ */
+    /* --- Type Weierstrass --- */
+    /* ------------------------ */
+    /** Low limit (not included) of Weierstrass curve ID */
+    CX_CURVE_WEIERSTRASS_START = 0x20,
 
 #ifdef HAVE_SECP256K1_CURVE
-  /** Secp256k1 */
-  CX_CURVE_SECP256K1 = 0x21,
+    /** Secp256k1 */
+    CX_CURVE_SECP256K1 = 0x21,
 /** Allowed identifier for Secp256k1*/
 #define CX_CURVE_256K1 CX_CURVE_SECP256K1
 #endif
 
 #ifdef HAVE_SECP256R1_CURVE
-  /** Secp256r1 */
-  CX_CURVE_SECP256R1 = 0x22,
+    /** Secp256r1 */
+    CX_CURVE_SECP256R1 = 0x22,
 /** Legacy identifier for Secp256r1 */
-#define CX_CURVE_256R1 CX_CURVE_SECP256R1
+#define CX_CURVE_256R1    CX_CURVE_SECP256R1
 /** Legacy identifier for Secp256r1 */
 #define CX_CURVE_NISTP256 CX_CURVE_SECP256R1
 #endif
 
 #ifdef HAVE_SECP384R1_CURVE
-  /** Secp384r1 */
-  CX_CURVE_SECP384R1 = 0x23,
+    /** Secp384r1 */
+    CX_CURVE_SECP384R1 = 0x23,
 /** Allowed identifier for Secp384r1 */
 #define CX_CURVE_NISTP384 CX_CURVE_SECP384R1
 #endif
 
 #ifdef HAVE_SECP521R1_CURVE
-  /** Secp521r1 */
-  CX_CURVE_SECP521R1 = 0x24,
+    /** Secp521r1 */
+    CX_CURVE_SECP521R1 = 0x24,
 /** Allowed identifier for Secp521r1 */
 #define CX_CURVE_NISTP521 CX_CURVE_SECP521R1
 #endif
 
 #ifdef HAVE_BRAINPOOL_P256T1_CURVE
-  /** BrainpoolP256t1 */
-  CX_CURVE_BrainPoolP256T1 = 0x31,
+    /** BrainpoolP256t1 */
+    CX_CURVE_BrainPoolP256T1 = 0x31,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P256R1_CURVE
-  /** BrainpoolP256r1 */
-  CX_CURVE_BrainPoolP256R1 = 0x32,
+    /** BrainpoolP256r1 */
+    CX_CURVE_BrainPoolP256R1 = 0x32,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P320T1_CURVE
-  /** BrainpoolP320t1 */
-  CX_CURVE_BrainPoolP320T1 = 0x33,
+    /** BrainpoolP320t1 */
+    CX_CURVE_BrainPoolP320T1 = 0x33,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P320R1_CURVE
-  /** BrainpoolP320r1 */
-  CX_CURVE_BrainPoolP320R1 = 0x34,
+    /** BrainpoolP320r1 */
+    CX_CURVE_BrainPoolP320R1 = 0x34,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P384T1_CURVE
-  /** BrainpoolP384t1 */
-  CX_CURVE_BrainPoolP384T1 = 0x35,
+    /** BrainpoolP384t1 */
+    CX_CURVE_BrainPoolP384T1 = 0x35,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P384R1_CURVE
-  /** Brainpool384r1 */
-  CX_CURVE_BrainPoolP384R1 = 0x36,
+    /** Brainpool384r1 */
+    CX_CURVE_BrainPoolP384R1 = 0x36,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P512T1_CURVE
-  /** BrainpoolP512t1 */
-  CX_CURVE_BrainPoolP512T1 = 0x37,
+    /** BrainpoolP512t1 */
+    CX_CURVE_BrainPoolP512T1 = 0x37,
 #endif
 
 #ifdef HAVE_BRAINPOOL_P512R1_CURVE
-  /** BrainpoolP512r1 */
-  CX_CURVE_BrainPoolP512R1 = 0x38,
+    /** BrainpoolP512r1 */
+    CX_CURVE_BrainPoolP512R1 = 0x38,
 #endif
 
 #ifdef HAVE_BLS12_381_G1_CURVE
-  /** BLS12-381 G1 */
-  CX_CURVE_BLS12_381_G1 = 0x39,
+    /** BLS12-381 G1 */
+    CX_CURVE_BLS12_381_G1 = 0x39,
 #endif
 
 #ifdef HAVE_FR256V1_CURVE
-  /** ANSSI FRP256 */
-  CX_CURVE_FRP256V1 = 0x41,
+    /** ANSSI FRP256 */
+    CX_CURVE_FRP256V1 = 0x41,
 #endif
 
 #ifdef HAVE_STARK256_CURVE
-  /** Stark */
-  CX_CURVE_Stark256 = 0x51,
+    /** Stark */
+    CX_CURVE_Stark256 = 0x51,
 #endif
 
-  /** High limit (not included) of Weierstrass curve ID */
-  CX_CURVE_WEIERSTRASS_END = 0x6F,
+    /** High limit (not included) of Weierstrass curve ID */
+    CX_CURVE_WEIERSTRASS_END = 0x6F,
 
-#endif // HAVE_ECC_WEIERSTRASS
+#endif  // HAVE_ECC_WEIERSTRASS
 
 /* ---------------------------- */
 /* --- Type Twisted Edwards --- */
 /* ---------------------------- */
 #ifdef HAVE_ECC_TWISTED_EDWARDS
-  /** Low limit (not included) of  Twisted Edwards curve ID */
-  CX_CURVE_TWISTED_EDWARDS_START = 0x70,
+    /** Low limit (not included) of  Twisted Edwards curve ID */
+    CX_CURVE_TWISTED_EDWARDS_START = 0x70,
 
 #ifdef HAVE_ED25519_CURVE
-  /** Ed25519 */
-  CX_CURVE_Ed25519 = 0x71,
+    /** Ed25519 */
+    CX_CURVE_Ed25519 = 0x71,
 #endif
 
 #ifdef HAVE_ED25519_CURVE
-  /** Ed448 */
-  CX_CURVE_Ed448 = 0x72,
+    /** Ed448 */
+    CX_CURVE_Ed448 = 0x72,
 #endif
 
-  /** High limit (not included) of Twisted Edwards curve ID */
-  CX_CURVE_TWISTED_EDWARDS_END = 0x7F,
+    /** High limit (not included) of Twisted Edwards curve ID */
+    CX_CURVE_TWISTED_EDWARDS_END = 0x7F,
 
-#endif // HAVE_ECC_TWISTED_EDWARDS
+#endif  // HAVE_ECC_TWISTED_EDWARDS
 
 /* ----------------------- */
 /* --- Type Montgomery --- */
 /* ----------------------- */
 #ifdef HAVE_ECC_MONTGOMERY
-  /** Low limit (not included) of Montgomery curve ID */
-  CX_CURVE_MONTGOMERY_START = 0x80,
+    /** Low limit (not included) of Montgomery curve ID */
+    CX_CURVE_MONTGOMERY_START = 0x80,
 
 #ifdef HAVE_CV25519_CURVE
-  /** Curve25519 */
-  CX_CURVE_Curve25519 = 0x81,
+    /** Curve25519 */
+    CX_CURVE_Curve25519 = 0x81,
 #endif
 #ifdef HAVE_CV448_CURVE
-  /** Curve448 */
-  CX_CURVE_Curve448 = 0x82,
+    /** Curve448 */
+    CX_CURVE_Curve448 = 0x82,
 #endif
 
-  /** High limit (not included) of Montgomery curve ID */
-  CX_CURVE_MONTGOMERY_END = 0x8F
-#endif // HAVE_ECC_MONTGOMERY
+    /** High limit (not included) of Montgomery curve ID */
+    CX_CURVE_MONTGOMERY_END = 0x8F
+#endif  // HAVE_ECC_MONTGOMERY
 };
 
 /** Convenience type. See #cx_curve_e. */
@@ -258,26 +258,24 @@ typedef enum cx_curve_e cx_curve_t;
 
 /** Return true if the curve identifier is in the specified range
  * @hideinitializer */
-#define CX_CURVE_RANGE(i, dom)                                                 \
-  (((i) > (CX_CURVE_##dom##_START)) && ((i) < (CX_CURVE_##dom##_END)))
+#define CX_CURVE_RANGE(i, dom) (((i) > (CX_CURVE_##dom##_START)) && ((i) < (CX_CURVE_##dom##_END)))
 
 #ifdef HAVE_ECC_WEIERSTRASS
 /** Return true if the curve is a short Weierstrass curve @hideinitializer */
-#define CX_CURVE_IS_WEIERSTRASS(c)                                             \
-  (((c) > CX_CURVE_WEIERSTRASS_START) && ((c) < CX_CURVE_WEIERSTRASS_END))
+#define CX_CURVE_IS_WEIERSTRASS(c) \
+    (((c) > CX_CURVE_WEIERSTRASS_START) && ((c) < CX_CURVE_WEIERSTRASS_END))
 #endif
 
 #ifdef HAVE_ECC_TWISTED_EDWARDS
 /** Return true if the curve is a twisted Edwards curve @hideinitializer */
-#define CX_CURVE_IS_TWISTED_EDWARDS(c)                                         \
-  (((c) > CX_CURVE_TWISTED_EDWARDS_START) &&                                   \
-   ((c) < CX_CURVE_TWISTED_EDWARDS_END))
+#define CX_CURVE_IS_TWISTED_EDWARDS(c) \
+    (((c) > CX_CURVE_TWISTED_EDWARDS_START) && ((c) < CX_CURVE_TWISTED_EDWARDS_END))
 #endif
 
 #ifdef HAVE_ECC_MONTGOMERY
 /** Return true if the curve is a Montgomery curve @hideinitializer */
-#define CX_CURVE_IS_MONTGOMERY(c)                                              \
-  (((c) > CX_CURVE_MONTGOMERY_START) && ((c) < CX_CURVE_MONTGOMERY_END))
+#define CX_CURVE_IS_MONTGOMERY(c) \
+    (((c) > CX_CURVE_MONTGOMERY_START) && ((c) < CX_CURVE_MONTGOMERY_END))
 #endif
 
 /**
@@ -300,19 +298,19 @@ typedef enum cx_curve_e cx_curve_t;
  *  @arg @c Hn:       Second Montgomery constant for the curve order
  *  @arg @c Hp:       Second Montgomery constant for the field characteristic p
  */
-#define CX_CURVE_HEADER                                                        \
-  cx_curve_t curve;                                                            \
-  unsigned int bit_size;                                                       \
-  unsigned int length;                                                         \
-  const uint8_t *a;                                                            \
-  const uint8_t *b;                                                            \
-  const uint8_t *p;                                                            \
-  const uint8_t *Gx;                                                           \
-  const uint8_t *Gy;                                                           \
-  const uint8_t *n;                                                            \
-  const uint8_t *h;                                                            \
-  const uint8_t *Hn;                                                           \
-  const uint8_t *Hp;
+#define CX_CURVE_HEADER      \
+    cx_curve_t     curve;    \
+    unsigned int   bit_size; \
+    unsigned int   length;   \
+    const uint8_t *a;        \
+    const uint8_t *b;        \
+    const uint8_t *p;        \
+    const uint8_t *Gx;       \
+    const uint8_t *Gy;       \
+    const uint8_t *n;        \
+    const uint8_t *h;        \
+    const uint8_t *Hn;       \
+    const uint8_t *Hp;
 
 /**
  * @brief   Weierstrass curve defined by **y^3 = x^2 + a*x + b over GF(p)**.
@@ -320,7 +318,7 @@ typedef enum cx_curve_e cx_curve_t;
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_weierstrass_s {
-  CX_CURVE_HEADER
+    CX_CURVE_HEADER
 };
 
 /** Convenience type. See #cx_curve_weierstrass_s. */
@@ -333,7 +331,7 @@ typedef struct cx_curve_weierstrass_s cx_curve_weierstrass_t;
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_twisted_edwards_s {
-  CX_CURVE_HEADER
+    CX_CURVE_HEADER
 };
 
 /** Convenience type. See #cx_curve_twisted_edwards_s. */
@@ -345,7 +343,7 @@ typedef struct cx_curve_twisted_edwards_s cx_curve_twisted_edwards_t;
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_montgomery_s {
-  CX_CURVE_HEADER
+    CX_CURVE_HEADER
 };
 
 /** Convenience type. See #cx_curve_montgomery_s. */
@@ -357,7 +355,7 @@ typedef struct cx_curve_montgomery_s cx_curve_montgomery_t;
  * @details See #CX_CURVE_HEADER for the structure members.
  */
 struct cx_curve_domain_s {
-  CX_CURVE_HEADER
+    CX_CURVE_HEADER
 };
 
 /** Convenience type. See #cx_curve_domain_s. */
@@ -367,10 +365,10 @@ typedef struct cx_curve_domain_s cx_curve_domain_t;
  * @brief Elliptic curve point.
  */
 struct cx_ec_point_s {
-  cx_curve_t curve; ///< Point's curve
-  cx_bn_t x;        ///< x-coordinate in affine representation
-  cx_bn_t y;        ///< y-coordinate in affine representation
-  cx_bn_t z;        ///< z-coordinate = 1 in affine representation
+    cx_curve_t curve;  ///< Point's curve
+    cx_bn_t    x;      ///< x-coordinate in affine representation
+    cx_bn_t    y;      ///< y-coordinate in affine representation
+    cx_bn_t    z;      ///< z-coordinate = 1 in affine representation
 };
 
 /** Convenience type. See #cx_ec_point_s. */
@@ -381,14 +379,14 @@ typedef struct cx_ec_point_s cx_ecpoint_t;
  */
 
 enum cx_curve_dom_param_s {
-  CX_CURVE_PARAM_NONE = 0,     ///< No parameter
-  CX_CURVE_PARAM_A = 1,        ///< First coefficient of the curve
-  CX_CURVE_PARAM_B = 2,        ///< Second coefficient of the curve
-  CX_CURVE_PARAM_Field = 3,    ///< Curve field
-  CX_CURVE_PARAM_Gx = 4,       ///< x-coordinate of the curve's generator
-  CX_CURVE_PARAM_Gy = 5,       ///< y-coordinate of the curve's generator
-  CX_CURVE_PARAM_Order = 6,    ///< Order of the generator
-  CX_CURVE_PARAM_Cofactor = 7, ///< Cofactor
+    CX_CURVE_PARAM_NONE     = 0,  ///< No parameter
+    CX_CURVE_PARAM_A        = 1,  ///< First coefficient of the curve
+    CX_CURVE_PARAM_B        = 2,  ///< Second coefficient of the curve
+    CX_CURVE_PARAM_Field    = 3,  ///< Curve field
+    CX_CURVE_PARAM_Gx       = 4,  ///< x-coordinate of the curve's generator
+    CX_CURVE_PARAM_Gy       = 5,  ///< y-coordinate of the curve's generator
+    CX_CURVE_PARAM_Order    = 6,  ///< Order of the generator
+    CX_CURVE_PARAM_Cofactor = 7,  ///< Cofactor
 };
 
 typedef enum cx_curve_dom_param_s cx_curve_dom_param_t;
@@ -435,9 +433,10 @@ SYSCALL cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length);
  *                   - CX_EC_INVALID_CURVE
  *                   - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_ecdomain_parameter(cx_curve_t cv, cx_curve_dom_param_t id,
-                                       uint8_t *p PLENGTH(p_len),
-                                       uint32_t p_len);
+SYSCALL cx_err_t cx_ecdomain_parameter(cx_curve_t           cv,
+                                       cx_curve_dom_param_t id,
+                                       uint8_t *p           PLENGTH(p_len),
+                                       uint32_t             p_len);
 
 /**
  * @brief   Store a specific parameter of the curve as a BN.
@@ -455,8 +454,7 @@ SYSCALL cx_err_t cx_ecdomain_parameter(cx_curve_t cv, cx_curve_dom_param_t id,
  *                - CX_INVALID_PARAMETER
  *                - CX_INVALID_PARAMETER_SIZE
  */
-SYSCALL cx_err_t cx_ecdomain_parameter_bn(cx_curve_t cv,
-                                          cx_curve_dom_param_t id, cx_bn_t p);
+SYSCALL cx_err_t cx_ecdomain_parameter_bn(cx_curve_t cv, cx_curve_dom_param_t id, cx_bn_t p);
 
 /**
  * @brief   Get the generator of the curve.
@@ -474,8 +472,10 @@ SYSCALL cx_err_t cx_ecdomain_parameter_bn(cx_curve_t cv,
  *                 - CX_EC_INVALID_CURVE
  *                 - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_ecdomain_generator(cx_curve_t cv, uint8_t *Gx PLENGTH(len),
-                                       uint8_t *Gy PLENGTH(len), size_t len);
+SYSCALL cx_err_t cx_ecdomain_generator(cx_curve_t  cv,
+                                       uint8_t *Gx PLENGTH(len),
+                                       uint8_t *Gy PLENGTH(len),
+                                       size_t      len);
 
 /**
  * @brief   Get the generator of the curve and store it in the point structure.
@@ -492,8 +492,8 @@ SYSCALL cx_err_t cx_ecdomain_generator(cx_curve_t cv, uint8_t *Gx PLENGTH(len),
  *                - CX_INVALID_PARAMETER_SIZE
  *                - CX_EC_INVALID_POINT
  */
-SYSCALL cx_err_t cx_ecdomain_generator_bn(
-    cx_curve_t cv, cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL cx_err_t cx_ecdomain_generator_bn(cx_curve_t      cv,
+                                          cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Allocate memory for a point on the curve.
@@ -509,8 +509,7 @@ SYSCALL cx_err_t cx_ecdomain_generator_bn(
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                  cx_curve_t cv);
+SYSCALL cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)), cx_curve_t cv);
 
 /**
  * @brief   Destroy a point on the curve.
@@ -524,8 +523,7 @@ SYSCALL cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *              - CX_INVALID_PARAMETER
  *              - CX_INTERNAL_ERROR
  */
-SYSCALL cx_err_t
-cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL cx_err_t cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Initialize a point on the curve.
@@ -550,9 +548,11 @@ cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
  *                  - CX_INVALID_PARAMETER
  *                  - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecpoint_init(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                 const uint8_t *x PLENGTH(x_len), size_t x_len,
-                                 const uint8_t *y PLENGTH(y_len), size_t y_len);
+SYSCALL cx_err_t cx_ecpoint_init(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                 const uint8_t *x PLENGTH(x_len),
+                                 size_t           x_len,
+                                 const uint8_t *y PLENGTH(y_len),
+                                 size_t           y_len);
 
 /**
  * @brief   Initialize a point on the curve with the BN indexes of the
@@ -572,9 +572,9 @@ SYSCALL cx_err_t cx_ecpoint_init(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *              - CX_INVALID_PARAMETER
  *              - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t
-cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                   const cx_bn_t x, const cx_bn_t y);
+SYSCALL cx_err_t cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                    const cx_bn_t   x,
+                                    const cx_bn_t   y);
 
 /**
  * @brief   Export a point.
@@ -601,10 +601,11 @@ cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                  uint8_t *x PLENGTH(x_len), size_t x_len,
-                  uint8_t *y PLENGTH(y_len), size_t y_len);
+SYSCALL cx_err_t cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                   uint8_t *x            PLENGTH(x_len),
+                                   size_t                x_len,
+                                   uint8_t *y            PLENGTH(y_len),
+                                   size_t                y_len);
 
 /**
  * @brief   Export a point using BN indexes of the coordinates.
@@ -623,9 +624,9 @@ cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *               - CX_EC_INFINITE_POINT
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_export_bn(
-    const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-    cx_bn_t *x PLENGTH(sizeof(cx_bn_t)), cx_bn_t *y PLENGTH(sizeof(cx_bn_t)));
+SYSCALL cx_err_t cx_ecpoint_export_bn(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                      cx_bn_t *x            PLENGTH(sizeof(cx_bn_t)),
+                                      cx_bn_t *y            PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Compute the compressed form of a point.
@@ -658,10 +659,10 @@ SYSCALL cx_err_t cx_ecpoint_export_bn(
  *                               - CX_EC_INFINITE_POINT
  *                               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_compress(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                    uint8_t *xy_compressed PLENGTH(xy_compressed_len),
-                    size_t xy_compressed_len, uint32_t *sign);
+SYSCALL cx_err_t cx_ecpoint_compress(const cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                     uint8_t *xy_compressed PLENGTH(xy_compressed_len),
+                                     size_t                 xy_compressed_len,
+                                     uint32_t              *sign);
 
 /**
  * @brief   Compute the affine coordinates of a point given its compressed form.
@@ -686,10 +687,10 @@ cx_ecpoint_compress(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                               - CX_NO_RESIDUE
  *
  */
-SYSCALL cx_err_t
-cx_ecpoint_decompress(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                      const uint8_t *xy_compressed PLENGTH(xy_compressed_len),
-                      size_t xy_compressed_len, uint32_t sign);
+SYSCALL cx_err_t cx_ecpoint_decompress(cx_ecpoint_t *P              PLENGTH(sizeof(cx_ecpoint_t)),
+                                       const uint8_t *xy_compressed PLENGTH(xy_compressed_len),
+                                       size_t                       xy_compressed_len,
+                                       uint32_t                     sign);
 
 /**
  * @brief   Add two points on a curve.
@@ -715,10 +716,9 @@ cx_ecpoint_decompress(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *               - CX_EC_INFINITE_POINT
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_add(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
-               const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-               const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL cx_err_t cx_ecpoint_add(cx_ecpoint_t *R       PLENGTH(sizeof(cx_ecpoint_t)),
+                                const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Compute the opposite of a point.
@@ -762,9 +762,9 @@ SYSCALL cx_err_t cx_ecpoint_neg(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
  *                       - CX_EC_INFINITE_POINT
  *                       - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                         const uint8_t *k PLENGTH(k_len), size_t k_len);
+SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                          const uint8_t *k PLENGTH(k_len),
+                                          size_t           k_len);
 
 /**
  * @brief   Perform a secure scalar multiplication given the BN index of the
@@ -785,9 +785,8 @@ cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                            const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
+SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ecpoint_t)),
+                                             const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Perform a secure scalar multiplication with a fixed scalar length.
@@ -810,9 +809,9 @@ cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                       - CX_EC_INFINITE_POINT
  *                       - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                               const uint8_t *k PLENGTH(k_len), size_t k_len);
+SYSCALL cx_err_t cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                                const uint8_t *k PLENGTH(k_len),
+                                                size_t           k_len);
 
 /**
  * @brief   Perform a scalar multiplication.
@@ -836,9 +835,9 @@ cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                        - CX_EC_INFINITE_POINT
  *                        - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                     const uint8_t *k PLENGTH(k_len), size_t k_len);
+SYSCALL cx_err_t cx_ecpoint_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                      const uint8_t *k PLENGTH(k_len),
+                                      size_t           k_len);
 
 /**
  * @brief   Perform a scalar multiplication given the BN index of the scalar.
@@ -860,9 +859,8 @@ cx_ecpoint_scalarmul(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
-cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                        const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
+SYSCALL cx_err_t cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ecpoint_t)),
+                                         const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Perform a double scalar multiplication.
@@ -893,12 +891,13 @@ cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *                   - CX_MEMORY_FULL
  *                   - CX_EC_INFINITE_POINT
  */
-SYSCALL cx_err_t
-cx_ecpoint_double_scalarmul(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
-                            cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                            cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
-                            const uint8_t *k PLENGTH(k_len), size_t k_len,
-                            const uint8_t *r PLENGTH(r_len), size_t r_len);
+SYSCALL cx_err_t cx_ecpoint_double_scalarmul(cx_ecpoint_t *R  PLENGTH(sizeof(cx_ecpoint_t)),
+                                             cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                             cx_ecpoint_t *Q  PLENGTH(sizeof(cx_ecpoint_t)),
+                                             const uint8_t *k PLENGTH(k_len),
+                                             size_t           k_len,
+                                             const uint8_t *r PLENGTH(r_len),
+                                             size_t           r_len);
 
 /**
  * @brief   Perform a double scalar multiplication given the BN indexes of the
@@ -926,11 +925,11 @@ cx_ecpoint_double_scalarmul(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
  *                  - CX_MEMORY_FULL
  *                  - CX_EC_INFINITE_POINT
  */
-SYSCALL cx_err_t
-cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
-                               cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                               cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
-                               const cx_bn_t bn_k, const cx_bn_t bn_r);
+SYSCALL cx_err_t cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
+                                                cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                                cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
+                                                const cx_bn_t   bn_k,
+                                                const cx_bn_t   bn_r);
 
 /**
  * @brief   Compare two points on the same curve.
@@ -952,9 +951,9 @@ cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_cmp(
-    const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-    const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)), bool *is_equal);
+SYSCALL cx_err_t cx_ecpoint_cmp(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
+                                bool                 *is_equal);
 
 /**
  * @brief   Check if a given point is on the curve.
@@ -974,8 +973,8 @@ SYSCALL cx_err_t cx_ecpoint_cmp(
  *                         - CX_EC_INFINITE_POINT
  *                         - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_is_on_curve(
-    const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)), bool *is_on_curve);
+SYSCALL cx_err_t cx_ecpoint_is_on_curve(const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
+                                        bool                 *is_on_curve);
 
 /**
  * @brief   Check if a given point is the point at infinity.
@@ -995,8 +994,8 @@ SYSCALL cx_err_t cx_ecpoint_is_on_curve(
  *                            - CX_INVALID_PARAMETER
  *                            - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecpoint_is_at_infinity(
-    const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)), bool *is_at_infinity);
+SYSCALL cx_err_t cx_ecpoint_is_at_infinity(const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
+                                           bool                 *is_at_infinity);
 
 #ifdef HAVE_X25519
 /**
@@ -1021,9 +1020,8 @@ SYSCALL cx_err_t cx_ecpoint_is_at_infinity(
  *                       - CX_MEMORY_FULL
  *
  */
-SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k,
-                                   size_t k_len);
-#endif // HAVE_X25519
+SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k, size_t k_len);
+#endif  // HAVE_X25519
 
 #ifdef HAVE_X448
 /**
@@ -1048,8 +1046,7 @@ SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k,
  *                       - CX_MEMORY_FULL
  *
  */
-SYSCALL cx_err_t cx_ecpoint_x448(const cx_bn_t bn_u, const uint8_t *k,
-                                 size_t k_len);
-#endif // HAVE_X448
+SYSCALL cx_err_t cx_ecpoint_x448(const cx_bn_t bn_u, const uint8_t *k, size_t k_len);
+#endif  // HAVE_X448
 
 #endif

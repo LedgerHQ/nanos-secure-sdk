@@ -44,7 +44,7 @@
   *
   ******************************************************************************
   */ 
-#include "os.h"
+#include "os_helpers.h"
 #include "os_io_seproxyhal.h"
 
 

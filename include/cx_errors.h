@@ -11,26 +11,26 @@
  * Check the error code of a function.
  * @hideinitializer
  */
-#define CX_CHECK(call)                                                         \
-  do {                                                                         \
-    error = call;                                                              \
-    if (error) {                                                               \
-      goto end;                                                                \
-    }                                                                          \
-  } while (0)
+#define CX_CHECK(call) \
+    do {               \
+        error = call;  \
+        if (error) {   \
+            goto end;  \
+        }              \
+    } while (0)
 
 /**
  * Check the error code of a function and ignore
  * it if CX_CARRY.
  * @hideinitializer
  */
-#define CX_CHECK_IGNORE_CARRY(call)                                            \
-  do {                                                                         \
-    error = call;                                                              \
-    if (error && error != CX_CARRY) {                                          \
-      goto end;                                                                \
-    }                                                                          \
-  } while (0)
+#define CX_CHECK_IGNORE_CARRY(call)       \
+    do {                                  \
+        error = call;                     \
+        if (error && error != CX_CARRY) { \
+            goto end;                     \
+        }                                 \
+    } while (0)
 
 /** Success. */
 #define CX_OK 0x00000000

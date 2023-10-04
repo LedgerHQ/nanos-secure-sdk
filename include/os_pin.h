@@ -14,13 +14,14 @@
 
 /* set_pin can update the pin if the perso is onboarded (tearing leads to perso
  * wipe though) */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_pin(
-    unsigned int identity, unsigned char *pin PLENGTH(length),
-    unsigned int length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_pin(unsigned int identity,
+                                                                    unsigned char *pin
+                                                                                 PLENGTH(length),
+                                                                    unsigned int length);
 // set the currently unlocked identity pin. (change pin feature)
 SYSCALL
-    PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_perso_set_current_identity_pin(
-        unsigned char *pin PLENGTH(length), unsigned int length);
+PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+void os_perso_set_current_identity_pin(unsigned char *pin PLENGTH(length), unsigned int length);
 
 /*
  * @return BOLOS_UX_OK if pin validated
@@ -31,13 +32,13 @@ SYSCALL bolos_bool_t os_global_pin_is_validated(void);
  * alternate)
  * @return BOLOS_UX_OK if pin validated
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) bolos_bool_t
-    os_global_pin_check(unsigned char *pin_buffer PLENGTH(pin_length),
-                        unsigned char pin_length);
+SYSCALL      PERMISSION(APPLICATION_FLAG_GLOBAL_PIN)
+bolos_bool_t os_global_pin_check(unsigned char *pin_buffer PLENGTH(pin_length),
+                                 unsigned char             pin_length);
 SYSCALL
-    PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) void os_global_pin_invalidate(void);
-SYSCALL PERMISSION(
-    APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_global_pin_retries(void);
+PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) void os_global_pin_invalidate(void);
+SYSCALL      PERMISSION(APPLICATION_FLAG_GLOBAL_PIN)
+unsigned int os_global_pin_retries(void);
 
 #if defined(HAVE_AEM_PIN)
 /* ----------------------------------------------------------------------- */
@@ -66,9 +67,9 @@ SYSCALL PERMISSION(
  * The different supported formats for the AEM response, and the value of the
  * last one.
  */
-#define AEM_RESPONSE_FORMAT_TEXT 0x01
+#define AEM_RESPONSE_FORMAT_TEXT      0x01
 #define AEM_RESPONSE_FORMAT_BMP_14x14 0x02
-#define AEM_RESPONSE_FORMAT_LAST AEM_RESPONSE_FORMAT_BMP_14x14
+#define AEM_RESPONSE_FORMAT_LAST      AEM_RESPONSE_FORMAT_BMP_14x14
 
 /**
  * This function allows one to set a value to the AEM PIN, and activate the
@@ -85,9 +86,9 @@ SYSCALL PERMISSION(
  * @throw SWO_SEC_PIN_0D when either the device is not onboarded or the
  * user PIN has not been checked beforehand.
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_set_pin(
-    unsigned char *aem_pin PLENGTH(aem_pin_length),
-    unsigned int aem_pin_length);
+SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_set_pin(unsigned char *aem_pin
+                                                                      PLENGTH(aem_pin_length),
+                                                                  unsigned int aem_pin_length);
 
 /**
  * This function allows one to unset the AEM PIN value (in such a case, it
@@ -106,8 +107,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_unset_pin(void);
  * @return BOLOS_TRUE if the AEM PIN has been set, any other value otherwise
  * (depending on the failed internal check).
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_bool_t
-    os_aem_is_pin_set(void);
+SYSCALL      PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+bolos_bool_t os_aem_is_pin_set(void);
 
 /**
  * This function allows one to set a value to the AEM response.
@@ -128,7 +129,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_bool_t
  */
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_set_response(
     unsigned char *aem_response PLENGTH(aem_response_length),
-    unsigned int aem_response_length, unsigned char aem_response_format);
+    unsigned int                aem_response_length,
+    unsigned char               aem_response_format);
 
 /**
  * This function allows one to activate the AEM response.
@@ -140,7 +142,7 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_set_response(
  * zero.
  */
 SYSCALL
-    PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_activate_response(void);
+PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_activate_response(void);
 
 /**
  * This function allows one to deactivate the AEM response, and
@@ -151,7 +153,7 @@ SYSCALL
  * user PIN has not been checked beforehand.
  */
 SYSCALL
-    PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_deactivate_response(void);
+PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_deactivate_response(void);
 
 /**
  * This function allows one to know whether the AEM response
@@ -161,8 +163,8 @@ SYSCALL
  * @return BOLOS_TRUE if the response has been set and activated, any other
  * value otherwise (depending on the failed internal check).
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_bool_t
-    os_aem_is_response_active(void);
+SYSCALL      PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+bolos_bool_t os_aem_is_response_active(void);
 
 /**
  * This function allows one to know whether the AEM PIN feature is active
@@ -172,8 +174,8 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_bool_t
  * @return BOLOS_TRUE if the feature is active, any other value otherwise
  * (depending on the failed internal check).
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_bool_t
-    os_aem_is_feature_active(void);
+SYSCALL      PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+bolos_bool_t os_aem_is_feature_active(void);
 
 /**
  * This function allows one to retrieve the length of the response.
@@ -181,15 +183,15 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) bolos_bool_t
  * 'os_aem_get_response' function.
  * @return The length of the currently stored response.
  */
-SYSCALL PERMISSION(
-    APPLICATION_FLAG_BOLOS_UX) unsigned char os_aem_get_response_length(void);
+SYSCALL       PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+unsigned char os_aem_get_response_length(void);
 
 /**
  * This function allows one to retrieve the format of the response.
  * @return The format of the currently stored response.
  */
-SYSCALL PERMISSION(
-    APPLICATION_FLAG_BOLOS_UX) unsigned char os_aem_get_response_format(void);
+SYSCALL       PERMISSION(APPLICATION_FLAG_BOLOS_UX)
+unsigned char os_aem_get_response_format(void);
 
 /**
  * This function allows one to retrieve the response.
@@ -207,7 +209,7 @@ SYSCALL PERMISSION(
  */
 SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_get_response(
     char *output_response_buffer PLENGTH(input_required_length),
-    unsigned char input_required_length);
+    unsigned char                input_required_length);
 
 /**
  * This function allows one to check a presented PIN against the internally
@@ -225,16 +227,16 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_UX) void os_aem_get_response(
  * @throw SWO_SEC_CHK_18 when the PIN verification detects an error in
  * the processing.
  */
-SYSCALL PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) bolos_bool_t
-    os_aem_check_pin(unsigned char *aem_pin_buffer PLENGTH(aem_pin_length),
-                     unsigned char aem_pin_length);
+SYSCALL      PERMISSION(APPLICATION_FLAG_GLOBAL_PIN)
+bolos_bool_t os_aem_check_pin(unsigned char *aem_pin_buffer PLENGTH(aem_pin_length),
+                              unsigned char                 aem_pin_length);
 
 /**
  * This function allows one to invalidate the AEM PIN, regardless of its
  * validation state.
  */
 SYSCALL
-    PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) void os_aem_invalidate_pin(void);
+PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) void os_aem_invalidate_pin(void);
 
 /**
  * This function allows one to retrieve the remaining attempts at verifying
@@ -246,7 +248,7 @@ SYSCALL
  * AEM PIN is not set.
  */
 SYSCALL
-    PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_aem_get_ptc(void);
+PERMISSION(APPLICATION_FLAG_GLOBAL_PIN) unsigned int os_aem_get_ptc(void);
 
 /**
  * This function allows one to check whether the AEM PIN is currently
@@ -257,4 +259,4 @@ SYSCALL
 SYSCALL
 bolos_bool_t os_aem_is_pin_validated(void);
 
-#endif // HAVE_AEM_PIN
+#endif  // HAVE_AEM_PIN

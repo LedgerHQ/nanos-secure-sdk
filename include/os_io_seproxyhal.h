@@ -1,27 +1,27 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2021 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2021 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #ifndef OS_IO_SEPROXYHAL_H
 #define OS_IO_SEPROXYHAL_H
 
 #if defined(HAVE_BOLOS)
 #include "bolos_privileged_ux.h"
-#endif // HAVE_BOLOS
+#endif  // HAVE_BOLOS
 
 #include "bolos_target.h"
 #include "decorators.h"
@@ -35,17 +35,16 @@
 #include "seproxyhal_protocol.h"
 
 // helper macro to swap values, without intermediate value
-#define SWAP(a, b)                                                             \
-  {                                                                            \
-    a ^= b;                                                                    \
-    b ^= a;                                                                    \
-    a ^= b;                                                                    \
-  }
+#define SWAP(a, b) \
+    {              \
+        a ^= b;    \
+        b ^= a;    \
+        a ^= b;    \
+    }
 
 extern unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
-SYSCALL void io_seph_send(const unsigned char *buffer PLENGTH(length),
-                          unsigned short length);
+SYSCALL void io_seph_send(const unsigned char *buffer PLENGTH(length), unsigned short length);
 
 // return 1 if the previous seproxyhal exchange has been terminated with a
 // status (packet which starts with 011x xxxx) else 0, which means the exchange
@@ -56,12 +55,12 @@ SYSCALL unsigned int io_seph_is_status_sent(void);
 // instead), resered for seproxyhal
 #define IO_CACHE 1
 SYSCALL unsigned short io_seph_recv(unsigned char *buffer PLENGTH(maxlength),
-                                    unsigned short maxlength,
-                                    unsigned int flags);
+                                    unsigned short        maxlength,
+                                    unsigned int          flags);
 
-#define io_seproxyhal_spi_send io_seph_send
+#define io_seproxyhal_spi_send           io_seph_send
 #define io_seproxyhal_spi_is_status_sent io_seph_is_status_sent
-#define io_seproxyhal_spi_recv io_seph_recv
+#define io_seproxyhal_spi_recv           io_seph_recv
 
 // HAL init, not meant to be called by applications, which shall call
 // ::io_seproxyhal_init instead
@@ -78,8 +77,7 @@ void io_seproxyhal_init_ux(void);
 void io_seproxyhal_init_button(void);
 
 // delegate function for generic io_exchange
-unsigned short io_exchange_al(unsigned char channel_and_flags,
-                              unsigned short tx_len);
+unsigned short io_exchange_al(unsigned char channel_and_flags, unsigned short tx_len);
 
 // Allow application to overload how the io_exchange function automatically
 // replies to get app name and version
@@ -90,7 +88,7 @@ unsigned char io_event(unsigned char channel);
 
 #ifdef HAVE_BLE
 void BLE_power(unsigned char powered, const char *discovered_name);
-#endif // HAVE_BLE
+#endif  // HAVE_BLE
 
 #ifdef __cplusplus
 extern "C" void USB_power(unsigned char enabled);
@@ -98,8 +96,8 @@ extern "C" void USB_power(unsigned char enabled);
 void USB_power(unsigned char enabled);
 #endif
 
-void io_seproxyhal_handle_usb_event(void);
-void io_seproxyhal_handle_usb_ep_xfer_event(void);
+void     io_seproxyhal_handle_usb_event(void);
+void     io_seproxyhal_handle_usb_ep_xfer_event(void);
 uint16_t io_seproxyhal_get_ep_rx_size(uint8_t epnum);
 
 // process event for io protocols when waiting for a ux operation to end
@@ -118,8 +116,10 @@ void io_usb_send_apdu_data_ep0x83(unsigned char *buffer, unsigned short length);
 
 // trigger a transfer over an usb endpoint and waits for it to occur if timeout
 // is != 0
-void io_usb_send_ep(unsigned int ep, unsigned char *buffer,
-                    unsigned short length, unsigned int timeout);
+void io_usb_send_ep(unsigned int   ep,
+                    unsigned char *buffer,
+                    unsigned short length,
+                    unsigned int   timeout);
 
 void io_usb_ccid_reply(unsigned char *buffer, unsigned short length);
 
@@ -131,24 +131,24 @@ void io_usb_ccid_reply(unsigned char *buffer, unsigned short length);
 void io_set_timeout(unsigned int timeout);
 
 typedef enum {
-  APDU_IDLE,
-  APDU_BLE,
-  APDU_BLE_WAIT_NOTIFY,
-  APDU_NFC_M24SR,
-  APDU_NFC_M24SR_SELECT,
-  APDU_NFC_M24SR_FIRST,
-  APDU_NFC_M24SR_RAPDU,
-  APDU_USB_HID,
-  APDU_USB_CCID,
-  APDU_U2F,
-  APDU_RAW,
-  APDU_USB_WEBUSB,
+    APDU_IDLE,
+    APDU_BLE,
+    APDU_BLE_WAIT_NOTIFY,
+    APDU_NFC_M24SR,
+    APDU_NFC_M24SR_SELECT,
+    APDU_NFC_M24SR_FIRST,
+    APDU_NFC_M24SR_RAPDU,
+    APDU_USB_HID,
+    APDU_USB_CCID,
+    APDU_U2F,
+    APDU_RAW,
+    APDU_USB_WEBUSB,
 } io_apdu_state_e;
 
 #ifdef HAVE_IO_U2F
 #include "u2f_service.h"
 extern u2f_service_t G_io_u2f;
-#endif // HAVE_IO_U2F
+#endif  // HAVE_IO_U2F
 
 /**
  *  Ledger Bluetooth Low Energy APDU Protocol
@@ -206,39 +206,39 @@ extern u2f_service_t G_io_u2f;
  */
 #if !defined(APP_UX)
 unsigned int os_ux_blocking(bolos_ux_params_t *params);
-#endif // !defined(APP_UX)
+#endif  // !defined(APP_UX)
 
 /**
  * Global type that enables to map memory onto the application zone instead of
  * over the os for os side
  */
 typedef struct io_seph_s {
-  io_apdu_state_e apdu_state; // by default
-  unsigned short apdu_length; // total length to be received
-  unsigned short io_flags;    // flags to be set when calling io_exchange
-  io_apdu_media_t apdu_media;
+    io_apdu_state_e apdu_state;   // by default
+    unsigned short  apdu_length;  // total length to be received
+    unsigned short  io_flags;     // flags to be set when calling io_exchange
+    io_apdu_media_t apdu_media;
 
-  unsigned int ms;
+    unsigned int ms;
 
 #ifdef HAVE_IO_USB
-  unsigned char usb_ep_xfer_len[IO_USB_MAX_ENDPOINTS];
-  struct {
-    unsigned short timeout; // up to 64k milliseconds (64 sec)
-  } usb_ep_timeouts[IO_USB_MAX_ENDPOINTS];
-#endif // HAVE_IO_USB
+    unsigned char usb_ep_xfer_len[IO_USB_MAX_ENDPOINTS];
+    struct {
+        unsigned short timeout;  // up to 64k milliseconds (64 sec)
+    } usb_ep_timeouts[IO_USB_MAX_ENDPOINTS];
+#endif  // HAVE_IO_USB
 
 #ifdef HAVE_BLE_APDU
-  unsigned short ble_xfer_timeout;
-#endif // HAVE_BLE_APDU
+    unsigned short ble_xfer_timeout;
+#endif  // HAVE_BLE_APDU
 
 #ifdef HAVE_BLE
-  // cached here to avoid unavailable zone deref within IO task
-  unsigned int plane_mode;
-  unsigned char ble_ready;
-  unsigned char name_changed;
-  unsigned char enabling_advertising;
-  unsigned char disabling_advertising;
-#endif // HAVE_BLE
+    // cached here to avoid unavailable zone deref within IO task
+    unsigned int  plane_mode;
+    unsigned char ble_ready;
+    unsigned char name_changed;
+    unsigned char enabling_advertising;
+    unsigned char disabling_advertising;
+#endif  // HAVE_BLE
 
 } io_seph_app_t;
 
@@ -258,7 +258,7 @@ void io_task(void);
  * IO task initializez
  */
 void io_start(void);
-#endif // HAVE_IO_TASK
+#endif  // HAVE_IO_TASK
 
 void io_seproxyhal_setup_ticker(unsigned int interval_ms);
 void io_seproxyhal_power_off(void);
@@ -268,7 +268,7 @@ void io_seproxyhal_disable_io(void);
 #ifdef HAVE_BLE
 void io_seph_ble_enable(unsigned char enable);
 void io_seph_ble_clear_bond_db(void);
-#endif // HAVE_BLE
+#endif  // HAVE_BLE
 
 /**
  * Function to ensure a I/O channel is not timeouting waiting for operations
@@ -282,8 +282,8 @@ unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
 #ifdef HAVE_PRINTF
 // Sends a character to the MCU and waits for the MCU acknowledgement.
 void mcu_usb_prints(const char *str, unsigned int charcount);
-#endif // HAVE_PRINTF
+#endif  // HAVE_PRINTF
 
-#endif // OS_IO_SEPROXYHAL
+#endif  // OS_IO_SEPROXYHAL
 
-#endif // OS_IO_SEPROXYHAL_H
+#endif  // OS_IO_SEPROXYHAL_H

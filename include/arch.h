@@ -27,6 +27,6 @@
 #include <stdio.h>
 #endif
 
-#endif // HAVE_BOLOS
+#endif  // HAVE_BOLOS
 
 #define WIDE

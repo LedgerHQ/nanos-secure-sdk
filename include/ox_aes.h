@@ -1,20 +1,20 @@
 
 /*******************************************************************************
-*   Ledger Nano S - Secure firmware
-*   (c) 2021 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger Nano S - Secure firmware
+ *   (c) 2021 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 /**
  * @file    ox_aes.h
@@ -77,8 +77,8 @@
  * changed at all. Only 16-byte key (AES128) is supported .
  */
 struct cx_aes_key_s {
-  size_t size;      ///< key size
-  uint8_t keys[32]; ///< key value
+    size_t  size;      ///< key size
+    uint8_t keys[32];  ///< key value
 };
 /** Convenience type. See #cx_aes_key_s. */
 typedef struct cx_aes_key_s cx_aes_key_t;
@@ -94,8 +94,8 @@ typedef struct cx_aes_key_s cx_aes_key_t;
  *                 - CX_OK on success
  *                 - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_aes_set_key_hw(
-    const cx_aes_key_t *key PLENGTH(sizeof(cx_aes_key_t)), uint32_t mode);
+SYSCALL cx_err_t cx_aes_set_key_hw(const cx_aes_key_t *key PLENGTH(sizeof(cx_aes_key_t)),
+                                   uint32_t                mode);
 
 /**
  * @brief   Reset AES context.
@@ -114,6 +114,6 @@ SYSCALL void cx_aes_reset_hw(void);
  *                      - INVALID_PARAMETER
  */
 SYSCALL cx_err_t cx_aes_block_hw(const unsigned char *inblock PLENGTH(16),
-                                 unsigned char *outblock PLENGTH(16));
+                                 unsigned char *outblock      PLENGTH(16));
 
 #endif

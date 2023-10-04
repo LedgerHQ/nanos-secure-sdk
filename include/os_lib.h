@@ -11,8 +11,7 @@
  * call_parameters[1] = library call identifier (0 = init, ...)
  * call_parameters[2+] = called function parameters
  */
-SYSCALL void
-os_lib_call(unsigned int *call_parameters PLENGTH(3 * sizeof(unsigned int)));
+SYSCALL void os_lib_call(unsigned int *call_parameters PLENGTH(3 * sizeof(unsigned int)));
 #ifdef HAVE_BOLOS
 SYSCALL void os_lib_end(void);
 #else

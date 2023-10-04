@@ -1,0 +1,17 @@
+# To install hooks, run:
+# pre-commit install --hook-type pre-commit
+# pre-commit install --hook-type commit-msg
+
+exclude: |
+    (?x)^(
+        lib_blewbxx/.*|
+        lib_stusb/.*|
+        lib_nbgl/include/.*.json|
+        lib_bagl/include/.*.json|
+    )$
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v16.0.6
+    hooks:
+    - id: clang-format
+      types_or: [c]

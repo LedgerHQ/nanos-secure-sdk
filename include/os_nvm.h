@@ -17,7 +17,8 @@
 // to another far memory.
 // @param src_adr NULL to fill with 00's
 SYSCALL void nvm_write(void *dst_adr PLENGTH(src_len),
-                       void *src_adr PLENGTH(src_len), unsigned int src_len);
+                       void *src_adr PLENGTH(src_len),
+                       unsigned int  src_len);
 
 SYSCALL void nvm_erase(void *dst_adr PLENGTH(len), unsigned int len);
 

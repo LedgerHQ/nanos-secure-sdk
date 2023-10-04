@@ -25,7 +25,7 @@
 #define APPLICATION_FLAG_DERIVE_MASTER 0x10
 
 #define APPLICATION_FLAG_SHARED_NVRAM 0x20
-#define APPLICATION_FLAG_GLOBAL_PIN 0x40
+#define APPLICATION_FLAG_GLOBAL_PIN   0x40
 
 // This flag means the application is meant to be debugged and allows for dump
 // or core ARM register in case of a fault detection
@@ -78,6 +78,6 @@
 #define APPLICATION_FLAG_AEM_PIN APPLICATION_FLAG_GLOBAL_PIN
 #else
 #define APPLICATION_FLAG_AEM_PIN APPLICATION_FLAG_BOLOS_UX
-#endif // BOLOS_DEBUG_UX_PERMISSION_FLAG
+#endif  // BOLOS_DEBUG_UX_PERMISSION_FLAG
 
 #define APPLICATION_FLAG_NEG_MASK 0xFFFF0000UL
