@@ -75,9 +75,6 @@ endif
 #                          STANDARD DEFINES                         #
 #####################################################################
 DEFINES += $(DEFINES_LIB)
-# Added directly as a CFLAG because it might contain spaces
-CFLAGS += -DAPPNAME=\"$(APPNAME)\"
-DEFINES += APPVERSION=\"$(APPVERSION)\"
 DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
 DEFINES += IO_HID_EP_LENGTH=64
 
