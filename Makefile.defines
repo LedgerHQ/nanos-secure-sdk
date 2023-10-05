@@ -48,10 +48,17 @@ endif
 ifeq ($(SDK_HASH),)
 SDK_HASH := "None"
 endif
-# Expose API_LEVEL, SDK_VERSION and SDK_HASH to the app.
+
+# APPNAME exposed to the app as a CFLAG because it might contain spaces
+CFLAGS += -DAPPNAME=\"$(APPNAME)\"
+
+# API_LEVEL exposed to the app as an integer
 DEFINES += API_LEVEL=$(API_LEVEL)
-DEFINES += SDK_VERSION=\"$(SDK_VERSION)\"
-DEFINES += SDK_HASH=\"$(SDK_HASH)\"
+
+# Define list of other items to be exposed to the app as strings
+# TARGET_ID is not in this list: it is already defined in bolos_target.h.
+APP_METADATA_LIST := TARGET TARGET_NAME APPVERSION SDK_NAME SDK_VERSION SDK_HASH
+DEFINES += $(foreach item,$(APP_METADATA_LIST), $(item)=\"$($(item))\")
 
 # extra load parameters for loadApp script
 ifneq ($(SCP_PRIVKEY),)
