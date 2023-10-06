@@ -47,7 +47,7 @@
 /* Private macros-------------------------------------------------------------*/
 
 /* Private functions prototypes ----------------------------------------------*/
-static void process_apdu_chunk(uint8_t *buffer, uint16_t length);
+static void process_apdu_chunk(const uint8_t *buffer, uint16_t length);
 
 /* Exported variables --------------------------------------------------------*/
 
@@ -57,7 +57,7 @@ static const uint8_t protocol_version[4] = {0x00, 0x00, 0x00, 0x00};
 static ledger_protocol_t *ledger_protocol;
 
 /* Private functions ---------------------------------------------------------*/
-static void process_apdu_chunk(uint8_t *buffer, uint16_t length)
+static void process_apdu_chunk(const uint8_t *buffer, uint16_t length)
 {
     // Check the sequence number
     if ((length < 2) || ((uint16_t) U2BE(buffer, 0) != ledger_protocol->rx_apdu_sequence_number)) {
@@ -118,14 +118,18 @@ void LEDGER_PROTOCOL_init(ledger_protocol_t *data)
     ledger_protocol->rx_apdu_sequence_number = 0;
 }
 
-void LEDGER_PROTOCOL_rx(uint8_t *buffer, uint16_t length)
+void LEDGER_PROTOCOL_rx(const uint8_t *buffer, uint16_t length)
 {
     if (!buffer || length < 3) {
         return;
     }
 
     memset(ledger_protocol->tx_chunk, 0, sizeof(ledger_protocol->tx_chunk));
-    memcpy(ledger_protocol->tx_chunk, buffer, 2);  // Copy channel ID
+
+    // For all calls to this function, the buffer was pre-initialized to the same constant
+    // In order for the input buffer to be 'const', this constant is forced directly here
+    ledger_protocol->tx_chunk[0] = 0xDE;
+    ledger_protocol->tx_chunk[1] = 0xF1;
 
     switch (buffer[2]) {
         case TAG_GET_PROTOCOL_VERSION:
@@ -172,7 +176,7 @@ void LEDGER_PROTOCOL_rx(uint8_t *buffer, uint16_t length)
     }
 }
 
-void LEDGER_PROTOCOL_tx(uint8_t *buffer, uint16_t length)
+void LEDGER_PROTOCOL_tx(const uint8_t *buffer, uint16_t length)
 {
     if (!buffer && !ledger_protocol->tx_apdu_buffer) {
         return;

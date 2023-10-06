@@ -279,7 +279,7 @@ unsigned int io_seproxyhal_handle_event(void)
 
 #ifdef HAVE_BLE
         case SEPROXYHAL_TAG_BLE_RECV_EVENT:
-            LEDGER_BLE_receive();
+            LEDGER_BLE_receive(G_io_seproxyhal_spi_buffer);
             return 1;
 #endif  // HAVE_BLE
 
@@ -417,9 +417,6 @@ static const unsigned char seph_io_mcu_protect[] = {
 void io_seproxyhal_init(void)
 {
 #ifndef HAVE_BOLOS
-    // Enforce OS compatibility
-    check_api_level(CX_COMPAT_APILEVEL);
-
 #ifdef HAVE_MCU_PROTECT
     // engage RDP2 on MCU
     io_seproxyhal_spi_send(seph_io_mcu_protect, sizeof(seph_io_mcu_protect));
