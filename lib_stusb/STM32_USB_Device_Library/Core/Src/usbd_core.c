@@ -26,10 +26,12 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
-#include "os.h"
+#include "os_helpers.h"
+#include "os_io.h"
 #include "os_pic.h"
 #include "usbd_core.h"
 #include "usbd_ioreq.h"
+#include <string.h>
 
 /** @addtogroup STM32_USBD_DEVICE_LIBRARY
 * @{
@@ -273,7 +275,7 @@ USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef *pdev, uint8_t *psetup)
 * @param  epnum: endpoint index
 * @retval status
 */
-USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum, uint8_t *pdata)
+USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum, uint8_t *pdata, apdu_buffer_t * apdu_buffer)
 {
   USBD_EndpointTypeDef    *pep;
   
@@ -312,7 +314,7 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev , uint8_t epnum
       if( usbd_is_valid_intf(pdev, intf) &&  (pdev->interfacesClass[intf].pClass->DataOut != NULL)&&
          (pdev->dev_state == USBD_STATE_CONFIGURED))
       {
-        ((DataOut_t)PIC(pdev->interfacesClass[intf].pClass->DataOut))(pdev, epnum, pdata); 
+        ((DataOut_t)PIC(pdev->interfacesClass[intf].pClass->DataOut))(pdev, epnum, pdata, apdu_buffer); 
       }
     }
   }  
