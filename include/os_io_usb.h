@@ -20,6 +20,7 @@
 #define OS_IO_USB_H
 
 #include "os_io_seproxyhal.h"
+#include "os_io.h"
 
 #ifdef HAVE_USB_APDU
 
@@ -46,7 +47,8 @@ void io_usb_hid_init(void);
  */
 io_usb_hid_receive_status_t io_usb_hid_receive(io_send_t      sndfct,
                                                unsigned char *buffer,
-                                               unsigned short l);
+                                               unsigned short l,
+                                               apdu_buffer_t *apdu_buffer);
 
 /**
  * Mark the last chunk transmitted as sent.
@@ -57,7 +59,7 @@ void io_usb_hid_sent(io_send_t sndfct);
 /**
  * Request transmission of an APDU from the G_io_apdu_buffer using the HID transport protocol
  */
-void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength);
+void io_usb_hid_send(io_send_t sndfct, unsigned short sndlength, unsigned char *apdu_buffer);
 
 #endif  // HAVE_USB_APDU
 

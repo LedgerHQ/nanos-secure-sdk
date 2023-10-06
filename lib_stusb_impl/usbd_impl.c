@@ -981,8 +981,15 @@ uint8_t USBD_U2F_DataIn_impl(USBD_HandleTypeDef *pdev, uint8_t epnum)
     return USBD_OK;
 }
 
-uint8_t USBD_U2F_DataOut_impl(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *buffer)
+uint8_t USBD_U2F_DataOut_impl(USBD_HandleTypeDef                    *pdev,
+                              uint8_t                                epnum,
+                              uint8_t                               *buffer,
+                              __attribute__((unused)) apdu_buffer_t *apdu_buf)
 {
+#ifdef HAVE_LOCAL_APDU_BUFFER
+#error "Feature not implemented"
+#endif
+
     switch (epnum) {
         // FIDO endpoint
         case (U2F_EPOUT_ADDR & 0x7F):
@@ -1009,7 +1016,10 @@ uint8_t USBD_HID_DataIn_impl(USBD_HandleTypeDef *pdev, uint8_t epnum)
     return USBD_OK;
 }
 
-uint8_t USBD_HID_DataOut_impl(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *buffer)
+uint8_t USBD_HID_DataOut_impl(USBD_HandleTypeDef *pdev,
+                              uint8_t             epnum,
+                              uint8_t            *buffer,
+                              apdu_buffer_t      *apdu_buf)
 {
     // only the data hid endpoint will receive data
     switch (epnum) {
@@ -1022,8 +1032,10 @@ uint8_t USBD_HID_DataOut_impl(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *
             // avoid troubles when an apdu has not been replied yet
             if (G_io_app.apdu_media == IO_APDU_MEDIA_NONE) {
                 // add to the hid transport
-                switch (io_usb_hid_receive(
-                    io_usb_send_apdu_data, buffer, io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR))) {
+                switch (io_usb_hid_receive(io_usb_send_apdu_data,
+                                           buffer,
+                                           io_seproxyhal_get_ep_rx_size(HID_EPOUT_ADDR),
+                                           apdu_buf)) {
                     default:
                         break;
 
@@ -1085,7 +1097,10 @@ uint8_t USBD_WEBUSB_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
     return USBD_OK;
 }
 
-uint8_t USBD_WEBUSB_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *buffer)
+uint8_t USBD_WEBUSB_DataOut(USBD_HandleTypeDef *pdev,
+                            uint8_t             epnum,
+                            uint8_t            *buffer,
+                            apdu_buffer_t      *apdu_buf)
 {
     // only the data hid endpoint will receive data
     switch (epnum) {
@@ -1099,7 +1114,8 @@ uint8_t USBD_WEBUSB_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum, uint8_t *bu
                 // add to the hid transport
                 switch (io_usb_hid_receive(io_usb_send_apdu_data_ep0x83,
                                            buffer,
-                                           io_seproxyhal_get_ep_rx_size(WEBUSB_EPOUT_ADDR))) {
+                                           io_seproxyhal_get_ep_rx_size(WEBUSB_EPOUT_ADDR),
+                                           apdu_buf)) {
                     default:
                         break;
 

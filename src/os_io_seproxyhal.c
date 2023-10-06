@@ -59,6 +59,10 @@
 #include "checks.h"
 #include "lcx_sha512.h"
 
+#ifndef IO_RAPDU_TRANSMIT_TIMEOUT_MS
+#define IO_RAPDU_TRANSMIT_TIMEOUT_MS 2000UL
+#endif  // IO_RAPDU_TRANSMIT_TIMEOUT_MS
+
 #ifdef HAVE_IO_U2F
 #include "u2f_processing.h"
 #include "u2f_transport.h"
@@ -110,16 +114,9 @@ unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
 io_seph_app_t G_io_app;
 #endif  // ! HAVE_BOLOS
 
-// usb endpoint buffer
-unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)];
-
 #if defined(HAVE_BAGL) || defined(HAVE_NBGL)
 ux_seph_os_and_app_t G_ux_os;
 #endif
-
-#ifndef IO_RAPDU_TRANSMIT_TIMEOUT_MS
-#define IO_RAPDU_TRANSMIT_TIMEOUT_MS 2000UL
-#endif  // IO_RAPDU_TRANSMIT_TIMEOUT_MS
 
 static const unsigned char seph_io_general_status[] = {
     SEPROXYHAL_TAG_GENERAL_STATUS,
@@ -174,14 +171,6 @@ void io_seproxyhal_handle_usb_event(void)
     }
 }
 
-uint16_t io_seproxyhal_get_ep_rx_size(uint8_t epnum)
-{
-    if ((epnum & 0x7F) < IO_USB_MAX_ENDPOINTS) {
-        return G_io_app.usb_ep_xfer_len[epnum & 0x7F];
-    }
-    return 0;
-}
-
 void io_seproxyhal_handle_usb_ep_xfer_event(void)
 {
     uint8_t epnum;
@@ -216,7 +205,7 @@ void io_seproxyhal_handle_usb_ep_xfer_event(void)
                     = MIN(G_io_seproxyhal_spi_buffer[5], IO_SEPROXYHAL_BUFFER_SIZE_B - 6);
 #endif
                 // prepare reception
-                USBD_LL_DataOutStage(&USBD_Device, epnum, &G_io_seproxyhal_spi_buffer[6]);
+                USBD_LL_DataOutStage(&USBD_Device, epnum, &G_io_seproxyhal_spi_buffer[6], NULL);
             }
             break;
     }
@@ -229,42 +218,6 @@ void io_seproxyhal_handle_usb_event(void) {}
 void io_seproxyhal_handle_usb_ep_xfer_event(void) {}
 
 #endif  // HAVE_L4_USBLIB
-
-// TODO, refactor this using the USB DataIn event like for the U2F tunnel
-// TODO add a blocking parameter, for HID KBD sending, or use a USB busy flag per channel to know if
-// the transfer has been processed or not. and move on to the next transfer on the same endpoint
-void io_usb_send_ep(unsigned int   ep,
-                    unsigned char *buffer,
-                    unsigned short length,
-                    unsigned int   timeout)
-{
-    // don't spoil the timeout :)
-    if (timeout) {
-        timeout++;
-    }
-
-    // won't send if overflowing seproxyhal buffer format
-    if (length > 255) {
-        return;
-    }
-
-    G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_USB_EP_PREPARE;
-    G_io_seproxyhal_spi_buffer[1] = (3 + length) >> 8;
-    G_io_seproxyhal_spi_buffer[2] = (3 + length);
-    G_io_seproxyhal_spi_buffer[3] = ep | 0x80;
-    G_io_seproxyhal_spi_buffer[4] = SEPROXYHAL_TAG_USB_EP_PREPARE_DIR_IN;
-    G_io_seproxyhal_spi_buffer[5] = length;
-    io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 6);
-    io_seproxyhal_spi_send(buffer, length);
-    // setup timeout of the endpoint
-    G_io_app.usb_ep_timeouts[ep & 0x7F].timeout = IO_RAPDU_TRANSMIT_TIMEOUT_MS;
-}
-
-void io_usb_send_apdu_data(unsigned char *buffer, unsigned short length)
-{
-    // wait for 20 events before hanging up and timeout (~2 seconds of timeout)
-    io_usb_send_ep(0x82, buffer, length, 20);
-}
 
 #ifdef HAVE_WEBUSB
 void io_usb_send_apdu_data_ep0x83(unsigned char *buffer, unsigned short length)
@@ -326,7 +279,7 @@ unsigned int io_seproxyhal_handle_event(void)
 
 #ifdef HAVE_BLE
         case SEPROXYHAL_TAG_BLE_RECV_EVENT:
-            LEDGER_BLE_receive();
+            LEDGER_BLE_receive(G_io_seproxyhal_spi_buffer);
             return 1;
 #endif  // HAVE_BLE
 
@@ -450,9 +403,6 @@ static const unsigned char seph_io_mcu_protect[] = {
 void io_seproxyhal_init(void)
 {
 #ifndef HAVE_BOLOS
-    // Enforce OS compatibility
-    check_api_level(CX_COMPAT_APILEVEL);
-
 #ifdef HAVE_MCU_PROTECT
     // engage RDP2 on MCU
     io_seproxyhal_spi_send(seph_io_mcu_protect, sizeof(seph_io_mcu_protect));
@@ -1362,7 +1312,7 @@ reply_apdu:
                         case APDU_USB_HID:
                             // only send, don't perform synchronous reception of the next command
                             // (will be done later by the seproxyhal packet processing)
-                            io_usb_hid_send(io_usb_send_apdu_data, tx_len);
+                            io_usb_hid_send(io_usb_send_apdu_data, tx_len, G_io_apdu_buffer);
                             goto break_send;
 #ifdef HAVE_USB_CLASS_CCID
                         case APDU_USB_CCID:
@@ -1371,7 +1321,7 @@ reply_apdu:
 #endif  // HAVE_USB_CLASS_CCID
 #ifdef HAVE_WEBUSB
                         case APDU_USB_WEBUSB:
-                            io_usb_hid_send(io_usb_send_apdu_data_ep0x83, tx_len);
+                            io_usb_hid_send(io_usb_send_apdu_data_ep0x83, tx_len, G_io_apdu_buffer);
                             goto break_send;
 #endif  // HAVE_WEBUSB
 #endif  // HAVE_USB_APDU
