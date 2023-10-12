@@ -113,13 +113,14 @@ def image_to_packed_buffer(img, bpp: int):
 # Compressions functions
 
 
-def rle_compress(im: Image, bpp) -> bytes:
+def rle_compress(im: Image, bpp) -> Optional[bytes]:
     """
     Run RLE compression on input image
     """
     if bpp == 1:
         return Rle1bpp.rle_1bpp(im)[1]
     elif bpp == 2:
+        # No compression supports BPP2
         return None
     elif bpp == 4:
         return Rle4bpp.rle_4bpp(im)[1]
@@ -167,6 +168,9 @@ def compress(im: Image, bpp) -> Tuple[NbglFileCompression, bytes]:
     min_comp = NbglFileCompression.NoCompression
 
     for compression, buffer in compressed_bufs.items():
+        if buffer is None:
+            continue
+
         final_length = len(buffer)
         if compression != NbglFileCompression.NoCompression:
             final_length += NBGL_IMAGE_FILE_HEADER_SIZE
@@ -341,7 +345,7 @@ def main():
 
         except Exception as e:
             sys.stderr.write(
-                "Exception while processing {} {}\n".format(file), e)
+                    "Exception while processing {}: {}\n".format(file, e))
             try:
                 traceback.print_tb()
             except:

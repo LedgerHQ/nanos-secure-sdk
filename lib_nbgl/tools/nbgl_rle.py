@@ -147,7 +147,7 @@ class Rle4bpp():
         return result
 
     @classmethod
-    def rle_4bpp(cls, img) -> bytes:
+    def rle_4bpp(cls, img) -> Tuple[int, bytes]:
         bpp = 4
         pixels = cls.image_to_pixels(img, bpp)
         occurrences = cls.pixels_to_occurrences(pixels)
@@ -314,7 +314,7 @@ class Rle1bpp():
 
     # -------------------------------------------------------------------------
     @classmethod
-    def rle_1bpp(cls, img) -> bytes:
+    def rle_1bpp(cls, img) -> Tuple[int, bytes]:
         """
         Input: image to compress
         - convert the picture to an array of pixels
