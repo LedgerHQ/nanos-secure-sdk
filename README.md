@@ -62,7 +62,7 @@ OS release candidates are only kept in the list when a corresponding OS release 
 | 2       | only rc releases                                                    | :x:
 | 3       | only rc releases                                                    | :x:
 | 4       | only rc releases                                                    | :x:
-| 5       | nanox_2.2.0 <br/> nanox 2.2.1 <br/> nanox 2.2.2                     | :heavy_check_mark:
+| 5       | nanox_2.2.0 <br/> nanox 2.2.1 <br/> nanox 2.2.2 <br/> nanox 2.2.3   | :heavy_check_mark:
 | 6       | only rc releases                                                    | :x:
 | 7 / 7.1 | only rc releases                                                    | :x:
 | 7.2     | only rc releases<br/> (not compatible due <br/> to font update)     | :x:
@@ -70,7 +70,8 @@ OS release candidates are only kept in the list when a corresponding OS release 
 | 9       | only rc releases                                                    | :x:
 | 10      | stax_1.1.0                                                          | :x:
 | 11      | stax_1.2.0 <br/> stax_1.2.1                                         | :x:
-| 12      | stax_1.3.0-rc1 <br/> nanox_2.3.0-rc2 <br/> nanos+_1.2.0-rc2         | :heavy_check_mark:
+| 12      | nanox_2.3.0-rc2 <br/> nanos+_1.2.0-rc2                              | :x:
+| 13      | stax_1.3.0                                                          | :heavy_check_mark:
 
 ### Cherry-picking process:
 
