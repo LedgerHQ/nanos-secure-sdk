@@ -1,4 +1,3 @@
-from turtle import back
 from nbgl_lib import *
 import pytest
 
@@ -15,6 +14,26 @@ def data_test():
 def run_deserialize_nbgl(hex_str: str):
     bytes_in = bytes.fromhex(hex_str)
     return deserialize_nbgl_bytes(bytes_in)
+
+
+def test_draw_nbgl_screen(data_test):
+    serialized = data_test["test_draw_nbgl_screen"]
+    deserialized = run_deserialize_nbgl(serialized)
+    expected = \
+        NbglDrawObjectEvent(
+            obj=NbglScreen(
+                area=NbglArea(
+                    background_color=NbglColor.WHITE,
+                    bpp=NbglBpp.BPP_4,
+                    height=670,
+                    width=400,
+                    x0=0,
+                    y0=0
+                )
+            )
+        )
+
+    assert deserialized == expected
 
 
 def test_draw_nbgl_container(data_test):
@@ -231,12 +250,16 @@ def test_draw_nbgl_image(data_test):
             obj=NbglImage(
                 area=NbglArea(
                     background_color=NbglColor.WHITE,
-                    bpp=NbglBpp.BPP_2,
-                    height=101,
-                    width=201,
+                    bpp=NbglBpp.BPP_1,
+                    height=32,
+                    width=32,
                     x0=124,
                     y0=235
                 ),
+                height=32,
+                width=32,
+                bpp=0,
+                isFile=1,
                 foreground_color=NbglColor.DARK_GRAY
             )
         )
@@ -285,7 +308,9 @@ def test_draw_nbgl_keypad(data_test):
                 text_color=NbglColor.WHITE,
                 border_color=NbglColor.BLACK,
                 enable_backspace=True,
-                enable_validate=False
+                enable_validate=False,
+                enable_digits=True,
+                shuffled=False
             )
         )
     assert deserialized == expected

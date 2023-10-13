@@ -1,5 +1,8 @@
+#include <stdio.h>
+#include <string.h>
 #include "nbgl_obj.h"
 #include "nbgl_serialize.h"
+#include "nbgl_image_utils.h"
 
 // Utility functions
 
@@ -19,17 +22,22 @@ static void nbgl_appendU32(uint32_t value, uint8_t *out, size_t *w_cnt, size_t m
     nbgl_appendU8((uint8_t) (value & 0xFF), out, w_cnt, max_len);
 }
 
+static void nbgl_appendPtr(void *value, uint8_t *out, size_t *w_cnt, size_t max_len)
+{
+    if (max_len < (*w_cnt + sizeof(void *))) {
+        return;
+    }
+    memcpy(&out[*w_cnt], &value, sizeof(void *));
+    (*w_cnt) = (*w_cnt) + sizeof(void *);
+}
+
 static void nbgl_appendU16(uint16_t value, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
     nbgl_appendU8((uint8_t) ((value >> 8) & 0xFF), out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) (value & 0xFF), out, w_cnt, max_len);
 }
 
-static void nbgl_serializeType(nbgl_obj_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
-{
-    nbgl_appendU8((uint8_t) obj->type, out, w_cnt, max_len);
-}
-
+// serialize a nbgl_area_t structure
 static void nbgl_serializeArea(nbgl_area_t *area, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
     nbgl_appendU16(area->x0, out, w_cnt, max_len);
@@ -38,6 +46,27 @@ static void nbgl_serializeArea(nbgl_area_t *area, uint8_t *out, size_t *w_cnt, s
     nbgl_appendU16(area->height, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) area->backgroundColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) area->bpp, out, w_cnt, max_len);
+}
+
+static uint8_t getObjId(nbgl_obj_t *obj)
+{
+    if (obj->type != SCREEN) {
+        // return the internal offset + 1
+        return nbgl_objPoolGetId(obj) + 1;
+    }
+    // no ID for screen, because it's not a real object, and not taken from pool
+    return 0;
+}
+
+// serialize a nbgl_obj_t structure (including nbgl_area_t)
+static void nbgl_serializeObj(nbgl_obj_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
+{
+    // at first serialize an id
+    nbgl_appendU8(getObjId(obj), out, w_cnt, max_len);
+    // the only field to be serialized is the object type
+    nbgl_appendU8((uint8_t) obj->type, out, w_cnt, max_len);
+    // then serialize the area
+    nbgl_serializeArea((nbgl_area_t *) &obj->area, out, w_cnt, max_len);
 }
 
 // Serialization functions
@@ -61,13 +90,97 @@ static void nbgl_serializeText(const char *text, uint8_t *out, size_t *w_cnt, si
     }
 }
 
+/**
+ * Mapping of nbgl_bpp_t type and their associated driver configuration
+ * and actual number of bit per pixel.
+ */
+static const uint8_t NBGL_BPP_MAPPING[NB_NBGL_BPP]
+    = {[NBGL_BPP_1] = 1, [NBGL_BPP_2] = 2, [NBGL_BPP_4] = 4};
+
+/**
+ * @brief Returns the number of bits per pixel associated to the input nbgl_bpp
+ * @param nbgl_bpp Input nbgl_bpp
+ *
+ * @return
+ * - Number of bits per pixel if nbgl_bpp is valid
+ * - -1 otherwise
+ */
+static int8_t nbgl_bpp_get_number_of_bits_per_pixel(nbgl_bpp_t nbgl_bpp)
+{
+    if (nbgl_bpp >= NB_NBGL_BPP) {
+        return -1;
+    }
+
+    return NBGL_BPP_MAPPING[nbgl_bpp];
+}
+
+/**
+ * @brief Calculate the size in bytes of a window
+ * @param width Width of the input window
+ * @param height Height of the input window
+ * @param nbgl_bpp Bpp of the input window
+ *
+ * @return
+ *  - Window size if parameters are correct
+ *  - (-1) otherwise
+ */
+static int32_t nbgl_bpp_get_window_size(uint16_t width, uint16_t height, nbgl_bpp_t nbgl_bpp)
+{
+    if ((width > SCREEN_WIDTH) || (height > SCREEN_HEIGHT) || (nbgl_bpp >= NB_NBGL_BPP)) {
+        return -1;
+    }
+
+    int32_t nb_bits = (width * height * nbgl_bpp_get_number_of_bits_per_pixel(nbgl_bpp));
+    uint8_t remain  = nb_bits % 8;
+
+    // Ceil division to ensure the output number of bytes contains
+    // all the bits of the window.
+    if (remain == 0) {
+        return nb_bits / 8;
+    }
+    else {
+        return (nb_bits + (8 - remain)) / 8;
+    }
+}
+
+static void nbgl_serializeIcon(const nbgl_icon_details_t *icon,
+                               uint8_t                   *out,
+                               size_t                    *w_cnt,
+                               size_t                     max_len)
+{
+    int32_t size = 0;
+    if (icon == NULL) {
+        nbgl_appendU16(0, out, w_cnt, max_len);
+        nbgl_appendU16(0, out, w_cnt, max_len);
+        nbgl_appendU8(0, out, w_cnt, max_len);
+        nbgl_appendU8(0, out, w_cnt, max_len);
+    }
+    else {
+        nbgl_appendU16(icon->width, out, w_cnt, max_len);
+        nbgl_appendU16(icon->height, out, w_cnt, max_len);
+        nbgl_appendU8(icon->bpp, out, w_cnt, max_len);
+        nbgl_appendU8(icon->isFile, out, w_cnt, max_len);
+        if (!icon->isFile) {
+            size = nbgl_bpp_get_window_size(icon->width, icon->height, icon->bpp);
+        }
+        else {
+            size = GET_IMAGE_FILE_BUFFER_LEN(icon->bitmap) + IMAGE_FILE_HEADER_SIZE;
+        }
+    }
+    nbgl_appendU32(size, out, w_cnt, max_len);
+#ifdef SERIALIZE_DATA
+    for (int32_t i = 0; i < size; i++) {
+        nbgl_appendU8(icon->bitmap[i], out, w_cnt, max_len);
+    }
+#endif  // SERIALIZE_DATA
+}
+
 static void nbgl_serializeTextArea(nbgl_text_area_t *obj,
                                    uint8_t          *out,
                                    size_t           *w_cnt,
                                    size_t            max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->textColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->textAlignment, out, w_cnt, max_len);
@@ -81,8 +194,7 @@ static void nbgl_serializeTextArea(nbgl_text_area_t *obj,
 
 static void nbgl_serializeLine(nbgl_line_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->direction, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->lineColor, out, w_cnt, max_len);
@@ -92,8 +204,7 @@ static void nbgl_serializeLine(nbgl_line_t *obj, uint8_t *out, size_t *w_cnt, si
 
 static void nbgl_serializeQrCode(nbgl_qrcode_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->foregroundColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->version, out, w_cnt, max_len);
@@ -102,8 +213,7 @@ static void nbgl_serializeQrCode(nbgl_qrcode_t *obj, uint8_t *out, size_t *w_cnt
 
 static void nbgl_serializeRadio(nbgl_radio_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->activeColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->borderColor, out, w_cnt, max_len);
@@ -112,8 +222,7 @@ static void nbgl_serializeRadio(nbgl_radio_t *obj, uint8_t *out, size_t *w_cnt, 
 
 static void nbgl_serializeSwitch(nbgl_switch_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->onColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->offColor, out, w_cnt, max_len);
@@ -125,20 +234,18 @@ static void nbgl_serializeProgressBar(nbgl_progress_bar_t *obj,
                                       size_t              *w_cnt,
                                       size_t               max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->withBorder, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->state, out, w_cnt, max_len);
 }
 
-static void nbgl_serializeNavigationBar(nbgl_page_indicator_t *obj,
+static void nbgl_serializePageIndicator(nbgl_page_indicator_t *obj,
                                         uint8_t               *out,
                                         size_t                *w_cnt,
                                         size_t                 max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->activePage, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->nbPages, out, w_cnt, max_len);
@@ -146,8 +253,7 @@ static void nbgl_serializeNavigationBar(nbgl_page_indicator_t *obj,
 
 static void nbgl_serializeButton(nbgl_button_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->innerColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->borderColor, out, w_cnt, max_len);
@@ -156,21 +262,19 @@ static void nbgl_serializeButton(nbgl_button_t *obj, uint8_t *out, size_t *w_cnt
     nbgl_appendU8((uint8_t) obj->fontId, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->localized, out, w_cnt, max_len);
     nbgl_serializeText(obj->text, out, w_cnt, max_len);
+    nbgl_serializeIcon((void *) obj->icon, out, w_cnt, max_len);
 }
 
 static void nbgl_serializeImage(nbgl_image_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
-
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
+    nbgl_serializeIcon((void *) obj->buffer, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->foregroundColor, out, w_cnt, max_len);
 }
 
 static void nbgl_serializeSpinner(nbgl_spinner_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
-
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
     nbgl_appendU8(obj->position, out, w_cnt, max_len);
 }
 
@@ -179,8 +283,7 @@ static void nbgl_serializeKeyboard(nbgl_keyboard_t *obj,
                                    size_t          *w_cnt,
                                    size_t           max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->textColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->borderColor, out, w_cnt, max_len);
@@ -192,13 +295,19 @@ static void nbgl_serializeKeyboard(nbgl_keyboard_t *obj,
 
 static void nbgl_serializeKeypad(nbgl_keypad_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->textColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->borderColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->enableBackspace, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->enableValidate, out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->enableDigits, out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->shuffled, out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->digitIndexes[0], out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->digitIndexes[1], out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->digitIndexes[2], out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->digitIndexes[3], out, w_cnt, max_len);
+    nbgl_appendU8((uint8_t) obj->digitIndexes[4], out, w_cnt, max_len);
 }
 
 static void nbgl_serializeImageFile(nbgl_image_file_t *obj,
@@ -206,8 +315,8 @@ static void nbgl_serializeImageFile(nbgl_image_file_t *obj,
                                     size_t            *w_cnt,
                                     size_t             max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
+    nbgl_appendPtr((void *) obj->buffer, out, w_cnt, max_len);
 }
 
 static void nbgl_serializeContainer(nbgl_container_t *obj,
@@ -215,8 +324,7 @@ static void nbgl_serializeContainer(nbgl_container_t *obj,
                                     size_t           *w_cnt,
                                     size_t            max_len)
 {
-    nbgl_serializeType((nbgl_obj_t *) obj, out, w_cnt, max_len);
-    nbgl_serializeArea((nbgl_area_t *) obj, out, w_cnt, max_len);
+    nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
 
     nbgl_appendU8((uint8_t) obj->layout, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->nbChildren, out, w_cnt, max_len);
@@ -227,7 +335,8 @@ static uint8_t nbgl_serializeObject(nbgl_obj_t *obj, uint8_t *out, size_t *w_cnt
 {
     switch (obj->type) {
         case SCREEN:
-            return NBGL_SERIALIZE_ERROR;
+            nbgl_serializeObj((nbgl_obj_t *) obj, out, w_cnt, max_len);
+            break;
         case CONTAINER:
             nbgl_serializeContainer((nbgl_container_t *) obj, out, w_cnt, max_len);
             break;
@@ -247,7 +356,7 @@ static uint8_t nbgl_serializeObject(nbgl_obj_t *obj, uint8_t *out, size_t *w_cnt
             nbgl_serializeSwitch((nbgl_switch_t *) obj, out, w_cnt, max_len);
             break;
         case PAGE_INDICATOR:
-            nbgl_serializeNavigationBar((nbgl_page_indicator_t *) obj, out, w_cnt, max_len);
+            nbgl_serializePageIndicator((nbgl_page_indicator_t *) obj, out, w_cnt, max_len);
             break;
         case PROGRESS_BAR:
             nbgl_serializeProgressBar((nbgl_progress_bar_t *) obj, out, w_cnt, max_len);

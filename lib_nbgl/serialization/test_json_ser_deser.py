@@ -3,6 +3,41 @@ from nbgl_lib import *
 import pytest
 
 
+def test_json_deserialize_screen():
+    serialized = {
+        'event': 'NBGL_DRAW_OBJ',
+        'obj': {
+            'type': 'SCREEN',
+            'content': {
+                'area': {
+                    'width': 400,
+                    'height': 670,
+                    'x0': 0,
+                    'y0': 0,
+                    'background_color': 'WHITE',
+                    'bpp': 'BPP_4'
+                }
+            }
+        }
+    }
+    deserialized = \
+        NbglDrawObjectEvent(
+            obj=NbglScreen(
+                area=NbglArea(
+                    width=400,
+                    height=670,
+                    x0=0,
+                    y0=0,
+                    background_color=NbglColor.WHITE,
+                    bpp=NbglBpp.BPP_4
+                )
+            )
+
+        )
+
+    assert serialize_nbgl_json(deserialized) == serialized
+    assert deserialized == deserialize_nbgl_json(serialized)
+
 def test_json_deserialize_container():
     serialized = {
         'event': 'NBGL_DRAW_OBJ',
@@ -396,6 +431,10 @@ def test_json_deserialize_image():
                     'background_color': 'BLACK',
                     'bpp': 'BPP_2'
                 },
+                'height':35,
+                'width':36,
+                'bpp':2,
+                'isFile':1,
                 'foreground_color': 'WHITE'
             }
         }
@@ -411,6 +450,10 @@ def test_json_deserialize_image():
                     background_color=NbglColor.BLACK,
                     bpp=NbglBpp.BPP_2
                 ),
+                height=35,
+                width=36,
+                bpp=2,
+                isFile=1,
                 foreground_color=NbglColor.WHITE
             )
         )
@@ -558,7 +601,9 @@ def test_json_deserialize_keypad():
                 'text_color': 'WHITE',
                 'border_color': 'LIGHT_GRAY',
                 'enable_backspace': True,
-                'enable_validate': False
+                'enable_validate': False,
+                'enable_digits': True,
+                'shuffled': False
             }
         }
     }
@@ -576,7 +621,9 @@ def test_json_deserialize_keypad():
                 text_color=NbglColor.WHITE,
                 border_color=NbglColor.LIGHT_GRAY,
                 enable_backspace=True,
-                enable_validate=False
+                enable_validate=False,
+                enable_digits=True,
+                shuffled=False
             )
         )
 

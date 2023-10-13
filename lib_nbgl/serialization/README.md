@@ -5,7 +5,7 @@
 Deserialize raw bytes into an Nbgl event:
 ```python
 >>> from nbgl_lib import deserialize_nbgl_bytes
->>> data = bytes.fromhex("000601f403e800ff003201000301020403015465737420627574746f6e00")
+>>> data = bytes.fromhex("00010501f403e800ff003201000301020403015465737420627574746f6e00")
 >>> nbgl_event = deserialize_nbgl_bytes(data)
 >>> nbgl_event
 NbglDrawObjectEvent(obj=NbglButton(area=NbglArea(width=255, height=50, x0=500, y0=1000, background_color=<NbglColor.DARK_GRAY: 1>, bpp=<NbglBpp.BPP_1: 0>), inner_color=<NbglColor.WHITE: 3>, border_color=<NbglColor.DARK_GRAY: 1>, foreground_color=<NbglColor.LIGHT_GRAY: 2>, radius=<NbglRadius.RADIUS_24_PIXELS: 4>, font_id=<NbglFontId.BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px: 3>, localized=True, text='Test button'))

@@ -11,10 +11,10 @@
 #include "nbgl_draw.h"
 #include "nbgl_front.h"
 #include "nbgl_debug.h"
-#include "nbgl_serialize.h"
 #include "os_print.h"
 #include "glyphs.h"
 #ifdef HAVE_SERIALIZED_NBGL
+#include "nbgl_serialize.h"
 #include "os_io_seproxyhal.h"
 #endif
 
@@ -39,7 +39,7 @@ void extendRefreshArea(nbgl_obj_t *obj);
 static nbgl_area_t refreshArea;
 
 // boolean used to enable/forbid drawing/refresh
-bool objDrawingDisabled;
+static bool objDrawingDisabled;
 
 /**********************
  *      VARIABLES
