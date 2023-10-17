@@ -246,10 +246,13 @@ void io_seproxyhal_handle_capdu_event(void)
 #ifdef HAVE_NFC
 void io_seproxyhal_handle_nfc_recv_event(void)
 {
+    size_t max  = MIN(sizeof(G_io_apdu_buffer), sizeof(G_io_seproxyhal_spi_buffer) - 3);
+    size_t size = U2BE(G_io_seproxyhal_spi_buffer, 1);
+
     G_io_app.apdu_media  = IO_APDU_MEDIA_NFC;
     G_io_app.apdu_state  = APDU_NFC;
-    G_io_app.apdu_length = ((G_io_seproxyhal_spi_buffer[1] << 8) & 0xFF00)
-                           | (G_io_seproxyhal_spi_buffer[2] & 0x00FF);
+    G_io_app.apdu_length = MIN(size, max);
+
     memcpy(G_io_apdu_buffer, &G_io_seproxyhal_spi_buffer[3], G_io_app.apdu_length);
 }
 #endif

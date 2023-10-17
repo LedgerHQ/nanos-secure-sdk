@@ -26,10 +26,10 @@
  * It consists in iteratively deriving HMAC.
  */
 
-#ifdef HAVE_PBKDF2
-
 #ifndef LCX_PBKDF2_H
 #define LCX_PBKDF2_H
+
+#ifdef HAVE_PBKDF2
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -118,6 +118,6 @@ DEPRECATED static inline void cx_pbkdf2(cx_md_t              md_type,
 #define cx_pbkdf2_sha512(password, password_len, salt, salt_len, iterations, out, out_len) \
     cx_pbkdf2_no_throw(CX_SHA512, password, password_len, salt, salt_len, iterations, out, out_len)
 
-#endif  // LCX_PBKDF2_H
-
 #endif  // HAVE_PBKDF2
+
+#endif  // LCX_PBKDF2_H

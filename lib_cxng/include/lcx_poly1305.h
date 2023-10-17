@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#if defined(HAVE_POLY1305)
 
 /**
  * @file    lcx_poly1305.h
@@ -35,6 +34,8 @@
 #ifndef LCX_POLY1305_H
 #define LCX_POLY1305_H
 
+#if defined(HAVE_POLY1305)
+
 #include "ox.h"
 #include <stddef.h>
 
@@ -49,5 +50,6 @@ typedef struct {
     size_t   block_len;  ///< The number of bytes stored in 'block'
 } cx_poly1305_context_t;
 
-#endif  /* LCX_POLY1305_H */
 #endif  // HAVE_POLY1305
+
+#endif  // LCX_POLY1305_H

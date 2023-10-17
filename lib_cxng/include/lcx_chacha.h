@@ -15,7 +15,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#if defined(HAVE_CHACHA)
 
 /**
  * @file    lcx_chacha.h
@@ -33,6 +32,8 @@
 
 #ifndef LCX_CHACHA_H
 #define LCX_CHACHA_H
+
+#if defined(HAVE_CHACHA)
 
 #include "ox.h"
 #include <stddef.h>
@@ -159,5 +160,6 @@ cx_err_t cx_chacha_cipher(uint32_t       nrounds,
                           uint8_t       *output,
                           size_t         len);
 
-#endif  /* LCX_CHACHA_H */
 #endif  // HAVE_CHACHA
+
+#endif  // LCX_CHACHA_H

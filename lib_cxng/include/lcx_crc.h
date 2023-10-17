@@ -23,10 +23,10 @@
  * CRC-16 is a variant of CRC, an error-detecting code, with a 16-bit long check value.
  */
 
-#ifdef HAVE_CRC
-
 #ifndef LCX_CRC_H
 #define LCX_CRC_H
+
+#ifdef HAVE_CRC
 
 #include <stddef.h>
 #include <stdint.h>
@@ -60,6 +60,6 @@ uint16_t cx_crc16(const void *buffer, size_t len);
  */
 uint16_t cx_crc16_update(uint16_t crc, const void *buffer, size_t len);
 
-#endif
-
 #endif  // HAVE_CRC
+
+#endif  // LCX_CRC_H

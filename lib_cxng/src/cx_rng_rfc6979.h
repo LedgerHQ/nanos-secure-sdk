@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_RNG_RFC6979
-
 #ifndef CX_RNG_RFC6979_H
 #define CX_RNG_RFC6979_H
+
+#ifdef HAVE_RNG_RFC6979
 
 #include "libcxng.h"
 #include "cx_hash.h"
@@ -69,6 +69,7 @@ cx_err_t cx_rng_rfc6979_init(cx_rnd_rfc6979_ctx_t *rfc_ctx,
                              /*const uint8_t *additional_input, size_t additional_input_len*/);
 
 cx_err_t cx_rng_rfc6979_next(cx_rnd_rfc6979_ctx_t *rfc_ctx, uint8_t *out, size_t out_len);
-#endif  // CX_HMAC_DRBG_H
 
 #endif  // HAVE_RNG_RFC6979
+
+#endif  // CX_RNG_RFC6979_H

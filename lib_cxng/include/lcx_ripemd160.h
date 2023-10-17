@@ -24,10 +24,10 @@
  * "https://homes.esat.kuleuven.be/~bosselae/ripemd160.html"> RIPEMD-160 </a> for more details.
  */
 
-#ifdef HAVE_RIPEMD160
-
 #ifndef LCX_RIPEMD160_H
 #define LCX_RIPEMD160_H
+
+#ifdef HAVE_RIPEMD160
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -90,6 +90,6 @@ static inline int cx_ripemd160_init(cx_ripemd160_t *hash)
  */
 size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 
-#endif
-
 #endif  // HAVE_RIPEMD160
+
+#endif  // LCX_RIPEMD160_H

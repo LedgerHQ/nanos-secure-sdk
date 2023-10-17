@@ -16,16 +16,16 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_CRC
-
 #ifndef CX_CRC_H
 #define CX_CRC_H
+
+#ifdef HAVE_CRC
 
 #include <stddef.h>
 #include <stdint.h>
 
 uint32_t cx_crc32(const void *buf, size_t len);
 
-#endif
+#endif  // HAVE_CRC
 
-#endif
+#endif  // CX_CRC_H
