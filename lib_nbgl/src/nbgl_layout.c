@@ -1914,6 +1914,7 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout,
     container->children
         = (nbgl_obj_t **) nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
     container->obj.alignment = BOTTOM_MIDDLE;
+    container->obj.touchId   = LONG_PRESS_BUTTON_ID;
     container->obj.touchMask = ((1 << TOUCHING) | (1 << TOUCH_RELEASED) | (1 << OUT_OF_TOUCH));
 
     button                       = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layoutInt->layer);
