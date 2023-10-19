@@ -1281,6 +1281,14 @@ void os_perso_set_onboarding_status(unsigned int state, unsigned int count, unsi
     return;
 }
 
+void os_set_ux_time_ms(unsigned int ux_ms)
+{
+    unsigned int parameters[1];
+    parameters[0] = (unsigned int) ux_ms;
+    SVC_Call(SYSCALL_os_set_ux_time_ms_ID, parameters);
+    return;
+}
+
 void os_perso_derive_node_bip32(cx_curve_t          curve,
                                 const unsigned int *path,
                                 unsigned int        pathLength,
