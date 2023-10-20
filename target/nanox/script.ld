@@ -30,7 +30,7 @@ MEMORY
 }
 
 PAGE_SIZE  = 256;
-STACK_SIZE = 1500;
+STACK_MIN_SIZE = DEFINED(stack_min_size) ? stack_min_size : 1500;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
 
 ENTRY(main);
@@ -124,14 +124,14 @@ SECTIONS
     app_stack_canary = .;
     PROVIDE(app_stack_canary = .);
     . += 4;
-    _stack_validation = .;
-    . = _stack_validation + STACK_SIZE;
-    _stack = ABSOLUTE(END_STACK) - STACK_SIZE;
-    PROVIDE( _stack = ABSOLUTE(END_STACK) - STACK_SIZE);
+    _stack = .;
+    PROVIDE( _stack = .);
     _estack = ABSOLUTE(END_STACK);
     PROVIDE( _estack = ABSOLUTE(END_STACK) );
 
   } > SRAM
+
+  ASSERT( (_estack - _stack) >= STACK_MIN_SIZE, "stack section too small" )
 
   /****************************************************************/
   /* DEBUG                                                        */
