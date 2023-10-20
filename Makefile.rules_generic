@@ -151,7 +151,14 @@ debug/app.map debug/app.asm: debug/app.%: $(DBG_DIR)/app.%
 # link_cmdline(objects,dest)		Macro that is used to format arguments for the linker
 link_cmdline = $(LD) $(LDFLAGS) -o $(2) $(1)
 ifneq ($(APP_STACK_SIZE),)
-link_cmdline += -Wl,--defsym=stack_size=$(APP_STACK_SIZE)
+ifneq ($(ENABLE_SDK_WERROR),0)
+$(error Deprecated APP_STACK_SIZE define, use APP_STACK_MIN_SIZE if really needed)
+else
+$(warning Deprecated APP_STACK_SIZE define, use APP_STACK_MIN_SIZE if really needed)
+endif
+endif
+ifneq ($(APP_STACK_MIN_SIZE),)
+link_cmdline += -Wl,--defsym=stack_min_size=$(APP_STACK_MIN_SIZE)
 endif
 
 # cc_cmdline(include,defines,src,dest)	Macro that is used to format arguments for the compiler
