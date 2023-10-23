@@ -189,6 +189,7 @@
 #define SYSCALL_os_deny_protected_flash_ID                   0x00000091
 #define SYSCALL_os_allow_protected_ram_ID                    0x00000092
 #define SYSCALL_os_deny_protected_ram_ID                     0x00000093
+#define SYSCALL_os_set_ux_time_ms_ID                         0x010000a2
 
 #ifdef HAVE_CUSTOM_CA_DETAILS_IN_SETTINGS
 #define SYSCALL_os_bolos_custom_ca_get_info_ID 0x01000CA0
