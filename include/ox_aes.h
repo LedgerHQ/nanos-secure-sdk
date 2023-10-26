@@ -93,8 +93,8 @@ typedef struct cx_aes_key_s cx_aes_key_t;
  *                 - CX_OK on success
  *                 - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_aes_set_key_hw(const cx_aes_key_t *key PLENGTH(sizeof(cx_aes_key_t)),
-                                   uint32_t                mode);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_aes_set_key_hw(const cx_aes_key_t *key PLENGTH(sizeof(cx_aes_key_t)), uint32_t mode);
 
 /**
  * @brief   Resets the AES context.
@@ -112,7 +112,7 @@ SYSCALL void cx_aes_reset_hw(void);
  *                      - CX_OK on success
  *                      - INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_aes_block_hw(const unsigned char *inblock PLENGTH(16),
-                                 unsigned char *outblock      PLENGTH(16));
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_aes_block_hw(const unsigned char *inblock PLENGTH(16),
+                                                    unsigned char *outblock      PLENGTH(16));
 
 #endif

@@ -33,7 +33,8 @@ extern const cx_hash_info_t cx_sha384_info;
 extern const cx_hash_info_t cx_sha512_info;
 #endif  // HAVE_SHA512
 
-cx_err_t cx_sha512_update(cx_sha512_t *ctx, const uint8_t *data, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_sha512_update(cx_sha512_t *ctx, const uint8_t *data, size_t len);
+// No need to add WARN_UNUSED_RESULT to cx_sha512_final(), it always returns CX_OK
 cx_err_t cx_sha512_final(cx_sha512_t *ctx, uint8_t *digest);
 
 #endif  // defined(HAVE_SHA512) || defined(HAVE_SHA384)

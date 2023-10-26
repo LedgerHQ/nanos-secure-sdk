@@ -130,8 +130,7 @@ cx_err_t cx_hash_update(cx_hash_t *ctx, const uint8_t *data, size_t len)
 cx_err_t cx_hash_final(cx_hash_t *ctx, uint8_t *digest)
 {
     const cx_hash_info_t *info = ctx->info;
-    info->finish_func(ctx, digest);
-    return CX_OK;
+    return info->finish_func(ctx, digest);
 }
 
 cx_err_t cx_hash_no_throw(cx_hash_t     *hash,

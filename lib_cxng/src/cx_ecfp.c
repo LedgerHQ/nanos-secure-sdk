@@ -314,11 +314,11 @@ cx_err_t cx_edwards_compress_point_no_throw(cx_curve_t curve, uint8_t *P, size_t
     CX_CHECK(cx_ecpoint_init(&P_ec, P + 1, size, P + 1 + size, size));
     CX_CHECK(cx_ecpoint_compress(&P_ec, P + 1, size, &sign));
     cx_encode_coord(P + 1, size, sign);
-    cx_bn_unlock();
     memmove(P + 1 + size, P + 1, size);
     P[0] = 0x02;
 
 end:
+    cx_bn_unlock();
     return error;
 }
 
@@ -337,10 +337,10 @@ cx_err_t cx_edwards_decompress_point_no_throw(cx_curve_t curve, uint8_t *P, size
     memmove(P + 1 + size, P + 1, size);
     CX_CHECK(cx_ecpoint_decompress(&P_ec, P + 1, size, sign));
     CX_CHECK(cx_ecpoint_export(&P_ec, P + 1, size, P + 1 + size, size));
-    cx_bn_unlock();
     P[0] = 0x04;
 
 end:
+    cx_bn_unlock();
     return error;
 }
 

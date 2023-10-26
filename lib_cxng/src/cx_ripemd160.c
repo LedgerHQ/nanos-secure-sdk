@@ -306,9 +306,12 @@ size_t cx_hash_ripemd160(const uint8_t *in, size_t in_len, uint8_t *out, size_t 
     if (out_len < CX_RIPEMD160_SIZE) {
         return 0;
     }
-    cx_ripemd160_init_no_throw(&G_cx.ripemd160);
-    cx_ripemd160_update(&G_cx.ripemd160, in, in_len);
-    cx_ripemd160_final(&G_cx.ripemd160, out);
+    if (cx_ripemd160_init_no_throw(&G_cx.ripemd160) != CX_OK
+        || cx_ripemd160_update(&G_cx.ripemd160, in, in_len) != CX_OK
+        || cx_ripemd160_final(&G_cx.ripemd160, out) != CX_OK) {
+        explicit_bzero(&G_cx.ripemd160, sizeof(cx_ripemd160_t));
+        return 0;
+    }
     explicit_bzero(&G_cx.ripemd160, sizeof(cx_ripemd160_t));
     return CX_RIPEMD160_SIZE;
 }

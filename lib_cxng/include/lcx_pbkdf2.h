@@ -62,6 +62,7 @@
  *                         - CX_OK
  *                         - CX_INVALID_PARAMETER
  */
+// No need to add WARN_UNUSED_RESULT, return value is never checked!
 cx_err_t cx_pbkdf2_no_throw(cx_md_t        md_type,
                             const uint8_t *password,
                             size_t         passwordlen,

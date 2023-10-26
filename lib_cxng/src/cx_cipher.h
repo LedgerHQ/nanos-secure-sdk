@@ -29,9 +29,9 @@ extern const cx_cipher_info_t cx_aes_192_info;
 extern const cx_cipher_info_t cx_aes_256_info;
 
 /** HW support */
-cx_err_t cx_aes_set_key_hw(const cx_aes_key_t *keys, uint32_t mode);
-cx_err_t cx_aes_block_hw(const uint8_t *inblock, uint8_t *outblock);
-void     cx_aes_reset_hw(void);
+WARN_UNUSED_RESULT cx_err_t cx_aes_set_key_hw(const cx_aes_key_t *keys, uint32_t mode);
+WARN_UNUSED_RESULT cx_err_t cx_aes_block_hw(const uint8_t *inblock, uint8_t *outblock);
+void                        cx_aes_reset_hw(void);
 #endif  // HAVE_AES
 
 #endif /* CX_CIPHER_H */

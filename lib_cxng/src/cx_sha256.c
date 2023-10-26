@@ -282,7 +282,9 @@ size_t cx_hash_sha256(const uint8_t *in, size_t in_len, uint8_t *out, size_t out
         return 0;
     }
     cx_sha256_init_no_throw(&G_cx.sha256);
-    cx_sha256_update(&G_cx.sha256, in, in_len);
+    if (cx_sha256_update(&G_cx.sha256, in, in_len) != CX_OK) {
+        return 0;
+    }
     cx_sha256_final(&G_cx.sha256, out);
     explicit_bzero(&G_cx.sha256, sizeof(cx_sha256_t));
     return CX_SHA256_SIZE;

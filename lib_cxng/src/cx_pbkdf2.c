@@ -42,6 +42,7 @@ cx_err_t cx_pbkdf2_hmac(cx_md_t        md_type,
     uint8_t   *md1 = G_cx.pbkdf2.md1;
     size_t     copy_len;
     size_t     digest_size;
+    cx_err_t   error = CX_OK;
 
     if (password == NULL || salt == NULL || key == NULL) {
         return CX_INVALID_PARAMETER;
@@ -54,19 +55,19 @@ cx_err_t cx_pbkdf2_hmac(cx_md_t        md_type,
     counter[sizeof(counter) - 1] = 1;
 
     while (key_len) {
-        cx_hmac_init(hmac_ctx, md_type, password, password_len);
-        cx_hmac_update(hmac_ctx, salt, salt_len);
-        cx_hmac_update(hmac_ctx, counter, 4);
+        CX_CHECK(cx_hmac_init(hmac_ctx, md_type, password, password_len));
+        CX_CHECK(cx_hmac_update(hmac_ctx, salt, salt_len));
+        CX_CHECK(cx_hmac_update(hmac_ctx, counter, 4));
 
         work_size = digest_size;
-        cx_hmac_final(hmac_ctx, work, &work_size);
+        CX_CHECK(cx_hmac_final(hmac_ctx, work, &work_size));
 
         memcpy(md1, work, digest_size);
         for (uint32_t i = 1; i < iterations; i++) {
-            cx_hmac_init(hmac_ctx, md_type, password, password_len);
-            cx_hmac_update(hmac_ctx, md1, digest_size);
+            CX_CHECK(cx_hmac_init(hmac_ctx, md_type, password, password_len));
+            CX_CHECK(cx_hmac_update(hmac_ctx, md1, digest_size));
             work_size = digest_size;
-            cx_hmac_final(hmac_ctx, md1, &work_size);
+            CX_CHECK(cx_hmac_final(hmac_ctx, md1, &work_size));
 
             for (unsigned int j = 0; j < digest_size; j++) {
                 work[j] ^= md1[j];
@@ -90,7 +91,8 @@ cx_err_t cx_pbkdf2_hmac(cx_md_t        md_type,
             }
         }
     }
-    return CX_OK;
+end:
+    return error;
 }
 
 cx_err_t cx_pbkdf2_no_throw(cx_md_t        md_type,

@@ -72,7 +72,9 @@ void cx_poly1305_set_key(cx_poly1305_context_t *ctx, const uint8_t *key);
  *
  * @return          Error code
  */
-cx_err_t cx_poly1305_update(cx_poly1305_context_t *ctx, const uint8_t *input, size_t in_len);
+WARN_UNUSED_RESULT cx_err_t cx_poly1305_update(cx_poly1305_context_t *ctx,
+                                               const uint8_t         *input,
+                                               size_t                 in_len);
 
 /**
  * @brief           Generate the Poly1305 Message
@@ -86,7 +88,7 @@ cx_err_t cx_poly1305_update(cx_poly1305_context_t *ctx, const uint8_t *input, si
  *
  * @return          Error code.
  */
-cx_err_t cx_poly1305_finish(cx_poly1305_context_t *ctx, uint8_t *tag);
+WARN_UNUSED_RESULT cx_err_t cx_poly1305_finish(cx_poly1305_context_t *ctx, uint8_t *tag);
 
 /**
  * @brief           Calculate the Poly1305 MAC of the input
@@ -107,7 +109,10 @@ cx_err_t cx_poly1305_finish(cx_poly1305_context_t *ctx, uint8_t *tag);
  *
  * @return          Error code
  */
-cx_err_t cx_poly1305_mac(const uint8_t *key, const uint8_t *input, size_t in_len, uint8_t *tag);
+WARN_UNUSED_RESULT cx_err_t cx_poly1305_mac(const uint8_t *key,
+                                            const uint8_t *input,
+                                            size_t         in_len,
+                                            uint8_t       *tag);
 
 #endif  // HAVE_POLY1305
 

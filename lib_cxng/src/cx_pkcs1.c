@@ -234,6 +234,7 @@ static cx_err_t cx_pkcs1_MGF1(cx_md_t  hID,
     size_t     round_len;
     uint8_t    counter[4] = {0};
     cx_hash_t *hash_ctx   = &G_cx.pkcs1.hash_ctx.hash;
+    cx_err_t   error      = CX_OK;
 
     if (hID != CX_SHA224 && hID != CX_SHA256 && hID != CX_SHA384 && hID != CX_SHA512
         && hID != CX_SHA3_256 && hID != CX_SHA3_512) {
@@ -244,10 +245,10 @@ static cx_err_t cx_pkcs1_MGF1(cx_md_t  hID,
     while (out_len) {
         round_len = (out_len < hLen) ? out_len : hLen;
 
-        cx_hash_init_ex(hash_ctx, hID, hLen);
-        cx_hash_update(hash_ctx, seed, seed_len);
-        cx_hash_update(hash_ctx, counter, 4);
-        cx_hash_final(hash_ctx, G_cx.pkcs1.digest);
+        CX_CHECK(cx_hash_init_ex(hash_ctx, hID, hLen));
+        CX_CHECK(cx_hash_update(hash_ctx, seed, seed_len));
+        CX_CHECK(cx_hash_update(hash_ctx, counter, 4));
+        CX_CHECK(cx_hash_final(hash_ctx, G_cx.pkcs1.digest));
 
         memcpy(out, G_cx.pkcs1.digest, round_len);
         out_len -= round_len;
@@ -257,8 +258,8 @@ static cx_err_t cx_pkcs1_MGF1(cx_md_t  hID,
             counter[2]++;
         }
     }
-
-    return CX_OK;
+end:
+    return error;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -386,11 +387,11 @@ cx_err_t cx_pkcs1_emsa_pss_encode_with_salt_len(cx_md_t        hID,
     cx_rng_no_throw(salt, mSaltLen);
 #endif
 
-    cx_hash_init_ex(hash_ctx, hID, hLen);
-    cx_hash_update(hash_ctx, C_cx_pss_zeros, 8);
-    cx_hash_update(hash_ctx, mHash, mHashLen);
-    cx_hash_update(hash_ctx, salt, mSaltLen);
-    cx_hash_final(hash_ctx, em + mDBlen);
+    CX_CHECK(cx_hash_init_ex(hash_ctx, hID, hLen));
+    CX_CHECK(cx_hash_update(hash_ctx, C_cx_pss_zeros, 8));
+    CX_CHECK(cx_hash_update(hash_ctx, mHash, mHashLen));
+    CX_CHECK(cx_hash_update(hash_ctx, salt, mSaltLen));
+    CX_CHECK(cx_hash_final(hash_ctx, em + mDBlen));
 
     em[emLen - 1] = 0xbc;
     CX_CHECK(cx_pkcs1_MGF1(hID, em + mDBlen, hLen, em, mDBlen));
@@ -399,7 +400,6 @@ cx_err_t cx_pkcs1_emsa_pss_encode_with_salt_len(cx_md_t        hID,
     em[0] &= CX_PSS_MASK[8 * emLen - emBits];
     *size = emLen;
     explicit_bzero(&G_cx.pkcs1, sizeof(cx_pkcs1_t));
-
 end:
     return error;
 }
@@ -466,11 +466,13 @@ bool cx_pkcs1_emsa_pss_verify_with_salt_len(cx_md_t        hID,
         return false;
     }
 
-    cx_hash_init_ex(hash_ctx, hID, hLen);
-    cx_hash_update(hash_ctx, C_cx_pss_zeros, 8);
-    cx_hash_update(hash_ctx, mHash, mHashLen);
-    cx_hash_update(hash_ctx, em + PSLen + 1, mSaltLen);
-    cx_hash_final(hash_ctx, G_cx.pkcs1.digest);
+    if (cx_hash_init_ex(hash_ctx, hID, hLen) != CX_OK
+        || cx_hash_update(hash_ctx, C_cx_pss_zeros, 8) != CX_OK
+        || cx_hash_update(hash_ctx, mHash, mHashLen) != CX_OK
+        || cx_hash_update(hash_ctx, em + PSLen + 1, mSaltLen) != CX_OK
+        || cx_hash_final(hash_ctx, G_cx.pkcs1.digest) != CX_OK) {
+        return false;
+    }
 
     return memcmp(G_cx.pkcs1.digest, em + mDBlen, hLen) == 0;
 }

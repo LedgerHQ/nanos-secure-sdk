@@ -30,9 +30,11 @@ void cx_hkdf_extract(const cx_md_t        hash_id,
         salt     = hmac_ctx->key;
         salt_len = md_len;
     }
-    cx_hmac_init(hmac_ctx, hash_id, salt, salt_len);
-    cx_hmac_update(hmac_ctx, ikm, ikm_len);
-    cx_hmac_final(hmac_ctx, prk, &md_len);
+    if (cx_hmac_init(hmac_ctx, hash_id, salt, salt_len) != CX_OK
+        || cx_hmac_update(hmac_ctx, ikm, ikm_len) != CX_OK
+        || cx_hmac_final(hmac_ctx, prk, &md_len) != CX_OK) {
+        return;
+    }
 }
 
 void cx_hkdf_expand(const cx_md_t        hash_id,
@@ -56,13 +58,20 @@ void cx_hkdf_expand(const cx_md_t        hash_id,
     hmac_ctx = &G_cx.hmac;
 
     for (i = 1; okm_len > 0; i++) {
-        cx_hmac_init(hmac_ctx, hash_id, prk, prk_len);
-        if (i > 1) {
-            cx_hmac_update(hmac_ctx, T, offset);
+        if (cx_hmac_init(hmac_ctx, hash_id, prk, prk_len) != CX_OK) {
+            return;
         }
-        cx_hmac_update(hmac_ctx, info, info_len);
-        cx_hmac_update(hmac_ctx, &i, sizeof(i));
-        cx_hmac_final(hmac_ctx, T, &md_len);
+        if (i > 1) {
+            if (cx_hmac_update(hmac_ctx, T, offset) != CX_OK) {
+                return;
+            }
+        }
+        if (cx_hmac_update(hmac_ctx, info, info_len) != CX_OK
+            || cx_hmac_update(hmac_ctx, &i, sizeof(i)) != CX_OK
+            || cx_hmac_final(hmac_ctx, T, &md_len) != CX_OK) {
+            return;
+        }
+
         offset = (okm_len < md_len) ? okm_len : md_len;
         memcpy(okm + (i - 1) * md_len, T, offset);
         okm_len -= offset;

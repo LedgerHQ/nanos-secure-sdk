@@ -36,6 +36,7 @@ cx_err_t cx_blake3_init_derive_key(cx_blake3_t *hash, const void *context, size_
 {
     uint8_t  context_key[BLAKE3_KEY_LEN];
     uint32_t context_key_words[BLAKE3_NB_OF_WORDS];
+    cx_err_t error;
 
     // The context string context is hashed with the key words set to IV_0,...,IV_7
     // The DERIVE_KEY_CONTEXT flag is set for every compression
@@ -43,12 +44,12 @@ cx_err_t cx_blake3_init_derive_key(cx_blake3_t *hash, const void *context, size_
     // the first 8 output words of the first stage (context_key)
 
     blake3_init_ctx(hash, IV, DERIVE_KEY_CONTEXT);
-    cx_blake3_update(hash, context, context_len);
-    cx_blake3_final(hash, context_key, BLAKE3_KEY_LEN);
+    CX_CHECK(cx_blake3_update(hash, context, context_len));
+    CX_CHECK(cx_blake3_final(hash, context_key, BLAKE3_KEY_LEN));
     load_key_words(context_key, context_key_words);
     blake3_init_ctx(hash, context_key_words, DERIVE_KEY_MATERIAL);
-
-    return CX_OK;
+end:
+    return error;
 }
 
 cx_err_t cx_blake3_init(cx_blake3_t   *hash,
@@ -226,7 +227,6 @@ cx_err_t cx_blake3(cx_blake3_t *hash,
     if (mode & LAST) {
         CX_CHECK(cx_blake3_final(hash, out, out_len));
     }
-    error = CX_OK;
 end:
     return error;
 }

@@ -74,6 +74,7 @@ static bool cx_is_allowed_digest(cx_md_t md_type)
 cx_err_t cx_hmac_init(cx_hmac_t *ctx, cx_md_t hash_id, const uint8_t *key, size_t key_len)
 {
     cx_hash_t *hash_ctx;
+    cx_err_t   error;
 
     if ((ctx == NULL) || (!cx_is_allowed_digest(hash_id)) || (key == NULL && key_len != 0)) {
         return CX_INVALID_PARAMETER;
@@ -84,9 +85,9 @@ cx_err_t cx_hmac_init(cx_hmac_t *ctx, cx_md_t hash_id, const uint8_t *key, size_
 
     if (key) {
         if (key_len > block_size) {
-            cx_hash_init(hash_ctx, hash_id);
-            cx_hash_update(hash_ctx, key, key_len);
-            cx_hash_final(hash_ctx, ctx->key);
+            CX_CHECK(cx_hash_init(hash_ctx, hash_id));
+            CX_CHECK(cx_hash_update(hash_ctx, key, key_len));
+            CX_CHECK(cx_hash_final(hash_ctx, ctx->key));
         }
         else {
             memcpy(ctx->key, key, key_len);
@@ -97,9 +98,10 @@ cx_err_t cx_hmac_init(cx_hmac_t *ctx, cx_md_t hash_id, const uint8_t *key, size_
         }
     }
 
-    cx_hash_init(hash_ctx, hash_id);
-    cx_hash_update(hash_ctx, ctx->key, block_size);
-    return CX_OK;
+    CX_CHECK(cx_hash_init(hash_ctx, hash_id));
+    CX_CHECK(cx_hash_update(hash_ctx, ctx->key, block_size));
+end:
+    return error;
 }
 
 cx_err_t cx_hmac_update(cx_hmac_t *ctx, const uint8_t *data, size_t data_len)
@@ -112,6 +114,8 @@ cx_err_t cx_hmac_update(cx_hmac_t *ctx, const uint8_t *data, size_t data_len)
 
 cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len)
 {
+    cx_err_t error;
+
     uint8_t inner_hash[MAX_HASH_SIZE];
     uint8_t hkey[MAX_HASH_BLOCK_SIZE];
 
@@ -121,7 +125,7 @@ cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len)
     size_t  block_size       = cx_get_block_size(hash_algorithm);
     size_t  hash_output_size = cx_hash_get_size(hash_ctx);
 
-    cx_hash_final(hash_ctx, inner_hash);
+    CX_CHECK(cx_hash_final(hash_ctx, inner_hash));
 
     // hash key xor 5c (and 36 to remove prepadding at init)
     memcpy(hkey, ctx->key, block_size);
@@ -129,17 +133,18 @@ cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len)
         hkey[i] ^= OPAD ^ IPAD;
     }
 
-    cx_hash_init(hash_ctx, hash_algorithm);
-    cx_hash_update(hash_ctx, hkey, block_size);
-    cx_hash_update(hash_ctx, inner_hash, hash_output_size);
-    cx_hash_final(hash_ctx, hkey);
+    CX_CHECK(cx_hash_init(hash_ctx, hash_algorithm));
+    CX_CHECK(cx_hash_update(hash_ctx, hkey, block_size));
+    CX_CHECK(cx_hash_update(hash_ctx, inner_hash, hash_output_size));
+    CX_CHECK(cx_hash_final(hash_ctx, hkey));
 
     // length result
     if (*out_len >= hash_output_size) {
         *out_len = hash_output_size;
     }
     memcpy(out, hkey, *out_len);
-    return CX_OK;
+end:
+    return error;
 }
 
 #ifdef HAVE_SHA224
@@ -200,10 +205,10 @@ cx_err_t cx_hmac_no_throw(cx_hmac_t     *hmac,
 
     if (mode & CX_LAST) {
         output_size = out_len;
-        cx_hmac_final(hmac, out, &output_size);
+        CX_CHECK(cx_hmac_final(hmac, out, &output_size));
 
         if (!(mode & CX_NO_REINIT)) {
-            cx_hmac_init(hmac, cx_get_algorithm(hmac), NULL, 0);
+            CX_CHECK(cx_hmac_init(hmac, cx_get_algorithm(hmac), NULL, 0));
         }
     }
 
@@ -220,9 +225,11 @@ size_t cx_hmac_sha256(const uint8_t *key,
                       size_t         out_len)
 {
     size_t mac_len = out_len;
-    cx_hmac_init(&G_cx.hmac, CX_SHA256, key, key_len);
-    cx_hmac_update(&G_cx.hmac, in, len);
-    cx_hmac_final(&G_cx.hmac, out, &mac_len);
+    if (cx_hmac_init(&G_cx.hmac, CX_SHA256, key, key_len) != CX_OK
+        || cx_hmac_update(&G_cx.hmac, in, len) != CX_OK
+        || cx_hmac_final(&G_cx.hmac, out, &mac_len) != CX_OK) {
+        mac_len = 0;
+    }
     explicit_bzero(&G_cx.hmac, sizeof(cx_hmac_sha256_t));
     return mac_len;
 }
@@ -237,9 +244,11 @@ size_t cx_hmac_sha512(const uint8_t *key,
                       size_t         out_len)
 {
     size_t mac_len = out_len;
-    cx_hmac_init(&G_cx.hmac, CX_SHA512, key, key_len);
-    cx_hmac_update(&G_cx.hmac, in, len);
-    cx_hmac_final(&G_cx.hmac, out, &mac_len);
+    if (cx_hmac_init(&G_cx.hmac, CX_SHA512, key, key_len) != CX_OK
+        || cx_hmac_update(&G_cx.hmac, in, len) != CX_OK
+        || cx_hmac_final(&G_cx.hmac, out, &mac_len) != CX_OK) {
+        mac_len = 0;
+    }
     explicit_bzero(&G_cx.hmac, sizeof(cx_hmac_sha512_t));
     return mac_len;
 }
