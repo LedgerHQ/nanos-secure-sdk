@@ -553,15 +553,20 @@ int bagl_draw_string(unsigned short font_id,
 
             // chars are storred LSB to MSB in each char, packed chars. horizontal scan
             if (ch_bitmap) {
-                bagl_hal_draw_bitmap_within_rect(xx + ch_offset_x,
-                                                 ch_y + ch_offset_y,
-                                                 ch_width,
-                                                 ch_height,
-                                                 (1 << bpp),
-                                                 colors,
-                                                 bpp,
-                                                 ch_bitmap,
-                                                 ch_bits);
+                bolos_err_t ret = bagl_hal_draw_bitmap_within_rect(xx + ch_offset_x,
+                                                                   ch_y + ch_offset_y,
+                                                                   ch_width,
+                                                                   ch_height,
+                                                                   (1 << bpp),
+                                                                   colors,
+                                                                   bpp,
+                                                                   ch_bitmap,
+                                                                   ch_bits);
+                if (SWO_SUCCESS != ret) {
+                    // Exiting as early as error is detected can permit to see
+                    // on screen that there is an issue drawing some text
+                    return xx;
+                }
             }
             else {
                 bagl_hal_draw_rect(bgcolor, xx, ch_y, ch_width, ch_height);
@@ -1126,7 +1131,7 @@ void bagl_draw_with_context(const bagl_component_t *component,
 
                 // center glyph in rect
                 // draw the glyph from the bitmap using the context for colors
-                bagl_hal_draw_bitmap_within_rect(
+                bolos_err_t ret = bagl_hal_draw_bitmap_within_rect(
                     component->x + (component->width / 2 - glyph->width / 2),
                     component->y + (component->height / 2 - glyph->height / 2),
                     glyph->width,
@@ -1136,6 +1141,9 @@ void bagl_draw_with_context(const bagl_component_t *component,
                     glyph->bits_per_pixel,
                     glyph->bitmap,
                     glyph->bits_per_pixel * (glyph->width * glyph->height));
+                if (SWO_SUCCESS != ret) {
+                    return;
+                }
             }
             else {
                 // context: <bitperpixel> [color_count*4 bytes (LE encoding)] <icon bitmap (raw
@@ -1153,15 +1161,19 @@ void bagl_draw_with_context(const bagl_component_t *component,
                 }
 
                 // draw the glyph from the bitmap using the context for colors
-                bagl_hal_draw_bitmap_within_rect(component->x,
-                                                 component->y,
-                                                 component->width,
-                                                 component->height,
-                                                 1 << bpp,
-                                                 colors,
-                                                 bpp,
-                                                 ((unsigned char *) context) + 1 + (1 << bpp) * 4,
-                                                 bpp * (component->width * component->height));
+                bolos_err_t ret = bagl_hal_draw_bitmap_within_rect(
+                    component->x,
+                    component->y,
+                    component->width,
+                    component->height,
+                    1 << bpp,
+                    colors,
+                    bpp,
+                    ((unsigned char *) context) + 1 + (1 << bpp) * 4,
+                    bpp * (component->width * component->height));
+                if (SWO_SUCCESS != ret) {
+                    return;
+                }
             }
             break;
 #endif  // HAVE_BAGL_GLYPH_ARRAY
@@ -1202,7 +1214,7 @@ void bagl_draw_glyph(const bagl_component_t *component, const bagl_icon_details_
     */
 
     // draw the glyph from the bitmap using the context for colors
-    bagl_hal_draw_bitmap_within_rect(
+    bolos_err_t ret = bagl_hal_draw_bitmap_within_rect(
         component->x,
         component->y,
         icon_details->width,
@@ -1220,6 +1232,9 @@ void bagl_draw_glyph(const bagl_component_t *component, const bagl_icon_details_
         (unsigned char *) PIC((unsigned int) icon_details->bitmap),
 #endif  // DISPLAY_FLOWS
         icon_details->bpp * (icon_details->width * icon_details->height));
+    if (SWO_SUCCESS != ret) {
+        return;
+    }
 }
 
 // --------------------------------------------------------------------------------------
