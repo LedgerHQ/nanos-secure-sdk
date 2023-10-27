@@ -172,8 +172,8 @@ LDFLAGS  += -L$(BOLOS_SDK)/arch/st33k1/lib/
 AFLAGS   += -mcpu=cortex-m35p+nodsp -mthumb
 endif
 
-NO_UI ?= 0
-ifeq ($(NO_UI), 0)
+DISABLE_UI ?= 0
+ifeq ($(DISABLE_UI),0)
 ifeq ($(TARGET_NAME),TARGET_STAX)
 DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_24PX
 DEFINES += HAVE_BAGL_FONT_INTER_SEMIBOLD_24PX
