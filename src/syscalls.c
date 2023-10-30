@@ -1914,15 +1914,15 @@ void screen_set_keepout(unsigned int x, unsigned int y, unsigned int width, unsi
     return;
 }
 
-void bagl_hal_draw_bitmap_within_rect(int                  x,
-                                      int                  y,
-                                      unsigned int         width,
-                                      unsigned int         height,
-                                      unsigned int         color_count,
-                                      const unsigned int  *colors,
-                                      unsigned int         bit_per_pixel,
-                                      const unsigned char *bitmap,
-                                      unsigned int         bitmap_length_bits)
+bolos_err_t bagl_hal_draw_bitmap_within_rect(int                  x,
+                                             int                  y,
+                                             unsigned int         width,
+                                             unsigned int         height,
+                                             unsigned int         color_count,
+                                             const unsigned int  *colors,
+                                             unsigned int         bit_per_pixel,
+                                             const unsigned char *bitmap,
+                                             unsigned int         bitmap_length_bits)
 {
     unsigned int parameters[9];
     parameters[0] = (unsigned int) x;
@@ -1934,8 +1934,7 @@ void bagl_hal_draw_bitmap_within_rect(int                  x,
     parameters[6] = (unsigned int) bit_per_pixel;
     parameters[7] = (unsigned int) bitmap;
     parameters[8] = (unsigned int) bitmap_length_bits;
-    SVC_Call(SYSCALL_bagl_hal_draw_bitmap_within_rect_ID, parameters);
-    return;
+    return SVC_Call(SYSCALL_bagl_hal_draw_bitmap_within_rect_ID, parameters);
 }
 
 void bagl_hal_draw_rect(unsigned int color, int x, int y, unsigned int width, unsigned int height)

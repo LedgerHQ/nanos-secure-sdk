@@ -2,6 +2,7 @@
 
 #include "bolos_target.h"
 #include "decorators.h"
+#include "os_types.h"
 
 #ifdef HAVE_BAGL
 #ifdef HAVE_SE_SCREEN
@@ -34,16 +35,16 @@ SYSCALL void screen_set_keepout(unsigned int x,
  * Draw the given bitmap, with the given colors and position into the screen buffer. Don't update
  * the screen driver.
  */
-SYSCALL void bagl_hal_draw_bitmap_within_rect(int                        x,
-                                              int                        y,
-                                              unsigned int               width,
-                                              unsigned int               height,
-                                              unsigned int               color_count,
-                                              const unsigned int *colors PLENGTH(color_count * 4),
-                                              unsigned int               bit_per_pixel,
-                                              const unsigned char *bitmap
-                                                           PLENGTH(1 + bitmap_length_bits / 8),
-                                              unsigned int bitmap_length_bits);
+SYSCALL bolos_err_t
+bagl_hal_draw_bitmap_within_rect(int                         x,
+                                 int                         y,
+                                 unsigned int                width,
+                                 unsigned int                height,
+                                 unsigned int                color_count,
+                                 const unsigned int *colors  PLENGTH(color_count * 4),
+                                 unsigned int                bit_per_pixel,
+                                 const unsigned char *bitmap PLENGTH(1 + bitmap_length_bits / 8),
+                                 unsigned int                bitmap_length_bits);
 /**
  * Fill a rectangle with a given color in the screen buffer, but don't update the screen driver.
  */
