@@ -66,10 +66,14 @@ typedef struct {
 
 /** Cipher information */
 typedef struct {
-    uint32_t                key_bitlen;  ///< Key size
-    uint32_t                iv_size;     ///< Initialization vector size
-    uint32_t                block_size;  ///< Block size
-    const cx_cipher_base_t *base;        /// Structure for base cipher
+    uint32_t key_bitlen;  ///< Key size
+    uint32_t iv_size;     ///< Initialization vector size
+    uint32_t block_size;  ///< Block size
+#if !defined(BOLOS_OS_UPGRADER_APP)
+    const cx_cipher_base_t *base;  /// Structure for base cipher
+#else
+    cx_cipher_base_t *base;  /// Structure for base cipher
+#endif
 
 } cx_cipher_info_t;
 
