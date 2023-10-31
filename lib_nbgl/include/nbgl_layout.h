@@ -155,7 +155,7 @@ typedef nbgl_layoutTagValue_t *(*nbgl_tagValueCallback_t)(uint8_t pairIndex);
  * @brief This structure contains a list of [tag,value] pairs
  */
 typedef struct {
-    nbgl_layoutTagValue_t
+    const nbgl_layoutTagValue_t
         *pairs;  ///< array of [tag,value] pairs (nbPairs items). If NULL, callback is used instead
     nbgl_tagValueCallback_t callback;  ///< function to call to retrieve a given pair
     uint8_t nbPairs;  ///< number of pairs in pairs array (or max number of pairs to retrieve with

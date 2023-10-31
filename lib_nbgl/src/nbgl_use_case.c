@@ -214,7 +214,7 @@ static void pageCallback(int token, uint8_t index)
         }
     }
     else if (token == DETAILS_BUTTON_TOKEN) {
-        nbgl_layoutTagValue_t *pair;
+        const nbgl_layoutTagValue_t *pair;
         if (staticReviewContext.tagValueList.pairs != NULL) {
             pair = &staticReviewContext.tagValueList.pairs[staticReviewContext.currentPairIndex];
         }

@@ -1597,8 +1597,8 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueL
     }
 
     for (i = 0; i < list->nbPairs; i++) {
-        nbgl_layoutTagValue_t *pair;
-        uint16_t               fullHeight = 0, usableWidth;
+        const nbgl_layoutTagValue_t *pair;
+        uint16_t                     fullHeight = 0, usableWidth;
 
         if (list->pairs != NULL) {
             pair = &list->pairs[i];
