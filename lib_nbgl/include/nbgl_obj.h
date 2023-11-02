@@ -476,6 +476,7 @@ enum {
     KEYPAD_ID,
     KEYBOARD_ID,
     ENTERED_TEXT_ID,
+    LONG_PRESS_BUTTON_ID,
     CONTROLS_ID,  // when multiple controls in the same pages (buttons, switches, radios)
     NB_CONTROL_IDS
 };
