@@ -138,10 +138,10 @@ SYSCALL PERMISSION(APPLICATION_FLAG_BOLOS_SETTINGS) void os_setting_set(unsigned
                                                                             PLENGTH(length),
                                                                         unsigned int length);
 
-#ifdef HAVE_LANGUAGE_PACK
 // Shift preferences settings (could be needed after an update)
 void os_setting_update(void);
 
+#ifdef HAVE_LANGUAGE_PACK
 // Prototypes for language helper functions
 unsigned int os_setting_get_language(void);
 void         os_setting_set_language(unsigned int language);
