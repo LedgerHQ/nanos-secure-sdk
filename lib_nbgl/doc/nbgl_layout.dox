@@ -1,3 +1,4 @@
+#ifdef HAVE_SE_TOUCH
 /** @page nbgl_layout Complex objects layout API
 
 @section nbgl_layout_intro Introduction
@@ -743,3 +744,4 @@ objects.
 
 
 */
+#endif // HAVE_SE_TOUCH

@@ -1,0 +1,104 @@
+#ifdef NBGL_STEP
+/** @page nbgl_flow Flow API
+
+@section nbgl_flow_intro Introduction
+This chapter describes briefly the Flow API of Advanced BOLOS Graphic Library.
+
+This layer offers a way to handle multi-steps flows in typical scenarios of Nanos OS or Apps, like a transaction, a navigation in a menu.
+
+A full description of the way to create and interact with a flow can be found in this document
+
+@section nbgl_flow_concepts Concepts
+
+This layer uses the step API described in @ref nbgl_step, but for list of steps. The navigation between steps is entirely managed
+by the flow engine.
+
+@subsection nbgl_flow_example Example
+
+\image{inline} html layout_nanos_flow1.png "caption" height=200
+
+In this example, a flow made of 4 steps (each on one page) is built. The navigation is possible between these steps (no loop), and the
+last step can be selected (double button press).
+
+@section nbgl_flow_operations Operations
+
+@subsection create_flow Draw a flow
+
+The configuration of a flow is provided in a single function call, through @ref nbgl_flowDraw() which will:
+
+- draw the first step
+- Refresh after first step drawing
+
+The arguments of @ref nbgl_flowDraw() are:
+
+- An array of step descriptions (see below)
+- The index of the step to start with in step descriptions array
+- A boolean indicating whether the flow shall be modal or not
+- A boolean indicating whether the flow is circular or not (loop)
+
+@code
+static char string_buffer[128];
+
+static void onPrepareOSversion(void);
+static void onPrepareMCUversion(void);
+static void onPrepareBootloaderversion(void);
+static void onBack(void);
+
+static nbgl_flow_t flowContext;
+
+static const nbgl_stepDesc_t flowSteps[] = {
+  {
+    .text = "\bSecure Element",
+    .subText = string_buffer,
+    .init = onPrepareOSversion
+  },
+  {
+    .text = "\bMicrocontroller",
+    .subText = string_buffer,
+    .init = onPrepareMCUversion
+  },
+  {
+    .text = "\bBootloader",
+    .subText = string_buffer,
+    .init = onPrepareBootloaderversion
+  },
+  {
+    .text = "\bBack",
+    .callback = onBack,
+    .icon = &C_icon_back
+  }
+};
+
+static void onPrepareOSversion(void) {
+  os_version((unsigned char*)string_buffer, 32);
+}
+
+static void onPrepareMCUversion(void) {
+  os_seph_version((unsigned char*)string_buffer, 32);
+}
+
+static void onPrepareBootloaderversion(void) {
+  os_bootloader_version((unsigned char*)string_buffer, 32);
+}
+
+static void onBack(void) {
+  nbgl_flowRelease(flowContext);
+  // go to parent flow
+}
+
+void displayInfo() {
+  // use string_buffer as temporary buffer
+  memset(string_buffer, 0, 128);
+  flowContext = nbgl_flowDraw(flowSteps, 4, 0, false, false);
+}
+
+@endcode
+
+@subsection page_release Releasing a predefined page
+
+Before leaving a screen built with a layout, it must be released with a call to @ref nbgl_flowRelease(). It will free the allocated
+objects.
+
+
+*/
+#endif // NBGL_STEP

@@ -1,0 +1,309 @@
+#ifndef HAVE_SE_TOUCH
+/** @page nbgl_layout Complex objects layout API
+
+@section nbgl_layout_intro Introduction
+This chapter describes briefly the mid level API of Advanced BOLOS Graphic Library.
+
+This layer offers a simplified view of a screen page, using complex (aggregated) objects, like a centered info or a set of navigation arrows.
+
+A full description of each functions/types can be found in this document
+
+@section concepts2 Concepts
+
+This layer uses the low-level API described in @ref nbgl_obj, but all graphic objects are hidden, in favor to abstract complex objects
+like a centered info or a set of navigation arrows.
+
+Moreover, positions of objects in the page are mostly hidden and automatic.
+
+@subsection example_1 Example
+
+\image{inline} html layout_nanos_1.png "caption" height=300
+
+In this example, 2 "objects" are used and added to the page with dedicated APIs:
+
+- A centered information area with an icon and a main text
+- A set of navigation arrows, indicating that the user can use left/right buttons to navigated across pages
+
+@section operations Common operations
+
+@subsection create_layout Getting a new layout
+
+The first operation is always to get a new layout, with the desired parameters:
+
+- An action callback used for all controls of the page
+- A boolean indicated whether the page is modal or not (on top of existing ones, or in background plane)
+- A potential ticker configuration if a ticker is required for the page
+
+The function to actually create the layout is @ref nbgl_layoutGet()
+
+For example:
+
+@code
+    nbgl_layoutDescription_t layoutDescription = {
+      .modal = false, // not modal (so on plane 0)
+      .onActionCallback = &myActionCallback, // generic callback for all controls
+      .ticker.callback = NULL // no ticker
+    };
+    // create layout
+    nbgl_layout_t *layout = nbgl_layoutGet(&layoutDescription);
+@endcode
+
+@subsection draw_layout Drawing a populated layout
+
+Once defined and populated, all objects can be drawn in **framebuffer**
+with a simple call to @ref nbgl_layoutDraw().
+
+@section add_objects Populating a layout
+
+Once the layout is defined and retrieved with @ref nbgl_layoutGet(), the page can be filled with complex objects.
+
+@subsection centered_info Centered info area
+
+\image{inline} html layout_nanos_centered.png "caption" height=300
+
+This object is made of:
+
+- An optional icon
+- An optional main text under the icon
+- An optional sub text under the main text
+
+The whole object is centered horizontally in the page
+
+It can be either centered vertically or put on top of the page.
+
+The API to insert such an object is @ref nbgl_layoutAddCenteredInfo(), using @ref nbgl_layoutCenteredInfo_t structure
+
+The fonts for the texts depends of the \b style field used in @ref nbgl_layoutCenteredInfo_t.
+
+- if @ref REGULAR_INFO, main text and sub text are in regular case
+- if @ref BOLD_TEXT1_INFO, main text is in bold case (and sub text in regular case)
+
+@subsection navigation Navigation area
+
+\image{inline} html layout_nanos_nav1.png "caption" height=300
+
+or
+
+\image{inline} html layout_nanos_nav2.png "caption" height=300
+
+
+This object is made of:
+
+- 1 or 2 arrows on left and right of the screen
+
+The arrows are centered vertically in the page
+
+There are two styles for the arrows:
+
+- either @ref HORIZONTAL_NAV for navigation between pages
+- or @ref VERTICAL_NAV for navigation between menu items
+
+The API to insert such an object is @ref nbgl_layoutAddNavigation(), using @ref nbgl_layoutNavigation_t structure
+
+The "direction" and the number of arrows (left, right or both) to use are set in @ref nbgl_layoutNavigation_t.
+
+@subsection menu_list Menu List area
+
+\image{inline} html layout_nanos_menu_list.png "caption" height=300
+
+On screen, the visible part of his object is made of up to 5 menu item elements (single line, centered horizontally)
+
+The first and last of the 5 lines are only partially visible (horizontal cut)
+
+The API to insert such an object is @ref nbgl_layoutAddMenuList(), using @ref nbgl_layoutMenuList_t structure,
+which enables to configure:
+
+- The total number of items in the list.
+- The selected item index in the list (that will be highlighted in bold, and always be centered vertically)
+- A callback that will be called to get the text of each displayed menu item
+
+@subsection keyboard_section Keyboard-related objects
+
+Some rare screens require displaying a keyboard at the bottom of the page, to enter text.
+
+The text to enter may be a generic string or a word (for example BIP39).
+
+Here is an example of these pages in Bolos UX:
+
+\image{inline} html layout_nanos_keyboard1.png "caption" height=300
+
+To build such screens, some dedicated APIs are necessary, which will be detailed in the sub-chapters.
+
+@subsubsection keyboard_sub_section_1 Adding/Updating keyboard
+
+This object, in the center of screen (with a margin), proposes a rotating keyboard, displaying 3 letters at max,
+(from 'a' to 'z' in letters-only).
+
+The parameters to configure this object are:
+
+- The mode in which to start the keyboard (letters, digits or special characters)
+- A boolean to indicate whether to display only letters, with no space and no shift key to switch between modes
+- A boolean to indicate whether to display a backspace key or not.
+- A boolean to indicate whether to display a validate key or not.
+- A 32 bits mask used to invalidate (remove) some keys on the keyboard (in letters-only mode).
+- A function to be called when an active key is pressed
+
+The API to insert such an object is @ref nbgl_layoutAddKeyboard(), with @ref nbgl_layoutKbd_t structure as parameter.
+
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateKeyboard() function,
+used to modify an existing keyboard.
+
+@note the 32 bits mask works like this:
+- If mask[0] bit is 1, the 'a' key is invalid
+- If mask[1] bit is 1, the 'b' key is invalid
+- And so on in "abcdefghijklmnopqrstuvwxyz" string.
+- If mask[26] bit is 1, the backspace key is not used
+
+@subsubsection keyboard_sub_section_4 Adding/Updating entered text
+
+This object, displayed under the keyboard consists in a set of 9 placeholders
+representing the text entered with the keyboard.
+
+If text is too long to be displayed (more than 8 characters), the beginning is replaced by ".."
+
+The only parameter to configure this object is:
+
+- The \b text to display
+
+The API to insert such an object is @ref nbgl_layoutAddEnteredText().
+
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateEnteredText() function,
+used to modify the text.
+
+@subsubsection keyboard_example Example
+
+Here is the source code to display the example:
+
+@code
+static nbgl_layout_t *layout;
+static char textToEnter[10];
+static char headerText[24];
+static int textIndex, keyboardIndex;
+
+// function called when a key of keyboard is touched
+static void keyboardCallback(char touchedKey) {
+
+}
+
+void app_keyboard(void) {
+ nbgl_layoutDescription_t layoutDescription = {
+    .modal = false,
+    .onActionCallback = NULL
+  };
+  nbgl_layoutKbd_t kbdInfo = {
+    .callback = keyboardCallback,
+    .keyMask = 1<<26, // no masked letter but masked backspace
+    .lettersOnly = true // only letters are allowed
+  };
+  nbgl_layoutCenteredInfo_t centeredInfo = {
+    .text1 = descriptionTxt,
+    .text2 = NULL,
+    .icon = NULL,
+    .onTop = true
+  };
+  nbgl_layoutNavigation_t navInfo = {
+    .direction = HORIZONTAL_NAV,
+    .indication = LEFT_ARROW | RIGHT_ARROW
+  };
+  int status;
+
+  // create description text
+  sprintf(headerText,"Enter word #%d",12);
+
+  // get empty layout
+  layout = nbgl_layoutGet(&layoutDescription);
+  // add description
+  nbgl_layoutAddCenteredInfo(layout, &centeredInfo);
+
+  // add keyboard
+  status = nbgl_layoutAddKeyboard(layout, &kbdInfo);
+  if (status < 0)
+    return;
+  keyboardIndex = (uint8_t)status;
+  // add empty entered text
+  status = nbgl_layoutAddEnteredText(layout, "");
+  if (status < 0)
+    return;
+  textIndex = (uint8_t)status;
+  nbgl_layoutAddNavigation(layout, &navInfo);
+  nbgl_layoutDraw(layout);
+  nbgl_refresh();
+}
+@endcode
+
+@subsection keypad_section Keypad-related objects
+
+Some rare screens require displaying a keypad at the bottom of the page, to enter digits.
+
+The digits to enter are usually a PIN code, to enter or to confirm.
+
+Here are some example of these pages in Bolos UX:
+
+\image{inline} html layout_nanos_keypad1.png "caption" height=300
+
+To build such screens, some dedicated APIs are necessary, which will be detailed in the sub-chapters.
+
+@subsubsection keypad_sub_section_1 Adding/Updating keypad
+
+This object is made of an area at the bottom of the screen, presenting the 10 digits, a backspace and a validate keys, that can be navigated
+with left and right buttons and selected with both buttons. And a title at the top of the screen.
+
+The only parameters to configure this object (at creation time) are:
+
+- the callback associated with active keypad key selection.
+- a boolean to choose between shuffled (selection starts with any key) and regular mode (selection starts at '5' key).
+- a single line string to use as title.
+
+The API to insert such an object is @ref nbgl_layoutAddKeypad().
+
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateKeypad() function,
+used to modify the active keys of an existing keypad (backspace and validate keys).
+
+@note at creation time, backspace and validate keys are inactive
+
+@subsubsection keypad_sub_section_2 Adding/Updating hidden digits area
+
+This object, displayed on top of the keypad, consists in up to 8 discs (plain or empty) corresponding to
+hidden entered/not entered digits.
+
+The parameters to configure this object are:
+
+- The number of total digits to be displayed (all digits are considered as "not entered")
+
+The API to insert such an object is @ref nbgl_layoutAddHiddenDigits().
+
+This function returns a positive integer (if successful) to be used as an index in @ref nbgl_layoutUpdateHiddenDigits() function,
+used to modify the number of entered digits.
+
+@section refresh_layout Refreshing screen
+
+After having drawn graphic objects in **framebuffer**, it is necessary to transfer the content of the **framebuffer** on display.
+This operation is called a refresh.
+
+The API to do that is @ref nbgl_refresh() (in nbgl_obj.h)
+
+It will only refresh the rectangle part of the screen having changed (with objects redrawn) since the last refresh.
+
+@section callbacks Control actions management
+
+Some controls, like a touchable bar, or a choice by radio buttons, can be interacted with thanks to the Touchscreen.
+
+The developer can subscribe to these events by providing an action callback in @ref nbgl_layoutGet(), with @ref nbgl_layoutTouchCallback_t prototype.
+
+The first parameter (*token*) of this function is a token provided along with the definition of the complex object.
+
+The second parameter (*index*) is only used for some types of complex objects:
+
+- **Navigation bar**: in this case, *index* gives the index of the new active page, when navigating.
+- **Radio button choices**: in this case, *index* gives the index of the selected choice.
+- **Switches**: in this case, if *index* is 0 it means OFF, otherwise it means ON.
+- **Choice buttons**: in this case, if *index* is 0, it means top-button (choice 1), otherwise it means bottom-buttom (choice 2)
+
+@subsection release Releasing a layout
+
+Before leaving a screen built with a layout, it must be released with a call to @ref nbgl_layoutRelease(). It will free the potentially allocated
+objects.
+
+
+*/
+#endif // HAVE_SE_TOUCH

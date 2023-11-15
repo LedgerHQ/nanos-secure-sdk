@@ -35,7 +35,9 @@ enum {
     TOUCH_LOGGER,
     APP_LOGGER,
     UX_LOGGER,
-    MISC_LOGGER
+    MISC_LOGGER,
+    STEP_LOGGER,
+    FLOW_LOGGER
 };
 /**********************
  *      TYPEDEFS

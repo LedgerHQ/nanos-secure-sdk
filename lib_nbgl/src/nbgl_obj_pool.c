@@ -20,12 +20,20 @@
  * @brief Max number of objects retrievable from pool
  *
  */
-#define OBJ_POOL_LEN           80
+#ifdef HAVE_SE_TOUCH
+#define OBJ_POOL_LEN 80
+#else  // HAVE_SE_TOUCH
+#define OBJ_POOL_LEN 40
+#endif  // HAVE_SE_TOUCH
 /**
  * @brief Max number of objects pointers usable for container pool
  *
  */
+#ifdef HAVE_SE_TOUCH
 #define OBJ_CONTAINER_POOL_LEN 128
+#else  // HAVE_SE_TOUCH
+#define OBJ_CONTAINER_POOL_LEN 64
+#endif  // HAVE_SE_TOUCH
 
 #define INVALID_LAYER 0xFF
 
@@ -35,19 +43,27 @@
 
 typedef struct {
     union {
-        nbgl_obj_t            obj;
+        nbgl_obj_t          obj;
+        nbgl_text_area_t    textAreaObj;
+        nbgl_progress_bar_t progressBarObj;
+        nbgl_container_t    containerObj;
+        nbgl_image_t        imageObj;
+#ifdef HAVE_SE_TOUCH
         nbgl_radio_t          radioObj;
         nbgl_switch_t         switchObj;
-        nbgl_text_area_t      textAreaObj;
         nbgl_button_t         buttonObj;
-        nbgl_progress_bar_t   progressBarObj;
         nbgl_page_indicator_t navBarObj;
-        nbgl_container_t      containerObj;
-        nbgl_image_t          imageObj;
         nbgl_line_t           lineObj;
-        nbgl_keyboard_t       keyboardObj;
-        nbgl_keypad_t         keypadObj;
         nbgl_spinner_t        spinnerObj;
+#else   // HAVE_SE_TOUCH
+        nbgl_text_entry_t entryObj;
+#endif  // HAVE_SE_TOUCH
+#ifdef NBGL_KEYBOARD
+        nbgl_keyboard_t keyboardObj;
+#endif  // NBGL_KEYBOARD
+#ifdef NBGL_KEYPAD
+        nbgl_keypad_t keypadObj;
+#endif  // NBGL_KEYPAD
     };
 } genericObj_t;
 
@@ -249,8 +265,10 @@ void nbgl_containerPoolRelease(uint8_t layer)
 {
     uint8_t i;
     LOG_DEBUG(OBJ_POOL_LOGGER,
-              "nbgl_containerPoolRelease(): %d containers in pool\n",
-              nbUsedObjsInContainerPool);
+              "nbgl_containerPoolRelease(): %d used obj containers in pool, trying to release for "
+              "layer %d\n",
+              nbUsedObjsInContainerPool,
+              layer);
     if (nbUsedObjsInContainerPool == 0) {
         return;
     }
@@ -272,6 +290,10 @@ nbgl_obj_t **nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer)
 {
     uint8_t      i = 0, nbContiguousFree = 0;
     nbgl_obj_t **container;
+    LOG_DEBUG(OBJ_POOL_LOGGER,
+              "nbgl_containerPoolGet(): getting %d obj containers for layer %d\n",
+              nbObjs,
+              layer);
     if (initialized == false) {
         memset(objPoolLayers, INVALID_LAYER, OBJ_POOL_LEN);
         memset(objPointersPoolLayers, INVALID_LAYER, OBJ_CONTAINER_POOL_LEN);

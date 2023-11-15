@@ -163,7 +163,7 @@ class Rle1bpp():
     """
     # -------------------------------------------------------------------------
     @staticmethod
-    def image_to_pixels(img):
+    def image_to_pixels(img, reverse):
         """
         Rotate and pack bitmap data of the character.
         return an array of pixels values.
@@ -173,8 +173,12 @@ class Rle1bpp():
         pixels = []
         # Intensity level value to be considered a white pixel
         white_threshold = 128
-        white_pixel = 1
-        black_pixel = 0
+        if reverse:
+            white_pixel = 0
+            black_pixel = 1
+        else:
+            white_pixel = 1
+            black_pixel = 0
 
         # col first
         for col in reversed(range(width)):
@@ -314,7 +318,7 @@ class Rle1bpp():
 
     # -------------------------------------------------------------------------
     @classmethod
-    def rle_1bpp(cls, img) -> Tuple[int, bytes]:
+    def rle_1bpp(cls, img, reverse) -> Tuple[int, bytes]:
         """
         Input: image to compress
         - convert the picture to an array of pixels
@@ -322,7 +326,7 @@ class Rle1bpp():
         - encode using custom RLE
         Output: array of compressed bytes
         """
-        pixels = cls.image_to_pixels(img)
+        pixels = cls.image_to_pixels(img, reverse)
         pairs = cls.encode_pass1(pixels)
         encoded_data = cls.encode_pass2(pairs)
 

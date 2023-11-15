@@ -27,6 +27,7 @@
 #include "os_math.h"
 #include "os_ux.h"
 #include "os_task.h"
+#include "os_screen.h"
 
 #ifndef HAVE_BOLOS_UX
 #ifndef HAVE_UX_FLOW

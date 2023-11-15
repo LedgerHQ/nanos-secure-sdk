@@ -107,7 +107,7 @@ ifneq ($(DISABLE_STANDARD_WEBUSB), 1)
 endif
 
 ifneq ($(DISABLE_STANDARD_BAGL_UX_FLOW), 1)
-ifneq ($(TARGET_NAME), TARGET_STAX)
+ifndef USE_NBGL
     DEFINES += HAVE_UX_FLOW
 endif
 endif

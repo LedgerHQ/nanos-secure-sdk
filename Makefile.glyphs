@@ -31,8 +31,8 @@ endif
 GLYPH_DESTC := $(GLYPH_SRC_DIR)/glyphs.c
 GLYPH_DESTH := $(GLYPH_SRC_DIR)/glyphs.h
 
-ifeq ($(TARGET_NAME),TARGET_STAX)
-# Stax glyphs files and generation script
+ifdef USE_NBGL
+# Not NanoS glyphs files and generation script
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/))))
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 ifneq (,$(wildcard $(ICONNAME)))
@@ -40,11 +40,18 @@ ifneq (,$(wildcard $(ICONNAME)))
 GLYPH_FILES += $(ICONNAME)
 endif
 ICON_SCRIPT = $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py
-GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --glyphcfile $(GLYPH_FILES)
+#inverse B&W for non Stax
+ifneq ($(TARGET_NAME),TARGET_STAX)
+GLYPH_OPT := --reverse
+else
+GLYPH_OPT :=
+endif
+GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) $(GLYPH_OPT) --glyphcfile $(GLYPH_FILES)
 else
 # Nano glyphs files and generation script
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_ux/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_ux/glyphs/))))
+GLYPH_OPT :=
 ICON_SCRIPT = $(BOLOS_SDK)/icon3.py
 GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --factorize --glyphcfile $(GLYPH_FILES)
 endif
@@ -54,7 +61,7 @@ $(GLYPH_DESTH): $(GLYPH_FILES) $(ICON_SCRIPT)
 	$(L)-mkdir -p $(GLYPH_SRC_DIR)
 	$(L)rm -f $(GLYPH_DESTC) $(GLYPH_DESTH)
 	@# Use temporary files to prevent issues when build is interrupted
-	$(L)python3 $(ICON_SCRIPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH)_tmp
+	$(L)python3 $(ICON_SCRIPT) $(GLYPH_OPT) --glyphcheader $(GLYPH_FILES) > $(GLYPH_DESTH)_tmp
 	$(L)$(GENERATE_GLYPHS_CMD) > $(GLYPH_DESTC)_tmp
 	$(L)mv $(GLYPH_DESTC)_tmp $(GLYPH_DESTC)
 	$(L)mv $(GLYPH_DESTH)_tmp $(GLYPH_DESTH)

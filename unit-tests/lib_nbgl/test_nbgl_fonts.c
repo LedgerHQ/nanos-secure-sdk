@@ -10,71 +10,9 @@
 #include "nbgl_fonts.h"
 #include "ux_loc.h"
 
-const LANGUAGE_PACK *language_pack = NULL;
+void fetch_language_packs(void);
 
-static void fetch_language_packs(void)
-{
-    // If we are looking for a language pack:
-    // - if the expected language is found then we'll use its begin/length range.
-    // - else we'll use the built-in package and need to reset allowed MMU range.
-
-    FILE *fptr = NULL;
-
-    fptr = fopen("../bolos_pack_fr.bin", "rb");
-
-    assert_non_null(fptr);
-    if (fptr != NULL) {
-        fseek(fptr, 0, SEEK_END);
-
-        uint32_t len = ftell(fptr);
-
-        fseek(fptr, 0, SEEK_SET);
-
-        uint8_t *source = (uint8_t *) malloc(len);
-
-        assert_non_null(source);
-
-        assert_int_equal(fread((unsigned char *) source, 1, len, fptr), len);
-
-        fclose(fptr);
-
-        language_pack = (LANGUAGE_PACK *) source;
-    }
-}
-
-#include "nbgl_fonts.h"
-#include "nbgl_font_hmalpha_mono_medium_32.inc"
-#include "nbgl_font_inter_regular_24.inc"
-#include "nbgl_font_inter_semibold_24.inc"
-#include "nbgl_font_inter_medium_32.inc"
-#include "nbgl_font_inter_regular_24_1bpp.inc"
-#include "nbgl_font_inter_semibold_24_1bpp.inc"
-#include "nbgl_font_inter_medium_32_1bpp.inc"
-
-static const nbgl_font_t *const C_nbgl_fonts[] = {
-#include "nbgl_font_rom_struct.inc"
-};
-static const unsigned int C_nbgl_fonts_count = sizeof(C_nbgl_fonts) / sizeof(C_nbgl_fonts[0]);
-
-const nbgl_font_t *nbgl_font_getFont(unsigned int fontId)
-{
-    unsigned int i = C_nbgl_fonts_count;
-    while (i--) {
-        // font id match this entry (non indexed array)
-        if (C_nbgl_fonts[i]->font_id == fontId) {
-            return C_nbgl_fonts[i];
-        }
-    }
-
-    // id not found
-    return NULL;
-}
-
-void *pic(void *addr)
-{
-    return addr;
-}
-
+#ifdef HAVE_SE_TOUCH
 static void test_get_length(void **state __attribute__((unused)))
 {
     char *str_with_unicode    = "çoto";
@@ -91,13 +29,13 @@ static void test_get_length(void **state __attribute__((unused)))
     assert_int_equal(strlen(str_with_unicode), 5);
 
     width = nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px, str_with_unicode);
-    assert_int_equal(width, 45);
+    assert_int_equal(width, 50);
 
     char myChar = 0x30;
     width       = nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px, &myChar);
     assert_int_equal(width, 15);
     width = nbgl_getCharWidth(BAGL_FONT_INTER_REGULAR_24px, "ç");
-    assert_int_equal(width, 8);
+    assert_int_equal(width, 13);
 
     assert_int_equal(nbgl_getTextNbLines(str_without_unicode), 1);
     assert_int_equal(nbgl_getTextNbLines(str_with_unicode), 1);
@@ -153,7 +91,7 @@ static void test_get_length(void **state __attribute__((unused)))
     nbgl_getTextMaxLenAndWidth(
         BAGL_FONT_INTER_REGULAR_24px, "totçour\nau revoir", 50, &len, &width, false);
     assert_int_equal(len, 5);
-    assert_int_equal(width, 40);
+    assert_int_equal(width, 45);
 
     char textToWrap[32] = "toto";
     nbgl_textWrapOnNbLines(BAGL_FONT_INTER_SEMIBOLD_24px, textToWrap, 156, 2);
@@ -175,6 +113,110 @@ static void test_get_length(void **state __attribute__((unused)))
         = nbgl_getTextHeightInWidth(BAGL_FONT_INTER_MEDIUM_32px, "AB WWWWWWWW WWW W", 200, true);
     assert_int_equal(height, 160);
 }
+#else   // HAVE_SE_TOUCH
+static void test_get_length(void **state __attribute__((unused)))
+{
+    uint16_t len;
+    uint16_t width;
+    fetch_language_packs();
+
+    width = nbgl_getTextWidth(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                              "justement ca tombe bienheureux");
+    assert_int_equal(width, 0xAC);
+    width = nbgl_getTextWidth(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp, "Setup as a");
+    assert_int_equal(width, 0x35);
+    width = nbgl_getTextWidth(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp, "new device");
+    assert_int_equal(width, 0x3A);
+
+    nbgl_getTextMaxLenAndWidth(
+        BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp, "new device", 114, &len, &width, false);
+    assert_int_equal(width, 0x3A);
+
+    nbgl_getTextMaxLenAndWidth(
+        BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp, "la mise à jour", 114, &len, &width, false);
+    assert_int_equal(width, 80);
+
+    nbgl_getTextMaxLenAndWidth(
+        BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp, "Confirmer", 114, &len, &width, false);
+    assert_int_equal(width, 58);
+
+    nbgl_getTextMaxLenInNbLines(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp, "toto", 114, 4, &len, true);
+    assert_int_equal(len, 4);
+    nbgl_getTextMaxLenInNbLines(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                                "toto\nbonjour au revoir a demain",
+                                114,
+                                4,
+                                &len,
+                                true);
+    assert_int_equal(len, strlen("toto\nbonjour au revoir a demain"));
+    nbgl_getTextMaxLenInNbLines(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                                "toto\nbonjour au revoir a demain\njustement ca tombe bienheureux",
+                                114,
+                                4,
+                                &len,
+                                true);
+    assert_int_equal(len, strlen("toto\nbonjour au revoir a demain\njustement ca tombe "));
+
+    width = nbgl_getTextWidth(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                              "Pressing both buttons allows you");
+    assert_int_equal(width, 0xAE);
+
+    assert_int_equal(
+        3,
+        nbgl_getTextNbPagesInWidth(
+            BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+            "Pressing both buttons allows you\nto select or confirm\fNow, download Ledger Live "
+            "at\n\bledger.com/start\b\fFollow the instructions in Live to set up your Nano",
+            4,
+            114));
+    nbgl_getTextMaxLenInNbLines(
+        BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+        "Pressing both buttons allows you\nto select or confirm\fNow, download Ledger Live "
+        "at\n\bledger.com/start\b\fFollow the instructions in Live to set up your Nano",
+        114,
+        4,
+        &len,
+        true);
+    assert_int_equal(len, strlen("Pressing both buttons allows you\nto select or confirm\f"));
+    nbgl_getTextMaxLenInNbLines(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                                "Now, download Ledger Live at\n\bledger.com/start\b\fFollow the "
+                                "instructions in Live to set up your Nano",
+                                114,
+                                4,
+                                &len,
+                                true);
+    assert_int_equal(len, strlen("Now, download Ledger Live at\n\bledger.com/start\b\f"));
+    nbgl_getTextMaxLenInNbLines(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                                "Follow the instructions in Live to set up your Nano",
+                                114,
+                                4,
+                                &len,
+                                true);
+    assert_int_equal(len, strlen("Follow the instructions in Live to set up your Nano"));
+
+    width = nbgl_getTextWidth(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp, "FCC Rules. Operation");
+    assert_int_equal(width, 0x6E);
+    nbgl_getTextMaxLenInNbLines(BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+                                "\bFCC Notes\b\nThis device complies with Part 15 of the FCC "
+                                "Rules. Operation is subject to the following",
+                                114,
+                                4,
+                                &len,
+                                true);
+    assert_int_equal(
+        len,
+        strlen("\bFCC Notes\b\nThis device complies with Part 15 of the FCC Rules. Operation "));
+
+    uint8_t nbPages = nbgl_getTextNbPagesInWidth(
+        BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp,
+        "Pour sélectionner ou confirmer, appuyez sur les deux boutons\fTéléchargez\nLedger "
+        "Live\nmaintenant sur\n\bledger.com/start\b\fSuivez les instructions dans Ledger Live pour "
+        "configurer\nvotre Nano",
+        4,
+        114);
+    assert_int_equal(nbPages, 3);
+}
+#endif  // HAVE_SE_TOUCH
 
 int main(int argc, char **argv)
 {

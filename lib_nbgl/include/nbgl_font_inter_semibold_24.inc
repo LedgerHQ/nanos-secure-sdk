@@ -1169,6 +1169,7 @@ __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_SEMIBOLD_
   (uint8_t) NBGL_BPP_4, // bpp
   32, // height of all characters in pixels
   32, // line height in pixels
+  0, // kerning
   1, // crop enabled (1) or not (0)
   4, // Most top Y coordinate of any char
   0x20, // first character

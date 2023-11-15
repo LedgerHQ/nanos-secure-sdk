@@ -122,25 +122,39 @@ static int nbgl_screenSetAt(uint8_t                                 screenIndex,
                             nbgl_obj_t                           ***children,
                             uint8_t                                 nbChildren,
                             const nbgl_screenTickerConfiguration_t *ticker,
-                            nbgl_touchCallback_t                    callback)
+#ifdef HAVE_SE_TOUCH
+                            nbgl_touchCallback_t callback)
 {
+#else   // HAVE_SE_TOUCH
+                            nbgl_buttonCallback_t callback)
+{
+#endif  // HAVE_SE_TOUCH
     if (screenIndex >= SCREEN_STACK_SIZE) {
         LOG_WARN(SCREEN_LOGGER, "nbgl_screenSetAt(): forbidden screenIndex (%d)\n", screenIndex);
         return -1;
     }
     *children                                   = nbgl_containerPoolGet(nbChildren, screenIndex);
     screenStack[screenIndex].container.obj.type = SCREEN;
+#ifdef HAVE_SE_TOUCH
     screenStack[screenIndex].container.obj.area.backgroundColor = WHITE;
-    screenStack[screenIndex].container.obj.area.height          = SCREEN_HEIGHT;
-    screenStack[screenIndex].container.obj.area.width           = SCREEN_WIDTH;
-    screenStack[screenIndex].container.obj.area.x0              = 0;
-    screenStack[screenIndex].container.obj.area.y0              = 0;
-    screenStack[screenIndex].container.obj.rel_x0               = 0;
-    screenStack[screenIndex].container.obj.rel_y0               = 0;
-    screenStack[screenIndex].container.layout                   = VERTICAL;
-    screenStack[screenIndex].container.children                 = *children;
-    screenStack[screenIndex].container.nbChildren               = nbChildren;
-    screenStack[screenIndex].touchCallback                      = callback;
+#else   // HAVE_SE_TOUCH
+    screenStack[screenIndex].container.obj.area.backgroundColor = BLACK;
+#endif  // HAVE_SE_TOUCH
+    screenStack[screenIndex].container.obj.area.height = SCREEN_HEIGHT;
+    screenStack[screenIndex].container.obj.area.width  = SCREEN_WIDTH;
+    screenStack[screenIndex].container.obj.area.x0     = 0;
+    screenStack[screenIndex].container.obj.area.y0     = 0;
+    screenStack[screenIndex].container.obj.rel_x0      = 0;
+    screenStack[screenIndex].container.obj.rel_y0      = 0;
+    screenStack[screenIndex].index                     = screenIndex;
+    screenStack[screenIndex].container.layout          = VERTICAL;
+    screenStack[screenIndex].container.children        = *children;
+    screenStack[screenIndex].container.nbChildren      = nbChildren;
+#ifdef HAVE_SE_TOUCH
+    screenStack[screenIndex].touchCallback = callback;
+#else   // HAVE_SE_TOUCH
+    screenStack[screenIndex].buttonCallback                     = callback;
+#endif  // HAVE_SE_TOUCH
     if (ticker != NULL) {
         screenStack[screenIndex].ticker.tickerCallback
             = (nbgl_tickerCallback_t) PIC(ticker->tickerCallback);
@@ -170,8 +184,13 @@ static int nbgl_screenSetAt(uint8_t                                 screenIndex,
 int nbgl_screenSet(nbgl_obj_t                           ***elements,
                    uint8_t                                 nbElements,
                    const nbgl_screenTickerConfiguration_t *ticker,
-                   nbgl_touchCallback_t                    callback)
+#ifdef HAVE_SE_TOUCH
+                   nbgl_touchCallback_t callback)
 {
+#else   // HAVE_SE_TOUCH
+                   nbgl_buttonCallback_t callback)
+{
+#endif  // HAVE_SE_TOUCH
     // if no screen, consider it as a first fake push
     if (nbScreensOnStack == 0) {
         nbScreensOnStack++;
@@ -270,8 +289,13 @@ nbgl_obj_t **nbgl_screenGetElements(uint8_t screenIndex)
 int nbgl_screenPush(nbgl_obj_t                           ***elements,
                     uint8_t                                 nbElements,
                     const nbgl_screenTickerConfiguration_t *ticker,
-                    nbgl_touchCallback_t                    callback)
+#ifdef HAVE_SE_TOUCH
+                    nbgl_touchCallback_t callback)
 {
+#else   // HAVE_SE_TOUCH
+                    nbgl_buttonCallback_t callback)
+{
+#endif  // HAVE_SE_TOUCH
     uint8_t screenIndex;
     if (nbScreensOnStack >= SCREEN_STACK_SIZE) {
         LOG_WARN(SCREEN_LOGGER,
@@ -449,6 +473,40 @@ static bool objIsIn(nbgl_obj_t *refObj, nbgl_obj_t *obj)
 /**
  * @brief return true if the given obj can be found in refObj or any of its children
  *
+ * @param refObj the object to search obj into
+ * @param obj the object to search
+ * @return found object or NULL if not found
+ */
+static nbgl_obj_t *objIsOfType(nbgl_obj_t *refObj, nbgl_obj_type_t type)
+{
+    uint8_t i;
+
+    if (refObj->type == type) {
+        LOG_DEBUG(SCREEN_LOGGER, "objIsOfType(): yes\n");
+        return refObj;
+    }
+
+    if ((refObj->type == SCREEN) || (refObj->type == CONTAINER)) {
+        nbgl_container_t *container = (nbgl_container_t *) refObj;
+        // draw the children, if any
+        if (container->children != NULL) {
+            for (i = 0; i < container->nbChildren; i++) {
+                nbgl_obj_t *current = container->children[i];
+                if (current != NULL) {
+                    nbgl_obj_t *found = objIsOfType(current, type);
+                    if (found) {
+                        return found;
+                    }
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+/**
+ * @brief return true if the given obj can be found in refObj or any of its children
+ *
  * @param obj the object to search
  * @return true if belongs, false otherwise
  */
@@ -458,4 +516,20 @@ bool nbgl_screenContainsObj(nbgl_obj_t *obj)
         return false;
     }
     return objIsIn((nbgl_obj_t *) topOfStack, obj);
+}
+
+/**
+ * @brief return an object of the given type in the given screen
+ *
+ * @param screen the screen in which to search
+ * @param type the type of object to search for
+ * @return the found object of given type
+ */
+nbgl_obj_t *nbgl_screenContainsObjType(nbgl_screen_t *screen, nbgl_obj_type_t type)
+{
+    if (nbScreensOnStack == 0) {
+        return NULL;
+    }
+
+    return objIsOfType((nbgl_obj_t *) screen, type);
 }

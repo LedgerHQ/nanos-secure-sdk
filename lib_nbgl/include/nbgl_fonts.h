@@ -47,13 +47,14 @@ typedef struct {
  *
  */
 typedef struct {
-    uint32_t bitmap_len;   ///< Size in bytes of the associated bitmap
-    uint8_t  font_id;      ///< ID of the font, from @ref nbgl_font_id_e
-    uint8_t  bpp;          ///< number of bits per pixels
-    uint8_t  height;       ///< height of all characters in pixels
-    uint8_t  line_height;  ///< height of a line for all characters in pixels
-    uint8_t  crop;         ///< If false, x_min_offset+y_min_offset=bytes to skip
-    uint8_t  y_min;        ///< Most top Y coordinate of any char in the font
+    uint32_t bitmap_len;    ///< Size in bytes of the associated bitmap
+    uint8_t  font_id;       ///< ID of the font, from @ref nbgl_font_id_e
+    uint8_t  bpp;           ///< number of bits per pixels
+    uint8_t  height;        ///< height of all characters in pixels
+    uint8_t  line_height;   ///< height of a line for all characters in pixels
+    uint8_t  char_kerning;  ///< kerning for the font
+    uint8_t  crop;          ///< If false, x_min_offset+y_min_offset=bytes to skip
+    uint8_t  y_min;         ///< Most top Y coordinate of any char in the font
     uint8_t
         first_char;  ///< ASCII code of the first character in \b bitmap and in \b characters fields
     uint8_t
@@ -88,13 +89,15 @@ typedef struct {
  *
  */
 typedef struct {
-    uint16_t bitmap_len;   ///< Size in bytes of all characters bitmaps
-    uint8_t  font_id;      ///< ID of the font, from @ref nbgl_font_id_e
-    uint8_t  bpp;          ///< Number of bits per pixels, (interpreted as nbgl_bpp_t)
-    uint8_t  height;       ///< height of all characters in pixels
-    uint8_t  line_height;  ///< height of a line for all characters in pixels
-    uint8_t  crop;         ///< If false, x_min_offset+y_min_offset=bytes to skip
-    uint8_t  y_min;        ///< Most top Y coordinate of any char in the font
+    uint16_t bitmap_len;    ///< Size in bytes of all characters bitmaps
+    uint8_t  font_id;       ///< ID of the font, from @ref nbgl_font_id_e
+    uint8_t  bpp;           ///< Number of bits per pixels, (interpreted as nbgl_bpp_t)
+    uint8_t  height;        ///< height of all characters in pixels
+    uint8_t  line_height;   ///< height of a line for all characters in pixels
+    uint8_t  char_kerning;  ///< kerning for the font
+    uint8_t  crop;          ///< If false, x_min_offset+y_min_offset=bytes to skip
+    uint8_t  y_min;         ///< Most top Y coordinate of any char in the font
+    uint8_t  unused[3];     ///< for alignment
 #if !defined(HAVE_LANGUAGE_PACK)
     // When using language packs, those 2 pointers does not exists
     const nbgl_font_unicode_character_t
@@ -111,6 +114,9 @@ typedef enum {
     BAGL_FONT_INTER_REGULAR_24px_1bpp,
     BAGL_FONT_INTER_SEMIBOLD_24px_1bpp,
     BAGL_FONT_INTER_MEDIUM_32px_1bpp,
+    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp = 8u,   // validated on nano s
+    BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp     = 9u,   // validated on nano s
+    BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp   = 10u,  // validated on nano s,
     BAGL_FONT_LAST  // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE CHECKS
 } nbgl_font_id_e;
 
@@ -158,8 +164,13 @@ bool     nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId,
                                      const char    *text,
                                      uint16_t       maxWidth,
                                      uint16_t       maxNbLines,
-                                     uint16_t      *len);
+                                     uint16_t      *len,
+                                     bool           wrapping);
 void nbgl_textWrapOnNbLines(nbgl_font_id_e fontId, char *text, uint16_t maxWidth, uint8_t nbLines);
+uint8_t nbgl_getTextNbPagesInWidth(nbgl_font_id_e fontId,
+                                   const char    *text,
+                                   uint8_t        nbLinesPerPage,
+                                   uint16_t       maxWidth);
 
 uint32_t nbgl_popUnicodeChar(const uint8_t **text, uint16_t *text_length, bool *is_unicode);
 #ifdef HAVE_UNICODE_SUPPORT

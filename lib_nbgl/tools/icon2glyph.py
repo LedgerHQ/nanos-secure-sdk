@@ -61,6 +61,9 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
     if bits_per_pixel == 3:
         bits_per_pixel = 4
 
+    if bits_per_pixel == 0:
+        bits_per_pixel = 1
+
     # Invert if bpp is 1
     if bits_per_pixel == 1:
         im = ImageOps.invert(im)
@@ -68,7 +71,7 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
     return im, bits_per_pixel
 
 
-def image_to_packed_buffer(img, bpp: int):
+def image_to_packed_buffer(img, bpp: int, reverse_1bpp):
     """
     Rotate and pack bitmap data of the character.
     """
@@ -94,6 +97,9 @@ def image_to_packed_buffer(img, bpp: int):
             if color_index >= nb_colors:
                 color_index = nb_colors - 1
 
+            if bpp == 1 and reverse_1bpp:
+                    color_index = (color_index+1)&0x1
+
             # le encoded
             current_byte += color_index << ((8-bpp)-current_bit)
             current_bit += bpp
@@ -113,12 +119,12 @@ def image_to_packed_buffer(img, bpp: int):
 # Compressions functions
 
 
-def rle_compress(im: Image, bpp) -> Optional[bytes]:
+def rle_compress(im: Image, bpp, reverse) -> Optional[bytes]:
     """
     Run RLE compression on input image
     """
     if bpp == 1:
-        return Rle1bpp.rle_1bpp(im)[1]
+        return Rle1bpp.rle_1bpp(im, reverse)[1]
     elif bpp == 2:
         # No compression supports BPP2
         return None
@@ -126,11 +132,11 @@ def rle_compress(im: Image, bpp) -> Optional[bytes]:
         return Rle4bpp.rle_4bpp(im)[1]
 
 
-def gzlib_compress(im: Image, bpp: int) -> bytes:
+def gzlib_compress(im: Image, bpp: int, reverse) -> bytes:
     """
     Run gzlib compression on input image
     """
-    pixels_buffer = image_to_packed_buffer(im, bpp)
+    pixels_buffer = image_to_packed_buffer(im, bpp, reverse)
     output_buffer = []
     # cut into chunks of 2048 bytes max of uncompressed data (because decompression needs the full buffer)
     full_uncompressed_size = len(pixels_buffer)
@@ -151,18 +157,25 @@ def gzlib_compress(im: Image, bpp: int) -> bytes:
 NBGL_IMAGE_FILE_HEADER_SIZE = 8
 
 
-def compress(im: Image, bpp) -> Tuple[NbglFileCompression, bytes]:
+def compress(im: Image, bpp, reverse) -> Tuple[NbglFileCompression, bytes]:
     """
     Compute multiple compression methods on the input image,
     and return a tuple containing:
         - The best compression method achieved
         - The associated compressed bytes
     """
-    compressed_bufs = {
-        NbglFileCompression.NoCompression: image_to_packed_buffer(im, bpp),
-        NbglFileCompression.Gzlib: gzlib_compress(im, bpp),
-        NbglFileCompression.Rle: rle_compress(im, bpp)
-    }
+    # GZlib is not supported on Nanos
+    if not reverse:
+        compressed_bufs = {
+            NbglFileCompression.NoCompression: image_to_packed_buffer(im, bpp, reverse),
+            NbglFileCompression.Gzlib: gzlib_compress(im, bpp, reverse),
+            NbglFileCompression.Rle: rle_compress(im, bpp, reverse)
+        }
+    else:
+        compressed_bufs = {
+            NbglFileCompression.NoCompression: image_to_packed_buffer(im, bpp, reverse),
+            NbglFileCompression.Rle: rle_compress(im, bpp, reverse)
+        }
 
     min_len = len(compressed_bufs[NbglFileCompression.NoCompression])
     min_comp = NbglFileCompression.NoCompression
@@ -201,13 +214,13 @@ def convert_to_image_file(image_data: bytes, width: int, height: int,
     return bytes(bytearray(result))
 
 
-def compute_app_icon_data(im: Image, bpp) -> Tuple[bool, bytes]:
+def compute_app_icon_data(im: Image, bpp, reverse) -> Tuple[bool, bytes]:
     """
     Process image as app icon:
     - App icon are always image file
     - Compression is not limited to 64x64
     """
-    compression, image_data = compress(im, bpp)
+    compression, image_data = compress(im, bpp, reverse)
     is_file = True
     width, height = im.size
     image_data = convert_to_image_file(
@@ -215,7 +228,7 @@ def compute_app_icon_data(im: Image, bpp) -> Tuple[bool, bytes]:
     return is_file, image_data
 
 
-def compute_regular_icon_data(no_comp: bool, im: Image, bpp) -> Tuple[bool, bytes]:
+def compute_regular_icon_data(no_comp: bool, im: Image, bpp, reverse) -> Tuple[bool, bytes]:
     """
     Process image as regular icon:
     - Regular icon are image file only if compressed
@@ -224,7 +237,7 @@ def compute_regular_icon_data(no_comp: bool, im: Image, bpp) -> Tuple[bool, byte
     width, height = im.size
 
     if not no_comp:
-        compression, image_data = compress(im, bpp)
+        compression, image_data = compress(im, bpp, reverse)
         if compression != NbglFileCompression.NoCompression:
             is_file = True
             image_data = convert_to_image_file(
@@ -233,7 +246,7 @@ def compute_regular_icon_data(no_comp: bool, im: Image, bpp) -> Tuple[bool, byte
             is_file = False
     else:
         is_file = False
-        image_data = image_to_packed_buffer(im, bpp)
+        image_data = image_to_packed_buffer(im, bpp, reverse)
     return is_file, image_data
 
 # glyphs.c/.h chunk files generators
@@ -295,6 +308,7 @@ def main():
     parser.add_argument('--hexbitmaponly', action='store_true')
     parser.add_argument('--glyphcheader', action='store_true')
     parser.add_argument('--glyphcfile', action='store_true')
+    parser.add_argument('--reverse', help="Reverse B&W for 1BPP icons", action='store_true')
     args = parser.parse_args()
 
     # Print C header
@@ -321,7 +335,7 @@ def main():
 
             if args.hexbitmaponly:
                 # Prepare and print app icon data
-                _, image_data = compute_app_icon_data(im, bpp)
+                _, image_data = compute_app_icon_data(im, bpp, args.reverse)
                 print(binascii.hexlify(image_data).decode('utf-8'))
             else:
                 # Prepare and print regular icon data
@@ -334,7 +348,7 @@ def main():
                 else:
                     no_comp = False
 
-                is_file, image_data = compute_regular_icon_data(no_comp, im, bpp)
+                is_file, image_data = compute_regular_icon_data(no_comp, im, bpp, args.reverse)
 
                 if args.glyphcfile:
                     print_glyphcfile_data(image_name, bpp, image_data)
