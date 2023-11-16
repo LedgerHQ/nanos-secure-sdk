@@ -26,7 +26,7 @@ MEMORY
 
   FLASH   (rx)  : ORIGIN = 0xc0de0000, LENGTH = 400K
   DATA    (r)   : ORIGIN = 0xc0de0000, LENGTH = 400K
-  SRAM    (rwx) : ORIGIN = 0xda7a0000, LENGTH = 30K
+  SRAM    (rwx) : ORIGIN = 0xda7a0000, LENGTH = 44K
 }
 
 PAGE_SIZE  = 512;
