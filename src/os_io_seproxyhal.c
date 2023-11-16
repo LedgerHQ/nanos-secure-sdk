@@ -1036,7 +1036,7 @@ void io_seproxyhal_se_reset(void)
 
 #ifdef HAVE_SERIALIZED_NBGL
 
-#define SERIALIZED_NBGL_MAX_LEN 120
+#define SERIALIZED_NBGL_MAX_LEN 200
 
 static uint8_t nbgl_serialize_buffer[SERIALIZED_NBGL_MAX_LEN];
 
