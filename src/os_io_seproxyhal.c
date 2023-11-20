@@ -1111,10 +1111,24 @@ static const unsigned char seph_io_usb_disconnect[] = {
     1,
     SEPROXYHAL_TAG_USB_CONFIG_DISCONNECT,
 };
+
 void io_seproxyhal_disable_io(void)
 {
     // usb off
     io_seproxyhal_spi_send(seph_io_usb_disconnect, sizeof(seph_io_usb_disconnect));
+}
+
+static const unsigned char seph_io_usb_connect[] = {
+    SEPROXYHAL_TAG_USB_CONFIG,
+    0,
+    1,
+    SEPROXYHAL_TAG_USB_CONFIG_CONNECT,
+};
+
+void io_seproxyhal_enable_io(void)
+{
+    // usb on
+    io_seproxyhal_spi_send(seph_io_usb_connect, sizeof(seph_io_usb_connect));
 }
 
 void io_seproxyhal_backlight(unsigned int flags, unsigned int backlight_percentage)

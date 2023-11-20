@@ -291,6 +291,7 @@ void io_seproxyhal_setup_ticker(unsigned int interval_ms);
 void io_seproxyhal_power_off(bool criticalBattery);
 void io_seproxyhal_se_reset(void);
 void io_seproxyhal_disable_io(void);
+void io_seproxyhal_enable_io(void);
 
 #ifdef HAVE_PIEZO_SOUND
 typedef enum tune_index_e {
