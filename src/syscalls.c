@@ -176,11 +176,11 @@ const nbgl_font_t *nbgl_font_getFont(unsigned int fontId)
     return (const nbgl_font_t *) SVC_Call(SYSCALL_nbgl_get_font_ID, parameters);
 }
 
-unsigned int nbgl_screen_reinit(void)
+void nbgl_screen_reinit(void)
 {
     unsigned int parameters[1];
     parameters[0] = 0;
-    return SVC_Call(SYSCALL_nbgl_screen_reinit_ID, parameters);
+    SVC_Call(SYSCALL_nbgl_screen_reinit_ID, parameters);
 }
 
 #ifdef HAVE_DISPLAY_FAST_MODE

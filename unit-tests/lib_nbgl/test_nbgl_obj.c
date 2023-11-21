@@ -184,9 +184,9 @@ uint8_t touch_exclude_borders(uint8_t excluded_borders)
     return excluded_borders;
 }
 
-unsigned int nbgl_screen_reinit(void)
+void nbgl_screen_reinit(void)
 {
-    return 0;
+    return;
 }
 
 #ifdef HAVE_SE_TOUCH
