@@ -25,9 +25,9 @@ uint8_t touch_exclude_borders(uint8_t excluded_borders)
     return excluded_borders;
 }
 
-unsigned int nbgl_screen_reinit(void)
+void nbgl_screen_reinit(void)
 {
-    return 0;
+    return;
 }
 
 void nbgl_redrawObject(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
