@@ -75,6 +75,9 @@ SECTIONS
     _envram_data = .;
 
     _install_parameters = .;
+    *(.install_parameters)
+    KEEP(*(.install_parameters))
+    _einstall_parameters = .;
     _nvram_end = .;
   } > FLASH = 0x00
 
