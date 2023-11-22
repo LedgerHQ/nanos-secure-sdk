@@ -15,6 +15,10 @@
 #  limitations under the License.
 #*******************************************************************************
 
+# Include Makefile.app_params here so that it is:
+# - included on all apps Makefile, without changing them
+# - included after apps Makefile changes on APP_LOAD_PARAMS
+include $(BOLOS_SDK)/Makefile.app_params
 
 # consider every intermediate target as final to avoid deleting intermediate files
 .SECONDARY:
