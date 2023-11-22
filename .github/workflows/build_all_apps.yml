@@ -118,9 +118,9 @@ env:
 \"app-flow\",
 \"app-passwords\",
 \"app-secret\",
-\"app-binance\"}
+\"app-binance\",
+\"app-ethereum\"}
 '
-# App-Ethereum to add in the previous list
 
     repo_list: '
 {\"repo_name\":[
