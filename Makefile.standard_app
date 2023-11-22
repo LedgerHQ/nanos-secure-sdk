@@ -165,21 +165,13 @@ ifeq ($(HAVE_APPLICATION_FLAG_LIBRARY), 1)
 STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x800)))
 endif
 
-APP_FLAGS = $(shell printf '0x%x' $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
-
-APP_LOAD_PARAMS += --appFlags $(APP_FLAGS)
-
-APP_LOAD_PARAMS += $(foreach curve, $(CURVE_APP_LOAD_PARAMS), --curve $(curve))
-
-APP_LOAD_PARAMS += $(foreach path, $(PATH_APP_LOAD_PARAMS), --path $(path))
-
-APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
-
 # Pending review flag
 ifeq ($(ENABLE_PENDING_REVIEW_SCREEN), 1)
-    APP_LOAD_PARAMS += --tlvraw 9F:01
+    TLVRAW_APP_LOAD_PARAMS += 9F:01
     DEFINES += HAVE_PENDING_REVIEW_SCREEN
 endif
+
+APP_FLAGS_APP_LOAD_PARAMS = $(shell printf '0x%x' $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
 
 #####################################################################
 #                         COMPILER SETTINGS                         #

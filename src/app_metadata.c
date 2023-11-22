@@ -68,4 +68,9 @@ CREATE_METADATA_STRING_ITEM(SDK_VERSION, sdk_version)
 CREATE_METADATA_STRING_ITEM(SDK_HASH, sdk_hash)
 #endif
 
+#ifdef APP_INSTALL_PARAMS_DATA
+__attribute__((section(".install_parameters"))) const uint8_t install_parameters[]
+    = {APP_INSTALL_PARAMS_DATA};
+#endif
+
 #endif
