@@ -165,13 +165,28 @@ static const cx_cipher_base_t aes_base = {
     (cx_err_t(*)(void)) cx_aes_reset_hw,
 };
 
-const cx_cipher_info_t cx_aes_128_info
-    = {128, 16, CX_AES_BLOCK_SIZE, (cx_cipher_base_t *) &aes_base};
+const cx_cipher_info_t cx_aes_128_info = {128,
+                                          16,
+                                          CX_AES_BLOCK_SIZE,
+#ifdef BOLOS_OS_UPGRADER_APP
+                                          (cx_cipher_base_t *)
+#endif
+                                          &aes_base};
 
-const cx_cipher_info_t cx_aes_192_info
-    = {192, 16, CX_AES_BLOCK_SIZE, (cx_cipher_base_t *) &aes_base};
+const cx_cipher_info_t cx_aes_192_info = {192,
+                                          16,
+                                          CX_AES_BLOCK_SIZE,
+#ifdef BOLOS_OS_UPGRADER_APP
+                                          (cx_cipher_base_t *)
+#endif
+                                          &aes_base};
 
-const cx_cipher_info_t cx_aes_256_info
-    = {256, 16, CX_AES_BLOCK_SIZE, (cx_cipher_base_t *) &aes_base};
+const cx_cipher_info_t cx_aes_256_info = {256,
+                                          16,
+                                          CX_AES_BLOCK_SIZE,
+#ifdef BOLOS_OS_UPGRADER_APP
+                                          (cx_cipher_base_t *)
+#endif
+                                          &aes_base};
 
 #endif  // HAVE_AES
