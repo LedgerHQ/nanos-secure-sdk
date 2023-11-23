@@ -174,7 +174,7 @@ static void nbgl_serializeIcon(const nbgl_icon_details_t *icon,
             size = nbgl_bpp_get_window_size(icon->width, icon->height, icon->bpp);
         }
         else {
-            size = GET_IMAGE_FILE_BUFFER_LEN(((uint8_t *) PIC(icon->bitmap)))
+            size = GET_IMAGE_FILE_BUFFER_LEN(((const uint8_t *) PIC(icon->bitmap)))
                    + IMAGE_FILE_HEADER_SIZE;
         }
     }

@@ -2229,9 +2229,7 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = NBGL_KEYBOARD \
                          NBGL_KEYPAD \
-                         NBGL_PAGE \
-                         NBGL_USE_CASE \
-                         NBGL_QRCODE
+                         $(NBGL_DEFINES)
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
