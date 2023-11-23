@@ -55,6 +55,7 @@ extern ux_state_t G_ux;
 extern bolos_ux_params_t G_ux_params;
 
 extern void ux_process_finger_event(uint8_t seph_packet[]);
+extern void ux_process_button_event(uint8_t seph_packet[]);
 extern void ux_process_ticker_event(void);
 extern void ux_process_default_event(void);
 #endif  // !defined(APP_UX)
@@ -98,10 +99,24 @@ extern void ux_process_default_event(void);
     G_ux_params.len = os_sched_last_status(TASK_BOLOS_UX);
 
 /**
+ * forward the button push/release events to the os ux handler. if not used by it, it will
+ * be used by App controls
+ */
+#ifdef HAVE_SE_TOUCH
+#define UX_BUTTON_PUSH_EVENT(seph_packet)
+#else  // HAVE_SE_TOUCH
+#define UX_BUTTON_PUSH_EVENT(seph_packet) ux_process_button_event(seph_packet)
+#endif  // HAVE_SE_TOUCH
+
+/**
  * forward the finger_event to the os ux handler. if not used by it, it will
  * be used by App controls
  */
+#ifdef HAVE_SE_TOUCH
 #define UX_FINGER_EVENT(seph_packet) ux_process_finger_event(seph_packet)
+#else  // HAVE_SE_TOUCH
+#define UX_FINGER_EVENT(seph_packet)
+#endif  // HAVE_SE_TOUCH
 
 /**
  * forward the ticker_event to the os ux handler. Ticker event callback is always called whatever

@@ -19,6 +19,7 @@
 #include "seproxyhal_protocol.h"
 #include "ux.h"
 #include "nbgl_touch.h"
+#include "nbgl_buttons.h"
 #include "os_io.h"
 #ifndef HAVE_BOLOS
 // number of 100ms ticks since the start-up of the app
@@ -50,17 +51,16 @@ static bool ux_forward_event(bool ignoring_app_if_ux_busy)
     return false;
 }
 
+#ifdef HAVE_SE_TOUCH
+static nbgl_touchStatePosition_t pos;
+
 /**
  * @brief Process finger event.
  * @note Application's finger event handler is called only if the ux app does not deny it (finger
  * event caught by BOLOS UX page).
  *
  * @param seph_packet received SEPH packet
- * @param nbTicks number of 100ms ticks from the launch of the app
  */
-
-static nbgl_touchStatePosition_t pos;
-
 void ux_process_finger_event(uint8_t seph_packet[])
 {
     bool displayEnabled = ux_forward_event(true);
@@ -76,6 +76,28 @@ void ux_process_finger_event(uint8_t seph_packet[])
         nbgl_refresh();
     }
 }
+#else   // HAVE_SE_TOUCH
+/**
+ * @brief Process button push event.
+ * @note Application's button push/release event handler is called only if the ux app does not deny
+ * it (button event caught by BOLOS UX page).
+ *
+ * @param seph_packet received SEPH packet
+ */
+void ux_process_button_event(uint8_t seph_packet[])
+{
+    bool displayEnabled = ux_forward_event(true);
+    // enable/disable drawing according to UX decision
+    nbgl_objAllowDrawing(displayEnabled);
+
+    // if the event is not fully consumed by UX, use it for NBGL
+    if (displayEnabled) {
+        uint8_t buttons_state = seph_packet[3] >> 1;
+        nbgl_buttonsHandler(buttons_state, nbTicks * 100);
+        nbgl_refresh();
+    }
+}
+#endif  // HAVE_SE_TOUCH
 
 /**
  * @brief Process the ticker_event to the os ux handler. Ticker event callback is always called
@@ -97,6 +119,7 @@ void ux_process_ticker_event(void)
         return;
     }
 
+#ifdef HAVE_SE_TOUCH
     // handle touch only if detected as pressed in last touch message
     if (pos.state == PRESSED) {
         io_touch_info_t touch_info;
@@ -107,6 +130,7 @@ void ux_process_ticker_event(void)
         // Send current touch position to nbgl
         nbgl_touchHandler(&pos, nbTicks * 100);
     }
+#endif  // HAVE_SE_TOUCH
     nbgl_refresh();
 }
 

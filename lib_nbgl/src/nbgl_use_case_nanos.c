@@ -14,6 +14,7 @@
 #include "nbgl_use_case.h"
 #include "glyphs.h"
 #include "os_pic.h"
+#include "os_helpers.h"
 #include "ux.h"
 
 /*********************
@@ -28,9 +29,9 @@ typedef struct ReviewContext_s {
     nbgl_navCallback_t         onNav;
     nbgl_choiceCallback_t      onChoice;
     nbgl_layoutTagValueList_t  tagValueList;
-    uint8_t                    currentPairIndex;
     const nbgl_icon_details_t *icon;
     const char                *reviewTitle;
+    const char                *address;  // for address confirmation review
     const char                *acceptText;
     const char                *rejectText;
     bool                       forwardNavOnly;
@@ -69,12 +70,6 @@ typedef struct UseCaseContext_s {
         SettingsContext_t settings;
     };
 } UseCaseContext_t;
-
-typedef struct AddressConfirmationContext_s {
-    const char                      *address;
-    nbgl_layout_t                    modalLayout;
-    const nbgl_layoutTagValueList_t *tagValueList;
-} AddressConfirmationContext_t;
 
 /**********************
  *  STATIC VARIABLES
@@ -205,10 +200,16 @@ static void displayReviewPage(nbgl_stepPosition_t pos)
                 context.step.text     = context.review.rejectText;
                 context.step.callback = onReject;
             }
+            else if ((context.review.address != NULL)
+                     && (context.currentPage == 1)) {  // address confirmation and 2nd page
+                context.step.text    = "Address";
+                context.step.subText = context.review.address;
+            }
             else {
-                context.step.text = context.review.tagValueList.pairs[context.currentPage - 1].item;
-                context.step.subText
-                    = context.review.tagValueList.pairs[context.currentPage - 1].value;
+                uint8_t pairIndex    = (context.review.address != NULL) ? (context.currentPage - 2)
+                                                                        : (context.currentPage - 1);
+                context.step.text    = context.review.tagValueList.pairs[pairIndex].item;
+                context.step.subText = context.review.tagValueList.pairs[pairIndex].value;
             }
         }
     }
@@ -231,9 +232,6 @@ static void displayReviewPage(nbgl_stepPosition_t pos)
     const char *txt = NULL;
     if (context.step.text != NULL) {
         txt = context.step.text;
-    }
-    else if (context.step.textId != INVALID_ID) {
-        txt = get_ux_loc_string(context.step.textId);
     }
     if (context.step.init != NULL) {
         context.step.init();
@@ -273,9 +271,6 @@ static void displayHomePage(nbgl_stepPosition_t pos)
     const char *txt = NULL;
     if (context.step.text != NULL) {
         txt = context.step.text;
-    }
-    else if (context.step.textId != INVALID_ID) {
-        txt = get_ux_loc_string(context.step.textId);
     }
     if (context.step.init != NULL) {
         context.step.init();
@@ -425,16 +420,74 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList,
 
     memcpy(&context.review.tagValueList, tagValueList, sizeof(nbgl_layoutTagValueList_t));
 
-    context.review.currentPairIndex = 0;
-    context.review.reviewTitle      = reviewTitle;
-    context.review.icon             = icon;
-    context.review.acceptText       = acceptText;
-    context.review.rejectText       = rejectText;
-    context.review.onChoice         = callback;
+    context.review.reviewTitle = reviewTitle;
+    context.review.icon        = icon;
+    context.review.acceptText  = acceptText;
+    context.review.rejectText  = rejectText;
+    context.review.onChoice    = callback;
 
     context.currentPage = 0;
     // + 3 because 1 page for title and 2 pages at the end for accept/reject
     context.nbPages = tagValueList->nbPairs + 3;
+
+    displayReviewPage(FORWARD_DIRECTION);
+}
+
+/**
+ * @brief Draws an address confirmation use case. This page contains the given address in a
+ * tag/value layout
+ *
+ * @param icon icon to be used on first page of address review
+ * @param title text to be used on first page of address review (NULL terminated string)
+ * @param address address to confirm (NULL terminated string)
+ * @param callback callback called when either confirm or reject page is double pressed
+ */
+void nbgl_useCaseAddressConfirmation(const nbgl_icon_details_t *icon,
+                                     const char                *title,
+                                     const char                *address,
+                                     nbgl_choiceCallback_t      callback)
+{
+    nbgl_useCaseAddressConfirmationExt(icon, title, address, callback, NULL);
+}
+
+/**
+ * @brief draws an extended address verification page. This page contains the given address in a
+ * tag/value layout.
+ *
+ * @param icon icon to be used on first page of address review
+ * @param title text to be used on first page of address review (NULL terminated string)
+ * @param address address to confirm (NULL terminated string)
+ * @param callback callback called when either confirm or reject page is double pressed
+ * @param tagValueList list of tag/value pairs (must be persistent because no copy)
+ */
+void nbgl_useCaseAddressConfirmationExt(const nbgl_icon_details_t       *icon,
+                                        const char                      *title,
+                                        const char                      *address,
+                                        nbgl_choiceCallback_t            callback,
+                                        const nbgl_layoutTagValueList_t *tagValueList)
+{
+    // memorize context
+    memset(&context, 0, sizeof(UseCaseContext_t));
+    context.review.forwardNavOnly = false;
+    context.type                  = REVIEW_USE_CASE;
+
+    if (tagValueList) {
+        memcpy(&context.review.tagValueList, tagValueList, sizeof(nbgl_layoutTagValueList_t));
+    }
+
+    context.review.address     = address;
+    context.review.reviewTitle = title;
+    context.review.icon        = icon;
+    context.review.acceptText  = "Approve";
+    context.review.rejectText  = "Reject";
+    context.review.onChoice    = callback;
+
+    context.currentPage = 0;
+    // + 4 because 1 page for title, 1 for address and 2 pages at the end for approve/reject
+    context.nbPages = 4;
+    if (tagValueList) {
+        context.nbPages += tagValueList->nbPairs;
+    }
 
     displayReviewPage(FORWARD_DIRECTION);
 }

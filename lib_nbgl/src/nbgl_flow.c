@@ -151,9 +151,13 @@ static void actionCallback(nbgl_step_t stepCtx, nbgl_buttonEvent_t event)
         return;
     }
     const nbgl_stepDesc_t *step = &ctx->steps[ctx->curStep];
-    const char            *txt  = (step->text != NULL)
-                                      ? step->text
-                                      : ((step->textId != INVALID_ID) ? get_ux_loc_string(step->textId) : NULL);
+#ifdef HAVE_LANGUAGE_PACK
+    const char *txt = (step->text != NULL)
+                          ? step->text
+                          : ((step->textId != INVALID_ID) ? get_ux_loc_string(step->textId) : NULL);
+#else   // HAVE_LANGUAGE_PACK
+    const char *txt = step->text;
+#endif  // HAVE_LANGUAGE_PACK
     // release the current step before opening new one
     nbgl_stepRelease((nbgl_step_t) ctx->stepCtx);
     if (step->init != NULL) {
@@ -184,11 +188,15 @@ nbgl_flow_t nbgl_flowDraw(const nbgl_stepDesc_t *steps,
                           bool                   modal)
 {
     const nbgl_stepDesc_t *step = &steps[initStep];
-    const char            *txt  = (step->text != NULL)
-                                      ? step->text
-                                      : ((step->textId != INVALID_ID) ? get_ux_loc_string(step->textId) : NULL);
-    nbgl_stepPosition_t    pos  = FORWARD_DIRECTION;
-    FlowContext_t         *ctx  = getFreeContext(modal);
+#ifdef HAVE_LANGUAGE_PACK
+    const char *txt = (step->text != NULL)
+                          ? step->text
+                          : ((step->textId != INVALID_ID) ? get_ux_loc_string(step->textId) : NULL);
+#else   // HAVE_LANGUAGE_PACK
+    const char *txt = step->text;
+#endif  // HAVE_LANGUAGE_PACK
+    nbgl_stepPosition_t pos = FORWARD_DIRECTION;
+    FlowContext_t      *ctx = getFreeContext(modal);
 
     if (!ctx) {
         return NULL;

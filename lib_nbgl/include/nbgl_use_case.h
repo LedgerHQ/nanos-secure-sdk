@@ -210,6 +210,15 @@ void nbgl_useCaseStaticReview(nbgl_layoutTagValueList_t *tagValueList,
                               const char                *acceptText,
                               const char                *rejectText,
                               nbgl_choiceCallback_t      callback);
+void nbgl_useCaseAddressConfirmation(const nbgl_icon_details_t *icon,
+                                     const char                *title,
+                                     const char                *address,
+                                     nbgl_choiceCallback_t      callback);
+void nbgl_useCaseAddressConfirmationExt(const nbgl_icon_details_t       *icon,
+                                        const char                      *title,
+                                        const char                      *address,
+                                        nbgl_choiceCallback_t            callback,
+                                        const nbgl_layoutTagValueList_t *tagValueList);
 #endif  // HAVE_SE_TOUCH
 void nbgl_useCaseSpinner(const char *text);
 #ifdef __cplusplus
