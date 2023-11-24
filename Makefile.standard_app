@@ -56,6 +56,13 @@ ifneq ($(DEBUG), 0)
     else
         DEFINES += PRINTF=mcu_usb_printf
     endif
+    ifneq ($(DISABLE_DEBUG_LEDGER_ASSERT), 1)
+        DEFINES += HAVE_LEDGER_ASSERT_DISPLAY
+        DEFINES += LEDGER_ASSERT_CONFIG_FILE_INFO
+    endif
+    ifneq ($(DISABLE_DEBUG_THROW), 1)
+        DEFINES += HAVE_DEBUG_THROWS
+    endif
 else
         DEFINES += PRINTF\(...\)=
 endif
