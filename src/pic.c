@@ -20,14 +20,14 @@ __attribute__((naked, no_instrument_function)) void *pic_internal(void *link_add
 // only apply PIC conversion if link_address is in linked code (over 0xC0D00000 in our example)
 // this way, PIC call are armless if the address is not meant to be converted
 extern void _nvram;
-extern void _install_parameters;
+extern void _envram;
 
 #if defined(ST31)
 
 void *pic(void *link_address)
 {
     // check if in the LINKED TEXT zone
-    if (link_address >= &_nvram && link_address < &_install_parameters) {
+    if (link_address >= &_nvram && link_address < &_envram) {
         link_address = pic_internal(link_address);
     }
 
@@ -45,7 +45,7 @@ void *pic(void *link_address)
 
     // check if in the LINKED TEXT zone
     __asm volatile("ldr %0, =_nvram" : "=r"(n));
-    __asm volatile("ldr %0, =_install_parameters" : "=r"(en));
+    __asm volatile("ldr %0, =_envram" : "=r"(en));
     if (link_address >= n && link_address <= en) {
         link_address = pic_internal(link_address);
     }
