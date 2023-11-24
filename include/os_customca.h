@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef HAVE_BOLOS_NO_CUSTOMCA
+#ifdef HAVE_BOLOS_CUSTOMCA
 #include "bolos_target.h"
 #include "decorators.h"
 
@@ -12,4 +12,4 @@
 SYSCALL unsigned int os_customca_verify(unsigned char *hash PLENGTH(32),
                                         unsigned char *sign PLENGTH(sign_length),
                                         unsigned int        sign_length);
-#endif  // HAVE_BOLOS_NO_CUSTOMCA
+#endif  // HAVE_BOLOS_CUSTOMCA
