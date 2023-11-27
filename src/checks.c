@@ -28,6 +28,7 @@
 
 // This label ultimately comes from the application link.
 extern unsigned int const _install_parameters;
+extern unsigned int const _einstall_parameters;
 
 #ifdef HAVE_BAGL
 
@@ -173,8 +174,10 @@ void check_audited_app(void)
 {
     unsigned char  data   = BOLOS_FALSE;
     unsigned char *buffer = &data;
-    unsigned int   length = os_parse_bertlv((unsigned char *) (&_install_parameters),
-                                          CHECK_NOT_AUDITED_MAX_LEN,
+    unsigned int   install_parameters_len
+        = (unsigned char *) &_einstall_parameters - (unsigned char *) &_install_parameters;
+    unsigned int length = os_parse_bertlv((unsigned char *) &_install_parameters,
+                                          install_parameters_len,
                                           NULL,
                                           CHECK_NOT_AUDITED_TLV_TAG,
                                           0x00,
