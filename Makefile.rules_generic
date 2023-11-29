@@ -88,7 +88,14 @@ $(OBJ_DIR)/%.o: %.S $(BUILD_DEPENDENCIES) prepare
 	@echo "[AS]   $@"
 	$(L)$(call as_cmdline,$(INCLUDES_PATH), $(DEFINES),$<,$@)
 
-ifeq ($(SCRIPT_LD),)
+ifeq (,$(filter $(DEFINES),BOLOS_OS_UPGRADER_APP))
+ifneq ($(SCRIPT_LD),)
+ifneq ($(ENABLE_SDK_WERROR),0)
+$(error Deprecated SCRIPT_LD setting)
+else
+$(warning Deprecated SCRIPT_LD setting)
+endif
+endif
 LDFLAGS += -L$(BOLOS_SDK)/target/$(TARGET)
 ifeq ($(IS_PLUGIN),)
 SCRIPT_LD := $(BOLOS_SDK)/target/$(TARGET)/script.ld
@@ -96,8 +103,6 @@ else
 SCRIPT_LD := $(BOLOS_SDK)/target/$(TARGET)/plugin_script.ld
 $(info Using plugin link script: $(SCRIPT_LD))
 endif
-else
-$(info Using custom link script: $(SCRIPT_LD))
 endif
 LDFLAGS  += -T$(SCRIPT_LD)
 
