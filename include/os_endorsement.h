@@ -29,6 +29,10 @@ SYSCALL unsigned int os_endorsement_key1_sign_data(unsigned char *src PLENGTH(sr
                                                    unsigned int       srcLength,
                                                    unsigned char *signature
                                                        PLENGTH(ENDORSEMENT_MAX_ASN1_LENGTH));
+SYSCALL unsigned int os_endorsement_key1_sign_without_code_hash(
+    unsigned char *src       PLENGTH(srcLength),
+    unsigned int             srcLength,
+    unsigned char *signature PLENGTH(ENDORSEMENT_MAX_ASN1_LENGTH));
 SYSCALL unsigned int os_endorsement_key2_derive_sign_data(unsigned char *src PLENGTH(srcLength),
                                                           unsigned int       srcLength,
                                                           unsigned char *signature

@@ -1400,6 +1400,18 @@ unsigned int os_endorsement_key1_sign_data(unsigned char *src,
     return (unsigned int) SVC_Call(SYSCALL_os_endorsement_key1_sign_data_ID, parameters);
 }
 
+unsigned int os_endorsement_key1_sign_without_code_hash(unsigned char *src,
+                                                        unsigned int   srcLength,
+                                                        unsigned char *signature)
+{
+    unsigned int parameters[3];
+    parameters[0] = (unsigned int) src;
+    parameters[1] = (unsigned int) srcLength;
+    parameters[2] = (unsigned int) signature;
+    return (unsigned int) SVC_Call(SYSCALL_os_endorsement_key1_sign_without_code_hash_ID,
+                                   parameters);
+}
+
 unsigned int os_endorsement_key2_derive_sign_data(unsigned char *src,
                                                   unsigned int   srcLength,
                                                   unsigned char *signature)
