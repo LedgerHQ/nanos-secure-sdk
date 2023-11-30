@@ -1209,7 +1209,9 @@ void nbgl_useCaseRegularReview(uint8_t                    initPage,
  * @brief Draws a flow of pages of a review, without back key.
  *        It is possible to go to next page thanks to "tap to continue".
  *        For each page, the given navCallback will be called to get the content. Only 'type' and
- * union has to be set in this content
+ *        union has to be set in this content.
+ *        Note that this is not a standard use case, it should only be used on very specific
+ *        situations.
  *
  * @param rejectText text to use in footer
  * @param buttonCallback callback called when a potential button (details or long press) in the
@@ -1239,6 +1241,47 @@ void nbgl_useCaseForwardOnlyReview(const char                *rejectText,
     navInfo.navWithTap.backToken     = BACK_TOKEN;
     navInfo.navWithTap.skipText      = "Skip >>";
     navInfo.navWithTap.skipToken     = SKIP_TOKEN;
+    navInfo.progressIndicator        = true;
+    navInfo.tuneId                   = TUNE_TAP_CASUAL;
+
+    displayReviewPage(0, false);
+}
+
+/**
+ * @brief Draws a flow of pages of a review, without back key.
+ *        It is possible to go to next page thanks to "tap to continue".
+ *        For each page, the given navCallback will be called to get the content. Only 'type' and
+ *        union has to be set in this content.
+ *        Note that this is not a standard use case, it should only be used on very specific
+ *        situations.
+ *
+ * @param rejectText text to use in footer
+ * @param buttonCallback callback called when a potential button (details or long press) in the
+ * content is touched
+ * @param navCallback callback called when navigation "tap to continue" is touched, to get the
+ * content of next page
+ * @param choiceCallback callback called when either long_press or footer is called (param is true
+ * for long press)
+ */
+void nbgl_useCaseForwardOnlyReviewNoSkip(const char                *rejectText,
+                                         nbgl_layoutTouchCallback_t buttonCallback,
+                                         nbgl_navCallback_t         navCallback,
+                                         nbgl_choiceCallback_t      choiceCallback)
+{
+    // memorize context
+    onChoice       = choiceCallback;
+    onNav          = navCallback;
+    onControls     = buttonCallback;
+    forwardNavOnly = true;
+
+    // fill navigation structure
+    navInfo.nbPages                  = 0;
+    navInfo.navType                  = NAV_WITH_TAP;
+    navInfo.quitToken                = REJECT_TOKEN;
+    navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
+    navInfo.navWithTap.quitText      = rejectText;
+    navInfo.navWithTap.backToken     = BACK_TOKEN;
+    navInfo.navWithTap.skipText      = NULL;
     navInfo.progressIndicator        = true;
     navInfo.tuneId                   = TUNE_TAP_CASUAL;
 

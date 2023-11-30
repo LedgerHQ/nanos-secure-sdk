@@ -177,6 +177,10 @@ void nbgl_useCaseForwardOnlyReview(const char                *rejectText,
                                    nbgl_layoutTouchCallback_t buttonCallback,
                                    nbgl_navCallback_t         navCallback,
                                    nbgl_choiceCallback_t      choiceCallback);
+void nbgl_useCaseForwardOnlyReviewNoSkip(const char                *rejectText,
+                                         nbgl_layoutTouchCallback_t buttonCallback,
+                                         nbgl_navCallback_t         navCallback,
+                                         nbgl_choiceCallback_t      choiceCallback);
 void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList,
                               const nbgl_pageInfoLongPress_t  *infoLongPress,
                               const char                      *rejectText,
