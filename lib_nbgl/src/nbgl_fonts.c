@@ -585,6 +585,7 @@ bool nbgl_getTextMaxLenInNbLines(nbgl_font_id_e fontId,
                 textLen       = lenAtLastDelimiter;
             }
             else {
+                textLen += text - previousText;
                 text = previousText;
             }
             width = 0;
