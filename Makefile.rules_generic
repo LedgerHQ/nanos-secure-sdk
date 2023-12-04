@@ -15,6 +15,10 @@
 #  limitations under the License.
 #*******************************************************************************
 
+# Include Makefile.app_params here so that it is:
+# - included on all apps Makefile, without changing them
+# - included after apps Makefile changes on APP_LOAD_PARAMS
+include $(BOLOS_SDK)/Makefile.app_params
 
 # consider every intermediate target as final to avoid deleting intermediate files
 .SECONDARY:
@@ -116,15 +120,6 @@ $(BIN_DIR)/app.elf: $(LINK_DEPENDENCIES)
 	$(L)$(call link_cmdline,$(OBJECT_FILES) $(LDLIBS),$(BIN_DIR)/app.elf)
 	$(L)$(GCCPATH)arm-none-eabi-objcopy -O ihex -S $(BIN_DIR)/app.elf $(BIN_DIR)/app.hex
 	$(L)$(GCCPATH)arm-none-eabi-objdump -S -d $(BIN_DIR)/app.elf > $(DBG_DIR)/app.asm
-	$(L)$(call objcopy_add_section_cmdline,$(TARGET), ledger.target)
-	$(L)$(call objcopy_add_section_cmdline,$(TARGET_NAME), ledger.target_name)
-	$(L)$(call objcopy_add_section_cmdline,$(TARGET_ID), ledger.target_id)
-	$(L)$(call objcopy_add_section_cmdline,$(APPNAME), ledger.app_name)
-	$(L)$(call objcopy_add_section_cmdline,$(APPVERSION), ledger.app_version)
-	$(L)$(call objcopy_add_section_cmdline,$(API_LEVEL), ledger.api_level)
-	$(L)$(call objcopy_add_section_cmdline,$(SDK_NAME), ledger.sdk_name)
-	$(L)$(call objcopy_add_section_cmdline,$(SDK_VERSION), ledger.sdk_version)
-	$(L)$(call objcopy_add_section_cmdline,$(SDK_HASH), ledger.sdk_hash)
 
 # This targets are generated along $(OBJ_DIR)/app.elf but we can't make them co-target
 # otherwise building with `make -j` fails due to multiple threads running simultaneously
@@ -171,14 +166,6 @@ endif
 cc_cmdline = $(CC) -c $(CFLAGS) -MMD -MT $(OBJ_DIR)/$(basename $(notdir $(4))).o -MF $(DEP_DIR)/$(basename $(notdir $(4))).d $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
 
 as_cmdline = $(AS) -c $(AFLAGS) $(addprefix -D,$(2)) $(addprefix -I,$(1)) -o $(4) $(3)
-
-# objcopy_add_section_cmdline(data,section_name)
-TMPFILE := $(shell mktemp)
-objcopy_add_section_cmdline = echo $(1) > $(TMPFILE) && \
-    $(GCCPATH)arm-none-eabi-objcopy --add-section $(2)="$(TMPFILE)" \
-	--set-section-flags $(2)=noload,readonly \
-	$(BIN_DIR)/app.elf $(BIN_DIR)/app.elf && \
-	rm $(TMPFILE)
 
 ### END GCC COMPILER RULES
 
