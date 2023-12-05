@@ -141,7 +141,7 @@ typedef struct {
  *
  * @return        Error code.
  */
-cx_err_t cx_aead_init(cx_aead_context_t *ctx);
+WARN_UNUSED_RESULT cx_err_t cx_aead_init(cx_aead_context_t *ctx);
 
 /**
  * @brief   AEAD set up.
@@ -158,7 +158,7 @@ cx_err_t cx_aead_init(cx_aead_context_t *ctx);
  *
  * @return         Error code
  */
-cx_err_t cx_aead_setup(cx_aead_context_t *ctx, cx_aead_type_t type);
+WARN_UNUSED_RESULT cx_err_t cx_aead_setup(cx_aead_context_t *ctx, cx_aead_type_t type);
 
 /**
  * @brief   Sets the cipher key.
@@ -176,7 +176,10 @@ cx_err_t cx_aead_setup(cx_aead_context_t *ctx, cx_aead_type_t type);
  *
  * @return            Error code
  */
-cx_err_t cx_aead_set_key(cx_aead_context_t *ctx, const uint8_t *key, size_t key_len, uint32_t mode);
+WARN_UNUSED_RESULT cx_err_t cx_aead_set_key(cx_aead_context_t *ctx,
+                                            const uint8_t     *key,
+                                            size_t             key_len,
+                                            uint32_t           mode);
 
 /**
  * @brief   Sets the initialization vector.
@@ -191,7 +194,9 @@ cx_err_t cx_aead_set_key(cx_aead_context_t *ctx, const uint8_t *key, size_t key_
  *
  * @return           Error code.
  */
-cx_err_t cx_aead_set_iv(cx_aead_context_t *ctx, const uint8_t *iv, size_t iv_len);
+WARN_UNUSED_RESULT cx_err_t cx_aead_set_iv(cx_aead_context_t *ctx,
+                                           const uint8_t     *iv,
+                                           size_t             iv_len);
 
 /**
  * @brief   Adds associated data to the context.
@@ -207,7 +212,9 @@ cx_err_t cx_aead_set_iv(cx_aead_context_t *ctx, const uint8_t *iv, size_t iv_len
  *
  * @return           Error code.
  */
-cx_err_t cx_aead_update_ad(cx_aead_context_t *ctx, const uint8_t *ad, size_t ad_len);
+WARN_UNUSED_RESULT cx_err_t cx_aead_update_ad(cx_aead_context_t *ctx,
+                                              const uint8_t     *ad,
+                                              size_t             ad_len);
 
 /**
  * @brief   Updates the data to encrypt or decrypt.
@@ -229,11 +236,8 @@ cx_err_t cx_aead_update_ad(cx_aead_context_t *ctx, const uint8_t *ad, size_t ad_
  * @return             Error code.
  *
  */
-cx_err_t cx_aead_update(cx_aead_context_t *ctx,
-                        uint8_t           *in,
-                        size_t             in_len,
-                        uint8_t           *out,
-                        size_t            *out_len);
+WARN_UNUSED_RESULT cx_err_t
+cx_aead_update(cx_aead_context_t *ctx, uint8_t *in, size_t in_len, uint8_t *out, size_t *out_len);
 
 /**
  * @brief   Writes the tag of the AEAD cipher.
@@ -248,7 +252,7 @@ cx_err_t cx_aead_update(cx_aead_context_t *ctx,
  *
  * @return             Error code.
  */
-cx_err_t cx_aead_write_tag(cx_aead_context_t *ctx, uint8_t *tag, size_t tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_aead_write_tag(cx_aead_context_t *ctx, uint8_t *tag, size_t tag_len);
 
 /**
  * @brief   Checks the tag of the AEAD cipher.
@@ -263,7 +267,9 @@ cx_err_t cx_aead_write_tag(cx_aead_context_t *ctx, uint8_t *tag, size_t tag_len)
  *
  * @return            Error code.
  */
-cx_err_t cx_aead_check_tag(cx_aead_context_t *ctx, const uint8_t *tag, size_t tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_aead_check_tag(cx_aead_context_t *ctx,
+                                              const uint8_t     *tag,
+                                              size_t             tag_len);
 
 /**
  * @brief   All-in-one authenticated encryption.
@@ -295,17 +301,17 @@ cx_err_t cx_aead_check_tag(cx_aead_context_t *ctx, const uint8_t *tag, size_t ta
  *
  * @return             Error code.
  */
-cx_err_t cx_aead_encrypt(cx_aead_context_t *ctx,
-                         const uint8_t     *iv,
-                         size_t             iv_len,
-                         const uint8_t     *ad,
-                         size_t             ad_len,
-                         uint8_t           *in,
-                         size_t             in_len,
-                         uint8_t           *out,
-                         size_t            *out_len,
-                         uint8_t           *tag,
-                         size_t             tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_aead_encrypt(cx_aead_context_t *ctx,
+                                            const uint8_t     *iv,
+                                            size_t             iv_len,
+                                            const uint8_t     *ad,
+                                            size_t             ad_len,
+                                            uint8_t           *in,
+                                            size_t             in_len,
+                                            uint8_t           *out,
+                                            size_t            *out_len,
+                                            uint8_t           *tag,
+                                            size_t             tag_len);
 
 /**
  * @brief   All-in-one authenticated decryption.
@@ -338,17 +344,17 @@ cx_err_t cx_aead_encrypt(cx_aead_context_t *ctx,
  *
  * @return             Error code.
  */
-cx_err_t cx_aead_decrypt(cx_aead_context_t *ctx,
-                         const uint8_t     *iv,
-                         size_t             iv_len,
-                         const uint8_t     *ad,
-                         size_t             ad_len,
-                         uint8_t           *in,
-                         size_t             in_len,
-                         uint8_t           *out,
-                         size_t            *out_len,
-                         const uint8_t     *tag,
-                         size_t             tag_len);
+WARN_UNUSED_RESULT cx_err_t cx_aead_decrypt(cx_aead_context_t *ctx,
+                                            const uint8_t     *iv,
+                                            size_t             iv_len,
+                                            const uint8_t     *ad,
+                                            size_t             ad_len,
+                                            uint8_t           *in,
+                                            size_t             in_len,
+                                            uint8_t           *out,
+                                            size_t            *out_len,
+                                            const uint8_t     *tag,
+                                            size_t             tag_len);
 
 #endif  // HAVE_AEAD
 

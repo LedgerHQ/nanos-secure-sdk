@@ -72,12 +72,12 @@
  *                          - CX_INVALID_PARAMETER_SIZE
  *                          - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *pvkey,
-                          uint32_t                     mode,
-                          const uint8_t               *P,
-                          size_t                       P_len,
-                          uint8_t                     *secret,
-                          size_t                       secret_len);
+WARN_UNUSED_RESULT cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                             uint32_t                     mode,
+                                             const uint8_t               *P,
+                                             size_t                       P_len,
+                                             uint8_t                     *secret,
+                                             size_t                       secret_len);
 
 /**
  * @deprecated
@@ -132,7 +132,7 @@ DEPRECATED static inline size_t cx_ecdh(const cx_ecfp_private_key_t *pvkey,
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
+WARN_UNUSED_RESULT cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
 #endif  // HAVE_X25519
 
 #if defined(HAVE_X448)
@@ -162,7 +162,7 @@ cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_x448(uint8_t *u, const uint8_t *k, size_t k_len);
+WARN_UNUSED_RESULT cx_err_t cx_x448(uint8_t *u, const uint8_t *k, size_t k_len);
 #endif  // HAVE_X448
 
 #endif  // HAVE_ECDH || HAVE_X25519 || HAVE_X448

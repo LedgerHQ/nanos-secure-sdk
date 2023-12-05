@@ -71,12 +71,12 @@
  *                      - CX_INTERNAL_ERROR
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                cx_md_t                      hashID,
-                                const uint8_t               *hash,
-                                size_t                       hash_len,
-                                uint8_t                     *sig,
-                                size_t                       sig_len);
+WARN_UNUSED_RESULT cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                   cx_md_t                      hashID,
+                                                   const uint8_t               *hash,
+                                                   size_t                       hash_len,
+                                                   uint8_t                     *sig,
+                                                   size_t                       sig_len);
 
 /**
  * @deprecated

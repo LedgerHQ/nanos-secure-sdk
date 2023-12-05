@@ -40,11 +40,11 @@ size_t cx_pkcs1_get_hash_len(cx_md_t hID);
  *
  * @return em_len, if encoded 0 else
  */
-cx_err_t cx_pkcs1_emsa_v1o5_encode(cx_md_t        hID,
-                                   uint8_t       *em,
-                                   size_t         em_len,
-                                   const uint8_t *mHash,
-                                   size_t         mHashLen);
+WARN_UNUSED_RESULT cx_err_t cx_pkcs1_emsa_v1o5_encode(cx_md_t        hID,
+                                                      uint8_t       *em,
+                                                      size_t         em_len,
+                                                      const uint8_t *mHash,
+                                                      size_t         mHashLen);
 /*
  * @param  [in]  hID       underlaid hash (ignored, sha256 forced)
  * @param  [in]  em        encoded message to verify
@@ -73,12 +73,12 @@ bool cx_pkcs1_emsa_v1o5_verify(cx_md_t        hID,
  *
  * @return em_len, if encoded 0 else
  */
-cx_err_t cx_pkcs1_emsa_pss_encode(cx_md_t        hID,
-                                  uint8_t       *em,
-                                  size_t         em_len,
-                                  const uint8_t *mHash,
-                                  size_t         mHashLen,
-                                  size_t        *size);
+WARN_UNUSED_RESULT cx_err_t cx_pkcs1_emsa_pss_encode(cx_md_t        hID,
+                                                     uint8_t       *em,
+                                                     size_t         em_len,
+                                                     const uint8_t *mHash,
+                                                     size_t         mHashLen,
+                                                     size_t        *size);
 
 /*
  * @param  [in]  hID       underlaid hash (ignored, sha256 forced)
@@ -90,13 +90,13 @@ cx_err_t cx_pkcs1_emsa_pss_encode(cx_md_t        hID,
  *
  * @return em_len, if encoded 0 else
  */
-cx_err_t cx_pkcs1_emsa_pss_encode_with_salt_len(cx_md_t        hID,
-                                                uint8_t       *em,
-                                                size_t         em_len,
-                                                const uint8_t *mHash,
-                                                size_t         mHashLen,
-                                                size_t         mSaltLen,
-                                                size_t        *size);
+WARN_UNUSED_RESULT cx_err_t cx_pkcs1_emsa_pss_encode_with_salt_len(cx_md_t        hID,
+                                                                   uint8_t       *em,
+                                                                   size_t         em_len,
+                                                                   const uint8_t *mHash,
+                                                                   size_t         mHashLen,
+                                                                   size_t         mSaltLen,
+                                                                   size_t        *size);
 
 /* The salt length is equal to the mHashLen value.
  * If another salt length is to be used, the
@@ -142,11 +142,11 @@ bool cx_pkcs1_emsa_pss_verify_with_salt_len(cx_md_t        hID,
  *
  * @return em_len, if encoded 0 else
  */
-cx_err_t cx_pkcs1_eme_v1o5_encode(cx_md_t        hID,
-                                  uint8_t       *em,
-                                  size_t         em_len,
-                                  const uint8_t *mHash,
-                                  size_t         mHashLen);
+WARN_UNUSED_RESULT cx_err_t cx_pkcs1_eme_v1o5_encode(cx_md_t        hID,
+                                                     uint8_t       *em,
+                                                     size_t         em_len,
+                                                     const uint8_t *mHash,
+                                                     size_t         mHashLen);
 /*
  * @param  [in]  hID       underlaid hash (ignored, sha256 forced)
  * @param  [in]  em        encoded message
@@ -171,11 +171,8 @@ size_t cx_pkcs1_eme_v1o5_decode(cx_md_t  hID,
  *
  * @return em_len, if encoded 0 else
  */
-cx_err_t cx_pkcs1_eme_oaep_encode(cx_md_t        hID,
-                                  uint8_t       *em,
-                                  size_t         em_len,
-                                  const uint8_t *m,
-                                  size_t         mLen);
+WARN_UNUSED_RESULT cx_err_t
+cx_pkcs1_eme_oaep_encode(cx_md_t hID, uint8_t *em, size_t em_len, const uint8_t *m, size_t mLen);
 /*
  * @param  [in]  hID       underlaid hash (ignored, sha256 forced)
  * @param  [in]  em        encoded message
@@ -185,11 +182,8 @@ cx_err_t cx_pkcs1_eme_oaep_encode(cx_md_t        hID,
  *
  * @return decoded message length, -1 if decoding fail
  */
-cx_err_t cx_pkcs1_eme_oaep_decode(cx_md_t  hID,
-                                  uint8_t *em,
-                                  size_t   em_len,
-                                  uint8_t *m,
-                                  size_t  *mLen);
+WARN_UNUSED_RESULT cx_err_t
+cx_pkcs1_eme_oaep_decode(cx_md_t hID, uint8_t *em, size_t em_len, uint8_t *m, size_t *mLen);
 
 // For PKCS1.5
 #define PKCS1_DIGEST_BUFFER_LENGTH 64
@@ -238,10 +232,15 @@ extern uint8_t const C_cx_oid_sha3_256[CX_OID_SHA3_256_LENGTH];
 extern uint8_t const C_cx_oid_sha3_512[CX_OID_SHA3_512_LENGTH];
 #endif  // HAVE_SHA3
 
-cx_err_t cx_rsa_get_public_components(const cx_rsa_public_key_t *key, uint8_t **e, uint8_t **n);
-cx_err_t cx_rsa_get_private_components(const cx_rsa_private_key_t *key, uint8_t **d, uint8_t **n);
+WARN_UNUSED_RESULT cx_err_t cx_rsa_get_public_components(const cx_rsa_public_key_t *key,
+                                                         uint8_t                  **e,
+                                                         uint8_t                  **n);
+WARN_UNUSED_RESULT cx_err_t cx_rsa_get_private_components(const cx_rsa_private_key_t *key,
+                                                          uint8_t                   **d,
+                                                          uint8_t                   **n);
 
-cx_err_t cx_rsa_private_key_ctx_size(const cx_rsa_private_key_t *key, size_t *size);
+WARN_UNUSED_RESULT cx_err_t cx_rsa_private_key_ctx_size(const cx_rsa_private_key_t *key,
+                                                        size_t                     *size);
 
 #endif  // CX_RSA_H
 #endif  // HAVE_RSA

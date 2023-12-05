@@ -28,7 +28,8 @@ extern const cx_hash_info_t cx_keccak_info;
 extern const cx_hash_info_t cx_shake128_info;
 extern const cx_hash_info_t cx_shake256_info;
 
-cx_err_t cx_sha3_update(cx_sha3_t *ctx, const uint8_t *data, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_sha3_update(cx_sha3_t *ctx, const uint8_t *data, size_t len);
+// No need to add WARN_UNUSED_RESULT to cx_sha3_final(), it always returns CX_OK
 cx_err_t cx_sha3_final(cx_sha3_t *ctx, uint8_t *digest);
 size_t   cx_sha3_get_output_size(const cx_sha3_t *ctx);
 

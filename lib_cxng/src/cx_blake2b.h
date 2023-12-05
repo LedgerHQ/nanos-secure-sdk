@@ -28,7 +28,8 @@
 
 extern const cx_hash_info_t cx_blake2b_info;
 
-cx_err_t cx_blake2b_update(cx_blake2b_t *ctx, const uint8_t *data, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_blake2b_update(cx_blake2b_t *ctx, const uint8_t *data, size_t len);
+// No need to add WARN_UNUSED_RESULT to cx_blake2b_final(), it always returns CX_OK
 cx_err_t cx_blake2b_final(cx_blake2b_t *ctx, uint8_t *digest);
 size_t   cx_blake2b_get_output_size(const cx_blake2b_t *ctx);
 
