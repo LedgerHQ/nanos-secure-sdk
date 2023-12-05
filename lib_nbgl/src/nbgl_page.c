@@ -203,8 +203,8 @@ nbgl_page_t *nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t              onA
     nbgl_layoutCenteredInfo_t centeredInfo = {.text1   = text,
                                               .text2   = NULL,
                                               .text3   = NULL,
-                                              .style   = LEDGER_INFO,
-                                              .icon    = NULL,
+                                              .style   = LARGE_CASE_INFO,
+                                              .icon    = &C_round_check_64px,
                                               .offsetY = 0};
 
     layoutDescription.modal          = false;

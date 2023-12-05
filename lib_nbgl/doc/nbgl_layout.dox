@@ -175,7 +175,6 @@ The API to insert such an object is @ref nbgl_layoutAddCenteredInfo(), using @re
 The colors and fonts for the texts depends of the \b style field used in @ref nbgl_layoutCenteredInfo_t.
 
 - if @ref LARGE_CASE_INFO, main text is in @ref BLACK and large case (INTER 32px), subText in @ref BLACK in INTER 24px
-- if @ref LEDGER_INFO, only text, in @ref BLACK and upper case (HM ALPHA MONO 32px), with Ledger border
 - if @ref NORMAL_INFO, icon in black and main text in INTER 24px in @ref BLACK under it, subText in INTER 24px in @ref DARK_GRAY under it
 
 @subsection choice_buttons Choice buttons
