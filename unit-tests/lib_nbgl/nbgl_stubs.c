@@ -54,7 +54,6 @@ void fetch_language_packs(void)
 }
 
 #include "nbgl_fonts.h"
-#include "nbgl_font_hmalpha_mono_medium_32.inc"
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_medium_32.inc"

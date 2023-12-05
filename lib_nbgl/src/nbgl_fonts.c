@@ -45,7 +45,6 @@ extern const LANGUAGE_PACK *language_pack;
 #endif  // defined(HAVE_LANGUAGE_PACK)
 
 #if defined(BOLOS_OS_UPGRADER_APP)
-#include "nbgl_font_hmalpha_mono_medium_32.inc"
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_medium_32.inc"

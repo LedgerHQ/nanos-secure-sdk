@@ -217,7 +217,7 @@ static void test_draw_obj(void **state __attribute__((unused)))
     textArea->textColor       = WHITE;
     textArea->text            = "TRUST YOURSELF";
     textArea->textAlignment   = CENTER;
-    textArea->fontId          = BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px;
+    textArea->fontId          = BAGL_FONT_INTER_MEDIUM_32px;
     textArea->obj.alignTo     = NULL;
     textArea->obj.alignment   = TOP_LEFT;
     textArea->obj.area.width  = 340;

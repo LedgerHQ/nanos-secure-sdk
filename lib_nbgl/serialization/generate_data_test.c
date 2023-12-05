@@ -218,7 +218,7 @@ void test_draw_nbgl_button()
         .borderColor     = DARK_GRAY,
         .foregroundColor = LIGHT_GRAY,
         .radius          = RADIUS_24_PIXELS,
-        .fontId          = BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px,
+        .fontId          = BAGL_FONT_INTER_MEDIUM_32px,
         .localized       = true,
         .text            = "Test button",
     };
