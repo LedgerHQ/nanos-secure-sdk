@@ -18,7 +18,9 @@
 
 #include "ledger_assert.h"
 #include "os.h"
+#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
 #include "ux.h"
+#endif
 #include "os_io_seproxyhal.h"
 
 #ifdef HAVE_NBGL
