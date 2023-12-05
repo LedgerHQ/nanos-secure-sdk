@@ -80,7 +80,9 @@ void cx_chacha_init(cx_chacha_context_t *ctx, uint32_t nrounds);
  *
  * @return        Error code
  */
-cx_err_t cx_chacha_set_key(cx_chacha_context_t *ctx, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_chacha_set_key(cx_chacha_context_t *ctx,
+                                              const uint8_t       *key,
+                                              size_t               key_len);
 
 /**
  * @brief        Set the nonce and initial counter value.
@@ -102,7 +104,9 @@ cx_err_t cx_chacha_set_key(cx_chacha_context_t *ctx, const uint8_t *key, size_t 
  *
  * @return       Error code
  */
-cx_err_t cx_chacha_start(cx_chacha_context_t *ctx, const uint8_t *iv, size_t iv_len);
+WARN_UNUSED_RESULT cx_err_t cx_chacha_start(cx_chacha_context_t *ctx,
+                                            const uint8_t       *iv,
+                                            size_t               iv_len);
 
 /**
  * @brief        Update the stream: encrypt or decrypt data.
@@ -123,10 +127,10 @@ cx_err_t cx_chacha_start(cx_chacha_context_t *ctx, const uint8_t *iv, size_t iv_
  *
  * @return       Error code
  */
-cx_err_t cx_chacha_update(cx_chacha_context_t *ctx,
-                          const uint8_t       *input,
-                          uint8_t             *output,
-                          size_t               len);
+WARN_UNUSED_RESULT cx_err_t cx_chacha_update(cx_chacha_context_t *ctx,
+                                             const uint8_t       *input,
+                                             uint8_t             *output,
+                                             size_t               len);
 
 /**
  * @brief Encrypt or decrypt data with Chacha and a given key and nonce.
@@ -151,14 +155,14 @@ cx_err_t cx_chacha_update(cx_chacha_context_t *ctx,
  *
  * @return        Error code.
  */
-cx_err_t cx_chacha_cipher(uint32_t       nrounds,
-                          const uint8_t *key,
-                          size_t         key_len,
-                          const uint8_t *iv,
-                          size_t         iv_len,
-                          const uint8_t *input,
-                          uint8_t       *output,
-                          size_t         len);
+WARN_UNUSED_RESULT cx_err_t cx_chacha_cipher(uint32_t       nrounds,
+                                             const uint8_t *key,
+                                             size_t         key_len,
+                                             const uint8_t *iv,
+                                             size_t         iv_len,
+                                             const uint8_t *input,
+                                             uint8_t       *output,
+                                             size_t         len);
 
 #endif  // HAVE_CHACHA
 

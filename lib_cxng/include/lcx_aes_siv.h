@@ -53,7 +53,7 @@ typedef struct _cx_aes_siv_context {
  * @param[in] ctx Pointer to the AES-SIV context.
  * @return        Error code.
  */
-cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx);
 
 /**
  * @brief   Sets the key to compute AES-SIV.
@@ -71,7 +71,9 @@ cx_err_t cx_aes_siv_init(cx_aes_siv_context_t *ctx);
  * @param[in] key_bitlen Size of the key in bits.
  * @return               Error code
  */
-cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx, const uint8_t *key, size_t key_bitlen);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx,
+                                               const uint8_t        *key,
+                                               size_t                key_bitlen);
 
 /**
  * @brief Starts the S2V algorithm following RFC5297 specification.
@@ -85,10 +87,10 @@ cx_err_t cx_aes_siv_set_key(cx_aes_siv_context_t *ctx, const uint8_t *key, size_
  *                   be 16 bytes.
  * @return           Error code
  */
-cx_err_t cx_aes_siv_start(cx_aes_siv_context_t *ctx,
-                          uint32_t              mode,
-                          const uint8_t        *iv,
-                          size_t                iv_len);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_start(cx_aes_siv_context_t *ctx,
+                                             uint32_t              mode,
+                                             const uint8_t        *iv,
+                                             size_t                iv_len);
 
 /**
  * @brief Processes additional data.
@@ -98,7 +100,9 @@ cx_err_t cx_aes_siv_start(cx_aes_siv_context_t *ctx,
  * @param[in] aad_len Length of the additional data.
  * @return            Error code.
  */
-cx_err_t cx_aes_siv_update_aad(cx_aes_siv_context_t *ctx, const uint8_t *aad, size_t aad_len);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_update_aad(cx_aes_siv_context_t *ctx,
+                                                  const uint8_t        *aad,
+                                                  size_t                aad_len);
 
 /**
  * @brief Processes plaintext or ciphertext with AES-CTR.
@@ -110,10 +114,10 @@ cx_err_t cx_aes_siv_update_aad(cx_aes_siv_context_t *ctx, const uint8_t *aad, si
  * @param[in]  len    Length of the input.
  * @return            Error code.
  */
-cx_err_t cx_aes_siv_update(cx_aes_siv_context_t *ctx,
-                           const uint8_t        *input,
-                           uint8_t              *output,
-                           size_t                len);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_update(cx_aes_siv_context_t *ctx,
+                                              const uint8_t        *input,
+                                              uint8_t              *output,
+                                              size_t                len);
 
 /**
  * @brief Finishes the S2V algorithm and prepares for the
@@ -126,10 +130,10 @@ cx_err_t cx_aes_siv_update(cx_aes_siv_context_t *ctx,
  *                       is given by the caller in case of decryption.
  * @return               Error code.
  */
-cx_err_t cx_aes_siv_finish(cx_aes_siv_context_t *ctx,
-                           const uint8_t        *input,
-                           size_t                in_len,
-                           uint8_t              *tag);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_finish(cx_aes_siv_context_t *ctx,
+                                              const uint8_t        *input,
+                                              size_t                in_len,
+                                              uint8_t              *tag);
 
 /**
  * @brief All-in-one encryption.
@@ -145,13 +149,13 @@ cx_err_t cx_aes_siv_finish(cx_aes_siv_context_t *ctx,
  *                     will contain *16* bytes.
  * @return             Error code.
  */
-cx_err_t cx_aes_siv_encrypt(cx_aes_siv_context_t *ctx,
-                            const uint8_t        *input,
-                            size_t                in_len,
-                            const uint8_t        *aad,
-                            size_t                aad_len,
-                            uint8_t              *output,
-                            uint8_t              *tag);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_encrypt(cx_aes_siv_context_t *ctx,
+                                               const uint8_t        *input,
+                                               size_t                in_len,
+                                               const uint8_t        *aad,
+                                               size_t                aad_len,
+                                               uint8_t              *output,
+                                               uint8_t              *tag);
 
 /**
  * @brief All-in-one decryption.
@@ -167,13 +171,13 @@ cx_err_t cx_aes_siv_encrypt(cx_aes_siv_context_t *ctx,
  *                     The buffer must contain *16* bytes.
  * @return             Error code
  */
-cx_err_t cx_aes_siv_decrypt(cx_aes_siv_context_t *ctx,
-                            const uint8_t        *input,
-                            size_t                in_len,
-                            const uint8_t        *aad,
-                            size_t                aad_len,
-                            uint8_t              *output,
-                            uint8_t              *tag);
+WARN_UNUSED_RESULT cx_err_t cx_aes_siv_decrypt(cx_aes_siv_context_t *ctx,
+                                               const uint8_t        *input,
+                                               size_t                in_len,
+                                               const uint8_t        *aad,
+                                               size_t                aad_len,
+                                               uint8_t              *output,
+                                               uint8_t              *tag);
 
 #endif /* LCX_AES_SIV_H */
 
