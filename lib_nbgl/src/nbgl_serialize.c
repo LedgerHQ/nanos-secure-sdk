@@ -3,6 +3,7 @@
 #include "nbgl_obj.h"
 #include "nbgl_serialize.h"
 #include "nbgl_image_utils.h"
+#include "os_pic.h"
 
 // Utility functions
 
@@ -173,7 +174,8 @@ static void nbgl_serializeIcon(const nbgl_icon_details_t *icon,
             size = nbgl_bpp_get_window_size(icon->width, icon->height, icon->bpp);
         }
         else {
-            size = GET_IMAGE_FILE_BUFFER_LEN(icon->bitmap) + IMAGE_FILE_HEADER_SIZE;
+            size = GET_IMAGE_FILE_BUFFER_LEN(((uint8_t *) PIC(icon->bitmap)))
+                   + IMAGE_FILE_HEADER_SIZE;
         }
     }
     nbgl_appendU32(size, out, w_cnt, max_len);
@@ -199,7 +201,7 @@ static void nbgl_serializeTextArea(nbgl_text_area_t *obj,
     nbgl_appendU8((uint8_t) obj->autoHideLongLine, out, w_cnt, max_len);
     nbgl_appendU16((uint16_t) obj->len, out, w_cnt, max_len);
 
-    nbgl_serializeText(obj->text, obj->len, out, w_cnt, max_len);
+    nbgl_serializeText(PIC(obj->text), obj->len, out, w_cnt, max_len);
 }
 
 static void nbgl_serializeLine(nbgl_line_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
@@ -218,7 +220,7 @@ static void nbgl_serializeQrCode(nbgl_qrcode_t *obj, uint8_t *out, size_t *w_cnt
 
     nbgl_appendU8((uint8_t) obj->foregroundColor, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->version, out, w_cnt, max_len);
-    nbgl_serializeText(obj->text, 0, out, w_cnt, max_len);
+    nbgl_serializeText(PIC(obj->text), 0, out, w_cnt, max_len);
 }
 
 static void nbgl_serializeRadio(nbgl_radio_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
@@ -271,14 +273,14 @@ static void nbgl_serializeButton(nbgl_button_t *obj, uint8_t *out, size_t *w_cnt
     nbgl_appendU8((uint8_t) obj->radius, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->fontId, out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->localized, out, w_cnt, max_len);
-    nbgl_serializeText(obj->text, 0, out, w_cnt, max_len);
-    nbgl_serializeIcon(obj->icon, out, w_cnt, max_len);
+    nbgl_serializeText(PIC(obj->text), 0, out, w_cnt, max_len);
+    nbgl_serializeIcon(PIC(obj->icon), out, w_cnt, max_len);
 }
 
 static void nbgl_serializeImage(nbgl_image_t *obj, uint8_t *out, size_t *w_cnt, size_t max_len)
 {
     nbgl_serializeObj((nbgl_obj_t *) &obj->obj, out, w_cnt, max_len);
-    nbgl_serializeIcon(obj->buffer, out, w_cnt, max_len);
+    nbgl_serializeIcon(PIC(obj->buffer), out, w_cnt, max_len);
     nbgl_appendU8((uint8_t) obj->foregroundColor, out, w_cnt, max_len);
 }
 

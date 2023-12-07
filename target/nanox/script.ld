@@ -77,6 +77,9 @@ SECTIONS
     _envram_data = .;
 
     _install_parameters = .;
+    *(.install_parameters)
+    KEEP(*(.install_parameters))
+    _einstall_parameters = .;
     _nvram_end = .;
   } > FLASH
 
@@ -179,6 +182,16 @@ SECTIONS
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
+
+  ledger.target (INFO): { KEEP(*(ledger.target)) }
+  ledger.target_name (INFO): { KEEP(*(ledger.target_name)) }
+  ledger.target_id (INFO): { KEEP(*(ledger.target_id)) }
+  ledger.app_name (INFO): { KEEP(*(ledger.app_name)) }
+  ledger.app_version (INFO): { KEEP(*(ledger.app_version)) }
+  ledger.api_level (INFO): { KEEP(*(ledger.api_level)) }
+  ledger.sdk_name (INFO): { KEEP(*(ledger.sdk_name)) }
+  ledger.sdk_version (INFO): { KEEP(*(ledger.sdk_version)) }
+  ledger.sdk_hash (INFO): { KEEP(*(ledger.sdk_hash)) }
 }
 
 PROVIDE(_nvram = ABSOLUTE(_nvram_start));

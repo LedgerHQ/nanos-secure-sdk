@@ -55,6 +55,73 @@ env:
   \"app-thorchain\"        : \"./app\"            ,
   \"app-xxnetwork\"        : \"./app\"            }
   "
+
+    build_for_stax_list: '
+{\"app-solana\",
+\"app-hedera\",
+\"app-acala\",
+\"app-bitcoin-new\",
+\"app-mina\",
+\"app-tezos\",
+\"app-plugin-nested\",
+\"app-plugin-staderlabs\",
+\"app-plugin-lido\",
+\"app-plugin-paraswap\",
+\"app-plugin-1inch\",
+\"app-plugin-yearn\",
+\"app-plugin-quickswap\",
+\"app-plugin-cometh\",
+\"app-plugin-stakedao\",
+\"app-plugin-ricochet\",
+\"app-plugin-poap\",
+\"app-plugin-angle\",
+\"app-plugin-kiln\",
+\"app-plugin-alkemi\",
+\"app-plugin-nft\",
+\"app-plugin-harvest\",
+\"app-plugin-opensea-new\",
+\"app-plugin-rarible\",
+\"app-plugin-cbridge\",
+\"app-plugin-ribbon\",
+\"app-plugin-art-blocks\",
+\"app-plugin-boilerplate\",
+\"app-stellar\",
+\"app-exchange\",
+\"app-ssh-agent\",
+\"app-neo\",
+\"app-boilerplate\",
+\"app-xrp\",
+\"app-recovery-check\",
+\"app-near\",
+\"app-nervos\",
+\"app-cardano\",
+\"app-kusama\",
+\"app-polymesh\",
+\"app-monero\",
+\"app-celo-spender\",
+\"app-cosmos\",
+\"app-statemine\",
+\"app-polkadot\",
+\"app-zilliqa\",
+\"app-nem\",
+\"app-eos\",
+\"app-u2f\",
+\"app-fantom\",
+\"app-multiversx\",
+\"app-symbol\",
+\"app-vechain\",
+\"app-decred\",
+\"app-cryptocom\",
+\"app-icp\",
+\"app-tron\",
+\"app-bitcoin\",
+\"app-flow\",
+\"app-passwords\",
+\"app-secret\",
+\"app-binance\",
+\"app-ethereum\"}
+'
+
     repo_list: '
 {\"repo_name\":[
 \"app-velas\",
@@ -128,9 +195,7 @@ env:
 \"app-terra\",
 \"app-symbol\",
 \"app-arweave\",
-\"app-ravencoin\",
 \"app-vechain\",
-\"app-avalanche-legacy\",
 \"app-decred\",
 \"app-cryptocom\",
 \"app-icp\",
@@ -138,7 +203,6 @@ env:
 \"app-filecoin\",
 \"app-algorand\",
 \"app-dock\",
-\"app-plugin-opensea\",
 \"app-ton-new\",
 \"app-tron\",
 \"app-khala\",
@@ -205,13 +269,14 @@ env:
 \"app-ark\",
 \"app-ardor\",
 \"app-aion\",
+\"app-neo3\",
 ]}
 '
 # Failing apps
-#\"app-starknet\",
 #\"app-avalanche\",
 #\"app-kadena\",
-
+#\"app-security-key\",
+#\"app-starknet\",
 #\"app-panacea\",
 #\"app-insolar\",
 #\"app-dgld\",
@@ -226,7 +291,6 @@ env:
 #\"app-equilibrium\",
 #\"app-revealer\",
 #\"app-rise\",
-#\"app-neo3\",
 #\"app-keepass\",
 #\"app-bitsong\",
 
@@ -262,6 +326,14 @@ jobs:
           build_path=$(echo '${{ env.build_path_list}}' |  sed -n 's/.*"${{ matrix.repo_name }}"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
           echo "build_path=$build_path" >> $GITHUB_ENV
 
+      - name: Build for Stax
+        run: |
+          if echo "${{ env.build_for_stax_list }}" | grep -q "${{ matrix.repo_name }}" || [[ "${{ inputs.run_stax }}" ]]; then
+            echo "build_for_stax=true" >> $GITHUB_ENV
+          else
+            echo "build_for_stax=false" >> $GITHUB_ENV
+          fi
+
       - name: Clone SDK
         uses: actions/checkout@v3
         with:
@@ -284,7 +356,7 @@ jobs:
           TARGET=nanos2 BOLOS_SDK=$GITHUB_WORKSPACE/sdk make
 
       - name: Build Stax
-        if: ${{ inputs.run_stax == true }}
+        if: ${{ env.build_for_stax == 'true' }}
         run: |
           [ -n '${{ env.build_path }}' ] && cd ${{ env.build_path }}
           TARGET=stax BOLOS_SDK=$GITHUB_WORKSPACE/sdk make
