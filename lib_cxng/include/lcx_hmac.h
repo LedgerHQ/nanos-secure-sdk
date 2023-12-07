@@ -24,10 +24,11 @@
  * which involves a hash function and a secret key. It enables
  * the verification of the integrity and the authenticity of a message.
  */
-#ifdef HAVE_HMAC
 
 #ifndef LCX_HMAC_H
 #define LCX_HMAC_H
+
+#ifdef HAVE_HMAC
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -73,9 +74,9 @@ typedef struct {
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac,
-                                         const uint8_t       *key,
-                                         size_t               key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac,
+                                                            const uint8_t       *key,
+                                                            size_t               key_len);
 
 /**
  * @deprecated
@@ -120,7 +121,9 @@ typedef struct {
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac, const uint8_t *key, unsigned int key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac,
+                                                const uint8_t    *key,
+                                                unsigned int      key_len);
 #endif
 
 #ifdef HAVE_SHA256
@@ -143,7 +146,9 @@ cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac, const uint8_t *key, unsigne
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac,
+                                                         const uint8_t    *key,
+                                                         size_t            key_len);
 
 /**
  * @deprecated
@@ -215,7 +220,9 @@ typedef struct {
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac, const uint8_t *key, unsigned int key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac,
+                                                const uint8_t    *key,
+                                                unsigned int      key_len);
 #endif
 
 #ifdef HAVE_SHA512
@@ -238,7 +245,9 @@ cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac, const uint8_t *key, unsigne
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac,
+                                                         const uint8_t    *key,
+                                                         size_t            key_len);
 
 /**
  * @deprecated
@@ -311,12 +320,12 @@ size_t cx_hmac_sha512(const uint8_t *key,
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_no_throw(cx_hmac_t     *hmac,
-                          uint32_t       mode,
-                          const uint8_t *in,
-                          size_t         len,
-                          uint8_t       *mac,
-                          size_t         mac_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_no_throw(cx_hmac_t     *hmac,
+                                             uint32_t       mode,
+                                             const uint8_t *in,
+                                             size_t         len,
+                                             uint8_t       *mac,
+                                             size_t         mac_len);
 
 /**
  * @deprecated
@@ -378,7 +387,10 @@ DEPRECATED static inline int cx_hmac(cx_hmac_t           *hmac,
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_init(cx_hmac_t *hmac, cx_md_t hash_id, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_init(cx_hmac_t     *hmac,
+                                         cx_md_t        hash_id,
+                                         const uint8_t *key,
+                                         size_t         key_len);
 
 /**
  * @brief   Adds more data to compute the HMAC.
@@ -397,7 +409,7 @@ cx_err_t cx_hmac_init(cx_hmac_t *hmac, cx_md_t hash_id, const uint8_t *key, size
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
 
 /**
  * @brief   Finalizes the HMAC algorithm.
@@ -414,8 +426,8 @@ cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
  * @return             Error code:
  *                     - CX_OK on success
  */
-cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len);
-
-#endif
+WARN_UNUSED_RESULT cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len);
 
 #endif  // HAVE_HMAC
+
+#endif  // LCX_HMAC_H

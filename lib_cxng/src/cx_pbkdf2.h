@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_PBKDF2
-
 #ifndef CX_PBKDF2_H
 #define CX_PBKDF2_H
+
+#ifdef HAVE_PBKDF2
 
 #include "lcx_hmac.h"
 
@@ -54,14 +54,15 @@ struct cx_pbkdf2_s {
 };
 typedef struct cx_pbkdf2_s cx_pbkdf2_t;
 
-cx_err_t cx_pbkdf2_hmac(cx_md_t        md_type,
-                        const uint8_t *password,
-                        size_t         password_len,
-                        const uint8_t *salt,
-                        size_t         salt_len,
-                        uint32_t       iterations,
-                        uint8_t       *key,
-                        size_t         key_len);
+WARN_UNUSED_RESULT cx_err_t cx_pbkdf2_hmac(cx_md_t        md_type,
+                                           const uint8_t *password,
+                                           size_t         password_len,
+                                           const uint8_t *salt,
+                                           size_t         salt_len,
+                                           uint32_t       iterations,
+                                           uint8_t       *key,
+                                           size_t         key_len);
+
+#endif  // HAVE_PBKDF2
 
 #endif  // CX_PBKDF2_H
-#endif  // HAVE_PBKDF2

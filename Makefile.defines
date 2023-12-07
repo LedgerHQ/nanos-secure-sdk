@@ -43,26 +43,17 @@ endif
 ifeq ($(SDK_HASH),)
 SDK_HASH := "None"
 endif
-# Expose API_LEVEL, SDK_VERSION and SDK_HASH to the app.
+
+# APPNAME exposed to the app as a CFLAG because it might contain spaces
+CFLAGS += -DAPPNAME=\"$(APPNAME)\"
+
+# API_LEVEL exposed to the app as an integer
 DEFINES += API_LEVEL=$(API_LEVEL)
-DEFINES += SDK_VERSION=\"$(SDK_VERSION)\"
-DEFINES += SDK_HASH=\"$(SDK_HASH)\"
 
-# extra load parameters for loadApp script
-ifneq ($(SCP_PRIVKEY),)
-PARAM_SCP+=--rootPrivateKey $(SCP_PRIVKEY)
-endif
-
-# Command to print ICONNAME hexadecimal bitmap on stdout
-# according to the hardware target.
-ifeq ($(TARGET_NAME),TARGET_STAX)
-ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --hexbitmaponly $(ICONNAME)
-else
-ICONHEX_CMD=python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)
-endif
-
-COMMON_LOAD_PARAMS=--tlv --targetId $(TARGET_ID) --targetVersion="$(TARGET_VERSION)" --apiLevel $(API_LEVEL) --delete --fileName bin/app.hex --appName $(APPNAME) --appVersion $(APPVERSION) --dataSize $$((0x`cat debug/app.map |grep _envram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'` - 0x`cat debug/app.map |grep _nvram_data | tr -s ' ' | cut -f2 -d' '|cut -f2 -d'x'`)) `ICONHEX=\`$(ICONHEX_CMD)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"` $(PARAM_SCP)
-COMMON_DELETE_PARAMS=--targetId $(TARGET_ID) --appName $(APPNAME) $(PARAM_SCP)
+# Define list of other items to be exposed to the app as strings
+# TARGET_ID is not in this list: it is already defined in bolos_target.h.
+APP_METADATA_LIST := TARGET TARGET_NAME APPVERSION SDK_NAME SDK_VERSION SDK_HASH
+DEFINES += $(foreach item,$(APP_METADATA_LIST), $(item)=\"$($(item))\")
 
 BUILD_DIR := build
 TARGET_BUILD_DIR := $(BUILD_DIR)/$(TARGET)
@@ -172,8 +163,8 @@ LDFLAGS  += -L$(BOLOS_SDK)/arch/st33k1/lib/
 AFLAGS   += -mcpu=cortex-m35p+nodsp -mthumb
 endif
 
-NO_UI ?= 0
-ifeq ($(NO_UI), 0)
+DISABLE_UI ?= 0
+ifeq ($(DISABLE_UI),0)
 ifeq ($(TARGET_NAME),TARGET_STAX)
 DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_24PX
 DEFINES += HAVE_BAGL_FONT_INTER_SEMIBOLD_24PX

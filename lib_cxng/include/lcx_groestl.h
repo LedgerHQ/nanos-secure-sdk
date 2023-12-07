@@ -73,7 +73,7 @@ size_t cx_groestl_get_output_size(const cx_groestl_t *ctx);
  *                  - CX_OK on success
  *                  - CX_INVALID_PARAMETER
  */
-cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
+WARN_UNUSED_RESULT cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
 
 /**
  * @deprecated
@@ -111,12 +111,12 @@ DEPRECATED static inline void cx_groestl_init(cx_groestl_t *hash, unsigned int s
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_groestl(cx_groestl_t  *hash,
-                    uint32_t       mode,
-                    const uint8_t *in,
-                    size_t         len,
-                    uint8_t       *out,
-                    size_t         out_len);
+WARN_UNUSED_RESULT cx_err_t cx_groestl(cx_groestl_t  *hash,
+                                       uint32_t       mode,
+                                       const uint8_t *in,
+                                       size_t         len,
+                                       uint8_t       *out,
+                                       size_t         out_len);
 
 /**
  * @brief   Adds more data to hash.
@@ -134,7 +134,7 @@ cx_err_t cx_groestl(cx_groestl_t  *hash,
  *                    - CX_OK on success
  *                    - CX_INVALID_PARAMETER
  */
-cx_err_t cx_groestl_update(cx_groestl_t *ctx, const uint8_t *data, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_groestl_update(cx_groestl_t *ctx, const uint8_t *data, size_t len);
 
 /**
  * @brief   Finalizes the hash.
@@ -149,6 +149,7 @@ cx_err_t cx_groestl_update(cx_groestl_t *ctx, const uint8_t *data, size_t len);
  * @return            Error code:
  *                    - CX_OK on success
  */
+// No need to add WARN_UNUSED_RESULT to cx_groestl_final(), it always returns CX_OK
 cx_err_t cx_groestl_final(cx_groestl_t *ctx, uint8_t *digest);
 
 #endif

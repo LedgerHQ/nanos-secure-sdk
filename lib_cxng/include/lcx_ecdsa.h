@@ -25,10 +25,10 @@
  * <a href="https://tools.ietf.org/html/rfc6979"> RFC6979 </a> for more details.
  */
 
-#ifdef HAVE_ECDSA
-
 #ifndef LCX_ECDSA_H
 #define LCX_ECDSA_H
+
+#ifdef HAVE_ECDSA
 
 #include "lcx_wrappers.h"
 #include "lcx_ecfp.h"
@@ -80,14 +80,14 @@
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                uint32_t                     mode,
-                                cx_md_t                      hashID,
-                                const uint8_t               *hash,
-                                size_t                       hash_len,
-                                uint8_t                     *sig,
-                                size_t                      *sig_len,
-                                uint32_t                    *info);
+WARN_UNUSED_RESULT cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                   uint32_t                     mode,
+                                                   cx_md_t                      hashID,
+                                                   const uint8_t               *hash,
+                                                   size_t                       hash_len,
+                                                   uint8_t                     *sig,
+                                                   size_t                      *sig_len,
+                                                   uint32_t                    *info);
 
 /**
  * @deprecated
@@ -203,6 +203,6 @@ DEPRECATED static inline bool cx_ecdsa_verify(const cx_ecfp_public_key_t *pukey,
     return cx_ecdsa_verify_no_throw(pukey, hash, hash_len, sig, sig_len);
 }
 
-#endif
-
 #endif  // HAVE_ECDSA
+
+#endif  // LCX_ECDSA_H

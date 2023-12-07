@@ -1,0 +1,121 @@
+#*******************************************************************************
+#   Ledger SDK
+#   (c) 2023 Ledger
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#*******************************************************************************
+
+# Command to print ICONNAME hexadecimal bitmap on stdout
+# according to the hardware target.
+ifeq ($(TARGET_NAME),TARGET_STAX)
+ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --hexbitmaponly $(ICONNAME)
+else
+ICONHEX_CMD=python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)
+endif
+
+
+#########################################
+#         Parse APP_LOAD_PARAMS         #
+#########################################
+# This is necessary when makefile.standard_app is not completely used.
+# Correctly implemented apps should not set anything in APP_LOAD_PARAMS anymore
+# Potential presents info are:
+# --appFlags
+# --curve
+# --path
+# --path_slip21
+# --tlvraw
+# --dep
+# --nocrc
+# Other info are considered an error and will be silently discarded.
+
+ifneq ($(APP_LOAD_PARAMS),)
+	EXTRACTED_APP_FLAGS := $(shell python3 $(BOLOS_SDK)/extract_param.py --appFlags $(APP_LOAD_PARAMS))
+	APP_FLAGS_APP_LOAD_PARAMS += $(EXTRACTED_APP_FLAGS)
+
+	EXTRACTED_CURVE := $(shell python3 $(BOLOS_SDK)/extract_param.py --curve $(APP_LOAD_PARAMS))
+	CURVE_APP_LOAD_PARAMS += $(EXTRACTED_CURVE)
+
+	EXTRACTED_PATH := $(shell python3 $(BOLOS_SDK)/extract_param.py --path $(APP_LOAD_PARAMS))
+	PATH_APP_LOAD_PARAMS += $(EXTRACTED_PATH)
+
+	EXTRACTED_PATH_SLIP21 := $(shell python3 $(BOLOS_SDK)/extract_param.py --path_slip21 $(APP_LOAD_PARAMS))
+	PATH_SLIP21_APP_LOAD_PARAMS += $(EXTRACTED_PATH_SLIP21)
+
+	EXTRACTED_TLVRAW := $(shell python3 $(BOLOS_SDK)/extract_param.py --tlvraw $(APP_LOAD_PARAMS))
+	TLVRAW_APP_LOAD_PARAMS += $(EXTRACTED_TLVRAW)
+
+	EXTRACTED_DEP := $(shell python3 $(BOLOS_SDK)/extract_param.py --dep $(APP_LOAD_PARAMS))
+	DEP_APP_LOAD_PARAMS += $(EXTRACTED_DEP)
+
+	ifneq ($(findstring --nocrc,$(APP_LOAD_PARAMS)),)
+		ENABLE_NOCRC_APP_LOAD_PARAMS = 1
+	endif
+endif
+
+
+#########################################
+#        Generate install_params        #
+#########################################
+# Compute params to call install_params.py
+# Consider only one path_slip21 can be added, whereas LedgerBlue seems to
+# support multiple, but has the path can hold a " " in it, it mess with the
+# foreach, so we choose to restrict to only one path_slip21.
+APP_INSTALL_PARAMS = --appName $(APPNAME)
+APP_INSTALL_PARAMS += --appVersion $(APPVERSION)
+APP_INSTALL_PARAMS += `ICONHEX=\`$(ICONHEX_CMD)  2>/dev/null\` ; [ ! -z "$$ICONHEX" ] && echo "--icon $$ICONHEX"`
+APP_INSTALL_PARAMS += $(foreach curve, $(CURVE_APP_LOAD_PARAMS), --curve $(curve))
+APP_INSTALL_PARAMS += $(foreach path, $(PATH_APP_LOAD_PARAMS), --path $(path))
+ifneq ($(PATH_SLIP21_APP_LOAD_PARAMS),)
+	APP_INSTALL_PARAMS += --path_slip21 $(PATH_SLIP21_APP_LOAD_PARAMS)
+endif
+APP_INSTALL_PARAMS += $(foreach tlvraw, $(TLVRAW_APP_LOAD_PARAMS), --tlvraw $(tlvraw))
+APP_INSTALL_PARAMS += $(foreach dep, $(DEP_APP_LOAD_PARAMS), --dep $(dep))
+
+# Compute install_params tlv binary blob then expose it via a define to
+# src/app_metadata.c so that it is inserted in the binary at link time
+APP_INSTALL_PARAMS_DATA := $(shell python3 $(BOLOS_SDK)/install_params.py $(APP_INSTALL_PARAMS))
+DEFINES += APP_INSTALL_PARAMS_DATA=$(APP_INSTALL_PARAMS_DATA)
+
+#########################################
+#        Generate APP_LOAD_PARAMS       #
+#########################################
+# Rewrite APP_LOAD_PARAMS with params needed for generating the sideloading
+# APDUs.
+# This variable is then used in some Makefiles target as Ledgerblue.loadapp
+# script parameters.
+APP_LOAD_PARAMS = --targetId $(TARGET_ID)
+APP_LOAD_PARAMS += --targetVersion="$(TARGET_VERSION)"
+APP_LOAD_PARAMS += --apiLevel $(API_LEVEL)
+APP_LOAD_PARAMS += --fileName bin/app.hex
+APP_LOAD_PARAMS += --appName $(APPNAME)
+ifneq ($(APP_FLAGS_APP_LOAD_PARAMS),)
+	APP_LOAD_PARAMS += --appFlags $(APP_FLAGS_APP_LOAD_PARAMS)
+endif
+APP_LOAD_PARAMS += --delete
+APP_LOAD_PARAMS += --tlv
+APP_LOAD_PARAMS += --dataSize $$((0x`cat debug/app.map | grep _envram_data | tr -s ' ' | cut -f2 -d' ' |cut -f2 -d'x' ` - 0x`cat debug/app.map | grep _nvram_data | tr -s ' ' | cut -f2 -d' ' | cut -f2 -d'x'`))
+APP_LOAD_PARAMS += --installparamsSize $$((0x`cat debug/app.map | grep _einstall_parameters | tr -s ' ' | cut -f2 -d' ' |cut -f2 -d'x'` - 0x`cat debug/app.map | grep _install_parameters | tr -s ' ' | cut -f2 -d' ' |cut -f2 -d'x'`))
+
+ifeq ($(ENABLE_NOCRC_APP_LOAD_PARAMS), 1)
+    APP_LOAD_PARAMS += --nocrc
+endif
+
+COMMON_DELETE_PARAMS = --targetId $(TARGET_ID) --appName $(APPNAME)
+
+# Extra load parameters for loadApp script
+ifneq ($(SCP_PRIVKEY),)
+	PARAM_SCP += --rootPrivateKey $(SCP_PRIVKEY)
+	APP_LOAD_PARAMS += $(PARAM_SCP)
+	COMMON_DELETE_PARAMS += $(PARAM_SCP)
+endif

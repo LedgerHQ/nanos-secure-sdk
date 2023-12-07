@@ -81,7 +81,7 @@ typedef struct {
  *                         - CX_OK on success
  *                         - CX_BN_LOCKED if already locked.
  */
-SYSCALL cx_err_t cx_bn_lock(size_t word_nbytes, uint32_t flags);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_lock(size_t word_nbytes, uint32_t flags);
 
 /**
  * @brief   Releases the BN lock.
@@ -114,7 +114,7 @@ SYSCALL bool cx_bn_is_locked(void);
  *         - CX_OK on success
  *         - CX_NOT_LOCKED
  */
-cx_err_t cx_bn_locked(void);
+WARN_UNUSED_RESULT cx_err_t cx_bn_locked(void);
 
 /* ========================================================================= */
 /* ===                             ALLOCA                                === */
@@ -137,7 +137,7 @@ cx_err_t cx_bn_locked(void);
  *                     - CX_BN_MEMORY_FULL
  *                     - CX_BN_INVALID_PARAMETER_SIZE
  */
-SYSCALL cx_err_t cx_bn_alloc(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)), size_t nbytes);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_alloc(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)), size_t nbytes);
 
 /**
  * @brief   Allocates memory for a new BN and
@@ -160,10 +160,10 @@ SYSCALL cx_err_t cx_bn_alloc(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)), size_t nbytes)
  *                         - CX_BN_MEMORY_FULL
  *                         - CX_BN_INVALID_PARAMETER_SIZE
  */
-SYSCALL cx_err_t cx_bn_alloc_init(cx_bn_t *x           PLENGTH(sizeof(cx_bn_t)),
-                                  size_t               nbytes,
-                                  const uint8_t *value PLENGTH(value_nbytes),
-                                  size_t               value_nbytes);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_alloc_init(cx_bn_t *x           PLENGTH(sizeof(cx_bn_t)),
+                                                     size_t               nbytes,
+                                                     const uint8_t *value PLENGTH(value_nbytes),
+                                                     size_t               value_nbytes);
 
 /**
  * @brief   Releases a BN and gives back its attached memory to the system.
@@ -175,7 +175,7 @@ SYSCALL cx_err_t cx_bn_alloc_init(cx_bn_t *x           PLENGTH(sizeof(cx_bn_t)),
  *              - CX_BN_INVALID_PARAMETER_SIZE
  *              - CX_BN_INVALID_PARAMETER_VALUE
  */
-SYSCALL cx_err_t cx_bn_destroy(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_destroy(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Gets the size in bytes of a BN.
@@ -188,7 +188,7 @@ SYSCALL cx_err_t cx_bn_destroy(cx_bn_t *x PLENGTH(sizeof(cx_bn_t)));
  *                    - CX_OK on success
  *                    - CX_BN_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_nbytes(const cx_bn_t x, size_t *nbytes);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_nbytes(const cx_bn_t x, size_t *nbytes);
 
 /* ========================================================================= */
 /* ===                                R/W                                === */
@@ -207,9 +207,9 @@ SYSCALL cx_err_t cx_bn_nbytes(const cx_bn_t x, size_t *nbytes);
  *                           - CX_BN_INVALID_PARAMETER_SIZE
  *                           - CX_BN_INVALID_PARAMETER_VALUE
  */
-SYSCALL cx_err_t cx_bn_init(cx_bn_t              x,
-                            const uint8_t *value PLENGTH(value_nbytes),
-                            size_t               value_nbytes);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_init(cx_bn_t              x,
+                                               const uint8_t *value PLENGTH(value_nbytes),
+                                               size_t               value_nbytes);
 
 /**
  * @brief   Generates a random number and
@@ -221,7 +221,7 @@ SYSCALL cx_err_t cx_bn_init(cx_bn_t              x,
  *              - CX_OK on success
  *              - CX_BN_INVALID_PARAMETER_VALUE
  */
-SYSCALL cx_err_t cx_bn_rand(cx_bn_t x);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_rand(cx_bn_t x);
 
 /**
  * @brief   Copies the BN value.
@@ -235,7 +235,7 @@ SYSCALL cx_err_t cx_bn_rand(cx_bn_t x);
  *               - CX_BN_INVALID_PARAMETER_SIZE
  *               - CX_BN_INVALID_PARAMETER_VALUE
  */
-SYSCALL cx_err_t cx_bn_copy(cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_copy(cx_bn_t a, const cx_bn_t b);
 
 /**
  * @brief   Sets the value of a BN with a 32-bit unsigned value.
@@ -249,7 +249,7 @@ SYSCALL cx_err_t cx_bn_copy(cx_bn_t a, const cx_bn_t b);
  *              - CX_NOT_LOCKED
  *              - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_set_u32(cx_bn_t x, uint32_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_set_u32(cx_bn_t x, uint32_t n);
 
 /**
  * @brief   Gets the 32-bit value corresponding to a BN.
@@ -263,7 +263,7 @@ SYSCALL cx_err_t cx_bn_set_u32(cx_bn_t x, uint32_t n);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_get_u32(const cx_bn_t x, uint32_t *n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_get_u32(const cx_bn_t x, uint32_t *n);
 
 /**
  * @brief   Stores (serializes) a BN value as
@@ -284,7 +284,9 @@ SYSCALL cx_err_t cx_bn_get_u32(const cx_bn_t x, uint32_t *n);
  *                     - CX_BN_INVALID_PARAMETER_SIZE
  *                     - CX_BN_INVALID_PARAMETER_VALUE
  */
-SYSCALL cx_err_t cx_bn_export(const cx_bn_t x, uint8_t *bytes PLENGTH(nbytes), size_t nbytes);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_export(const cx_bn_t  x,
+                                                 uint8_t *bytes PLENGTH(nbytes),
+                                                 size_t         nbytes);
 
 /* ========================================================================= */
 /* ===                               TEST                                === */
@@ -307,7 +309,7 @@ SYSCALL cx_err_t cx_bn_export(const cx_bn_t x, uint8_t *bytes PLENGTH(nbytes), s
  *                  - CX_NOT_LOCKED
  *                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_cmp(const cx_bn_t a, const cx_bn_t b, int *diff);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_cmp(const cx_bn_t a, const cx_bn_t b, int *diff);
 
 /**
  * @brief   Compares a BN value with an unsigned integer.
@@ -326,7 +328,7 @@ SYSCALL cx_err_t cx_bn_cmp(const cx_bn_t a, const cx_bn_t b, int *diff);
  *                  - CX_NOT_LOCKED
  *                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_cmp_u32(const cx_bn_t a, uint32_t b, int *diff);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_cmp_u32(const cx_bn_t a, uint32_t b, int *diff);
 
 /**
  * @brief   Tests whether a BN value is odd.
@@ -342,7 +344,7 @@ SYSCALL cx_err_t cx_bn_cmp_u32(const cx_bn_t a, uint32_t b, int *diff);
  *                  - CX_NOT_LOCKED
  *                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_is_odd(const cx_bn_t n, bool *odd);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_is_odd(const cx_bn_t n, bool *odd);
 
 /* ========================================================================= */
 /* ===                         BIT MANIPULATION                          === */
@@ -364,7 +366,7 @@ SYSCALL cx_err_t cx_bn_is_odd(const cx_bn_t n, bool *odd);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_xor(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_xor(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
 
 /**
  * @brief   Performs the bitwise 'OR' of two BN values.
@@ -382,7 +384,7 @@ SYSCALL cx_err_t cx_bn_xor(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_or(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_or(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
 
 /**
  * @brief   Performs the bitwise 'AND' of two BN values.
@@ -400,7 +402,7 @@ SYSCALL cx_err_t cx_bn_or(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_and(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_and(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
 
 /**
  * @brief   Tests the bit value at the specified index.
@@ -421,7 +423,7 @@ SYSCALL cx_err_t cx_bn_and(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *                  - CX_NOT_LOCKED
  *                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_tst_bit(const cx_bn_t x, uint32_t pos, bool *set);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_tst_bit(const cx_bn_t x, uint32_t pos, bool *set);
 
 /**
  * @brief   Sets the bit value at the specified index.
@@ -438,7 +440,7 @@ SYSCALL cx_err_t cx_bn_tst_bit(const cx_bn_t x, uint32_t pos, bool *set);
  *                  - CX_NOT_LOCKED
  *                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_set_bit(cx_bn_t x, uint32_t pos);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_set_bit(cx_bn_t x, uint32_t pos);
 
 /**
  * @brief   Clears the bit value at the specified index.
@@ -455,7 +457,7 @@ SYSCALL cx_err_t cx_bn_set_bit(cx_bn_t x, uint32_t pos);
  *                  - CX_NOT_LOCKED
  *                  - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_clr_bit(cx_bn_t x, uint32_t pos);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_clr_bit(cx_bn_t x, uint32_t pos);
 
 /**
  * @brief   Performs a right shift.
@@ -469,7 +471,7 @@ SYSCALL cx_err_t cx_bn_clr_bit(cx_bn_t x, uint32_t pos);
  *                - CX_NOT_LOCKED
  *                - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_shr(cx_bn_t x, uint32_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_shr(cx_bn_t x, uint32_t n);
 
 /**
  * @brief   Performs a left shift.
@@ -483,7 +485,7 @@ SYSCALL cx_err_t cx_bn_shr(cx_bn_t x, uint32_t n);
  *                - CX_NOT_LOCKED
  *                - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_shl(cx_bn_t x, uint32_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_shl(cx_bn_t x, uint32_t n);
 
 /**
  * @brief   Counts the number of bits set to 1 of the BN value.
@@ -497,7 +499,7 @@ SYSCALL cx_err_t cx_bn_shl(cx_bn_t x, uint32_t n);
  *                    - CX_NOT_LOCKED
  *                    - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_cnt_bits(cx_bn_t n, uint32_t *nbits);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_cnt_bits(cx_bn_t n, uint32_t *nbits);
 
 /* ========================================================================= */
 /* ===                      NON MODULAR ARITHMETIC                       === */
@@ -519,7 +521,7 @@ SYSCALL cx_err_t cx_bn_cnt_bits(cx_bn_t n, uint32_t *nbits);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_add(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_add(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
 
 /**
  * @brief   Performs a subtraction **r = a - b**.
@@ -537,7 +539,7 @@ SYSCALL cx_err_t cx_bn_add(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_sub(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_sub(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
 
 /**
  * @brief   Performs a multiplication **r = a * b**.
@@ -557,7 +559,7 @@ SYSCALL cx_err_t cx_bn_sub(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *               - CX_NOT_LOCKED
  *               - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_bn_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
 
 /* ========================================================================= */
 /* ===                     Z/pZ  MODULAR ARITHMETIC                      === */
@@ -584,7 +586,10 @@ SYSCALL cx_err_t cx_bn_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b);
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_add(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_add(cx_bn_t       r,
+                                                  const cx_bn_t a,
+                                                  const cx_bn_t b,
+                                                  const cx_bn_t n);
 
 /**
  * @brief   Performs a modular subtraction **r = a - b mod n**.
@@ -607,7 +612,10 @@ SYSCALL cx_err_t cx_bn_mod_add(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, cons
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_sub(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_sub(cx_bn_t       r,
+                                                  const cx_bn_t a,
+                                                  const cx_bn_t b,
+                                                  const cx_bn_t n);
 
 /**
  * @brief   Performs a modular multiplication **r = a * b mod n**.
@@ -631,7 +639,10 @@ SYSCALL cx_err_t cx_bn_mod_sub(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, cons
  *               - CX_INVALID_PARAMETER_VALUE
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_mul(cx_bn_t       r,
+                                                  const cx_bn_t a,
+                                                  const cx_bn_t b,
+                                                  const cx_bn_t n);
 
 /**
  * @brief   Performs a reduction **r = d mod n**.
@@ -650,7 +661,7 @@ SYSCALL cx_err_t cx_bn_mod_mul(cx_bn_t r, const cx_bn_t a, const cx_bn_t b, cons
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_reduce(cx_bn_t r, const cx_bn_t d, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_reduce(cx_bn_t r, const cx_bn_t d, const cx_bn_t n);
 
 /**
  * @brief   Computes *r* such that **r² = a mod n** if *a* is a quadratic residue.
@@ -673,7 +684,10 @@ SYSCALL cx_err_t cx_bn_reduce(cx_bn_t r, const cx_bn_t d, const cx_bn_t n);
  *                  - CX_MEMORY_FULL
  *                  - CX_NO_RESIDUE
  */
-SYSCALL cx_err_t cx_bn_mod_sqrt(cx_bn_t r, const cx_bn_t a, const cx_bn_t n, uint32_t sign);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_sqrt(cx_bn_t       r,
+                                                   const cx_bn_t a,
+                                                   const cx_bn_t n,
+                                                   uint32_t      sign);
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -695,7 +709,10 @@ SYSCALL cx_err_t cx_bn_mod_sqrt(cx_bn_t r, const cx_bn_t a, const cx_bn_t n, uin
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_pow_bn(cx_bn_t r, const cx_bn_t a, const cx_bn_t e, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_pow_bn(cx_bn_t       r,
+                                                     const cx_bn_t a,
+                                                     const cx_bn_t e,
+                                                     const cx_bn_t n);
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -719,11 +736,11 @@ SYSCALL cx_err_t cx_bn_mod_pow_bn(cx_bn_t r, const cx_bn_t a, const cx_bn_t e, c
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_pow(cx_bn_t          r,
-                               const cx_bn_t    a,
-                               const uint8_t *e PLENGTH(e_len),
-                               uint32_t         e_len,
-                               const cx_bn_t    n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_pow(cx_bn_t          r,
+                                                  const cx_bn_t    a,
+                                                  const uint8_t *e PLENGTH(e_len),
+                                                  uint32_t         e_len,
+                                                  const cx_bn_t    n);
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -751,11 +768,11 @@ SYSCALL cx_err_t cx_bn_mod_pow(cx_bn_t          r,
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_pow2(cx_bn_t          r,
-                                const cx_bn_t    a,
-                                const uint8_t *e PLENGTH(e_len),
-                                uint32_t         e_len,
-                                const cx_bn_t    n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_pow2(cx_bn_t          r,
+                                                   const cx_bn_t    a,
+                                                   const uint8_t *e PLENGTH(e_len),
+                                                   uint32_t         e_len,
+                                                   const cx_bn_t    n);
 
 /**
  * @brief   Computes the modular inverse **r = a^(-1) mod n**,
@@ -775,7 +792,9 @@ SYSCALL cx_err_t cx_bn_mod_pow2(cx_bn_t          r,
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_mod_invert_nprime(cx_bn_t r, const cx_bn_t a, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_invert_nprime(cx_bn_t       r,
+                                                            const cx_bn_t a,
+                                                            const cx_bn_t n);
 
 /**
  * @brief   Computes the modular inverse **r = a^(-1) mod n**,
@@ -799,7 +818,7 @@ SYSCALL cx_err_t cx_bn_mod_invert_nprime(cx_bn_t r, const cx_bn_t a, const cx_bn
  *               - CX_INTERNAL_ERROR
  *               - CX_NOT_INVERTIBLE
  */
-SYSCALL cx_err_t cx_bn_mod_u32_invert(cx_bn_t r, uint32_t a, cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_mod_u32_invert(cx_bn_t r, uint32_t a, cx_bn_t n);
 
 /* ========================================================================= */
 /* ===                   MONTGOMERY  MODULAR ARITHMETIC                  === */
@@ -817,8 +836,8 @@ SYSCALL cx_err_t cx_bn_mod_u32_invert(cx_bn_t r, uint32_t a, cx_bn_t n);
  *                   - CX_NOT_LOCKED
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_alloc(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
-                               size_t                length);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_mont_alloc(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)), size_t length);
 
 /**
  * @brief   Initializes a Montgomery context with the modulus.
@@ -835,8 +854,8 @@ SYSCALL cx_err_t cx_mont_alloc(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_c
  *                - CX_INVALID_PARAMETER
  *                - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_init(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
-                              const cx_bn_t         n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_mont_init(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)), const cx_bn_t n);
 
 /**
  * @brief   Initializes a Montgomery context with the modulus and
@@ -858,9 +877,10 @@ SYSCALL cx_err_t cx_mont_init(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ct
  *                - CX_NOT_LOCKED
  *                - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_mont_init2(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
-                               const cx_bn_t         n,
-                               const cx_bn_t         h);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_mont_init2(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)),
+              const cx_bn_t         n,
+              const cx_bn_t         h);
 
 /**
  * @brief   Computes the Montgomery representation of a BN value.
@@ -880,7 +900,7 @@ SYSCALL cx_err_t cx_mont_init2(cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_c
  *                 - CX_INVALID_PARAMETER
  *                 - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
+SYSCALL WARN_UNUSED_RESULT cx_err_t
 cx_mont_to_montgomery(cx_bn_t                     x,
                       const cx_bn_t               z,
                       const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
@@ -905,7 +925,7 @@ cx_mont_to_montgomery(cx_bn_t                     x,
  *                 - CX_INVALID_PARAMETER
  *                 - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
+SYSCALL WARN_UNUSED_RESULT cx_err_t
 cx_mont_from_montgomery(cx_bn_t                     z,
                         const cx_bn_t               x,
                         const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
@@ -929,10 +949,11 @@ cx_mont_from_montgomery(cx_bn_t                     z,
  *                 - CX_NOT_LOCKED
  *                 - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_mont_mul(cx_bn_t                     r,
-                             const cx_bn_t               a,
-                             const cx_bn_t               b,
-                             const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_mont_mul(cx_bn_t                     r,
+            const cx_bn_t               a,
+            const cx_bn_t               b,
+            const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -959,11 +980,12 @@ SYSCALL cx_err_t cx_mont_mul(cx_bn_t                     r,
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_pow(cx_bn_t                     r,
-                             const cx_bn_t               a,
-                             const uint8_t *e            PLENGTH(e_len),
-                             uint32_t                    e_len,
-                             const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_mont_pow(cx_bn_t                     r,
+            const cx_bn_t               a,
+            const uint8_t *e            PLENGTH(e_len),
+            uint32_t                    e_len,
+            const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Performs a modular exponentiation **r = a^e mod n**.
@@ -988,10 +1010,11 @@ SYSCALL cx_err_t cx_mont_pow(cx_bn_t                     r,
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_mont_pow_bn(cx_bn_t                     r,
-                                const cx_bn_t               a,
-                                const cx_bn_t               e,
-                                const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_mont_pow_bn(cx_bn_t                     r,
+               const cx_bn_t               a,
+               const cx_bn_t               e,
+               const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
 
 /**
  * @brief   Computes the modular inverse **r = a^(-1) mod n** for
@@ -1014,7 +1037,7 @@ SYSCALL cx_err_t cx_mont_pow_bn(cx_bn_t                     r,
  *                 - CX_INVALID_PARAMETER
  *                 - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t
+SYSCALL WARN_UNUSED_RESULT cx_err_t
 cx_mont_invert_nprime(cx_bn_t                     r,
                       const cx_bn_t               a,
                       const cx_bn_mont_ctx_t *ctx PLENGTH(sizeof(cx_bn_mont_ctx_t)));
@@ -1038,7 +1061,7 @@ cx_mont_invert_nprime(cx_bn_t                     r,
  *                   - CX_INVALID_PARAMETER
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_is_prime(const cx_bn_t n, bool *prime);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_is_prime(const cx_bn_t n, bool *prime);
 
 /**
  * @brief   Gets the first prime number after a
@@ -1053,7 +1076,7 @@ SYSCALL cx_err_t cx_bn_is_prime(const cx_bn_t n, bool *prime);
  *                   - CX_MEMORY_FULL
  *                   - CX_OVERFLOW
  */
-SYSCALL cx_err_t cx_bn_next_prime(cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_next_prime(cx_bn_t n);
 
 /**
  * @brief Generates a random number *r* in the range ]0,n[.
@@ -1070,7 +1093,7 @@ SYSCALL cx_err_t cx_bn_next_prime(cx_bn_t n);
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_rng(cx_bn_t r, const cx_bn_t n);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_rng(cx_bn_t r, const cx_bn_t n);
 
 /**
  * @brief Performs a multiplication over GF(2^n).
@@ -1093,10 +1116,10 @@ SYSCALL cx_err_t cx_bn_rng(cx_bn_t r, const cx_bn_t n);
  *                  - CX_INVALID_PARAMETER
  *                  - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_bn_gf2_n_mul(cx_bn_t       bn_r,
-                                 const cx_bn_t bn_a,
-                                 const cx_bn_t bn_b,
-                                 const cx_bn_t bn_n,
-                                 const cx_bn_t bn_h);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_bn_gf2_n_mul(cx_bn_t       bn_r,
+                                                    const cx_bn_t bn_a,
+                                                    const cx_bn_t bn_b,
+                                                    const cx_bn_t bn_n,
+                                                    const cx_bn_t bn_h);
 
 #endif /* CX_BN_H */

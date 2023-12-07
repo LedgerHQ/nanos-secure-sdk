@@ -49,16 +49,17 @@ typedef struct {
  * @param[in]  threshold     Threshold of the secret sharing.
  * @return Error code
  */
-SYSCALL cx_err_t cx_vss_generate_shares(cx_vss_share_t *shares       PLENGTH(shares_number),
-                                        cx_vss_commitment_t *commits PLENGTH(threshold),
-                                        const uint8_t               *point,
-                                        size_t                       point_len,
-                                        const uint8_t *seed          PLENGTH(seed_len),
-                                        size_t                       seed_len,
-                                        const uint8_t *secret        PLENGTH(secret_len),
-                                        size_t                       secret_len,
-                                        uint8_t                      shares_number,
-                                        uint8_t                      threshold);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_vss_generate_shares(cx_vss_share_t *shares       PLENGTH(shares_number),
+                       cx_vss_commitment_t *commits PLENGTH(threshold),
+                       const uint8_t               *point,
+                       size_t                       point_len,
+                       const uint8_t *seed          PLENGTH(seed_len),
+                       size_t                       seed_len,
+                       const uint8_t *secret        PLENGTH(secret_len),
+                       size_t                       secret_len,
+                       uint8_t                      shares_number,
+                       uint8_t                      threshold);
 
 /**
  * @brief This function combines the given shares to get a secret.
@@ -69,10 +70,11 @@ SYSCALL cx_err_t cx_vss_generate_shares(cx_vss_share_t *shares       PLENGTH(sha
  * @param[in]  threshold  Threshold of the secret sharing.
  * @return Error code
  */
-SYSCALL cx_err_t cx_vss_combine_shares(uint8_t *secret        PLENGTH(secret_len),
-                                       size_t                 secret_len,
-                                       cx_vss_share_t *shares PLENGTH(sizeof(cx_vss_share_t)),
-                                       uint8_t                threshold);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_vss_combine_shares(uint8_t *secret        PLENGTH(secret_len),
+                      size_t                 secret_len,
+                      cx_vss_share_t *shares PLENGTH(sizeof(cx_vss_share_t)),
+                      uint8_t                threshold);
 
 /**
  * @brief This function verifies whether the coefficients commitments match
@@ -86,11 +88,11 @@ SYSCALL cx_err_t cx_vss_combine_shares(uint8_t *secret        PLENGTH(secret_len
  * @param[out] verified         The commitments match.
  * @return Error code.
  */
-SYSCALL cx_err_t cx_vss_verify_commits(cx_vss_commitment_t *commitments,
-                                       uint8_t              threshold,
-                                       cx_vss_commitment_t *share_commitment,
-                                       uint32_t             share_index,
-                                       bool                *verified);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_vss_verify_commits(cx_vss_commitment_t *commitments,
+                                                          uint8_t              threshold,
+                                                          cx_vss_commitment_t *share_commitment,
+                                                          uint32_t             share_index,
+                                                          bool                *verified);
 
 #endif  /* OX_VSS_H */
 #endif  // HAVE_VSS

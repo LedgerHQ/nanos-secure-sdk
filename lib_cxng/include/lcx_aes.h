@@ -28,10 +28,10 @@
  * </a> for more details.
  */
 
-#ifdef HAVE_AES
-
 #ifndef LCX_AES_H
 #define LCX_AES_H
+
+#ifdef HAVE_AES
 
 #include "cx_errors.h"
 #include "lcx_wrappers.h"
@@ -54,7 +54,9 @@
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_aes_init_key_no_throw(const uint8_t *rawkey, size_t key_len, cx_aes_key_t *key);
+WARN_UNUSED_RESULT cx_err_t cx_aes_init_key_no_throw(const uint8_t *rawkey,
+                                                     size_t         key_len,
+                                                     cx_aes_key_t  *key);
 
 /**
  * @deprecated
@@ -112,14 +114,14 @@ DEPRECATED static inline size_t cx_aes_init_key(const unsigned char *rawkey,
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
-                            uint32_t            mode,
-                            const uint8_t      *iv,
-                            size_t              iv_len,
-                            const uint8_t      *in,
-                            size_t              in_len,
-                            uint8_t            *out,
-                            size_t             *out_len);
+WARN_UNUSED_RESULT cx_err_t cx_aes_iv_no_throw(const cx_aes_key_t *key,
+                                               uint32_t            mode,
+                                               const uint8_t      *iv,
+                                               size_t              iv_len,
+                                               const uint8_t      *in,
+                                               size_t              in_len,
+                                               uint8_t            *out,
+                                               size_t             *out_len);
 
 /**
  * @deprecated
@@ -179,12 +181,12 @@ DEPRECATED static inline size_t cx_aes_iv(const cx_aes_key_t  *key,
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_aes_no_throw(const cx_aes_key_t *key,
-                         uint32_t            mode,
-                         const uint8_t      *in,
-                         size_t              in_len,
-                         uint8_t            *out,
-                         size_t             *out_len);
+WARN_UNUSED_RESULT cx_err_t cx_aes_no_throw(const cx_aes_key_t *key,
+                                            uint32_t            mode,
+                                            const uint8_t      *in,
+                                            size_t              in_len,
+                                            uint8_t            *out,
+                                            size_t             *out_len);
 
 /**
  * @deprecated
@@ -216,7 +218,9 @@ DEPRECATED static inline size_t cx_aes(const cx_aes_key_t  *key,
  *                      - CX_INVALID_PARAMETER
  *                      - INVALID_PARAMETER
  */
-cx_err_t cx_aes_enc_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8_t *outblock);
+WARN_UNUSED_RESULT cx_err_t cx_aes_enc_block(const cx_aes_key_t *key,
+                                             const uint8_t      *inblock,
+                                             uint8_t            *outblock);
 
 /**
  * @brief   Decrypts a 16-byte block using AES algorithm.
@@ -232,8 +236,10 @@ cx_err_t cx_aes_enc_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8
  *                      - CX_INVALID_PARAMETER
  *                      - INVALID_PARAMETER
  */
-cx_err_t cx_aes_dec_block(const cx_aes_key_t *key, const uint8_t *inblock, uint8_t *outblock);
-
-#endif
+WARN_UNUSED_RESULT cx_err_t cx_aes_dec_block(const cx_aes_key_t *key,
+                                             const uint8_t      *inblock,
+                                             uint8_t            *outblock);
 
 #endif  // HAVE_AES
+
+#endif  // LCX_AES_H

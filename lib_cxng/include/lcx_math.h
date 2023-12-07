@@ -21,10 +21,10 @@
  * @brief   Basic arithmetic.
  */
 
-#ifdef HAVE_MATH
-
 #ifndef LCX_MATH_H
 #define LCX_MATH_H
+
+#ifdef HAVE_MATH
 
 #include "lcx_wrappers.h"
 #include "ox_bn.h"
@@ -51,7 +51,10 @@
  *                    - CX_MEMORY_FULL
  *                    - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_cmp_no_throw(const uint8_t *a, const uint8_t *b, size_t length, int *diff);
+WARN_UNUSED_RESULT cx_err_t cx_math_cmp_no_throw(const uint8_t *a,
+                                                 const uint8_t *b,
+                                                 size_t         length,
+                                                 int           *diff);
 
 /**
  * @deprecated
@@ -83,7 +86,10 @@ DEPRECATED static inline int32_t cx_math_cmp(const uint8_t *a, const uint8_t *b,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_add_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_add_no_throw(uint8_t       *r,
+                                                 const uint8_t *a,
+                                                 const uint8_t *b,
+                                                 size_t         len);
 
 /**
  * @brief   Adds two integers represented as byte arrays.
@@ -138,7 +144,10 @@ static inline uint32_t cx_math_add(uint8_t *r, const uint8_t *a, const uint8_t *
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_sub_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_sub_no_throw(uint8_t       *r,
+                                                 const uint8_t *a,
+                                                 const uint8_t *b,
+                                                 size_t         len);
 
 /**
  * @brief   Subtracts two integers represented as byte arrays.
@@ -193,7 +202,10 @@ static inline uint32_t cx_math_sub(uint8_t *r, const uint8_t *a, const uint8_t *
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_mult_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_mult_no_throw(uint8_t       *r,
+                                                  const uint8_t *a,
+                                                  const uint8_t *b,
+                                                  size_t         len);
 
 /**
  * @deprecated
@@ -231,11 +243,8 @@ DEPRECATED static inline void cx_math_mult(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_addm_no_throw(uint8_t       *r,
-                               const uint8_t *a,
-                               const uint8_t *b,
-                               const uint8_t *m,
-                               size_t         len);
+WARN_UNUSED_RESULT cx_err_t
+cx_math_addm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
 
 /**
  * @deprecated
@@ -274,11 +283,8 @@ DEPRECATED static inline void cx_math_addm(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_subm_no_throw(uint8_t       *r,
-                               const uint8_t *a,
-                               const uint8_t *b,
-                               const uint8_t *m,
-                               size_t         len);
+WARN_UNUSED_RESULT cx_err_t
+cx_math_subm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
 
 /**
  * @deprecated
@@ -317,11 +323,11 @@ DEPRECATED static inline void cx_math_subm(uint8_t       *r,
  *                 - CX_INVALID_PARAMETER
  *                 - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_math_multm_no_throw(uint8_t       *r,
-                                const uint8_t *a,
-                                const uint8_t *b,
-                                const uint8_t *m,
-                                size_t         len);
+WARN_UNUSED_RESULT cx_err_t cx_math_multm_no_throw(uint8_t       *r,
+                                                   const uint8_t *a,
+                                                   const uint8_t *b,
+                                                   const uint8_t *m,
+                                                   size_t         len);
 
 /**
  * @deprecated
@@ -357,7 +363,10 @@ DEPRECATED static inline void cx_math_multm(uint8_t       *r,
  *                      - CX_MEMORY_FULL
  *                      - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_modm_no_throw(uint8_t *v, size_t len_v, const uint8_t *m, size_t len_m);
+WARN_UNUSED_RESULT cx_err_t cx_math_modm_no_throw(uint8_t       *v,
+                                                  size_t         len_v,
+                                                  const uint8_t *m,
+                                                  size_t         len_m);
 
 /**
  * @deprecated
@@ -393,12 +402,12 @@ DEPRECATED static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8
  *                   - CX_MEMORY_FULL
  *                   - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_powm_no_throw(uint8_t       *r,
-                               const uint8_t *a,
-                               const uint8_t *e,
-                               size_t         len_e,
-                               const uint8_t *m,
-                               size_t         len);
+WARN_UNUSED_RESULT cx_err_t cx_math_powm_no_throw(uint8_t       *r,
+                                                  const uint8_t *a,
+                                                  const uint8_t *e,
+                                                  size_t         len_e,
+                                                  const uint8_t *m,
+                                                  size_t         len);
 
 /**
  * @deprecated
@@ -435,7 +444,10 @@ DEPRECATED static inline void cx_math_powm(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_invprimem_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *m, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_invprimem_no_throw(uint8_t       *r,
+                                                       const uint8_t *a,
+                                                       const uint8_t *m,
+                                                       size_t         len);
 
 /**
  * @deprecated
@@ -471,7 +483,10 @@ DEPRECATED static inline void cx_math_invprimem(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_invintm_no_throw(uint8_t *r, uint32_t a, const uint8_t *m, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_invintm_no_throw(uint8_t       *r,
+                                                     uint32_t       a,
+                                                     const uint8_t *m,
+                                                     size_t         len);
 
 /**
  * @deprecated
@@ -501,7 +516,7 @@ DEPRECATED static inline void cx_math_invintm(uint8_t *r, uint32_t a, const uint
  *                   - CX_MEMORY_FULL
  *                   - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
+WARN_UNUSED_RESULT cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
 
 /**
  * @deprecated
@@ -531,7 +546,7 @@ DEPRECATED static inline bool cx_math_is_prime(const uint8_t *r, size_t len)
  *                     - CX_INTERNAL_ERROR
  *                     - CX_OVERFLOW
  */
-cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
 
 /**
  * @deprecated
@@ -562,6 +577,6 @@ static inline bool cx_math_is_zero(const uint8_t *a, size_t len)
     return 1;
 }
 
-#endif  // LCX_MATH_H
-
 #endif  // HAVE_MATH
+
+#endif  // LCX_MATH_H
