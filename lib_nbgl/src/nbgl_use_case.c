@@ -1458,6 +1458,7 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
     navInfo.navWithTap.backButton    = (tagValueList != NULL);
     navInfo.navWithTap.quitText      = "Cancel";
     navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
+    navInfo.navWithTap.nextPageText  = NULL;
     navInfo.navWithTap.backToken     = ADDR_BACK_TOKEN;
     navInfo.navWithTap.skipText      = NULL;
     navInfo.quitToken                = REJECT_TOKEN;
