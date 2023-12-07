@@ -25,13 +25,13 @@
  * for more details.
  */
 
-#ifdef HAVE_EDDSA
+#ifndef LCX_EDDSA_H
+#define LCX_EDDSA_H
 
 #include "lcx_ecfp.h"
 #include "lcx_wrappers.h"
 
-#ifndef LCX_EDDSA_H
-#define LCX_EDDSA_H
+#ifdef HAVE_EDDSA
 
 /**
  * @brief   Signs a message digest.
@@ -71,12 +71,12 @@
  *                      - CX_INTERNAL_ERROR
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                cx_md_t                      hashID,
-                                const uint8_t               *hash,
-                                size_t                       hash_len,
-                                uint8_t                     *sig,
-                                size_t                       sig_len);
+WARN_UNUSED_RESULT cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                   cx_md_t                      hashID,
+                                                   const uint8_t               *hash,
+                                                   size_t                       hash_len,
+                                                   uint8_t                     *sig,
+                                                   size_t                       sig_len);
 
 /**
  * @deprecated
@@ -211,6 +211,6 @@ void cx_encode_coord(uint8_t *coord, int len, int sign);
  */
 int cx_decode_coord(uint8_t *coord, int len);
 
-#endif
-
 #endif  // HAVE_EDDSA
+
+#endif  // LCX_EDDSA_H

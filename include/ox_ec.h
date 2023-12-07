@@ -400,7 +400,7 @@ typedef enum cx_curve_dom_param_s cx_curve_dom_param_t;
  *                    - CX_OK on success
  *                    - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecdomain_size(cx_curve_t curve, size_t *length);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecdomain_size(cx_curve_t curve, size_t *length);
 
 /**
  * @brief   Gets the byte length of each parameter of the curve.
@@ -413,7 +413,7 @@ SYSCALL cx_err_t cx_ecdomain_size(cx_curve_t curve, size_t *length);
  *                    - CX_OK on success
  *                    - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length);
 
 /**
  * @brief   Gets a specific parameter of the curve.
@@ -431,10 +431,10 @@ SYSCALL cx_err_t cx_ecdomain_parameters_length(cx_curve_t cv, size_t *length);
  *                   - CX_EC_INVALID_CURVE
  *                   - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_ecdomain_parameter(cx_curve_t           cv,
-                                       cx_curve_dom_param_t id,
-                                       uint8_t *p           PLENGTH(p_len),
-                                       uint32_t             p_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecdomain_parameter(cx_curve_t           cv,
+                                                          cx_curve_dom_param_t id,
+                                                          uint8_t *p           PLENGTH(p_len),
+                                                          uint32_t             p_len);
 
 /**
  * @brief   Stores a specific parameter of the curve as a BN.
@@ -452,7 +452,9 @@ SYSCALL cx_err_t cx_ecdomain_parameter(cx_curve_t           cv,
  *                - CX_INVALID_PARAMETER
  *                - CX_INVALID_PARAMETER_SIZE
  */
-SYSCALL cx_err_t cx_ecdomain_parameter_bn(cx_curve_t cv, cx_curve_dom_param_t id, cx_bn_t p);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecdomain_parameter_bn(cx_curve_t           cv,
+                                                             cx_curve_dom_param_t id,
+                                                             cx_bn_t              p);
 
 /**
  * @brief   Gets the generator of the curve.
@@ -470,10 +472,10 @@ SYSCALL cx_err_t cx_ecdomain_parameter_bn(cx_curve_t cv, cx_curve_dom_param_t id
  *                 - CX_EC_INVALID_CURVE
  *                 - CX_INVALID_PARAMETER
  */
-SYSCALL cx_err_t cx_ecdomain_generator(cx_curve_t  cv,
-                                       uint8_t *Gx PLENGTH(len),
-                                       uint8_t *Gy PLENGTH(len),
-                                       size_t      len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecdomain_generator(cx_curve_t  cv,
+                                                          uint8_t *Gx PLENGTH(len),
+                                                          uint8_t *Gy PLENGTH(len),
+                                                          size_t      len);
 
 /**
  * @brief   Gets the generator of the curve and stores it in the point structure.
@@ -490,8 +492,8 @@ SYSCALL cx_err_t cx_ecdomain_generator(cx_curve_t  cv,
  *                - CX_INVALID_PARAMETER_SIZE
  *                - CX_EC_INVALID_POINT
  */
-SYSCALL cx_err_t cx_ecdomain_generator_bn(cx_curve_t      cv,
-                                          cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecdomain_generator_bn(cx_curve_t cv, cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Allocates memory for a point on the curve.
@@ -507,7 +509,8 @@ SYSCALL cx_err_t cx_ecdomain_generator_bn(cx_curve_t      cv,
  *               - CX_INVALID_PARAMETER
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)), cx_curve_t cv);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                                                     cx_curve_t      cv);
 
 /**
  * @brief   Destroys a point on the curve.
@@ -521,7 +524,8 @@ SYSCALL cx_err_t cx_ecpoint_alloc(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
  *              - CX_INVALID_PARAMETER
  *              - CX_INTERNAL_ERROR
  */
-SYSCALL cx_err_t cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Initializes a point on the curve.
@@ -544,11 +548,11 @@ SYSCALL cx_err_t cx_ecpoint_destroy(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)
  *                  - CX_INVALID_PARAMETER
  *                  - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecpoint_init(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
-                                 const uint8_t *x PLENGTH(x_len),
-                                 size_t           x_len,
-                                 const uint8_t *y PLENGTH(y_len),
-                                 size_t           y_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecpoint_init(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                                                    const uint8_t *x PLENGTH(x_len),
+                                                    size_t           x_len,
+                                                    const uint8_t *y PLENGTH(y_len),
+                                                    size_t           y_len);
 
 /**
  * @brief   Initializes a point on the curve with the BN indexes of the coordinates.
@@ -567,9 +571,8 @@ SYSCALL cx_err_t cx_ecpoint_init(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
  *              - CX_INVALID_PARAMETER
  *              - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                    const cx_bn_t   x,
-                                    const cx_bn_t   y);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)), const cx_bn_t x, const cx_bn_t y);
 
 /**
  * @brief   Exports a point.
@@ -596,11 +599,12 @@ SYSCALL cx_err_t cx_ecpoint_init_bn(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                   uint8_t *x            PLENGTH(x_len),
-                                   size_t                x_len,
-                                   uint8_t *y            PLENGTH(y_len),
-                                   size_t                y_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                  uint8_t *x            PLENGTH(x_len),
+                  size_t                x_len,
+                  uint8_t *y            PLENGTH(y_len),
+                  size_t                y_len);
 
 /**
  * @brief   Exports a point using BN indexes of the coordinates.
@@ -619,9 +623,10 @@ SYSCALL cx_err_t cx_ecpoint_export(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoi
  *               - CX_EC_INFINITE_POINT
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_export_bn(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                      cx_bn_t *x            PLENGTH(sizeof(cx_bn_t)),
-                                      cx_bn_t *y            PLENGTH(sizeof(cx_bn_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_export_bn(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                     cx_bn_t *x            PLENGTH(sizeof(cx_bn_t)),
+                     cx_bn_t *y            PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Computes the compressed form of a point.
@@ -653,10 +658,11 @@ SYSCALL cx_err_t cx_ecpoint_export_bn(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ec
  *                               - CX_EC_INFINITE_POINT
  *                               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_compress(const cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
-                                     uint8_t *xy_compressed PLENGTH(xy_compressed_len),
-                                     size_t                 xy_compressed_len,
-                                     uint32_t              *sign);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_compress(const cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                    uint8_t *xy_compressed PLENGTH(xy_compressed_len),
+                    size_t                 xy_compressed_len,
+                    uint32_t              *sign);
 
 /**
  * @brief   Computes the affine coordinates of a point given its compressed form.
@@ -680,10 +686,11 @@ SYSCALL cx_err_t cx_ecpoint_compress(const cx_ecpoint_t *P  PLENGTH(sizeof(cx_ec
  *                               - CX_NO_RESIDUE
  *
  */
-SYSCALL cx_err_t cx_ecpoint_decompress(cx_ecpoint_t *P              PLENGTH(sizeof(cx_ecpoint_t)),
-                                       const uint8_t *xy_compressed PLENGTH(xy_compressed_len),
-                                       size_t                       xy_compressed_len,
-                                       uint32_t                     sign);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_decompress(cx_ecpoint_t *P              PLENGTH(sizeof(cx_ecpoint_t)),
+                      const uint8_t *xy_compressed PLENGTH(xy_compressed_len),
+                      size_t                       xy_compressed_len,
+                      uint32_t                     sign);
 
 /**
  * @brief   Adds two points on a curve.
@@ -709,9 +716,10 @@ SYSCALL cx_err_t cx_ecpoint_decompress(cx_ecpoint_t *P              PLENGTH(size
  *               - CX_EC_INFINITE_POINT
  *               - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_add(cx_ecpoint_t *R       PLENGTH(sizeof(cx_ecpoint_t)),
-                                const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_add(cx_ecpoint_t *R       PLENGTH(sizeof(cx_ecpoint_t)),
+               const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+               const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Computes the opposite of a point.
@@ -732,7 +740,7 @@ SYSCALL cx_err_t cx_ecpoint_add(cx_ecpoint_t *R       PLENGTH(sizeof(cx_ecpoint_
  *                   - CX_MEMORY_FULL
  *                   - CX_EC_INFINITE_POINT
  */
-SYSCALL cx_err_t cx_ecpoint_neg(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecpoint_neg(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
 
 /**
  * @brief   Performs a secure scalar multiplication.
@@ -753,9 +761,10 @@ SYSCALL cx_err_t cx_ecpoint_neg(cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)));
  *                       - CX_EC_INFINITE_POINT
  *                       - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
-                                          const uint8_t *k PLENGTH(k_len),
-                                          size_t           k_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                         const uint8_t *k PLENGTH(k_len),
+                         size_t           k_len);
 
 /**
  * @brief   Performs a secure scalar multiplication given the BN index of the scalar.
@@ -774,8 +783,9 @@ SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecp
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ecpoint_t)),
-                                             const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ecpoint_t)),
+                            const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Performs a secure scalar multiplication with a fixed scalar length.
@@ -796,9 +806,10 @@ SYSCALL cx_err_t cx_ecpoint_rnd_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(c
  *                       - CX_EC_INFINITE_POINT
  *                       - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
-                                                const uint8_t *k PLENGTH(k_len),
-                                                size_t           k_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                               const uint8_t *k PLENGTH(k_len),
+                               size_t           k_len);
 
 /**
  * @brief   Performs a scalar multiplication.
@@ -823,9 +834,10 @@ SYSCALL cx_err_t cx_ecpoint_rnd_fixed_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(
  *                        - CX_EC_INFINITE_POINT
  *                        - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
-                                      const uint8_t *k PLENGTH(k_len),
-                                      size_t           k_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                     const uint8_t *k PLENGTH(k_len),
+                     size_t           k_len);
 
 /**
  * @brief   Performs a scalar multiplication given the BN index of the scalar.
@@ -848,8 +860,9 @@ SYSCALL cx_err_t cx_ecpoint_scalarmul(cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ecpoint_t)),
-                                         const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ecpoint_t)),
+                        const cx_bn_t bn_k PLENGTH(sizeof(cx_bn_t)));
 
 /**
  * @brief   Performs a double scalar multiplication.
@@ -880,13 +893,14 @@ SYSCALL cx_err_t cx_ecpoint_scalarmul_bn(cx_ecpoint_t *P    PLENGTH(sizeof(cx_ec
  *                   - CX_MEMORY_FULL
  *                   - CX_EC_INFINITE_POINT
  */
-SYSCALL cx_err_t cx_ecpoint_double_scalarmul(cx_ecpoint_t *R  PLENGTH(sizeof(cx_ecpoint_t)),
-                                             cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
-                                             cx_ecpoint_t *Q  PLENGTH(sizeof(cx_ecpoint_t)),
-                                             const uint8_t *k PLENGTH(k_len),
-                                             size_t           k_len,
-                                             const uint8_t *r PLENGTH(r_len),
-                                             size_t           r_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_double_scalarmul(cx_ecpoint_t *R  PLENGTH(sizeof(cx_ecpoint_t)),
+                            cx_ecpoint_t *P  PLENGTH(sizeof(cx_ecpoint_t)),
+                            cx_ecpoint_t *Q  PLENGTH(sizeof(cx_ecpoint_t)),
+                            const uint8_t *k PLENGTH(k_len),
+                            size_t           k_len,
+                            const uint8_t *r PLENGTH(r_len),
+                            size_t           r_len);
 
 /**
  * @brief   Performs a double scalar multiplication
@@ -914,11 +928,12 @@ SYSCALL cx_err_t cx_ecpoint_double_scalarmul(cx_ecpoint_t *R  PLENGTH(sizeof(cx_
  *                  - CX_MEMORY_FULL
  *                  - CX_EC_INFINITE_POINT
  */
-SYSCALL cx_err_t cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
-                                                cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                                cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
-                                                const cx_bn_t   bn_k,
-                                                const cx_bn_t   bn_r);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
+                               cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+                               cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
+                               const cx_bn_t   bn_k,
+                               const cx_bn_t   bn_r);
 
 /**
  * @brief   Compares two points on the same curve.
@@ -939,9 +954,10 @@ SYSCALL cx_err_t cx_ecpoint_double_scalarmul_bn(cx_ecpoint_t *R PLENGTH(sizeof(c
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_cmp(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
-                                const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
-                                bool                 *is_equal);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_cmp(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_t)),
+               const cx_ecpoint_t *Q PLENGTH(sizeof(cx_ecpoint_t)),
+               bool                 *is_equal);
 
 /**
  * @brief   Checks whether a given point is on the curve.
@@ -960,8 +976,8 @@ SYSCALL cx_err_t cx_ecpoint_cmp(const cx_ecpoint_t *P PLENGTH(sizeof(cx_ecpoint_
  *                         - CX_EC_INFINITE_POINT
  *                         - CX_MEMORY_FULL
  */
-SYSCALL cx_err_t cx_ecpoint_is_on_curve(const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
-                                        bool                 *is_on_curve);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_is_on_curve(const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)), bool *is_on_curve);
 
 /**
  * @brief   Checks whether a given point is the point at infinity.
@@ -980,8 +996,9 @@ SYSCALL cx_err_t cx_ecpoint_is_on_curve(const cx_ecpoint_t *R PLENGTH(sizeof(cx_
  *                            - CX_INVALID_PARAMETER
  *                            - CX_EC_INVALID_CURVE
  */
-SYSCALL cx_err_t cx_ecpoint_is_at_infinity(const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
-                                           bool                 *is_at_infinity);
+SYSCALL WARN_UNUSED_RESULT cx_err_t
+cx_ecpoint_is_at_infinity(const cx_ecpoint_t *R PLENGTH(sizeof(cx_ecpoint_t)),
+                          bool                 *is_at_infinity);
 
 #ifdef HAVE_X25519
 /**
@@ -1006,7 +1023,9 @@ SYSCALL cx_err_t cx_ecpoint_is_at_infinity(const cx_ecpoint_t *R PLENGTH(sizeof(
  *                       - CX_MEMORY_FULL
  *
  */
-SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k, size_t k_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecpoint_x25519(const cx_bn_t  bn_u,
+                                                      const uint8_t *k,
+                                                      size_t         k_len);
 #endif  // HAVE_X25519
 
 #ifdef HAVE_X448
@@ -1032,7 +1051,9 @@ SYSCALL cx_err_t cx_ecpoint_x25519(const cx_bn_t bn_u, const uint8_t *k, size_t 
  *                       - CX_MEMORY_FULL
  *
  */
-SYSCALL cx_err_t cx_ecpoint_x448(const cx_bn_t bn_u, const uint8_t *k, size_t k_len);
+SYSCALL WARN_UNUSED_RESULT cx_err_t cx_ecpoint_x448(const cx_bn_t  bn_u,
+                                                    const uint8_t *k,
+                                                    size_t         k_len);
 #endif  // HAVE_X448
 
 #endif

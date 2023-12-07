@@ -30,7 +30,7 @@ MEMORY
 }
 
 PAGE_SIZE  = 512;
-STACK_SIZE = 1500;
+STACK_MIN_SIZE = DEFINED(stack_min_size) ? stack_min_size : 1500;
 END_STACK  = ORIGIN(SRAM) + LENGTH(SRAM);
 
 ENTRY(main);
@@ -76,6 +76,9 @@ SECTIONS
     _envram_data = .;
 
     _install_parameters = .;
+    *(.install_parameters)
+    KEEP(*(.install_parameters))
+    _einstall_parameters = .;
     _nvram_end = .;
   } > FLASH = 0x00
 
@@ -114,14 +117,14 @@ SECTIONS
     app_stack_canary = .;
     PROVIDE(app_stack_canary = .);
     . += 4;
-    _stack_validation = .;
-    . = _stack_validation + STACK_SIZE;
-    _stack = ABSOLUTE(END_STACK) - STACK_SIZE;
-    PROVIDE( _stack = ABSOLUTE(END_STACK) - STACK_SIZE);
+    _stack = .;
+    PROVIDE( _stack = .);
     _estack = ABSOLUTE(END_STACK);
     PROVIDE( _estack = ABSOLUTE(END_STACK) );
 
   } > SRAM = 0x00
+
+  ASSERT( (_estack - _stack) >= STACK_MIN_SIZE, "stack section too small" )
 
   /****************************************************************/
   /* DEBUG                                                        */
@@ -169,6 +172,16 @@ SECTIONS
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
+
+  ledger.target (INFO): { KEEP(*(ledger.target)) }
+  ledger.target_name (INFO): { KEEP(*(ledger.target_name)) }
+  ledger.target_id (INFO): { KEEP(*(ledger.target_id)) }
+  ledger.app_name (INFO): { KEEP(*(ledger.app_name)) }
+  ledger.app_version (INFO): { KEEP(*(ledger.app_version)) }
+  ledger.api_level (INFO): { KEEP(*(ledger.api_level)) }
+  ledger.sdk_name (INFO): { KEEP(*(ledger.sdk_name)) }
+  ledger.sdk_version (INFO): { KEEP(*(ledger.sdk_version)) }
+  ledger.sdk_hash (INFO): { KEEP(*(ledger.sdk_hash)) }
 }
 
 PROVIDE(_nvram = ABSOLUTE(_nvram_start));

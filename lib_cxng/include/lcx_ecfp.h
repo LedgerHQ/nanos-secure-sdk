@@ -23,9 +23,10 @@
  * Private and public keys initialization and key pair generation based on elliptic curves.
  */
 
-#ifdef HAVE_ECC
 #ifndef LCX_ECFP_H
 #define LCX_ECFP_H
+
+#ifdef HAVE_ECC
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -159,10 +160,10 @@ typedef struct cx_ecfp_640_private_key_s cx_ecfp_640_private_key_t;
  *                   - CX_EC_INVALID_POINT
  *                   - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_add_point_no_throw(cx_curve_t     curve,
-                                    uint8_t       *R,
-                                    const uint8_t *P,
-                                    const uint8_t *Q);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_add_point_no_throw(cx_curve_t     curve,
+                                                       uint8_t       *R,
+                                                       const uint8_t *P,
+                                                       const uint8_t *Q);
 
 /**
  * @deprecated
@@ -209,7 +210,10 @@ DEPRECATED static inline size_t cx_ecfp_add_point(cx_curve_t           curve,
  *                       - CX_INVALID_PARAMETER
  *                       - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_scalar_mult_no_throw(cx_curve_t curve, uint8_t *P, const uint8_t *k, size_t k_len);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_scalar_mult_no_throw(cx_curve_t     curve,
+                                                         uint8_t       *P,
+                                                         const uint8_t *k,
+                                                         size_t         k_len);
 
 /**
  * @deprecated
@@ -254,10 +258,10 @@ DEPRECATED static inline size_t cx_ecfp_scalar_mult(cx_curve_t           curve,
  *                     - CX_EC_INVALID_CURVE
  *                     - INVALID_PARAMETER
  */
-cx_err_t cx_ecfp_init_public_key_no_throw(cx_curve_t            curve,
-                                          const uint8_t        *rawkey,
-                                          size_t                key_len,
-                                          cx_ecfp_public_key_t *key);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_init_public_key_no_throw(cx_curve_t            curve,
+                                                             const uint8_t        *rawkey,
+                                                             size_t                key_len,
+                                                             cx_ecfp_public_key_t *key);
 
 /**
  * @deprecated
@@ -292,10 +296,10 @@ DEPRECATED static inline size_t cx_ecfp_init_public_key(cx_curve_t            cu
  *                     - CX_EC_INVALID_CURVE
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t             curve,
-                                           const uint8_t         *rawkey,
-                                           size_t                 key_len,
-                                           cx_ecfp_private_key_t *pvkey);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t             curve,
+                                                              const uint8_t         *rawkey,
+                                                              size_t                 key_len,
+                                                              cx_ecfp_private_key_t *pvkey);
 
 /**
  * @deprecated
@@ -335,10 +339,10 @@ DEPRECATED static inline size_t cx_ecfp_init_private_key(cx_curve_t             
  *                         - CX_EC_INVALID_POINT
  *                         - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t             curve,
-                                        cx_ecfp_public_key_t  *pubkey,
-                                        cx_ecfp_private_key_t *privkey,
-                                        bool                   keepprivate);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t             curve,
+                                                           cx_ecfp_public_key_t  *pubkey,
+                                                           cx_ecfp_private_key_t *privkey,
+                                                           bool                   keepprivate);
 
 /**
  * @deprecated
@@ -380,11 +384,11 @@ DEPRECATED static inline int cx_ecfp_generate_pair(cx_curve_t             curve,
  *                         - CX_EC_INVALID_POINT
  *                         - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t             curve,
-                                         cx_ecfp_public_key_t  *pubkey,
-                                         cx_ecfp_private_key_t *privkey,
-                                         bool                   keepprivate,
-                                         cx_md_t                hashID);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t             curve,
+                                                            cx_ecfp_public_key_t  *pubkey,
+                                                            cx_ecfp_private_key_t *privkey,
+                                                            bool                   keepprivate,
+                                                            cx_md_t                hashID);
 
 /**
  * @deprecated
@@ -436,13 +440,13 @@ DEPRECATED static inline int cx_ecfp_generate_pair2(cx_curve_t             curve
  *                    - CX_INTERNAL_ERROR
  *
  */
-cx_err_t cx_eddsa_get_public_key_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                          cx_md_t                      hashID,
-                                          cx_ecfp_public_key_t        *pukey,
-                                          uint8_t                     *a,
-                                          size_t                       a_len,
-                                          uint8_t                     *h,
-                                          size_t                       h_len);
+WARN_UNUSED_RESULT cx_err_t cx_eddsa_get_public_key_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                             cx_md_t                      hashID,
+                                                             cx_ecfp_public_key_t        *pukey,
+                                                             uint8_t                     *a,
+                                                             size_t                       a_len,
+                                                             uint8_t                     *h,
+                                                             size_t                       h_len);
 
 /**
  * @deprecated
@@ -481,7 +485,9 @@ DEPRECATED static inline void cx_eddsa_get_public_key(const cx_ecfp_private_key_
  *                       - CX_INVALID_PARAMETER
  *                       - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_edwards_compress_point_no_throw(cx_curve_t curve, uint8_t *p, size_t p_len);
+WARN_UNUSED_RESULT cx_err_t cx_edwards_compress_point_no_throw(cx_curve_t curve,
+                                                               uint8_t   *p,
+                                                               size_t     p_len);
 
 /**
  * @deprecated
@@ -516,7 +522,9 @@ DEPRECATED static inline void cx_edwards_compress_point(cx_curve_t curve, uint8_
  *                       - CX_NO_RESIDUE
  *                       - INVALID_PARAMETER
  */
-cx_err_t cx_edwards_decompress_point_no_throw(cx_curve_t curve, uint8_t *p, size_t p_len);
+WARN_UNUSED_RESULT cx_err_t cx_edwards_decompress_point_no_throw(cx_curve_t curve,
+                                                                 uint8_t   *p,
+                                                                 size_t     p_len);
 
 /**
  * @deprecated
@@ -549,6 +557,6 @@ DEPRECATED static inline void cx_edward_decompress_point(cx_curve_t curve, uint8
 
 #endif  // HAVE_ECC_TWISTED_EDWARDS
 
-#endif
-
 #endif  // HAVE_ECC
+
+#endif  // LCX_ECFP_H

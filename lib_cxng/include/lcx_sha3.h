@@ -26,10 +26,10 @@
  * for more details.
  */
 
-#ifdef HAVE_SHA3
-
 #ifndef LCX_SHA3_H
 #define LCX_SHA3_H
+
+#ifdef HAVE_SHA3
 
 #include "lcx_common.h"
 #include "lcx_hash.h"
@@ -67,7 +67,7 @@ typedef struct cx_sha3_s cx_sha3_t;
  *                  - CX_OK on success
  *                  - CX_INVALID_PARAMETER
  */
-cx_err_t cx_sha3_init_no_throw(cx_sha3_t *hash, size_t size);
+WARN_UNUSED_RESULT cx_err_t cx_sha3_init_no_throw(cx_sha3_t *hash, size_t size);
 
 /**
  * @deprecated
@@ -98,7 +98,7 @@ DEPRECATED static inline int cx_sha3_init(cx_sha3_t *hash, size_t size)
  *                   - CX_OK on success
  *                   - CX_INVALID_PARAMETER
  */
-cx_err_t cx_keccak_init_no_throw(cx_sha3_t *hash, size_t size);
+WARN_UNUSED_RESULT cx_err_t cx_keccak_init_no_throw(cx_sha3_t *hash, size_t size);
 
 /**
  * @deprecated
@@ -128,7 +128,7 @@ DEPRECATED static inline int cx_keccak_init(cx_sha3_t *hash, size_t size)
  *                       - CX_OK on success
  *                       - CX_INVALID_PARAMETER
  */
-cx_err_t cx_shake128_init_no_throw(cx_sha3_t *hash, size_t out_size);
+WARN_UNUSED_RESULT cx_err_t cx_shake128_init_no_throw(cx_sha3_t *hash, size_t out_size);
 
 /**
  * @deprecated
@@ -158,7 +158,7 @@ DEPRECATED static inline int cx_shake128_init(cx_sha3_t *hash, unsigned int out_
  *                       - CX_OK on success
  *                       - CX_INVALID_PARAMETER
  */
-cx_err_t cx_shake256_init_no_throw(cx_sha3_t *hash, size_t out_size);
+WARN_UNUSED_RESULT cx_err_t cx_shake256_init_no_throw(cx_sha3_t *hash, size_t out_size);
 
 /**
  * @deprecated
@@ -190,7 +190,9 @@ DEPRECATED static inline int cx_shake256_init(cx_sha3_t *hash, unsigned int out_
  *                          - CX_OK on success
  *                          - CX_INVALID_PARAMETER
  */
-cx_err_t cx_sha3_xof_init_no_throw(cx_sha3_t *hash, size_t size, size_t out_length);
+WARN_UNUSED_RESULT cx_err_t cx_sha3_xof_init_no_throw(cx_sha3_t *hash,
+                                                      size_t     size,
+                                                      size_t     out_length);
 
 /**
  * @deprecated
@@ -210,6 +212,6 @@ DEPRECATED static inline int cx_sha3_xof_init(cx_sha3_t   *hash,
     }
 }
 
-#endif
-
 #endif  // HAVE_SHA3
+
+#endif  // LCX_SHA3_H

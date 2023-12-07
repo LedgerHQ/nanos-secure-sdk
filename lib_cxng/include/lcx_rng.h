@@ -25,10 +25,10 @@
  * random bytes. The random number can also be generated within a specific range.
  */
 
-#ifdef HAVE_RNG
-
 #ifndef LCX_RNG_H
 #define LCX_RNG_H
+
+#ifdef HAVE_RNG
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -147,16 +147,16 @@ static inline uint32_t cx_rng_u32_range(uint32_t a, uint32_t b)
  *                      - CX_OK on success
  *                      - CX_INVALID_PARAMETER
  */
-cx_err_t cx_rng_rfc6979(cx_md_t        hash_id,
-                        const uint8_t *x,
-                        size_t         x_len,
-                        const uint8_t *h1,
-                        size_t         h1_len,
-                        const uint8_t *q,
-                        size_t         q_len,
-                        uint8_t       *out,
-                        size_t         out_len);
-
-#endif  // LCX_RNG_H
+WARN_UNUSED_RESULT cx_err_t cx_rng_rfc6979(cx_md_t        hash_id,
+                                           const uint8_t *x,
+                                           size_t         x_len,
+                                           const uint8_t *h1,
+                                           size_t         h1_len,
+                                           const uint8_t *q,
+                                           size_t         q_len,
+                                           uint8_t       *out,
+                                           size_t         out_len);
 
 #endif  // HAVE_RNG
+
+#endif  // LCX_RNG_H
