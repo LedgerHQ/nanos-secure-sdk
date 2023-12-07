@@ -131,6 +131,10 @@ void mcu_usb_printf(const char *format, ...);
 int snprintf(char *str, size_t str_size, const char *format, ...);
 #endif  // HAVE_SPRINTF
 
+#ifndef HAVE_BOLOS
+int compute_address_location(int address);
+#endif
+
 // syscall test
 // SYSCALL void dummy_1(unsigned int* p PLENGTH(2+len+15+ len + 16 +
 // sizeof(io_send_t) + 1 ), unsigned int len);

@@ -15,4 +15,6 @@ unsigned int os_parse_bertlv(unsigned char *mem,
                              void         **buffer,
                              unsigned int   maxlength);
 
+#ifndef UNUSED
 #define UNUSED(x) (void) x
+#endif

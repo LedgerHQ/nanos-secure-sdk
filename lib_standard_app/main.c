@@ -19,7 +19,7 @@
 
 #include "os.h"
 #include "io.h"
-#include "debug.h"
+#include "ledger_assert.h"
 
 #ifdef HAVE_SWAP
 #include "swap.h"
@@ -72,8 +72,6 @@ static void standalone_app_main(void)
         }
         CATCH_OTHER(e)
         {
-            PRINTF("Exiting following exception: %d\n", e);
-
 #ifdef HAVE_DEBUG_THROWS
             // Disable USB and BLE, the app have crashed and is going to be exited
             // This is necessary to avoid device freeze while displaying throw error
@@ -90,7 +88,9 @@ static void standalone_app_main(void)
             BLE_power(0, NULL);
 #endif
             // Display crash info on screen for debug purpose
-            debug_display_throw_error(e);
+            assert_display_exit();
+#else
+            PRINTF("Exiting following exception: 0x%04X\n", e);
 #endif
         }
         FINALLY {}
@@ -141,7 +141,7 @@ static void library_app_main(libargs_t *args)
         }
         CATCH_OTHER(e)
         {
-            PRINTF("Exiting following exception: %d\n", e);
+            PRINTF("Exiting following exception: 0x%04X\n", e);
         }
         FINALLY
         {

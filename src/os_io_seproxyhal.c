@@ -54,7 +54,9 @@
 #include "ledger_ble.h"
 #endif  // HAVE_BLE
 
+#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
 #include "ux.h"
+#endif
 #include "checks.h"
 
 #ifndef IO_RAPDU_TRANSMIT_TIMEOUT_MS
@@ -107,7 +109,9 @@ unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
 io_seph_app_t G_io_app;
 #endif  // ! HAVE_BOLOS
 
+#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
 ux_seph_os_and_app_t G_ux_os;
+#endif
 
 static const unsigned char seph_io_general_status[] = {
     SEPROXYHAL_TAG_GENERAL_STATUS,
@@ -236,7 +240,7 @@ void io_seproxyhal_handle_capdu_event(void)
 
 unsigned int io_seproxyhal_handle_event(void)
 {
-#if defined(HAVE_IO_USB) || defined(HAVE_BLE)
+#ifdef HAVE_IO_USB
     unsigned int rx_len = U2BE(G_io_seproxyhal_spi_buffer, 1);
 #endif
 
@@ -381,6 +385,8 @@ void io_seproxyhal_init(void)
 #endif  // !defined(HAVE_BOLOS) && defined(HAVE_PENDING_REVIEW_SCREEN)
 }
 
+#ifdef HAVE_BAGL
+
 void io_seproxyhal_init_ux(void)
 {
 #ifdef TARGET_BLUE
@@ -395,8 +401,6 @@ void io_seproxyhal_init_button(void)
     G_ux_os.button_mask              = 0;
     G_ux_os.button_same_mask_counter = 0;
 }
-
-#ifdef HAVE_BAGL
 
 #ifdef TARGET_BLUE
 unsigned int io_seproxyhal_touch_out(const bagl_element_t   *element,

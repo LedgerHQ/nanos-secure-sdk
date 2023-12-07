@@ -969,8 +969,14 @@ uint8_t USBD_HID_DataIn_impl(USBD_HandleTypeDef *pdev, uint8_t epnum)
 
 uint8_t USBD_HID_DataOut_impl(USBD_HandleTypeDef *pdev,
                               uint8_t             epnum,
-                              uint8_t            *buffer,
-                              apdu_buffer_t      *apdu_buf)
+#ifndef HAVE_USB_HIDKBD
+                              uint8_t       *buffer,
+                              apdu_buffer_t *apdu_buf
+#else
+                              __attribute__((unused)) uint8_t       *buffer,
+                              __attribute__((unused)) apdu_buffer_t *apdu_buf
+#endif  // HAVE_USB_HIDKBD
+)
 {
     // only the data hid endpoint will receive data
     switch (epnum) {

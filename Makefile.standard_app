@@ -56,6 +56,13 @@ ifneq ($(DEBUG), 0)
     else
         DEFINES += PRINTF=mcu_usb_printf
     endif
+    ifneq ($(DISABLE_DEBUG_LEDGER_ASSERT), 1)
+        DEFINES += HAVE_LEDGER_ASSERT_DISPLAY
+        DEFINES += LEDGER_ASSERT_CONFIG_FILE_INFO
+    endif
+    ifneq ($(DISABLE_DEBUG_THROW), 1)
+        DEFINES += HAVE_DEBUG_THROWS
+    endif
 else
         DEFINES += PRINTF\(...\)=
 endif
@@ -75,9 +82,6 @@ endif
 #                          STANDARD DEFINES                         #
 #####################################################################
 DEFINES += $(DEFINES_LIB)
-# Added directly as a CFLAG because it might contain spaces
-CFLAGS += -DAPPNAME=\"$(APPNAME)\"
-DEFINES += APPVERSION=\"$(APPVERSION)\"
 DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
 DEFINES += IO_HID_EP_LENGTH=64
 
@@ -86,18 +90,11 @@ ifeq ($(DISABLE_STANDARD_APP_DEFINES), 1)
     DISABLE_STANDARD_USB = 1
     DISABLE_STANDARD_WEBUSB = 1
     DISABLE_STANDARD_BAGL_UX_FLOW = 1
+    DISABLE_STANDARD_SEPROXYHAL = 1
 endif
 
 ifneq ($(DISABLE_STANDARD_SNPRINTF), 1)
     DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
-endif
-
-ifneq ($(DEBUG), 0)
-    # Since the PRINTF implementation uses the USB code
-    ifneq ($(TARGET_NAME),TARGET_NANOS)
-        DISABLE_STANDARD_USB = 0
-    endif
-    DISABLE_SEPROXYHAL = 0
 endif
 
 ifneq ($(DISABLE_STANDARD_USB), 1)
@@ -119,7 +116,7 @@ ifneq ($(TARGET_NAME), TARGET_STAX)
 endif
 endif
 
-ifneq ($(DISABLE_SEPROXYHAL), 1)
+ifneq ($(DISABLE_STANDARD_SEPROXYHAL), 1)
     DEFINES += OS_IO_SEPROXYHAL
 endif
 
@@ -175,21 +172,13 @@ ifeq ($(HAVE_APPLICATION_FLAG_LIBRARY), 1)
 STANDARD_APP_FLAGS := $(shell echo $$(($(STANDARD_APP_FLAGS) + 0x800)))
 endif
 
-APP_FLAGS = $(shell printf '0x%x' $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
-
-APP_LOAD_PARAMS += --appFlags $(APP_FLAGS)
-
-APP_LOAD_PARAMS += $(foreach curve, $(CURVE_APP_LOAD_PARAMS), --curve $(curve))
-
-APP_LOAD_PARAMS += $(foreach path, $(PATH_APP_LOAD_PARAMS), --path $(path))
-
-APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
-
 # Pending review flag
 ifeq ($(ENABLE_PENDING_REVIEW_SCREEN), 1)
-    APP_LOAD_PARAMS += --tlvraw 9F:01
+    TLVRAW_APP_LOAD_PARAMS += 9F:01
     DEFINES += HAVE_PENDING_REVIEW_SCREEN
 endif
+
+APP_FLAGS_APP_LOAD_PARAMS = $(shell printf '0x%x' $$(( $(STANDARD_APP_FLAGS) + $(CUSTOM_APP_FLAGS) )) )
 
 #####################################################################
 #                         COMPILER SETTINGS                         #

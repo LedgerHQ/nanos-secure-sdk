@@ -85,30 +85,28 @@ char os_secure_memcmp(void *src1, void *src2, unsigned int length)
 }
 
 #ifndef HAVE_BOLOS
-#define MAIN_LINKER_SCRIPT_LOCATION 0xC0DE0000
+#include "ledger_assert.h"
 int main(void);
 
-// This function can be used to declare a callback to THROW in the application
-__attribute((weak)) void app_throw_info(unsigned int exception, unsigned int lr_val)
+#define MAIN_LINKER_SCRIPT_LOCATION 0xC0DE0000
+int compute_address_location(int address)
 {
-    UNUSED(exception);
-    UNUSED(lr_val);
+    // Compute location before relocation (sort of anti PIC)
+    return address - (unsigned int) main + MAIN_LINKER_SCRIPT_LOCATION;
 }
 
 void os_longjmp(unsigned int exception)
 {
-    unsigned int lr_val;
-    __asm volatile("mov %0, lr" : "=r"(lr_val));
-
-    // Compute location before relocation (sort of anti PIC)
-    lr_val = lr_val - (unsigned int) main + MAIN_LINKER_SCRIPT_LOCATION;
-
-#ifdef HAVE_PRINTF
-    PRINTF("exception[%d]: LR=0x%08X\n", exception, lr_val);
-#endif  // HAVE_PRINTF
-
+#ifdef HAVE_DEBUG_THROWS
     // Send to the app the info of exception and LR for debug purpose
-    app_throw_info(exception, lr_val);
+    DEBUG_THROW(exception);
+#elif defined(HAVE_PRINTF)
+    int lr_val;
+    __asm volatile("mov %0, lr" : "=r"(lr_val));
+    lr_val = compute_address_location(lr_val);
+
+    PRINTF("exception[0x%04X]: LR=0x%08X\n", exception, lr_val);
+#endif
 
     longjmp(try_context_get()->jmp_buf, exception);
 }
