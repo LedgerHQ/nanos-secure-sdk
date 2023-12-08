@@ -31,30 +31,37 @@ endif
 GLYPH_DESTC := $(GLYPH_SRC_DIR)/glyphs.c
 GLYPH_DESTH := $(GLYPH_SRC_DIR)/glyphs.h
 
-ifdef USE_NBGL
-# Not NanoS glyphs files and generation script
-GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/))))
+# search icons (glyphs) in glyphs folder of the app first
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
+
+ifdef USE_NBGL
+# NBGL glyphs files and generation script
+#
+# search icons (glyphs) in lib_nbgl/glyphs(_nano) folder of the SDK
+ifeq ($(TARGET_NAME),TARGET_STAX)
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/))))
+GLYPH_OPT :=
+else # ($(TARGET_NAME),TARGET_STAX)
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs_nano/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs_nano/))))
+#inverse B&W for non Stax
+GLYPH_OPT := --reverse
+endif # ($(TARGET_NAME),TARGET_STAX)
+
 ifneq (,$(wildcard $(ICONNAME)))
 # Do not try to generate app icon glyph, if image does not exist
 GLYPH_FILES += $(ICONNAME)
 endif
 ICON_SCRIPT = $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py
-#inverse B&W for non Stax
-ifneq ($(TARGET_NAME),TARGET_STAX)
-GLYPH_OPT := --reverse
-else
-GLYPH_OPT :=
-endif
 GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) $(GLYPH_OPT) --glyphcfile $(GLYPH_FILES)
-else
+
+else # USE_NBGL
+
 # Nano glyphs files and generation script
-GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_ux/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_ux/glyphs/))))
 GLYPH_OPT :=
 ICON_SCRIPT = $(BOLOS_SDK)/icon3.py
 GENERATE_GLYPHS_CMD = python3 $(ICON_SCRIPT) --factorize --glyphcfile $(GLYPH_FILES)
-endif
+endif# USE_NBGL
 
 $(GLYPH_DESTH): $(GLYPH_FILES) $(ICON_SCRIPT)
 	$(L)echo "[GLYPH] Compiling..."

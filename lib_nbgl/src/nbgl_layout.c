@@ -398,7 +398,7 @@ static void radioTouchCallback(nbgl_obj_t            *obj,
         }
     }
 }
-#else   // HAVE_SE_TOUCH
+#else  // HAVE_SE_TOUCH
 static void buttonCallback(nbgl_screen_t *screen, nbgl_buttonEvent_t buttonEvent)
 {
     uint8_t                i      = NB_MAX_LAYOUTS;
@@ -421,19 +421,25 @@ static void buttonCallback(nbgl_screen_t *screen, nbgl_buttonEvent_t buttonEvent
             buttonEvent);
         return;
     }
+
+#ifdef NBGL_KEYPAD
     // special case of keypad
-    nbgl_obj_t *obj = nbgl_screenContainsObjType(screen, KEYPAD);
-    if (obj) {
-        nbgl_keypadCallback(obj, buttonEvent);
+    nbgl_obj_t *kpd = nbgl_screenContainsObjType(screen, KEYPAD);
+    if (kpd) {
+        nbgl_keypadCallback(kpd, buttonEvent);
         return;
     }
-    else {
-        obj = nbgl_screenContainsObjType(screen, KEYBOARD);
-        if (obj) {
-            nbgl_keyboardCallback(obj, buttonEvent);
+    else
+#endif  // NBGL_KEYPAD
+#ifdef NBGL_KEYBOARD
+    {
+        nbgl_obj_t *kbd = nbgl_screenContainsObjType(screen, KEYBOARD);
+        if (kbd) {
+            nbgl_keyboardCallback(kbd, buttonEvent);
             return;
         }
     }
+#endif  // NBGL_KEYBOARD
     if (layout->callback != NULL) {
         layout->callback((nbgl_layout_t *) layout, buttonEvent);
     }
