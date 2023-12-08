@@ -1241,6 +1241,7 @@ void nbgl_useCaseForwardOnlyReview(const char                *rejectText,
     navInfo.navWithTap.backToken     = BACK_TOKEN;
     navInfo.navWithTap.skipText      = "Skip >>";
     navInfo.navWithTap.skipToken     = SKIP_TOKEN;
+    navInfo.navWithTap.backButton    = false;
     navInfo.progressIndicator        = true;
     navInfo.tuneId                   = TUNE_TAP_CASUAL;
 
@@ -1281,6 +1282,7 @@ void nbgl_useCaseForwardOnlyReviewNoSkip(const char                *rejectText,
     navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
     navInfo.navWithTap.quitText      = rejectText;
     navInfo.navWithTap.backToken     = BACK_TOKEN;
+    navInfo.navWithTap.backButton    = false;
     navInfo.navWithTap.skipText      = NULL;
     navInfo.progressIndicator        = true;
     navInfo.tuneId                   = TUNE_TAP_CASUAL;
@@ -1456,6 +1458,7 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
     navInfo.navWithTap.backButton    = (tagValueList != NULL);
     navInfo.navWithTap.quitText      = "Cancel";
     navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
+    navInfo.navWithTap.nextPageText  = NULL;
     navInfo.navWithTap.backToken     = ADDR_BACK_TOKEN;
     navInfo.navWithTap.skipText      = NULL;
     navInfo.quitToken                = REJECT_TOKEN;
