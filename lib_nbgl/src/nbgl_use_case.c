@@ -83,8 +83,10 @@ static nbgl_page_t *pageContext;
 static nbgl_page_t *modalPageContext;
 
 // context for settings pages
-static const char               *settingsTitle;
-static bool                      touchableTitle;
+static const char *settingsTitle;
+static bool        touchableTitle;
+
+// context for navigation use case
 static nbgl_pageNavigationInfo_t navInfo;
 static bool                      forwardNavOnly;
 
@@ -115,6 +117,17 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index);
 static void    displayAddressPage(uint8_t page, bool forceFullRefresh);
 static void    displaySkipWarning(void);
 static uint8_t getNbPairs(uint8_t page, bool *tooLongToFit);
+
+static void reset_callbacks(void)
+{
+    onQuit         = NULL;
+    onContinue     = NULL;
+    onAction       = NULL;
+    onNav          = NULL;
+    onControls     = NULL;
+    onChoice       = NULL;
+    onModalConfirm = NULL;
+}
 
 // function called when navigating (or exiting) modal details pages
 // or when skip choice is displayed
@@ -832,6 +845,8 @@ void nbgl_useCaseHomeExt(const char                *appName,
                          nbgl_callback_t            topRightCallback,
                          nbgl_callback_t            quitCallback)
 {
+    reset_callbacks();
+
     nbgl_pageInfoDescription_t info = {.centeredInfo.icon    = appIcon,
                                        .centeredInfo.text1   = appName,
                                        .centeredInfo.text3   = NULL,
@@ -922,6 +937,8 @@ void nbgl_useCasePlugInHome(const char                *plugInName,
                             nbgl_callback_t            topRightCallback,
                             nbgl_callback_t            quitCallback)
 {
+    reset_callbacks();
+
     nbgl_pageInfoDescription_t info = {.centeredInfo.icon    = appIcon,
                                        .centeredInfo.text1   = plugInName,
                                        .centeredInfo.style   = PLUGIN_INFO,
@@ -981,6 +998,9 @@ void nbgl_useCaseSettings(const char                *title,
                           nbgl_navCallback_t         navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+
     // memorize context
     onQuit         = quitCallback;
     onNav          = navCallback;
@@ -1015,6 +1035,8 @@ void nbgl_useCaseSettings(const char                *title,
  */
 void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t quitCallback)
 {
+    reset_callbacks();
+
     nbgl_screenTickerConfiguration_t ticker = {
         .tickerCallback  = &tickerCallback,
         .tickerIntervale = 0,    // not periodic
@@ -1067,6 +1089,8 @@ void nbgl_useCaseChoice(const nbgl_icon_details_t *icon,
                         const char                *cancelText,
                         nbgl_choiceCallback_t      callback)
 {
+    reset_callbacks();
+
     nbgl_pageConfirmationDescription_t info = {.cancelText           = cancelText,
                                                .centeredInfo.text1   = message,
                                                .centeredInfo.text2   = subMessage,
@@ -1106,6 +1130,8 @@ void nbgl_useCaseConfirm(const char     *message,
                          const char     *cancelText,
                          nbgl_callback_t callback)
 {
+    // Don't reset callback or nav context as this is just a modal.
+
     nbgl_pageConfirmationDescription_t info = {.cancelText           = cancelText,
                                                .centeredInfo.text1   = message,
                                                .centeredInfo.text2   = subMessage,
@@ -1140,6 +1166,8 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon,
                              nbgl_callback_t            continueCallback,
                              nbgl_callback_t            rejectCallback)
 {
+    reset_callbacks();
+
     nbgl_pageInfoDescription_t info = {.centeredInfo.icon    = icon,
                                        .centeredInfo.text1   = reviewTitle,
                                        .centeredInfo.text2   = reviewSubTitle,
@@ -1185,6 +1213,9 @@ void nbgl_useCaseRegularReview(uint8_t                    initPage,
                                nbgl_navCallback_t         navCallback,
                                nbgl_choiceCallback_t      choiceCallback)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+
     // memorize context
     onChoice       = choiceCallback;
     onNav          = navCallback;
@@ -1226,6 +1257,9 @@ void nbgl_useCaseForwardOnlyReview(const char                *rejectText,
                                    nbgl_navCallback_t         navCallback,
                                    nbgl_choiceCallback_t      choiceCallback)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+
     // memorize context
     onChoice       = choiceCallback;
     onNav          = navCallback;
@@ -1241,6 +1275,7 @@ void nbgl_useCaseForwardOnlyReview(const char                *rejectText,
     navInfo.navWithTap.backToken     = BACK_TOKEN;
     navInfo.navWithTap.skipText      = "Skip >>";
     navInfo.navWithTap.skipToken     = SKIP_TOKEN;
+    navInfo.navWithTap.backButton    = false;
     navInfo.progressIndicator        = true;
     navInfo.tuneId                   = TUNE_TAP_CASUAL;
 
@@ -1268,6 +1303,9 @@ void nbgl_useCaseForwardOnlyReviewNoSkip(const char                *rejectText,
                                          nbgl_navCallback_t         navCallback,
                                          nbgl_choiceCallback_t      choiceCallback)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+
     // memorize context
     onChoice       = choiceCallback;
     onNav          = navCallback;
@@ -1281,6 +1319,7 @@ void nbgl_useCaseForwardOnlyReviewNoSkip(const char                *rejectText,
     navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
     navInfo.navWithTap.quitText      = rejectText;
     navInfo.navWithTap.backToken     = BACK_TOKEN;
+    navInfo.navWithTap.backButton    = false;
     navInfo.navWithTap.skipText      = NULL;
     navInfo.progressIndicator        = true;
     navInfo.tuneId                   = TUNE_TAP_CASUAL;
@@ -1305,6 +1344,10 @@ void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList,
                               const char                      *rejectText,
                               nbgl_choiceCallback_t            callback)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+    memset(&staticReviewContext, 0, sizeof(staticReviewContext));
+
     // memorize context
     onChoice       = callback;
     onNav          = NULL;
@@ -1349,6 +1392,10 @@ void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList
                                    const char                      *rejectText,
                                    nbgl_choiceCallback_t            callback)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+    memset(&staticReviewContext, 0, sizeof(staticReviewContext));
+
     // memorize context
     onChoice       = callback;
     onNav          = NULL;
@@ -1385,6 +1432,8 @@ void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList
  */
 void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping)
 {
+    memset(&detailsContext, 0, sizeof(detailsContext));
+
     uint16_t nbLines = nbgl_getTextNbLinesInWidth(
         BAGL_FONT_INTER_REGULAR_24px, value, SCREEN_WIDTH - 2 * BORDER_MARGIN, wrapping);
 
@@ -1443,6 +1492,10 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
                                         nbgl_choiceCallback_t            callback,
                                         const nbgl_layoutTagValueList_t *tagValueList)
 {
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+    memset(&addressConfirmationContext, 0, sizeof(addressConfirmationContext));
+
     // save context
     onChoice                                = callback;
     addressConfirmationContext.address      = address;
@@ -1456,6 +1509,7 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
     navInfo.navWithTap.backButton    = (tagValueList != NULL);
     navInfo.navWithTap.quitText      = "Cancel";
     navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
+    navInfo.navWithTap.nextPageText  = NULL;
     navInfo.navWithTap.backToken     = ADDR_BACK_TOKEN;
     navInfo.navWithTap.skipText      = NULL;
     navInfo.quitToken                = REJECT_TOKEN;
