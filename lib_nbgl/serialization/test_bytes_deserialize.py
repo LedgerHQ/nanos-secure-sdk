@@ -86,7 +86,7 @@ def test_draw_nbgl_text_area(data_test):
 
                 text_color=NbglColor.BLACK,
                 text_alignment=NbglAlignment.BOTTOM_RIGHT,
-                style=NbglStyle.LEDGER_BORDER,
+                style=NbglStyle.NO_STYLE,
                 font_id=NbglFontId.BAGL_FONT_INTER_MEDIUM_32px,
                 localized=False,
                 auto_hide_long_line=True,

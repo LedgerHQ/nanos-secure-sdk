@@ -88,7 +88,7 @@ void test_draw_nbgl_text_area()
 
                              .textColor        = BLACK,
                              .textAlignment    = BOTTOM_RIGHT,
-                             .style            = LEDGER_BORDER,
+                             .style            = NO_STYLE,
                              .fontId           = BAGL_FONT_INTER_MEDIUM_32px,
                              .localized        = false,
                              .autoHideLongLine = true,

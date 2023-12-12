@@ -407,7 +407,7 @@ static void onConfirmAbandon(void) {
 static void reviewChoice(bool confirm) {
   if (confirm) {
     // display a status page and go back to main
-    nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
+    nbgl_useCaseStatus("Transaction signed",true,appMain);
   }
   else {
     nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
@@ -488,7 +488,7 @@ static void onConfirmAbandon(void) {
 static void reviewChoice(bool confirm) {
   if (confirm) {
     // display a status page and go back to main
-    nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
+    nbgl_useCaseStatus("Transaction signed",true,appMain);
   }
   else {
     nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
@@ -573,7 +573,7 @@ static void onConfirmAbandon(void) {
 static void reviewChoice(bool confirm) {
   if (confirm) {
     // display a status page and go back to main
-    nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
+    nbgl_useCaseStatus("Transaction signed",true,appMain);
   }
   else {
     // display a confirmation to confirm/cancel rejection
@@ -619,7 +619,7 @@ static void onConfirmAbandon(void) {
 static void reviewChoice(bool confirm) {
   if (confirm) {
     // display a status page and go back to main
-    nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
+    nbgl_useCaseStatus("Transaction signed",true,appMain);
   }
   else {
     // display a confirmation to confirm/cancel rejection
@@ -722,7 +722,7 @@ static void onConfirmAbandon(void) {
 static void reviewChoice(bool confirm) {
   if (confirm) {
     // display a status page and go back to main
-    nbgl_useCaseStatus("TRANSACTION\nSIGNED",true,appMain);
+    nbgl_useCaseStatus("Transaction signed",true,appMain);
   }
   else {
     nbgl_useCaseConfirm("Reject transaction?","Yes, Reject","Go back to transaction",onConfirmAbandon);
@@ -789,7 +789,7 @@ Here is the code to display something similar to example picture:
 // called when either confirm button or reject token is called
 static void displayAddressCallback(bool confirm) {
   if (confirm) {
-    nbgl_useCaseStatus("ADDRESS\nVERIFIED",true,app_fullEthereum);
+    nbgl_useCaseStatus("Address\nVerified",true,app_fullEthereum);
   }
   else {
     nbgl_useCaseStatus("Address rejected",false,app_fullEthereum);
@@ -809,7 +809,7 @@ void app_ethereumVerifyAddress(void) {
 
 @subsection use_case_addr_confirm_ext Extended Address Confirmation Use Case
 
-\image{inline} html UseCase-AddressConfirmationExt.png "caption" height=300
+\image{inline} html UseCase-AddressConfirmationExt.png "caption" height=500
 
 When an address needs to be confirmed, it can be displayed in a Address Confirmation Use Case, at first as simple page with
 the raw address (as text). An extra button under the raw address enables to open a modal page to see the address as a QR code.

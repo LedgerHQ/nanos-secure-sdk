@@ -245,12 +245,11 @@ uint32_t nbgl_touchGetTouchDuration(nbgl_obj_t *obj)
 }
 
 /**
- * @brief if the given obj contains the coordinates of the given event, parse
- * all its children with the same criterion.
- * If no children or none concerned, check whether this object can process the event or not
+ * @brief parse all the children of the given object, recursively, until an object with the given
+ * touch if is found.
  *
- * @param obj
- * @param event
+ * @param obj parent of the touched object
+ * @param id id of the touched object to find
  * @return the concerned object or NULL if not found
  */
 nbgl_obj_t *nbgl_touchGetObjectFromId(nbgl_obj_t *obj, uint8_t id)

@@ -130,7 +130,6 @@ typedef enum {
  */
 typedef enum {
     NO_STYLE,        ///< no border
-    LEDGER_BORDER,   ///< Ledger style border, only for @ref TEXT_AREA
     INVERTED_COLORS  ///< Inverted background and rounded corners, only for @ref TEXT_AREA
 } nbgl_style_t;
 
