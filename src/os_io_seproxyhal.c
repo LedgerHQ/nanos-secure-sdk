@@ -430,6 +430,13 @@ void io_seproxyhal_init(void)
     app_stack_canary = APP_STACK_CANARY_MAGIC;
 #endif  // HAVE_BOLOS_APP_STACK_CANARY
 
+#if !defined(HAVE_BOLOS) && !defined(BOLOS_OS_UPGRADER_APP)
+    // Warn UX layer of io reset to avoid unwanted pin lock
+    memset(&G_ux_params, 0, sizeof(G_ux_params));
+    G_ux_params.ux_id = BOLOS_UX_IO_RESET;
+    os_ux(&G_ux_params);
+#endif
+
     // wipe the io structure before it's used
 #ifdef HAVE_BLE
     unsigned int plane = G_io_app.plane_mode;
