@@ -185,7 +185,7 @@ static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout)
  **********************/
 
 /**
- * @brief draw a page with a centered text with LEDGER style
+ * @brief draw a page with a centered text in large case, with a round check icon
  *
  * @param onActionCallback common callback for all actions on this page
  * @param ticker ticker configuration, set to NULL to disable it
@@ -203,8 +203,8 @@ nbgl_page_t *nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t              onA
     nbgl_layoutCenteredInfo_t centeredInfo = {.text1   = text,
                                               .text2   = NULL,
                                               .text3   = NULL,
-                                              .style   = LEDGER_INFO,
-                                              .icon    = NULL,
+                                              .style   = LARGE_CASE_INFO,
+                                              .icon    = &C_round_check_64px,
                                               .offsetY = 0};
 
     layoutDescription.modal          = false;
@@ -228,10 +228,10 @@ nbgl_page_t *nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t              onA
 }
 
 /**
- * @brief draw a spinner page with the given parameters. The spinner will "turn" automatically every
- * 800 ms
+ * @brief draw a spinner page with the given parameters. The spinner will "rotate" automatically
+ * every 800 ms
  *
- * @param onActionCallback common callback for all actions on this page
+ * @param onActionCallback common callback for all actions on this page (unused, so set to NULL)
  * @param text text to use under spinner
  * @return the page context (or NULL if error)
  */

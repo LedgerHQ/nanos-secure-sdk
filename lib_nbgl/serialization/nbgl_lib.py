@@ -94,10 +94,9 @@ class NbglFontId(IntEnum):
     BAGL_FONT_INTER_REGULAR_24px = 0,
     BAGL_FONT_INTER_SEMIBOLD_24px = 1,
     BAGL_FONT_INTER_MEDIUM_32px = 2,
-    BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px = 3
-    BAGL_FONT_INTER_REGULAR_24px_1bpp = 4
-    BAGL_FONT_INTER_SEMIBOLD_24px_1bpp = 5
-    BAGL_FONT_INTER_MEDIUM_32px_1bpp = 6
+    BAGL_FONT_INTER_REGULAR_24px_1bpp = 3
+    BAGL_FONT_INTER_SEMIBOLD_24px_1bpp = 4
+    BAGL_FONT_INTER_MEDIUM_32px_1bpp = 5
     BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp = 8
     BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp     = 9
     BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp   = 10
@@ -105,8 +104,7 @@ class NbglFontId(IntEnum):
 
 class NbglStyle(IntEnum):
     NO_STYLE = 0,
-    LEDGER_BORDER = 1,
-    INVERTED_COLORS = 2
+    INVERTED_COLORS = 1
 
 
 def parse_str(data: bytes) -> str:

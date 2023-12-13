@@ -47,7 +47,7 @@ The configuration of a page is provided in a single function call, and all prede
 
 A few APIs are available to draw typical pages, like:
 
-- @ref nbgl_pageDrawLedgerInfo() to draw a simple centered text in Ledger format (typically to provide the status of an action)
+- @ref nbgl_pageDrawLedgerInfo() to draw a simple centered text in a center info in large case, with a round check icon (typically to provide the status of an action)
 - @ref nbgl_pageDrawSpinner() to draw a spinner (typically a waiting screen)
 - @ref nbgl_pageDrawInfo() to draw a centered info with potential footer (or bottom button), "tapable" container and top-right button
 - @ref nbgl_pageDrawConfirmation() to draw a typical confirmation screen, for example when rejecting a transaction (with 1 button for confirmation)
@@ -63,11 +63,11 @@ or for a multi-pages configuration.
 
 \image{inline} html page3.png "caption" height=300
 
-This type is intended to draw a simple centered text in Ledger format (typically to provide the status of an action)
+This type is intended to draw a simple centered text in large case, with a round check icon (typically to provide the status of an action)
 
 The API to insert such an object is @ref nbgl_pageDrawLedgerInfo() with:
 
-- The text to draw in Ledger frame (upper-case is mandatory).
+- The text to draw in centered info
 - A potential ticker configuration.
 
 @subsubsection page_spinner Spinner
@@ -76,10 +76,9 @@ The API to insert such an object is @ref nbgl_pageDrawLedgerInfo() with:
 
 This type is intended to to draw a spinner (typically a waiting screen)
 
-The API to insert such an object is @ref nbgl_pageDrawLedgerInfo() with:
+The API to insert such an object is @ref nbgl_pageDrawSpinner() with:
 
-- The text to draw in Ledger frame (upper-case is mandatory).
-- A potential ticker configuration.
+- The text to draw.
 
 @subsubsection page_info Generic information
 

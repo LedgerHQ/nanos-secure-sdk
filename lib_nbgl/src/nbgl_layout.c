@@ -1408,11 +1408,8 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         textArea->textColor     = BLACK;
         textArea->text          = PIC(info->text1);
         textArea->textAlignment = CENTER;
-        if (info->style == LEDGER_INFO) {
-            textArea->fontId = BAGL_FONT_HM_ALPHA_MONO_MEDIUM_32px;
-        }
-        else if ((info->style == LARGE_CASE_INFO) || (info->style == LARGE_CASE_BOLD_INFO)
-                 || (info->style == PLUGIN_INFO)) {
+        if ((info->style == LARGE_CASE_INFO) || (info->style == LARGE_CASE_BOLD_INFO)
+            || (info->style == PLUGIN_INFO)) {
             textArea->fontId = BAGL_FONT_INTER_MEDIUM_32px;
         }
         else {
@@ -1423,14 +1420,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         textArea->obj.area.height = nbgl_getTextHeightInWidth(
             textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
 
-        if (info->style == LEDGER_INFO) {
-            textArea->style          = LEDGER_BORDER;
-            textArea->obj.area.width = SCREEN_WIDTH - 2 * 40;
-            textArea->obj.area.height += 2 * 16;
-        }
-        else {
-            textArea->style = NO_STYLE;
-        }
+        textArea->style = NO_STYLE;
         if (container->nbChildren > 0) {
             textArea->obj.alignment = BOTTOM_MIDDLE;
             textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];

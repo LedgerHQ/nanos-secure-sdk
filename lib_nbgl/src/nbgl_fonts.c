@@ -45,7 +45,6 @@ extern const LANGUAGE_PACK *language_pack;
 #endif  // defined(HAVE_LANGUAGE_PACK)
 
 #if defined(BOLOS_OS_UPGRADER_APP)
-#include "nbgl_font_hmalpha_mono_medium_32.inc"
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_medium_32.inc"
@@ -121,7 +120,7 @@ const nbgl_font_t *nbgl_getFont(nbgl_font_id_e fontId)
  * @brief Get the coming unicode value on the given UTF-8 string. If the value is a simple ASCII
  * character, is_unicode is set to false.
  *
- * @param txt (in/out) text to get character from. Updated after pop to the next UTF-8 char
+ * @param text (in/out) text to get character from. Updated after pop to the next UTF-8 char
  * @param textLen (in/out) remaining length in given text (before '\n' or '\0')
  * @param is_unicode (out) set to true if it's a real unicode (not ASCII)
  * @return unicode (or ascii-7) value of the found character
@@ -290,6 +289,7 @@ uint16_t nbgl_getSingleLineTextWidth(nbgl_font_id_e fontId, const char *text)
  *
  * @param fontId font ID
  * @param text text in UTF8
+ * @param maxLen max number of bytes to parse
  * @return the width in pixels of the text
  */
 uint16_t nbgl_getSingleLineTextWidthInLen(nbgl_font_id_e fontId, const char *text, uint16_t maxLen)
@@ -417,6 +417,7 @@ uint16_t nbgl_getTextLength(const char *text)
  * @param maxWidth maximum width in bytes, if text is greater than that the parsing is escaped
  * @param len (output) consumed bytes in text fitting in maxWidth
  * @param width (output) set to maximum width in pixels in text fitting in maxWidth
+ * @param wrapping if true, lines are split on separators like spaces, \n...
  *
  * @return true if maxWidth is reached, false otherwise
  *
@@ -866,6 +867,7 @@ uint8_t nbgl_getTextNbPagesInWidth(nbgl_font_id_e fontId,
  * @param fontId font ID
  * @param text text to get the height from
  * @param maxWidth maximum width in which the text must fit
+ * @param wrapping if true, lines are split on separators like spaces, \n...
  * @return the height in pixels
  */
 uint16_t nbgl_getTextHeightInWidth(nbgl_font_id_e fontId,

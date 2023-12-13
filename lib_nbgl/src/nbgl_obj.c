@@ -836,34 +836,6 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     else {
         nbgl_frontDrawRect(&rectArea);
     }
-    // draw border with given style
-    if (obj->style == LEDGER_BORDER) {
-        // draw horizontal segments (4 pixels stroke)
-        rectArea.x0     = obj->obj.area.x0;
-        rectArea.y0     = obj->obj.area.y0;
-        rectArea.width  = 24;
-        rectArea.height = 4;
-        nbgl_frontDrawHorizontalLine(&rectArea, 0xF, obj->textColor);  // top left
-        rectArea.x0 = obj->obj.area.x0 + obj->obj.area.width - rectArea.width;
-        nbgl_frontDrawHorizontalLine(&rectArea, 0xF, obj->textColor);  // top right
-        rectArea.y0 = obj->obj.area.y0 + obj->obj.area.height - 4;
-        nbgl_frontDrawHorizontalLine(&rectArea, 0xF, obj->textColor);  // bottom right
-        rectArea.x0 = obj->obj.area.x0;
-        nbgl_frontDrawHorizontalLine(&rectArea, 0xF, obj->textColor);  // bottom left
-        // draw vertical segments (4 pixels stroke)
-        rectArea.x0              = obj->obj.area.x0;
-        rectArea.y0              = obj->obj.area.y0 + 4;
-        rectArea.width           = 4;
-        rectArea.height          = 12;
-        rectArea.backgroundColor = obj->textColor;
-        nbgl_frontDrawRect(&rectArea);  // top left
-        rectArea.x0 = obj->obj.area.x0 + obj->obj.area.width - rectArea.width;
-        nbgl_frontDrawRect(&rectArea);  // top right
-        rectArea.y0 = obj->obj.area.y0 + obj->obj.area.height - rectArea.height - 4;
-        nbgl_frontDrawRect(&rectArea);  // bottom right
-        rectArea.x0 = obj->obj.area.x0;
-        nbgl_frontDrawRect(&rectArea);  // bottom left
-    }
 
     fontHeight = nbgl_getFontHeight(fontId);
     lineHeight = nbgl_getFontLineHeight(fontId);
