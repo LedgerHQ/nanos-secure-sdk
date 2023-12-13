@@ -27,6 +27,7 @@ typedef enum bolos_ux_e {
     BOLOS_UX_ASYNCHMODAL_PAIRING_REQUEST,  // ask the ux to display a modal to accept/reject the
                                            // current pairing request
     BOLOS_UX_ASYNCHMODAL_PAIRING_CANCEL,
+    BOLOS_UX_IO_RESET,
     BOLOS_UX_LAST_ID,
 } bolos_ux_t;
 
