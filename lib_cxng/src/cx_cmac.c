@@ -20,7 +20,7 @@ cx_err_t cx_cmac_start(cx_cipher_context_t *ctx, const uint8_t *key, size_t key_
     CX_CHECK(cx_cipher_setkey(ctx, key, key_bitlen, CX_ENCRYPT));
 
     ctx->cmac_ctx = &G_cx.cmac;
-    memset(ctx->cmac_ctx->state, 0, sizeof(ctx->cmac_ctx->state));
+    memset(ctx->cmac_ctx, 0, sizeof(cx_cmac_context_t));
 
 end:
     return error;

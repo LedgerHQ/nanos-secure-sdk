@@ -80,7 +80,8 @@ cx_err_t cx_hmac_init(cx_hmac_t *ctx, cx_md_t hash_id, const uint8_t *key, size_
         return CX_INVALID_PARAMETER;
     }
 
-    hash_ctx          = &ctx->hash_ctx, memset(ctx, 0, sizeof(cx_hmac_t));
+    hash_ctx = &ctx->hash_ctx;
+    memset(ctx, 0, sizeof(cx_hmac_t));
     size_t block_size = cx_get_block_size(hash_id);
 
     if (key) {
