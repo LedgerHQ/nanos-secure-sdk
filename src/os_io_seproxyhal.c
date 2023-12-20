@@ -246,14 +246,16 @@ void io_seproxyhal_handle_capdu_event(void)
 #ifdef HAVE_NFC
 void io_seproxyhal_handle_nfc_recv_event(void)
 {
-    size_t max  = MIN(sizeof(G_io_apdu_buffer), sizeof(G_io_seproxyhal_spi_buffer) - 3);
-    size_t size = U2BE(G_io_seproxyhal_spi_buffer, 1);
+    if (G_io_app.apdu_state == APDU_IDLE) {
+        size_t max  = MIN(sizeof(G_io_apdu_buffer), sizeof(G_io_seproxyhal_spi_buffer) - 3);
+        size_t size = U2BE(G_io_seproxyhal_spi_buffer, 1);
 
-    G_io_app.apdu_media  = IO_APDU_MEDIA_NFC;
-    G_io_app.apdu_state  = APDU_NFC;
-    G_io_app.apdu_length = MIN(size, max);
+        G_io_app.apdu_media  = IO_APDU_MEDIA_NFC;
+        G_io_app.apdu_state  = APDU_NFC;
+        G_io_app.apdu_length = MIN(size, max);
 
-    memcpy(G_io_apdu_buffer, &G_io_seproxyhal_spi_buffer[3], G_io_app.apdu_length);
+        memcpy(G_io_apdu_buffer, &G_io_seproxyhal_spi_buffer[3], G_io_app.apdu_length);
+    }
 }
 #endif
 unsigned int io_seproxyhal_handle_event(void)
@@ -502,62 +504,19 @@ void io_seproxyhal_play_tune(tune_index_e tune_index)
 #endif  // HAVE_PIEZO_SOUND
 
 #ifdef HAVE_NFC
-#ifdef HAVE_NDEF_SUPPORT
-#include "nfc_ndef.h"
-#endif
-
-#ifdef HAVE_NDEF_SUPPORT
-/**
- * @brief Send a SEPH message to MCU to init NFC
- *
- * @param ndef_message NDEF message to program into tag, can be NULL (ie no message in tag)
- * @param async set to true, if nfc_init is performed while an NFC transfer is ongoing, set to false
- * otherwise
- * @param forceInit set to true, to force NFC init even if NFC is de-activated in settings, false
- * otherwise
- */
-void io_seproxyhal_nfc_init(ndef_struct_t *ndef_message, bool async, bool forceInit)
-{
-    uint8_t  buffer[5];
-    uint16_t total_length = 0;
-    uint8_t  is_nfc_enabled
-        = forceInit
-              ? 1
-              : (os_setting_get(OS_SETTING_FEATURES, NULL, 0) & OS_SETTING_FEATURES_NFC_ENABLED);
-    buffer[0] = SEPROXYHAL_TAG_NFC_INIT;
-    // Fill length offsets 1 and 2 later when text length is known
-    buffer[3] = is_nfc_enabled;
-    buffer[4] = (uint8_t) async;
-    total_length += 2;
-    if (ndef_message != NULL) {
-        total_length += sizeof(ndef_struct_t);
-        memcpy(G_io_seproxyhal_spi_buffer, ndef_message, sizeof(ndef_struct_t));
-    }
-    else {
-        total_length += os_setting_get(OS_SETTING_NFC_TAG_CONTENT,
-                                       (uint8_t *) G_io_seproxyhal_spi_buffer,
-                                       sizeof(ndef_struct_t));
-    }
-    buffer[1] = (total_length & 0xFF00) >> 8;
-    buffer[2] = total_length & 0x00FF;
-    io_seproxyhal_spi_send(buffer, 5);
-    io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, total_length - 2);
-}
-#else   // ! HAVE_NDEF_SUPPORT
-void io_seproxyhal_nfc_init(bool forceInit)
+void io_seproxyhal_nfc_power(bool forceInit)
 {
     uint8_t buffer[4];
-    uint8_t is_nfc_enabled
+    uint8_t power
         = forceInit
               ? 1
               : (os_setting_get(OS_SETTING_FEATURES, NULL, 0) & OS_SETTING_FEATURES_NFC_ENABLED);
-    buffer[0] = SEPROXYHAL_TAG_NFC_INIT;
+    buffer[0] = SEPROXYHAL_TAG_NFC_POWER;
     buffer[1] = 0;
     buffer[2] = 1;
-    buffer[3] = is_nfc_enabled;
+    buffer[3] = power;
     io_seproxyhal_spi_send(buffer, 4);
 }
-#endif  // HAVE_NDEF_SUPPORT
 #endif  // HAVE_NFC
 
 #ifdef HAVE_SE_TOUCH
