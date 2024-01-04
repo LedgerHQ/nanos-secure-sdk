@@ -206,6 +206,7 @@ void CCID_BulkMessage_Out (USBD_HandleTypeDef  *pdev,
       G_io_ccid.Ccid_BulkState = CCID_STATE_IDLE;
       // no break is intentional
 
+    __attribute__((fallthrough));
     case CCID_STATE_IDLE:
       // prepare to receive another packet later on (to avoid troubles with timeout due to other hid command timeouting the ccid endpoint reply)
       USBD_LL_PrepareReceive(pdev, CCID_BULK_OUT_EP, CCID_BULK_EPOUT_SIZE);
