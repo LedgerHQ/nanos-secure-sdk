@@ -615,11 +615,10 @@ void io_usb_ccid_set_card_inserted(unsigned int inserted) {
 #endif // HAVE_CCID_INTERRUPT
 }
 
-
-
-
-
-
+void io_usb_ccid_configure_pinpad(uint8_t enabled) {
+    const volatile uint8_t *cfgDesc = USBD_GetPinPadOffset();
+    nvm_write((void *)cfgDesc, &enabled, 1);
+}
 
 #endif // HAVE_USB_CLASS_CCID
 

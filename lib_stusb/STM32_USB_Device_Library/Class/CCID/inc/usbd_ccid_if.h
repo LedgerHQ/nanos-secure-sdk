@@ -223,6 +223,8 @@ void Set_CSW (uint8_t CSW_Status, uint8_t Send_Permission);
 
 void io_usb_ccid_set_card_inserted(unsigned int inserted);
 
+void io_usb_ccid_configure_pinpad(uint8_t enabled);
+
 #endif // HAVE_USB_CLASS_CCID
 
 #endif /* __USBD_CCID_IF_H */
