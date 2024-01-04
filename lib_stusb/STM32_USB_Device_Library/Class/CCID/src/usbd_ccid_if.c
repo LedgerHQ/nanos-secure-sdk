@@ -526,35 +526,39 @@ uint8_t SC_SetDataRateAndClockFrequency(uint32_t dwClockFrequency,
   UNUSED(dwDataRate);
   return SLOT_NO_ERROR;
 }
-uint8_t SC_Secure(uint32_t dwLength, uint8_t bBWI, uint16_t wLevelParameter, 
-                    uint8_t* pbuf, uint32_t* returnLen )  {
-  UNUSED(bBWI);
-  UNUSED(wLevelParameter);
-  UNUSED(returnLen);
-  // return SLOTERROR_CMD_NOT_SUPPORTED;
-  uint16_t ret_len,off;
+uint8_t SC_Secure(uint8_t* pbuf, uint32_t* returnLen)  {
+  // Extract the APDU to send to the App
   switch(pbuf[0]) {
-    case 0: // verify pin
-      ret_len = dwLength - 15;
-      memmove(G_io_apdu_buffer, pbuf+15, dwLength-15);
+    case PIN_OPR_VERIFICATION:
+      // CCID Spec: APDU starts at offset 25, after the 10-Byte header
+      pbuf += 15;
       break;
-    case 1: // modify pin
+    case PIN_OPR_MODIFICATION:
+      // CCID Spec: APDU starts at offset 28, 29 or 30
+      //   depending on the nb of messages to display
       switch(pbuf[11]) {
-      case 3:
-        off = 20;
+      case 0:
+        // CCID Spec: No message to display
+        //   APDU starts at offset 28, after the 10-Byte header
+        pbuf += 18;
         break;
-      case 2:
       case 1:
-        off = 19;
+      case 2:
+        // CCID Spec: 1 or 2 message(s) to display
+        //   APDU starts at offset 29, after the 10-Byte header
+        pbuf += 19;
         break;
-      // 0 and 4-0xFF
-      default:
-        off = 18; 
+      case 3:
+        // CCID Spec: 3 messages to display
+        //   APDU starts at offset 30, after the 10-Byte header
+        pbuf += 20;
         break;
+      default: // unsupported
+        G_io_ccid.bulk_header.bulkin.dwLength = 0;
+        RDR_to_PC_DataBlock(SLOTERROR_CMD_NOT_SUPPORTED);
+        CCID_Send_Reply(&USBD_Device);
+        return SLOTERROR_CMD_NOT_SUPPORTED;
       }
-      ret_len = dwLength-off;
-      // provide with the complete apdu
-      memmove(G_io_apdu_buffer, pbuf+off, dwLength-off);
       break;
     default: // unsupported
       G_io_ccid.bulk_header.bulkin.dwLength = 0;
@@ -562,13 +566,15 @@ uint8_t SC_Secure(uint32_t dwLength, uint8_t bBWI, uint16_t wLevelParameter,
       CCID_Send_Reply(&USBD_Device);
       return SLOTERROR_CMD_NOT_SUPPORTED;
   }
-  return SC_XferBlock(G_io_apdu_buffer, ret_len, &ret_len);
+  // Change APDU CLA to be interpreted by the CCID compatible App (like OpenPGP)
+  pbuf[0] = PIN_OPR_APDU_CLA;
+  // The APDU has no data, only the header (size 5)
+  *returnLen = 5;
+  return SC_XferBlock(pbuf, *returnLen);
 }
 
 // prepare the apdu to be processed by the application
-uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen, uint16_t* expectedLen) {
-  UNUSED(expectedLen);
-
+uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen) {
   // check for overflow
   if (blockLen > IO_APDU_BUFFER_SIZE) {
     return SLOTERROR_BAD_LENTGH;
