@@ -44,13 +44,13 @@ extern "C" {
 // WARNING: please DON'T CHANGE the order/values of the fields below!
 // (otherwise python tools that generate data will need to be modified too)
 typedef struct {
-    uint32_t encoding : 1;        ///< method used to encode bitmap data
-    uint32_t bitmap_offset : 14;  ///< offset of this character in chars buffer
-    uint32_t width : 6;           ///< width of character in pixels
-    uint32_t x_min_offset : 3;    ///< x_min = x_min_offset
-    uint32_t y_min_offset : 3;    ///< y_min = (y_min + y_min_offset) * 4
-    uint32_t x_max_offset : 2;    ///< x_max = width - x_max_offset
-    uint32_t y_max_offset : 3;    ///< y_max = (height - y_max_offset) * 4
+    uint32_t bitmap_offset;     ///< offset of this character in chars buffer
+    uint32_t encoding : 1;      ///< method used to encode bitmap data
+    uint32_t width : 6;         ///< width of character in pixels
+    uint32_t x_min_offset : 4;  ///< x_min = x_min_offset
+    uint32_t y_min_offset : 6;  ///< y_min = (y_min + y_min_offset)
+    uint32_t x_max_offset : 4;  ///< x_max = width - x_max_offset
+    uint32_t y_max_offset : 6;  ///< y_max = (height - y_max_offset)
 } nbgl_font_character_t;
 
 /**
@@ -87,12 +87,12 @@ typedef struct {
 // (otherwise python tools that generate data will need to be modified too)
 typedef struct {
     uint32_t char_unicode : 21;   ///< plane value from 0 to 16 then 16-bit code.
+    uint32_t encoding : 1;        ///< method used to encode bitmap data
     uint32_t width : 6;           ///< width of character in pixels
-    uint32_t x_min_offset : 5;    ///< x_min = x_min_offset
-    uint32_t y_min_offset : 4;    ///< y_min = (y_min + y_min_offset) * 4
-    uint32_t x_max_offset : 5;    ///< x_max = width - x_max_offset
-    uint32_t y_max_offset : 5;    ///< y_max = (height - y_max_offset) * 4
-    uint32_t encoding : 2;        ///< method used to encode bitmap data
+    uint32_t x_min_offset : 4;    ///< x_min = x_min_offset
+    uint32_t y_min_offset : 6;    ///< y_min = (y_min + y_min_offset)
+    uint32_t x_max_offset : 4;    ///< x_max = width - x_max_offset
+    uint32_t y_max_offset : 6;    ///< y_max = (height - y_max_offset)
     uint32_t bitmap_offset : 16;  ///< offset of this character in chars buffer
 } nbgl_font_unicode_character_t;
 /**

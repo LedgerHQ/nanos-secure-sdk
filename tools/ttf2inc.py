@@ -70,7 +70,6 @@ class TTF2INC:
         self.loaded_baseline = 0
         self.baseline_offset = 0
         self.bpp = 1
-        self.kerning = 0
         self.char_info = {}
         self.ttf_info_dictionary = {}
         # Be sure there are at least some mandatory characters
@@ -318,7 +317,7 @@ class TTF2INC:
             if self.unicode_needed:
                 max_bits = 5
             else:
-                max_bits = 2
+                max_bits = 4
         else:
             if self.unicode_needed:
                 max_bits = 5
@@ -328,16 +327,14 @@ class TTF2INC:
 
         # Compute value of max_y_min_offset, depending of allowed bits
         if self.nbgl:
-            if self.unicode_needed:
-                max_bits = 4
-            else:
-                max_bits = 3
+            max_bits = 6
+            self.max_y_min_offset = pow(2, max_bits) - 1
         else:
             if self.unicode_needed:
                 max_bits = 6
             else:
                 max_bits = 5
-        self.max_y_min_offset = 4 * (pow(2, max_bits) - 1)
+            self.max_y_min_offset = 4 * (pow(2, max_bits) - 1)
 
         # Some fonts display some characters at y < 0
         # => Be sure we are aware of that and already compensated it
@@ -770,13 +767,13 @@ class TTF2INC:
         check that the values do not exceed the boundaries of each fieds.
         Structure defined in public_sdk/lib_nbgl/include/nbgl_fonts.h
         typedef struct {
-          uint32_t encoding:1;        ///< method used to encode bitmap data
-          uint32_t bitmap_offset:14;  ///< offset of this character in chars buffer
-          uint32_t width:6;           ///< width of character in pixels
-          uint32_t x_min_offset:3;    ///< x_min = x_min_offset
-          uint32_t y_min_offset:3;    ///< y_min = (y_min + y_min_offset) * 4
-          uint32_t x_max_offset:2;    ///< x_max = width - x_max_offset
-          uint32_t y_max_offset:3;    ///< y_max = (height - y_max_offset) * 4
+          uint32_t bitmap_offset;  ///< offset of this character in chars buffer
+          uint32_t encoding : 1;        ///< method used to encode bitmap data
+          uint32_t width : 6;           ///< width of character in pixels
+          uint32_t x_min_offset : 4;    ///< x_min = x_min_offset
+          uint32_t y_min_offset : 6;    ///< y_min = (y_min + y_min_offset)
+          uint32_t x_max_offset : 4;    ///< x_max = width - x_max_offset
+          uint32_t y_max_offset : 6;    ///< y_max = (height - y_max_offset)
         } nbgl_font_character_t;
         """
         encoding = info["encoding"]
@@ -794,11 +791,11 @@ class TTF2INC:
         else:
             x_min_offset = info["left"]
             y_min_offset = info["top"] - self.char_topmost_y
-            y_min_offset = y_min_offset // 4
+            y_min_offset = (y_min_offset // 4) * 4
 
             x_max_offset = width - info["right"]
             y_max_offset = self.height - info["bottom"]
-            y_max_offset = y_max_offset // 4
+            y_max_offset = (y_max_offset // 4) * 4
 
         # When crop is False, we may have some bytes to skip at beginning
         if not self.crop:
@@ -810,15 +807,15 @@ class TTF2INC:
 
         # Check values does not exceed bitfield capabilities
         self.check_max_bits(encoding, 1, char, "encoding")
-        self.check_max_bits(bitmap_offset, 14, char, "bitmap_offset")
+        self.check_max_bits(bitmap_offset, 15, char, "bitmap_offset")
         self.check_max_bits(width, 6, char, "width")
-        self.check_max_bits(x_min_offset, 3, char, "x_min_offset")
-        self.check_max_bits(y_min_offset, 3, char, "y_min_offset")
+        self.check_max_bits(x_min_offset, 4, char, "x_min_offset")
+        self.check_max_bits(y_min_offset, 6, char, "y_min_offset")
         # Next one should never occur, thanks to max_x_max_offset check
-        self.check_max_bits(x_max_offset, 2, char, "x_max_offset")
-        self.check_max_bits(y_max_offset, 3, char, "y_max_offset")
+        self.check_max_bits(x_max_offset, 4, char, "x_max_offset")
+        self.check_max_bits(y_max_offset, 6, char, "y_max_offset")
 
-        inc.write(f"  {{ {encoding:1}, {bitmap_offset:5}, {width:2},"
+        inc.write(f"  {{ {bitmap_offset:5}, {encoding:1}, {width:2},"
                   f"{x_min_offset}, {y_min_offset}, "
                   f"{x_max_offset}, {y_max_offset} }},"
                   f" //asciii 0x{ord(char):04X}\n")
@@ -877,15 +874,14 @@ class TTF2INC:
         check that the values do not exceed the boundaries of each fieds.
         Structure defined in public_sdk/lib_nbgl/include/nbgl_fonts.h
         typedef struct {
-          uint32_t  char_unicode;     ///< unicode = plane value from 0 to 16 then 16-bit code.
-          uint16_t  bitmap_byte_count;///< number of bytes used in chars buffer for this character
-          uint16_t  bitmap_offset;    ///< offset of this character in chars buffer
-          uint8_t   width;            ///< width of character in pixels
-          uint8_t   x_min_offset;     ///< x_min = x_min_offset
-          uint8_t   y_min_offset;     ///< y_min = (y_min + y_min_offset) * 4
-          uint8_t   x_max_offset;     ///< x_max = width - x_max_offset
-          uint8_t   y_max_offset;     ///< y_max = (height - y_max_offset) * 4
-          uint8_t   encoding;         ///< method used to encode bitmap data
+            uint32_t char_unicode : 21;   ///< plane value from 0 to 16 then 16-bit code.
+            uint32_t encoding : 1;        ///< method used to encode bitmap data
+            uint32_t width : 6;           ///< width of character in pixels
+            uint32_t x_min_offset : 4;    ///< x_min = x_min_offset
+            uint32_t y_min_offset : 6;    ///< y_min = (y_min + y_min_offset)
+            uint32_t x_max_offset : 4;    ///< x_max = width - x_max_offset
+            uint32_t y_max_offset : 6;    ///< y_max = (height - y_max_offset)
+            uint32_t bitmap_offset : 16;  ///< offset of this character in chars buffer
         } nbgl_font_unicode_character_t;
         """
         char_unicode = ord(char)
@@ -904,11 +900,11 @@ class TTF2INC:
         else:
             x_min_offset = info["left"]
             y_min_offset = info["top"] - self.char_topmost_y
-            y_min_offset = y_min_offset // 4
+            y_min_offset = (y_min_offset // 4) * 4
 
             x_max_offset = width - info["right"]
             y_max_offset = self.height - info["bottom"]
-            y_max_offset = y_max_offset // 4
+            y_max_offset = (y_max_offset // 4) * 4
 
         # When crop is False, we may have some bytes to skip at beginning
         if not self.crop:
@@ -945,9 +941,9 @@ class TTF2INC:
             "char": ord(char),
         })
         inc.write(f"  {{ 0x{ord(char):06X}, {bitmap_byte_count:3},"
-                  f" {bitmap_offset:5}, {width:2},"
+                  f" {bitmap_offset:5}, {encoding}, {width:2},"
                   f" {x_min_offset:2}, {y_min_offset:2},"
-                  f" {x_max_offset:2}, {y_max_offset:2}, {encoding} }}, "
+                  f" {x_max_offset:2}, {y_max_offset:2}}}, "
                   f"//unicode {unicode}\n")
 
     # -------------------------------------------------------------------------

@@ -45,15 +45,20 @@ extern const LANGUAGE_PACK *language_pack;
 #endif  // defined(HAVE_LANGUAGE_PACK)
 
 #if defined(BOLOS_OS_UPGRADER_APP)
+#ifdef SCREEN_SIZE_WALLET
+#ifdef TARGET_STAX
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_medium_32.inc"
 #include "nbgl_font_inter_regular_24_1bpp.inc"
 #include "nbgl_font_inter_semibold_24_1bpp.inc"
 #include "nbgl_font_inter_medium_32_1bpp.inc"
+#endif  // TARGET_STAX
+#else   // SCREEN_SIZE_WALLET
 #include "nbgl_font_open_sans_extrabold_11.inc"
 #include "nbgl_font_open_sans_regular_11.inc"
 #include "nbgl_font_open_sans_light_16.inc"
+#endif  // SCREEN_SIZE_WALLET
 
 const nbgl_font_t *const C_nbgl_fonts[] = {
 
