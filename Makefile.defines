@@ -17,7 +17,7 @@
 
 # TARGET should be set as an environment variable otherwise it will be read from a `.target`
 # file in the SDK root repository
-TARGETS := nanos nanox nanos2 stax
+TARGETS := nanos nanox nanos2 stax europa
 ifeq ($(TARGET),)
 ifeq ("$(wildcard $(BOLOS_SDK)/.target)","")
 $(error No TARGET specified and no .target file in SDK repository $(BOLOS_SDK))
@@ -31,7 +31,7 @@ $(error TARGET not set to a valid value (possible values: $(TARGETS)))
 endif
 
 # for Stax, NBGL must be used
-ifeq ($(TARGET),stax)
+ifneq (,$(filter $(TARGET),stax europa))
 USE_NBGL ?= 1
 endif
 
@@ -184,6 +184,17 @@ DEFINES += NBGL_USE_CASE
 DEFINES += SCREEN_SIZE_WALLET
 #DEFINES += HAVE_DISPLAY_FAST_MODE
 else
+ifeq ($(TARGET_NAME),TARGET_EUROPA)
+DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_28PX
+DEFINES += HAVE_BAGL_FONT_INTER_SEMIBOLD_28PX
+DEFINES += HAVE_BAGL_FONT_INTER_MEDIUM_36PX
+DEFINES += HAVE_INAPP_BLE_PAIRING
+DEFINES += HAVE_NBGL
+DEFINES += HAVE_PIEZO_SOUND
+DEFINES += HAVE_SE_TOUCH
+DEFINES += NBGL_PAGE
+DEFINES += NBGL_USE_CASE
+else
 DEFINES += BAGL_WIDTH=128
 DEFINES += SCREEN_SIZE_NANO
 ifdef USE_NBGL
@@ -192,9 +203,6 @@ DEFINES += NBGL_STEP
 DEFINES += NBGL_USE_CASE
 else
 DEFINES += HAVE_BAGL
-endif
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-DEFINES += BAGL_HEIGHT=32
 endif
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
 ifndef USE_NBGL
@@ -205,6 +213,7 @@ DEFINES += HAVE_BAGL_ELLIPSIS
 DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
 DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
 DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+endif
 endif
 endif
 endif

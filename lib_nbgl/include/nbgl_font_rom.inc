@@ -16,18 +16,27 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifdef HAVE_SE_TOUCH
+#ifdef SCREEN_SIZE_WALLET
+#ifdef TARGET_STAX
 #include "nbgl_font_inter_regular_24.inc"
 #include "nbgl_font_inter_semibold_24.inc"
 #include "nbgl_font_inter_medium_32.inc"
 #include "nbgl_font_inter_regular_24_1bpp.inc"
 #include "nbgl_font_inter_semibold_24_1bpp.inc"
 #include "nbgl_font_inter_medium_32_1bpp.inc"
-#else // HAVE_SE_TOUCH
+#else // TARGET_STAX
+#include "nbgl_font_inter_regular_28.inc"
+#include "nbgl_font_inter_semibold_28.inc"
+#include "nbgl_font_inter_medium_36.inc"
+#include "nbgl_font_inter_regular_28_1bpp.inc"
+#include "nbgl_font_inter_semibold_28_1bpp.inc"
+#include "nbgl_font_inter_medium_36_1bpp.inc"
+#endif // TARGET_STAX
+#else // SCREEN_SIZE_WALLET
 #include "nbgl_font_open_sans_extrabold_11.inc"
 #include "nbgl_font_open_sans_regular_11.inc"
 #include "nbgl_font_open_sans_light_16.inc"
-#endif // HAVE_SE_TOUCH
+#endif // SCREEN_SIZE_WALLET
 #if (defined(HAVE_BOLOS) && !defined(BOLOS_OS_UPGRADER_APP))
 #if !defined(HAVE_LANGUAGE_PACK)
   #if (OS_LANGUAGE==LANG_ENGLISH)

@@ -28,6 +28,8 @@ extern "C" {
 #ifdef SCREEN_SIZE_WALLET
 #ifdef TARGET_STAX
 #define SCREEN_WIDTH 400
+#else  // TARGET_STAX
+#define SCREEN_WIDTH 480
 #endif  // TARGET_STAX
 #else   // SCREEN_SIZE_WALLET
 #define SCREEN_WIDTH 128
@@ -39,6 +41,8 @@ extern "C" {
 #ifdef SCREEN_SIZE_WALLET
 #ifdef TARGET_STAX
 #define SCREEN_HEIGHT 672
+#else  // TARGET_STAX
+#define SCREEN_HEIGHT 600
 #endif  // TARGET_STAX
 #else   // SCREEN_SIZE_WALLET
 #define SCREEN_HEIGHT 64

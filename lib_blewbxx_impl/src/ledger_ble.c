@@ -181,7 +181,7 @@ static void check_transfer_mode(uint8_t enable);
 
 /* Private variables ---------------------------------------------------------*/
 // clang-format off
-#ifdef TARGET_STAX
+#if defined(TARGET_STAX) || defined(TARGET_EUROPA)
 const uint8_t service_uuid[16] = {0x72,0x65,0x67,0x64,0x65,0x4c,0x00,0x00,0x04,0x60,0x97,0x2C,0x00,0x34,0xD6,0x13,};
 const uint8_t charUuidTX[16]   = {0x72,0x65,0x67,0x64,0x65,0x4c,0x01,0x00,0x04,0x60,0x97,0x2C,0x00,0x34,0xD6,0x13,};
 const uint8_t charUuidRX[16]   = {0x72,0x65,0x67,0x64,0x65,0x4c,0x02,0x00,0x04,0x60,0x97,0x2C,0x00,0x34,0xD6,0x13,};
@@ -451,7 +451,7 @@ static void init_mngr(uint16_t opcode, const uint8_t *buffer, uint16_t length)
         case BLE_INIT_STEP_SET_TX_POWER_LEVEL:
             ledger_ble_data.hci_cmd_opcode = 0xfc0f;
             aci_hal_set_tx_power_level(1,  // High power (ignored)
-#ifdef TARGET_STAX
+#if defined(TARGET_STAX) || defined(TARGET_EUROPA)
                                        0x19);  // 0 dBm
 #else                                          // !TARGET_STAX
                                        0x07);  // -14.1 dBm
@@ -771,7 +771,7 @@ static void ask_user_pairing_numeric_comparison(uint32_t code)
     ledger_ble_data.pairing_in_progress          = 1;
     ux_params.u.pairing_request.pairing_info_len = 6;
     SPRINTF(ux_params.u.pairing_request.pairing_info, "%06d", (unsigned int) code);
-#ifdef TARGET_STAX
+#if defined(TARGET_STAX) || defined(TARGET_EUROPA)
     G_io_asynch_ux_callback.asynchmodal_end_callback = NULL;
 #else   // !TARGET_STAX
     G_io_asynch_ux_callback.asynchmodal_end_callback = rsp_user_pairing_numeric_comparison;
@@ -809,7 +809,7 @@ static void ask_user_pairing_passkey(void)
     ledger_ble_data.pairing_code                 = cx_rng_u32_range_func(0, 1000000, cx_rng_u32);
     ux_params.u.pairing_request.pairing_info_len = 6;
     SPRINTF(ux_params.u.pairing_request.pairing_info, "%06d", ledger_ble_data.pairing_code);
-#ifdef TARGET_STAX
+#if defined(TARGET_STAX) || defined(TARGET_EUROPA)
     G_io_asynch_ux_callback.asynchmodal_end_callback = NULL;
 #else   // !TARGET_STAX
     G_io_asynch_ux_callback.asynchmodal_end_callback = rsp_user_pairing_passkey;
