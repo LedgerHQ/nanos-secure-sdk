@@ -17,7 +17,7 @@
 
 # TARGET should be set as an environment variable otherwise it will be read from a `.target`
 # file in the SDK root repository
-TARGETS := nanos nanox nanos2 stax
+TARGETS := nanos nanox nanos2 stax europa
 ifeq ($(TARGET),)
 ifeq ("$(wildcard $(BOLOS_SDK)/.target)","")
 $(error No TARGET specified and no .target file in SDK repository $(BOLOS_SDK))
@@ -177,7 +177,20 @@ DEFINES += HAVE_SE_TOUCH
 DEFINES += NBGL_PAGE
 DEFINES += NBGL_USE_CASE
 DEFINES += SCREEN_SIZE_WALLET
+#DEFINES += HAVE_DISPLAY_FAST_MODE
 endif # TARGET_STAX
+
+ifeq ($(TARGET_NAME),TARGET_EUROPA)
+DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_28PX
+DEFINES += HAVE_BAGL_FONT_INTER_SEMIBOLD_28PX
+DEFINES += HAVE_BAGL_FONT_INTER_MEDIUM_36PX
+DEFINES += HAVE_INAPP_BLE_PAIRING
+DEFINES += HAVE_NBGL
+DEFINES += HAVE_PIEZO_SOUND
+DEFINES += HAVE_SE_TOUCH
+DEFINES += NBGL_PAGE
+DEFINES += NBGL_USE_CASE
+endif # TARGET_EUROPA
 
 # For other devices, by default NBGL is not used
 USE_NBGL ?= 0

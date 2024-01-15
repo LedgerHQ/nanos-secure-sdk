@@ -76,6 +76,12 @@ typedef struct {
     uint8_t      index;   // index within the token
     tune_index_e tuneId;  // if not @ref NBGL_NO_TUNE, a tune will be played
 } layoutObj_t;
+
+typedef enum {
+    SWIPE_USAGE_NAVIGATION,
+    SWIPE_USAGE_CUSTOM,
+    NB_SWIPE_USAGE
+} nbgl_swipe_usage_t;
 #endif  // HAVE_SE_TOUCH
 
 /**
@@ -106,7 +112,8 @@ typedef struct nbgl_layoutInternal_s {
     // number of callback objects used by the whole layout in callbackObjPool
     uint8_t nbUsedCallbackObjs;
 
-    nbgl_container_t *container;
+    nbgl_container_t  *container;
+    nbgl_swipe_usage_t swipeUsage;
 #else   // HAVE_SE_TOUCH
     nbgl_layoutButtonCallback_t callback;  // user callback for all controls
 #endif  // HAVE_SE_TOUCH
@@ -208,7 +215,9 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
     layoutObj_t           *layoutObj;
     bool                   needRefresh = false;
 
-    UNUSED(eventType);
+    if (obj == NULL) {
+        return;
+    }
 
     if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false) {
         // try with parent, if existing
@@ -219,6 +228,23 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
                 eventType,
                 obj);
             return;
+        }
+    }
+
+    // case of swipe
+    if (((eventType == SWIPED_UP) || (eventType == SWIPED_DOWN) || (eventType == SWIPED_LEFT)
+         || (eventType == SWIPED_RIGHT))
+        && (obj->type == CONTAINER)) {
+        if (layout->swipeUsage == SWIPE_USAGE_CUSTOM) {
+            layoutObj->index = eventType;
+        }
+        else if (layout->swipeUsage == SWIPE_USAGE_NAVIGATION) {
+            if (nbgl_navigationCallback(obj, eventType, layout->nbPages, &layout->activePage)
+                == false) {
+                // navigation was impossible
+                return;
+            }
+            layoutObj->index = layout->activePage;
         }
     }
 
@@ -701,6 +727,36 @@ nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description)
     return (nbgl_layout_t *) layout;
 }
 
+static int nbgl_layoutAddSwipeInternal(nbgl_layout_t     *layout,
+                                       uint8_t            token,
+                                       uint16_t           swipesMask,
+                                       nbgl_swipe_usage_t usage)
+{
+    if ((swipesMask & SWIPE_MASK) == 0) {
+        return -1;
+    }
+
+    nbgl_layoutInternal_t *layoutInt      = (nbgl_layoutInternal_t *) layout;
+    nbgl_obj_t            *swipeContainer = nbgl_objPoolGet(CONTAINER, layoutInt->layer);
+
+    layoutInt->children[layoutInt->nbChildren] = swipeContainer;
+    layoutInt->nbChildren++;
+    addCallbackObj(layoutInt, swipeContainer, token, TUNE_TAP_CASUAL);
+    swipeContainer->touchMask = swipesMask;
+    layoutInt->swipeUsage     = usage;
+
+    return 0;
+}
+
+/**
+ * @brief Create a swipe interaction
+ */
+
+int nbgl_layoutAddSwipe(nbgl_layout_t *layout, uint8_t token, uint16_t swipesMask)
+{
+    return nbgl_layoutAddSwipeInternal(layout, token, swipesMask, SWIPE_USAGE_CUSTOM);
+}
+
 /**
  * @brief Creates a Top-right button in the top right corner of the top panel
  *
@@ -790,6 +846,11 @@ int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigati
 
         layoutInt->container->obj.area.height -= 4;
     }
+
+    nbgl_layoutAddSwipeInternal(layout,
+                                info->token,
+                                ((1 << SWIPED_LEFT) | (1 << SWIPED_RIGHT) | (1 << SWIPED_DOWN)),
+                                SWIPE_USAGE_NAVIGATION);
 
     return 0;
 }
@@ -2764,14 +2825,16 @@ int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, const nbgl_layoutKbd_t *kbdInf
 
     // create keyboard
     keyboard = (nbgl_keyboard_t *) nbgl_objPoolGet(KEYBOARD, layoutInt->layer);
+#ifdef TARGET_STAX
     keyboard->obj.alignmentMarginY = 64;
-    keyboard->obj.alignment        = BOTTOM_MIDDLE;
-    keyboard->borderColor          = LIGHT_GRAY;
-    keyboard->callback             = PIC(kbdInfo->callback);
-    keyboard->lettersOnly          = kbdInfo->lettersOnly;
-    keyboard->mode                 = kbdInfo->mode;
-    keyboard->keyMask              = kbdInfo->keyMask;
-    keyboard->casing               = kbdInfo->casing;
+#endif  // TARGET_STAX
+    keyboard->obj.alignment = BOTTOM_MIDDLE;
+    keyboard->borderColor   = LIGHT_GRAY;
+    keyboard->callback      = PIC(kbdInfo->callback);
+    keyboard->lettersOnly   = kbdInfo->lettersOnly;
+    keyboard->mode          = kbdInfo->mode;
+    keyboard->keyMask       = kbdInfo->keyMask;
+    keyboard->casing        = kbdInfo->casing;
     // set this new keyboard as child of the container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) keyboard);
 

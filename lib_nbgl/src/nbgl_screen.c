@@ -6,6 +6,7 @@
 /*********************
  *      INCLUDES
  *********************/
+#include "nbgl_front.h"
 #include "nbgl_screen.h"
 #include "nbgl_debug.h"
 #include "os_pic.h"
@@ -74,6 +75,21 @@ void nbgl_screenRedraw(void)
 
     nbgl_screen_reinit();
     nbgl_redrawObject((nbgl_obj_t *) topOfStack, NULL, true);
+}
+
+/**
+ * @brief Returns the screen on the given layer index, as a generic object
+ * @param screenIndex index of the screen in the stack
+ * @return the screen on the given layer, or NULL if no screen in stack
+ */
+nbgl_obj_t *nbgl_screenGetAt(uint8_t screenIndex)
+{
+    if (screenIndex < nbScreensOnStack) {
+        return (nbgl_obj_t *) &screenStack[screenIndex];
+    }
+    else {
+        return NULL;
+    }
 }
 
 /**

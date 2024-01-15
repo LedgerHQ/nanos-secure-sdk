@@ -38,14 +38,14 @@ ifneq ($(USE_NBGL),0)
 # NBGL glyphs files and generation script
 #
 # search icons (glyphs) in lib_nbgl/glyphs(_nano) folder of the SDK
-ifeq ($(TARGET_NAME),TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/))))
 GLYPH_OPT :=
-else # ($(TARGET_NAME),TARGET_STAX)
+else # ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs_nano/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs_nano/))))
 #inverse B&W for non Stax
 GLYPH_OPT := --reverse
-endif # ($(TARGET_NAME),TARGET_STAX)
+endif # ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
 
 ifneq (,$(wildcard $(ICONNAME)))
 # Do not try to generate app icon glyph, if image does not exist

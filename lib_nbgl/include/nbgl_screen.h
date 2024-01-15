@@ -80,6 +80,7 @@ void nbgl_screen_config_fast_mode(uint8_t fast_mode_setting);
 #endif  // HAVE_CONFIGURABLE_DISPLAY_FAST_MODE
 
 void        nbgl_screenRedraw(void);
+nbgl_obj_t *nbgl_screenGetAt(uint8_t screenIndex);
 nbgl_obj_t *nbgl_screenGetTop(void);
 uint8_t     nbgl_screenGetCurrentStackSize(void);
 bool        nbgl_screenContainsObj(nbgl_obj_t *obj);

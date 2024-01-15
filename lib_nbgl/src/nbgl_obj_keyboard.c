@@ -27,7 +27,11 @@
 #define FIRST_LINE_CHAR_COUNT  10
 #define SECOND_LINE_CHAR_COUNT 9
 
-#define NORMAL_KEY_WIDTH                 40
+#if (SCREEN_WIDTH == 400)
+#define NORMAL_KEY_WIDTH 40
+#else
+#define NORMAL_KEY_WIDTH 48
+#endif
 #define LETTER_OFFSET_Y                  (((KEYBOARD_KEY_HEIGHT - 32) / 2) & 0xFFC)
 #define SHIFT_KEY_WIDTH                  (NORMAL_KEY_WIDTH + SECOND_LINE_OFFSET)
 #define SECOND_LINE_OFFSET               ((SCREEN_WIDTH - (SECOND_LINE_CHAR_COUNT * NORMAL_KEY_WIDTH)) / 2)

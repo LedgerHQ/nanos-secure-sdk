@@ -37,7 +37,11 @@ extern "C" {
 
 // for Keypad
 #ifdef HAVE_SE_TOUCH
+#if (SCREEN_HEIGHT == 600)
+#define KEYPAD_KEY_HEIGHT 88
+#else
 #define KEYPAD_KEY_HEIGHT 104
+#endif
 #define KEYPAD_MAX_DIGITS 12
 #else  // HAVE_SE_TOUCH
 #define KEYPAD_WIDTH  114
@@ -169,8 +173,16 @@ typedef enum {
                      ///< been pressed.
     TOUCH_RELEASED,  ///< corresponding to an object that was touched and where the finger has been
                      ///< released.
-    VALUE_CHANGED    ///< corresponding to a change of state of the object (indirect event)
+    VALUE_CHANGED,   ///< corresponding to a change of state of the object (indirect event)
+    SWIPED_UP,
+    SWIPED_DOWN,
+    SWIPED_RIGHT,
+    SWIPED_LEFT,
+    NB_TOUCH_TYPES
 } nbgl_touchType_t;
+
+#define SWIPE_MASK \
+    ((1 << SWIPED_UP) | (1 << SWIPED_DOWN) | (1 << SWIPED_LEFT) | (1 << SWIPED_RIGHT))
 
 /**
  * @brief The different pressed buttons
@@ -240,9 +252,9 @@ typedef struct PACKED__ nbgl_obj_s {
     int16_t            alignmentMarginX;  ///< horizontal margin when aligning
     int16_t            alignmentMarginY;  ///< vertical margin when aligning
     nbgl_obj_type_t    type;              ///< type of the graphical object, must be explicitly set
-    uint8_t touchMask;  ///< bit mask to tell engine which touch events are handled by this object
-    uint8_t touchId;    ///< a unique identifier (by screen) to be used by external test environment
-                        ///< (TTYT or Screenshots)
+    uint16_t touchMask;  ///< bit mask to tell engine which touch events are handled by this object
+    uint8_t  touchId;  ///< a unique identifier (by screen) to be used by external test environment
+                       ///< (TTYT or Screenshots)
 } nbgl_obj_t;
 
 /**
