@@ -139,36 +139,27 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
         key_value = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
 
         rectArea.x0 = keypad->obj.area.x0 + i * KEY_WIDTH;
-        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(BAGL_FONT_INTER_MEDIUM_32px, &key_value)) / 2;
-        nbgl_drawText(&rectArea,
-                      &key_value,
-                      1,
-                      BAGL_FONT_INTER_MEDIUM_32px,
-                      keypad->enableDigits ? BLACK : WHITE);
+        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+        nbgl_drawText(
+            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
     }
     // Second row: 4 5 6
     rectArea.y0 += KEYPAD_KEY_HEIGHT;
     for (; i < 6; i++) {
         key_value   = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
         rectArea.x0 = keypad->obj.area.x0 + (i - 3) * KEY_WIDTH;
-        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(BAGL_FONT_INTER_MEDIUM_32px, &key_value)) / 2;
-        nbgl_drawText(&rectArea,
-                      &key_value,
-                      1,
-                      BAGL_FONT_INTER_MEDIUM_32px,
-                      keypad->enableDigits ? BLACK : WHITE);
+        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+        nbgl_drawText(
+            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
     }
     // Third row: 7 8 9
     rectArea.y0 += KEYPAD_KEY_HEIGHT;
     for (; i < 9; i++) {
         key_value   = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
         rectArea.x0 = keypad->obj.area.x0 + (i - 6) * KEY_WIDTH;
-        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(BAGL_FONT_INTER_MEDIUM_32px, &key_value)) / 2;
-        nbgl_drawText(&rectArea,
-                      &key_value,
-                      1,
-                      BAGL_FONT_INTER_MEDIUM_32px,
-                      keypad->enableDigits ? BLACK : WHITE);
+        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+        nbgl_drawText(
+            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
     }
     // 4th raw, Backspace, 0 and Validate
     // draw backspace
@@ -193,13 +184,10 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
     // draw 0
     key_value   = GET_DIGIT_INDEX(keypad, 0) + 0x30;
     rectArea.x0 = keypad->obj.area.x0 + KEY_WIDTH;
-    rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(BAGL_FONT_INTER_MEDIUM_32px, &key_value)) / 2;
+    rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
     rectArea.y0 = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3 + DIGIT_OFFSET_Y;
-    nbgl_drawText(&rectArea,
-                  &key_value,
-                  1,
-                  BAGL_FONT_INTER_MEDIUM_32px,
-                  keypad->enableDigits ? BLACK : WHITE);
+    nbgl_drawText(
+        &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
 
     // draw validate on gray with white background if not enabled
     if (!keypad->enableValidate) {

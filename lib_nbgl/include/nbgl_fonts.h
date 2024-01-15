@@ -22,6 +22,17 @@ extern "C" {
 #define PIC_CHAR(x) ((const nbgl_font_character_t *) PIC(x))
 #define PIC_BMP(x)  ((uint8_t const *) PIC(x))
 
+/**
+ * @brief fonts nicknames to be used for various wallet size targets (non-Nano)
+ *
+ */
+#define SMALL_REGULAR_FONT      BAGL_FONT_INTER_REGULAR_24px
+#define SMALL_BOLD_FONT         BAGL_FONT_INTER_SEMIBOLD_24px
+#define LARGE_MEDIUM_FONT       BAGL_FONT_INTER_MEDIUM_32px
+#define SMALL_REGULAR_1BPP_FONT BAGL_FONT_INTER_REGULAR_24px_1bpp
+#define SMALL_BOLD_1BPP_FONT    BAGL_FONT_INTER_SEMIBOLD_24px_1bpp
+#define LARGE_MEDIUM_1BPP_FONT  BAGL_FONT_INTER_MEDIUM_32px_1bpp
+
 /**********************
  *      TYPEDEFS
  **********************/
