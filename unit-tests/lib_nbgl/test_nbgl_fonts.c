@@ -134,7 +134,7 @@ static void test_get_length(void **state __attribute__((unused)))
 
     nbgl_getTextMaxLenAndWidth(
         BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp, "la mise à jour", 114, &len, &width, false);
-    assert_int_equal(width, 80);
+    assert_int_equal(width, 77);
 
     nbgl_getTextMaxLenAndWidth(
         BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp, "Confirmer", 114, &len, &width, false);

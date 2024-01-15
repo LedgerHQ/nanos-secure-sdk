@@ -124,9 +124,15 @@ typedef enum {
     BAGL_FONT_INTER_REGULAR_24px_1bpp,
     BAGL_FONT_INTER_SEMIBOLD_24px_1bpp,
     BAGL_FONT_INTER_MEDIUM_32px_1bpp,
-    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp = 8u,   // validated on nano s
-    BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp     = 9u,   // validated on nano s
-    BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp   = 10u,  // validated on nano s,
+    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp = 8u,   // on Nano
+    BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp     = 9u,   // on Nano
+    BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp   = 10u,  // on Nano
+    BAGL_FONT_INTER_REGULAR_28px            = 11u,
+    BAGL_FONT_INTER_SEMIBOLD_28px           = 12u,
+    BAGL_FONT_INTER_MEDIUM_36px             = 13u,
+    BAGL_FONT_INTER_REGULAR_28px_1bpp       = 14u,
+    BAGL_FONT_INTER_SEMIBOLD_28px_1bpp      = 15u,
+    BAGL_FONT_INTER_MEDIUM_36px_1bpp        = 16u,
     BAGL_FONT_LAST  // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE CHECKS
 } nbgl_font_id_e;
 
