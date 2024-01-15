@@ -733,9 +733,9 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
 
         SPRINTF(navText, "%d of %d", obj->activePage + 1, obj->nbPages);
         // force height
-        obj->obj.area.height = nbgl_getFontHeight(BAGL_FONT_INTER_REGULAR_24px);
+        obj->obj.area.height = nbgl_getFontHeight(SMALL_REGULAR_FONT);
         // the width must be at least 80
-        obj->obj.area.width = nbgl_getTextWidth(BAGL_FONT_INTER_REGULAR_24px, navText);
+        obj->obj.area.width = nbgl_getTextWidth(SMALL_REGULAR_FONT, navText);
 
         if (computePosition) {
             compute_position((nbgl_obj_t *) obj, prevObj);
@@ -760,7 +760,7 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
         rectArea.height          = obj->obj.area.height;
         rectArea.backgroundColor = obj->obj.area.backgroundColor;
         rectArea.bpp             = NBGL_BPP_1;
-        nbgl_drawText(&rectArea, navText, strlen(navText), BAGL_FONT_INTER_REGULAR_24px, DARK_GRAY);
+        nbgl_drawText(&rectArea, navText, strlen(navText), SMALL_REGULAR_FONT, DARK_GRAY);
     }
 }
 #endif  // HAVE_SE_TOUCH

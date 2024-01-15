@@ -20,7 +20,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 33,
         "bitmap_byte_count": 40
       },
@@ -31,7 +31,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 4,
+        "y_max_offset": 16,
         "char": 34,
         "bitmap_byte_count": 21
       },
@@ -42,7 +42,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 35,
         "bitmap_byte_count": 111
       },
@@ -75,7 +75,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 38,
         "bitmap_byte_count": 130
       },
@@ -86,7 +86,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 4,
+        "y_max_offset": 16,
         "char": 39,
         "bitmap_byte_count": 10
       },
@@ -97,7 +97,7 @@
         "x_min_offset": 2,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 40,
         "bitmap_byte_count": 49
       },
@@ -108,7 +108,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 41,
         "bitmap_byte_count": 50
       },
@@ -128,9 +128,9 @@
         "bitmap_offset": 745,
         "width": 16,
         "x_min_offset": 2,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 2,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 43,
         "bitmap_byte_count": 54
       },
@@ -139,7 +139,7 @@
         "bitmap_offset": 799,
         "width": 7,
         "x_min_offset": 1,
-        "y_min_offset": 4,
+        "y_min_offset": 16,
         "x_max_offset": 1,
         "y_max_offset": 0,
         "char": 44,
@@ -150,9 +150,9 @@
         "bitmap_offset": 819,
         "width": 11,
         "x_min_offset": 1,
-        "y_min_offset": 2,
+        "y_min_offset": 8,
         "x_max_offset": 1,
-        "y_max_offset": 3,
+        "y_max_offset": 12,
         "char": 45,
         "bitmap_byte_count": 27
       },
@@ -185,7 +185,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 48,
         "bitmap_byte_count": 102
       },
@@ -196,7 +196,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 3,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 49,
         "bitmap_byte_count": 35
       },
@@ -229,7 +229,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 52,
         "bitmap_byte_count": 84
       },
@@ -240,7 +240,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 53,
         "bitmap_byte_count": 125
       },
@@ -251,7 +251,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 54,
         "bitmap_byte_count": 132
       },
@@ -262,7 +262,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 55,
         "bitmap_byte_count": 82
       },
@@ -273,7 +273,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 56,
         "bitmap_byte_count": 129
       },
@@ -293,9 +293,9 @@
         "bitmap_offset": 1962,
         "width": 7,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 58,
         "bitmap_byte_count": 35
       },
@@ -304,7 +304,7 @@
         "bitmap_offset": 1997,
         "width": 7,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
         "y_max_offset": 0,
         "char": 59,
@@ -315,9 +315,9 @@
         "bitmap_offset": 2031,
         "width": 16,
         "x_min_offset": 2,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 2,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 60,
         "bitmap_byte_count": 79
       },
@@ -326,9 +326,9 @@
         "bitmap_offset": 2110,
         "width": 16,
         "x_min_offset": 2,
-        "y_min_offset": 2,
+        "y_min_offset": 8,
         "x_max_offset": 2,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 61,
         "bitmap_byte_count": 84
       },
@@ -350,7 +350,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 63,
         "bitmap_byte_count": 80
       },
@@ -383,7 +383,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 66,
         "bitmap_byte_count": 116
       },
@@ -405,7 +405,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 68,
         "bitmap_byte_count": 102
       },
@@ -416,7 +416,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 69,
         "bitmap_byte_count": 104
       },
@@ -427,7 +427,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 70,
         "bitmap_byte_count": 76
       },
@@ -438,7 +438,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 71,
         "bitmap_byte_count": 134
       },
@@ -449,7 +449,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 72,
         "bitmap_byte_count": 63
       },
@@ -460,7 +460,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 73,
         "bitmap_byte_count": 64
       },
@@ -471,7 +471,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 74,
         "bitmap_byte_count": 55
       },
@@ -482,7 +482,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 75,
         "bitmap_byte_count": 93
       },
@@ -493,7 +493,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 76,
         "bitmap_byte_count": 44
       },
@@ -504,7 +504,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 77,
         "bitmap_byte_count": 101
       },
@@ -515,7 +515,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 78,
         "bitmap_byte_count": 73
       },
@@ -526,7 +526,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 79,
         "bitmap_byte_count": 120
       },
@@ -537,7 +537,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 80,
         "bitmap_byte_count": 89
       },
@@ -548,7 +548,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 81,
         "bitmap_byte_count": 141
       },
@@ -559,7 +559,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 82,
         "bitmap_byte_count": 105
       },
@@ -581,7 +581,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 84,
         "bitmap_byte_count": 62
       },
@@ -592,7 +592,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 2,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 85,
         "bitmap_byte_count": 76
       },
@@ -603,7 +603,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 86,
         "bitmap_byte_count": 83
       },
@@ -625,7 +625,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 88,
         "bitmap_byte_count": 116
       },
@@ -647,7 +647,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 90,
         "bitmap_byte_count": 122
       },
@@ -658,7 +658,7 @@
         "x_min_offset": 2,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 91,
         "bitmap_byte_count": 39
       },
@@ -669,7 +669,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 92,
         "bitmap_byte_count": 46
       },
@@ -680,7 +680,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 2,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 93,
         "bitmap_byte_count": 40
       },
@@ -691,7 +691,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 4,
+        "y_max_offset": 16,
         "char": 94,
         "bitmap_byte_count": 45
       },
@@ -700,9 +700,9 @@
         "bitmap_offset": 5259,
         "width": 11,
         "x_min_offset": 0,
-        "y_min_offset": 5,
+        "y_min_offset": 20,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 95,
         "bitmap_byte_count": 33
       },
@@ -713,7 +713,7 @@
         "x_min_offset": 3,
         "y_min_offset": 0,
         "x_max_offset": 3,
-        "y_max_offset": 5,
+        "y_max_offset": 20,
         "char": 96,
         "bitmap_byte_count": 19
       },
@@ -735,7 +735,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 98,
         "bitmap_byte_count": 82
       },
@@ -757,7 +757,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 100,
         "bitmap_byte_count": 90
       },
@@ -788,7 +788,7 @@
         "bitmap_offset": 5827,
         "width": 15,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
         "y_max_offset": 0,
         "char": 103,
@@ -801,7 +801,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 104,
         "bitmap_byte_count": 57
       },
@@ -812,7 +812,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 105,
         "bitmap_byte_count": 27
       },
@@ -845,7 +845,7 @@
         "x_min_offset": 1,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 108,
         "bitmap_byte_count": 30
       },
@@ -854,9 +854,9 @@
         "bitmap_offset": 6163,
         "width": 22,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 2,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 109,
         "bitmap_byte_count": 82
       },
@@ -865,9 +865,9 @@
         "bitmap_offset": 6245,
         "width": 15,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 110,
         "bitmap_byte_count": 45
       },
@@ -876,9 +876,9 @@
         "bitmap_offset": 6290,
         "width": 15,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 111,
         "bitmap_byte_count": 88
       },
@@ -887,7 +887,7 @@
         "bitmap_offset": 6378,
         "width": 15,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
         "y_max_offset": 0,
         "char": 112,
@@ -898,7 +898,7 @@
         "bitmap_offset": 6470,
         "width": 15,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
         "y_max_offset": 0,
         "char": 113,
@@ -909,9 +909,9 @@
         "bitmap_offset": 6562,
         "width": 10,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 114,
         "bitmap_byte_count": 32
       },
@@ -920,9 +920,9 @@
         "bitmap_offset": 6594,
         "width": 13,
         "x_min_offset": 1,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 115,
         "bitmap_byte_count": 104
       },
@@ -933,7 +933,7 @@
         "x_min_offset": 0,
         "y_min_offset": 0,
         "x_max_offset": 0,
-        "y_max_offset": 1,
+        "y_max_offset": 4,
         "char": 116,
         "bitmap_byte_count": 54
       },
@@ -953,9 +953,9 @@
         "bitmap_offset": 6797,
         "width": 14,
         "x_min_offset": 0,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 0,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 118,
         "bitmap_byte_count": 61
       },
@@ -975,9 +975,9 @@
         "bitmap_offset": 6948,
         "width": 14,
         "x_min_offset": 0,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 1,
-        "y_max_offset": 2,
+        "y_max_offset": 8,
         "char": 120,
         "bitmap_byte_count": 82
       },
@@ -986,7 +986,7 @@
         "bitmap_offset": 7030,
         "width": 14,
         "x_min_offset": 0,
-        "y_min_offset": 1,
+        "y_min_offset": 4,
         "x_max_offset": 0,
         "y_max_offset": 0,
         "char": 121,
@@ -1041,9 +1041,9 @@
         "bitmap_offset": 7342,
         "width": 16,
         "x_min_offset": 1,
-        "y_min_offset": 2,
+        "y_min_offset": 8,
         "x_max_offset": 1,
-        "y_max_offset": 3,
+        "y_max_offset": 12,
         "char": 126,
         "bitmap_byte_count": 52
       }

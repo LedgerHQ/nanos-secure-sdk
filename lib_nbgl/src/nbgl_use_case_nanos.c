@@ -505,5 +505,5 @@ void nbgl_useCaseSpinner(const char *text)
     nbgl_refresh();
 }
 
-#endif  // TARGET_STAX
+#endif  // HAVE_SE_TOUCH
 #endif  // NBGL_USE_CASE

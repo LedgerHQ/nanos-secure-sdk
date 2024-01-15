@@ -602,9 +602,9 @@ nbgl_font_id_e nbgl_drawText(const nbgl_area_t *area,
                 nb_skipped_bytes = 0;
                 char_x_min       = (uint16_t) unicodeCharacter->x_min_offset;
                 char_y_min       = unicode_ctx->font->y_min;
-                char_y_min += (uint16_t) unicodeCharacter->y_min_offset * 4;
+                char_y_min += (uint16_t) unicodeCharacter->y_min_offset;
                 char_x_max -= (uint16_t) unicodeCharacter->x_max_offset;
-                char_y_max -= (uint16_t) unicodeCharacter->y_max_offset * 4;
+                char_y_max -= (uint16_t) unicodeCharacter->y_max_offset;
             }
 
             char_byte_cnt = nbgl_getUnicodeFontCharacterByteCount();
@@ -660,9 +660,9 @@ nbgl_font_id_e nbgl_drawText(const nbgl_area_t *area,
                 nb_skipped_bytes = 0;
                 char_x_min       = (uint16_t) character->x_min_offset;
                 char_y_min       = font->y_min;
-                char_y_min += (uint16_t) character->y_min_offset * 4;
+                char_y_min += (uint16_t) character->y_min_offset;
                 char_x_max -= (uint16_t) character->x_max_offset;
-                char_y_max -= (uint16_t) character->y_max_offset * 4;
+                char_y_max -= (uint16_t) character->y_max_offset;
             }
 
             char_byte_cnt = get_bitmap_byte_cnt(font, unicode);

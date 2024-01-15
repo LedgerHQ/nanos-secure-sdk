@@ -17,6 +17,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "bolos_target.h"
 
 /*********************
  *      DEFINES
@@ -24,20 +25,24 @@ extern "C" {
 /**
  * Width of the front screen in pixels
  */
-#ifndef BAGL_WIDTH
+#ifdef SCREEN_SIZE_WALLET
+#ifdef TARGET_STAX
 #define SCREEN_WIDTH 400
-#else  // HAVE_SE_TOUCH
-#define SCREEN_WIDTH BAGL_WIDTH
-#endif  // HAVE_SE_TOUCH
+#endif  // TARGET_STAX
+#else   // SCREEN_SIZE_WALLET
+#define SCREEN_WIDTH 128
+#endif  // SCREEN_SIZE_WALLET
 
 /**
  * Height of the front screen in pixels
  */
-#ifndef BAGL_HEIGHT
+#ifdef SCREEN_SIZE_WALLET
+#ifdef TARGET_STAX
 #define SCREEN_HEIGHT 672
-#else  // HAVE_SE_TOUCH
-#define SCREEN_HEIGHT BAGL_HEIGHT
-#endif  // HAVE_SE_TOUCH
+#endif  // TARGET_STAX
+#else   // SCREEN_SIZE_WALLET
+#define SCREEN_HEIGHT 64
+#endif  // SCREEN_SIZE_WALLET
 
 /**
  * No transformation

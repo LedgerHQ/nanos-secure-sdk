@@ -22,6 +22,17 @@ extern "C" {
 #define PIC_CHAR(x) ((const nbgl_font_character_t *) PIC(x))
 #define PIC_BMP(x)  ((uint8_t const *) PIC(x))
 
+/**
+ * @brief fonts nicknames to be used for various wallet size targets (non-Nano)
+ *
+ */
+#define SMALL_REGULAR_FONT      BAGL_FONT_INTER_REGULAR_24px
+#define SMALL_BOLD_FONT         BAGL_FONT_INTER_SEMIBOLD_24px
+#define LARGE_MEDIUM_FONT       BAGL_FONT_INTER_MEDIUM_32px
+#define SMALL_REGULAR_1BPP_FONT BAGL_FONT_INTER_REGULAR_24px_1bpp
+#define SMALL_BOLD_1BPP_FONT    BAGL_FONT_INTER_SEMIBOLD_24px_1bpp
+#define LARGE_MEDIUM_1BPP_FONT  BAGL_FONT_INTER_MEDIUM_32px_1bpp
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -33,13 +44,13 @@ extern "C" {
 // WARNING: please DON'T CHANGE the order/values of the fields below!
 // (otherwise python tools that generate data will need to be modified too)
 typedef struct {
-    uint32_t encoding : 1;        ///< method used to encode bitmap data
-    uint32_t bitmap_offset : 14;  ///< offset of this character in chars buffer
-    uint32_t width : 6;           ///< width of character in pixels
-    uint32_t x_min_offset : 3;    ///< x_min = x_min_offset
-    uint32_t y_min_offset : 3;    ///< y_min = (y_min + y_min_offset) * 4
-    uint32_t x_max_offset : 2;    ///< x_max = width - x_max_offset
-    uint32_t y_max_offset : 3;    ///< y_max = (height - y_max_offset) * 4
+    uint32_t bitmap_offset;     ///< offset of this character in chars buffer
+    uint32_t encoding : 1;      ///< method used to encode bitmap data
+    uint32_t width : 6;         ///< width of character in pixels
+    uint32_t x_min_offset : 4;  ///< x_min = x_min_offset
+    uint32_t y_min_offset : 6;  ///< y_min = (y_min + y_min_offset)
+    uint32_t x_max_offset : 4;  ///< x_max = width - x_max_offset
+    uint32_t y_max_offset : 6;  ///< y_max = (height - y_max_offset)
 } nbgl_font_character_t;
 
 /**
@@ -76,12 +87,12 @@ typedef struct {
 // (otherwise python tools that generate data will need to be modified too)
 typedef struct {
     uint32_t char_unicode : 21;   ///< plane value from 0 to 16 then 16-bit code.
+    uint32_t encoding : 1;        ///< method used to encode bitmap data
     uint32_t width : 6;           ///< width of character in pixels
-    uint32_t x_min_offset : 5;    ///< x_min = x_min_offset
-    uint32_t y_min_offset : 4;    ///< y_min = (y_min + y_min_offset) * 4
-    uint32_t x_max_offset : 5;    ///< x_max = width - x_max_offset
-    uint32_t y_max_offset : 5;    ///< y_max = (height - y_max_offset) * 4
-    uint32_t encoding : 2;        ///< method used to encode bitmap data
+    uint32_t x_min_offset : 4;    ///< x_min = x_min_offset
+    uint32_t y_min_offset : 6;    ///< y_min = (y_min + y_min_offset)
+    uint32_t x_max_offset : 4;    ///< x_max = width - x_max_offset
+    uint32_t y_max_offset : 6;    ///< y_max = (height - y_max_offset)
     uint32_t bitmap_offset : 16;  ///< offset of this character in chars buffer
 } nbgl_font_unicode_character_t;
 /**
@@ -113,9 +124,15 @@ typedef enum {
     BAGL_FONT_INTER_REGULAR_24px_1bpp,
     BAGL_FONT_INTER_SEMIBOLD_24px_1bpp,
     BAGL_FONT_INTER_MEDIUM_32px_1bpp,
-    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp = 8u,   // validated on nano s
-    BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp     = 9u,   // validated on nano s
-    BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp   = 10u,  // validated on nano s,
+    BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp = 8u,   // on Nano
+    BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp     = 9u,   // on Nano
+    BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp   = 10u,  // on Nano
+    BAGL_FONT_INTER_REGULAR_28px            = 11u,
+    BAGL_FONT_INTER_SEMIBOLD_28px           = 12u,
+    BAGL_FONT_INTER_MEDIUM_36px             = 13u,
+    BAGL_FONT_INTER_REGULAR_28px_1bpp       = 14u,
+    BAGL_FONT_INTER_SEMIBOLD_28px_1bpp      = 15u,
+    BAGL_FONT_INTER_MEDIUM_36px_1bpp        = 16u,
     BAGL_FONT_LAST  // MUST ALWAYS BE THE LAST, FOR AUTOMATED INVALID VALUE CHECKS
 } nbgl_font_id_e;
 

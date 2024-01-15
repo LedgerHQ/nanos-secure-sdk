@@ -487,10 +487,10 @@ static const char *getDetailsPageAt(uint8_t detailsPage)
     const char *currentChar = detailsContext.value;
     while (page < detailsPage) {
         uint16_t nbLines = nbgl_getTextNbLinesInWidth(
-            BAGL_FONT_INTER_REGULAR_24px, currentChar, SCREEN_WIDTH - 2 * BORDER_MARGIN, false);
+            SMALL_REGULAR_FONT, currentChar, SCREEN_WIDTH - 2 * BORDER_MARGIN, false);
         if (nbLines > NB_MAX_LINES_IN_DETAILS) {
             uint16_t len;
-            nbgl_getTextMaxLenInNbLines(BAGL_FONT_INTER_REGULAR_24px,
+            nbgl_getTextMaxLenInNbLines(SMALL_REGULAR_FONT,
                                         currentChar,
                                         SCREEN_WIDTH - 2 * BORDER_MARGIN,
                                         NB_MAX_LINES_IN_DETAILS,
@@ -537,11 +537,11 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh)
     }
     detailsContext.currentPage = detailsPage;
     uint16_t nbLines           = nbgl_getTextNbLinesInWidth(
-        BAGL_FONT_INTER_REGULAR_24px, currentPair.value, SCREEN_WIDTH - 2 * BORDER_MARGIN, false);
+        SMALL_REGULAR_FONT, currentPair.value, SCREEN_WIDTH - 2 * BORDER_MARGIN, false);
 
     if (nbLines > NB_MAX_LINES_IN_DETAILS) {
         uint16_t len;
-        nbgl_getTextMaxLenInNbLines(BAGL_FONT_INTER_REGULAR_24px,
+        nbgl_getTextMaxLenInNbLines(SMALL_REGULAR_FONT,
                                     currentPair.value,
                                     SCREEN_WIDTH - 2 * BORDER_MARGIN,
                                     NB_MAX_LINES_IN_DETAILS,
@@ -740,18 +740,16 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPair
             item            = callback_result->item;
         }
         // tag height
-        currentHeight += nbgl_getTextHeightInWidth(BAGL_FONT_INTER_REGULAR_24px,
-                                                   item,
-                                                   SCREEN_WIDTH - 2 * BORDER_MARGIN,
-                                                   tagValueList->wrapping);
+        currentHeight += nbgl_getTextHeightInWidth(
+            SMALL_REGULAR_FONT, item, SCREEN_WIDTH - 2 * BORDER_MARGIN, tagValueList->wrapping);
         // space between tag and value
         currentHeight += 4;
         // set value font
         if (tagValueList->smallCaseForValue) {
-            value_font = BAGL_FONT_INTER_REGULAR_24px;
+            value_font = SMALL_REGULAR_FONT;
         }
         else {
-            value_font = BAGL_FONT_INTER_MEDIUM_32px;
+            value_font = LARGE_MEDIUM_FONT;
         }
         // value height
         currentHeight += nbgl_getTextHeightInWidth(
@@ -885,10 +883,8 @@ void nbgl_useCaseHomeExt(const char                *appName,
 
         // If there is more than 3 lines, it means the appName was split, so we put it on the next
         // line
-        if (nbgl_getTextNbLinesInWidth(BAGL_FONT_INTER_REGULAR_24px,
-                                       appDescription,
-                                       SCREEN_WIDTH - 2 * BORDER_MARGIN,
-                                       false)
+        if (nbgl_getTextNbLinesInWidth(
+                SMALL_REGULAR_FONT, appDescription, SCREEN_WIDTH - 2 * BORDER_MARGIN, false)
             > 3) {
             snprintf(appDescription,
                      APP_DESCRIPTION_MAX_LEN,
@@ -1435,7 +1431,7 @@ void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping)
     memset(&detailsContext, 0, sizeof(detailsContext));
 
     uint16_t nbLines = nbgl_getTextNbLinesInWidth(
-        BAGL_FONT_INTER_REGULAR_24px, value, SCREEN_WIDTH - 2 * BORDER_MARGIN, wrapping);
+        SMALL_REGULAR_FONT, value, SCREEN_WIDTH - 2 * BORDER_MARGIN, wrapping);
 
     // initialize context
     detailsContext.tag         = tag;
