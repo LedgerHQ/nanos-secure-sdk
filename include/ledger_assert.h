@@ -2,6 +2,10 @@
 
 #include <stdbool.h>
 
+#ifdef HAVE_PRINTF
+#include "os.h"
+#endif
+
 #ifdef LEDGER_ASSERT_CONFIG_FILE_INFO
 #define LEDGER_ASSERT_CONFIG_MESSAGE_INFO   1
 #define LEDGER_ASSERT_CONFIG_LR_AND_PC_INFO 1
