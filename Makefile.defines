@@ -153,7 +153,7 @@ LDFLAGS  += -L$(BOLOS_SDK)/arch/st33/lib/
 AFLAGS   += -mcpu=cortex-m0plus -mtune=cortex-m0plus -mthumb
 endif
 
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_NANOS2))
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA TARGET_NANOS2))
 CFLAGS   += -mno-movt -frwpi --target=armv8m-none-eabi -mcpu=cortex-m35p+nodsp -mthumb -msoft-float -mtune=cortex-m35p+nodsp
 LDFLAGS  += -momit-leaf-frame-pointer
 LDFLAGS  += --target=armv8m-none-eabi
@@ -190,11 +190,17 @@ DEFINES += HAVE_PIEZO_SOUND
 DEFINES += HAVE_SE_TOUCH
 DEFINES += NBGL_PAGE
 DEFINES += NBGL_USE_CASE
-endif # TARGET_EUROPA
-
-# For other devices, by default NBGL is not used
-USE_NBGL ?= 0
-
+DEFINES += SCREEN_SIZE_WALLET
+else
+DEFINES += BAGL_WIDTH=128
+DEFINES += SCREEN_SIZE_NANO
+ifdef USE_NBGL
+DEFINES += HAVE_NBGL
+DEFINES += NBGL_STEP
+DEFINES += NBGL_USE_CASE
+else
+DEFINES += HAVE_BAGL
+endif
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
 DEFINES += BAGL_HEIGHT=64
 DEFINES += BAGL_WIDTH=128
