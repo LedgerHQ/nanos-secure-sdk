@@ -35,6 +35,13 @@
 static char assert_buffer[ASSERT_BUFFER_LEN];
 #endif
 
+#if defined(HAVE_PRINTF)
+void assert_print_failed(void)
+{
+    PRINTF("LEDGER_ASSERT FAILED\n");
+}
+#endif
+
 #if defined(HAVE_LEDGER_ASSERT_DISPLAY) && defined(LEDGER_ASSERT_CONFIG_LR_AND_PC_INFO)
 void assert_display_lr_and_pc(int lr, int pc)
 {
