@@ -817,11 +817,14 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
 
     // draw background to make sure it's clean
+#ifdef SCREEN_SIZE_NANO
     if (obj->style == INVERTED_COLORS) {
         obj->obj.area.backgroundColor = WHITE;
         rectArea.backgroundColor      = BLACK;
     }
-    else {
+    else
+#endif  // SCREEN_SIZE_NANO
+    {
         // inherit background from parent
         obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
         rectArea.backgroundColor      = obj->obj.area.backgroundColor;
@@ -830,10 +833,13 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     rectArea.y0     = obj->obj.area.y0;
     rectArea.width  = obj->obj.area.width;
     rectArea.height = obj->obj.area.height;
+#ifdef SCREEN_SIZE_NANO
     if (obj->style == INVERTED_COLORS) {
         nbgl_drawRoundedRect(&rectArea, RADIUS_1_PIXEL, WHITE);
     }
-    else {
+    else
+#endif  // SCREEN_SIZE_NANO
+    {
         nbgl_frontDrawRect(&rectArea);
     }
 
@@ -877,16 +883,11 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     textHeight = (nbLines - 1) * lineHeight + fontHeight;
 
     midHeight = (obj->obj.area.height - textHeight) / 2;
-    // Be sure midHeight is modulo 4
-#ifdef HAVE_SE_TOUCH
-    if (midHeight % 4) {
-        midHeight -= midHeight % 4;
-    }
-#else   // HAVE_SE_TOUCH
+#ifdef SCREEN_SIZE_NANO
     if (obj->style == INVERTED_COLORS) {
         midHeight--;
     }
-#endif  // HAVE_SE_TOUCH
+#endif  // SCREEN_SIZE_NANO
 
     rectArea.backgroundColor = obj->obj.area.backgroundColor;
     rectArea.height          = fontHeight;

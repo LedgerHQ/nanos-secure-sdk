@@ -36,15 +36,11 @@ class NbglQrCodeVersion(IntEnum):
 
 
 class NbglRadius(IntEnum):
-    RADIUS_4_PIXELS = 0,
-    RADIUS_8_PIXELS = 1,
-    RADIUS_16_PIXELS = 2,
-    RADIUS_20_PIXELS = 3,
-    RADIUS_24_PIXELS = 4,
-    RADIUS_32_PIXELS = 5,
-    RADIUS_40_PIXELS = 6,
-    RADIUS_48_PIXELS = 7,
-    RADIUS_0_PIXELS = 0xFF,
+    RADIUS_32_PIXELS = 0
+    RADIUS_40_PIXELS = 1
+    RADIUS_1_PIXEL  = 0
+    RADIUS_3_PIXELS = 1
+    RADIUS_0_PIXELS = 0xFF
 
 
 class NbglKeyboardMode(IntEnum):

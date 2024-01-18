@@ -270,7 +270,7 @@ def test_draw_nbgl_button(data_test):
                     inner_color=NbglColor.WHITE,
                     border_color=NbglColor.DARK_GRAY,
                     foreground_color=NbglColor.LIGHT_GRAY,
-                    radius=NbglRadius.RADIUS_24_PIXELS,
+                    radius=NbglRadius.RADIUS_40_PIXELS,
                     font_id=NbglFontId.BAGL_FONT_INTER_MEDIUM_32px,
                     text="Test button",
                     localized=True

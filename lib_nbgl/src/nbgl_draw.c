@@ -53,70 +53,38 @@ typedef struct {
 /**********************
  *  STATIC VARIABLES
  **********************/
-static const uint8_t quarter_disc_3px_1bpp[] = {0xEC, 0xFF};
-#ifndef HAVE_SE_TOUCH
+#ifndef SCREEN_SIZE_WALLET
+static const uint8_t quarter_disc_3px_1bpp[]     = {0xEC, 0xFF};
 static const uint8_t quarter_disc_3px_90_1bpp[]  = {0x2F, 0xFF};
 static const uint8_t quarter_disc_3px_180_1bpp[] = {0x9B, 0xFF};
 static const uint8_t quarter_disc_3px_270_1bpp[] = {0xFA, 0x00};
-#endif  // HAVE_SE_TOUCH
 
-static const uint8_t quarter_circle_3px_1bpp[] = {0x4C, 0x00};
-#ifndef HAVE_SE_TOUCH
+static const uint8_t quarter_circle_3px_1bpp[]     = {0x4C, 0x00};
 static const uint8_t quarter_circle_3px_90_1bpp[]  = {0x0D, 0x00};
 static const uint8_t quarter_circle_3px_180_1bpp[] = {0x19, 0x00};
 static const uint8_t quarter_circle_3px_270_1bpp[] = {0x58, 0x00};
-#else   // HAVE_SE_TOUCH
-static const nbgl_icon_details_t C_quarter_disc_3px_1bpp
-    = {2, 2, NBGL_BPP_1, false, quarter_disc_3px_1bpp};
-static const nbgl_icon_details_t C_quarter_circle_3px_1bpp
-    = {2, 2, NBGL_BPP_1, false, quarter_circle_3px_1bpp};
-
-static const uint8_t             quarter_disc_4px_1bpp[] = {0x13, 0xFF};
-static const nbgl_icon_details_t C_quarter_disc_4px_1bpp
-    = {4, 4, NBGL_BPP_1, false, quarter_disc_4px_1bpp};
-
-static const uint8_t             quarter_circle_4px_1bpp[] = {0x13, 0xFF};
-static const nbgl_icon_details_t C_quarter_circle_4px_1bpp
-    = {4, 4, NBGL_BPP_1, false, quarter_circle_4px_1bpp};
-#endif  // HAVE_SE_TOUCH
+#endif  // SCREEN_SIZE_WALLET
 
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const uint8_t radiusValues[] = {3,
-#ifdef HAVE_SE_TOUCH
-                                       4,
-                                       8,
-                                       16,
-                                       20,
-                                       24,
-                                       32,
-                                       40,
-                                       48
-#endif  // HAVE_SE_TOUCH
+static const uint8_t radiusValues[] = {
+#ifdef SCREEN_SIZE_WALLET
+    32,
+    40
+#else   // SCREEN_SIZE_WALLET
+    1,
+    3
+#endif  // SCREEN_SIZE_WALLET
 };
 
-#ifdef HAVE_SE_TOUCH
+#ifdef SCREEN_SIZE_WALLET
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const nbgl_icon_details_t *quarterDiscs[] = {&C_quarter_disc_3px_1bpp,
-                                                    &C_quarter_disc_4px_1bpp,
-                                                    &C_quarter_round_8px_1bpp,
-                                                    &C_quarter_round_16px_1bpp,
-                                                    &C_quarter_round_20px_1bpp,
-                                                    &C_quarter_round_24px_1bpp,
-                                                    &C_quarter_round_32px_1bpp,
-                                                    &C_quarter_round_40px_1bpp,
-                                                    &C_quarter_round_48px_1bpp};
+static const nbgl_icon_details_t *quarterDiscs[] = {&C_quarter_round_32px_1bpp,
+                                                    &C_quarter_round_40px_1bpp};
 
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const nbgl_icon_details_t *quarterCircles[] = {&C_quarter_circle_3px_1bpp,
-                                                      &C_quarter_circle_4px_1bpp,
-                                                      &C_quarter_circle_8px_1bpp,
-                                                      &C_quarter_circle_16px_1bpp,
-                                                      &C_quarter_circle_20px_1bpp,
-                                                      &C_quarter_circle_24px_1bpp,
-                                                      &C_quarter_circle_32px_1bpp,
-                                                      &C_quarter_circle_40px_1bpp,
-                                                      &C_quarter_circle_48px_1bpp};
-#endif  // HAVE_SE_TOUCH
+static const nbgl_icon_details_t *quarterCircles[] = {&C_quarter_circle_32px_1bpp,
+                                                      &C_quarter_circle_40px_1bpp};
+#endif  // SCREEN_SIZE_WALLET
 
 #ifdef NBGL_QRCODE
 // ensure that the ramBuffer also used for image file decompression is big enough for QR code
@@ -142,11 +110,11 @@ static void draw_circle_helper(int           x_center,
     const uint8_t *quarter_buffer = NULL;
     nbgl_area_t    area           = {.bpp = NBGL_BPP_1, .backgroundColor = backgroundColor};
 
-#ifdef HAVE_SE_TOUCH
     // radius is not supported
-    if (radiusIndex > RADIUS_48_PIXELS) {
+    if (radiusIndex > RADIUS_MAX) {
         return;
     }
+#ifdef SCREEN_SIZE_WALLET
     if (borderColor == innerColor) {
         quarter_buffer
             = (const uint8_t *) ((const nbgl_icon_details_t *) PIC(quarterDiscs[radiusIndex]))
@@ -179,11 +147,7 @@ static void draw_circle_helper(int           x_center,
         area.y0 = y_center - area.width;
         nbgl_frontDrawImage(&area, quarter_buffer, NO_TRANSFORMATION, borderColor);
     }
-#else   // HAVE_SE_TOUCH
-    // radius is not supported
-    if (radiusIndex > RADIUS_3_PIXELS) {
-        return;
-    }
+#else   // SCREEN_SIZE_WALLET
     area.width = area.height = radiusValues[radiusIndex];
     area.backgroundColor     = backgroundColor;
     if (quarter & BAGL_FILL_CIRCLE_3PI2_2PI) {  //
@@ -211,7 +175,7 @@ static void draw_circle_helper(int           x_center,
             = (borderColor == innerColor) ? quarter_disc_3px_1bpp : quarter_circle_3px_1bpp;
     }
     nbgl_frontDrawImage(&area, quarter_buffer, NO_TRANSFORMATION, borderColor);
-#endif  // HAVE_SE_TOUCH
+#endif  // SCREEN_SIZE_WALLET
 }
 
 /**********************
@@ -239,16 +203,8 @@ void nbgl_drawRoundedRect(const nbgl_area_t *area, nbgl_radius_t radiusIndex, co
               area->width,
               area->height);
 
-    if (radiusIndex <= RADIUS_48_PIXELS) {
-#ifndef HAVE_SE_TOUCH
-        if (radiusIndex > RADIUS_3_PIXELS) {
-            return;
-        }
-#endif  // HAVE_SE_TOUCH
+    if (radiusIndex <= RADIUS_MAX) {
         radius = radiusValues[radiusIndex];
-    }
-    else if (radiusIndex == RADIUS_1_PIXEL) {
-        radius = 1;
     }
     else if (radiusIndex == RADIUS_0_PIXELS) {
         radius = 0;
@@ -283,9 +239,11 @@ void nbgl_drawRoundedRect(const nbgl_area_t *area, nbgl_radius_t radiusIndex, co
     rectArea.height = area->height - (2 * radius);
     nbgl_frontDrawRect(&rectArea);
 
+#ifdef SCREEN_SIZE_NANO
     if (radiusIndex == RADIUS_1_PIXEL) {
         return;
     }
+#endif  // SCREEN_SIZE_NANO
     // Draw 4 quarters of disc
     draw_circle_helper(area->x0 + radius,
                        area->y0 + radius,
@@ -343,7 +301,7 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
         borderColor,
         area->backgroundColor);
 
-    if (radiusIndex <= RADIUS_48_PIXELS) {
+    if (radiusIndex <= RADIUS_MAX) {
         radius = radiusValues[radiusIndex];
     }
     else if (radiusIndex == RADIUS_0_PIXELS) {
@@ -375,7 +333,7 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
         nbgl_frontDrawRect(&rectArea);
     }
     // special case when radius is null, left and right rectangles are not necessary
-    if (radiusIndex <= RADIUS_48_PIXELS) {
+    if (radiusIndex <= RADIUS_MAX) {
         if ((2 * radius) < area->height) {
             rectArea.x0     = area->x0;
             rectArea.y0     = area->y0 + radius;
@@ -389,7 +347,7 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
     }
     // border
     // 4 rectangles (with last pixel of each corner not set)
-#ifdef HAVE_SE_TOUCH
+#ifdef SCREEN_SIZE_WALLET
     uint8_t maskTop, maskBottom;
     if (stroke == 1) {
         maskTop    = 0x1;
@@ -419,7 +377,7 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
     rectArea.x0 = area->x0 + radius;
     rectArea.y0 = area->y0 + area->height - 4;
     nbgl_frontDrawHorizontalLine(&rectArea, maskBottom, borderColor);  // bottom
-#else                                                                  // HAVE_SE_TOUCH
+#else                                                                  // SCREEN_SIZE_WALLET
     rectArea.x0              = area->x0 + radius;
     rectArea.y0              = area->y0;
     rectArea.width           = area->width - 2 * radius;
@@ -428,7 +386,7 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
     nbgl_frontDrawRect(&rectArea);  // top
     rectArea.y0 = area->y0 + area->height - stroke;
     nbgl_frontDrawRect(&rectArea);  // bottom
-#endif                                                                 // HAVE_SE_TOUCH
+#endif                                                                 // SCREEN_SIZE_WALLET
     if ((2 * radius) < area->height) {
         rectArea.x0              = area->x0;
         rectArea.y0              = area->y0 + radius;
@@ -440,7 +398,7 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
         nbgl_frontDrawRect(&rectArea);  // right
     }
 
-    if (radiusIndex <= RADIUS_48_PIXELS) {
+    if (radiusIndex <= RADIUS_MAX) {
         // Draw 4 quarters of circles
         draw_circle_helper(area->x0 + radius,
                            area->y0 + radius,
