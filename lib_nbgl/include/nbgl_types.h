@@ -53,22 +53,12 @@ extern "C" {
  *
  */
 #define NO_TRANSFORMATION 0
-/**
- * Horizontal mirroring when rendering bitmap
- *
- */
-#define HORIZONTAL_MIRROR 0x1
+
 /**
  * Vertical mirroring when rendering bitmap
  *
  */
-#define VERTICAL_MIRROR   0x2
-
-/**
- * Both directions mirroring when rendering bitmap
- *
- */
-#define BOTH_MIRRORS (HORIZONTAL_MIRROR | VERTICAL_MIRROR)
+#define VERTICAL_MIRROR 0x2
 
 /**
  * Rotation 90 degrees clockwise when rendering bitmap
@@ -206,7 +196,7 @@ typedef enum {
 
 /**
  * @brief Represents the transformation to be applied on the bitmap before rendering
- * This is a bitfield using masks as @ref HORIZONTAL_MIRROR
+ * This is a bitfield using masks as @ref VERTICAL_MIRROR
  */
 typedef uint8_t nbgl_transformation_t;
 
