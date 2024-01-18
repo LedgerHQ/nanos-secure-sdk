@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #ifdef HAVE_PRINTF
-#include "os.h"
+void assert_print_failed(void);
 #endif
 
 #ifdef LEDGER_ASSERT_CONFIG_FILE_INFO
@@ -97,7 +97,7 @@ void assert_print_file_info(const char *file, int line);
         ASSERT_DISPLAY_LR_AND_PC(_lr_address, _pc_address); \
     } while (0)
 #elif defined(HAVE_PRINTF)
-#define LEDGER_ASSERT_LR_AND_PC() PRINTF("LEDGER_ASSERT FAILED\n")
+#define LEDGER_ASSERT_LR_AND_PC() assert_print_failed()
 #else
 #define LEDGER_ASSERT_LR_AND_PC() \
     do {                          \
