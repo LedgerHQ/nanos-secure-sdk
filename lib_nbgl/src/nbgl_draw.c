@@ -24,10 +24,12 @@
 /*********************
  *      DEFINES
  *********************/
-#define BAGL_FILL_CIRCLE_3PI2_2PI 1
-#define BAGL_FILL_CIRCLE_PI_3PI2  2
-#define BAGL_FILL_CIRCLE_0_PI2    4
-#define BAGL_FILL_CIRCLE_PI2_PI   8
+typedef enum {
+    BAGL_FILL_CIRCLE_0_PI2,
+    BAGL_FILL_CIRCLE_PI2_PI,
+    BAGL_FILL_CIRCLE_PI_3PI2,
+    BAGL_FILL_CIRCLE_3PI2_2PI
+} quarter_t;
 
 #define QR_PIXEL_WIDTH_HEIGHT 4
 
@@ -78,12 +80,18 @@ static const uint8_t radiusValues[] = {
 
 #ifdef SCREEN_SIZE_WALLET
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const nbgl_icon_details_t *quarterDiscs[] = {&C_quarter_round_32px_1bpp,
-                                                    &C_quarter_round_40px_1bpp};
+static const uint8_t *topQuarterDiscs[]
+    = {C_quarter_disc_top_left_32px_1bpp_bitmap, C_quarter_disc_top_left_40px_1bpp_bitmap};
+
+static const uint8_t *bottomQuarterDiscs[]
+    = {C_quarter_disc_bottom_left_32px_1bpp_bitmap, C_quarter_disc_bottom_left_40px_1bpp_bitmap};
 
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const nbgl_icon_details_t *quarterCircles[] = {&C_quarter_circle_32px_1bpp,
-                                                      &C_quarter_circle_40px_1bpp};
+static const uint8_t *topQuarterCircles[]
+    = {C_quarter_circle_top_left_32px_1bpp_bitmap, C_quarter_circle_top_left_40px_1bpp_bitmap};
+
+static const uint8_t *bottomQuarterCircles[] = {C_quarter_circle_bottom_left_32px_1bpp_bitmap,
+                                                C_quarter_circle_bottom_left_40px_1bpp_bitmap};
 #endif  // SCREEN_SIZE_WALLET
 
 #ifdef NBGL_QRCODE
@@ -102,7 +110,7 @@ CCASSERT(qr_code_buffer, sizeof(QrCodeBuffer_t) <= GZLIB_UNCOMPRESSED_CHUNK);
 static void draw_circle_helper(int           x_center,
                                int           y_center,
                                nbgl_radius_t radiusIndex,
-                               uint8_t       quarter,
+                               quarter_t     quarter,
                                color_t       borderColor,
                                color_t       innerColor,
                                color_t       backgroundColor)
@@ -114,65 +122,72 @@ static void draw_circle_helper(int           x_center,
     if (radiusIndex > RADIUS_MAX) {
         return;
     }
+    area.width = area.height = radiusValues[radiusIndex];
 #ifdef SCREEN_SIZE_WALLET
     if (borderColor == innerColor) {
-        quarter_buffer
-            = (const uint8_t *) ((const nbgl_icon_details_t *) PIC(quarterDiscs[radiusIndex]))
-                  ->bitmap;
+        if (quarter < BAGL_FILL_CIRCLE_PI_3PI2) {
+            quarter_buffer = (const uint8_t *) PIC(topQuarterDiscs[radiusIndex]);
+        }
+        else {
+            quarter_buffer = (const uint8_t *) PIC(bottomQuarterDiscs[radiusIndex]);
+        }
     }
     else {
-        quarter_buffer
-            = (const uint8_t *) ((const nbgl_icon_details_t *) PIC(quarterCircles[radiusIndex]))
-                  ->bitmap;
+        if (quarter < BAGL_FILL_CIRCLE_PI_3PI2) {
+            quarter_buffer = (const uint8_t *) PIC(topQuarterCircles[radiusIndex]);
+        }
+        else {
+            quarter_buffer = (const uint8_t *) PIC(bottomQuarterCircles[radiusIndex]);
+        }
     }
-    area.width = area.height = radiusValues[radiusIndex];
-    area.backgroundColor     = backgroundColor;
-    if (quarter & BAGL_FILL_CIRCLE_3PI2_2PI) {  //
-        area.x0 = x_center;
-        area.y0 = y_center;
-        nbgl_frontDrawImage(&area, quarter_buffer, BOTH_MIRRORS, borderColor);
-    }
-    if (quarter & BAGL_FILL_CIRCLE_PI_3PI2) {  //
-        area.x0 = x_center - area.width;
-        area.y0 = y_center;
-        nbgl_frontDrawImage(&area, quarter_buffer, HORIZONTAL_MIRROR, borderColor);
-    }
-    if (quarter & BAGL_FILL_CIRCLE_0_PI2) {  //
-        area.x0 = x_center;
-        area.y0 = y_center - area.width;
-        nbgl_frontDrawImage(&area, quarter_buffer, VERTICAL_MIRROR, borderColor);
-    }
-    if (quarter & BAGL_FILL_CIRCLE_PI2_PI) {  //
-        area.x0 = x_center - area.width;
-        area.y0 = y_center - area.width;
-        nbgl_frontDrawImage(&area, quarter_buffer, NO_TRANSFORMATION, borderColor);
+    switch (quarter) {
+        case BAGL_FILL_CIRCLE_3PI2_2PI:  // bottom right
+            area.x0 = x_center;
+            area.y0 = y_center;
+            nbgl_frontDrawImage(&area, quarter_buffer, VERTICAL_MIRROR, borderColor);
+            break;
+        case BAGL_FILL_CIRCLE_PI_3PI2:  // bottom left
+            area.x0 = x_center - area.width;
+            area.y0 = y_center;
+            nbgl_frontDrawImage(&area, quarter_buffer, NO_TRANSFORMATION, borderColor);
+            break;
+        case BAGL_FILL_CIRCLE_0_PI2:  // top right
+            area.x0 = x_center;
+            area.y0 = y_center - area.width;
+            nbgl_frontDrawImage(&area, quarter_buffer, VERTICAL_MIRROR, borderColor);
+            break;
+        case BAGL_FILL_CIRCLE_PI2_PI:  // top left
+            area.x0 = x_center - area.width;
+            area.y0 = y_center - area.width;
+            nbgl_frontDrawImage(&area, quarter_buffer, NO_TRANSFORMATION, borderColor);
+            break;
     }
 #else   // SCREEN_SIZE_WALLET
-    area.width = area.height = radiusValues[radiusIndex];
-    area.backgroundColor     = backgroundColor;
-    if (quarter & BAGL_FILL_CIRCLE_3PI2_2PI) {  //
-        area.x0 = x_center;
-        area.y0 = y_center;
-        quarter_buffer
-            = (borderColor == innerColor) ? quarter_disc_3px_180_1bpp : quarter_circle_3px_180_1bpp;
-    }
-    if (quarter & BAGL_FILL_CIRCLE_PI_3PI2) {  //
-        area.x0 = x_center - area.width;
-        area.y0 = y_center;
-        quarter_buffer
-            = (borderColor == innerColor) ? quarter_disc_3px_270_1bpp : quarter_circle_3px_270_1bpp;
-    }
-    if (quarter & BAGL_FILL_CIRCLE_0_PI2) {  //
-        area.x0 = x_center;
-        area.y0 = y_center - area.width;
-        quarter_buffer
-            = (borderColor == innerColor) ? quarter_disc_3px_90_1bpp : quarter_circle_3px_90_1bpp;
-    }
-    if (quarter & BAGL_FILL_CIRCLE_PI2_PI) {  //
-        area.x0 = x_center - area.width;
-        area.y0 = y_center - area.width;
-        quarter_buffer
-            = (borderColor == innerColor) ? quarter_disc_3px_1bpp : quarter_circle_3px_1bpp;
+    switch (quarter) {
+        case BAGL_FILL_CIRCLE_3PI2_2PI:  // bottom right
+            area.x0        = x_center;
+            area.y0        = y_center;
+            quarter_buffer = (borderColor == innerColor) ? quarter_disc_3px_180_1bpp
+                                                         : quarter_circle_3px_180_1bpp;
+            break;
+        case BAGL_FILL_CIRCLE_PI_3PI2:  // bottom left
+            area.x0        = x_center - area.width;
+            area.y0        = y_center;
+            quarter_buffer = (borderColor == innerColor) ? quarter_disc_3px_270_1bpp
+                                                         : quarter_circle_3px_270_1bpp;
+            break;
+        case BAGL_FILL_CIRCLE_0_PI2:  // top right
+            area.x0        = x_center;
+            area.y0        = y_center - area.width;
+            quarter_buffer = (borderColor == innerColor) ? quarter_disc_3px_90_1bpp
+                                                         : quarter_circle_3px_90_1bpp;
+            break;
+        case BAGL_FILL_CIRCLE_PI2_PI:  // top left
+            area.x0 = x_center - area.width;
+            area.y0 = y_center - area.width;
+            quarter_buffer
+                = (borderColor == innerColor) ? quarter_disc_3px_1bpp : quarter_circle_3px_1bpp;
+            break;
     }
     nbgl_frontDrawImage(&area, quarter_buffer, NO_TRANSFORMATION, borderColor);
 #endif  // SCREEN_SIZE_WALLET

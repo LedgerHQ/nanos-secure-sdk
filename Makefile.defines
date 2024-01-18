@@ -33,7 +33,7 @@ endif
 API_LEVEL   := 0
 TARGET_PATH := $(BOLOS_SDK)/target/$(TARGET)
 TARGET_ID   := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
-TARGET_NAME := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
+TARGET_NAME := $(sort $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' '))
 SDK_NAME    := "ledger-secure-sdk"
 SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
 SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
