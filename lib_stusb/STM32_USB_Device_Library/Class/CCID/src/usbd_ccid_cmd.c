@@ -231,28 +231,25 @@ uint8_t  PC_to_RDR_XfrBlock(void)
   if (error != 0) 
     return error;
     
-    if (G_io_ccid.bulk_header.bulkout.dwLength > IO_CCID_DATA_BUFFER_SIZE)
-    { /* Check amount of Data Sent by Host is > than memory allocated ? */
+  if (G_io_ccid.bulk_header.bulkout.dwLength > IO_CCID_DATA_BUFFER_SIZE)
+  { /* Check amount of Data Sent by Host is > than memory allocated ? */
      
-      return SLOTERROR_BAD_DWLENGTH;
-    }
+    return SLOTERROR_BAD_DWLENGTH;
+  }
 
 
-    /* wLevelParameter = Size of expected data to be returned by the 
-                          bulk-IN endpoint */
-    expectedLength = (G_io_ccid.bulk_header.bulkout.bSpecific_2 << 8) | 
-                      G_io_ccid.bulk_header.bulkout.bSpecific_1;   
+  /* wLevelParameter = Size of expected data to be returned by the 
+                        bulk-IN endpoint */
+  expectedLength = (G_io_ccid.bulk_header.bulkout.bSpecific_2 << 8) | 
+                    G_io_ccid.bulk_header.bulkout.bSpecific_1;   
 
-    reqlen = G_io_ccid.bulk_header.bulkout.dwLength;
-    
-    G_io_ccid.bulk_header.bulkin.dwLength = (uint16_t)expectedLength;  
+  reqlen = G_io_ccid.bulk_header.bulkout.dwLength;
 
+  G_io_ccid.bulk_header.bulkin.dwLength = (uint16_t)expectedLength;  
 
-    error = SC_XferBlock(&G_io_ccid_data_buffer[0], 
-                     reqlen, 
-                     &expectedLength); 
+  error = SC_XferBlock(&G_io_ccid_data_buffer[0], reqlen); 
 
-   if (error != SLOT_NO_ERROR)
+  if (error != SLOT_NO_ERROR)
   {
     CCID_UpdateCommandStatus(BM_COMMAND_STATUS_FAILED, BM_ICC_PRESENT_ACTIVE);
   }
@@ -639,7 +636,6 @@ uint8_t  PC_TO_RDR_SetDataRateAndClockFrequency(void)
   uint8_t error;
   uint32_t clockFrequency;
   uint32_t dataRate;
-  uint32_t temp =0;
   
   error = CCID_CheckCommandParams(CHK_PARAM_SLOT |\
     CHK_PARAM_CARD_PRESENT |\
@@ -694,7 +690,6 @@ uint8_t  PC_TO_RDR_SetDataRateAndClockFrequency(void)
 uint8_t  PC_TO_RDR_Secure(void)
 {
   uint8_t error;
-  uint8_t bBWI;
   uint16_t wLevelParameter;
   uint32_t responseLen; 
   
@@ -708,14 +703,13 @@ uint8_t  PC_TO_RDR_Secure(void)
     return error;
   }
   
-  bBWI = G_io_ccid.bulk_header.bulkout.bSpecific_0;
   wLevelParameter = (G_io_ccid.bulk_header.bulkout.bSpecific_1 + ((uint16_t)G_io_ccid.bulk_header.bulkout.bSpecific_2<<8));
   
   if ((EXCHANGE_LEVEL_FEATURE == TPDU_EXCHANGE) || 
     (EXCHANGE_LEVEL_FEATURE == SHORT_APDU_EXCHANGE))
   {
     /* TPDU level & short APDU level, wLevelParameter is RFU, = 0000h */
-    if (wLevelParameter != 0 )
+    if (wLevelParameter != 0)
     {
       G_io_ccid.bulk_header.bulkin.dwLength = 0;
       CCID_UpdateCommandStatus(BM_COMMAND_STATUS_FAILED, BM_ICC_PRESENT_ACTIVE);
@@ -724,8 +718,7 @@ uint8_t  PC_TO_RDR_Secure(void)
     }
   }
 
-  error = SC_Secure(G_io_ccid.bulk_header.bulkout.dwLength - CCID_HEADER_SIZE, bBWI, wLevelParameter, 
-                    &G_io_ccid_data_buffer[0], &responseLen);
+  error = SC_Secure(&G_io_ccid_data_buffer[0], &responseLen);
 
   G_io_ccid.bulk_header.bulkin.dwLength = responseLen;
   
