@@ -134,8 +134,10 @@ typedef enum {
  *
  */
 typedef enum {
-    NO_STYLE,        ///< no border
+    NO_STYLE,  ///< no border
+#ifdef SCREEN_SIZE_NANO
     INVERTED_COLORS  ///< Inverted background and rounded corners, only for @ref TEXT_AREA
+#endif               // SCREEN_SIZE_NANO
 } nbgl_style_t;
 
 /**

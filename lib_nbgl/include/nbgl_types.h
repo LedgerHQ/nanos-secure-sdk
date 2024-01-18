@@ -192,16 +192,15 @@ typedef enum nbgl_post_refresh_t {
  *
  */
 typedef enum {
-    RADIUS_3_PIXELS = 0,     ///< 3 pixels (not on Stax)
-    RADIUS_4_PIXELS,         ///< 4 pixels
-    RADIUS_8_PIXELS,         ///< 8 pixels
-    RADIUS_16_PIXELS,        ///< 16 pixels
-    RADIUS_20_PIXELS,        ///< 20 pixels
-    RADIUS_24_PIXELS,        ///< 24 pixels
-    RADIUS_32_PIXELS,        ///< 32 pixels
-    RADIUS_40_PIXELS,        ///< 40 pixels
-    RADIUS_48_PIXELS,        ///< 48 pixels
-    RADIUS_1_PIXEL,          ///< 1 pixel (not on Stax)
+#ifdef SCREEN_SIZE_WALLET
+    RADIUS_32_PIXELS = 0,  ///< 32 pixels
+    RADIUS_40_PIXELS,      ///< 48 pixels
+    RADIUS_MAX = RADIUS_40_PIXELS,
+#else                        // SCREEN_SIZE_WALLET
+    RADIUS_1_PIXEL = 0,  ///< 1 pixel
+    RADIUS_3_PIXELS,     ///< 3 pixels
+    RADIUS_MAX = RADIUS_3_PIXELS,
+#endif                       // SCREEN_SIZE_WALLET
     RADIUS_0_PIXELS = 0xFF,  ///< no radius (square angle)
 } nbgl_radius_t;
 
