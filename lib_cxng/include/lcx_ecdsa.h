@@ -152,15 +152,15 @@ DEPRECATED static inline size_t cx_ecdsa_sign(const cx_ecfp_private_key_t *pvkey
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
-                                   uint32_t                     mode,
-                                   cx_md_t                      hashID,
-                                   const uint8_t               *hash,
-                                   size_t                       hash_len,
-                                   size_t                       rs_len,
-                                   uint8_t                     *sig_r,
-                                   uint8_t                     *sig_s,
-                                   uint32_t                    *info);
+WARN_UNUSED_RESULT cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
+                                                      uint32_t                     mode,
+                                                      cx_md_t                      hashID,
+                                                      const uint8_t               *hash,
+                                                      size_t                       hash_len,
+                                                      size_t                       rs_len,
+                                                      uint8_t                     *sig_r,
+                                                      uint8_t                     *sig_s,
+                                                      uint32_t                    *info);
 
 /**
  * @brief   Verifies an ECDSA signature according to ECDSA specification.
@@ -180,11 +180,11 @@ cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
  *
  * @return             1 if the signature is verified, 0 otherwise.
  */
-bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
-                              const uint8_t              *hash,
-                              size_t                      hash_len,
-                              const uint8_t              *sig,
-                              size_t                      sig_len);
+WARN_UNUSED_RESULT bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
+                                                 const uint8_t              *hash,
+                                                 size_t                      hash_len,
+                                                 const uint8_t              *sig,
+                                                 size_t                      sig_len);
 
 /**
  * @deprecated

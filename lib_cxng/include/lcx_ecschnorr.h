@@ -71,13 +71,13 @@
  *                     - CX_EC_INFINITE_POINT
  *                     - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                    uint32_t                     mode,
-                                    cx_md_t                      hashID,
-                                    const uint8_t               *msg,
-                                    size_t                       msg_len,
-                                    uint8_t                     *sig,
-                                    size_t                      *sig_len);
+WARN_UNUSED_RESULT cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                       uint32_t                     mode,
+                                                       cx_md_t                      hashID,
+                                                       const uint8_t               *msg,
+                                                       size_t                       msg_len,
+                                                       uint8_t                     *sig,
+                                                       size_t                      *sig_len);
 
 /**
  * @deprecated
@@ -128,13 +128,13 @@ DEPRECATED static inline size_t cx_ecschnorr_sign(const cx_ecfp_private_key_t *p
  *
  * @return            1 if signature is verified, 0 otherwise.
  */
-bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pukey,
-                         uint32_t                    mode,
-                         cx_md_t                     hashID,
-                         const uint8_t              *msg,
-                         size_t                      msg_len,
-                         const uint8_t              *sig,
-                         size_t                      sig_len);
+WARN_UNUSED_RESULT bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pukey,
+                                            uint32_t                    mode,
+                                            cx_md_t                     hashID,
+                                            const uint8_t              *msg,
+                                            size_t                      msg_len,
+                                            const uint8_t              *sig,
+                                            size_t                      sig_len);
 
 #endif
 
