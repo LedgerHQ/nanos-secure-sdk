@@ -160,6 +160,7 @@ end:
     memset(sub_key1, 0, CMAC_MAX_BLOCK_LENGTH);
     memset(sub_key2, 0, CMAC_MAX_BLOCK_LENGTH);
     explicit_bzero(ctx->cmac_ctx, sizeof(cx_cmac_context_t));
+    ctx->cipher_info->base->ctx_reset();
     return error;
 }
 
