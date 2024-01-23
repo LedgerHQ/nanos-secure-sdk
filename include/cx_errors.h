@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "ledger_assert.h"
 
 /**
  * Checks the error code of a function.
@@ -30,6 +31,15 @@
         if (error && error != CX_CARRY) { \
             goto end;                     \
         }                                 \
+    } while (0)
+
+/**
+ * Checks the error code of a function and assert in case of error.
+ */
+#define CX_ASSERT(call)                                                   \
+    do {                                                                  \
+        cx_err_t _assert_err = call;                                      \
+        LEDGER_ASSERT(!_assert_err, "err 0x%X <%s>", _assert_err, #call); \
     } while (0)
 
 /** Success. */
