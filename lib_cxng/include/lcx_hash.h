@@ -143,7 +143,6 @@ size_t cx_hash_get_size(const cx_hash_t *ctx);
  *                     - INVALID_PARAMETER
  *                     - CX_INVALID_PARAMETER
  */
-// WARN_UNUSED_RESULT cx_err_t cx_hash_no_throw(cx_hash_t     *hash,
 WARN_UNUSED_RESULT cx_err_t cx_hash_no_throw(cx_hash_t     *hash,
                                              uint32_t       mode,
                                              const uint8_t *in,
