@@ -1489,9 +1489,6 @@ void nbgl_refreshSpecial(nbgl_refresh_mode_t mode)
         return;
     }
 
-#ifdef HAVE_SERIALIZED_NBGL
-    io_seproxyhal_send_nbgl_serialized(NBGL_REFRESH_AREA, (nbgl_obj_t *) &refreshArea);
-#endif
     nbgl_frontRefreshArea(&refreshArea, mode, POST_REFRESH_FORCE_POWER_OFF);
     LOG_DEBUG(OBJ_LOGGER,
               "nbgl_refreshSpecial(), x0,y0 = [%d, %d], w,h = [%d, %d]\n",
@@ -1508,9 +1505,6 @@ void nbgl_refreshSpecialWithPostRefresh(nbgl_refresh_mode_t mode, nbgl_post_refr
         return;
     }
 
-#ifdef HAVE_SERIALIZED_NBGL
-    io_seproxyhal_send_nbgl_serialized(NBGL_REFRESH_AREA, (nbgl_obj_t *) &refreshArea);
-#endif
     nbgl_frontRefreshArea(&refreshArea, mode, post_refresh);
     LOG_DEBUG(OBJ_LOGGER,
               "nbgl_refreshSpecialNoPoff(), x0,y0 = [%d, %d], w,h = [%d, %d]\n",
@@ -1539,6 +1533,9 @@ bool nbgl_refreshIsNeeded(void)
  */
 void nbgl_refreshReset(void)
 {
+#ifdef HAVE_SERIALIZED_NBGL
+    io_seproxyhal_send_nbgl_serialized(NBGL_REFRESH_AREA, (nbgl_obj_t *) &refreshArea);
+#endif
     refreshArea.x0     = SCREEN_WIDTH - 1;
     refreshArea.width  = 0;
     refreshArea.y0     = SCREEN_HEIGHT - 1;
