@@ -131,12 +131,12 @@ DEPRECATED static inline size_t cx_eddsa_sign(const cx_ecfp_private_key_t *pvkey
  *
  * @return              1 if the signature is verified, otherwise 0.
  */
-bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
-                              cx_md_t                     hashID,
-                              const uint8_t              *hash,
-                              size_t                      hash_len,
-                              const uint8_t              *sig,
-                              size_t                      sig_len);
+WARN_UNUSED_RESULT bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
+                                                 cx_md_t                     hashID,
+                                                 const uint8_t              *hash,
+                                                 size_t                      hash_len,
+                                                 const uint8_t              *sig,
+                                                 size_t                      sig_len);
 
 /**
  * @brief   Verifies a signature.

@@ -776,16 +776,14 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPair
  */
 uint8_t nbgl_useCaseGetNbPagesForTagValueList(const nbgl_layoutTagValueList_t *tagValueList)
 {
-    uint8_t  nbPages = 0;
-    uint8_t  nbPairs = tagValueList->nbPairs;
-    uint8_t  nbPairsInPage;
-    uint16_t currentHeight = 0;
-    uint8_t  i             = 0;
-    bool     tooLongToFit;
+    uint8_t nbPages = 0;
+    uint8_t nbPairs = tagValueList->nbPairs;
+    uint8_t nbPairsInPage;
+    uint8_t i = 0;
+    bool    tooLongToFit;
 
     while (i < tagValueList->nbPairs) {
         // upper margin
-        currentHeight += 24;
         nbPairsInPage = nbgl_useCaseGetNbTagValuesInPage(nbPairs, tagValueList, i, &tooLongToFit);
         i += nbPairsInPage;
         setNbPairs(nbPages, nbPairsInPage, tooLongToFit);

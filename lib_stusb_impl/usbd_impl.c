@@ -353,21 +353,34 @@ static uint8_t const HID_ReportDesc_fido[] = {
 
 #define ARRAY_U2LE(l) (l)&0xFF, (l)>>8
 
+#define CFG_HDR_LEN    (0x9)
+#define CFG_HIDGEN_LEN (0x9+0x9+0x7+0x7)
+#define CFG_IO_U2F_LEN (0x9+0x9+0x7+0x7)
+#define CFG_USB_CCID_LEN (0x9+0x36+0x7+0x7)
+#define CFG_WEBUSB_LEN (0x9+0x7+0x7)
+
 /* USB HID device Configuration Descriptor */
+#ifdef HAVE_USB_CLASS_CCID
+// Note: keeping const qualifier to ensure the good section is used by the linker.
+// This table is mapped in NVRAM section and therefore it is correctly initialized,
+//  normal Read is possible and Write can be done through nvm_write() calls.
+static __ALIGN_BEGIN uint8_t const N_USBD_CfgDesc[] __ALIGN_END =
+#else
 static __ALIGN_BEGIN uint8_t const USBD_CfgDesc[] __ALIGN_END =
+#endif  // HAVE_USB_CLASS_CCID
 {
   0x09, /* bLength: Configuration Descriptor size */
   USB_DESC_TYPE_CONFIGURATION, /* bDescriptorType: Configuration */
-  ARRAY_U2LE(0x9  /* wTotalLength: Bytes returned */
-   +0x9+0x9+0x7+0x7
+  ARRAY_U2LE(CFG_HDR_LEN  /* wTotalLength: Bytes returned */
+   +CFG_HIDGEN_LEN
 #ifdef HAVE_IO_U2F
-   +0x9+0x9+0x7+0x7
+   +CFG_IO_U2F_LEN
 #endif // HAVE_IO_U2F
 #ifdef HAVE_USB_CLASS_CCID
-   +0x9+0x36+0x7+0x7
+   +CFG_USB_CCID_LEN
 #endif // HAVE_USB_CLASS_CCID
 #ifdef HAVE_WEBUSB
-   +0x9+0x7+0x7
+   +CFG_WEBUSB_LEN
 #endif // HAVE_WEBUSB
    ),
   1
@@ -870,8 +883,13 @@ static uint8_t *USBD_GetDeviceQualifierDesc_impl(uint16_t *length)
  */
 static uint8_t *USBD_GetCfgDesc_impl(uint16_t *length)
 {
+#ifdef HAVE_USB_CLASS_CCID
+    *length = sizeof(N_USBD_CfgDesc);
+    return (uint8_t *) N_USBD_CfgDesc;
+#else
     *length = sizeof(USBD_CfgDesc);
     return (uint8_t *) USBD_CfgDesc;
+#endif
 }
 
 uint8_t *USBD_HID_GetHidDescriptor_impl(uint16_t *len)
@@ -926,6 +944,34 @@ uint8_t *USBD_HID_GetReportDescriptor_impl(uint16_t *len)
     *len = 0;
     return 0;
 }
+
+#ifdef HAVE_USB_CLASS_CCID
+/**
+ * @brief  Returns the pinpad value offset in the descriptor.
+ * @retval Offset
+ */
+const volatile uint8_t *USBD_GetPinPadOffset(void)
+{
+    unsigned short length  = 0;
+    uint8_t       *cfgDesc = NULL;
+    unsigned short offset  = 0;
+
+    cfgDesc = USBD_GetCfgDesc_impl(&length);
+
+    offset = CFG_HDR_LEN + CFG_HIDGEN_LEN;
+#ifdef HAVE_IO_U2F
+    offset += CFG_IO_U2F_LEN;
+#endif  // HAVE_IO_U2F
+    // Offset of the parameter 'bPINSupport' inside the CCID interface structure in N_USBD_CfgDesc
+    offset += 61;
+
+    // Returns a const volatile pointer allowing callers to do
+    // - write operations through nvram_write
+    // - read operation without potential compilation optimization issue thanks to the volatile
+    // qualifier.
+    return (const volatile uint8_t *) (cfgDesc + offset);
+}
+#endif  // HAVE_USB_CLASS_CCID
 
 /**
  * @}

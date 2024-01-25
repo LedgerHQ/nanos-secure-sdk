@@ -58,6 +58,14 @@
 #define VOLTAGE_SELECTION_5V  0x01
 #define VOLTAGE_SELECTION_1V8 0x03
 
+/* PC_to_RDR_Secure PIN operations */
+#define PIN_OPR_VERIFICATION   0x00
+#define PIN_OPR_MODIFICATION   0x01
+#define PIN_OPR_TRANSFER       0x02
+#define PIN_OPR_WAIT_ICC_RESP  0x03
+#define PIN_OPR_CANCEL         0x04
+#define PIN_OPR_APDU_CLA       0xEF
+
 #define		PC_TO_RDR_ICCPOWERON		0x62
 #define		PC_TO_RDR_ICCPOWEROFF		0x63
 #define		PC_TO_RDR_GETSLOTSTATUS		0x65
@@ -222,6 +230,8 @@ void Transfer_Data_Request(void);
 void Set_CSW (uint8_t CSW_Status, uint8_t Send_Permission);
 
 void io_usb_ccid_set_card_inserted(unsigned int inserted);
+
+void io_usb_ccid_configure_pinpad(uint8_t enabled);
 
 #endif // HAVE_USB_CLASS_CCID
 
