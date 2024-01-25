@@ -65,7 +65,7 @@ size_t cx_groestl_get_output_size(const cx_groestl_t *ctx);
 /**
  * @brief   Initializes a GROESTL context.
  *
- * @param[out] hash Pointer to the context to init.ialize.
+ * @param[out] hash Pointer to the context to initialize.
  *
  * @param[in]  size Length of the digest.
  *
