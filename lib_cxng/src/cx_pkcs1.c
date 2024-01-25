@@ -244,10 +244,13 @@ static cx_err_t cx_pkcs1_MGF1(cx_md_t  hID,
     while (out_len) {
         round_len = (out_len < hLen) ? out_len : hLen;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
         cx_hash_init_ex(hash_ctx, hID, hLen);
         cx_hash_update(hash_ctx, seed, seed_len);
         cx_hash_update(hash_ctx, counter, 4);
         cx_hash_final(hash_ctx, G_cx.pkcs1.digest);
+#pragma GCC diagnostic pop
 
         memcpy(out, G_cx.pkcs1.digest, round_len);
         out_len -= round_len;
@@ -386,11 +389,14 @@ cx_err_t cx_pkcs1_emsa_pss_encode_with_salt_len(cx_md_t        hID,
     cx_rng_no_throw(salt, mSaltLen);
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     cx_hash_init_ex(hash_ctx, hID, hLen);
     cx_hash_update(hash_ctx, C_cx_pss_zeros, 8);
     cx_hash_update(hash_ctx, mHash, mHashLen);
     cx_hash_update(hash_ctx, salt, mSaltLen);
     cx_hash_final(hash_ctx, em + mDBlen);
+#pragma GCC diagnostic pop
 
     em[emLen - 1] = 0xbc;
     CX_CHECK(cx_pkcs1_MGF1(hID, em + mDBlen, hLen, em, mDBlen));
@@ -466,11 +472,14 @@ bool cx_pkcs1_emsa_pss_verify_with_salt_len(cx_md_t        hID,
         return false;
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     cx_hash_init_ex(hash_ctx, hID, hLen);
     cx_hash_update(hash_ctx, C_cx_pss_zeros, 8);
     cx_hash_update(hash_ctx, mHash, mHashLen);
     cx_hash_update(hash_ctx, em + PSLen + 1, mSaltLen);
     cx_hash_final(hash_ctx, G_cx.pkcs1.digest);
+#pragma GCC diagnostic pop
 
     return memcmp(G_cx.pkcs1.digest, em + mDBlen, hLen) == 0;
 }
