@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@
 #define LCX_ECSCHNORR_H
 
 /**
- * @brief   Sign a digest message according to the given mode.
+ * @brief   Signs a digest message according to the given mode.
  *
  * @param[in]  pvkey   Pointer to the private key initialized with
  *                     #cx_ecfp_init_private_key_no_throw beforehand.
@@ -43,6 +43,7 @@
  *                       - CX_ECSCHNORR_BSI03111
  *                       - CX_ECSCHNORR_LIBSECP
  *                       - CX_ECSCHNORR_Z
+ *                       - CX_ECSCHNORR_BIP0340
  *
  * @param[in]  hashID  Message digest algorithm identifier.
  *                     This parameter is mandatory when
@@ -54,8 +55,7 @@
  * @param[in]  msg_len Length of input data.
  *
  * @param[out] sig     ECSchnorr signature encoded in TLV: **30 || L || 02 || Lr || r || 02 || Ls ||
- * s**.
- *
+ * s**. This parameter holds the auxiliary random data when CX_ECSCHNORR_BIP0340 is used.
  *
  * @param[in]  sig_len Length of the signature.
  *
@@ -71,13 +71,13 @@
  *                     - CX_EC_INFINITE_POINT
  *                     - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                    uint32_t                     mode,
-                                    cx_md_t                      hashID,
-                                    const uint8_t               *msg,
-                                    size_t                       msg_len,
-                                    uint8_t                     *sig,
-                                    size_t                      *sig_len);
+WARN_UNUSED_RESULT cx_err_t cx_ecschnorr_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                       uint32_t                     mode,
+                                                       cx_md_t                      hashID,
+                                                       const uint8_t               *msg,
+                                                       size_t                       msg_len,
+                                                       uint8_t                     *sig,
+                                                       size_t                      *sig_len);
 
 /**
  * @deprecated
@@ -98,7 +98,7 @@ DEPRECATED static inline int cx_ecschnorr_sign(const cx_ecfp_private_key_t *pvke
 }
 
 /**
- * @brief   Verify a hash message signature according to the given mode.
+ * @brief   Verifies a digest message signature according to the given mode.
  *
  * @param[in] pukey   Pointer to the public key initialized with
  *                    #cx_ecfp_init_private_key_no_throw beforehand.
@@ -128,13 +128,13 @@ DEPRECATED static inline int cx_ecschnorr_sign(const cx_ecfp_private_key_t *pvke
  *
  * @return            1 if signature is verified, 0 otherwise.
  */
-bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pukey,
-                         uint32_t                    mode,
-                         cx_md_t                     hashID,
-                         const uint8_t              *msg,
-                         size_t                      msg_len,
-                         const uint8_t              *sig,
-                         size_t                      sig_len);
+WARN_UNUSED_RESULT bool cx_ecschnorr_verify(const cx_ecfp_public_key_t *pukey,
+                                            uint32_t                    mode,
+                                            cx_md_t                     hashID,
+                                            const uint8_t              *msg,
+                                            size_t                      msg_len,
+                                            const uint8_t              *sig,
+                                            size_t                      sig_len);
 
 #endif
 

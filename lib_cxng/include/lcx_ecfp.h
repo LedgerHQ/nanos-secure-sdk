@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@
  * Private and public keys initialization and key pair generation based on elliptic curves.
  */
 
-#ifdef HAVE_ECC
 #ifndef LCX_ECFP_H
 #define LCX_ECFP_H
+
+#ifdef HAVE_ECC
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -36,33 +37,33 @@
 struct cx_ecfp_public_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     W_len;  ///< Public key length in bytes
-    uint8_t    W[1];   ///< Public key value starting at offset 0
+    uint8_t    W[1];   ///< Public key value
 };
 
 /** Elliptic Curve private key */
 struct cx_ecfp_private_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     d_len;  ///< Private key length in bytes
-    uint8_t    d[1];   ///< Private key value starting at offset 0
+    uint8_t    d[1];   ///< Private key value
 };
 
 /** Up to 256-bit Elliptic Curve public key */
 struct cx_ecfp_256_public_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     W_len;  ///< Public key length in bytes
-    uint8_t    W[65];  ///< Public key value starting at offset 0
+    uint8_t    W[65];  ///< Public key value
 };
 /** Up to 256-bit Elliptic Curve private key */
 struct cx_ecfp_256_private_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     d_len;  ///< Private key length in bytes
-    uint8_t    d[32];  ///< Private key value starting at offset 0
+    uint8_t    d[32];  ///< Private key value
 };
 /** Up to 256-bit Elliptic Curve extended private key */
 struct cx_ecfp_256_extended_private_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     d_len;  ///< Public key length in bytes
-    uint8_t    d[64];  ///< Public key value starting at offset 0
+    uint8_t    d[64];  ///< Public key value
 };
 /** Convenience type. See #cx_ecfp_256_public_key_s. */
 typedef struct cx_ecfp_256_public_key_s cx_ecfp_256_public_key_t;
@@ -79,13 +80,13 @@ typedef struct cx_ecfp_256_private_key_s cx_ecfp_private_key_t;
 struct cx_ecfp_384_public_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     W_len;  ///< Public key length in bytes
-    uint8_t    W[97];  ///< Public key value starting at offset 0
+    uint8_t    W[97];  ///< Public key value
 };
 /** Up to 384-bit Elliptic Curve private key */
 struct cx_ecfp_384_private_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     d_len;  ///< Private key length in bytes
-    uint8_t    d[48];  ///< Private key value starting at offset 0
+    uint8_t    d[48];  ///< Private key value
 };
 /** Convenience type. See #cx_ecfp_384_public_key_s. */
 typedef struct cx_ecfp_384_private_key_s cx_ecfp_384_private_key_t;
@@ -96,19 +97,19 @@ typedef struct cx_ecfp_384_public_key_s cx_ecfp_384_public_key_t;
 struct cx_ecfp_512_public_key_s {
     cx_curve_t curve;   ///< Curve identifier
     size_t     W_len;   ///< Public key length in bytes
-    uint8_t    W[129];  ///< Public key value starting at offset 0
+    uint8_t    W[129];  ///< Public key value
 };
 /** Up to 512-bit Elliptic Curve private key */
 struct cx_ecfp_512_private_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     d_len;  ///< Private key length in bytes
-    uint8_t    d[64];  ///< Private key value starting at offset 0
+    uint8_t    d[64];  ///< Private key value
 };
 /** Up to 512-bit Elliptic Curve extended private key */
 struct cx_ecfp_512_extented_private_key_s {
     cx_curve_t curve;   ///< Curve identifier
     size_t     d_len;   ///< Private key length in bytes
-    uint8_t    d[128];  ///< Private key value starting at offset 0
+    uint8_t    d[128];  ///< Private key value
 };
 /** Convenience type. See #cx_ecfp_512_public_key_s. */
 typedef struct cx_ecfp_512_public_key_s cx_ecfp_512_public_key_t;
@@ -121,13 +122,13 @@ typedef struct cx_ecfp_512_extented_private_key_s cx_ecfp_512_extented_private_k
 struct cx_ecfp_640_public_key_s {
     cx_curve_t curve;   ///< Curve identifier
     size_t     W_len;   ///< Public key length in bytes
-    uint8_t    W[161];  ///< Public key value starting at offset 0
+    uint8_t    W[161];  ///< Public key value
 };
 /** Up to 640-bit Elliptic Curve private key */
 struct cx_ecfp_640_private_key_s {
     cx_curve_t curve;  ///< Curve identifier
     size_t     d_len;  ///< Private key length in bytes
-    uint8_t    d[80];  ///< Private key value starting at offset 0
+    uint8_t    d[80];  ///< Private key value
 };
 /** Convenience type. See #cx_ecfp_640_public_key_s. */
 typedef struct cx_ecfp_640_public_key_s cx_ecfp_640_public_key_t;
@@ -135,7 +136,7 @@ typedef struct cx_ecfp_640_public_key_s cx_ecfp_640_public_key_t;
 typedef struct cx_ecfp_640_private_key_s cx_ecfp_640_private_key_t;
 
 /**
- * @brief   Add two points of an elliptic curve.
+ * @brief   Adds two points of an elliptic curve.
  *
  * @param[in]  curve Curve identifier.
  *
@@ -159,10 +160,10 @@ typedef struct cx_ecfp_640_private_key_s cx_ecfp_640_private_key_t;
  *                   - CX_EC_INVALID_POINT
  *                   - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_add_point_no_throw(cx_curve_t     curve,
-                                    uint8_t       *R,
-                                    const uint8_t *P,
-                                    const uint8_t *Q);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_add_point_no_throw(cx_curve_t     curve,
+                                                       uint8_t       *R,
+                                                       const uint8_t *P,
+                                                       const uint8_t *Q);
 
 /**
  * @deprecated
@@ -185,7 +186,7 @@ DEPRECATED static inline int cx_ecfp_add_point(cx_curve_t           curve,
 }
 
 /**
- * @brief   Perform a scalar multiplication over an elliptic curve.
+ * @brief   Performs a scalar multiplication over an elliptic curve.
  *
  * @param[in]      curve Curve identifier.
  *
@@ -209,7 +210,10 @@ DEPRECATED static inline int cx_ecfp_add_point(cx_curve_t           curve,
  *                       - CX_INVALID_PARAMETER
  *                       - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_scalar_mult_no_throw(cx_curve_t curve, uint8_t *P, const uint8_t *k, size_t k_len);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_scalar_mult_no_throw(cx_curve_t     curve,
+                                                         uint8_t       *P,
+                                                         const uint8_t *k,
+                                                         size_t         k_len);
 
 /**
  * @deprecated
@@ -232,7 +236,7 @@ DEPRECATED static inline int cx_ecfp_scalar_mult(cx_curve_t           curve,
 }
 
 /**
- * @brief   Initialize a public key.
+ * @brief   Initializes a public key.
  *
  * @param[in]  curve   Curve identifier.
  *
@@ -254,10 +258,10 @@ DEPRECATED static inline int cx_ecfp_scalar_mult(cx_curve_t           curve,
  *                     - CX_EC_INVALID_CURVE
  *                     - INVALID_PARAMETER
  */
-cx_err_t cx_ecfp_init_public_key_no_throw(cx_curve_t            curve,
-                                          const uint8_t        *rawkey,
-                                          size_t                key_len,
-                                          cx_ecfp_public_key_t *key);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_init_public_key_no_throw(cx_curve_t            curve,
+                                                             const uint8_t        *rawkey,
+                                                             size_t                key_len,
+                                                             cx_ecfp_public_key_t *key);
 
 /**
  * @deprecated
@@ -273,7 +277,7 @@ DEPRECATED static inline int cx_ecfp_init_public_key(cx_curve_t            curve
 }
 
 /**
- * @brief   Initialize a private key.
+ * @brief   Initializes a private key.
  *
  * @details The key can be stored in non-volatile memory and
  *          used for ECDSA or ECDH processing.
@@ -292,10 +296,10 @@ DEPRECATED static inline int cx_ecfp_init_public_key(cx_curve_t            curve
  *                     - CX_EC_INVALID_CURVE
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t             curve,
-                                           const uint8_t         *rawkey,
-                                           size_t                 key_len,
-                                           cx_ecfp_private_key_t *pvkey);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_init_private_key_no_throw(cx_curve_t             curve,
+                                                              const uint8_t         *rawkey,
+                                                              size_t                 key_len,
+                                                              cx_ecfp_private_key_t *pvkey);
 
 /**
  * @deprecated
@@ -311,7 +315,7 @@ DEPRECATED static inline int cx_ecfp_init_private_key(cx_curve_t             cur
 }
 
 /**
- * @brief   Generate a key pair with SHA-512 hash function.
+ * @brief   Generates a key pair with SHA-512 hash function.
  *
  * @param[in]  curve       Curve identifier.
  *
@@ -335,10 +339,10 @@ DEPRECATED static inline int cx_ecfp_init_private_key(cx_curve_t             cur
  *                         - CX_EC_INVALID_POINT
  *                         - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t             curve,
-                                        cx_ecfp_public_key_t  *pubkey,
-                                        cx_ecfp_private_key_t *privkey,
-                                        bool                   keepprivate);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_generate_pair_no_throw(cx_curve_t             curve,
+                                                           cx_ecfp_public_key_t  *pubkey,
+                                                           cx_ecfp_private_key_t *privkey,
+                                                           bool                   keepprivate);
 
 /**
  * @deprecated
@@ -354,7 +358,7 @@ DEPRECATED static inline int cx_ecfp_generate_pair(cx_curve_t             curve,
 }
 
 /**
- * @brief   Generate a key pair.
+ * @brief   Generates a key pair.
  *
  * @param[in]  curve       Curve identifier.
  *
@@ -380,11 +384,11 @@ DEPRECATED static inline int cx_ecfp_generate_pair(cx_curve_t             curve,
  *                         - CX_EC_INVALID_POINT
  *                         - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t             curve,
-                                         cx_ecfp_public_key_t  *pubkey,
-                                         cx_ecfp_private_key_t *privkey,
-                                         bool                   keepprivate,
-                                         cx_md_t                hashID);
+WARN_UNUSED_RESULT cx_err_t cx_ecfp_generate_pair2_no_throw(cx_curve_t             curve,
+                                                            cx_ecfp_public_key_t  *pubkey,
+                                                            cx_ecfp_private_key_t *privkey,
+                                                            bool                   keepprivate,
+                                                            cx_md_t                hashID);
 
 /**
  * @deprecated
@@ -403,10 +407,10 @@ DEPRECATED static inline int cx_ecfp_generate_pair2(cx_curve_t             curve
 #ifdef HAVE_ECC_TWISTED_EDWARDS
 
 /**
- * @brief   Retrieve an EDDSA public key.
+ * @brief   Retrieves an EDDSA public key.
  *
- * @details Retrieve (a,h) = (Kr, Kl), such that (Kr, Kl) = Hash(pv_key)
- *          as specified in <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
+ * @details Retrieves (a,h) = (Kr, Kl), such that (Kr, Kl) = Hash(pv_key)
+ *          as specified at <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *
  * @param[in]  pvkey  A private key fully initialized with #cx_ecfp_init_private_key_no_throw.
  *
@@ -436,13 +440,13 @@ DEPRECATED static inline int cx_ecfp_generate_pair2(cx_curve_t             curve
  *                    - CX_INTERNAL_ERROR
  *
  */
-cx_err_t cx_eddsa_get_public_key_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                          cx_md_t                      hashID,
-                                          cx_ecfp_public_key_t        *pukey,
-                                          uint8_t                     *a,
-                                          size_t                       a_len,
-                                          uint8_t                     *h,
-                                          size_t                       h_len);
+WARN_UNUSED_RESULT cx_err_t cx_eddsa_get_public_key_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                             cx_md_t                      hashID,
+                                                             cx_ecfp_public_key_t        *pukey,
+                                                             uint8_t                     *a,
+                                                             size_t                       a_len,
+                                                             uint8_t                     *h,
+                                                             size_t                       h_len);
 
 /**
  * @deprecated
@@ -460,8 +464,8 @@ DEPRECATED static inline void cx_eddsa_get_public_key(const cx_ecfp_private_key_
 }
 
 /**
- * @brief   Compress a point according to <a href="https://tools.ietf.org/html/rfc8032"> RFC8032
- * </a>.
+ * @brief   Compresses a point according to
+ *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *
  * @param[in]      curve Curve identifier. The curve must be
  *                       a Twisted Edwards curve.
@@ -481,7 +485,9 @@ DEPRECATED static inline void cx_eddsa_get_public_key(const cx_ecfp_private_key_
  *                       - CX_INVALID_PARAMETER
  *                       - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_edwards_compress_point_no_throw(cx_curve_t curve, uint8_t *p, size_t p_len);
+WARN_UNUSED_RESULT cx_err_t cx_edwards_compress_point_no_throw(cx_curve_t curve,
+                                                               uint8_t   *p,
+                                                               size_t     p_len);
 
 /**
  * @deprecated
@@ -493,8 +499,8 @@ DEPRECATED static inline void cx_edwards_compress_point(cx_curve_t curve, uint8_
 }
 
 /**
- * @brief   Decompress a point according to <a href="https://tools.ietf.org/html/rfc8032"> RFC8032
- * </a>.
+ * @brief   Decompresses a point according to
+ *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *
  * @param[in]      curve Curve identifier. The curve must be
  *                       a Twisted Edwards curve.
@@ -516,7 +522,9 @@ DEPRECATED static inline void cx_edwards_compress_point(cx_curve_t curve, uint8_
  *                       - CX_NO_RESIDUE
  *                       - INVALID_PARAMETER
  */
-cx_err_t cx_edwards_decompress_point_no_throw(cx_curve_t curve, uint8_t *p, size_t p_len);
+WARN_UNUSED_RESULT cx_err_t cx_edwards_decompress_point_no_throw(cx_curve_t curve,
+                                                                 uint8_t   *p,
+                                                                 size_t     p_len);
 
 /**
  * @deprecated
@@ -549,6 +557,6 @@ DEPRECATED static inline void cx_edward_decompress_point(cx_curve_t curve, uint8
 
 #endif  // HAVE_ECC_TWISTED_EDWARDS
 
-#endif
-
 #endif  // HAVE_ECC
+
+#endif  // LCX_ECFP_H

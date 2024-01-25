@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@
  * @brief   Basic arithmetic.
  */
 
-#ifdef HAVE_MATH
-
 #ifndef LCX_MATH_H
 #define LCX_MATH_H
+
+#ifdef HAVE_MATH
 
 #include "lcx_wrappers.h"
 #include "ox_bn.h"
 
 /**
- * @brief Compare two integers represented as byte arrays.
+ * @brief Compares two integers represented as byte arrays.
  *
  * @param[in]  a      Pointer to the first integer.
  *
@@ -51,7 +51,10 @@
  *                    - CX_MEMORY_FULL
  *                    - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_cmp_no_throw(const uint8_t *a, const uint8_t *b, size_t length, int *diff);
+WARN_UNUSED_RESULT cx_err_t cx_math_cmp_no_throw(const uint8_t *a,
+                                                 const uint8_t *b,
+                                                 size_t         length,
+                                                 int           *diff);
 
 /**
  * @deprecated
@@ -65,7 +68,7 @@ DEPRECATED static inline int32_t cx_math_cmp(const uint8_t *a, const uint8_t *b,
 }
 
 /**
- * @brief Add two integers represented as byte arrays.
+ * @brief Adds two integers represented as byte arrays.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -83,13 +86,19 @@ DEPRECATED static inline int32_t cx_math_cmp(const uint8_t *a, const uint8_t *b,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_add_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_add_no_throw(uint8_t       *r,
+                                                 const uint8_t *a,
+                                                 const uint8_t *b,
+                                                 size_t         len);
 
 /**
- * @brief   Add two integers represented as byte arrays.
+ * @brief   Adds two integers represented as byte arrays.
  *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
+ *
+ * @warning It is recommended to use #cx_math_add_no_throw rather
+ *          than this function.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -117,7 +126,7 @@ static inline uint32_t cx_math_add(uint8_t *r, const uint8_t *a, const uint8_t *
 }
 
 /**
- * @brief Subtract two integers represented as byte arrays.
+ * @brief Subtracts two integers represented as byte arrays.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -135,13 +144,19 @@ static inline uint32_t cx_math_add(uint8_t *r, const uint8_t *a, const uint8_t *
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_sub_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_sub_no_throw(uint8_t       *r,
+                                                 const uint8_t *a,
+                                                 const uint8_t *b,
+                                                 size_t         len);
 
 /**
- * @brief   Subtract two integers represented as byte arrays.
+ * @brief   Subtracts two integers represented as byte arrays.
  *
  * @details This function throws an exception if the computation
  *          doesn't succeed.
+ *
+ * @warning It is recommended to use #cx_math_sub_no_throw rather
+ *          than this function.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -169,7 +184,7 @@ static inline uint32_t cx_math_sub(uint8_t *r, const uint8_t *a, const uint8_t *
 }
 
 /**
- * @brief Multiply two integers represented as byte arrays.
+ * @brief Multiplies two integers represented as byte arrays.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -187,7 +202,10 @@ static inline uint32_t cx_math_sub(uint8_t *r, const uint8_t *a, const uint8_t *
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_mult_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_mult_no_throw(uint8_t       *r,
+                                                  const uint8_t *a,
+                                                  const uint8_t *b,
+                                                  size_t         len);
 
 /**
  * @deprecated
@@ -202,7 +220,8 @@ DEPRECATED static inline void cx_math_mult(uint8_t       *r,
 }
 
 /**
- * @brief Modular addition of two integers represented as byte arrays.
+ * @brief Performs a modular addition
+ *        of two integers represented as byte arrays.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -224,11 +243,8 @@ DEPRECATED static inline void cx_math_mult(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_addm_no_throw(uint8_t       *r,
-                               const uint8_t *a,
-                               const uint8_t *b,
-                               const uint8_t *m,
-                               size_t         len);
+WARN_UNUSED_RESULT cx_err_t
+cx_math_addm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
 
 /**
  * @deprecated
@@ -244,7 +260,8 @@ DEPRECATED static inline void cx_math_addm(uint8_t       *r,
 }
 
 /**
- * @brief Modular subtraction of two integers represented as byte arrays.
+ * @brief Performs a modular subtraction of
+ *        two integers represented as byte arrays.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -266,11 +283,8 @@ DEPRECATED static inline void cx_math_addm(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_subm_no_throw(uint8_t       *r,
-                               const uint8_t *a,
-                               const uint8_t *b,
-                               const uint8_t *m,
-                               size_t         len);
+WARN_UNUSED_RESULT cx_err_t
+cx_math_subm_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *b, const uint8_t *m, size_t len);
 
 /**
  * @deprecated
@@ -286,7 +300,8 @@ DEPRECATED static inline void cx_math_subm(uint8_t       *r,
 }
 
 /**
- * @brief Modular multiplication of two integers represented as byte arrays.
+ * @brief Performs a modular multiplication of
+ *        two integers represented as byte arrays.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -308,11 +323,11 @@ DEPRECATED static inline void cx_math_subm(uint8_t       *r,
  *                 - CX_INVALID_PARAMETER
  *                 - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_math_multm_no_throw(uint8_t       *r,
-                                const uint8_t *a,
-                                const uint8_t *b,
-                                const uint8_t *m,
-                                size_t         len);
+WARN_UNUSED_RESULT cx_err_t cx_math_multm_no_throw(uint8_t       *r,
+                                                   const uint8_t *a,
+                                                   const uint8_t *b,
+                                                   const uint8_t *m,
+                                                   size_t         len);
 
 /**
  * @deprecated
@@ -328,9 +343,9 @@ DEPRECATED static inline void cx_math_multm(uint8_t       *r,
 }
 
 /**
- * @brief   Modulo operation.
+ * @brief   Performs a modular reduction.
  *
- * @details Compute the remainder of the division of v by m. Store the result in v.
+ * @details Computes the remainder of the division of v by m. Store the result in v.
  *
  * @param[in,out] v     Pointer to the dividend and buffer for the result.
  *
@@ -348,7 +363,10 @@ DEPRECATED static inline void cx_math_multm(uint8_t       *r,
  *                      - CX_MEMORY_FULL
  *                      - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_modm_no_throw(uint8_t *v, size_t len_v, const uint8_t *m, size_t len_m);
+WARN_UNUSED_RESULT cx_err_t cx_math_modm_no_throw(uint8_t       *v,
+                                                  size_t         len_v,
+                                                  const uint8_t *m,
+                                                  size_t         len_m);
 
 /**
  * @deprecated
@@ -360,9 +378,9 @@ DEPRECATED static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8
 }
 
 /**
- * @brief   Modular exponentiation.
+ * @brief   Performs a modular exponentiation.
  *
- * @details Compute the result of **a^e mod m**.
+ * @details Computes the result of **a^e mod m**.
  *
  * @param[out] r     Buffer for the result.
  *
@@ -384,12 +402,12 @@ DEPRECATED static inline void cx_math_modm(uint8_t *v, size_t len_v, const uint8
  *                   - CX_MEMORY_FULL
  *                   - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_powm_no_throw(uint8_t       *r,
-                               const uint8_t *a,
-                               const uint8_t *e,
-                               size_t         len_e,
-                               const uint8_t *m,
-                               size_t         len);
+WARN_UNUSED_RESULT cx_err_t cx_math_powm_no_throw(uint8_t       *r,
+                                                  const uint8_t *a,
+                                                  const uint8_t *e,
+                                                  size_t         len_e,
+                                                  const uint8_t *m,
+                                                  size_t         len);
 
 /**
  * @deprecated
@@ -406,9 +424,9 @@ DEPRECATED static inline void cx_math_powm(uint8_t       *r,
 }
 
 /**
- * @brief   Modular inverse with a prime modulus.
+ * @brief   Computes the modular inverse with a prime modulus.
  *
- * @details Compute the result of **a^(-1) mod m**, for a prime *m*.
+ * @details It computes the result of **a^(-1) mod m**, for a prime *m*.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -426,7 +444,10 @@ DEPRECATED static inline void cx_math_powm(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_invprimem_no_throw(uint8_t *r, const uint8_t *a, const uint8_t *m, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_invprimem_no_throw(uint8_t       *r,
+                                                       const uint8_t *a,
+                                                       const uint8_t *m,
+                                                       size_t         len);
 
 /**
  * @deprecated
@@ -441,10 +462,10 @@ DEPRECATED static inline void cx_math_invprimem(uint8_t       *r,
 }
 
 /**
- * @brief   Modular inverse.
+ * @brief   Computes the modular inverse.
  *
- * @details Compute the result of **a^(-1) mod m**. *a* must be invertible modulo *m*,
- *          i.e. the greatest common divisor of *a* and *n* is 1.
+ * @details It computes the result of **a^(-1) mod m**. *a* must be invertible modulo *m*,
+ *          i.e. the greatest common divisor of *a* and *m* is 1.
  *
  * @param[out] r   Buffer for the result.
  *
@@ -462,7 +483,10 @@ DEPRECATED static inline void cx_math_invprimem(uint8_t       *r,
  *                 - CX_MEMORY_FULL
  *                 - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_invintm_no_throw(uint8_t *r, uint32_t a, const uint8_t *m, size_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_invintm_no_throw(uint8_t       *r,
+                                                     uint32_t       a,
+                                                     const uint8_t *m,
+                                                     size_t         len);
 
 /**
  * @deprecated
@@ -474,7 +498,7 @@ DEPRECATED static inline void cx_math_invintm(uint8_t *r, uint32_t a, const uint
 }
 
 /**
- * @brief Check whether a number is probable prime.
+ * @brief Checks whether a number is probably prime.
  *
  * @param[in]  r     Pointer to an integer.
  *
@@ -492,7 +516,7 @@ DEPRECATED static inline void cx_math_invintm(uint8_t *r, uint32_t a, const uint
  *                   - CX_MEMORY_FULL
  *                   - CX_INVALID_PARAMETER
  */
-cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
+WARN_UNUSED_RESULT cx_err_t cx_math_is_prime_no_throw(const uint8_t *r, size_t len, bool *prime);
 
 /**
  * @deprecated
@@ -506,23 +530,23 @@ DEPRECATED static inline bool cx_math_is_prime(const uint8_t *r, size_t len)
 }
 
 /**
- * @brief Compute the next prime after a given number.
+ * @brief Computes the next prime after a given number.
  *
- * @param[in] r   Pointer to the integer and buffer for the result.
+ * @param[in, out] r   Pointer to the integer and buffer for the result.
  *
- * @param[in] len Number of bytes of the integer.
+ * @param[in]      len Number of bytes of the integer.
  *
- * @return        Error code:
- *                - CX_OK on success
- *                - CX_NOT_UNLOCKED
- *                - CX_INVALID_PARAMETER_SIZE
- *                - CX_MEMORY_FULL
- *                - CX_NOT_LOCKED
- *                - CX_INVALID_PARAMETER
- *                - CX_INTERNAL_ERROR
- *                - CX_OVERFLOW
+ * @return             Error code:
+ *                     - CX_OK on success
+ *                     - CX_NOT_UNLOCKED
+ *                     - CX_INVALID_PARAMETER_SIZE
+ *                     - CX_MEMORY_FULL
+ *                     - CX_NOT_LOCKED
+ *                     - CX_INVALID_PARAMETER
+ *                     - CX_INTERNAL_ERROR
+ *                     - CX_OVERFLOW
  */
-cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
+WARN_UNUSED_RESULT cx_err_t cx_math_next_prime_no_throw(uint8_t *r, uint32_t len);
 
 /**
  * @deprecated
@@ -534,7 +558,7 @@ DEPRECATED static inline void cx_math_next_prime(uint8_t *r, uint32_t len)
 }
 
 /**
- * @brief Compare if the byte array of an integer is all zero.
+ * @brief Checks whether the byte array of an integer is all zero.
  *
  * @param[in] a   Pointer to an integer.
  *
@@ -553,6 +577,6 @@ static inline bool cx_math_is_zero(const uint8_t *a, size_t len)
     return 1;
 }
 
-#endif  // LCX_MATH_H
-
 #endif  // HAVE_MATH
+
+#endif  // LCX_MATH_H

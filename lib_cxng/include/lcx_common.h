@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 #define ARCH_BIG_ENDIAN
 #endif
 
-#ifdef __UINT64_TYPE__
+#if defined(__UINT64_TYPE__) && !defined(NATIVE_64BITS)
 #define NATIVE_64BITS
 #endif
 
@@ -95,7 +95,7 @@ typedef uint64_t uint64bits_t;
  * | 2:1            | 0000000000000100  | CX_ENCRYPT                    | Encryption                                 | AES/DES               |
  * | 2:1            | 0000000000000010  | CX_VERIFY                     | Signature verification                     | AES/DES               |
  * | 2:1            | 0000000000000000  | CX_DECRYPT                    | Decryption                                 | AES/DES               |
- * | 0              | 0000000000000000  | CX_LAST                       | Last block                                 |                       |
+ * | 0              | 0000000000000001  | CX_LAST                       | Last block                                 |                       |
  */
 // clang-format on
 #define CX_FLAG

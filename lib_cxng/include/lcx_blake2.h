@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@
  * produces digests of any size between 1 and 64 bytes. It is specified at https://blake2.net.
  */
 
-#ifdef HAVE_BLAKE2
 #ifndef LCX_BLAKE2_H
 #define LCX_BLAKE2_H
+
+#ifdef HAVE_BLAKE2
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -67,7 +68,7 @@ struct cx_blake2b_s {
 typedef struct cx_blake2b_s cx_blake2b_t;
 
 /**
- * @brief   Initialize BLAKE2b message digest context.
+ * @brief   Initializes BLAKE2b message digest context.
  *
  * @param[out] hash    Pointer to the BLAKE2b context to initialize.
  *                     The context shall be in RAM.
@@ -78,7 +79,7 @@ typedef struct cx_blake2b_s cx_blake2b_t;
  *                     - CX_OK
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
+WARN_UNUSED_RESULT cx_err_t cx_blake2b_init_no_throw(cx_blake2b_t *hash, size_t out_len);
 
 /**
  * @deprecated
@@ -91,7 +92,7 @@ DEPRECATED static inline int cx_blake2b_init(cx_blake2b_t *hash, unsigned int ou
 }
 
 /**
- * @brief   Initialize BLAKE2b message digest context with
+ * @brief   Initializes BLAKE2b message digest context with
  *          salt and personnalization string.
  *
  * @param[out] hash     Pointer to the BLAKE2b context to initialize.
@@ -111,12 +112,12 @@ DEPRECATED static inline int cx_blake2b_init(cx_blake2b_t *hash, unsigned int ou
  *                      - CX_OK on success
  *                      - CX_INVALID_PARAMETER
  */
-cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
-                                   size_t        out_len,
-                                   uint8_t      *salt,
-                                   size_t        salt_len,
-                                   uint8_t      *perso,
-                                   size_t        perso_len);
+WARN_UNUSED_RESULT cx_err_t cx_blake2b_init2_no_throw(cx_blake2b_t *hash,
+                                                      size_t        out_len,
+                                                      uint8_t      *salt,
+                                                      size_t        salt_len,
+                                                      uint8_t      *perso,
+                                                      size_t        perso_len);
 
 /**
  * @deprecated
@@ -133,6 +134,6 @@ DEPRECATED static inline int cx_blake2b_init2(cx_blake2b_t  *hash,
     return CX_BLAKE2B;
 }
 
-#endif
-
 #endif  // HAVE_BLAKE2
+
+#endif  // LCX_BLAKE2_H

@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@
  * It consists in iteratively deriving HMAC.
  */
 
-#ifdef HAVE_PBKDF2
-
 #ifndef LCX_PBKDF2_H
 #define LCX_PBKDF2_H
+
+#ifdef HAVE_PBKDF2
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
 
 /**
- * @brief   Compute PBKDF2 bytes sequence.
+ * @brief   Computes a PBKDF2 bytes sequence.
  *
- * @details Compute PBKDF2 bytes sequence according to
+ * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898"> RFC 2898 </a>.
  *
  * @param[in]  md_type     Message digest algorithm identifier.
@@ -62,6 +62,7 @@
  *                         - CX_OK
  *                         - CX_INVALID_PARAMETER
  */
+// No need to add WARN_UNUSED_RESULT, return value is never checked!
 cx_err_t cx_pbkdf2_no_throw(cx_md_t        md_type,
                             const uint8_t *password,
                             size_t         passwordlen,
@@ -89,9 +90,9 @@ DEPRECATED static inline void cx_pbkdf2(cx_md_t              md_type,
 }
 
 /**
- * @brief   Compute PBKDF2 bytes sequence with SHA512.
+ * @brief   Computes a PBKDF2 bytes sequence with SHA512.
  *
- * @details Compute PBKDF2 bytes sequence according to
+ * @details It computes the bytes sequence according to
  *          <a href="https://tools.ietf.org/html/rfc2898">  RFC 2898 </a>
  *          with SHA512 as the underlying hash function.
  *
@@ -118,6 +119,6 @@ DEPRECATED static inline void cx_pbkdf2(cx_md_t              md_type,
 #define cx_pbkdf2_sha512(password, password_len, salt, salt_len, iterations, out, out_len) \
     cx_pbkdf2_no_throw(CX_SHA512, password, password_len, salt, salt_len, iterations, out, out_len)
 
-#endif  // LCX_PBKDF2_H
-
 #endif  // HAVE_PBKDF2
+
+#endif  // LCX_PBKDF2_H

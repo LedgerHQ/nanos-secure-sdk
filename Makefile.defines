@@ -16,7 +16,7 @@
 #*******************************************************************************
 
 #extract TARGET_NAME/TARGET_ID from the SDK to allow for makefile choices
-TARGET := "nanos"
+TARGET := nanos
 TARGET_ID:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
 TARGET_NAME:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
 TARGET_VERSION:=$(shell cat $(BOLOS_SDK)/include/bolos_version.h | grep define | cut -f2 -d'"')

@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@
  * <a href="https://tools.ietf.org/html/rfc6979"> RFC6979 </a> for more details.
  */
 
-#ifdef HAVE_ECDSA
-
 #ifndef LCX_ECDSA_H
 #define LCX_ECDSA_H
+
+#ifdef HAVE_ECDSA
 
 #include "lcx_wrappers.h"
 #include "lcx_ecfp.h"
@@ -39,7 +39,7 @@
 #define cx_ecdsa_init_private_key cx_ecfp_init_private_key_no_throw
 
 /**
- * @brief   Sign a message digest according to ECDSA specification
+ * @brief   Signs a message digest according to ECDSA specification
  *
  * @param[in]  pvkey    Private key.
  *                      Shall be initialized with #cx_ecfp_init_private_key_no_throw.
@@ -53,7 +53,8 @@
  *                      This parameter is mandatory with the flag CX_RND_RFC6979.
  *
  * @param[in]  hash     Digest of the message to be signed.
- *                      The length of *hash* must be shorter than the curve domain size.
+ *                      The length of *hash* must be shorter than the group order size.
+ *                      Otherwise it is truncated.
  *
  * @param[in]  hash_len Length of the digest in octets.
  *
@@ -79,14 +80,14 @@
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                uint32_t                     mode,
-                                cx_md_t                      hashID,
-                                const uint8_t               *hash,
-                                size_t                       hash_len,
-                                uint8_t                     *sig,
-                                size_t                      *sig_len,
-                                uint32_t                    *info);
+WARN_UNUSED_RESULT cx_err_t cx_ecdsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                   uint32_t                     mode,
+                                                   cx_md_t                      hashID,
+                                                   const uint8_t               *hash,
+                                                   size_t                       hash_len,
+                                                   uint8_t                     *sig,
+                                                   size_t                      *sig_len,
+                                                   uint32_t                    *info);
 
 /**
  * @deprecated
@@ -151,18 +152,18 @@ DEPRECATED static inline int cx_ecdsa_sign(const cx_ecfp_private_key_t *pvkey,
  *                      - CX_EC_INFINITE_POINT
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
-                                   uint32_t                     mode,
-                                   cx_md_t                      hashID,
-                                   const uint8_t               *hash,
-                                   size_t                       hash_len,
-                                   size_t                       rs_len,
-                                   uint8_t                     *sig_r,
-                                   uint8_t                     *sig_s,
-                                   uint32_t                    *info);
+WARN_UNUSED_RESULT cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
+                                                      uint32_t                     mode,
+                                                      cx_md_t                      hashID,
+                                                      const uint8_t               *hash,
+                                                      size_t                       hash_len,
+                                                      size_t                       rs_len,
+                                                      uint8_t                     *sig_r,
+                                                      uint8_t                     *sig_s,
+                                                      uint32_t                    *info);
 
 /**
- * @brief   Verify an ECDSA signature according to ECDSA specification.
+ * @brief   Verifies an ECDSA signature according to ECDSA specification.
  *
  * @param[in] pukey    Public key initialized with #cx_ecfp_init_public_key_no_throw.
  *
@@ -179,15 +180,15 @@ cx_err_t cx_ecdsa_sign_rs_no_throw(const cx_ecfp_private_key_t *key,
  *
  * @return             1 if the signature is verified, 0 otherwise.
  */
-bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
-                              const uint8_t              *hash,
-                              size_t                      hash_len,
-                              const uint8_t              *sig,
-                              size_t                      sig_len);
+WARN_UNUSED_RESULT bool cx_ecdsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
+                                                 const uint8_t              *hash,
+                                                 size_t                      hash_len,
+                                                 const uint8_t              *sig,
+                                                 size_t                      sig_len);
 
 /**
  * @deprecated
- * See #cx_ecdsa_sign_no_throw
+ * See #cx_ecdsa_verify_no_throw
  */
 DEPRECATED static inline bool cx_ecdsa_verify(const cx_ecfp_public_key_t *pukey,
                                               int                         mode,
@@ -202,6 +203,6 @@ DEPRECATED static inline bool cx_ecdsa_verify(const cx_ecfp_public_key_t *pukey,
     return cx_ecdsa_verify_no_throw(pukey, hash, hash_len, sig, sig_len);
 }
 
-#endif
-
 #endif  // HAVE_ECDSA
+
+#endif  // LCX_ECDSA_H

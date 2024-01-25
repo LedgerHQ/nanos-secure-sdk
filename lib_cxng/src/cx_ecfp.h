@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_ECC
-
 #ifndef CX_ECFP_H
 #define CX_ECFP_H
+
+#ifdef HAVE_ECC
 
 #include <stddef.h>
 #include <stdint.h>
@@ -49,6 +49,6 @@ int    cx_ecfp_decode_sig_der(const uint8_t  *sig,
                               const uint8_t **s,
                               size_t         *s_len);
 
-#endif  // CX_ECFP_H
-
 #endif  // HAVE_ECC
+
+#endif  // CX_ECFP_H

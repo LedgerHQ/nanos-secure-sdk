@@ -15,10 +15,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-#ifdef HAVE_RNG
 
 #ifndef CX_RNG_H
 #define CX_RNG_H
+
+#ifdef HAVE_RNG
 
 #include <stdint.h>
 
@@ -31,6 +32,6 @@ uint32_t cx_trng_u32(void);
 void cx_trng_lengthtest(void);
 #endif
 
-#endif
-
 #endif  // HAVE_RNG
+
+#endif  // CX_RNG_G

@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,18 +25,18 @@
  * for more details.
  */
 
-#ifdef HAVE_EDDSA
+#ifndef LCX_EDDSA_H
+#define LCX_EDDSA_H
 
 #include "lcx_ecfp.h"
 #include "lcx_wrappers.h"
 
-#ifndef LCX_EDDSA_H
-#define LCX_EDDSA_H
+#ifdef HAVE_EDDSA
 
 /**
- * @brief   Sign a message digest.
+ * @brief   Signs a message digest.
  *
- * @details Sign a message digest according to the EDDSA specification
+ * @details The signature is done according to the EDDSA specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *
  * @param[in]  pvkey    Private key.
@@ -71,12 +71,12 @@
  *                      - CX_INTERNAL_ERROR
  *                      - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
-                                cx_md_t                      hashID,
-                                const uint8_t               *hash,
-                                size_t                       hash_len,
-                                uint8_t                     *sig,
-                                size_t                       sig_len);
+WARN_UNUSED_RESULT cx_err_t cx_eddsa_sign_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                                   cx_md_t                      hashID,
+                                                   const uint8_t               *hash,
+                                                   size_t                       hash_len,
+                                                   uint8_t                     *sig,
+                                                   size_t                       sig_len);
 
 /**
  * @deprecated
@@ -107,9 +107,9 @@ DEPRECATED static inline int cx_eddsa_sign(const cx_ecfp_private_key_t *pvkey,
 }
 
 /**
- * @brief   Verify a signature.
+ * @brief   Verifies a signature.
  *
- * @details Verify a signature according to the specification
+ * @details The verification is done according to the specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *
  * @param[in]  pukey    Public key.
@@ -131,17 +131,17 @@ DEPRECATED static inline int cx_eddsa_sign(const cx_ecfp_private_key_t *pvkey,
  *
  * @return              1 if the signature is verified, otherwise 0.
  */
-bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
-                              cx_md_t                     hashID,
-                              const uint8_t              *hash,
-                              size_t                      hash_len,
-                              const uint8_t              *sig,
-                              size_t                      sig_len);
+WARN_UNUSED_RESULT bool cx_eddsa_verify_no_throw(const cx_ecfp_public_key_t *pukey,
+                                                 cx_md_t                     hashID,
+                                                 const uint8_t              *hash,
+                                                 size_t                      hash_len,
+                                                 const uint8_t              *sig,
+                                                 size_t                      sig_len);
 
 /**
- * @brief   Verify a signature.
+ * @brief   Verifies a signature.
  *
- * @details Verify a signature according to the specification
+ * @details The verification is done according to the specification
  *          <a href="https://tools.ietf.org/html/rfc8032"> RFC8032 </a>.
  *          This function throws an exception if the computation doesn't
  *          succeed.
@@ -189,28 +189,28 @@ static inline int cx_eddsa_verify(const cx_ecfp_public_key_t *pukey,
 }
 
 /**
- * @brief   Encode the curve point coordinates.
+ * @brief   Encodes the curve point coordinates.
  *
- * @param[in] coord A pointer to the point coordinates in the form x|y.
+ * @param[in, out] coord A pointer to the point coordinates in the form x|y.
  *
- * @param[in] len   Length of the coordinates.
+ * @param[in]      len   Length of the coordinates.
  *
- * @param[in] sign  Sign of the x-coordinate.
+ * @param[in]      sign  Sign of the x-coordinate.
  *
  */
 void cx_encode_coord(uint8_t *coord, int len, int sign);
 
 /**
- * @brief   Decode the curve point coordinates.
+ * @brief   Decodes the curve point coordinates.
  *
- * @param[in] coord A pointer to the point encoded coordinates.
+ * @param[in, out] coord A pointer to the point encoded coordinates.
  *
- * @param[in] len   Length of the encoded coordinates.
+ * @param[in]      len   Length of the encoded coordinates.
  *
- * @return Sign of the x-coordinate.
+ * @return               Sign of the x-coordinate.
  */
 int cx_decode_coord(uint8_t *coord, int len);
 
-#endif
-
 #endif  // HAVE_EDDSA
+
+#endif  // LCX_EDDSA_H

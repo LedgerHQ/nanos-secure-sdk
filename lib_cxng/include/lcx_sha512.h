@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@
  * for more details.
  */
 
-#if defined(HAVE_SHA384) || defined(HAVE_SHA512)
-
 #ifndef LCX_SHA512_H
 #define LCX_SHA512_H
+
+#if defined(HAVE_SHA384) || defined(HAVE_SHA512)
 
 /** SHA-384 message digest size */
 #define CX_SHA384_SIZE 48
@@ -50,7 +50,7 @@ struct cx_sha512_s {
 typedef struct cx_sha512_s cx_sha512_t;
 
 /**
- * @brief   Initialize a SHA-384 context.
+ * @brief   Initializes a SHA-384 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -58,10 +58,11 @@ typedef struct cx_sha512_s cx_sha512_t;
  * @return          Error code:
  *                  - CX_OK on success
  */
+// No need to add WARN_UNUSED_RESULT to cx_sha384_init_no_throw(), it always returns CX_OK
 cx_err_t cx_sha384_init_no_throw(cx_sha512_t *hash);
 
 /**
- * @brief   Initialize a SHA-384 context.
+ * @brief   Initializes a SHA-384 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -75,7 +76,7 @@ static inline int cx_sha384_init(cx_sha512_t *hash)
 }
 
 /**
- * @brief   Initialize a SHA-512 context.
+ * @brief   Initializes a SHA-512 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -83,10 +84,11 @@ static inline int cx_sha384_init(cx_sha512_t *hash)
  * @return          Error code:
  *                  - CX_OK on success
  */
+// No need to add WARN_UNUSED_RESULT to cx_sha512_init_no_throw(), it always returns CX_OK
 cx_err_t cx_sha512_init_no_throw(cx_sha512_t *hash);
 
 /**
- * @brief   Initialize a SHA-512 context.
+ * @brief   Initializes a SHA-512 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -100,7 +102,7 @@ static inline int cx_sha512_init(cx_sha512_t *hash)
 }
 
 /**
- * @brief   Compute a one shot SHA-512 digest.
+ * @brief   Computes a one shot SHA-512 digest.
  *
  * @param[in]  in      Input data.
  *
@@ -113,6 +115,6 @@ static inline int cx_sha512_init(cx_sha512_t *hash)
  */
 size_t cx_hash_sha512(const uint8_t *in, size_t in_len, uint8_t *out, size_t out_len);
 
-#endif
-
 #endif  // defined(HAVE_SHA384) || defined(HAVE_SHA512)
+
+#endif  // LCX_SHA512_H

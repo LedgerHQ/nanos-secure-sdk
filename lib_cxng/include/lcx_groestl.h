@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ struct cx_groestl_s {
 typedef struct cx_groestl_s cx_groestl_t;
 
 /**
- * @brief   Initialize a GROESTL224 context.
+ * @brief   Initializes a GROESTL context.
  *
- * @param[out] hash Pointer to the context to init.
+ * @param[out] hash Pointer to the context to initialize.
  *
  * @param[in]  size Length of the digest.
  *
@@ -72,7 +72,7 @@ typedef struct cx_groestl_s cx_groestl_t;
  *                  - CX_OK on success
  *                  - CX_INVALID_PARAMETER
  */
-cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
+WARN_UNUSED_RESULT cx_err_t cx_groestl_init_no_throw(cx_groestl_t *hash, size_t size);
 
 /**
  * @deprecated

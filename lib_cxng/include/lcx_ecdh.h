@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@
  * are elements of a chosen elliptic curve.
  */
 
-#ifdef HAVE_ECDH
-
 #ifndef LCX_ECDH_H
 #define LCX_ECDH_H
+
+#ifdef HAVE_ECDH
 
 #if defined(HAVE_ECDH) || defined(HAVE_X25519) || defined(HAVE_X448)
 
@@ -38,7 +38,7 @@
 
 #if defined(HAVE_ECDH)
 /**
- * @brief   Compute an ECDH shared secret.
+ * @brief   Computes an ECDH shared secret.
  *
  * @details Depending on the mode, the shared secret is either the full point or
  *          only the *x* coordinate.
@@ -72,12 +72,12 @@
  *                          - CX_INVALID_PARAMETER_SIZE
  *                          - CX_EC_INFINITE_POINT
  */
-cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *pvkey,
-                          uint32_t                     mode,
-                          const uint8_t               *P,
-                          size_t                       P_len,
-                          uint8_t                     *secret,
-                          size_t                       secret_len);
+WARN_UNUSED_RESULT cx_err_t cx_ecdh_no_throw(const cx_ecfp_private_key_t *pvkey,
+                                             uint32_t                     mode,
+                                             const uint8_t               *P,
+                                             size_t                       P_len,
+                                             uint8_t                     *secret,
+                                             size_t                       secret_len);
 
 /**
  * @deprecated
@@ -107,7 +107,8 @@ DEPRECATED static inline int cx_ecdh(const cx_ecfp_private_key_t *pvkey,
 
 #if defined(HAVE_X25519)
 /**
- * @brief   Perform a scalar multiplication on Curve25519 with u-coordinate only.
+ * @brief   Performs a scalar multiplication
+ *          on Curve25519 with u-coordinate only.
  *
  * @details The notation (u, v) is used for Montgomery curves while (x, y)
  *          is used for the birational equivalents (Edwards curves).
@@ -131,12 +132,13 @@ DEPRECATED static inline int cx_ecdh(const cx_ecfp_private_key_t *pvkey,
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
+WARN_UNUSED_RESULT cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
 #endif  // HAVE_X25519
 
 #if defined(HAVE_X448)
 /**
- * @brief   Perform a scalar multiplication on Curve448 with u-coordinate only.
+ * @brief   Performs a scalar multiplication
+ *          on Curve448 with u-coordinate only.
  *
  * @details The notation (u, v) is used for Montgomery curves while (x, y)
  *          is used for the birational equivalents (Edwards curves).
@@ -160,7 +162,7 @@ cx_err_t cx_x25519(uint8_t *u, const uint8_t *k, size_t k_len);
  *                   - CX_EC_INFINITE_POINT
  *                   - CX_INVALID_PARAMETER_VALUE
  */
-cx_err_t cx_x448(uint8_t *u, const uint8_t *k, size_t k_len);
+WARN_UNUSED_RESULT cx_err_t cx_x448(uint8_t *u, const uint8_t *k, size_t k_len);
 #endif  // HAVE_X448
 
 #endif  // HAVE_ECDH || HAVE_X25519 || HAVE_X448

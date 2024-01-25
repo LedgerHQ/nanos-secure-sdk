@@ -265,8 +265,8 @@ cx_err_t cx_rsa_generate_pair_no_throw(size_t                modulus_len,
     CX_CHECK(cx_bn_destroy(&bn_q));
     // - d = inv(e) mod n
     CX_CHECK(cx_bn_alloc(&bn_p, modulus_len));
-    cx_bn_mod_u32_invert(
-        bn_p, (pu_e[0] << 24) | (pu_e[1] << 16) | (pu_e[2] << 8) | (pu_e[3] << 0), bn_n);
+    CX_CHECK(cx_bn_mod_u32_invert(
+        bn_p, (pu_e[0] << 24) | (pu_e[1] << 16) | (pu_e[2] << 8) | (pu_e[3] << 0), bn_n));
     CX_CHECK(cx_bn_export(bn_p, pv_d, modulus_len));
     memmove(pv_n, pu_n, modulus_len);
 

@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@
  *   - SHA512
  */
 
-#ifdef HAVE_HASH
-
 #ifndef LCX_HASH_H
 #define LCX_HASH_H
+
+#ifdef HAVE_HASH
 
 #include "cx_errors.h"
 #include "lcx_wrappers.h"
@@ -116,7 +116,7 @@ struct cx_hash_header_s {
 size_t cx_hash_get_size(const cx_hash_t *ctx);
 
 /**
- * @brief   Hash data according to the specified algorithm.
+ * @brief   Hashes data according to the specified algorithm.
  *
  * @param[in]  hash    Pointer to the hash context.
  *                     Shall be in RAM.
@@ -136,19 +136,19 @@ size_t cx_hash_get_size(const cx_hash_t *ctx);
  *                       - message digest if CX_LAST is set
  *
  * @param[out] out_len The size of the output buffer or 0 if out is NULL.
- *                     If buffer is too small to store the hash a exception is returned.
+ *                     If buffer is too small to store the hash an error is returned.
  *
  * @return             Error code:
  *                     - CX_OK on success
  *                     - INVALID_PARAMETER
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hash_no_throw(cx_hash_t     *hash,
-                          uint32_t       mode,
-                          const uint8_t *in,
-                          size_t         len,
-                          uint8_t       *out,
-                          size_t         out_len);
+WARN_UNUSED_RESULT cx_err_t cx_hash_no_throw(cx_hash_t     *hash,
+                                             uint32_t       mode,
+                                             const uint8_t *in,
+                                             size_t         len,
+                                             uint8_t       *out,
+                                             size_t         out_len);
 
 /**
  * @deprecated
@@ -166,7 +166,7 @@ DEPRECATED static inline int cx_hash(cx_hash_t           *hash,
 }
 
 /**
- * @brief   Initialize a hash context.
+ * @brief   Initializes a hash context.
  *
  * @param[out] hash    Pointer to the context to be initialized.
  *                     The context shall be in RAM.
@@ -177,12 +177,12 @@ DEPRECATED static inline int cx_hash(cx_hash_t           *hash,
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
+WARN_UNUSED_RESULT cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
 
 /**
- * @brief   Initialize a hash context.
+ * @brief   Initializes a hash context.
  *
- * @details Initialize a hash context with a chosen output length
+ * @details It initializes a hash context with a chosen output length
  *          (typically for eXtendable Output Functions (XOF)).
  *
  * @param[out] hash        Pointer to the context to be initialized.
@@ -200,10 +200,10 @@ cx_err_t cx_hash_init(cx_hash_t *hash, cx_md_t hash_id);
  *                         - CX_OK on success
  *                         - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
+WARN_UNUSED_RESULT cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
 
 /**
- * @brief   Add more data to hash.
+ * @brief   Adds more data to hash.
  *
  * @details A call to this function is equivalent to:
  *          *cx_hash_no_throw(hash, 0, in, in_len, NULL, 0)*.
@@ -219,10 +219,10 @@ cx_err_t cx_hash_init_ex(cx_hash_t *hash, cx_md_t hash_id, size_t output_size);
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
+WARN_UNUSED_RESULT cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
 
 /**
- * @brief   Finalize the hash.
+ * @brief   Finalizes the hash.
  *
  * @details A call to this function is equivalent to:
  *          *cx_hash_no_throw(hash, CX_LAST, NULL, 0, out, out_len)*.
@@ -234,8 +234,8 @@ cx_err_t cx_hash_update(cx_hash_t *hash, const uint8_t *in, size_t in_len);
  * @return            Error code:
  *                    - CX_OK on success
  */
-cx_err_t cx_hash_final(cx_hash_t *hash, uint8_t *digest);
-
-#endif
+WARN_UNUSED_RESULT cx_err_t cx_hash_final(cx_hash_t *hash, uint8_t *digest);
 
 #endif  // HAVE_HASH
+
+#endif  // LCX_HASH_H

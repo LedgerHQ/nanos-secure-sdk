@@ -64,7 +64,7 @@ uint8_t SC_ExecuteEscape (uint8_t* escapePtr, uint32_t escapeLen,
                           uint8_t* responseBuff,
                           uint16_t* responseLen);
 uint8_t SC_SetClock (uint8_t bClockCommand);
-uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen, uint16_t* expectedLen);
+uint8_t SC_XferBlock (uint8_t* ptrBlock, uint32_t blockLen);
 uint8_t SC_Request_GetClockFrequencies(uint8_t* pbuf, uint16_t* len);
 uint8_t SC_Request_GetDataRates(uint8_t* pbuf, uint16_t* len);
 uint8_t SC_T0Apdu(uint8_t bmChanges, uint8_t bClassGetResponse, 
@@ -72,8 +72,7 @@ uint8_t SC_T0Apdu(uint8_t bmChanges, uint8_t bClassGetResponse,
 uint8_t SC_Mechanical(uint8_t bFunction);
 uint8_t SC_SetDataRateAndClockFrequency(uint32_t dwClockFrequency, 
                                         uint32_t dwDataRate); 
-uint8_t SC_Secure(uint32_t dwLength, uint8_t bBWI, uint16_t wLevelParameter, 
-                    uint8_t* pbuf, uint32_t* returnLen );
+uint8_t SC_Secure(uint8_t* pbuf, uint32_t* returnLen);
 
 #endif // HAVE_USB_CLASS_CCID
 

@@ -16,10 +16,10 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#ifdef HAVE_HASH
-
 #ifndef CX_HASH_H
 #define CX_HASH_H
+
+#ifdef HAVE_HASH
 
 #include "lcx_hash.h"
 #include <stddef.h>
@@ -37,25 +37,25 @@
 #define MAX_HASH_BLOCK_SIZE 128
 
 #ifdef HAVE_GROESTL
-cx_err_t cx_groestl(cx_hash_t     *hash,
-                    uint32_t       mode,
-                    const uint8_t *in,
-                    size_t         in_len,
-                    uint8_t       *out,
-                    size_t         out_len);
+WARN_UNUSED_RESULT cx_err_t cx_groestl(cx_hash_t     *hash,
+                                       uint32_t       mode,
+                                       const uint8_t *in,
+                                       size_t         in_len,
+                                       uint8_t       *out,
+                                       size_t         out_len);
 #endif
 
 #ifdef HAVE_BLAKE2
-cx_err_t cx_blake2b(cx_hash_t     *hash,
-                    uint32_t       mode,
-                    const uint8_t *in,
-                    size_t         in_len,
-                    uint8_t       *out,
-                    size_t         out_len);
+WARN_UNUSED_RESULT cx_err_t cx_blake2b(cx_hash_t     *hash,
+                                       uint32_t       mode,
+                                       const uint8_t *in,
+                                       size_t         in_len,
+                                       uint8_t       *out,
+                                       size_t         out_len);
 #endif
 
 const cx_hash_info_t *cx_hash_get_info(cx_md_t md_type);
 
-#endif
-
 #endif  // HAVE_HASH
+
+#endif  // CX_HASH_H

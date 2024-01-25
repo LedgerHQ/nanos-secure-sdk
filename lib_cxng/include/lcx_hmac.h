@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@
  * which involves a hash function and a secret key. It enables
  * the verification of the integrity and the authenticity of a message.
  */
-#ifdef HAVE_HMAC
 
 #ifndef LCX_HMAC_H
 #define LCX_HMAC_H
+
+#ifdef HAVE_HMAC
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -56,14 +57,14 @@ typedef struct {
 } cx_hmac_ripemd160_t;
 
 /**
- * @brief   Initialize a HMAC-RIPEMD160 context.
+ * @brief   Initializes a HMAC-RIPEMD160 context.
  *
  * @param[out] hmac    Pointer to the HMAC context.
  *                     The context shall be in RAM.
  *
  * @param[in]  key     Pointer to the HMAC key value.
  *                     If a key has been set, passing
- *                     NULL pointeur will reinitialize
+ *                     NULL pointer will reinitialize
  *                     the context with the previously set key.
  *
  * @param [in] key_len Length of the key.
@@ -73,9 +74,9 @@ typedef struct {
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac,
-                                         const uint8_t       *key,
-                                         size_t               key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_ripemd160_init_no_throw(cx_hmac_ripemd160_t *hmac,
+                                                            const uint8_t       *key,
+                                                            size_t               key_len);
 
 /**
  * @deprecated
@@ -103,14 +104,14 @@ typedef struct {
 #ifdef HAVE_SHA224
 
 /**
- * @brief   Initialize a HMAC-SHA224 context.
+ * @brief   Initializes a HMAC-SHA224 context.
  *
  * @param[out] hmac    Pointer to the HMAC context.
  *                     The context shall be in RAM.
  *
  * @param[in]  key     Pointer to the HMAC key value.
  *                     If a key has been set, passing
- *                     NULL pointeur will reinitialize
+ *                     NULL pointer will reinitialize
  *                     the context with the previously set key.
  *
  * @param [in] key_len Length of the key.
@@ -120,20 +121,22 @@ typedef struct {
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac, const uint8_t *key, unsigned int key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac,
+                                                const uint8_t    *key,
+                                                unsigned int      key_len);
 #endif
 
 #ifdef HAVE_SHA256
 
 /**
- * @brief   Initialize a HMAC-SHA256 context.
+ * @brief   Initializes a HMAC-SHA256 context.
  *
  * @param[out] hmac    Pointer to the HMAC context.
  *                     The context shall be in RAM.
  *
  * @param[in]  key     Pointer to the HMAC key value.
  *                     If a key has been set, passing
- *                     NULL pointeur will reinitialize
+ *                     NULL pointer will reinitialize
  *                     the context with the previously set key.
  *
  * @param [in] key_len Length of the key.
@@ -143,7 +146,9 @@ cx_err_t cx_hmac_sha224_init(cx_hmac_sha256_t *hmac, const uint8_t *key, unsigne
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha256_init_no_throw(cx_hmac_sha256_t *hmac,
+                                                         const uint8_t    *key,
+                                                         size_t            key_len);
 
 /**
  * @deprecated
@@ -158,7 +163,7 @@ DEPRECATED static inline int cx_hmac_sha256_init(cx_hmac_sha256_t    *hmac,
 }
 
 /**
- * @brief   Compute a HMAC value using SHA256.
+ * @brief   Computes a HMAC value using SHA256.
  *
  * @param[in]  key     HMAC key value.
  *
@@ -198,14 +203,14 @@ typedef struct {
 #ifdef HAVE_SHA384
 
 /**
- * @brief   Initialize a HMAC-SHA384 context.
+ * @brief   Initializes a HMAC-SHA384 context.
  *
  * @param[out] hmac    Pointer to the context.
  *                     The context shall be in RAM.
  *
  * @param[in]  key     Pointer to the HMAC key value.
  *                     If a key has been set, passing
- *                     NULL pointeur will reinitialize
+ *                     NULL pointer will reinitialize
  *                     the context with the previously set key.
  *
  * @param[in]  key_len Length of the key.
@@ -215,20 +220,22 @@ typedef struct {
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac, const uint8_t *key, unsigned int key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac,
+                                                const uint8_t    *key,
+                                                unsigned int      key_len);
 #endif
 
 #ifdef HAVE_SHA512
 
 /**
- * @brief   Initialize a HMAC-SHA512 context.
+ * @brief   Initializes a HMAC-SHA512 context.
  *
  * @param[out] hmac    Pointer to the context.
  *                     The context shall be in RAM.
  *
  * @param[in]  key     Pointer to the HMAC key value.
  *                     If a key has been set, passing
- *                     NULL pointeur will reinitialize
+ *                     NULL pointer will reinitialize
  *                     the context with the previously set key.
  *
  * @param[in]  key_len Length of the key.
@@ -238,7 +245,9 @@ cx_err_t cx_hmac_sha384_init(cx_hmac_sha512_t *hmac, const uint8_t *key, unsigne
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_sha512_init_no_throw(cx_hmac_sha512_t *hmac,
+                                                         const uint8_t    *key,
+                                                         size_t            key_len);
 
 /**
  * @deprecated
@@ -253,7 +262,7 @@ DEPRECATED static inline int cx_hmac_sha512_init(cx_hmac_sha512_t    *hmac,
 }
 
 /**
- * @brief   Compute a HMAC value using SHA512.
+ * @brief   Computes a HMAC value using SHA512.
  *
  * @param[in]  key     HMAC key value.
  *
@@ -281,7 +290,7 @@ size_t cx_hmac_sha512(const uint8_t *key,
 #endif
 
 /**
- * @brief   Compute a HMAC value according to the specified
+ * @brief   Computes a HMAC value according to the specified
  *          hash function.
  *
  * @param[in]  hmac    Pointer to the HMAC context.
@@ -311,12 +320,12 @@ size_t cx_hmac_sha512(const uint8_t *key,
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_no_throw(cx_hmac_t     *hmac,
-                          uint32_t       mode,
-                          const uint8_t *in,
-                          size_t         len,
-                          uint8_t       *mac,
-                          size_t         mac_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_no_throw(cx_hmac_t     *hmac,
+                                             uint32_t       mode,
+                                             const uint8_t *in,
+                                             size_t         len,
+                                             uint8_t       *mac,
+                                             size_t         mac_len);
 
 /**
  * @deprecated
@@ -359,16 +368,16 @@ DEPRECATED static inline int cx_hmac(cx_hmac_t           *hmac,
 }
 
 /**
- * @brief   Initialize a HMAC context.
+ * @brief   Initializes a HMAC context.
  *
  * @param[out] hmac    Pointer to the context.
  *                     The context shall be in RAM.
  *
- * @param[in]  hash_id The message digest algorithm identifier
+ * @param[in]  hash_id The message digest algorithm identifier.
  *
  * @param[in]  key     Pointer to the HMAC key value.
  *                     If a key has been set, passing
- *                     NULL pointeur will reinitialize
+ *                     NULL pointer will reinitialize
  *                     the context with the previously set key.
  *
  * @param[in]  key_len Length of the key.
@@ -378,10 +387,13 @@ DEPRECATED static inline int cx_hmac(cx_hmac_t           *hmac,
  *                     - CX_OK on success
  *                     - CX_INVALID_PARAMETER
  */
-cx_err_t cx_hmac_init(cx_hmac_t *hmac, cx_md_t hash_id, const uint8_t *key, size_t key_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_init(cx_hmac_t     *hmac,
+                                         cx_md_t        hash_id,
+                                         const uint8_t *key,
+                                         size_t         key_len);
 
 /**
- * @brief   Add more data to compute the HMAC.
+ * @brief   Adds more data to compute the HMAC.
  *
  * @details A call to this function is equivalent to:
  *          *cx_hmac_no_throw(hmac, 0, in, in_len, NULL, 0)*.
@@ -397,15 +409,16 @@ cx_err_t cx_hmac_init(cx_hmac_t *hmac, cx_md_t hash_id, const uint8_t *key, size
  *                    - CX_INVALID_PARAMETER
  *                    - INVALID_PARAMETER
  */
-cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
+WARN_UNUSED_RESULT cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
 
 /**
- * @brief   Finalize the HMAC algorithm.
+ * @brief   Finalizes the HMAC algorithm.
  *
  * @details A call to this function is
  *          equivalent to *cx_hmac_no_throw(hash, CX_LAST, NULL, 0, out, out_len)*.
  *
  * @param[in]  ctx     Pointer to the HMAC context.
+ *
  * @param[out] out     Computed HMAC value is CX_LAST is set.
  *
  * @param[in]  out_len Length of the output (the most significant bytes).
@@ -413,8 +426,8 @@ cx_err_t cx_hmac_update(cx_hmac_t *hmac, const uint8_t *in, size_t in_len);
  * @return             Error code:
  *                     - CX_OK on success
  */
-cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len);
-
-#endif
+WARN_UNUSED_RESULT cx_err_t cx_hmac_final(cx_hmac_t *ctx, uint8_t *out, size_t *out_len);
 
 #endif  // HAVE_HMAC
+
+#endif  // LCX_HMAC_H

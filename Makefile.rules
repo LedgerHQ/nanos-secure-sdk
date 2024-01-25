@@ -22,6 +22,17 @@ ifeq ($(DISABLE_UI),0)
     endif
 endif
 
+define uniq =
+  $(eval seen :=)
+  $(foreach _,$1,$(if $(filter $_,${seen}),,$(eval seen += $_)))
+  ${seen}
+endef
+
+define check_duplicate =
+  $(eval LIST := $(sort $(foreach file_h, $(notdir $1), $(notdir $(shell find $2 -name $(file_h))))))
+  $(if $(LIST), $(info [WARNING] Found duplicate files in SDK and APP: ${LIST}))
+endef
+
 # Expose all SDK header files with their full relative path to the SDK root folder
 INCLUDES_PATH  += ${BOLOS_SDK}
 
@@ -30,12 +41,49 @@ ifeq ($(NO_CXNG),)
 INCLUDES_PATH += $(BOLOS_SDK)/lib_cxng/include
 endif
 
-SOURCE_PATH   += $(BOLOS_SDK)/src $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.[csS]'))) $(dir $(shell find $(APP_SOURCE_PATH) -name '*.[csS]'))
-SOURCE_FILES  += $(shell find $(SOURCE_PATH) -name '*.[csS]') $(GLYPH_DESTC) $(APP_SOURCE_FILES)
-INCLUDES_PATH += $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.h')))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(shell find $(APP_SOURCE_PATH) -name '*.h')) $(GLYPH_SRC_DIR)
+# Get absolute App root directory to ensure correct stem replacement
+APP_DIR := $(shell git rev-parse --show-toplevel)
+ifeq ($(APP_DIR),)
+MSG := "[ERROR] You should be inside a git repo (you can use 'git init')"
+ifneq ($(ENABLE_SDK_WERROR),0)
+$(error $(MSG))
+else
+$(warning $(MSG))
+endif
+endif
 
-VPATH += $(dir $(SOURCE_FILES))
-OBJECT_FILES += $(sort $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(notdir $(SOURCE_FILES))))))
-DEPEND_FILES += $(sort $(addprefix $(DEP_DIR)/, $(addsuffix .d, $(basename $(notdir $(SOURCE_FILES))))))
+# Extract BOLOS_SDK source files added by the App Makefile
+APP_SRC_FROM_SDK = $(filter $(BOLOS_SDK)/%, $(APP_SOURCE_FILES))
+# Extract generated and glyphs source files added by the App Makefile
+APP_SRC_GEN = $(filter $(GEN_SRC_DIR)/%, $(APP_SOURCE_FILES))
+# Extract proto source files added by the App Makefile
+APP_SRC_PROTOC = $(filter %.pb.c, $(APP_SOURCE_FILES) $(SOURCE_FILES)) $(shell find $(APP_SOURCE_PATH) -name '*.pb.c')
+# Filter remaining real source files from App (proto filtered globally hereafter)
+APP_SRC_FILTER = $(filter-out $(APP_SRC_FROM_SDK) $(APP_SRC_GEN), $(APP_SOURCE_FILES))
+
+# Separate SDK and APP and GEN sources
+SOURCES_SDK += $(foreach libdir, src $(SDK_SOURCE_PATH), $(shell find $(BOLOS_SDK)/$(libdir) -name '*.[csS]')) $(APP_SRC_FROM_SDK)
+SOURCES_APP += $(filter-out %.pb.c, $(abspath $(SOURCE_FILES) $(foreach libdir, $(SOURCE_PATH) $(APP_SOURCE_PATH), $(shell find $(libdir) -name '*.[csS]')) $(APP_SRC_FILTER)))
+SOURCES_GEN += $(GLYPH_DESTC) $(APP_SRC_GEN)
+VPATH += $(call uniq, $(dir $(SOURCES_SDK) $(SOURCES_APP) $(GLYPH_DESTC)))
+
+# Retrieve APP header filenames
+INCLUDES_APP += $(shell find $(APP_SOURCE_PATH) -name '*.h')
+# Warn if a same header filename is found in both APP and SDK
+$(call check_duplicate, $(INCLUDES_APP), $(BOLOS_SDK))
+# Compute header directories list
+INCLUDES_PATH += $(call uniq, $(dir $(foreach libdir, $(SDK_SOURCE_PATH), $(dir $(shell find $(BOLOS_SDK)/$(libdir) -name '*.h')))) include $(BOLOS_SDK)/include $(BOLOS_SDK)/include/arm $(dir $(INCLUDES_APP)) $(GLYPH_SRC_DIR))
+
+# Separate object files from SDK and APP to avoid name conflicts
+OBJECTS_SDK += $(sort $(subst $(BOLOS_SDK), $(OBJ_DIR)/sdk, $(addsuffix .o, $(basename $(SOURCES_SDK)))))
+OBJECTS_APP += $(sort $(addprefix $(OBJ_DIR)/app, $(addsuffix .o, $(basename $(foreach f, $(SOURCES_APP), $(shell echo $(f) | sed "s|$(APP_DIR)||" 2>/dev/null))))))
+OBJECTS_GEN += $(sort $(SOURCES_GEN:%c=%o))
+OBJECTS_PROTOC += $(sort $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(APP_SRC_PROTOC)))))
+OBJECT_FILES = $(OBJECTS_GEN) $(OBJECTS_PROTOC) $(OBJECTS_APP) $(OBJECTS_SDK)
+OBJECTS_DIR += $(sort $(dir $(OBJECT_FILES)))
+
+# Separate dependency files from SDK and APP to avoid name conflicts
+DEPEND_FILES = $(subst $(OBJ_DIR), $(DEP_DIR), $(addsuffix .d, $(basename $(OBJECT_FILES))))
+DEPEND_DIR += $(sort $(dir $(DEPEND_FILES)))
 
 include $(BOLOS_SDK)/Makefile.rules_generic

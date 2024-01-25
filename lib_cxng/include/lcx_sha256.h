@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@
  * for more details.
  */
 
-#if defined(HAVE_SHA256) || defined(HAVE_SHA224)
-
 #ifndef LCX_SHA256_H
 #define LCX_SHA256_H
+
+#if defined(HAVE_SHA256) || defined(HAVE_SHA224)
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -59,7 +59,7 @@ typedef struct cx_sha256_s cx_sha256_t;
 
 #if defined(HAVE_SHA224)
 /**
- * @brief   Initialize a SHA-224 context.
+ * @brief   Initializes a SHA-224 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -67,8 +67,17 @@ typedef struct cx_sha256_s cx_sha256_t;
  * @return          Error code:
  *                  - CX_OK on success
  */
+// No need to add WARN_UNUSED_RESULT to cx_sha224_init_no_throw(), it always returns CX_OK
 cx_err_t cx_sha224_init_no_throw(cx_sha256_t *hash);
 
+/**
+ * @brief   Initializes a SHA-224 context.
+ *
+ * @param[out] hash Pointer to the context.
+ *                  The context shall be in RAM.
+ *
+ * @return          SHA224 identifier.
+ */
 static inline int cx_sha224_init(cx_sha256_t *hash)
 {
     cx_sha224_init_no_throw(hash);
@@ -77,7 +86,7 @@ static inline int cx_sha224_init(cx_sha256_t *hash)
 #endif
 
 /**
- * @brief   Initialize a SHA-256 context.
+ * @brief   Initializes a SHA-256 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -85,10 +94,11 @@ static inline int cx_sha224_init(cx_sha256_t *hash)
  * @return          Error code:
  *                  - CX_OK on success
  */
+// No need to add WARN_UNUSED_RESULT to cx_sha256_init_no_throw(), it always returns CX_OK
 cx_err_t cx_sha256_init_no_throw(cx_sha256_t *hash);
 
 /**
- * @brief   Initialize a SHA-256 context.
+ * @brief   Initializes a SHA-256 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -102,7 +112,7 @@ static inline int cx_sha256_init(cx_sha256_t *hash)
 }
 
 /**
- * @brief   Compute a one shot SHA-256 digest.
+ * @brief   Computes a one shot SHA-256 digest.
  *
  * @param[in]  in      Input data.
  *
@@ -116,6 +126,6 @@ static inline int cx_sha256_init(cx_sha256_t *hash)
  */
 size_t cx_hash_sha256(const uint8_t *in, size_t len, uint8_t *out, size_t out_len);
 
-#endif
-
 #endif  // defined(HAVE_SHA256) || defined(HAVE_SHA224)
+
+#endif  // LCX_SHA256_H

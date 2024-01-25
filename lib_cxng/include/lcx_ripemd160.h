@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@
  * "https://homes.esat.kuleuven.be/~bosselae/ripemd160.html"> RIPEMD-160 </a> for more details.
  */
 
-#ifdef HAVE_RIPEMD160
-
 #ifndef LCX_RIPEMD160_H
 #define LCX_RIPEMD160_H
+
+#ifdef HAVE_RIPEMD160
 
 #include "lcx_wrappers.h"
 #include "lcx_hash.h"
@@ -51,7 +51,7 @@ struct cx_ripemd160_s {
 typedef struct cx_ripemd160_s cx_ripemd160_t;
 
 /**
- * @brief   Initialize a RIPEMD-160 context.
+ * @brief   Initializes a RIPEMD-160 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -59,10 +59,10 @@ typedef struct cx_ripemd160_s cx_ripemd160_t;
  * @return          Error code:
  *                  - CX_OK on success
  */
-cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
+WARN_UNUSED_RESULT cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
 
 /**
- * @brief   Initialize a RIPEMD-160 context.
+ * @brief   Initializes a RIPEMD-160 context.
  *
  * @param[out] hash Pointer to the context.
  *                  The context shall be in RAM.
@@ -71,10 +71,13 @@ cx_err_t cx_ripemd160_init_no_throw(cx_ripemd160_t *hash);
  */
 static inline int cx_ripemd160_init(cx_ripemd160_t *hash)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     cx_ripemd160_init_no_throw(hash);
+#pragma GCC diagnostic pop
     return CX_RIPEMD160;
 }
 
-#endif
-
 #endif  // HAVE_RIPEMD160
+
+#endif  // LCX_RIPEMD160_H

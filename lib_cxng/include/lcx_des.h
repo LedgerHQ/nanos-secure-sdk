@@ -1,7 +1,7 @@
 
 /*******************************************************************************
  *   Ledger Nano S - Secure firmware
- *   (c) 2021 Ledger
+ *   (c) 2022 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@
  * @brief   DES (Data Encryption Standard).
  *
  * DES is an encryption algorithm designed to encipher and decipher blocks of
- * 64 bits under control of a 64-bit key.
+ * 64 bits under control of a 56-bit key. However, the key is represented with 64 bits.
  *
- * Triple DES variant supports either a 128-bit or 192-bit key.
+ * Triple DES variant supports either a 128-bit (two 64-bit keys) or 192-bit key
+ * (three 64-bit keys).
  */
 
 #ifdef HAVE_DES
@@ -37,8 +38,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/** Simple DES key length in bits */
+#define CX_DES_KEY_LENGTH 64
+
+/** Key length in bits of a triple DES with 2 keys */
+#define CX_3DES_2_KEY_LENGTH 128
+
+/** Key length in bits of a triple DES with 3 keys */
+#define CX_3DES_3_KEY_LENGTH 192
+
 /**
- * @brief   Initialize a DES key.
+ * @brief   Initializes a DES key.
  *
  * @details Once initialized, the key can be stored in non-volatile memory
  *          and directly used for any DES processing.
@@ -47,7 +57,7 @@
  *
  * @param[in]  key_len Length of the key: 8, 16 or 24 octets.
  *
- * @param[out] key     Pointer to the key.
+ * @param[out] key     Pointer to the key structure. This must not be NULL.
  *
  * @return             Error code:
  *                     - CX_OK on success
@@ -68,7 +78,7 @@ DEPRECATED static inline int cx_des_init_key(const unsigned char *rawkey,
 }
 
 /**
- * @brief   Encrypt, Decrypt, Sign or Verify data with DES algorithm.
+ * @brief   Encrypts, decrypts, signs or verifies data with DES algorithm.
  *
  * @param[in] key    Pointer to the key initialized with
  *                   #cx_des_init_key_no_throw.
@@ -137,7 +147,7 @@ DEPRECATED static inline int cx_des_iv(const cx_des_key_t  *key,
 }
 
 /**
- * @brief   Encrypt, Decrypt, Sign or Verify data with DES algorithm.
+ * @brief   Encrypts, decrypts, signs or verifies data with DES algorithm.
  *
  * @param[in] key    Pointer to the key initialized with
  *                   #cx_des_init_key_no_throw.
@@ -198,7 +208,7 @@ DEPRECATED static inline int cx_des(const cx_des_key_t  *key,
 }
 
 /**
- * @brief   Encrypt a 8-byte block using DES/3-DES algorithm.
+ * @brief   Encrypts a 8-byte block using DES/3-DES algorithm.
  *
  * @param[in]  key      Pointer to the DES key.
  *
@@ -214,7 +224,7 @@ DEPRECATED static inline int cx_des(const cx_des_key_t  *key,
 void cx_des_enc_block(const cx_des_key_t *key, const uint8_t *inblock, uint8_t *outblock);
 
 /**
- * @brief   Decrypt a 8-byte block using DES/3-DES algorithm.
+ * @brief   Decrypts a 8-byte block using DES/3-DES algorithm.
  *
  * @param[in]  key      Pointer to the DES key.
  *
