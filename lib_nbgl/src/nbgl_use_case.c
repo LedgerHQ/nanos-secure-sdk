@@ -292,7 +292,7 @@ static void tickerCallback(void)
 // function used to display the current page in review
 static void displaySettingsPage(uint8_t page, bool forceFullRefresh)
 {
-    nbgl_pageContent_t content;
+    nbgl_pageContent_t content = {0};
 
     if ((onNav == NULL) || (onNav(page, &content) == false)) {
         return;
