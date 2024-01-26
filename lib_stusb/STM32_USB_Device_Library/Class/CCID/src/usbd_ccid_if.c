@@ -333,7 +333,7 @@ void CCID_CmdDecode(USBD_HandleTypeDef  *pdev)
     RDR_to_PC_SlotStatus(errorCode);
     break;
   case PC_TO_RDR_XFRBLOCK:
-    errorCode = PC_to_RDR_XfrBlock();
+    PC_to_RDR_XfrBlock();
     // asynchronous // RDR_to_PC_DataBlock(errorCode);
     break;
   case PC_TO_RDR_GETPARAMETERS:
@@ -373,7 +373,7 @@ void CCID_CmdDecode(USBD_HandleTypeDef  *pdev)
     RDR_to_PC_DataRateAndClockFrequency(errorCode);
     break;
   case PC_TO_RDR_SECURE:
-    errorCode = PC_TO_RDR_Secure();
+    PC_TO_RDR_Secure();
     // asynchronous // RDR_to_PC_DataBlock(errorCode);
     break;
   default:
