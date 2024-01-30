@@ -3475,19 +3475,29 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
     nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
     nbgl_container_t      *container;
     nbgl_line_t           *line;
+    uint8_t                space;
 
     LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddHiddenDigits():\n");
     if (layout == NULL) {
         return -1;
+    }
+    if (nbDigits > 12) {
+        return -1;
+    }
+    if (nbDigits > 8) {
+        space = 4;
+    }
+    else {
+        space = 12;
     }
 
     // create a container, invisible or bordered
     container             = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
     container->nbChildren = nbDigits + 1;  // +1 for the line
     container->children   = nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
-    // 12 pixels between each icon (knowing that the effective round are 18px large and the icon
-    // 24px)
-    container->obj.area.width  = nbDigits * C_round_24px.width + (nbDigits + 1) * 12;
+    // <space> pixels between each icon (knowing that the effective round are 18px large and the
+    // icon 24px)
+    container->obj.area.width  = nbDigits * C_round_24px.width + (nbDigits + 1) * space;
     container->obj.area.height = 48;
     // distance from digits to title is fixed to 20 px, except if title is more than 1 line and a
     // back key is present
@@ -3512,7 +3522,7 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
         nbgl_image_t *image         = (nbgl_image_t *) container->children[i];
         image->buffer               = &C_round_24px;
         image->foregroundColor      = WHITE;
-        image->obj.alignmentMarginX = 12;
+        image->obj.alignmentMarginX = space;
         if (i > 0) {
             image->obj.alignment = MID_RIGHT;
             image->obj.alignTo   = (nbgl_obj_t *) container->children[i - 1];
