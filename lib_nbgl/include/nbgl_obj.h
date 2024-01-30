@@ -28,8 +28,12 @@ extern "C" {
 
 // for Keyboard
 #ifdef HAVE_SE_TOUCH
+#ifdef TARGET_STAX
 #define KEYBOARD_KEY_HEIGHT 60
-#else  // HAVE_SE_TOUCH
+#else  // TARGET_STAX
+#define KEYBOARD_KEY_HEIGHT 72
+#endif  // TARGET_STAX
+#else   // HAVE_SE_TOUCH
 #define KEYBOARD_KEY_WIDTH  14
 #define KEYBOARD_KEY_HEIGHT 14
 #define KEYBOARD_WIDTH      (5 * KEYBOARD_KEY_WIDTH)
@@ -54,14 +58,27 @@ extern "C" {
 #define EXIT_PAGE 0xFF
 
 // external margin in pixels
+#ifdef TARGET_STAX
 #define BORDER_MARGIN 24
+#else  // TARGET_STAX
+#define BORDER_MARGIN 32
+#endif  // TARGET_STAX
 
 // Back button header height
+#ifdef TARGET_STAX
 #define BACK_BUTTON_HEADER_HEIGHT 88
+#else  // TARGET_STAX
+#define BACK_BUTTON_HEADER_HEIGHT 96
+#endif  // TARGET_STAX
 
 // common dimensions for buttons
+#ifdef TARGET_STAX
 #define BUTTON_RADIUS   RADIUS_40_PIXELS
 #define BUTTON_DIAMETER 80
+#else  // TARGET_STAX
+#define BUTTON_RADIUS   RADIUS_44_PIXELS
+#define BUTTON_DIAMETER 88
+#endif  // TARGET_STAX
 #endif  // HAVE_SE_TOUCH
 
 /**********************
@@ -303,6 +320,7 @@ typedef struct PACKED__ nbgl_image_s {
     nbgl_obj_t obj;           // common part
     color_t foregroundColor;  ///< color set to '1' bits, for 1PBB images. '0' are set to background
                               ///< color.
+    nbgl_transformation_t      transformation;  ///< usually NO_TRANSFORMATION
     const nbgl_icon_details_t *buffer;     ///< buffer containing bitmap, with exact same size as
                                            ///< object (width*height*bpp/8 bytes)
     onImageDrawCallback_t onDrawCallback;  ///< function called if buffer is NULL, with above token
@@ -369,6 +387,15 @@ typedef struct PACKED__ nbgl_progress_bar_s {
 } nbgl_progress_bar_t;
 
 /**
+ * @brief Style to apply to @ref nbgl_page_indicator_t
+ *
+ */
+typedef enum {
+    PROGRESSIVE_INDICATOR = 0,  ///< all dashes before active page are black
+    CURRENT_INDICATOR           ///< only current page dash is black
+} nbgl_page_indicator_style_t;
+
+/**
  * @brief  struct to represent a navigation bar (@ref PAGE_INDICATOR type)
  * There can be up to 5 page indicators, whose shape is fixed.
  * If there are more than 5 pages, the middle indicator will be "..."
@@ -376,9 +403,10 @@ typedef struct PACKED__ nbgl_progress_bar_s {
  * @note height is fixed
  */
 typedef struct PACKED__ nbgl_navigation_bar_s {
-    nbgl_obj_t obj;         ///< common part
-    uint8_t    nbPages;     ///< number of pages.
-    uint8_t    activePage;  ///< index of active page (from 0 to nbPages-1).
+    nbgl_obj_t                  obj;         ///< common part
+    uint8_t                     nbPages;     ///< number of pages.
+    uint8_t                     activePage;  ///< index of active page (from 0 to nbPages-1).
+    nbgl_page_indicator_style_t style;       ///< Style to apply
 } nbgl_page_indicator_t;
 
 /**

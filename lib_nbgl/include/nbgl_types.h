@@ -184,8 +184,13 @@ typedef enum nbgl_post_refresh_t {
 typedef enum {
 #ifdef SCREEN_SIZE_WALLET
     RADIUS_32_PIXELS = 0,  ///< 32 pixels
-    RADIUS_40_PIXELS,      ///< 48 pixels
+#ifdef TARGET_STAX
+    RADIUS_40_PIXELS,  ///< 40 pixels
     RADIUS_MAX = RADIUS_40_PIXELS,
+#else                        // TARGET_STAX
+    RADIUS_44_PIXELS,  ///< 44 pixels
+    RADIUS_MAX = RADIUS_44_PIXELS,
+#endif                       // TARGET_STAX
 #else                        // SCREEN_SIZE_WALLET
     RADIUS_1_PIXEL = 0,  ///< 1 pixel
     RADIUS_3_PIXELS,     ///< 3 pixels

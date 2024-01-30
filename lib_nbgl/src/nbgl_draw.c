@@ -71,7 +71,11 @@ static const uint8_t quarter_circle_3px_270_1bpp[] = {0x58, 0x00};
 static const uint8_t radiusValues[] = {
 #ifdef SCREEN_SIZE_WALLET
     32,
-    40
+#ifdef TARGET_STAX
+    40,
+#else   // TARGET_STAX
+    44
+#endif  // TARGET_STAX
 #else   // SCREEN_SIZE_WALLET
     1,
     3
@@ -80,18 +84,42 @@ static const uint8_t radiusValues[] = {
 
 #ifdef SCREEN_SIZE_WALLET
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const uint8_t *topQuarterDiscs[]
-    = {C_quarter_disc_top_left_32px_1bpp_bitmap, C_quarter_disc_top_left_40px_1bpp_bitmap};
+static const uint8_t *topQuarterDiscs[] = {
+    C_quarter_disc_top_left_32px_1bpp_bitmap,
+#ifdef TARGET_STAX
+    C_quarter_disc_top_left_40px_1bpp_bitmap,
+#else   // TARGET_STAX
+    C_quarter_disc_top_left_44px_1bpp_bitmap
+#endif  // TARGET_STAX
+};
 
-static const uint8_t *bottomQuarterDiscs[]
-    = {C_quarter_disc_bottom_left_32px_1bpp_bitmap, C_quarter_disc_bottom_left_40px_1bpp_bitmap};
+static const uint8_t *bottomQuarterDiscs[] = {
+    C_quarter_disc_bottom_left_32px_1bpp_bitmap,
+#ifdef TARGET_STAX
+    C_quarter_disc_bottom_left_40px_1bpp_bitmap,
+#else   // TARGET_STAX
+    C_quarter_disc_bottom_left_44px_1bpp_bitmap
+#endif  // TARGET_STAX
+};
 
 // indexed by nbgl_radius_t (except RADIUS_0_PIXELS)
-static const uint8_t *topQuarterCircles[]
-    = {C_quarter_circle_top_left_32px_1bpp_bitmap, C_quarter_circle_top_left_40px_1bpp_bitmap};
+static const uint8_t *topQuarterCircles[] = {
+    C_quarter_circle_top_left_32px_1bpp_bitmap,
+#ifdef TARGET_STAX
+    C_quarter_circle_top_left_40px_1bpp_bitmap,
+#else   // TARGET_STAX
+    C_quarter_circle_top_left_44px_1bpp_bitmap
+#endif  // TARGET_STAX
+};
 
-static const uint8_t *bottomQuarterCircles[] = {C_quarter_circle_bottom_left_32px_1bpp_bitmap,
-                                                C_quarter_circle_bottom_left_40px_1bpp_bitmap};
+static const uint8_t *bottomQuarterCircles[] = {
+    C_quarter_circle_bottom_left_32px_1bpp_bitmap,
+#ifdef TARGET_STAX
+    C_quarter_circle_bottom_left_40px_1bpp_bitmap,
+#else   // TARGET_STAX
+    C_quarter_circle_bottom_left_44px_1bpp_bitmap
+#endif  // TARGET_STAX
+};
 #endif  // SCREEN_SIZE_WALLET
 
 #ifdef NBGL_QRCODE
@@ -453,16 +481,21 @@ void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
  * No transformation is applied to the icon.
  *
  * @param area Area of drawing
+ * @param transformation Transformation to apply to this icon (only available for raw image, not
+ * image file)
  * @param color_map Color map applied to icon
  * @param icon Icon details structure to draw
  */
-void nbgl_drawIcon(nbgl_area_t *area, nbgl_color_map_t color_map, const nbgl_icon_details_t *icon)
+void nbgl_drawIcon(nbgl_area_t               *area,
+                   nbgl_transformation_t      transformation,
+                   nbgl_color_map_t           color_map,
+                   const nbgl_icon_details_t *icon)
 {
     if (icon->isFile) {
         nbgl_frontDrawImageFile(area, icon->bitmap, color_map, ramBuffer);
     }
     else {
-        nbgl_frontDrawImage(area, icon->bitmap, NO_TRANSFORMATION, color_map);
+        nbgl_frontDrawImage(area, icon->bitmap, transformation, color_map);
     }
 }
 
