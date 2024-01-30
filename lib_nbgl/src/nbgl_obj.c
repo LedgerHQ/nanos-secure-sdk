@@ -340,8 +340,9 @@ static void draw_button(nbgl_button_t *obj, nbgl_obj_t *prevObj, bool computePos
 
     // inherit background from parent
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
-    // draw the rounded corner rectangle
-    if (obj->innerColor == obj->borderColor) {
+    // draw the rounded corner rectangle if necessary
+    if ((obj->innerColor == obj->borderColor)
+        && (obj->innerColor != obj->obj.area.backgroundColor)) {
         nbgl_drawRoundedRect((nbgl_area_t *) obj, obj->radius, obj->innerColor);
     }
     else {
@@ -404,7 +405,7 @@ static void draw_button(nbgl_button_t *obj, nbgl_obj_t *prevObj, bool computePos
         rectArea.height          = obj->icon->height;
         rectArea.bpp             = obj->icon->bpp;
 
-        nbgl_drawIcon(&rectArea, obj->foregroundColor, obj->icon);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->foregroundColor, obj->icon);
     }
 }
 
@@ -510,7 +511,7 @@ static void draw_image(nbgl_image_t *obj, nbgl_obj_t *prevObj, bool computePosit
         colorMap = obj->foregroundColor;
     }
 
-    nbgl_drawIcon((nbgl_area_t *) obj, colorMap, iconDetails);
+    nbgl_drawIcon((nbgl_area_t *) obj, obj->transformation, colorMap, iconDetails);
 }
 
 #ifdef HAVE_SE_TOUCH
@@ -575,10 +576,10 @@ static void draw_radioButton(nbgl_radio_t *obj, nbgl_obj_t *prevObj, bool comput
     rectArea.backgroundColor = obj->obj.area.backgroundColor;
     rectArea.bpp             = NBGL_BPP_1;
     if (obj->state == OFF_STATE) {
-        nbgl_drawIcon(&rectArea, obj->borderColor, &C_radio_inactive_32px);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->borderColor, &C_radio_inactive_32px);
     }
     else {
-        nbgl_drawIcon(&rectArea, obj->activeColor, &C_radio_active_32px);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->activeColor, &C_radio_active_32px);
     }
 }
 #endif  // HAVE_SE_TOUCH
@@ -689,8 +690,12 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
     nbgl_area_t rectArea;
     uint16_t    dashWidth;
 
+    if (obj->nbPages == 0) {
+        return;
+    }
+
     if (obj->nbPages <= NB_MAX_PAGES_WITH_DASHES) {
-        uint8_t i;
+        int i;
 #define INTER_DASHES 10  // pixels
         // force height
         obj->obj.area.height = 4;
@@ -719,10 +724,15 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
         rectArea.backgroundColor = obj->obj.area.backgroundColor;
         rectArea.bpp             = NBGL_BPP_1;
         // draw dashes
-        for (i = 0; i <= obj->activePage; i++) {
-            nbgl_frontDrawHorizontalLine(&rectArea, 0xF, BLACK);
+        for (i = 0; i < obj->activePage; i++) {
+            nbgl_frontDrawHorizontalLine(
+                &rectArea, 0xF, (obj->style == PROGRESSIVE_INDICATOR) ? BLACK : LIGHT_GRAY);
             rectArea.x0 += dashWidth + INTER_DASHES;
         }
+        nbgl_frontDrawHorizontalLine(&rectArea, 0xF, BLACK);
+        rectArea.x0 += dashWidth + INTER_DASHES;
+        i++;
+
         for (; i < obj->nbPages; i++) {
             nbgl_frontDrawHorizontalLine(&rectArea, 0xF, LIGHT_GRAY);
             rectArea.x0 += dashWidth + INTER_DASHES;

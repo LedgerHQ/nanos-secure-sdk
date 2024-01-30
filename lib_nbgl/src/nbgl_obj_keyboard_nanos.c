@@ -95,7 +95,7 @@ static void keyboardDrawIcon(int16_t x0, int8_t y0, bool inverted, const nbgl_ic
     // center
     rectArea.x0 = x0 + (KEYBOARD_KEY_WIDTH - icon->width) / 2;
     rectArea.y0 = y0 + (KEYBOARD_KEY_HEIGHT - icon->height) / 2;
-    nbgl_drawIcon(&rectArea, inverted ? BLACK : WHITE, icon);
+    nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, inverted ? BLACK : WHITE, icon);
 }
 
 static void keyboardDrawChar(int16_t x0, int8_t y0, bool inverted, const char *charPtr)
