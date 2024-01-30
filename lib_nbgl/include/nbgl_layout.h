@@ -29,9 +29,14 @@ extern "C" {
 #define NO_MORE_OBJ_ERROR -3
 #define NBGL_NO_TUNE      NB_TUNES
 
-#define NB_MAX_SUGGESTION_BUTTONS 4
-
 #ifdef HAVE_SE_TOUCH
+#define NB_MAX_SUGGESTION_BUTTONS 4
+#ifdef TARGET_STAX
+#define NB_MAX_VISIBLE_SUGGESTION_BUTTONS NB_MAX_SUGGESTION_BUTTONS
+#else  // TARGET_STAX
+#define NB_MAX_VISIBLE_SUGGESTION_BUTTONS 2
+#endif  // TARGET_STAX
+
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * BORDER_MARGIN)
 #else  // HAVE_SE_TOUCH
 // 7 pixels on each side
@@ -214,6 +219,8 @@ typedef struct {
     const char *url;         ///< URL for QR code
     const char *text1;       ///< first text (can be null)
     const char *text2;       ///< second text (can be null)
+    int16_t     offsetY;     ///< vertical shift to apply to this info (if > 0, shift to bottom)
+    bool        centered;    ///< if set to true, center vertically
     bool        largeText1;  ///< if set to true, use 32px font for text1
 } nbgl_layoutQRCode_t;
 

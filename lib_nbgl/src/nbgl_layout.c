@@ -49,12 +49,31 @@
 
 #define TAG_VALUE_ICON_WIDTH 32
 
+#ifdef TARGET_STAX
 #define TOUCHABLE_BAR_HEIGHT 88
 #define FOOTER_HEIGHT        80
+#else  // TARGET_STAX
+#define TOUCHABLE_BAR_HEIGHT 100
+#define FOOTER_HEIGHT        80
+#endif  // TARGET_STAX
 #endif  // HAVE_SE_TOUCH
 
 // refresh period of the spinner, in ms
 #define SPINNER_REFRESH_PERIOD 400
+
+#ifdef HAVE_SE_TOUCH
+#ifdef TARGET_STAX
+#define FIRST_BUTTON_INDEX 0
+#else   // TARGET_STAX
+// for suggestion buttons, on Europa there are other objects than buttons
+enum {
+    PAGE_INDICATOR_INDEX = 0,
+    LEFT_HALF_INDEX,   // half disc displayed on the bottom left
+    RIGHT_HALF_INDEX,  // half disc displayed on the bottom right
+    FIRST_BUTTON_INDEX
+};
+#endif  // TARGET_STAX
+#endif  // HAVE_SE_TOUCH
 
 /**********************
  *      MACROS
@@ -133,11 +152,12 @@ static nbgl_layoutInternal_t gLayout[NB_MAX_LAYOUTS] = {0};
 #ifdef HAVE_SE_TOUCH
 #ifdef NBGL_KEYBOARD
 static nbgl_button_t *choiceButtons[NB_MAX_SUGGESTION_BUTTONS];
+static char           numText[5];
+static uint8_t        nbActiveButtons;
+#ifndef TARGET_STAX
+static nbgl_image_t *partialButtonImages[2];
+#endif  // TARGET_STAX
 #endif  // NBGL_KEYBOARD
-
-#ifdef NBGL_KEYBOARD
-static char numText[5];
-#endif
 
 // numbers of touchable controls for the whole page
 static uint8_t nbTouchableControls = 0;
@@ -165,6 +185,74 @@ static inline uint8_t get_hold_to_approve_percent(uint32_t touch_duration)
     uint8_t current_step_nb = (touch_duration / HOLD_TO_APPROVE_STEP_DURATION_MS) + 1;
     return (current_step_nb * HOLD_TO_APPROVE_STEP_PERCENT);
 }
+
+#if (!defined(TARGET_STAX) && defined(NBGL_KEYBOARD))
+// function used on Europa to display (or not) beginning of next button and/or end of
+// previous button, and update buttons when swipping
+static bool updateSuggestionButtons(nbgl_container_t *container,
+                                    nbgl_touchType_t  eventType,
+                                    uint8_t           currentLeftButtonIndex)
+{
+    bool    needRefresh = false;
+    uint8_t page        = 0;
+    if ((eventType == SWIPED_LEFT) && (currentLeftButtonIndex < (uint32_t) (nbActiveButtons - 2))) {
+        // shift all buttons on the left if there are still at least 2 buttons to display
+        currentLeftButtonIndex++;
+        container->children[FIRST_BUTTON_INDEX]
+            = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex];
+        container->children[FIRST_BUTTON_INDEX + 1]
+            = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex + 1];
+        page        = currentLeftButtonIndex;
+        needRefresh = true;
+    }
+    else if ((eventType == SWIPED_RIGHT) && (currentLeftButtonIndex > 0)) {
+        // shift all buttons on the left if we are not already displaying the 2 first ones
+        currentLeftButtonIndex--;
+        container->children[FIRST_BUTTON_INDEX]
+            = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex];
+        container->children[FIRST_BUTTON_INDEX + 1]
+            = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex + 1];
+        page        = currentLeftButtonIndex;
+        needRefresh = true;
+    }
+    // align left button on the left
+    if (nbActiveButtons > 0) {
+        container->children[FIRST_BUTTON_INDEX]->alignmentMarginX = 32;
+        container->children[FIRST_BUTTON_INDEX]->alignment        = TOP_LEFT;
+        container->children[FIRST_BUTTON_INDEX]->alignTo          = (nbgl_obj_t *) container;
+    }
+
+    // align right button on left one
+    if (nbActiveButtons > 1) {
+        container->children[FIRST_BUTTON_INDEX + 1]->alignmentMarginX = 8;
+        container->children[FIRST_BUTTON_INDEX + 1]->alignment        = MID_RIGHT;
+        container->children[FIRST_BUTTON_INDEX + 1]->alignTo
+            = container->children[FIRST_BUTTON_INDEX];
+    }
+
+    // on Europa, the first child is used by the progress indicator, displayed if more that 2
+    // buttons
+    nbgl_page_indicator_t *indicator
+        = (nbgl_page_indicator_t *) container->children[PAGE_INDICATOR_INDEX];
+    indicator->activePage = page;
+
+    // if not on the first button, display end of previous button
+    if (currentLeftButtonIndex > 0) {
+        container->children[LEFT_HALF_INDEX] = (nbgl_obj_t *) partialButtonImages[0];
+    }
+    else {
+        container->children[LEFT_HALF_INDEX] = NULL;
+    }
+    // if not on the last button, display beginning of next button
+    if (currentLeftButtonIndex < (nbActiveButtons - 2)) {
+        container->children[RIGHT_HALF_INDEX] = (nbgl_obj_t *) partialButtonImages[1];
+    }
+    else {
+        container->children[RIGHT_HALF_INDEX] = NULL;
+    }
+    return needRefresh;
+}
+#endif  // TARGET_STAX
 
 // function used to retrieve the concerned layout and layout obj matching the given touched obj
 static bool getLayoutAndLayoutObj(nbgl_obj_t             *obj,
@@ -218,7 +306,7 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
     if (obj == NULL) {
         return;
     }
-
+    LOG_DEBUG(LAYOUT_LOGGER, "touchCallback(): eventType = %d, obj = %p\n", eventType, obj);
     if (getLayoutAndLayoutObj(obj, &layout, &layoutObj) == false) {
         // try with parent, if existing
         if (getLayoutAndLayoutObj(obj->parent, &layout, &layoutObj) == false) {
@@ -235,6 +323,30 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
     if (((eventType == SWIPED_UP) || (eventType == SWIPED_DOWN) || (eventType == SWIPED_LEFT)
          || (eventType == SWIPED_RIGHT))
         && (obj->type == CONTAINER)) {
+#if (!defined(TARGET_STAX) && defined(NBGL_KEYBOARD))
+        // try if suggestions buttons
+        nbgl_container_t *container = (nbgl_container_t *) obj;
+        if (((eventType == SWIPED_LEFT) || (eventType == SWIPED_RIGHT))
+            && (container->nbChildren == (nbActiveButtons + FIRST_BUTTON_INDEX))
+            && (nbActiveButtons > 2)) {
+            uint32_t i = 0;
+            while (i < (uint32_t) nbActiveButtons) {
+                if (container->children[FIRST_BUTTON_INDEX] == (nbgl_obj_t *) choiceButtons[i]) {
+                    break;
+                }
+                i++;
+            }
+
+            if (i < (uint32_t) nbActiveButtons) {
+                if (updateSuggestionButtons(container, eventType, i)) {
+                    nbgl_redrawObject((nbgl_obj_t *) container, NULL, false);
+                    nbgl_refresh();
+                }
+
+                return;
+            }
+        }
+#endif  // TARGET_STAX
         if (layout->swipeUsage == SWIPE_USAGE_CUSTOM) {
             layoutObj->index = eventType;
         }
@@ -674,6 +786,9 @@ nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description)
     memset(layout, 0, sizeof(nbgl_layoutInternal_t));
 
     nbTouchableControls = 0;
+#ifdef NBGL_KEYBOARD
+    nbActiveButtons = 0;
+#endif  // NBGL_KEYBOARD
 
     layout->callback       = (nbgl_layoutTouchCallback_t) PIC(description->onActionCallback);
     layout->modal          = description->modal;
@@ -712,16 +827,20 @@ nbgl_layout_t *nbgl_layoutGet(const nbgl_layoutDescription_t *description)
         layout->container->obj.touchId   = WHOLE_SCREEN_ID;
 
         // create 'tap to continue' text area
-        layout->tapText                       = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, 0);
-        layout->tapText->localized            = false;
-        layout->tapText->text                 = PIC(description->tapActionText);
-        layout->tapText->textColor            = DARK_GRAY;
-        layout->tapText->fontId               = SMALL_REGULAR_FONT;
-        layout->tapText->obj.area.width       = SCREEN_WIDTH - 2 * BORDER_MARGIN;
-        layout->tapText->obj.area.height      = nbgl_getFontLineHeight(layout->tapText->fontId);
-        layout->tapText->textAlignment        = CENTER;
+        layout->tapText                  = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, 0);
+        layout->tapText->localized       = false;
+        layout->tapText->text            = PIC(description->tapActionText);
+        layout->tapText->textColor       = DARK_GRAY;
+        layout->tapText->fontId          = SMALL_REGULAR_FONT;
+        layout->tapText->obj.area.width  = SCREEN_WIDTH - 2 * BORDER_MARGIN;
+        layout->tapText->obj.area.height = nbgl_getFontLineHeight(layout->tapText->fontId);
+        layout->tapText->textAlignment   = CENTER;
+#ifdef TARGET_STAX
         layout->tapText->obj.alignmentMarginY = BORDER_MARGIN;
-        layout->tapText->obj.alignment        = BOTTOM_MIDDLE;
+#else   // TARGET_STAX
+        layout->tapText->obj.alignmentMarginY = 30;
+#endif  // TARGET_STAX
+        layout->tapText->obj.alignment = BOTTOM_MIDDLE;
     }
 
     return (nbgl_layout_t *) layout;
@@ -841,10 +960,9 @@ int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigati
         nbgl_line_t *line                          = createHorizontalLine(layoutInt->layer);
         line->obj.alignTo                          = (nbgl_obj_t *) layoutInt->bottomContainer;
         line->obj.alignment                        = TOP_MIDDLE;
+        line->offset                               = 3;
         layoutInt->children[layoutInt->nbChildren] = (nbgl_obj_t *) line;
         layoutInt->nbChildren++;
-
-        layoutInt->container->obj.area.height -= 4;
     }
 
     nbgl_layoutAddSwipeInternal(layout,
@@ -1054,8 +1172,9 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
         if (barLayout->iconRight != NULL) {
             textArea->obj.area.width -= ((nbgl_icon_details_t *) PIC(barLayout->iconRight))->width;
         }
-        textArea->obj.area.height = container->obj.area.height;
-        textArea->style           = NO_STYLE;
+        textArea->obj.area.height = nbgl_getTextHeightInWidth(
+            textArea->fontId, textArea->text, textArea->obj.area.width, true);
+        textArea->style = NO_STYLE;
         if ((barLayout->iconLeft != NULL) && (barLayout->centered != true)) {
             textArea->obj.alignmentMarginX = 12;
         }
@@ -1065,7 +1184,7 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
         }
         else {
             textArea->obj.alignTo   = (nbgl_obj_t *) NULL;
-            textArea->obj.alignment = NO_ALIGNMENT;
+            textArea->obj.alignment = MID_LEFT;
         }
         if (barLayout->centered != true) {
             textArea->textAlignment = MID_LEFT;
@@ -1205,8 +1324,8 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switc
  * @brief Creates an area with given text and sub text (in gray)
  *
  * @param layout the current layout
- * @param text main text for the switch
- * @param subText description under main text (NULL terminated, single line, may be null)
+ * @param text main text (in small bold font), optional
+ * @param subText description under main text (in small regular font), optional
  * @return >= 0 if OK
  */
 int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subText)
@@ -1237,18 +1356,22 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
     if (text != NULL) {
         textArea = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
 
-        textArea->textColor            = BLACK;
-        textArea->text                 = PIC(text);
-        textArea->textAlignment        = MID_LEFT;
-        textArea->fontId               = SMALL_BOLD_FONT;
-        textArea->style                = NO_STYLE;
-        textArea->wrapping             = true;
-        textArea->obj.alignment        = NO_ALIGNMENT;
+        textArea->textColor     = BLACK;
+        textArea->text          = PIC(text);
+        textArea->textAlignment = MID_LEFT;
+        textArea->fontId        = SMALL_BOLD_FONT;
+        textArea->style         = NO_STYLE;
+        textArea->wrapping      = true;
+        textArea->obj.alignment = NO_ALIGNMENT;
+#ifdef TARGET_STAX
         textArea->obj.alignmentMarginY = BORDER_MARGIN;
-        textArea->obj.area.width       = container->obj.area.width;
-        textArea->obj.area.height      = nbgl_getTextHeightInWidth(
+#else   // TARGET_STAX
+        textArea->obj.alignmentMarginY        = 28;
+#endif  // TARGET_STAX
+        textArea->obj.area.width  = container->obj.area.width;
+        textArea->obj.area.height = nbgl_getTextHeightInWidth(
             textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
-        fullHeight += textArea->obj.area.height;
+        fullHeight += textArea->obj.area.height + textArea->obj.alignmentMarginY;
         container->children[0] = (nbgl_obj_t *) textArea;
     }
     if (subText != NULL) {
@@ -1263,18 +1386,26 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
             subTextArea->fontId, subTextArea->text, subTextArea->obj.area.width, false);
         subTextArea->textAlignment = MID_LEFT;
         subTextArea->obj.alignment = NO_ALIGNMENT;
-        fullHeight += subTextArea->obj.area.height;
         if (text != NULL) {
             subTextArea->obj.alignmentMarginY = INTERNAL_MARGIN;
             fullHeight += INTERNAL_MARGIN;
             container->children[1] = (nbgl_obj_t *) subTextArea;
         }
         else {
+#ifdef TARGET_STAX
             subTextArea->obj.alignmentMarginY = BORDER_MARGIN;
-            container->children[0]            = (nbgl_obj_t *) subTextArea;
+#else   // TARGET_STAX
+            subTextArea->obj.alignmentMarginY = 28;
+#endif  // TARGET_STAX
+            container->children[0] = (nbgl_obj_t *) subTextArea;
         }
+        fullHeight += subTextArea->obj.area.height + subTextArea->obj.alignmentMarginY;
     }
-    container->obj.area.height      = fullHeight + 2 * BORDER_MARGIN;
+#ifdef TARGET_STAX
+    container->obj.area.height = fullHeight + BORDER_MARGIN;
+#else   // TARGET_STAX
+    container->obj.area.height = fullHeight + 28;
+#endif  // TARGET_STAX
     container->layout               = VERTICAL;
     container->obj.alignmentMarginX = BORDER_MARGIN;
     container->obj.alignment        = NO_ALIGNMENT;
@@ -1371,14 +1502,12 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoic
         else {
             textArea->text = PIC(choices->names[i]);
         }
-
-        textArea->textAlignment   = MID_LEFT;
-        textArea->obj.area.width  = 300;
-        textArea->obj.area.height = 24;
-        textArea->style           = NO_STYLE;
-        textArea->obj.alignment   = MID_LEFT;
-        textArea->obj.alignTo     = (nbgl_obj_t *) container;
-        container->children[0]    = (nbgl_obj_t *) textArea;
+        textArea->textAlignment  = MID_LEFT;
+        textArea->obj.area.width = 300;
+        textArea->style          = NO_STYLE;
+        textArea->obj.alignment  = MID_LEFT;
+        textArea->obj.alignTo    = (nbgl_obj_t *) container;
+        container->children[0]   = (nbgl_obj_t *) textArea;
 
         // init button for this choice
         button->activeColor          = BLACK;
@@ -1390,10 +1519,9 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoic
         container->children[1]       = (nbgl_obj_t *) button;
 
         container->obj.area.width       = SCREEN_WIDTH - 2 * BORDER_MARGIN;
-        container->obj.area.height      = 32;
+        container->obj.area.height      = TOUCHABLE_BAR_HEIGHT;
         container->obj.alignment        = NO_ALIGNMENT;
         container->obj.alignmentMarginX = BORDER_MARGIN;
-        container->obj.alignmentMarginY = BORDER_MARGIN;
         container->obj.alignTo          = (nbgl_obj_t *) NULL;
         // whole container should be touchable
         container->obj.touchMask = (1 << TOUCHED);
@@ -1411,8 +1539,10 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoic
             textArea->textColor = DARK_GRAY;
             textArea->fontId    = SMALL_REGULAR_FONT;
         }
+        textArea->obj.area.height = nbgl_getFontHeight(textArea->fontId);
+
         line                       = createHorizontalLine(layoutInt->layer);
-        line->obj.alignmentMarginY = BORDER_MARGIN;
+        line->obj.alignmentMarginY = -4;
 
         // set these new objs as child of main container
         addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
@@ -1485,7 +1615,11 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         if (container->nbChildren > 0) {
             textArea->obj.alignment = BOTTOM_MIDDLE;
             textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];
+#ifdef TARGET_STAX
             textArea->obj.alignmentMarginY = BORDER_MARGIN + 4;
+#else   // TARGET_STAX
+            textArea->obj.alignmentMarginY = BOTTOM_BORDER_MARGIN;
+#endif  // TARGET_STAX
         }
         else {
             textArea->obj.alignment = TOP_MIDDLE;
@@ -1519,14 +1653,21 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         if (container->nbChildren > 0) {
             textArea->obj.alignment = BOTTOM_MIDDLE;
             textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];
-            textArea->obj.alignmentMarginY = BORDER_MARGIN;
             if (info->text1 != NULL) {
-                // if previous element is text1, only space of 16 px
-                textArea->obj.alignmentMarginY -= 4;
+#ifdef TARGET_STAX
+                // if previous element is text1, only space of 20 px
+                textArea->obj.alignmentMarginY = 20;
+#else   // TARGET_STAX
+                textArea->obj.alignmentMarginY = 16;
+#endif  // TARGET_STAX
             }
             else {
-                // else if icon, space of 24 px
-                textArea->obj.alignmentMarginY += 4;
+#ifdef TARGET_STAX
+                // else if icon, space of 28 px
+                textArea->obj.alignmentMarginY = 28;
+#else   // TARGET_STAX
+                textArea->obj.alignmentMarginY = 24;
+#endif  // TARGET_STAX
             }
         }
         else {
@@ -1574,7 +1715,11 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         if (container->nbChildren > 0) {
             textArea->obj.alignment = BOTTOM_MIDDLE;
             textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];
+#ifdef TARGET_STAX
             textArea->obj.alignmentMarginY = BORDER_MARGIN;
+#else   // TARGET_STAX
+            textArea->obj.alignmentMarginY = 28;
+#endif  // TARGET_STAX
         }
         else {
             textArea->obj.alignment = TOP_MIDDLE;
@@ -1912,8 +2057,8 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
 
     container = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
 
-    // get container children (max 2 (QRCode + text1/text2))
-    container->children   = nbgl_containerPoolGet(2, layoutInt->layer);
+    // get container children (max 2 (QRCode + text1 + text2))
+    container->children   = nbgl_containerPoolGet(3, layoutInt->layer);
     container->nbChildren = 0;
 
     qrcode = (nbgl_qrcode_t *) nbgl_objPoolGet(QR_CODE, layoutInt->layer);
@@ -1929,11 +2074,10 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
     // in QR V10, we use 4*4 screen pixels for one QR pixel
     qrcode->obj.area.width
         = (qrcode->version == QRCODE_V4) ? (QR_V4_NB_PIX_SIZE * 8) : (QR_V10_NB_PIX_SIZE * 4);
-    qrcode->obj.area.height      = qrcode->obj.area.width;
-    qrcode->text                 = PIC(info->url);
-    qrcode->obj.area.bpp         = NBGL_BPP_1;
-    qrcode->obj.alignment        = TOP_MIDDLE;
-    qrcode->obj.alignmentMarginY = 24;
+    qrcode->obj.area.height = qrcode->obj.area.width;
+    qrcode->text            = PIC(info->url);
+    qrcode->obj.area.bpp    = NBGL_BPP_1;
+    qrcode->obj.alignment   = TOP_MIDDLE;
 
     fullHeight += qrcode->obj.area.height;
     container->children[container->nbChildren] = (nbgl_obj_t *) qrcode;
@@ -1951,14 +2095,18 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
             textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
         textArea->obj.alignment = BOTTOM_MIDDLE;
         textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];
+#ifdef TARGET_STAX
         textArea->obj.alignmentMarginY = 40;
+#else   // TARGET_STAX
+        textArea->obj.alignmentMarginY = 24;
+#endif  // TARGET_STAX
 
-        fullHeight += textArea->obj.area.height;
+        fullHeight += textArea->obj.area.height + textArea->obj.alignmentMarginY;
 
         container->children[container->nbChildren] = (nbgl_obj_t *) textArea;
         container->nbChildren++;
     }
-    else if (info->text2 != NULL) {
+    if (info->text2 != NULL) {
         textArea                = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
         textArea->textColor     = DARK_GRAY;
         textArea->text          = PIC(info->text2);
@@ -1970,25 +2118,28 @@ int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info)
             textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
         textArea->obj.alignment = BOTTOM_MIDDLE;
         textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];
+#ifdef TARGET_STAX
         textArea->obj.alignmentMarginY = 40;
+#else   // TARGET_STAX
+        textArea->obj.alignmentMarginY = 28;
+#endif  // TARGET_STAX
 
-        fullHeight += textArea->obj.area.height;
+        fullHeight += textArea->obj.area.height + textArea->obj.alignmentMarginY;
 
         container->children[container->nbChildren] = (nbgl_obj_t *) textArea;
         container->nbChildren++;
     }
     container->obj.area.height = fullHeight;
     container->layout          = VERTICAL;
-    // center the QRCode only if it's the first (and probably only) child
-    if (layoutInt->container->nbChildren == 0) {
+    if (info->centered) {
         container->obj.alignment = CENTER;
     }
     else {
-        container->obj.alignment        = BOTTOM_MIDDLE;
-        container->obj.alignmentMarginY = BORDER_MARGIN;
+        container->obj.alignment = BOTTOM_MIDDLE;
         container->obj.alignTo
             = layoutInt->container->children[layoutInt->container->nbChildren - 1];
     }
+    container->obj.alignmentMarginY = info->offsetY;
 
     container->obj.area.width = AVAILABLE_WIDTH;
 
@@ -2037,7 +2188,7 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceBu
         bottomButton->borderColor          = WHITE;
     }
     else if (info->style == BOTH_ROUNDED_STYLE) {
-        bottomButton->obj.alignmentMarginY = BORDER_MARGIN;  // 24 pixels from screen bottom
+        bottomButton->obj.alignmentMarginY = BOTTOM_BORDER_MARGIN;  // 24 pixels from screen bottom
         bottomButton->borderColor          = LIGHT_GRAY;
     }
     bottomButton->innerColor      = WHITE;
@@ -2183,7 +2334,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueL
         container->children[container->nbChildren] = (nbgl_obj_t *) valueTextArea;
         container->nbChildren++;
 
-        fullHeight += valueTextArea->obj.area.height;
+        fullHeight += valueTextArea->obj.area.height + valueTextArea->obj.alignmentMarginY;
         if (pair->valueIcon != NULL) {
             nbgl_image_t *image = (nbgl_image_t *) nbgl_objPoolGet(IMAGE, layoutInt->layer);
             layoutObj_t  *obj
@@ -2204,8 +2355,17 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueL
         container->obj.area.height      = fullHeight;
         container->layout               = VERTICAL;
         container->obj.alignmentMarginX = BORDER_MARGIN;
+#ifdef TARGET_STAX
         container->obj.alignmentMarginY = 12;
-        container->obj.alignment        = NO_ALIGNMENT;
+#else   // TARGET_STAX
+        if ((i == 0) && (layoutInt->container->nbChildren == 0)) {
+            container->obj.alignmentMarginY = 40;
+        }
+        else {
+            container->obj.alignmentMarginY = 24;
+        }
+#endif  // TARGET_STAX
+        container->obj.alignment = NO_ALIGNMENT;
 
         addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
     }
@@ -2379,7 +2539,11 @@ int nbgl_layoutAddButton(nbgl_layout_t *layout, const nbgl_layoutButton_t *butto
         return -1;
     }
 
+#ifdef TARGET_STAX
     button->obj.alignmentMarginY = BORDER_MARGIN;
+#else   // TARGET_STAX
+    button->obj.alignmentMarginY = BOTTOM_BORDER_MARGIN;
+#endif  // TARGET_STAX
     if (buttonInfo->onBottom != true) {
         button->obj.alignmentMarginX = BORDER_MARGIN;
         button->obj.alignment        = NO_ALIGNMENT;
@@ -2732,10 +2896,16 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
         button->obj.area.height = BUTTON_DIAMETER;
         button->radius          = BUTTON_RADIUS;
         button->text            = NULL;
-        button->icon            = PIC(&C_leftArrow32px);
-        button->obj.touchMask   = (1 << TOUCHED);
-        button->obj.touchId     = BACK_BUTTON_ID;
-        container->children[1]  = (nbgl_obj_t *) button;
+#ifdef TARGET_STAX
+        button->icon                 = PIC(&C_leftArrow32px);
+        button->obj.alignmentMarginX = 4;
+#else   // TARGET_STAX
+        button->icon                 = PIC(&C_leftArrow40px);
+        button->obj.alignmentMarginX = 8;
+#endif  // TARGET_STAX
+        button->obj.touchMask  = (1 << TOUCHED);
+        button->obj.touchId    = BACK_BUTTON_ID;
+        container->children[1] = (nbgl_obj_t *) button;
     }
 
     // set this new container as child of the main container
@@ -2937,18 +3107,38 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
         return -1;
     }
 
-    container                  = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
-    container->obj.area.width  = SCREEN_WIDTH;
+    nbActiveButtons           = nbUsedButtons;
+    container                 = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
+    container->layout         = VERTICAL;
+    container->obj.area.width = SCREEN_WIDTH;
+#ifdef TARGET_STAX
+    // 2 rows of buttons with radius=32, and a intervale of 8px
     container->obj.area.height = 2 * 64 + 8;
-    container->layout          = VERTICAL;
-    container->nbChildren      = NB_MAX_SUGGESTION_BUTTONS;
-    container->children
-        = (nbgl_obj_t **) nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
+    container->nbChildren      = nbUsedButtons;
+    container->children = (nbgl_obj_t **) nbgl_containerPoolGet(NB_MAX_VISIBLE_SUGGESTION_BUTTONS,
+                                                                layoutInt->layer);
+#else   // TARGET_STAX
+    // 1 row of buttons + page indicator
+    container->obj.area.height = 64 + 20;
+    // on Europa, the first child is used by the progress indicator, if more that 2 buttons
+    container->nbChildren = nbUsedButtons + FIRST_BUTTON_INDEX;
+    container->children   = (nbgl_obj_t **) nbgl_containerPoolGet(
+        NB_MAX_VISIBLE_SUGGESTION_BUTTONS + 1, layoutInt->layer);
+
+    // the container is swipable on Europa
+    container->obj.touchMask = (1 << SWIPED_LEFT) | (1 << SWIPED_RIGHT);
+    container->obj.touchId   = CONTROLS_ID;  // TODO: change this value
+    obj                      = addCallbackObj(layoutInt, (nbgl_obj_t *) container, 0, NBGL_NO_TUNE);
+    if (obj == NULL) {
+        return -1;
+    }
+#endif  // TARGET_STAX
+    // align this control on top of keyboard (that must have been added just before)
     container->obj.alignmentMarginY = BORDER_MARGIN;
     container->obj.alignment        = TOP_MIDDLE;
     container->obj.alignTo = layoutInt->container->children[layoutInt->container->nbChildren - 1];
 
-    // create suggestion buttons, even if not displayed at first
+    // create all possible suggestion buttons, even if not displayed at first
     nbgl_objPoolGetArray(BUTTON, NB_MAX_SUGGESTION_BUTTONS, 0, (nbgl_obj_t **) &choiceButtons);
     for (int i = 0; i < NB_MAX_SUGGESTION_BUTTONS; i++) {
         obj = addCallbackObj(
@@ -2960,17 +3150,29 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
         choiceButtons[i]->innerColor      = BLACK;
         choiceButtons[i]->borderColor     = BLACK;
         choiceButtons[i]->foregroundColor = WHITE;
-        choiceButtons[i]->obj.area.width  = (SCREEN_WIDTH - 2 * BORDER_MARGIN - 8) / 2;
+#ifdef TARGET_STAX
+        choiceButtons[i]->obj.area.width = (SCREEN_WIDTH - 2 * BORDER_MARGIN - 8) / 2;
+#else   // TARGET_STAX
+        choiceButtons[i]->obj.area.width = (SCREEN_WIDTH - 2 * 32 - 8) / 2;
+#endif  // TARGET_STAX
         choiceButtons[i]->obj.area.height = 64;
         choiceButtons[i]->radius          = RADIUS_32_PIXELS;
         choiceButtons[i]->fontId          = SMALL_BOLD_1BPP_FONT;
         choiceButtons[i]->icon            = NULL;
         if ((i % 2) == 0) {
+#ifdef TARGET_STAX
             choiceButtons[i]->obj.alignmentMarginX = BORDER_MARGIN;
+            // second row 8px under the first one
             if (i != 0) {
                 choiceButtons[i]->obj.alignmentMarginY = 8;
             }
             choiceButtons[i]->obj.alignment = NO_ALIGNMENT;
+#else   // TARGET_STAX
+            choiceButtons[i]->obj.alignmentMarginX = 32 + 8;
+            if (i == 0) {
+                choiceButtons[i]->obj.alignment = TOP_LEFT;
+            }
+#endif  // TARGET_STAX
         }
         else {
             choiceButtons[i]->obj.alignmentMarginX = 8;
@@ -2981,13 +3183,31 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
         choiceButtons[i]->obj.touchMask = (1 << TOUCHED);
         choiceButtons[i]->obj.touchId   = CONTROLS_ID + i;
         // some buttons may not be visible
-        if (i < nbUsedButtons) {
-            container->children[i] = (nbgl_obj_t *) choiceButtons[i];
-        }
-        else {
-            container->children[i] = NULL;
+        if (i < MIN(NB_MAX_VISIBLE_SUGGESTION_BUTTONS, nbActiveButtons)) {
+            container->children[i + FIRST_BUTTON_INDEX] = (nbgl_obj_t *) choiceButtons[i];
         }
     }
+#ifndef TARGET_STAX
+    // on Europa, the first child is used by the progress indicator, if more that 2 buttons
+    nbgl_page_indicator_t *indicator
+        = (nbgl_page_indicator_t *) nbgl_objPoolGet(PAGE_INDICATOR, layoutInt->layer);
+    indicator->activePage                     = 0;
+    indicator->nbPages                        = (nbUsedButtons > 2) ? (nbUsedButtons - 1) : 0;
+    indicator->obj.area.width                 = 184;
+    indicator->obj.alignment                  = BOTTOM_MIDDLE;
+    indicator->style                          = CURRENT_INDICATOR;
+    container->children[PAGE_INDICATOR_INDEX] = (nbgl_obj_t *) indicator;
+    nbgl_objPoolGetArray(IMAGE, 2, 0, (nbgl_obj_t **) &partialButtonImages);
+    partialButtonImages[0]->buffer          = &C_left_half_64px;
+    partialButtonImages[0]->obj.alignment   = TOP_LEFT;
+    partialButtonImages[0]->foregroundColor = BLACK;
+    partialButtonImages[0]->transformation  = VERTICAL_MIRROR;
+    partialButtonImages[1]->buffer          = &C_left_half_64px;
+    partialButtonImages[1]->obj.alignment   = TOP_RIGHT;
+    partialButtonImages[1]->foregroundColor = BLACK;
+    partialButtonImages[1]->transformation  = NO_TRANSFORMATION;
+    updateSuggestionButtons(container, 0, 0);
+#endif  // TARGET_STAX
     // set this new container as child of the main container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
 
@@ -3022,19 +3242,48 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout,
     if ((container == NULL) || (container->obj.type != CONTAINER)) {
         return -1;
     }
+    nbActiveButtons       = nbUsedButtons;
+    container->nbChildren = nbUsedButtons + FIRST_BUTTON_INDEX;
 
     // update suggestion buttons
     for (int i = 0; i < NB_MAX_SUGGESTION_BUTTONS; i++) {
         choiceButtons[i]->text = buttonTexts[i];
         // some buttons may not be visible
-        if (i < nbUsedButtons) {
-            container->children[i] = (nbgl_obj_t *) choiceButtons[i];
+        if (i < MIN(NB_MAX_VISIBLE_SUGGESTION_BUTTONS, nbUsedButtons)) {
+            if ((i % 2) == 0) {
+                choiceButtons[i]->obj.alignmentMarginX = BORDER_MARGIN;
+#ifdef TARGET_STAX
+                // second row 8px under the first one
+                if (i != 0) {
+                    choiceButtons[i]->obj.alignmentMarginY = 8;
+                }
+                choiceButtons[i]->obj.alignment = NO_ALIGNMENT;
+#else   // TARGET_STAX
+                if (i == 0) {
+                    choiceButtons[i]->obj.alignment = TOP_LEFT;
+                }
+#endif  // TARGET_STAX
+            }
+            else {
+                choiceButtons[i]->obj.alignmentMarginX = 8;
+                choiceButtons[i]->obj.alignment        = MID_RIGHT;
+                choiceButtons[i]->obj.alignTo          = (nbgl_obj_t *) choiceButtons[i - 1];
+            }
+            container->children[i + FIRST_BUTTON_INDEX] = (nbgl_obj_t *) choiceButtons[i];
         }
         else {
-            container->children[i] = NULL;
+            container->children[i + FIRST_BUTTON_INDEX] = NULL;
         }
     }
     container->forceClean = true;
+#ifndef TARGET_STAX
+    // on Europa, the first child is used by the progress indicator, if more that 2 buttons
+    nbgl_page_indicator_t *indicator
+        = (nbgl_page_indicator_t *) container->children[PAGE_INDICATOR_INDEX];
+    indicator->nbPages    = (nbUsedButtons > 2) ? (nbUsedButtons - 1) : 0;
+    indicator->activePage = 0;
+    updateSuggestionButtons(container, 0, 0);
+#endif  // TARGET_STAX
 
     nbgl_redrawObject((nbgl_obj_t *) container, NULL, false);
 
@@ -3094,14 +3343,22 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout,
         textArea            = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
         textArea->textColor = BLACK;
         snprintf(numText, sizeof(numText), "%d.", number);
-        textArea->text                 = numText;
-        textArea->textAlignment        = MID_LEFT;
-        textArea->fontId               = LARGE_MEDIUM_1BPP_FONT;
+        textArea->text          = numText;
+        textArea->textAlignment = CENTER;
+        textArea->fontId        = LARGE_MEDIUM_1BPP_FONT;
+#ifdef TARGET_STAX
         textArea->obj.alignmentMarginY = 12;
-        textArea->obj.alignTo          = (nbgl_obj_t *) line;
-        textArea->obj.alignment        = TOP_LEFT;
-        textArea->obj.area.width       = 50;
-        textArea->obj.area.height      = nbgl_getFontLineHeight(textArea->fontId);
+#else   // TARGET_STAX
+        textArea->obj.alignmentMarginY = 9;
+#endif  // TARGET_STAX
+        textArea->obj.alignTo   = (nbgl_obj_t *) line;
+        textArea->obj.alignment = TOP_LEFT;
+#ifdef TARGET_STAX
+        textArea->obj.area.width = 50;
+#else   // TARGET_STAX
+        textArea->obj.area.width       = 66;
+#endif  // TARGET_STAX
+        textArea->obj.area.height = nbgl_getFontLineHeight(textArea->fontId);
         // set this new text area as child of the main container
         addObjectToLayout(layoutInt, (nbgl_obj_t *) textArea);
     }
@@ -3112,14 +3369,21 @@ int nbgl_layoutAddEnteredText(nbgl_layout_t *layout,
     textArea->text          = text;
     textArea->textAlignment = MID_LEFT;
     textArea->fontId        = LARGE_MEDIUM_1BPP_FONT;
+#ifdef TARGET_STAX
     textArea->obj.alignmentMarginY = 12;
-    textArea->obj.alignTo          = (nbgl_obj_t *) line;
-    textArea->obj.alignment        = TOP_MIDDLE;
+#else   // TARGET_STAX
+    textArea->obj.alignmentMarginY = 9;
+#endif  // TARGET_STAX
+    textArea->obj.alignTo    = (nbgl_obj_t *) line;
+    textArea->obj.alignment  = TOP_LEFT;
+    textArea->obj.area.width = line->obj.area.width;
     if (numbered) {
-        textArea->obj.area.width = line->obj.area.width - 2 * 50;
-    }
-    else {
-        textArea->obj.area.width = line->obj.area.width;
+#ifdef TARGET_STAX
+        textArea->obj.alignmentMarginX = 50;
+#else   // TARGET_STAX
+        textArea->obj.alignmentMarginX = 66;
+#endif  // TARGET_STAX
+        textArea->obj.area.width -= textArea->obj.alignmentMarginX;
     }
     textArea->obj.area.height  = nbgl_getFontLineHeight(textArea->fontId);
     textArea->autoHideLongLine = true;
@@ -3222,7 +3486,7 @@ int nbgl_layoutAddConfirmationButton(nbgl_layout_t *layout,
         return -1;
     }
 
-    button->obj.alignmentMarginY = BORDER_MARGIN;
+    button->obj.alignmentMarginY = BOTTOM_BORDER_MARGIN;
     button->obj.alignment        = TOP_MIDDLE;
     button->foregroundColor      = WHITE;
     if (active) {
@@ -3537,7 +3801,6 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
 {
     nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
     nbgl_container_t      *container;
-    nbgl_line_t           *line;
     uint8_t                space;
 
     LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddHiddenDigits():\n");
@@ -3556,8 +3819,11 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
 
     // create a container, invisible or bordered
     container             = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
-    container->nbChildren = nbDigits + 1;  // +1 for the line
-    container->children   = nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
+    container->nbChildren = nbDigits;
+#ifdef TARGET_STAX
+    container->nbChildren++;  // +1 for the line
+#endif                        // TARGET_STAX
+    container->children = nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
     // <space> pixels between each icon (knowing that the effective round are 18px large and the
     // icon 24px)
     container->obj.area.width  = nbDigits * C_round_24px.width + (nbDigits + 1) * space;
@@ -3595,6 +3861,8 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
             image->obj.alignmentMarginY = (container->obj.area.height - C_round_24px.width) / 2;
         }
     }
+#ifdef TARGET_STAX
+    nbgl_line_t *line;
     // create gray line
     line                          = (nbgl_line_t *) nbgl_objPoolGet(LINE, layoutInt->layer);
     line->lineColor               = LIGHT_GRAY;
@@ -3607,6 +3875,7 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
     line->thickness               = 2;
     line->offset                  = 2;
     container->children[nbDigits] = (nbgl_obj_t *) line;
+#endif  // TARGET_STAX
 
     // return index of keypad to be modified later on
     return (layoutInt->container->nbChildren - 1);

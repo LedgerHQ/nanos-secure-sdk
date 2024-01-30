@@ -59,9 +59,11 @@ extern "C" {
 
 // external margin in pixels
 #ifdef TARGET_STAX
-#define BORDER_MARGIN 24
+#define BORDER_MARGIN        24
+#define BOTTOM_BORDER_MARGIN 24
 #else  // TARGET_STAX
-#define BORDER_MARGIN 32
+#define BORDER_MARGIN        32
+#define BOTTOM_BORDER_MARGIN 24
 #endif  // TARGET_STAX
 
 // Back button header height

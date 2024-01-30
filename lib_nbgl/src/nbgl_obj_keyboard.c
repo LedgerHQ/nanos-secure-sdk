@@ -161,9 +161,13 @@ static void keyboardDrawCommonLines(nbgl_keyboard_t *keyboard)
     nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 2nd line
     rectArea.y0 += KEYBOARD_KEY_HEIGHT;
     nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 3rd line
-    rectArea.y0 += KEYBOARD_KEY_HEIGHT;
-    nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 4th line
-    if (!keyboard->lettersOnly) {
+    // in letter only mode, only draw the last line if not at bottom of screen
+    if ((keyboard->obj.alignmentMarginY > 0) || (!keyboard->lettersOnly)) {
+        rectArea.y0 += KEYBOARD_KEY_HEIGHT;
+        nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 4th line
+    }
+    // in non letter only mode, only draw the last line if not at bottom of screen
+    if ((keyboard->obj.alignmentMarginY > 0) && (!keyboard->lettersOnly)) {
         rectArea.y0 += KEYBOARD_KEY_HEIGHT;
         nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 5th line
     }
@@ -353,8 +357,8 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard)
         rectArea.backgroundColor = (keyboard->casing != LOWER_CASE) ? BLACK : WHITE;
         nbgl_drawIcon(
             &rectArea,
-            (keyboard->casing != LOWER_CASE) ? WHITE : BLACK,
             NO_TRANSFORMATION,
+            (keyboard->casing != LOWER_CASE) ? WHITE : BLACK,
             (keyboard->casing != LOCKED_UPPER_CASE) ? (&C_shift_lock32px) : (&C_shift32px));
         rectArea.backgroundColor = WHITE;
         offsetX                  = keyboard->obj.area.x0 + SHIFT_KEY_WIDTH;

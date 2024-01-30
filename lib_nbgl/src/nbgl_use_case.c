@@ -225,11 +225,12 @@ static void pageCallback(int token, uint8_t index)
                .tapActionText    = NULL};
 
         addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
-        nbgl_layoutQRCode_t qrCode             = {
-                        .url   = addressConfirmationContext.address,
-                        .text1 = NULL,
-                        .text2 = addressConfirmationContext.address  // display as gray text
-        };
+        nbgl_layoutQRCode_t qrCode
+            = {.url      = addressConfirmationContext.address,
+               .text1    = NULL,
+               .text2    = addressConfirmationContext.address,  // display as gray text
+               .centered = true,
+               .offsetY  = 0};
         nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
 
         nbgl_layoutAddBottomButton(

@@ -185,10 +185,14 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
         if (!withExitKey) {
             button->obj.area.width += BUTTON_DIAMETER / 2;
         }
-        button->obj.area.height                 = BUTTON_DIAMETER;
-        button->radius                          = BUTTON_RADIUS;
-        button->text                            = NULL;
-        button->icon                            = &C_rightArrow32px;
+        button->obj.area.height = BUTTON_DIAMETER;
+        button->radius          = BUTTON_RADIUS;
+        button->text            = NULL;
+#ifdef TARGET_STAX
+        button->icon = &C_rightArrow32px;
+#else   // TARGET_STAX
+        button->icon = &C_rightArrow40px;
+#endif  // TARGET_STAX
         button->obj.alignmentMarginX            = INTERNAL_SMALL_MARGIN;
         button->obj.alignmentMarginY            = 0;
         button->obj.alignment                   = MID_RIGHT;
