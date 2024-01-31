@@ -56,9 +56,7 @@ CX_TRAMPOLINE _NR_cx_cmac                                  cx_cmac
 CX_TRAMPOLINE _NR_cx_constant_time_eq                      cx_constant_time_eq
 CX_TRAMPOLINE _NR_cx_crc16                                 cx_crc16
 CX_TRAMPOLINE _NR_cx_crc16_update                          cx_crc16_update
-// Disable lib CX CRC32 until it get fixed in the OS.
-// Meanwhile, it's implemented in cx_wrappers.c
-//CX_TRAMPOLINE _NR_cx_crc32                                 cx_crc32
+CX_TRAMPOLINE _NR_cx_crc32                                 cx_crc32
 CX_TRAMPOLINE _NR_cx_decode_coord                          cx_decode_coord
 CX_TRAMPOLINE _NR_cx_ecdh_no_throw                         cx_ecdh_no_throw
 CX_TRAMPOLINE _NR_cx_ecdsa_sign_no_throw                   cx_ecdsa_sign_no_throw
