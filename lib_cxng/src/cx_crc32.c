@@ -24,7 +24,7 @@
 // x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1
 uint32_t cx_crc32(const void *buf, size_t len)
 {
-    return cx_crc32_hw(buf, len);
+    return cx_crc_hw(CRC_TYPE_CRC32, CX_CRC32_INIT, buf, len);
 }
 
 #endif  // HAVE_CRC

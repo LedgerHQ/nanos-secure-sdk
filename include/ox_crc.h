@@ -28,16 +28,44 @@
 
 #include "decorators.h"
 
+typedef enum crc_type_e {
+    CRC_TYPE_CRC16_CCITT_FALSE = 0,
+    CRC_TYPE_CRC32             = 1
+} crc_type_t;
+
 /**
- * @brief Calculates a 32-bit cyclic redundancy check.
+ * @brief Calculates a cyclic redundancy check.
  *
- * @param[in] buf Pointer to the buffer to check.
+ * @details
+ * Two types are supported:
+ * - CRC16-CCITT-FALSE: polynomial = x16 + x12 + x5 + 1
+ *                      Init = 0xFFFF
+ *                      RefIn = False
+ *                      RefOut = False
+ *                      XorOut = 0x0000
+ * - CRC32: polynomial = x32 + x26 + x23 + x22 + x16 + x12 + x11 + x10 + x8 + x7 + x5 + x4 + x2 + x
+ *                      + 1
+ *                      Init = 0xFFFFFFFF
+ *                      RefIn = True
+ *                      RefOut = True
+ *                      XorOut = 0xFFFFFFFF
  *
- * @param[in] len Length of the buffer.
+ * @param[in] crc_type  CRC type: either CRC_TYPE_CRC16_CCITT_FALSE
+ *                      or CRC_TYPE_CRC32. The function returns 0 for
+ *                      other values
  *
- * @return        Result of the 32-bit CRC calculation.
+ * @param[in] crc_state CRC value for initialization
+ *
+ * @param[in] buf       Pointer to the buffer to check.
+ *
+ * @param[in] len       Length of the buffer.
+ *
+ * @return             Result of CRC calculation: either 16-bit or 32-bit
  *
  */
-SYSCALL uint32_t cx_crc32_hw(const void *buf PLENGTH(len), size_t len);
+SYSCALL uint32_t cx_crc_hw(crc_type_t      crc_type,
+                           uint32_t        crc_state,
+                           const void *buf PLENGTH(len),
+                           size_t          len);
 
 #endif  // OX_CRC_H
