@@ -216,10 +216,14 @@ typedef struct {
  * @brief This structure contains a [tag,value] pair
  */
 typedef struct {
-    const char                *item;       ///< string giving the tag name
-    const char                *value;      ///< string giving the value name
+    const char *item;   ///< string giving the tag name
+    const char *value;  ///< string giving the value name
+#ifdef SCREEN_SIZE_WALLET
     const nbgl_icon_details_t *valueIcon;  ///< a buffer containing the 32px 1BPP icon for icon on
                                            ///< right of value (can be NULL)
+    int8_t force_page_start : 1;  ///< if set to 1, the tag will be displayed at the top of a new
+                                  ///< review page
+#endif
 } nbgl_layoutTagValue_t;
 
 /**
