@@ -721,27 +721,31 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPair
 
     *tooLongToFit = false;
     while (nbPairsInPage < nbPairs) {
-        const char            *item;
-        const char            *value;
-        nbgl_layoutTagValue_t *callback_result;
-        nbgl_font_id_e         value_font;
+        const nbgl_layoutTagValue_t *pair;
+        nbgl_font_id_e               value_font;
+
         // margin between pairs
         if (nbPairsInPage > 0) {
             currentHeight += 12;
         }
         // fetch tag/value pair strings.
         if (tagValueList->pairs != NULL) {
-            value = tagValueList->pairs[startIndex + nbPairsInPage].value;
-            item  = tagValueList->pairs[startIndex + nbPairsInPage].item;
+            pair = &tagValueList->pairs[startIndex + nbPairsInPage];
         }
         else {
-            callback_result = tagValueList->callback(startIndex + nbPairsInPage);
-            value           = callback_result->value;
-            item            = callback_result->item;
+            pair = tagValueList->callback(startIndex + nbPairsInPage);
         }
+
+        if (pair->force_page_start && nbPairsInPage > 0) {
+            // This pair must be at the top of a page
+            break;
+        }
+
         // tag height
-        currentHeight += nbgl_getTextHeightInWidth(
-            SMALL_REGULAR_FONT, item, SCREEN_WIDTH - 2 * BORDER_MARGIN, tagValueList->wrapping);
+        currentHeight += nbgl_getTextHeightInWidth(SMALL_REGULAR_FONT,
+                                                   pair->item,
+                                                   SCREEN_WIDTH - 2 * BORDER_MARGIN,
+                                                   tagValueList->wrapping);
         // space between tag and value
         currentHeight += 4;
         // set value font
@@ -753,7 +757,7 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPair
         }
         // value height
         currentHeight += nbgl_getTextHeightInWidth(
-            value_font, value, SCREEN_WIDTH - 2 * BORDER_MARGIN, tagValueList->wrapping);
+            value_font, pair->value, SCREEN_WIDTH - 2 * BORDER_MARGIN, tagValueList->wrapping);
         if (currentHeight >= TAG_VALUE_AREA_HEIGHT) {
             break;
         }
