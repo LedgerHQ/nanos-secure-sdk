@@ -62,6 +62,18 @@ typedef struct AddressConfirmationContext_s {
     const nbgl_layoutTagValueList_t *tagValueList;
 } AddressConfirmationContext_t;
 
+#ifdef NBGL_KEYPAD
+typedef struct KeypadContext_s {
+    uint8_t        pinEntry[KEYPAD_MAX_DIGITS];
+    uint8_t        pinLen;
+    uint8_t        pinMinDigits;
+    uint8_t        pinMaxDigits;
+    uint32_t       keypadIndex;
+    uint32_t       hiddenDigitsIndex;
+    nbgl_layout_t *layoutCtx;
+} KeypadContext_t;
+#endif
+
 /**********************
  *  STATIC VARIABLES
  **********************/
@@ -77,6 +89,9 @@ static nbgl_navCallback_t         onNav;
 static nbgl_layoutTouchCallback_t onControls;
 static nbgl_choiceCallback_t      onChoice;
 static nbgl_callback_t            onModalConfirm;
+#ifdef NBGL_KEYPAD
+static nbgl_pinValidCallback_t onValidatePin;
+#endif
 
 // contexts for background and modal pages
 static nbgl_page_t *pageContext;
@@ -96,6 +111,9 @@ static StaticReviewContext_t staticReviewContext;
 
 static AddressConfirmationContext_t addressConfirmationContext;
 
+#ifdef NBGL_KEYPAD
+static KeypadContext_t keypadContext;
+#endif
 // buffer of bits to store all numbers of tag/value pairs per page in static review
 // this number is from 1 to 4, so we can use 2 bits per page
 // there are up to 256 pages, so a buffer of 256/4 bytes is enough
@@ -127,6 +145,9 @@ static void reset_callbacks(void)
     onControls     = NULL;
     onChoice       = NULL;
     onModalConfirm = NULL;
+#ifdef NBGL_KEYPAD
+    onValidatePin = NULL;
+#endif
 }
 
 // function called when navigating (or exiting) modal details pages
@@ -672,6 +693,90 @@ static void displaySkipWarning(void)
     modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
+
+#ifdef NBGL_KEYPAD
+// called to update the keypad and automatically show / hide:
+// - backspace key if no digits are present
+// - validation key if the min digit is reached
+// - keypad if the max number of digit is reached
+static void updateKeyPad(bool add)
+{
+    bool                enableValidate, enableBackspace, enableDigits;
+    bool                redrawKeypad = false;
+    nbgl_refresh_mode_t mode         = BLACK_AND_WHITE_FAST_REFRESH;
+
+    enableDigits    = (keypadContext.pinLen < keypadContext.pinMaxDigits);
+    enableValidate  = (keypadContext.pinLen >= keypadContext.pinMinDigits);
+    enableBackspace = (keypadContext.pinLen > 0);
+    if (add) {
+        if ((keypadContext.pinLen == keypadContext.pinMinDigits)
+            ||  // activate "validate" button on keypad
+            (keypadContext.pinLen == keypadContext.pinMaxDigits)
+            ||                              // deactivate "digits" on keypad
+            (keypadContext.pinLen == 1)) {  // activate "backspace"
+            redrawKeypad = true;
+        }
+    }
+    else {                                  // remove
+        if ((keypadContext.pinLen == 0) ||  // deactivate "backspace" button on keypad
+            (keypadContext.pinLen == (keypadContext.pinMinDigits - 1))
+            ||  // deactivate "validate" button on keypad
+            (keypadContext.pinLen
+             == (keypadContext.pinMaxDigits - 1))) {  // reactivate "digits" on keypad
+            redrawKeypad = true;
+        }
+    }
+    nbgl_layoutUpdateHiddenDigits(
+        keypadContext.layoutCtx, keypadContext.hiddenDigitsIndex, keypadContext.pinLen);
+    if (redrawKeypad) {
+        nbgl_layoutUpdateKeypad(keypadContext.layoutCtx,
+                                keypadContext.keypadIndex,
+                                enableValidate,
+                                enableBackspace,
+                                enableDigits);
+    }
+
+    if ((!add) && (keypadContext.pinLen == 0)) {
+        // Full refresh to fully clean the bullets when reaching 0 digits
+        mode = FULL_COLOR_REFRESH;
+    }
+    nbgl_refreshSpecialWithPostRefresh(mode, POST_REFRESH_FORCE_POWER_ON);
+}
+
+// called when a key is touched on the keypad
+static void keypadCallback(char touchedKey)
+{
+    switch (touchedKey) {
+        case BACKSPACE_KEY:
+            if (keypadContext.pinLen > 0) {
+                keypadContext.pinLen--;
+                keypadContext.pinEntry[keypadContext.pinLen] = 0;
+            }
+            updateKeyPad(false);
+            break;
+
+        case VALIDATE_KEY:
+            // Gray out keyboard / buttons as a first user feedback
+            nbgl_layoutUpdateKeypad(
+                keypadContext.layoutCtx, keypadContext.keypadIndex, false, false, true);
+            nbgl_refreshSpecialWithPostRefresh(BLACK_AND_WHITE_FAST_REFRESH,
+                                               POST_REFRESH_FORCE_POWER_ON);
+
+            onValidatePin(keypadContext.pinEntry, keypadContext.pinLen);
+            break;
+
+        default:
+            if ((touchedKey >= 0x30) && (touchedKey < 0x40)) {
+                if (keypadContext.pinLen < keypadContext.pinMaxDigits) {
+                    keypadContext.pinEntry[keypadContext.pinLen] = touchedKey;
+                    keypadContext.pinLen++;
+                }
+                updateKeyPad(true);
+            }
+            break;
+    }
+}
+#endif
 
 ///////////// STATIC REVIEW UTILITIES /////////////
 
@@ -1526,5 +1631,88 @@ void nbgl_useCaseSpinner(const char *text)
     pageContext = nbgl_pageDrawSpinner(NULL, (const char *) text);
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
+
+#ifdef NBGL_KEYPAD
+/**
+ * @brief draws a standard keypad modal page. The page contains
+ *        - a navigation bar at the top
+ *        - a title for the pin code
+ *        - a hidden digit entry
+ *        - the keypad at the bottom
+ *
+ * @note callbacks allow to control the behavior.
+ *       backspace and validation button are shown/hidden automatically
+ *
+ * @param title string to set in pin code title
+ * @param minDigits pin minimum number of digits
+ * @param maxDigits maximum number of digits to be displayed
+ * @param backToken token used with actionCallback (0 if unused))
+ * @param shuffled if set to true, digits are shuffled in keypad
+ * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when back button is pressed
+ * @param validatePinCallback function calledto validate the pin code
+ * @param onActionCallback callback called on any action on the layout
+ */
+void nbgl_useCaseKeypad(const char                *title,
+                        uint8_t                    minDigits,
+                        uint8_t                    maxDigits,
+                        uint8_t                    backToken,
+                        bool                       shuffled,
+                        tune_index_e               tuneId,
+                        nbgl_pinValidCallback_t    validatePinCallback,
+                        nbgl_layoutTouchCallback_t actionCallback)
+{
+    nbgl_layoutDescription_t  layoutDescription = {0};
+    nbgl_layoutCenteredInfo_t centeredInfo      = {0};
+    int                       status            = -1;
+
+    if ((minDigits > KEYPAD_MAX_DIGITS) || (maxDigits > KEYPAD_MAX_DIGITS)) {
+        return;
+    }
+
+    reset_callbacks();
+    // reset the keypad context
+    memset(&keypadContext, 0, sizeof(KeypadContext_t));
+
+    // get a layout
+    layoutDescription.onActionCallback = actionCallback;
+    layoutDescription.modal            = false;
+    layoutDescription.withLeftBorder   = false;
+    keypadContext.layoutCtx            = nbgl_layoutGet(&layoutDescription);
+
+    // set navigation bar
+    nbgl_layoutAddProgressIndicator(
+        keypadContext.layoutCtx, 0, 0, (backToken != 0), backToken, tuneId);
+
+    // add text description
+    centeredInfo.text1 = title;
+    centeredInfo.style = LARGE_CASE_INFO;
+    centeredInfo.onTop = true;
+    nbgl_layoutAddCenteredInfo(keypadContext.layoutCtx, &centeredInfo);
+
+    // add keypad
+    status = nbgl_layoutAddKeypad(keypadContext.layoutCtx, keypadCallback, shuffled);
+    if (status < 0) {
+        return;
+    }
+    keypadContext.keypadIndex = (unsigned int) status;
+
+    // add hidden digits
+    status = nbgl_layoutAddHiddenDigits(keypadContext.layoutCtx, maxDigits);
+    if (status < 0) {
+        return;
+    }
+    keypadContext.hiddenDigitsIndex = (unsigned int) status;
+
+    // validation pin callback
+    onValidatePin = validatePinCallback;
+    // pin code acceptable lengths
+    keypadContext.pinMinDigits = minDigits;
+    keypadContext.pinMaxDigits = maxDigits;
+
+    nbgl_layoutDraw(keypadContext.layoutCtx);
+    nbgl_refreshSpecialWithPostRefresh(FULL_COLOR_CLEAN_REFRESH, POST_REFRESH_FORCE_POWER_ON);
+}
+#endif  // NBGL_KEYPAD
+
 #endif  // HAVE_SE_TOUCH
 #endif  // NBGL_USE_CASE

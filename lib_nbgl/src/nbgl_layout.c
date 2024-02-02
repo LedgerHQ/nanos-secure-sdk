@@ -3481,7 +3481,7 @@ int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
     if (layout == NULL) {
         return -1;
     }
-    if (nbDigits > 12) {
+    if (nbDigits > KEYPAD_MAX_DIGITS) {
         return -1;
     }
     if (nbDigits > 8) {
