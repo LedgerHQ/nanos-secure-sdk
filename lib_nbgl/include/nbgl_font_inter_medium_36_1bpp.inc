@@ -655,7 +655,7 @@ __attribute__ ((section("._nbgl_fonts_"))) const nbgl_font_t fontINTER_MEDIUM_36
   BAGL_FONT_INTER_MEDIUM_36px_1bpp, // font id
   (uint8_t) NBGL_BPP_1, // bpp
   48, // height of all characters in pixels
-  44, // line height in pixels
+  40, // line height in pixels
   0, // kerning
   1, // crop enabled (1) or not (0)
   0, // Most top Y coordinate of any char
