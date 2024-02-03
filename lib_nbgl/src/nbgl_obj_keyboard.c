@@ -161,9 +161,13 @@ static void keyboardDrawCommonLines(nbgl_keyboard_t *keyboard)
     nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 2nd line
     rectArea.y0 += KEYBOARD_KEY_HEIGHT;
     nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 3rd line
-    rectArea.y0 += KEYBOARD_KEY_HEIGHT;
-    nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 4th line
-    if (!keyboard->lettersOnly) {
+    // in letter only mode, only draw the last line if not at bottom of screen
+    if ((keyboard->obj.alignmentMarginY > 0) || (!keyboard->lettersOnly)) {
+        rectArea.y0 += KEYBOARD_KEY_HEIGHT;
+        nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 4th line
+    }
+    // in non letter only mode, only draw the last line if not at bottom of screen
+    if ((keyboard->obj.alignmentMarginY > 0) && (!keyboard->lettersOnly)) {
         rectArea.y0 += KEYBOARD_KEY_HEIGHT;
         nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keyboard->borderColor);  // 5th line
     }
@@ -353,6 +357,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard)
         rectArea.backgroundColor = (keyboard->casing != LOWER_CASE) ? BLACK : WHITE;
         nbgl_drawIcon(
             &rectArea,
+            NO_TRANSFORMATION,
             (keyboard->casing != LOWER_CASE) ? WHITE : BLACK,
             (keyboard->casing != LOCKED_UPPER_CASE) ? (&C_shift_lock32px) : (&C_shift32px));
         rectArea.backgroundColor = WHITE;
@@ -386,7 +391,10 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard)
     else {
         rectArea.x0 += (BACKSPACE_KEY_WIDTH_LETTERS_ONLY - rectArea.width) / 2;
     }
-    nbgl_drawIcon(&rectArea, (keyboard->keyMask & (1 << 26)) ? WHITE : BLACK, &C_backspace32px);
+    nbgl_drawIcon(&rectArea,
+                  NO_TRANSFORMATION,
+                  (keyboard->keyMask & (1 << 26)) ? WHITE : BLACK,
+                  &C_backspace32px);
 
     // 4th row, only in Full mode
     if (!keyboard->lettersOnly) {
@@ -395,8 +403,10 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard)
         nbgl_drawText(&rectArea, ".?123", 5, SMALL_REGULAR_1BPP_FONT, BLACK);
 
         rectArea.x0 = SWITCH_KEY_WIDTH + (SPACE_KEY_WIDTH - C_space32px.width) / 2;
-        nbgl_drawIcon(
-            &rectArea, (keyboard->keyMask & (1 << SPACE_KEY_INDEX)) ? WHITE : BLACK, &C_space32px);
+        nbgl_drawIcon(&rectArea,
+                      NO_TRANSFORMATION,
+                      (keyboard->keyMask & (1 << SPACE_KEY_INDEX)) ? WHITE : BLACK,
+                      &C_space32px);
     }
 }
 
@@ -477,7 +487,7 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard)
     rectArea.y0     = keyboard->obj.area.y0 + KEYBOARD_KEY_HEIGHT * 2
                   + (((KEYBOARD_KEY_HEIGHT - rectArea.height) / 2) & 0xFFC);
     rectArea.x0 += (BACKSPACE_KEY_WIDTH_DIGITS - rectArea.width) / 2;
-    nbgl_drawIcon(&rectArea, BLACK, &C_backspace32px);
+    nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, BLACK, &C_backspace32px);
 
     // 4th row
     rectArea.x0 = (SWITCH_KEY_WIDTH - nbgl_getTextWidth(SMALL_REGULAR_1BPP_FONT, "ABC")) / 2;
@@ -485,8 +495,10 @@ static void keyboardDrawDigits(nbgl_keyboard_t *keyboard)
     nbgl_drawText(&rectArea, "ABC", 3, SMALL_REGULAR_1BPP_FONT, BLACK);
 
     rectArea.x0 = SWITCH_KEY_WIDTH + (SPACE_KEY_WIDTH - C_space32px.width) / 2;
-    nbgl_drawIcon(
-        &rectArea, (keyboard->keyMask & (1 << SPACE_KEY_INDEX)) ? WHITE : BLACK, &C_space32px);
+    nbgl_drawIcon(&rectArea,
+                  NO_TRANSFORMATION,
+                  (keyboard->keyMask & (1 << SPACE_KEY_INDEX)) ? WHITE : BLACK,
+                  &C_space32px);
 }
 
 static void keyboardDraw(nbgl_keyboard_t *keyboard)
