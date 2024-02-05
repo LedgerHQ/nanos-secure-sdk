@@ -20,6 +20,14 @@
  *********************/
 #define INTERNAL_SMALL_MARGIN 8
 
+#ifdef TARGET_STAX
+#define BORDER_COLOR      LIGHT_GRAY
+#define NAVIGATION_HEIGHT (BUTTON_DIAMETER + 2 * BORDER_MARGIN)
+#else  // TARGET_STAX
+#define BORDER_COLOR      WHITE
+#define NAVIGATION_HEIGHT 100
+#endif  // TARGET_STAX
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -117,92 +125,106 @@ nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
     nbgl_button_t    *button;
     nbgl_container_t *navContainer;
 
-    navContainer                  = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layer);
-    navContainer->obj.area.width  = SCREEN_WIDTH - 2 * BORDER_MARGIN;
-    navContainer->obj.area.height = BUTTON_DIAMETER + 2 * BORDER_MARGIN;
+    navContainer = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layer);
+#ifdef TARGET_STAX
+    navContainer->obj.area.width = SCREEN_WIDTH - 2 * BORDER_MARGIN;
+#else   // TARGET_STAX
+    navContainer->obj.area.width = SCREEN_WIDTH;
+#endif  // TARGET_STAX
+    navContainer->obj.area.height = NAVIGATION_HEIGHT;
     navContainer->layout          = HORIZONTAL;
     navContainer->nbChildren      = NB_MAX_CHILDREN;
     navContainer->children = (nbgl_obj_t **) nbgl_containerPoolGet(navContainer->nbChildren, layer);
-    navContainer->obj.alignmentMarginX = 0;
-    navContainer->obj.alignmentMarginY = 0;
-    navContainer->obj.alignment        = NO_ALIGNMENT;
 
     if (withExitKey) {
-        button                       = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
-        button->innerColor           = WHITE;
-        button->borderColor          = LIGHT_GRAY;
-        button->obj.area.width       = BUTTON_DIAMETER;
-        button->obj.area.height      = BUTTON_DIAMETER;
-        button->radius               = BUTTON_RADIUS;
-        button->text                 = NULL;
-        button->icon                 = &C_cross32px;
-        button->obj.alignmentMarginX = 0;
-        button->obj.alignmentMarginY = 0;
+        button                  = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
+        button->innerColor      = WHITE;
+        button->borderColor     = BORDER_COLOR;
+        button->obj.area.width  = BUTTON_DIAMETER;
+        button->obj.area.height = BUTTON_DIAMETER;
+        button->radius          = BUTTON_RADIUS;
+#ifdef TARGET_STAX
+        button->icon = &C_cross32px;
+#else   // TARGET_STAX
+        button->icon                 = &C_cross40px;
+        button->obj.alignmentMarginX = (nbPages > 1) ? 8 : 0;
+#endif  // TARGET_STAX
 
         button->obj.alignment                     = (nbPages > 1) ? MID_LEFT : CENTER;
-        button->obj.alignTo                       = NULL;
         button->obj.touchMask                     = (1 << TOUCHED);
         button->obj.touchId                       = BOTTOM_BUTTON_ID;
         navContainer->children[EXIT_BUTTON_INDEX] = (nbgl_obj_t *) button;
     }
-    if (nbPages > 1) {
-        button              = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
-        button->innerColor  = WHITE;
-        button->borderColor = LIGHT_GRAY;
-        button->obj.area.width
-            = (SCREEN_WIDTH - (2 * BORDER_MARGIN + 2 * INTERNAL_SMALL_MARGIN + BUTTON_DIAMETER))
-              / 2;
-        if (!withExitKey) {
-            button->obj.area.width += BUTTON_DIAMETER / 2;
-        }
-        button->obj.area.height      = BUTTON_DIAMETER;
-        button->radius               = BUTTON_RADIUS;
-        button->text                 = NULL;
-        button->icon                 = &C_leftArrow32px;
-        button->obj.alignmentMarginY = 0;
-        if (withExitKey) {
-            button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
-            button->obj.alignment        = MID_RIGHT;
-            button->obj.alignTo          = navContainer->children[EXIT_BUTTON_INDEX];
-        }
-        else {
-            button->obj.alignmentMarginX = 0;
-            button->obj.alignment        = MID_LEFT;
-            button->obj.alignTo          = NULL;
-        }
-        button->obj.touchMask                       = (1 << TOUCHED);
-        button->obj.touchId                         = LEFT_BUTTON_ID;
-        navContainer->children[PREVIOUS_PAGE_INDEX] = (nbgl_obj_t *) button;
-
-        // create next page button
-        button                  = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
-        button->innerColor      = WHITE;
-        button->borderColor     = LIGHT_GRAY;
-        button->foregroundColor = BLACK;
-        button->obj.area.width
-            = (SCREEN_WIDTH - (2 * BORDER_MARGIN + 2 * INTERNAL_SMALL_MARGIN + BUTTON_DIAMETER))
-              / 2;
-        if (!withExitKey) {
-            button->obj.area.width += BUTTON_DIAMETER / 2;
-        }
-        button->obj.area.height = BUTTON_DIAMETER;
-        button->radius          = BUTTON_RADIUS;
-        button->text            = NULL;
-#ifdef TARGET_STAX
-        button->icon = &C_rightArrow32px;
-#else   // TARGET_STAX
-        button->icon = &C_rightArrow40px;
-#endif  // TARGET_STAX
-        button->obj.alignmentMarginX            = INTERNAL_SMALL_MARGIN;
-        button->obj.alignmentMarginY            = 0;
-        button->obj.alignment                   = MID_RIGHT;
-        button->obj.alignTo                     = navContainer->children[PREVIOUS_PAGE_INDEX];
-        button->obj.touchMask                   = (1 << TOUCHED);
-        button->obj.touchId                     = RIGHT_BUTTON_ID;
-        navContainer->children[NEXT_PAGE_INDEX] = (nbgl_obj_t *) button;
-
-        configButtons(navContainer, nbPages, activePage);
+    if (nbPages <= 1) {
+        return navContainer;
     }
+    // create previous page button
+    button              = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
+    button->innerColor  = WHITE;
+    button->borderColor = BORDER_COLOR;
+#ifdef TARGET_STAX
+    button->obj.area.width
+        = (SCREEN_WIDTH - (2 * BORDER_MARGIN + 2 * INTERNAL_SMALL_MARGIN + BUTTON_DIAMETER)) / 2;
+    if (!withExitKey) {
+        button->obj.area.width += BUTTON_DIAMETER / 2;
+    }
+#else   // TARGET_STAX
+    button->obj.area.width = BUTTON_DIAMETER;
+#endif  // TARGET_STAX
+    button->obj.area.height = BUTTON_DIAMETER;
+    button->radius          = BUTTON_RADIUS;
+#ifdef TARGET_STAX
+    button->icon = &C_leftArrow32px;
+    // align either on the right of Exit key, or on the inner left of the container
+    if (withExitKey) {
+        button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
+        button->obj.alignment        = MID_RIGHT;
+        button->obj.alignTo          = navContainer->children[EXIT_BUTTON_INDEX];
+    }
+    else {
+        button->obj.alignment = MID_LEFT;
+    }
+#else   // TARGET_STAX
+    button->icon           = &C_Back40px;
+    // align on the right of the container, leaving space for "Next" button
+    button->obj.alignment        = MID_RIGHT;
+    button->obj.alignmentMarginX = 16 + BUTTON_DIAMETER + 8;
+#endif  // TARGET_STAX
+    button->obj.touchMask                       = (1 << TOUCHED);
+    button->obj.touchId                         = LEFT_BUTTON_ID;
+    navContainer->children[PREVIOUS_PAGE_INDEX] = (nbgl_obj_t *) button;
+
+    // create next page button
+    button                  = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layer);
+    button->innerColor      = WHITE;
+    button->borderColor     = BORDER_COLOR;
+    button->foregroundColor = BLACK;
+#ifdef TARGET_STAX
+    button->obj.area.width
+        = (SCREEN_WIDTH - (2 * BORDER_MARGIN + 2 * INTERNAL_SMALL_MARGIN + BUTTON_DIAMETER)) / 2;
+    if (!withExitKey) {
+        button->obj.area.width += BUTTON_DIAMETER / 2;
+    }
+#else   // TARGET_STAX
+    button->obj.area.width       = BUTTON_DIAMETER;
+#endif  // TARGET_STAX
+    button->obj.area.height = BUTTON_DIAMETER;
+    button->radius          = BUTTON_RADIUS;
+#ifdef TARGET_STAX
+    button->icon = &C_rightArrow32px;
+    // on Stax, align next button on the right of left one
+    button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
+    button->obj.alignTo          = navContainer->children[PREVIOUS_PAGE_INDEX];
+#else   // TARGET_STAX
+    button->icon                 = &C_Next40px;
+#endif  // TARGET_STAX
+    button->obj.alignment                   = MID_RIGHT;
+    button->obj.touchMask                   = (1 << TOUCHED);
+    button->obj.touchId                     = RIGHT_BUTTON_ID;
+    navContainer->children[NEXT_PAGE_INDEX] = (nbgl_obj_t *) button;
+
+    // configure enabling/disabling of button
+    configButtons(navContainer, nbPages, activePage);
 
     return navContainer;
 }

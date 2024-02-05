@@ -34,10 +34,12 @@ extern "C" {
 #ifdef TARGET_STAX
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS NB_MAX_SUGGESTION_BUTTONS
 #else  // TARGET_STAX
+// only 2 buttons are visible at the same time on Europa
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS 2
 #endif  // TARGET_STAX
 
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * BORDER_MARGIN)
+
 #else  // HAVE_SE_TOUCH
 // 7 pixels on each side
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * 7)
