@@ -28,7 +28,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout)
+static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout, uint16_t availableHeight)
 {
     if (content->title != NULL) {
         nbgl_layoutBar_t bar;
@@ -40,7 +40,7 @@ static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout)
         bar.centered  = true;
         bar.inactive  = false;
         bar.tuneId    = content->tuneId;
-        nbgl_layoutAddTouchableBar(layout, &bar);
+        availableHeight -= nbgl_layoutAddTouchableBar(layout, &bar);
         nbgl_layoutAddSeparationLine(layout);
     }
     switch (content->type) {
@@ -143,17 +143,23 @@ static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout)
         case SWITCHES_LIST: {
             uint8_t i;
             for (i = 0; i < content->switchesList.nbSwitches; i++) {
-                nbgl_layoutAddSwitch(layout, &content->switchesList.switches[i]);
-                nbgl_layoutAddSeparationLine(layout);
+                availableHeight -= nbgl_layoutAddSwitch(layout, &content->switchesList.switches[i]);
+                // do not draw a separation line if too low in the container
+                if (availableHeight > 10) {
+                    nbgl_layoutAddSeparationLine(layout);
+                }
             }
             break;
         }
         case INFOS_LIST: {
             uint8_t i;
             for (i = 0; i < content->infosList.nbInfos; i++) {
-                nbgl_layoutAddText(
+                availableHeight -= nbgl_layoutAddText(
                     layout, content->infosList.infoTypes[i], content->infosList.infoContents[i]);
-                nbgl_layoutAddSeparationLine(layout);
+                // do not draw a separation line if too low in the container
+                if (availableHeight > 10) {
+                    nbgl_layoutAddSeparationLine(layout);
+                }
             }
             break;
         }
@@ -171,8 +177,11 @@ static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout)
                 bar.token     = content->barsList.tokens[i];
                 bar.centered  = false;
                 bar.tuneId    = content->barsList.tuneId;
-                nbgl_layoutAddTouchableBar(layout, &bar);
-                nbgl_layoutAddSeparationLine(layout);
+                availableHeight -= nbgl_layoutAddTouchableBar(layout, &bar);
+                // do not draw a separation line if too low in the container
+                if (availableHeight > 10) {
+                    nbgl_layoutAddSeparationLine(layout);
+                }
             }
             break;
         }
@@ -431,6 +440,7 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
 {
     nbgl_layoutDescription_t layoutDescription;
     nbgl_layout_t           *layout;
+    uint16_t                 availableHeight = SCREEN_HEIGHT;
 
     layoutDescription.modal                 = modal;
     layoutDescription.withLeftBorder        = true;
@@ -450,23 +460,24 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
     if (nav != NULL) {
         if (nav->navType == NAV_WITH_TAP) {
             if (nav->navWithTap.skipText == NULL) {
-                nbgl_layoutAddFooter(layout, nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
+                availableHeight -= nbgl_layoutAddFooter(
+                    layout, nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
             }
             else {
-                nbgl_layoutAddSplitFooter(layout,
-                                          nav->navWithTap.quitText,
-                                          nav->quitToken,
-                                          nav->navWithTap.skipText,
-                                          nav->navWithTap.skipToken,
-                                          nav->tuneId);
+                availableHeight -= nbgl_layoutAddSplitFooter(layout,
+                                                             nav->navWithTap.quitText,
+                                                             nav->quitToken,
+                                                             nav->navWithTap.skipText,
+                                                             nav->navWithTap.skipToken,
+                                                             nav->tuneId);
             }
             if (nav->progressIndicator) {
-                nbgl_layoutAddProgressIndicator(layout,
-                                                nav->activePage,
-                                                nav->nbPages,
-                                                nav->navWithTap.backButton,
-                                                nav->navWithTap.backToken,
-                                                nav->tuneId);
+                availableHeight -= nbgl_layoutAddProgressIndicator(layout,
+                                                                   nav->activePage,
+                                                                   nav->nbPages,
+                                                                   nav->navWithTap.backButton,
+                                                                   nav->navWithTap.backToken,
+                                                                   nav->tuneId);
             }
         }
         else if (nav->navType == NAV_WITH_BUTTONS) {
@@ -476,14 +487,14 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
                                                   .withExitKey = nav->navWithButtons.quitButton,
                                                   .withSeparationLine = true,
                                                   .tuneId             = nav->tuneId};
-            nbgl_layoutAddNavigationBar(layout, &navInfo);
+            availableHeight -= nbgl_layoutAddNavigationBar(layout, &navInfo);
             if (nav->progressIndicator) {
-                nbgl_layoutAddProgressIndicator(
+                availableHeight -= nbgl_layoutAddProgressIndicator(
                     layout, nav->activePage, nav->nbPages, false, 0, nav->tuneId);
             }
         }
     }
-    addContent(content, layout);
+    addContent(content, layout, availableHeight);
     nbgl_layoutDraw(layout);
 
     return (nbgl_page_t *) layout;
