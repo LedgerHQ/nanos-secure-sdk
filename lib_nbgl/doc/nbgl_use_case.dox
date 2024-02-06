@@ -60,6 +60,8 @@ A few APIs are available to draw typical Use-Cases, such as:
 - for address verification:
  - @ref nbgl_useCaseAddressConfirmation() to draw an address confirmation page, with a possibility to see it as QR Code (see @subpage use_case_addr_confirm)
  - @ref nbgl_useCaseAddressConfirmationExt() to draw an address confirmation page, with a possibility to see it as QR Code and some extra tag/value pairs (see @subpage use_case_addr_confirm_ext)
+- for keypad:
+ - @ref nbgl_useCaseKeypad() to draw a default keypad implementation (see @subpage use_case_keypad)
 
 @subsection use_case_home Home screen Use Case
 
@@ -865,6 +867,56 @@ the raw address (as text) and a black button/Footer pair to choose to confirm or
 An extra button under the raw address enables to open a modal page to see the address as a QR code.
 
 The @ref nbgl_useCaseSpinner() function enables to create such a page, with the following parameters:
+
+@subsection use_case_keypad Keypad Use Case
+
+\image{inline} html UseCase-Keypad.png "caption" height=350
+
+When a pincode is requested, a default keypad can be displayed. As show on the image above, it consists of:
+
+- a navigation bar at the top
+- a title area, specifying the type of pin code or operation requested
+- a hidden Digits area (the max nb of supported digits is 12)
+- the keypad at the bottom
+
+The @ref nbgl_useCaseKeypad() function enables to create such page, with the following parameters:
+
+- the title
+- min and max pin code length
+- a token for the navigation callback (if not provided, no navigation bar will appear)
+- a boolean to request a shuffled keypad
+- a tune value
+- callbacks for navigation and pin validation
+
+@note The \em backspace and \em validate buttons will be shown or hidden automatically.
+
+Here is the code to display something similar to example picture:
+
+@code
+static void validate_pin(const uint8_t *pinentry, uint8_t length) {
+    // Code to validate the entered pin code
+}
+
+static void pinentry_cb(int token, uint8_t index) {
+    UNUSED(index);
+    // Callback for the key navigation (back key mainly)
+    if (token == TOKEN_PIN_ENTRY_BACK) {
+        ui_init();
+    }
+}
+
+void ui_menu_pinentry_display(unsigned int value) {
+    // Draw the keypad
+    nbgl_useCaseKeypad("Enter User PIN",
+                       6,
+                       12,
+                       TOKEN_PIN_ENTRY_BACK,
+                       false,
+                       TUNE_TAP_CASUAL,
+                       validate_pin,
+                       pinentry_cb);
+}
+@endcode
 
 @section use_case_refresh_page Refreshing screen
 
