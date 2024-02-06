@@ -17,7 +17,7 @@
 
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
 ifeq ($(DISABLE_UI),0)
-    ifndef USE_NBGL
+    ifeq ($(USE_NBGL),0)
         SDK_SOURCE_PATH += lib_bagl lib_ux
     else
         SDK_SOURCE_PATH += lib_nbgl lib_ux_stax
