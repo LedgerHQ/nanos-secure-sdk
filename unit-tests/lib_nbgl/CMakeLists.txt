@@ -56,7 +56,7 @@ include_directories(.)
 include_directories(../../target/stax/include)
 include_directories(../../include)
 include_directories(../../lib_nbgl/include)
-include_directories(../../lib_ux_stax)
+include_directories(../../lib_ux_nbgl)
 
 add_executable(test_nbgl_fonts test_nbgl_fonts.c)
 add_executable(test_nbgl_obj_pool test_nbgl_obj_pool.c)

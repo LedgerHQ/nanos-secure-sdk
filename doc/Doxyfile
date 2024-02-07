@@ -855,8 +855,8 @@ INPUT                  = \
                          lib_ux/doc \
                          lib_ux/include \
                          lib_ux/src \
-                         lib_ux_stax/doc \
-                         lib_ux_stax
+                         lib_ux_nbgl/doc \
+                         lib_ux_nbgl
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
