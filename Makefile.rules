@@ -16,10 +16,8 @@
 #*******************************************************************************
 
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
-ifeq ($(DISABLE_UI),0)
-    ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
-        SDK_SOURCE_PATH += lib_bagl lib_ux
-    endif
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
+    SDK_SOURCE_PATH += lib_bagl lib_ux
 endif
 
 define uniq =

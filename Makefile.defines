@@ -133,12 +133,9 @@ else
 LDFLAGS  += -nostartfiles
 endif
 
-DISABLE_UI ?= 0
-ifeq ($(DISABLE_UI), 0)
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += HAVE_BAGL
 DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=32
-endif
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
