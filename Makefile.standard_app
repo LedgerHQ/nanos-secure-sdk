@@ -124,6 +124,12 @@ ifneq ($(DISABLE_STANDARD_APP_FILES), 1)
 SDK_SOURCE_PATH += lib_standard_app
 endif
 
+ifneq ($(DISABLE_STANDARD_APP_SYNC_RAPDU), 1)
+ifneq ($(TARGET_NAME),TARGET_NANOS)
+DEFINES += STANDARD_APP_SYNC_RAPDU
+endif
+endif
+
 #####################################################################
 #                              NBGL                                 #
 #####################################################################
