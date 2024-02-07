@@ -34,7 +34,7 @@ GLYPH_DESTH := $(GLYPH_SRC_DIR)/glyphs.h
 # search icons (glyphs) in glyphs folder of the app first
 GLYPH_FILES += $(addprefix glyphs/,$(sort $(notdir $(shell find glyphs/))))
 
-ifdef USE_NBGL
+ifneq ($(USE_NBGL),0)
 # NBGL glyphs files and generation script
 #
 # search icons (glyphs) in lib_nbgl/glyphs(_nano) folder of the SDK
