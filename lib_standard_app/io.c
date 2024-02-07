@@ -136,8 +136,8 @@ WEAK int io_recv_command()
 
     switch (G_io_state) {
         case READY:
+            ret        = io_exchange(CHANNEL_APDU | IO_CONTINUE_RX, G_output_len);
             G_io_state = RECEIVED;
-            ret        = io_exchange(CHANNEL_APDU, G_output_len);
             break;
         case RECEIVED:
             G_io_state = WAITING;
@@ -200,9 +200,17 @@ WEAK int io_send_response_buffers(const buffer_t *rdatalist, size_t count, uint1
             ret = -1;
             break;
         case RECEIVED:
+#ifdef STANDARD_APP_SYNC_RAPDU
+            // Send synchronously the APDU response.
+            // This is needed to send the response before displaying synchronous
+            // status message on the screen.
+            // This is not always done to spare the RAM (stack) on LNS.
+            __attribute__((fallthrough));
+#else
             G_io_state = READY;
             ret        = 0;
             break;
+#endif
         case WAITING:
             ret          = io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, G_output_len);
             G_output_len = 0;
