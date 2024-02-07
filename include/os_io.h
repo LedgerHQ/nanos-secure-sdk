@@ -38,7 +38,8 @@ extern unsigned char G_io_apdu_buffer[IO_APDU_BUFFER_SIZE];
 #define IO_RETURN_AFTER_TX     0x20
 #define IO_ASYNCH_REPLY        0x10  // avoid apdu state reset if tx_len == 0 when we're expected to reply
 #define IO_FINISHED            0x08  // inter task communication value
-#define IO_FLAGS               0xF8
+#define IO_CONTINUE_RX         0x04
+#define IO_FLAGS               0xFC
 unsigned short io_exchange(unsigned char channel_and_flags, unsigned short tx_len);
 
 typedef enum {

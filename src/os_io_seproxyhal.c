@@ -1412,48 +1412,46 @@ reply_apdu:
                 }
             }
 
-            if (!(channel & IO_ASYNCH_REPLY)) {
-                // already received the data of the apdu when received the whole apdu
-                if ((channel & (CHANNEL_APDU | IO_RECEIVE_DATA))
-                    == (CHANNEL_APDU | IO_RECEIVE_DATA)) {
-                    // return apdu data - header
-                    return G_io_app.apdu_length - 5;
+            // When IO_CONTINUE_RX is used we don't reset potentially already received APDU.
+            // Instead we directly process them.
+            // Use case is:
+            // - First APDU received (call to io_exchange())
+            // - UX waiting for user approval
+            // - First APDU response sent (call to io_exchange() with flag IO_RETURN_AFTER_TX)
+            // - UX with transient message like ("Transaction signed")
+            //   This need to loop on os_io_seph_recv_and_process() to process tick and UX
+            //   events, but a second APDU can be received here too.
+            // - Then a call to io_exchange() with flag IO_CONTINUE_RX will allow processing
+            //   the APDU now that the app is ready.
+            //
+            // Note that a received APDU will be cleared out (reset of G_io_app.apdu_state /
+            // G_io_app.apdu_media / G_io_app.apdu_length) during the APDU response sending.
+            // Therefore there is no risk to process an APDU twice.
+            if (!(channel & IO_CONTINUE_RX)) {
+                if (!(channel & IO_ASYNCH_REPLY)) {
+                    // already received the data of the apdu when received the whole apdu
+                    if ((channel & (CHANNEL_APDU | IO_RECEIVE_DATA))
+                        == (CHANNEL_APDU | IO_RECEIVE_DATA)) {
+                        // return apdu data - header
+                        return G_io_app.apdu_length - 5;
+                    }
+
+                    // reply has ended, proceed to next apdu reception (reset status only after
+                    // asynch reply)
+                    G_io_app.apdu_state = APDU_IDLE;
+                    G_io_app.apdu_media = IO_APDU_MEDIA_NONE;
                 }
 
-                // reply has ended, proceed to next apdu reception (reset status only after asynch
-                // reply)
-                G_io_app.apdu_state = APDU_IDLE;
-                G_io_app.apdu_media = IO_APDU_MEDIA_NONE;
+                // reset the received apdu length
+                G_io_app.apdu_length = 0;
             }
-
-            // reset the received apdu length
-            G_io_app.apdu_length = 0;
 
             // ensure ready to receive an event (after an apdu processing with asynch flag, it may
             // occur if the channel is not correctly managed)
 
             // until a new whole CAPDU is received
             for (;;) {
-                io_seproxyhal_general_status();
-                // wait until a SPI packet is available
-                // NOTE: on ST31, dual wait ISO & RF (ISO instead of SPI)
-                rx_len = io_seproxyhal_spi_recv(
-                    G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-                // can't process split TLV, continue
-                if (rx_len < 3
-                    || rx_len
-                           != U2(G_io_seproxyhal_spi_buffer[1], G_io_seproxyhal_spi_buffer[2])
-                                  + 3U) {
-                    LOG("invalid TLV format\n");
-                    G_io_app.apdu_state  = APDU_IDLE;
-                    G_io_app.apdu_length = 0;
-                    continue;
-                }
-
-                io_seproxyhal_handle_event();
-
-                // An apdu has been received asynchroneously.
+                // An apdu has been received asynchronously.
                 if (G_io_app.apdu_state != APDU_IDLE && G_io_app.apdu_length > 0) {
                     if (os_perso_isonboarded() == BOLOS_TRUE
                         && os_global_pin_is_validated() != BOLOS_TRUE) {
@@ -1473,6 +1471,25 @@ reply_apdu:
 
                     return G_io_app.apdu_length;
                 }
+
+                io_seproxyhal_general_status();
+                // wait until a SPI packet is available
+                // NOTE: on ST31, dual wait ISO & RF (ISO instead of SPI)
+                rx_len = io_seproxyhal_spi_recv(
+                    G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
+
+                // can't process split TLV, continue
+                if (rx_len < 3
+                    || rx_len
+                           != U2(G_io_seproxyhal_spi_buffer[1], G_io_seproxyhal_spi_buffer[2])
+                                  + 3U) {
+                    LOG("invalid TLV format\n");
+                    G_io_app.apdu_state  = APDU_IDLE;
+                    G_io_app.apdu_length = 0;
+                    continue;
+                }
+
+                io_seproxyhal_handle_event();
             }
             break;
 
