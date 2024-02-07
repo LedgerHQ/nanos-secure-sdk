@@ -164,9 +164,6 @@ LDFLAGS  += -L$(BOLOS_SDK)/arch/st33k1/lib/
 AFLAGS   += -mcpu=cortex-m35p+nodsp -mthumb
 endif
 
-DISABLE_UI ?= 0
-ifeq ($(DISABLE_UI),0)
-
 ifeq ($(TARGET_NAME),TARGET_STAX)
 # For Stax NBGL must be used
 USE_NBGL = 1
@@ -211,8 +208,6 @@ DEFINES += BAGL_WIDTH=128
 DEFINES += SCREEN_SIZE_NANO
 DEFINES += HAVE_BAGL
 endif # TARGET_NANOS
-
-endif # DISABLE_UI
 
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
 # Screen is directly connected to the SE
