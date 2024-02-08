@@ -690,7 +690,8 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
     nbgl_area_t rectArea;
     uint16_t    dashWidth;
 
-    if (obj->nbPages == 0) {
+    // display nothing if less than two pages
+    if (obj->nbPages < 2) {
         return;
     }
 

@@ -51,11 +51,15 @@
 
 #ifdef TARGET_STAX
 #define TOUCHABLE_BAR_HEIGHT 88
+#define RADIO_CHOICE_HEIGHT  88
 #define FOOTER_HEIGHT        80
 #else  // TARGET_STAX
 #define TOUCHABLE_BAR_HEIGHT 100
+#define RADIO_CHOICE_HEIGHT  92
 #define FOOTER_HEIGHT        80
 #endif  // TARGET_STAX
+
+#define SMALL_BUTTON_HEIGHT 64
 #endif  // HAVE_SE_TOUCH
 
 // refresh period of the spinner, in ms
@@ -197,34 +201,39 @@ static bool updateSuggestionButtons(nbgl_container_t *container,
     uint8_t page        = 0;
     if ((eventType == SWIPED_LEFT) && (currentLeftButtonIndex < (uint32_t) (nbActiveButtons - 2))) {
         // shift all buttons on the left if there are still at least 2 buttons to display
-        currentLeftButtonIndex++;
+        currentLeftButtonIndex += 2;
         container->children[FIRST_BUTTON_INDEX]
             = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex];
-        container->children[FIRST_BUTTON_INDEX + 1]
-            = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex + 1];
-        page        = currentLeftButtonIndex;
+        if (currentLeftButtonIndex < (uint32_t) (nbActiveButtons - 1)) {
+            container->children[FIRST_BUTTON_INDEX + 1]
+                = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex + 1];
+        }
+        else {
+            container->children[FIRST_BUTTON_INDEX + 1] = NULL;
+        }
+        page        = currentLeftButtonIndex / 2;
         needRefresh = true;
     }
-    else if ((eventType == SWIPED_RIGHT) && (currentLeftButtonIndex > 0)) {
+    else if ((eventType == SWIPED_RIGHT) && (currentLeftButtonIndex > 1)) {
         // shift all buttons on the left if we are not already displaying the 2 first ones
-        currentLeftButtonIndex--;
+        currentLeftButtonIndex -= 2;
         container->children[FIRST_BUTTON_INDEX]
             = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex];
         container->children[FIRST_BUTTON_INDEX + 1]
             = (nbgl_obj_t *) choiceButtons[currentLeftButtonIndex + 1];
-        page        = currentLeftButtonIndex;
+        page        = currentLeftButtonIndex / 2;
         needRefresh = true;
     }
     // align left button on the left
     if (nbActiveButtons > 0) {
-        container->children[FIRST_BUTTON_INDEX]->alignmentMarginX = 32;
+        container->children[FIRST_BUTTON_INDEX]->alignmentMarginX = BORDER_MARGIN;
         container->children[FIRST_BUTTON_INDEX]->alignment        = TOP_LEFT;
         container->children[FIRST_BUTTON_INDEX]->alignTo          = (nbgl_obj_t *) container;
     }
 
     // align right button on left one
-    if (nbActiveButtons > 1) {
-        container->children[FIRST_BUTTON_INDEX + 1]->alignmentMarginX = 8;
+    if (container->children[FIRST_BUTTON_INDEX + 1] != NULL) {
+        container->children[FIRST_BUTTON_INDEX + 1]->alignmentMarginX = INTERNAL_MARGIN;
         container->children[FIRST_BUTTON_INDEX + 1]->alignment        = MID_RIGHT;
         container->children[FIRST_BUTTON_INDEX + 1]->alignTo
             = container->children[FIRST_BUTTON_INDEX];
@@ -926,7 +935,7 @@ int nbgl_layoutAddTopRightButton(nbgl_layout_t             *layout,
  *
  * @param layout the current layout
  * @param info structure giving the description of the navigation bar
- * @return >= 0 if OK
+ * @return the height of the control if OK
  */
 int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigationBar_t *info)
 {
@@ -970,7 +979,7 @@ int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigati
                                 ((1 << SWIPED_LEFT) | (1 << SWIPED_RIGHT) | (1 << SWIPED_DOWN)),
                                 SWIPE_USAGE_NAVIGATION);
 
-    return 0;
+    return layoutInt->bottomContainer->obj.area.height;
 }
 
 #else   // HAVE_SE_TOUCH
@@ -1109,20 +1118,24 @@ int nbgl_layoutAddBottomButton(nbgl_layout_t             *layout,
  *
  * @param layout the current layout
  * @param barLayout the properties of the bar
- * @return >= 0 if OK
+ * @return the height of the bar if OK
  */
 int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *barLayout)
 {
     nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
     layoutObj_t           *obj;
     nbgl_text_area_t      *textArea;
-    nbgl_image_t          *imageLeft = NULL, *imageRight = NULL;
     nbgl_container_t      *container;
-    color_t                color = (barLayout->inactive != true) ? BLACK : LIGHT_GRAY;
+    color_t                color      = (barLayout->inactive != true) ? BLACK : LIGHT_GRAY;
+    int16_t                usedHeight = 0;
 
     LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddTouchableBar():\n");
     if (layout == NULL) {
         return -1;
+    }
+    // main text is mandatory
+    if (barLayout->text == NULL) {
+        LOG_FATAL(LAYOUT_LOGGER, "nbgl_layoutAddTouchableBar(): main text is mandatory\n");
     }
 
     container = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
@@ -1131,7 +1144,7 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
         return -1;
     }
 
-    // get container children (up to 4)
+    // get container children (up to 4: text +  left+right icons +  sub text)
     container->children   = nbgl_containerPoolGet(4, layoutInt->layer);
     container->nbChildren = 0;
 
@@ -1150,89 +1163,104 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
         nbTouchableControls++;
     }
 
+    // allocate main text because always present
+    textArea                 = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
+    textArea->textColor      = color;
+    textArea->text           = PIC(barLayout->text);
+    textArea->onDrawCallback = NULL;
+    textArea->fontId         = SMALL_BOLD_FONT;
+    textArea->wrapping       = true;
+    textArea->obj.area.width = container->obj.area.width;
     if (barLayout->iconLeft != NULL) {
-        imageLeft                  = (nbgl_image_t *) nbgl_objPoolGet(IMAGE, layoutInt->layer);
-        imageLeft->foregroundColor = color;
-        imageLeft->buffer          = PIC(barLayout->iconLeft);
-        imageLeft->obj.alignment   = MID_LEFT;
-        imageLeft->obj.alignTo     = (nbgl_obj_t *) NULL;
-        container->children[container->nbChildren] = (nbgl_obj_t *) imageLeft;
-        container->nbChildren++;
-    }
-    if (barLayout->text != NULL) {
-        textArea            = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
-        textArea->textColor = color;
-        textArea->text      = PIC(barLayout->text);
-        textArea->onDrawCallback = NULL;
-        textArea->fontId         = SMALL_BOLD_FONT;
-        textArea->obj.area.width = container->obj.area.width;
-        if (barLayout->iconLeft != NULL) {
-            textArea->obj.area.width -= imageLeft->buffer->width + 12;
+        // reduce text width accordingly
+        textArea->obj.area.width -= ((nbgl_icon_details_t *) PIC(barLayout->iconLeft))->width + 12;
+        if (barLayout->centered) {
+            textArea->obj.area.width
+                -= ((nbgl_icon_details_t *) PIC(barLayout->iconLeft))->width + 12;
         }
-        if (barLayout->iconRight != NULL) {
-            textArea->obj.area.width -= ((nbgl_icon_details_t *) PIC(barLayout->iconRight))->width;
-        }
-        textArea->obj.area.height = nbgl_getTextHeightInWidth(
-            textArea->fontId, textArea->text, textArea->obj.area.width, true);
-        textArea->style = NO_STYLE;
-        if ((barLayout->iconLeft != NULL) && (barLayout->centered != true)) {
-            textArea->obj.alignmentMarginX = 12;
-        }
-        if (barLayout->iconLeft != NULL) {
-            textArea->obj.alignTo   = (nbgl_obj_t *) imageLeft;
-            textArea->obj.alignment = MID_RIGHT;
-        }
-        else {
-            textArea->obj.alignTo   = (nbgl_obj_t *) NULL;
-            textArea->obj.alignment = MID_LEFT;
-        }
-        if (barLayout->centered != true) {
-            textArea->textAlignment = MID_LEFT;
-        }
-        else {
-            textArea->textAlignment = CENTER;
-        }
-        textArea->wrapping                         = true;
-        container->children[container->nbChildren] = (nbgl_obj_t *) textArea;
-        container->nbChildren++;
     }
     if (barLayout->iconRight != NULL) {
-        imageRight                  = (nbgl_image_t *) nbgl_objPoolGet(IMAGE, layoutInt->layer);
+        // reduce text width accordingly
+        textArea->obj.area.width -= ((nbgl_icon_details_t *) PIC(barLayout->iconRight))->width;
+    }
+    textArea->obj.area.height = nbgl_getTextHeightInWidth(
+        textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
+    usedHeight              = textArea->obj.area.height;
+    textArea->style         = NO_STYLE;
+    textArea->obj.alignment = MID_LEFT;
+
+    if (barLayout->centered != true) {
+        textArea->textAlignment = MID_LEFT;
+    }
+    else {
+        textArea->textAlignment = CENTER;
+    }
+    container->children[container->nbChildren] = (nbgl_obj_t *) textArea;
+    container->nbChildren++;
+
+    // allocate left icon if present
+    if (barLayout->iconLeft != NULL) {
+        nbgl_image_t *imageLeft    = (nbgl_image_t *) nbgl_objPoolGet(IMAGE, layoutInt->layer);
+        imageLeft->foregroundColor = color;
+        imageLeft->buffer          = PIC(barLayout->iconLeft);
+        // align at the left of text
+        imageLeft->obj.alignment                   = MID_LEFT;
+        imageLeft->obj.alignTo                     = (nbgl_obj_t *) textArea;
+        imageLeft->obj.alignmentMarginX            = 12;
+        container->children[container->nbChildren] = (nbgl_obj_t *) imageLeft;
+        container->nbChildren++;
+
+        textArea->obj.alignmentMarginX = imageLeft->buffer->width + 12;
+
+        if (imageLeft->buffer->height > usedHeight) {
+            usedHeight = imageLeft->buffer->height;
+        }
+    }
+    // allocate right icon if present
+    if (barLayout->iconRight != NULL) {
+        nbgl_image_t *imageRight    = (nbgl_image_t *) nbgl_objPoolGet(IMAGE, layoutInt->layer);
         imageRight->foregroundColor = color;
         imageRight->buffer          = PIC(barLayout->iconRight);
-        imageRight->obj.alignment   = MID_RIGHT;
-        if (barLayout->text == NULL) {
-            imageRight->obj.alignTo = (nbgl_obj_t *) NULL;
-        }
-        else {
-            imageRight->obj.alignTo = (nbgl_obj_t *) container->children[container->nbChildren - 1];
-        }
+        // align at the right of text
+        imageRight->obj.alignment = MID_RIGHT;
+        imageRight->obj.alignTo   = (nbgl_obj_t *) textArea;
+
         container->children[container->nbChildren] = (nbgl_obj_t *) imageRight;
         container->nbChildren++;
+
+        if (imageRight->buffer->height > usedHeight) {
+            usedHeight = imageRight->buffer->height;
+        }
     }
     if (barLayout->subText != NULL) {
-        textArea = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
+        nbgl_text_area_t *subTextArea
+            = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
 
-        textArea->textColor            = BLACK;
-        textArea->text                 = PIC(barLayout->subText);
-        textArea->textAlignment        = MID_LEFT;
-        textArea->fontId               = SMALL_REGULAR_FONT;
-        textArea->style                = NO_STYLE;
-        textArea->wrapping             = true;
-        textArea->obj.alignment        = BOTTOM_LEFT;
-        textArea->obj.alignmentMarginY = BORDER_MARGIN;
-        textArea->obj.area.width       = container->obj.area.width;
-        textArea->obj.area.height      = nbgl_getTextHeightInWidth(
-            textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
-        container->children[container->nbChildren] = (nbgl_obj_t *) textArea;
+        subTextArea->textColor                     = color;
+        subTextArea->text                          = PIC(barLayout->subText);
+        subTextArea->textAlignment                 = MID_LEFT;
+        subTextArea->fontId                        = SMALL_REGULAR_FONT;
+        subTextArea->style                         = NO_STYLE;
+        subTextArea->wrapping                      = true;
+        subTextArea->obj.alignment                 = MID_LEFT;
+        subTextArea->obj.area.width                = container->obj.area.width;
+        subTextArea->obj.area.height               = nbgl_getTextHeightInWidth(subTextArea->fontId,
+                                                                 subTextArea->text,
+                                                                 subTextArea->obj.area.width,
+                                                                 subTextArea->wrapping);
+        container->children[container->nbChildren] = (nbgl_obj_t *) subTextArea;
         container->nbChildren++;
-        container->obj.area.height += textArea->obj.area.height + 16;
+        container->obj.area.height += subTextArea->obj.area.height;
+
+        // modify alignments to have sub-text under (icon left - text - icon right)
+        textArea->obj.alignmentMarginY    = -(subTextArea->obj.area.height + 16) / 2;
+        subTextArea->obj.alignmentMarginY = (usedHeight + 16) / 2;
     }
 
     // set this new container as child of main container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
 
-    return 0;
+    return container->obj.area.height;
 }
 
 /**
@@ -1240,7 +1268,7 @@ int nbgl_layoutAddTouchableBar(nbgl_layout_t *layout, const nbgl_layoutBar_t *ba
  *
  * @param layout the current layout
  * @param switchLayout description of the parameters of the switch
- * @return >= 0 if OK
+ * @return height of the control if OK
  */
 int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switchLayout)
 {
@@ -1317,7 +1345,7 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switc
     // set this new container as child of main container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
 
-    return 0;
+    return container->obj.area.height;
 }
 
 /**
@@ -1326,7 +1354,7 @@ int nbgl_layoutAddSwitch(nbgl_layout_t *layout, const nbgl_layoutSwitch_t *switc
  * @param layout the current layout
  * @param text main text (in small bold font), optional
  * @param subText description under main text (in small regular font), optional
- * @return >= 0 if OK
+ * @return height of the control if OK
  */
 int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subText)
 {
@@ -1412,7 +1440,7 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
     // set this new obj as child of main container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
 
-    return 0;
+    return container->obj.area.height;
 }
 
 /**
@@ -1519,7 +1547,7 @@ int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoic
         container->children[1]       = (nbgl_obj_t *) button;
 
         container->obj.area.width       = SCREEN_WIDTH - 2 * BORDER_MARGIN;
-        container->obj.area.height      = TOUCHABLE_BAR_HEIGHT;
+        container->obj.area.height      = RADIO_CHOICE_HEIGHT;
         container->obj.alignment        = NO_ALIGNMENT;
         container->obj.alignmentMarginX = BORDER_MARGIN;
         container->obj.alignTo          = (nbgl_obj_t *) NULL;
@@ -2574,9 +2602,10 @@ int nbgl_layoutAddButton(nbgl_layout_t *layout, const nbgl_layoutButton_t *butto
     button->fontId = SMALL_BOLD_FONT;
     button->icon   = PIC(buttonInfo->icon);
     if (buttonInfo->fittingContent == true) {
-        button->obj.area.width = nbgl_getTextWidth(button->fontId, button->text) + 64
+        button->obj.area.width = nbgl_getTextWidth(button->fontId, button->text)
+                                 + SMALL_BUTTON_HEIGHT
                                  + ((button->icon) ? (button->icon->width + 8) : 0);
-        button->obj.area.height = 64;
+        button->obj.area.height = SMALL_BUTTON_HEIGHT;
         button->radius          = RADIUS_32_PIXELS;
         if (buttonInfo->onBottom != true) {
             button->obj.alignmentMarginX
@@ -2695,7 +2724,7 @@ int nbgl_layoutAddLongPressButton(nbgl_layout_t *layout,
  * @param text text to used in the footer
  * @param token token to use when the footer is touched
  * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when button is long pressed
- * @return >= 0 if OK
+ * @return height of the control if OK
  */
 int nbgl_layoutAddFooter(nbgl_layout_t *layout,
                          const char    *text,
@@ -2738,7 +2767,7 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout,
 
     layoutInt->container->obj.area.height -= textArea->obj.area.height + line->obj.area.height;
 
-    return 0;
+    return textArea->obj.area.height + line->obj.area.height;
 }
 
 /**
@@ -2751,7 +2780,7 @@ int nbgl_layoutAddFooter(nbgl_layout_t *layout,
  * @param rightText text to used in the right part of footer
  * @param rightToken token to use when the right part of footer is touched
  * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when button is long pressed
- * @return >= 0 if OK
+ * @return height of the control if OK
  */
 int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
                               const char    *leftText,
@@ -2828,7 +2857,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
 
     layoutInt->container->obj.area.height -= textArea->obj.area.height + 4;
 
-    return 0;
+    return textArea->obj.area.height + 4;
 }
 
 /**
@@ -2841,7 +2870,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
  * @param withBack if true, the back arrow is drawn
  * @param backToken token used with actionCallback is withBack is true
  * @param tuneId if not @ref NBGL_NO_TUNE, a tune will be played when back button is pressed
- * @return >= 0 if OK
+ * @return the height of the control if OK
  */
 int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
                                     uint8_t        activePage,
@@ -2911,7 +2940,7 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
     // set this new container as child of the main container
     addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
 
-    return 0;
+    return container->obj.area.height;
 }
 
 /**
@@ -3113,13 +3142,13 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
     container->obj.area.width = SCREEN_WIDTH;
 #ifdef TARGET_STAX
     // 2 rows of buttons with radius=32, and a intervale of 8px
-    container->obj.area.height = 2 * 64 + 8;
+    container->obj.area.height = 2 * SMALL_BUTTON_HEIGHT + INTERNAL_MARGIN;
     container->nbChildren      = nbUsedButtons;
     container->children = (nbgl_obj_t **) nbgl_containerPoolGet(NB_MAX_VISIBLE_SUGGESTION_BUTTONS,
                                                                 layoutInt->layer);
 #else   // TARGET_STAX
     // 1 row of buttons + page indicator
-    container->obj.area.height = 64 + 20;
+    container->obj.area.height = SMALL_BUTTON_HEIGHT + 20;
     // on Europa, the first child is used by the progress indicator, if more that 2 buttons
     container->nbChildren = nbUsedButtons + FIRST_BUTTON_INDEX;
     container->children   = (nbgl_obj_t **) nbgl_containerPoolGet(
@@ -3150,12 +3179,8 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
         choiceButtons[i]->innerColor      = BLACK;
         choiceButtons[i]->borderColor     = BLACK;
         choiceButtons[i]->foregroundColor = WHITE;
-#ifdef TARGET_STAX
-        choiceButtons[i]->obj.area.width = (SCREEN_WIDTH - 2 * BORDER_MARGIN - 8) / 2;
-#else   // TARGET_STAX
-        choiceButtons[i]->obj.area.width = (SCREEN_WIDTH - 2 * 32 - 8) / 2;
-#endif  // TARGET_STAX
-        choiceButtons[i]->obj.area.height = 64;
+        choiceButtons[i]->obj.area.width = (SCREEN_WIDTH - 2 * BORDER_MARGIN - INTERNAL_MARGIN) / 2;
+        choiceButtons[i]->obj.area.height = SMALL_BUTTON_HEIGHT;
         choiceButtons[i]->radius          = RADIUS_32_PIXELS;
         choiceButtons[i]->fontId          = SMALL_BOLD_1BPP_FONT;
         choiceButtons[i]->icon            = NULL;
@@ -3164,18 +3189,18 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
             choiceButtons[i]->obj.alignmentMarginX = BORDER_MARGIN;
             // second row 8px under the first one
             if (i != 0) {
-                choiceButtons[i]->obj.alignmentMarginY = 8;
+                choiceButtons[i]->obj.alignmentMarginY = INTERNAL_MARGIN;
             }
             choiceButtons[i]->obj.alignment = NO_ALIGNMENT;
 #else   // TARGET_STAX
-            choiceButtons[i]->obj.alignmentMarginX = 32 + 8;
+            choiceButtons[i]->obj.alignmentMarginX = BORDER_MARGIN + INTERNAL_MARGIN;
             if (i == 0) {
                 choiceButtons[i]->obj.alignment = TOP_LEFT;
             }
 #endif  // TARGET_STAX
         }
         else {
-            choiceButtons[i]->obj.alignmentMarginX = 8;
+            choiceButtons[i]->obj.alignmentMarginX = INTERNAL_MARGIN;
             choiceButtons[i]->obj.alignment        = MID_RIGHT;
             choiceButtons[i]->obj.alignTo          = (nbgl_obj_t *) choiceButtons[i - 1];
         }
@@ -3192,11 +3217,12 @@ int nbgl_layoutAddSuggestionButtons(nbgl_layout_t *layout,
     nbgl_page_indicator_t *indicator
         = (nbgl_page_indicator_t *) nbgl_objPoolGet(PAGE_INDICATOR, layoutInt->layer);
     indicator->activePage                     = 0;
-    indicator->nbPages                        = (nbUsedButtons > 2) ? (nbUsedButtons - 1) : 0;
+    indicator->nbPages                        = (nbUsedButtons + 1) / 2;
     indicator->obj.area.width                 = 184;
     indicator->obj.alignment                  = BOTTOM_MIDDLE;
     indicator->style                          = CURRENT_INDICATOR;
     container->children[PAGE_INDICATOR_INDEX] = (nbgl_obj_t *) indicator;
+    // also allocate the semi disc that may be displayed on the left or right of the full buttons
     nbgl_objPoolGetArray(IMAGE, 2, 0, (nbgl_obj_t **) &partialButtonImages);
     partialButtonImages[0]->buffer          = &C_left_half_64px;
     partialButtonImages[0]->obj.alignment   = TOP_LEFT;
@@ -3255,7 +3281,7 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout,
 #ifdef TARGET_STAX
                 // second row 8px under the first one
                 if (i != 0) {
-                    choiceButtons[i]->obj.alignmentMarginY = 8;
+                    choiceButtons[i]->obj.alignmentMarginY = INTERNAL_MARGIN;
                 }
                 choiceButtons[i]->obj.alignment = NO_ALIGNMENT;
 #else   // TARGET_STAX
@@ -3265,7 +3291,7 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout,
 #endif  // TARGET_STAX
             }
             else {
-                choiceButtons[i]->obj.alignmentMarginX = 8;
+                choiceButtons[i]->obj.alignmentMarginX = INTERNAL_MARGIN;
                 choiceButtons[i]->obj.alignment        = MID_RIGHT;
                 choiceButtons[i]->obj.alignTo          = (nbgl_obj_t *) choiceButtons[i - 1];
             }
@@ -3280,7 +3306,7 @@ int nbgl_layoutUpdateSuggestionButtons(nbgl_layout_t *layout,
     // on Europa, the first child is used by the progress indicator, if more that 2 buttons
     nbgl_page_indicator_t *indicator
         = (nbgl_page_indicator_t *) container->children[PAGE_INDICATOR_INDEX];
-    indicator->nbPages    = (nbUsedButtons > 2) ? (nbUsedButtons - 1) : 0;
+    indicator->nbPages    = (nbUsedButtons + 1) / 2;
     indicator->activePage = 0;
     updateSuggestionButtons(container, 0, 0);
 #endif  // TARGET_STAX
