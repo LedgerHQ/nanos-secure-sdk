@@ -35,8 +35,6 @@
  */
 #define LINE_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px
 
-typedef void (*ux_layout_paging_redisplay_t)(unsigned int stack_slot);
-
 #if (BAGL_WIDTH == 128 && BAGL_HEIGHT == 64)
 // clang-format off
 static const bagl_element_t ux_layout_paging_elements[] = {

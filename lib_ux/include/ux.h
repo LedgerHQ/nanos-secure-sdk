@@ -62,6 +62,13 @@ struct bagl_element_e {
 #endif  // TARGET_BLUE
 };
 
+// When not using indexed strings, some functions can be inlined, to save space
+#if !defined(HAVE_INDEXED_STRINGS)
+#define STATIC_IF_NOT_INDEXED static
+#else
+#define STATIC_IF_NOT_INDEXED
+#endif
+
 // touch management helper function (callback the call with the element for the given position,
 // taking into account touch release)
 void io_seproxyhal_touch(const bagl_element_t *elements,
