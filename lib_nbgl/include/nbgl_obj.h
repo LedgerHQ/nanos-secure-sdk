@@ -83,6 +83,43 @@ extern "C" {
 #endif  // TARGET_STAX
 #endif  // HAVE_SE_TOUCH
 
+// width & height for spinner
+#ifdef TARGET_STAX
+#define SPINNER_WIDTH  60
+#define SPINNER_HEIGHT 44
+#else  // TARGET_STAX
+#define SPINNER_WIDTH  64
+#define SPINNER_HEIGHT 48
+#endif  // TARGET_STAX
+
+// width & height for radio button
+#ifdef TARGET_STAX
+#define RADIO_WIDTH  32
+#define RADIO_HEIGHT 32
+#else  // TARGET_STAX
+#define RADIO_WIDTH  40
+#define RADIO_HEIGHT 40
+#endif  // TARGET_STAX
+
+// icons for some objects
+#ifdef TARGET_STAX
+#define SPACE_ICON        C_space32px
+#define BACKSPACE_ICON    C_backspace32px
+#define SHIFT_ICON        C_shift32px
+#define SHIFT_LOCKED_ICON C_shift_lock32px
+#define VALIDATE_ICON     C_check32px
+#define RADIO_OFF_ICON    C_radio_inactive_32px
+#define RADIO_ON_ICON     C_radio_active_32px
+#else  // TARGET_STAX
+#define SPACE_ICON        C_ic_caps_1_40
+#define BACKSPACE_ICON    C_ic_erase_40
+#define SHIFT_ICON        C_ic_caps_40
+#define SHIFT_LOCKED_ICON C_ic_caps_lock_40
+#define VALIDATE_ICON     C_ic_check_40
+#define RADIO_OFF_ICON    C_radio_inactive_40
+#define RADIO_ON_ICON     C_radio_active_40
+#endif  // TARGET_STAX
+
 /**********************
  *      TYPEDEFS
  **********************/

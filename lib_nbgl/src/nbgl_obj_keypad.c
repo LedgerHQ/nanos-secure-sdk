@@ -163,20 +163,20 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
     }
     // 4th raw, Backspace, 0 and Validate
     // draw backspace
-    rectArea.width  = C_backspace32px.width;
-    rectArea.height = C_backspace32px.height;
+    rectArea.width  = BACKSPACE_ICON.width;
+    rectArea.height = BACKSPACE_ICON.height;
     rectArea.bpp    = NBGL_BPP_1;
     rectArea.x0     = keypad->obj.area.x0 + (KEY_WIDTH - rectArea.width) / 2;
     rectArea.y0
         = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3 + (KEYPAD_KEY_HEIGHT - rectArea.height) / 2;
 #if GLYPH_backspace32px_ISFILE
     nbgl_frontDrawImageFile(&rectArea,
-                            (uint8_t *) C_backspace32px.bitmap,
+                            (uint8_t *) BACKSPACE_ICON.bitmap,
                             keypad->enableBackspace ? BLACK : WHITE,
                             ramBuffer);
 #else
     nbgl_frontDrawImage(&rectArea,
-                        (uint8_t *) C_backspace32px.bitmap,
+                        (uint8_t *) BACKSPACE_ICON.bitmap,
                         NO_TRANSFORMATION,
                         keypad->enableBackspace ? BLACK : WHITE);
 #endif
@@ -191,8 +191,8 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
 
     // draw validate on gray with white background if not enabled
     if (!keypad->enableValidate) {
-        rectArea.width  = C_check32px.width;
-        rectArea.height = C_check32px.height;
+        rectArea.width  = VALIDATE_ICON.width;
+        rectArea.height = VALIDATE_ICON.height;
         rectArea.bpp    = NBGL_BPP_1;
         rectArea.x0     = keypad->obj.area.x0 + 2 * KEY_WIDTH + (KEY_WIDTH - rectArea.width) / 2;
         rectArea.y0     = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3
@@ -208,16 +208,16 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
         rectArea.width           = KEY_WIDTH;
         rectArea.height          = KEYPAD_KEY_HEIGHT;
         nbgl_frontDrawRect(&rectArea);
-        rectArea.width  = C_check32px.width;
-        rectArea.height = C_check32px.height;
+        rectArea.width  = VALIDATE_ICON.width;
+        rectArea.height = VALIDATE_ICON.height;
         rectArea.bpp    = NBGL_BPP_1;
         rectArea.x0     = keypad->obj.area.x0 + 2 * KEY_WIDTH + (KEY_WIDTH - rectArea.width) / 2;
         rectArea.y0     = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3
                       + (KEYPAD_KEY_HEIGHT - rectArea.height) / 2;
 #if GLYPH_check32px_ISFILE
-        nbgl_frontDrawImageFile(&rectArea, (uint8_t *) C_check32px.bitmap, WHITE, ramBuffer);
+        nbgl_frontDrawImageFile(&rectArea, (uint8_t *) VALIDATE_ICON.bitmap, WHITE, ramBuffer);
 #else
-        nbgl_frontDrawImage(&rectArea, (uint8_t *) C_check32px.bitmap, NO_TRANSFORMATION, WHITE);
+        nbgl_frontDrawImage(&rectArea, (uint8_t *) VALIDATE_ICON.bitmap, NO_TRANSFORMATION, WHITE);
 #endif
     }
 }

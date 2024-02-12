@@ -234,10 +234,10 @@ static void compute_relativePosition(nbgl_obj_t *obj, nbgl_obj_t *prevObj)
             }
         }
     }
-#ifdef HAVE_SE_TOUCH
+#ifdef TARGET_STAX
     // align on multiples of 4
     obj->rel_y0 &= ~0x3;
-#endif  // HAVE_SE_TOUCH
+#endif  // TARGET_STAX
 }
 
 static void compute_position(nbgl_obj_t *obj, nbgl_obj_t *prevObj)
@@ -300,10 +300,11 @@ static void draw_container(nbgl_container_t *obj, nbgl_obj_t *prevObj, bool comp
         return;
     }
     LOG_DEBUG(OBJ_LOGGER,
-              "draw_container(), x0 = %d, y0 = %d, width = %d\n",
+              "draw_container(), x0 = %d, y0 = %d, width = %d, height = %d\n",
               obj->obj.area.x0,
               obj->obj.area.y0,
-              obj->obj.area.width);
+              obj->obj.area.width,
+              obj->obj.area.height);
     // inherit background from parent
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
     if (obj->forceClean) {
@@ -552,8 +553,8 @@ static void draw_radioButton(nbgl_radio_t *obj, nbgl_obj_t *prevObj, bool comput
     nbgl_area_t rectArea;
 
     // force dimensions
-    obj->obj.area.width  = 32;
-    obj->obj.area.height = 32;
+    obj->obj.area.width  = RADIO_WIDTH;
+    obj->obj.area.height = RADIO_HEIGHT;
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
     }
@@ -576,10 +577,10 @@ static void draw_radioButton(nbgl_radio_t *obj, nbgl_obj_t *prevObj, bool comput
     rectArea.backgroundColor = obj->obj.area.backgroundColor;
     rectArea.bpp             = NBGL_BPP_1;
     if (obj->state == OFF_STATE) {
-        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->borderColor, &C_radio_inactive_32px);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->borderColor, &RADIO_OFF_ICON);
     }
     else {
-        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->activeColor, &C_radio_active_32px);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->activeColor, &RADIO_ON_ICON);
     }
 }
 #endif  // HAVE_SE_TOUCH
@@ -1082,8 +1083,8 @@ static void draw_spinner(nbgl_spinner_t *obj, nbgl_obj_t *prevObj, bool computeP
     nbgl_area_t rectArea;
     color_t     foreColor;
 
-    obj->obj.area.width  = 60;
-    obj->obj.area.height = 44;
+    obj->obj.area.width  = SPINNER_WIDTH;
+    obj->obj.area.height = SPINNER_HEIGHT;
 
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
