@@ -126,44 +126,44 @@ The API to insert such an object is @ref nbgl_pageDrawConfirmation()  with the @
 
 @subsubsection page_generic_content Generic content types
 
-The different types of generic content are given in @ref nbgl_pageContentType_t enumeration.
+The different types of generic content are given in @ref nbgl_contentType_t enumeration.
 
-- @ref CENTERED_INFO is used to draw a centered info. The structure containing data to build it is @ref nbgl_layoutCenteredInfo_t
-- @ref INFO_LONG_PRESS is used to draw a centered info and a long press button. The structure containing data to build it is @ref nbgl_pageInfoLongPress_t
-- @ref INFO_BUTTON is used to draw a centered info and a simple black button. The structure containing data to build it is @ref nbgl_pageInfoButton_t
-- @ref TAG_VALUE_LIST is used to draw alist of tag/value pairs. The structure containing data to build it is @ref nbgl_layoutTagValueList_t
+- @ref CENTERED_INFO is used to draw a centered info. The structure containing data to build it is @ref nbgl_contentCenteredInfo_t
+- @ref INFO_LONG_PRESS is used to draw a centered info and a long press button. The structure containing data to build it is @ref nbgl_contentInfoLongPress_t
+- @ref INFO_BUTTON is used to draw a centered info and a simple black button. The structure containing data to build it is @ref nbgl_contentInfoButton_t
+- @ref TAG_VALUE_LIST is used to draw alist of tag/value pairs. The structure containing data to build it is @ref nbgl_contentTagValueList_t
 
 \image{inline} html page15.png "caption" height=300
 
 The \b smallCaseForValue field is used to indicate whether to use a 32px (false) or 24px (true) font for \b value text. Normally, the small font is
 supposed to be used only to display details.
 
-- @ref TAG_VALUE_DETAILS is used to draw a tag/value pair and a small button to get details on it. The structure containing data to build it is @ref nbgl_pageTagValueDetails_t
+- @ref TAG_VALUE_DETAILS is used to draw a tag/value pair and a small button to get details on it. The structure containing data to build it is @ref nbgl_contentTagValueDetails_t
 
 \image{inline} html page14.png "caption" height=300
 
 The "details" button is only displayed if the \b value text is longer than 9 lines. And in this case, the \b value text is truncated at the 6th line, and
 "..." is used to show that the text is truncated.
 
-- @ref TAG_VALUE_CONFIRM is used to draw tag/value pairs and a potential confirmation button in the same page. The structure containing data to build it is @ref nbgl_pageTagValueConfirm_t
+- @ref TAG_VALUE_CONFIRM is used to draw tag/value pairs and a potential confirmation button in the same page. The structure containing data to build it is @ref nbgl_contentTagValueConfirm_t
 
 \image{inline} html page-TagValueConfirm.png "caption" height=300
 
 The "details" button is only displayed if the \b detailsButtonText is not NULL.
 
-- @ref SWITCHES_LIST is used to draw a list of switches with descriptions. The structure containing data to build it is @ref nbgl_pageSwitchesList_t
+- @ref SWITCHES_LIST is used to draw a list of switches with descriptions. The structure containing data to build it is @ref nbgl_contentSwitchesList_t
 
 \image{inline} html page16.png "caption" height=300
 
-- @ref INFOS_LIST is used to draw a list of infos with titles. The structure containing data to build it is @ref nbgl_pageInfoList_t
+- @ref INFOS_LIST is used to draw a list of infos with titles. The structure containing data to build it is @ref nbgl_contentInfoList_t
 
 \image{inline} html page13.png "caption" height=300
 
-- @ref CHOICES_LIST is used to draw a list of choices through radio buttons. The structure containing data to build it is @ref nbgl_layoutRadioChoice_t
+- @ref CHOICES_LIST is used to draw a list of choices through radio buttons. The structure containing data to build it is @ref nbgl_contentRadioChoice_t
 
 \image{inline} html page11.png "caption" height=300
 
-- @ref BARS_LIST is used to draw a list of touchable bars (with > on the right to go to sub-pages). The structure containing data to build it is @ref nbgl_pageBarsList_t
+- @ref BARS_LIST is used to draw a list of touchable bars (with > on the right to go to sub-pages). The structure containing data to build it is @ref nbgl_contentBarsList_t
 
 \image{inline} html page17.png "caption" height=300
 
