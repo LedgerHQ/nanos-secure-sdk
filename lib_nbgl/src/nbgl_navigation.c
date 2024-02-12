@@ -25,7 +25,7 @@
 #define NAVIGATION_HEIGHT (BUTTON_DIAMETER + 2 * BORDER_MARGIN)
 #else  // TARGET_STAX
 #define BORDER_COLOR      WHITE
-#define NAVIGATION_HEIGHT 100
+#define NAVIGATION_HEIGHT 96
 #endif  // TARGET_STAX
 
 /**********************

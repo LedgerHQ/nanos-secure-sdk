@@ -33,9 +33,17 @@ extern "C" {
 #define NB_MAX_SUGGESTION_BUTTONS 4
 #ifdef TARGET_STAX
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS NB_MAX_SUGGESTION_BUTTONS
+#define TOUCHABLE_HEADER_BAR_HEIGHT       88
+#define TOUCHABLE_MAIN_BAR_HEIGHT         88
+#define TOUCHABLE_BAR_HEIGHT              88
+#define TOUCHABLE_DETAILLED_BAR_HEIGHT    88
 #else  // TARGET_STAX
 // only 2 buttons are visible at the same time on Europa
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS 2
+#define TOUCHABLE_HEADER_BAR_HEIGHT       96
+#define TOUCHABLE_MAIN_BAR_HEIGHT         100
+#define TOUCHABLE_BAR_HEIGHT              92
+#define TOUCHABLE_DETAILLED_BAR_HEIGHT    140
 #endif  // TARGET_STAX
 
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * BORDER_MARGIN)
@@ -159,6 +167,7 @@ typedef struct {
     const nbgl_icon_details_t *iconRight;  ///< a buffer containing the 1BPP icon for icon 2 (can be
                                            ///< NULL). Dimensions must be the same as iconLeft
     const char *subText;                   ///< sub text (can be NULL)
+    uint16_t    height;                    ///< height of the bar
     uint8_t     token;     ///< the token that will be used as argument of the callback
     bool        inactive;  ///< if set to true, the bar is grayed-out and cannot be touched
     bool        centered;  ///< if set to true, the text is centered horizontaly in the bar

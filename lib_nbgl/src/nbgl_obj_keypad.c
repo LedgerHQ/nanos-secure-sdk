@@ -169,17 +169,18 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
     rectArea.x0     = keypad->obj.area.x0 + (KEY_WIDTH - rectArea.width) / 2;
     rectArea.y0
         = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3 + (KEYPAD_KEY_HEIGHT - rectArea.height) / 2;
-#if GLYPH_backspace32px_ISFILE
-    nbgl_frontDrawImageFile(&rectArea,
+    if (BACKSPACE_ICON.isFile) {
+        nbgl_frontDrawImageFile(&rectArea,
+                                (uint8_t *) BACKSPACE_ICON.bitmap,
+                                keypad->enableBackspace ? BLACK : WHITE,
+                                ramBuffer);
+    }
+    else {
+        nbgl_frontDrawImage(&rectArea,
                             (uint8_t *) BACKSPACE_ICON.bitmap,
-                            keypad->enableBackspace ? BLACK : WHITE,
-                            ramBuffer);
-#else
-    nbgl_frontDrawImage(&rectArea,
-                        (uint8_t *) BACKSPACE_ICON.bitmap,
-                        NO_TRANSFORMATION,
-                        keypad->enableBackspace ? BLACK : WHITE);
-#endif
+                            NO_TRANSFORMATION,
+                            keypad->enableBackspace ? BLACK : WHITE);
+    }
 
     // draw 0
     key_value   = GET_DIGIT_INDEX(keypad, 0) + 0x30;

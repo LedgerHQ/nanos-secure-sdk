@@ -40,6 +40,7 @@ static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout, uint1
         bar.centered  = true;
         bar.inactive  = false;
         bar.tuneId    = content->tuneId;
+        bar.height    = TOUCHABLE_HEADER_BAR_HEIGHT;
         availableHeight -= nbgl_layoutAddTouchableBar(layout, &bar);
         nbgl_layoutAddSeparationLine(layout);
     }
@@ -177,6 +178,7 @@ static void addContent(nbgl_pageContent_t *content, nbgl_layout_t *layout, uint1
                 bar.token     = content->barsList.tokens[i];
                 bar.centered  = false;
                 bar.tuneId    = content->barsList.tuneId;
+                bar.height    = TOUCHABLE_HEADER_BAR_HEIGHT;
                 availableHeight -= nbgl_layoutAddTouchableBar(layout, &bar);
                 // do not draw a separation line if too low in the container
                 if (availableHeight > 10) {
