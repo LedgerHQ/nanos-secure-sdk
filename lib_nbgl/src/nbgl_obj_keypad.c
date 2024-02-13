@@ -215,11 +215,13 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
         rectArea.x0     = keypad->obj.area.x0 + 2 * KEY_WIDTH + (KEY_WIDTH - rectArea.width) / 2;
         rectArea.y0     = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3
                       + (KEYPAD_KEY_HEIGHT - rectArea.height) / 2;
-#if GLYPH_check32px_ISFILE
-        nbgl_frontDrawImageFile(&rectArea, (uint8_t *) VALIDATE_ICON.bitmap, WHITE, ramBuffer);
-#else
-        nbgl_frontDrawImage(&rectArea, (uint8_t *) VALIDATE_ICON.bitmap, NO_TRANSFORMATION, WHITE);
-#endif
+        if (VALIDATE_ICON.isFile) {
+            nbgl_frontDrawImageFile(&rectArea, (uint8_t *) VALIDATE_ICON.bitmap, WHITE, ramBuffer);
+        }
+        else {
+            nbgl_frontDrawImage(
+                &rectArea, (uint8_t *) VALIDATE_ICON.bitmap, NO_TRANSFORMATION, WHITE);
+        }
     }
 }
 
