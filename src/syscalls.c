@@ -2168,11 +2168,14 @@ uint8_t touch_exclude_borders(uint8_t excluded_borders)
 }
 
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
-uint8_t touch_switch_debug_mode_and_read(io_touch_debug_mode_t mode, uint8_t *read_buffer)
+uint8_t touch_switch_debug_mode_and_read(io_touch_debug_mode_t mode,
+                                         uint8_t               buffer_type,
+                                         uint8_t              *read_buffer)
 {
-    unsigned int parameters[2];
+    unsigned int parameters[3];
     parameters[0] = (unsigned int) mode;
-    parameters[1] = (unsigned int) read_buffer;
+    parameters[1] = (unsigned int) buffer_type;  // Only applicable to ewd720 touch
+    parameters[2] = (unsigned int) read_buffer;
     return (uint8_t) SVC_Call(SYSCALL_touch_debug_ID, parameters);
 }
 #endif
