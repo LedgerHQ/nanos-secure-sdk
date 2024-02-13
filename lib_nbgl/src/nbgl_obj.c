@@ -1058,6 +1058,7 @@ static void draw_keypad(nbgl_keypad_t *obj, nbgl_obj_t *prevObj, bool computePos
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
     }
+    obj->obj.area.y0 &= ~0x3;
     if (objDrawingDisabled) {
         return;
     }
