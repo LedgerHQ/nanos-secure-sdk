@@ -1089,6 +1089,7 @@ static void draw_spinner(nbgl_spinner_t *obj, nbgl_obj_t *prevObj, bool computeP
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
     }
+    obj->obj.area.y0 &= ~0x3;
     if (objDrawingDisabled) {
         return;
     }
