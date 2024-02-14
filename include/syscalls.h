@@ -317,7 +317,7 @@
 #define SYSCALL_touch_exclude_borders_ID 0x01fa000d
 #define SYSCALL_touch_set_state_ID       0x01fa000e
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
-#define SYSCALL_touch_debug_ID 0x02fa000f
+#define SYSCALL_touch_debug_ID 0x03fa000f
 #endif
 
 #endif  // HAVE_SE_TOUCH

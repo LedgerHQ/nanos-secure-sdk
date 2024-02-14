@@ -140,9 +140,14 @@ void io_seproxyhal_nfc_power(bool forceInit);
 
 #ifdef HAVE_SE_TOUCH
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
+#ifdef HAVE_GT1151_TOUCH
 bolos_bool_t io_seproxyhal_touch_debug_read_sensi(uint8_t *sensi_data);
 bolos_bool_t io_seproxyhal_touch_debug_read_diff_data(uint8_t *sensi_data);
 bolos_bool_t io_seproxyhal_touch_debug_end(void);
+#endif
+#ifdef HAVE_EWD720_TOUCH
+bolos_bool_t io_seproxyhal_touch_debug_read_offset_data(uint8_t *offset_data);
+#endif
 #endif
 #endif
 
