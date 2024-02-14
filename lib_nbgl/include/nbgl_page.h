@@ -18,6 +18,7 @@ extern "C" {
 #include "nbgl_layout.h"
 #include "nbgl_obj.h"
 #include "nbgl_types.h"
+#include "nbgl_content.h"
 
 /*********************
  *      DEFINES
@@ -40,108 +41,9 @@ typedef enum {
 } nbgl_pageButtonStyle_t;
 
 /**
- * @brief The different types of predefined page contents
- *
+ * @brief Deprecated, kept for retro compatibility
  */
-typedef enum {
-    CENTERED_INFO = 0,  ///< a centered info
-    INFO_LONG_PRESS,    ///< a centered info and a long press button
-    INFO_BUTTON,        ///< a centered info and a simple black button
-    TAG_VALUE_LIST,     ///< list of tag/value pairs
-    TAG_VALUE_DETAILS,  ///< a tag/value pair and a small button to get details.
-    TAG_VALUE_CONFIRM,  ///< tag/value pairs and a black button/footer to confirm/cancel.
-    SWITCHES_LIST,      ///< list of switches with descriptions
-    INFOS_LIST,         ///< list of infos with titles
-    CHOICES_LIST,       ///< list of choices through radio buttons
-    BARS_LIST           ///< list of touchable bars (with > on the right to go to sub-pages)
-} nbgl_pageContentType_t;
-
-/**
- * @brief This structure contains a [item,value] pair and info about "details" button
- */
-typedef struct nbgl_pageTagValueDetails_s {
-    nbgl_layoutTagValueList_t  tagValueList;       ///< list of tag/value pairs
-    const nbgl_icon_details_t *detailsButtonIcon;  ///< icon to use in details button
-    const char                *detailsButtonText;  ///< this text is used for "details" button
-    uint8_t detailsButtonToken;  ///< the token used as argument of the actionCallback when the
-                                 ///< "details" button is touched
-    tune_index_e
-        tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when details button is touched
-} nbgl_pageTagValueDetails_t;
-
-/**
- * @brief This structure contains [item,value] pair(s) and info about a potential "details" button,
- * but also a black button + footer to confirm/cancel
- */
-typedef struct nbgl_pageTagValueConfirm_s {
-    nbgl_layoutTagValueList_t  tagValueList;       ///< list of tag/value pairs
-    const nbgl_icon_details_t *detailsButtonIcon;  ///< icon to use in details button
-    const char *detailsButtonText;  ///< this text is used for "details" button (if NULL, no button)
-    uint8_t     detailsButtonToken;  ///< the token used as argument of the actionCallback when the
-                                     ///< "details" button is touched
-    tune_index_e
-        tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when details button is touched
-    const char
-        *confirmationText;  ///< text of the confirmation button, if NULL "It matches" is used
-    const char
-           *cancelText;  ///< the text used for cancel action, if NULL "It doesn't matches" is used
-    uint8_t confirmationToken;  ///< the token used as argument of the onActionCallback
-    uint8_t cancelToken;  ///< the token used as argument of the onActionCallback when the cancel
-                          ///< button is pressed
-} nbgl_pageTagValueConfirm_t;
-
-/**
- * @brief This structure contains data to build a centered info + long press button page content
- */
-typedef struct nbgl_pageInfoLongPress_s {
-    const char                *text;           ///< centered text in large case
-    const nbgl_icon_details_t *icon;           ///< a buffer containing the 1BPP icon
-    const char                *longPressText;  ///< text of the long press button
-    uint8_t longPressToken;  ///< the token used as argument of the onActionCallback when button is
-                             ///< long pressed
-    tune_index_e
-        tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when button is touched
-} nbgl_pageInfoLongPress_t;
-
-/**
- * @brief This structure contains data to build a centered info + simple black button page content
- */
-typedef struct nbgl_pageInfoButton_s {
-    const char                *text;        ///< centered text in large case
-    const nbgl_icon_details_t *icon;        ///< a buffer containing the 1BPP icon
-    const char                *buttonText;  ///< text of the long press button
-    uint8_t buttonToken;  ///< the token used as argument of the onActionCallback when button is
-                          ///< long pressed
-    tune_index_e
-        tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when button is touched
-} nbgl_pageInfoButton_t;
-
-/**
- * @brief This structure contains data to build a @ref SWITCHES_LIST page content
- */
-typedef struct nbgl_pageSwitchesList_s {
-    const nbgl_layoutSwitch_t *switches;    ///< array of switches (nbSwitches items)
-    uint8_t                    nbSwitches;  ///< number of elements in switches and tokens array
-} nbgl_pageSwitchesList_t;
-
-/**
- * @brief This structure contains data to build a @ref INFOS_LIST page content
- */
-typedef struct nbgl_pageInfoList_s {
-    const char *const *infoTypes;     ///< array of types of infos (in black/bold)
-    const char *const *infoContents;  ///< array of contents of infos (in black)
-    uint8_t            nbInfos;       ///< number of elements in infoTypes and infoContents array
-} nbgl_pageInfoList_t;
-
-/**
- * @brief This structure contains data to build a @ref BARS_LIST page content
- */
-typedef struct nbgl_pageBarsList_s {
-    const char *const *barTexts;  ///< array of texts for each bar (nbBars items, in black/bold)
-    const uint8_t     *tokens;    ///< array of tokens, one for each bar (nbBars items)
-    uint8_t            nbBars;    ///< number of elements in barTexts and tokens array
-    tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when a bar is touched
-} nbgl_pageBarsList_t;
+typedef nbgl_contentInfoLongPress_t nbgl_pageInfoLongPress_t;
 
 /**
  * @brief This structure contains data to build a page in multi-pages mode (@ref
@@ -153,18 +55,18 @@ typedef struct nbgl_pageContent_s {
     uint8_t titleToken;   ///< if isTouchableTitle set to true, this is the token used when touching
                           ///< title
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when title is touched
-    nbgl_pageContentType_t type;  ///< type of page content in the following union
+    nbgl_contentType_t type;  ///< type of page content in the following union
     union {
-        nbgl_layoutTagValueList_t  tagValueList;     ///< @ref TAG_VALUE_LIST type
-        nbgl_layoutCenteredInfo_t  centeredInfo;     ///< @ref CENTERED_INFO type
-        nbgl_pageInfoLongPress_t   infoLongPress;    ///< @ref INFO_LONG_PRESS type
-        nbgl_pageInfoButton_t      infoButton;       ///< @ref INFO_BUTTON type
-        nbgl_pageTagValueDetails_t tagValueDetails;  ///< @ref TAG_VALUE_DETAILS type
-        nbgl_pageTagValueConfirm_t tagValueConfirm;  ///< @ref TAG_VALUE_CONFIRM type
-        nbgl_pageSwitchesList_t    switchesList;     ///< @ref SWITCHES_LIST type
-        nbgl_pageInfoList_t        infosList;        ///< @ref INFOS_LIST type
-        nbgl_layoutRadioChoice_t   choicesList;      ///< @ref CHOICES_LIST type
-        nbgl_pageBarsList_t        barsList;         ///< @ref BARS_LIST type
+        nbgl_contentCenteredInfo_t    centeredInfo;     ///< @ref CENTERED_INFO type
+        nbgl_contentInfoLongPress_t   infoLongPress;    ///< @ref INFO_LONG_PRESS type
+        nbgl_contentInfoButton_t      infoButton;       ///< @ref INFO_BUTTON type
+        nbgl_contentTagValueList_t    tagValueList;     ///< @ref TAG_VALUE_LIST type
+        nbgl_contentTagValueDetails_t tagValueDetails;  ///< @ref TAG_VALUE_DETAILS type
+        nbgl_contentTagValueConfirm_t tagValueConfirm;  ///< @ref TAG_VALUE_CONFIRM type
+        nbgl_contentSwitchesList_t    switchesList;     ///< @ref SWITCHES_LIST type
+        nbgl_contentInfoList_t        infosList;        ///< @ref INFOS_LIST type
+        nbgl_contentRadioChoice_t     choicesList;      ///< @ref CHOICES_LIST type
+        nbgl_contentBarsList_t        barsList;         ///< @ref BARS_LIST type
     };
 } nbgl_pageContent_t;
 

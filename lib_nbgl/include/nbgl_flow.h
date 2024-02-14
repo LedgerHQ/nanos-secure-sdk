@@ -53,17 +53,6 @@ typedef struct nbgl_stepDesc_s {
 
 typedef nbgl_stepDesc_t nbgl_pageContent_t;
 
-/**
- * @brief This structure contains data to build a centered info + long press button page content
- */
-typedef struct nbgl_pageInfoLongPress_s {
-    const char                *text;           ///< centered text in large case
-    const nbgl_icon_details_t *icon;           ///< a buffer containing the 1BPP icon
-    const char                *longPressText;  ///< text of the long press button
-    uint8_t longPressToken;  ///< the token used as argument of the onActionCallback when button is
-                             ///< long pressed
-} nbgl_pageInfoLongPress_t;
-
 /**********************
  * GLOBAL PROTOTYPES
  **********************/

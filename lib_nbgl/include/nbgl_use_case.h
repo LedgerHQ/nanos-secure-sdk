@@ -15,6 +15,7 @@ extern "C" {
  *      INCLUDES
  *********************/
 
+#include "nbgl_content.h"
 #ifdef NBGL_PAGE
 #include "nbgl_page.h"
 #else  // NBGL_PAGE
