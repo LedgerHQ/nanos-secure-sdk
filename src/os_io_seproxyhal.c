@@ -510,7 +510,11 @@ void io_seproxyhal_nfc_power(bool forceInit)
     uint8_t power
         = forceInit
               ? 1
+#ifdef HAVE_NFC_ACTIVATED_BY_DEFAULT
+              : !(os_setting_get(OS_SETTING_FEATURES, NULL, 0) & OS_SETTING_FEATURES_NFC_ENABLED);
+#else
               : (os_setting_get(OS_SETTING_FEATURES, NULL, 0) & OS_SETTING_FEATURES_NFC_ENABLED);
+#endif
     buffer[0] = SEPROXYHAL_TAG_NFC_POWER;
     buffer[1] = 0;
     buffer[2] = 1;
