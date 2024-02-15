@@ -34,6 +34,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/** BLAKE2B_256 message digest size */
+#define CX_BLAKE2B_256_SIZE 32
+
+/** BLAKE2B_512 message digest size */
+#define CX_BLAKE2B_512_SIZE 64
+
 /**  @private BLAKE2b constants */
 enum blake2b_constant {
     BLAKE2B_BLOCKBYTES    = 128,  ///< Size of a block
@@ -89,6 +95,80 @@ DEPRECATED static inline int cx_blake2b_init(cx_blake2b_t *hash, unsigned int ou
 {
     CX_THROW(cx_blake2b_init_no_throw(hash, out_len));
     return CX_BLAKE2B;
+}
+
+/**
+ * @brief   Computes a standalone one shot BLAKE2B_256 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_blake2b_256_hash_iovec(const cx_iovec_t *iovec,
+                                   size_t            iovec_len,
+                                   uint8_t           digest[static CX_BLAKE2B_256_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot BLAKE2B_256 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_blake2b_256_hash(const uint8_t *in,
+                                           size_t         in_len,
+                                           uint8_t        digest[static CX_BLAKE2B_256_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_blake2b_256_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot BLAKE2B_512 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_blake2b_512_hash_iovec(const cx_iovec_t *iovec,
+                                   size_t            iovec_len,
+                                   uint8_t           digest[static CX_BLAKE2B_512_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot BLAKE2B_512 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_blake2b_512_hash(const uint8_t *in,
+                                           size_t         in_len,
+                                           uint8_t        digest[static CX_BLAKE2B_512_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_blake2b_512_hash_iovec(&iovec, 1, digest);
 }
 
 /**
