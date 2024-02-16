@@ -49,7 +49,8 @@ typedef struct TextContext_s {
                                                  ///< step (other than internal navigation)
     char tmpString[TMP_STRING_MAX_LEN];          ///< temporary string used for title when text +
                                                  ///< multi-pages subText
-    nbgl_centeredInfoStyle_t style;  ///< style to be used with a @ref CENTERED_INFO_STEP step
+    nbgl_contentCenteredInfoStyle_t
+        style;  ///< style to be used with a @ref CENTERED_INFO_STEP step
 } TextContext_t;
 
 /**
@@ -387,7 +388,7 @@ nbgl_step_t nbgl_stepDrawText(nbgl_stepPosition_t               pos,
                               nbgl_screenTickerConfiguration_t *ticker,
                               const char                       *text,
                               const char                       *subText,
-                              nbgl_centeredInfoStyle_t          style,
+                              nbgl_contentCenteredInfoStyle_t   style,
                               bool                              modal)
 {
     StepContext_t *ctx = getFreeContext(TEXT_STEP, modal);
