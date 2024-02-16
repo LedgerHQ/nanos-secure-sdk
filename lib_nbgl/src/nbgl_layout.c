@@ -1555,10 +1555,10 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
  * @param style if @ref REGULAR_INFO, use regular font for text, otherwise use bold font for text
  * @return >= 0 if OK
  */
-int nbgl_layoutAddText(nbgl_layout_t           *layout,
-                       const char              *text,
-                       const char              *subText,
-                       nbgl_centeredInfoStyle_t style)
+int nbgl_layoutAddText(nbgl_layout_t                  *layout,
+                       const char                     *text,
+                       const char                     *subText,
+                       nbgl_contentCenteredInfoStyle_t style)
 {
     nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
     nbgl_container_t      *container;

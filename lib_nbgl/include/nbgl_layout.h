@@ -353,10 +353,10 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
                                     tune_index_e   tuneId);
 int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed);
 #else   // HAVE_SE_TOUCH
-int nbgl_layoutAddText(nbgl_layout_t           *layout,
-                       const char              *text,
-                       const char              *subText,
-                       nbgl_centeredInfoStyle_t style);
+int nbgl_layoutAddText(nbgl_layout_t                  *layout,
+                       const char                     *text,
+                       const char                     *subText,
+                       nbgl_contentCenteredInfoStyle_t style);
 int nbgl_layoutAddNavigation(nbgl_layout_t *layout, nbgl_layoutNavigation_t *info);
 int nbgl_layoutAddMenuList(nbgl_layout_t *layout, nbgl_layoutMenuList_t *list);
 #endif  // HAVE_SE_TOUCH

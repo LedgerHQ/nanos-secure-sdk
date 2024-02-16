@@ -90,7 +90,7 @@ nbgl_step_t nbgl_stepDrawText(nbgl_stepPosition_t               pos,
                               nbgl_screenTickerConfiguration_t *ticker,
                               const char                       *text,
                               const char                       *subText,
-                              nbgl_centeredInfoStyle_t          style,
+                              nbgl_contentCenteredInfoStyle_t   style,
                               bool                              modal);
 nbgl_step_t nbgl_stepDrawCenteredInfo(nbgl_stepPosition_t               pos,
                                       nbgl_stepButtonCallback_t         onActionCallback,
