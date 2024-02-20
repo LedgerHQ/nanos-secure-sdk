@@ -657,14 +657,17 @@ nbgl_obj_t **nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer);
 uint8_t      nbgl_containerPoolGetNbUsed(uint8_t layer);
 
 #ifdef HAVE_SE_TOUCH
-nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
-                                          uint8_t activePage,
-                                          bool    withExitKey,
-                                          uint8_t layer);
-bool              nbgl_navigationCallback(nbgl_obj_t      *obj,
-                                          nbgl_touchType_t eventType,
-                                          uint8_t          nbPages,
-                                          uint8_t         *activePage);
+void nbgl_navigationPopulate(nbgl_container_t *navContainer,
+                             uint8_t           nbPages,
+                             uint8_t           activePage,
+                             bool              withExitKey,
+                             bool              withBackKey,
+                             bool              withPageIndicator,
+                             uint8_t           layer);
+bool nbgl_navigationCallback(nbgl_obj_t      *obj,
+                             nbgl_touchType_t eventType,
+                             uint8_t          nbPages,
+                             uint8_t         *activePage);
 #endif  // HAVE_SE_TOUCH
 
 // for internal use

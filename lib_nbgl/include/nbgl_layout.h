@@ -87,13 +87,13 @@ typedef void (*nbgl_layoutButtonCallback_t)(nbgl_layout_t *layout, nbgl_buttonEv
  *
  */
 typedef struct {
-    uint8_t token;            ///< the token that will be used as argument of the callback
-    uint8_t nbPages;          ///< number of pages. (if 0, no navigation)
-    uint8_t activePage;       ///< index of active page (from 0 to nbPages-1).
-    bool    withExitKey;      ///< if set to true, an exit button is drawn, either on the left of
-                              ///< navigation keys or in the center if no navigation
-    bool withSeparationLine;  ///< if set to true, an horizontal line is drawn on top of bar in
-                              ///< light gray
+    uint8_t token;               ///< the token that will be used as argument of the callback
+    uint8_t nbPages;             ///< number of pages. (if 0, no navigation)
+    uint8_t activePage;          ///< index of active page (from 0 to nbPages-1).
+    bool    withExitKey;         ///< if set to true, an exit button is drawn
+    bool    withBackKey;         ///< if set to true, the "back" key is drawn
+    bool    withSeparationLine;  ///< if set to true, an horizontal line is drawn on top of bar in
+                                 ///< light gray
 #ifdef HAVE_PIEZO_SOUND
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when pressing keys)
 #endif                    // HAVE_PIEZO_SOUND
@@ -290,6 +290,57 @@ typedef struct {
 } nbgl_layoutButton_t;
 
 /**
+ * @brief The different types of extended footer
+ *
+ */
+typedef enum {
+    FOOTER_EMPTY = 0,    ///< empty space, to have a better vertical centering of centered info
+    FOOTER_SIMPLE_TEXT,  ///< simple touchable text in bold
+    FOOTER_DOUBLE_TEXT,  ///< 2 touchable texts in bold, separated by a vertical line (only on Stax)
+    FOOTER_TEXT_AND_NAV,   ///< touchable text in bold on the left, navigation on the right (only on
+                           ///< Europa)
+    FOOTER_NAV,            ///< navigation bar
+    FOOTER_SIMPLE_BUTTON,  ///< simple black or white button (see @ref nbgl_layoutButtonStyle_t)
+    FOOTER_CHOICE_BUTTONS,  ///< double buttons (see @ref nbgl_layoutChoiceButtonsStyle_t)
+    NB_FOOTER_TYPES
+} nbgl_layoutFooterType_t;
+
+/**
+ * @brief This structure contains info to build an extended footer.
+ *
+ */
+typedef struct {
+    nbgl_layoutFooterType_t type;  ///< type of footer
+    bool separationLine;  ///< if true, a separation line is added at the top of this control
+    union {
+        struct {
+            uint16_t height;
+        } emptySpace;  ///< if type is @ref FOOTER_EMPTY
+        struct {
+            const char  *text;
+            uint8_t      token;
+            tune_index_e tuneId;
+        } simpleText;  ///< if type is @ref FOOTER_SIMPLE_TEXT
+        struct {
+            const char  *leftText;
+            const char  *rightText;
+            uint8_t      leftToken;
+            uint8_t      rightToken;
+            tune_index_e tuneId;
+        } doubleText;  ///< if type is @ref FOOTER_DOUBLE_TEXT
+        struct {
+            nbgl_layoutNavigationBar_t navigation;
+            const char                *text;
+            uint8_t                    token;
+            tune_index_e               tuneId;
+        } textAndNav;                              ///< if type is @ref FOOTER_TEXT_AND_NAV
+        nbgl_layoutNavigationBar_t navigation;     ///< if type is @ref FOOTER_NAV
+        nbgl_layoutButton_t        button;         ///< if type is @ref FOOTER_SIMPLE_BUTTON
+        nbgl_layoutChoiceButtons_t choiceButtons;  ///< if type is @ref FOOTER_SIMPLE_BUTTON
+    };
+} nbgl_layoutFooter_t;
+
+/**
  * @brief This structure contains info to build a progress bar with info. The progress bar itself is
  * 120px width * 12px height
  *
@@ -357,6 +408,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
                               const char    *rightText,
                               uint8_t        rightToken,
                               tune_index_e   tuneId);
+int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_t *footerDesc);
 int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigationBar_t *info);
 int nbgl_layoutAddBottomButton(nbgl_layout_t             *layout,
                                const nbgl_icon_details_t *icon,
@@ -438,7 +490,11 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout,
                             bool           enableDigits);
 int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits);
 int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive);
-int nbgl_layoutAddSwipe(nbgl_layout_t *layout, uint8_t token, uint16_t swipesMask);
+int nbgl_layoutAddSwipe(nbgl_layout_t *layout,
+                        uint16_t       swipesMask,
+                        const char    *text,
+                        uint8_t        token,
+                        tune_index_e   tuneId);
 
 #else   // HAVE_SE_TOUCH
 /* layout objects for pages with keypad (nanos) */
