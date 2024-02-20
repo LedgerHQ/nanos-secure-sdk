@@ -27,6 +27,7 @@
 #define LCX_COMMON_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define ARCH_LITTLE_ENDIAN
@@ -58,6 +59,14 @@ typedef struct uint64_s uint64bits_t;
 #else
 typedef uint64_t uint64bits_t;
 #endif
+
+/**
+ * @brief Similar to libc iovec type
+ */
+typedef struct {
+    const uint8_t *iov_base;
+    size_t         iov_len;
+} cx_iovec_t;
 
 // clang-format off
 /**
