@@ -17,11 +17,15 @@
 
 # Command to print ICONNAME hexadecimal bitmap on stdout according to the
 # hardware target.
-#inverse B&W for Nano
+ifneq ($(TARGET),nanos)
+#inverse B&W for non Stax
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_NANOS2))
 ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --reverse --hexbitmaponly $(ICONNAME)
 else
 ICONHEX_CMD=python3 $(BOLOS_SDK)/lib_nbgl/tools/icon2glyph.py --hexbitmaponly $(ICONNAME)
+endif
+else
+ICONHEX_CMD=python3 $(BOLOS_SDK)/icon3.py --hexbitmaponly $(ICONNAME)
 endif
 
 
