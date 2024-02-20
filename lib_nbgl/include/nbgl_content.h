@@ -36,6 +36,8 @@ typedef enum {
     LARGE_CASE_INFO,  ///< text in BLACK and large case (INTER 32px), subText in black in Inter24px
     LARGE_CASE_BOLD_INFO,  ///< text in BLACK and large case (INTER 32px), subText in black bold
                            ///< Inter24px, text3 in black Inter24px
+    LARGE_CASE_GRAY_INFO,  ///< text in BLACK and large case (INTER 32px), subText in black
+                           ///< Inter24px text3 in dark gray Inter24px
     NORMAL_INFO,  ///< Icon in black, a potential text in black bold 24px under it, a potential text
                   ///< in dark gray (24px) under it, a potential text in black (24px) under it
     PLUGIN_INFO   ///< A potential text in black 32px, a potential text in black (24px) under it, a

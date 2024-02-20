@@ -278,7 +278,7 @@ typedef enum {
  */
 typedef struct {
     const char                *text;   ///< button text
-    const nbgl_icon_details_t *icon;   ///< a buffer containing the 1BPP icon for button1
+    const nbgl_icon_details_t *icon;   ///< a buffer containing the 1BPP icon for button
     uint8_t                    token;  ///< the token that will be used as argument of the callback
     nbgl_layoutButtonStyle_t   style;
     bool fittingContent;  ///< if set to true, fit the width of button to text, otherwise full width

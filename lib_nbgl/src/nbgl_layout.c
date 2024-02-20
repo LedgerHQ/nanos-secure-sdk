@@ -1667,8 +1667,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         textArea->textColor     = BLACK;
         textArea->text          = PIC(info->text1);
         textArea->textAlignment = CENTER;
-        if ((info->style == LARGE_CASE_INFO) || (info->style == LARGE_CASE_BOLD_INFO)
-            || (info->style == PLUGIN_INFO)) {
+        if (info->style != NORMAL_INFO) {
             textArea->fontId = LARGE_MEDIUM_FONT;
         }
         else {
@@ -1700,14 +1699,8 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
         container->nbChildren++;
     }
     if (info->text2 != NULL) {
-        textArea = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
-        if ((info->style != LARGE_CASE_INFO) && (info->style != LARGE_CASE_BOLD_INFO)
-            && (info->style != PLUGIN_INFO)) {
-            textArea->textColor = DARK_GRAY;
-        }
-        else {
-            textArea->textColor = BLACK;
-        }
+        textArea                = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
+        textArea->textColor     = (info->style == NORMAL_INFO) ? DARK_GRAY : BLACK;
         textArea->text          = PIC(info->text2);
         textArea->textAlignment = CENTER;
         textArea->fontId
@@ -1771,7 +1764,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
     }
     if (info->text3 != NULL) {
         textArea                = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
-        textArea->textColor     = BLACK;
+        textArea->textColor     = (info->style == LARGE_CASE_GRAY_INFO) ? DARK_GRAY : BLACK;
         textArea->text          = PIC(info->text3);
         textArea->textAlignment = CENTER;
         textArea->fontId        = SMALL_REGULAR_FONT;
@@ -1787,7 +1780,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
             textArea->obj.alignmentMarginY
                 = (info->style == LARGE_CASE_BOLD_INFO) ? 0 : BORDER_MARGIN;
 #else   // TARGET_STAX
-            textArea->obj.alignmentMarginY = (info->style == LARGE_CASE_BOLD_INFO) ? 0 : 28;
+            textArea->obj.alignmentMarginY = (info->style == LARGE_CASE_BOLD_INFO) ? 16 : 28;
 #endif  // TARGET_STAX
         }
         else {
