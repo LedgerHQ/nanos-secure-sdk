@@ -73,12 +73,16 @@ extern unsigned char G_io_usb_ep_buffer[MAX(USB_SEGMENT_SIZE, BLE_SEGMENT_SIZE)]
 unsigned char io_event(unsigned char channel);
 
 #ifdef HAVE_SE_TOUCH
+
 typedef struct io_touch_info_s {
     uint16_t x;
     uint16_t y;
     uint8_t  state;
     uint8_t  w;
     uint8_t  h;
+#ifdef HAVE_HW_TOUCH_SWIPE
+    uint8_t swipe;
+#endif  // HAVE_HW_TOUCH_SWIPE
 } io_touch_info_t;
 
 // bitfield for exclusion borders, for touch_exclude_borders() (if a bit is set, means that pixels

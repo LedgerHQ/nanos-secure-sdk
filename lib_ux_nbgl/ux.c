@@ -72,6 +72,9 @@ void ux_process_finger_event(uint8_t seph_packet[])
         pos.state = (seph_packet[3] == SEPROXYHAL_TAG_FINGER_EVENT_TOUCH) ? PRESSED : RELEASED;
         pos.x     = (seph_packet[4] << 8) + seph_packet[5];
         pos.y     = (seph_packet[6] << 8) + seph_packet[7];
+#ifdef HAVE_HW_TOUCH_SWIPE
+        pos.swipe = seph_packet[10];
+#endif  // HAVE_HW_TOUCH_SWIPE
         nbgl_touchHandler(&pos, nbTicks * 100);
         nbgl_refresh();
     }
