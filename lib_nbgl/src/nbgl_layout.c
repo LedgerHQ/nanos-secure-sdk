@@ -1365,14 +1365,7 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
     container = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
 
     // get container children
-    if (text != NULL) {
-        container->nbChildren++;
-    }
-    if (subText != NULL) {
-        container->nbChildren++;
-    }
-
-    container->children       = nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
+    container->children       = nbgl_containerPoolGet(2, layoutInt->layer);
     container->obj.area.width = AVAILABLE_WIDTH;
 
     if (text != NULL) {
@@ -1394,7 +1387,8 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
         textArea->obj.area.height = nbgl_getTextHeightInWidth(
             textArea->fontId, textArea->text, textArea->obj.area.width, textArea->wrapping);
         fullHeight += textArea->obj.area.height + textArea->obj.alignmentMarginY;
-        container->children[0] = (nbgl_obj_t *) textArea;
+        container->children[container->nbChildren] = (nbgl_obj_t *) textArea;
+        container->nbChildren++;
     }
     if (subText != NULL) {
         subTextArea            = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
@@ -1404,10 +1398,12 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
         subTextArea->style     = NO_STYLE;
         subTextArea->wrapping  = true;
         subTextArea->obj.area.width  = container->obj.area.width;
-        subTextArea->obj.area.height = nbgl_getTextHeightInWidth(
-            subTextArea->fontId, subTextArea->text, subTextArea->obj.area.width, false);
-        subTextArea->textAlignment = MID_LEFT;
-        subTextArea->obj.alignment = NO_ALIGNMENT;
+        subTextArea->obj.area.height = nbgl_getTextHeightInWidth(subTextArea->fontId,
+                                                                 subTextArea->text,
+                                                                 subTextArea->obj.area.width,
+                                                                 subTextArea->wrapping);
+        subTextArea->textAlignment   = MID_LEFT;
+        subTextArea->obj.alignment   = NO_ALIGNMENT;
         if (text != NULL) {
 #ifdef TARGET_STAX
             subTextArea->obj.alignmentMarginY = INTERNAL_MARGIN;
@@ -1416,7 +1412,6 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
             subTextArea->obj.alignmentMarginY = 14;
             fullHeight += 26;  // under the subText
 #endif  // TARGET_STAX
-            container->children[1] = (nbgl_obj_t *) subTextArea;
         }
         else {
 #ifdef TARGET_STAX
@@ -1426,8 +1421,9 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
             subTextArea->obj.alignmentMarginY = 26;
             fullHeight += 26;  // under the subText
 #endif  // TARGET_STAX
-            container->children[0] = (nbgl_obj_t *) subTextArea;
         }
+        container->children[container->nbChildren] = (nbgl_obj_t *) subTextArea;
+        container->nbChildren++;
         fullHeight += subTextArea->obj.area.height + subTextArea->obj.alignmentMarginY;
     }
     else {
@@ -1655,7 +1651,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
             textArea->obj.alignment = BOTTOM_MIDDLE;
             textArea->obj.alignTo   = (nbgl_obj_t *) container->children[container->nbChildren - 1];
 #ifdef TARGET_STAX
-            textArea->obj.alignmentMarginY = BORDER_MARGIN + 4;
+            textArea->obj.alignmentMarginY = BORDER_MARGIN;
 #else   // TARGET_STAX
             textArea->obj.alignmentMarginY = BOTTOM_BORDER_MARGIN;
 #endif  // TARGET_STAX
@@ -3070,7 +3066,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
 #ifdef TARGET_STAX
             textArea->obj.area.height = 88;
 #else   // TARGET_STAX
-            textArea->obj.area.height                   = 96;
+            textArea->obj.area.height                   = SIMPLE_FOOTER_HEIGHT;
 #endif  // TARGET_STAX
             textArea->text          = PIC(footerDesc->simpleText.text);
             textArea->fontId        = SMALL_BOLD_FONT;
@@ -3098,7 +3094,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
 #ifdef TARGET_STAX
             textArea->obj.area.height = 88;
 #else   // TARGET_STAX
-            textArea->obj.area.height                   = 96;
+            textArea->obj.area.height                   = SIMPLE_FOOTER_HEIGHT;
 #endif  // TARGET_STAX
             textArea->text          = PIC(footerDesc->doubleText.leftText);
             textArea->fontId        = SMALL_BOLD_FONT;
@@ -3126,7 +3122,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
 #ifdef TARGET_STAX
             textArea->obj.area.height = 88;
 #else   // TARGET_STAX
-            textArea->obj.area.height                   = 96;
+            textArea->obj.area.height                   = SIMPLE_FOOTER_HEIGHT;
 #endif  // TARGET_STAX
             textArea->text          = PIC(footerDesc->doubleText.rightText);
             textArea->fontId        = SMALL_BOLD_FONT;
@@ -3154,7 +3150,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
         case FOOTER_TEXT_AND_NAV: {
 #ifndef TARGET_STAX
             layoutInt->footerContainer->obj.area.width  = SCREEN_WIDTH;
-            layoutInt->footerContainer->obj.area.height = 96;
+            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
             // add touchable text on the left
             textArea = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
             obj      = addCallbackObj(layoutInt,
@@ -3167,7 +3163,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             textArea->obj.alignment   = BOTTOM_LEFT;
             textArea->textColor       = BLACK;
             textArea->obj.area.width  = 192;
-            textArea->obj.area.height = 96;
+            textArea->obj.area.height = SIMPLE_FOOTER_HEIGHT;
             textArea->text            = PIC(footerDesc->textAndNav.text);
             textArea->fontId          = SMALL_BOLD_FONT;
             textArea->textAlignment   = CENTER;
@@ -3188,7 +3184,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
                 = (nbgl_obj_t **) nbgl_containerPoolGet(navContainer->nbChildren, layoutInt->layer);
             navContainer->obj.alignment   = BOTTOM_RIGHT;
             navContainer->obj.area.width  = SCREEN_WIDTH - textArea->obj.area.width;
-            navContainer->obj.area.height = 96;
+            navContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
             nbgl_navigationPopulate(navContainer,
                                     footerDesc->textAndNav.navigation.nbPages,
                                     footerDesc->textAndNav.navigation.activePage,
@@ -3229,7 +3225,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             layoutInt->footerContainer->obj.area.height = 128;
 #else   // TARGET_STAX
             layoutInt->footerContainer->obj.area.width  = SCREEN_WIDTH;
-            layoutInt->footerContainer->obj.area.height = 96;
+            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
 #endif  // TARGET_STAX
             nbgl_navigationPopulate(layoutInt->footerContainer,
                                     footerDesc->navigation.nbPages,
@@ -3261,7 +3257,11 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
                 return -1;
             }
 
-            button->obj.alignment = CENTER;
+#ifdef TARGET_STAX
+            button->obj.alignment = TOP_MIDDLE;
+#else   // TARGET_STAX
+            button->obj.alignment                       = CENTER;
+#endif  // TARGET_STAX
             if (footerDesc->button.style == BLACK_BACKGROUND) {
                 button->innerColor      = BLACK;
                 button->foregroundColor = WHITE;
@@ -3300,7 +3300,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
                 = (nbgl_obj_t *) button;
             layoutInt->footerContainer->nbChildren++;
 #ifdef TARGET_STAX
-            layoutInt->footerContainer->obj.area.height = 128;
+            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
 #else   // TARGET_STAX
             layoutInt->footerContainer->obj.area.height = 136;
 #endif  // TARGET_STAX
@@ -3380,12 +3380,6 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             obj->index            = 0;
             button->obj.alignment = TOP_MIDDLE;
 #ifdef TARGET_STAX
-            if (footerDesc->choiceButtons.style == BOTH_ROUNDED_STYLE) {
-                button->obj.alignmentMarginY = 0;  // 0 pixels from top of container
-            }
-            else {
-                button->obj.alignmentMarginY = 4;  // 4 pixels from top of container
-            }
             button->innerColor      = BLACK;
             button->borderColor     = BLACK;
             button->foregroundColor = WHITE;

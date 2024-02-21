@@ -37,6 +37,8 @@ extern "C" {
 #define TOUCHABLE_MAIN_BAR_HEIGHT         88
 #define TOUCHABLE_BAR_HEIGHT              88
 #define TOUCHABLE_DETAILLED_BAR_HEIGHT    88
+#define SIMPLE_FOOTER_HEIGHT              104
+#define SMALL_CENTERING_HEADER            24
 #else  // TARGET_STAX
 // only 2 buttons are visible at the same time on Europa
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS 2
@@ -44,6 +46,8 @@ extern "C" {
 #define TOUCHABLE_MAIN_BAR_HEIGHT         100
 #define TOUCHABLE_BAR_HEIGHT              92
 #define TOUCHABLE_DETAILLED_BAR_HEIGHT    140
+#define SIMPLE_FOOTER_HEIGHT              96
+#define SMALL_CENTERING_HEADER            40
 #endif  // TARGET_STAX
 
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * BORDER_MARGIN)
