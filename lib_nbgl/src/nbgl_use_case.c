@@ -508,13 +508,13 @@ static const char *getDetailsPageAt(uint8_t detailsPage)
     uint8_t     page        = 0;
     const char *currentChar = detailsContext.value;
     while (page < detailsPage) {
-        uint16_t nbLines = nbgl_getTextNbLinesInWidth(
-            SMALL_REGULAR_FONT, currentChar, SCREEN_WIDTH - 2 * BORDER_MARGIN, false);
+        uint16_t nbLines
+            = nbgl_getTextNbLinesInWidth(SMALL_BOLD_FONT, currentChar, AVAILABLE_WIDTH, false);
         if (nbLines > NB_MAX_LINES_IN_DETAILS) {
             uint16_t len;
-            nbgl_getTextMaxLenInNbLines(SMALL_REGULAR_FONT,
+            nbgl_getTextMaxLenInNbLines(SMALL_BOLD_FONT,
                                         currentChar,
-                                        SCREEN_WIDTH - 2 * BORDER_MARGIN,
+                                        AVAILABLE_WIDTH,
                                         NB_MAX_LINES_IN_DETAILS,
                                         &len,
                                         false);
@@ -558,14 +558,14 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh)
         currentPair.value = detailsContext.nextPageStart;
     }
     detailsContext.currentPage = detailsPage;
-    uint16_t nbLines           = nbgl_getTextNbLinesInWidth(
-        SMALL_REGULAR_FONT, currentPair.value, SCREEN_WIDTH - 2 * BORDER_MARGIN, false);
+    uint16_t nbLines
+        = nbgl_getTextNbLinesInWidth(SMALL_BOLD_FONT, currentPair.value, AVAILABLE_WIDTH, false);
 
     if (nbLines > NB_MAX_LINES_IN_DETAILS) {
         uint16_t len;
-        nbgl_getTextMaxLenInNbLines(SMALL_REGULAR_FONT,
+        nbgl_getTextMaxLenInNbLines(SMALL_BOLD_FONT,
                                     currentPair.value,
-                                    SCREEN_WIDTH - 2 * BORDER_MARGIN,
+                                    AVAILABLE_WIDTH,
                                     NB_MAX_LINES_IN_DETAILS,
                                     &len,
                                     false);
@@ -848,10 +848,8 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPair
         }
 
         // tag height
-        currentHeight += nbgl_getTextHeightInWidth(SMALL_REGULAR_FONT,
-                                                   pair->item,
-                                                   SCREEN_WIDTH - 2 * BORDER_MARGIN,
-                                                   tagValueList->wrapping);
+        currentHeight += nbgl_getTextHeightInWidth(
+            SMALL_REGULAR_FONT, pair->item, AVAILABLE_WIDTH, tagValueList->wrapping);
         // space between tag and value
         currentHeight += 4;
         // set value font
@@ -863,7 +861,7 @@ uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPair
         }
         // value height
         currentHeight += nbgl_getTextHeightInWidth(
-            value_font, pair->value, SCREEN_WIDTH - 2 * BORDER_MARGIN, tagValueList->wrapping);
+            value_font, pair->value, AVAILABLE_WIDTH, tagValueList->wrapping);
         if (currentHeight >= TAG_VALUE_AREA_HEIGHT) {
             break;
         }
@@ -927,7 +925,7 @@ void nbgl_useCaseHome(const char                *appName,
 /**
  * @brief draws the extended version of home page of an app (page on which we land when launching it
  * from dashboard)
- * @note it enables to use an action button (black)
+ * @note it enables to use an action button (black on Stax, white on Europa)
  *
  * @param appName app name
  * @param appIcon app icon
@@ -935,8 +933,8 @@ void nbgl_useCaseHome(const char                *appName,
  * the <appName> network.")
  * @param withSettings if true, use a "settings" (wheel) icon in bottom button, otherwise a "info"
  * (i)
- * @param actionButtonText if not NULL, text used for an action button (in black, on top of "Quit
- * App" button)
+ * @param actionButtonText if not NULL, text used for an action button (on top of "Quit
+ * App" button/footer)
  * @param actionCallback callback called when action button is touched (if actionButtonText is not
  * NULL)
  * @param topRightCallback callback called when top-right button is touched
@@ -957,7 +955,7 @@ void nbgl_useCaseHomeExt(const char                *appName,
                                        .centeredInfo.text1   = appName,
                                        .centeredInfo.text3   = NULL,
                                        .centeredInfo.style   = LARGE_CASE_INFO,
-                                       .centeredInfo.offsetY = -16,
+                                       .centeredInfo.offsetY = 0,
                                        .footerText           = NULL,
                                        .bottomButtonStyle    = QUIT_APP_TEXT,
                                        .tapActionText        = NULL,
@@ -991,8 +989,7 @@ void nbgl_useCaseHomeExt(const char                *appName,
 
         // If there is more than 3 lines, it means the appName was split, so we put it on the next
         // line
-        if (nbgl_getTextNbLinesInWidth(
-                SMALL_REGULAR_FONT, appDescription, SCREEN_WIDTH - 2 * BORDER_MARGIN, false)
+        if (nbgl_getTextNbLinesInWidth(SMALL_REGULAR_FONT, appDescription, AVAILABLE_WIDTH, false)
             > 3) {
             snprintf(appDescription,
                      APP_DESCRIPTION_MAX_LEN,
@@ -1538,8 +1535,8 @@ void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping)
 {
     memset(&detailsContext, 0, sizeof(detailsContext));
 
-    uint16_t nbLines = nbgl_getTextNbLinesInWidth(
-        SMALL_REGULAR_FONT, value, SCREEN_WIDTH - 2 * BORDER_MARGIN, wrapping);
+    uint16_t nbLines
+        = nbgl_getTextNbLinesInWidth(SMALL_REGULAR_FONT, value, AVAILABLE_WIDTH, wrapping);
 
     // initialize context
     detailsContext.tag         = tag;
@@ -1550,9 +1547,8 @@ void nbgl_useCaseViewDetails(const char *tag, const char *value, bool wrapping)
     // add some spare for room lost with "..." substitution
     if (detailsContext.nbPages > 1) {
         uint16_t nbLostChars = (detailsContext.nbPages - 1) * 3;
-        uint16_t nbLostLines
-            = (nbLostChars + ((SCREEN_WIDTH - 2 * BORDER_MARGIN) / 16) - 1)
-              / ((SCREEN_WIDTH - 2 * BORDER_MARGIN) / 16);  // 16 for average char width
+        uint16_t nbLostLines = (nbLostChars + ((AVAILABLE_WIDTH) / 16) - 1)
+                               / ((AVAILABLE_WIDTH) / 16);  // 16 for average char width
         uint8_t nbLinesInLastPage
             = nbLines - ((detailsContext.nbPages - 1) * NB_MAX_LINES_IN_DETAILS);
 

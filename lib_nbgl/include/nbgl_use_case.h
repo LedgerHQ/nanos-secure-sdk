@@ -40,7 +40,11 @@ extern "C" {
 /**
  *  @brief maximum number of lines for value field in details pages
  */
+#ifdef TARGET_STAX
 #define NB_MAX_LINES_IN_DETAILS 12
+#else  // TARGET_STAX
+#define NB_MAX_LINES_IN_DETAILS 11
+#endif  // TARGET_STAX
 
 /**
  *  @brief maximum number of lines for value field in review pages

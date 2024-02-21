@@ -101,7 +101,7 @@ static void addContent(nbgl_pageContent_t *content,
                 nbgl_layoutAddHeader(layout, &headerDesc);
             }
             uint16_t nbLines = nbgl_getTextNbLinesInWidth(
-                content->tagValueDetails.tagValueList.smallCaseForValue ? SMALL_REGULAR_FONT
+                content->tagValueDetails.tagValueList.smallCaseForValue ? SMALL_BOLD_FONT
                                                                         : LARGE_MEDIUM_FONT,
                 content->tagValueDetails.tagValueList.pairs[0].value,
                 SCREEN_WIDTH - 2 * BORDER_MARGIN,

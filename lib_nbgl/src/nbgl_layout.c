@@ -2350,7 +2350,7 @@ int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueL
         valueTextArea->text          = PIC(pair->value);
         valueTextArea->textAlignment = MID_LEFT;
         if (list->smallCaseForValue) {
-            valueTextArea->fontId = SMALL_REGULAR_FONT;
+            valueTextArea->fontId = SMALL_BOLD_FONT;
         }
         else {
             valueTextArea->fontId = LARGE_MEDIUM_FONT;
