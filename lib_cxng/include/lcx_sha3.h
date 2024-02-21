@@ -35,6 +35,30 @@
 #include "lcx_hash.h"
 #include <stddef.h>
 
+/** SHA3_224 message digest size */
+#define CX_SHA3_224_SIZE 28
+
+/** SHA3_256 message digest size */
+#define CX_SHA3_256_SIZE 32
+
+/** SHA3_384 message digest size */
+#define CX_SHA3_384_SIZE 48
+
+/** SHA3_512 message digest size */
+#define CX_SHA3_512_SIZE 64
+
+/** KECCAK_224 message digest size */
+#define CX_KECCAK_224_SIZE 28
+
+/** KECCAK_256 message digest size */
+#define CX_KECCAK_256_SIZE 32
+
+/** KECCAK_384 message digest size */
+#define CX_KECCAK_384_SIZE 48
+
+/** KECCAK_512 message digest size */
+#define CX_KECCAK_512_SIZE 64
+
 /**
  * @brief KECCAK, SHA3 and SHA3-XOF context
  */
@@ -80,6 +104,154 @@ DEPRECATED static inline int cx_sha3_init(cx_sha3_t *hash, size_t size)
 }
 
 /**
+ * @brief   Computes a standalone one shot SHA3_224 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_sha3_224_hash_iovec(const cx_iovec_t *iovec,
+                                size_t            iovec_len,
+                                uint8_t           digest[static CX_SHA3_224_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot SHA3_224 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_sha3_224_hash(const uint8_t *in,
+                                        size_t         in_len,
+                                        uint8_t        digest[static CX_SHA3_224_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_sha3_224_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot SHA3_256 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_sha3_256_hash_iovec(const cx_iovec_t *iovec,
+                                size_t            iovec_len,
+                                uint8_t           digest[static CX_SHA3_256_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot SHA3_256 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_sha3_256_hash(const uint8_t *in,
+                                        size_t         in_len,
+                                        uint8_t        digest[static CX_SHA3_256_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_sha3_256_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot SHA3_384 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_sha3_384_hash_iovec(const cx_iovec_t *iovec,
+                                size_t            iovec_len,
+                                uint8_t           digest[static CX_SHA3_384_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot SHA3_384 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_sha3_384_hash(const uint8_t *in,
+                                        size_t         in_len,
+                                        uint8_t        digest[static CX_SHA3_384_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_sha3_384_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot SHA3_512 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_sha3_512_hash_iovec(const cx_iovec_t *iovec,
+                                size_t            iovec_len,
+                                uint8_t           digest[static CX_SHA3_512_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot SHA3_512 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_sha3_512_hash(const uint8_t *in,
+                                        size_t         in_len,
+                                        uint8_t        digest[static CX_SHA3_512_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_sha3_512_hash_iovec(&iovec, 1, digest);
+}
+
+/**
  * @brief Initializes a KECCAK context.
  *
  * @details Supported output sizes in bits:
@@ -108,6 +280,154 @@ DEPRECATED static inline int cx_keccak_init(cx_sha3_t *hash, size_t size)
 {
     CX_THROW(cx_keccak_init_no_throw(hash, size));
     return CX_KECCAK;
+}
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_224 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_keccak_224_hash_iovec(const cx_iovec_t *iovec,
+                                  size_t            iovec_len,
+                                  uint8_t           digest[static CX_KECCAK_224_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_224 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_keccak_224_hash(const uint8_t *in,
+                                          size_t         in_len,
+                                          uint8_t        digest[static CX_KECCAK_224_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_keccak_224_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_256 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_keccak_256_hash_iovec(const cx_iovec_t *iovec,
+                                  size_t            iovec_len,
+                                  uint8_t           digest[static CX_KECCAK_256_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_256 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_keccak_256_hash(const uint8_t *in,
+                                          size_t         in_len,
+                                          uint8_t        digest[static CX_KECCAK_256_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_keccak_256_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_384 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_keccak_384_hash_iovec(const cx_iovec_t *iovec,
+                                  size_t            iovec_len,
+                                  uint8_t           digest[static CX_KECCAK_384_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_384 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_keccak_384_hash(const uint8_t *in,
+                                          size_t         in_len,
+                                          uint8_t        digest[static CX_KECCAK_384_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_keccak_384_hash_iovec(&iovec, 1, digest);
+}
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_512 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_keccak_512_hash_iovec(const cx_iovec_t *iovec,
+                                  size_t            iovec_len,
+                                  uint8_t           digest[static CX_KECCAK_512_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot KECCAK_512 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_keccak_512_hash(const uint8_t *in,
+                                          size_t         in_len,
+                                          uint8_t        digest[static CX_KECCAK_512_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_keccak_512_hash_iovec(&iovec, 1, digest);
 }
 
 /**
@@ -141,6 +461,49 @@ DEPRECATED static inline int cx_shake128_init(cx_sha3_t *hash, unsigned int out_
 }
 
 /**
+ * @brief   Computes a standalone one shot SHAKE128 digest.
+ *
+ * @param[in]  iovec       Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len   Length of the iovec array.
+ *
+ * @param[out] digest      Buffer where to store the digest.
+ *
+ * @param[in]  out_length  Length of the output in bytes.
+ *
+ * @return                 Error code:
+ *                         - CX_OK on success
+ */
+cx_err_t cx_shake128_hash_iovec(const cx_iovec_t *iovec,
+                                size_t            iovec_len,
+                                uint8_t          *digest,
+                                size_t            out_length);
+
+/**
+ * @brief   Computes a standalone one shot SHAKE128 digest.
+ *
+ * @param[in]  in         Input data.
+ *
+ * @param[in]  len        Length of the input data.
+ *
+ * @param[out] digest     Buffer where to store the digest.
+ *
+ * @param[in]  out_length Length of the output in bytes.
+ *
+ * @return                Error code:
+ *                        - CX_OK on success
+ */
+static inline cx_err_t cx_shake128_hash(const uint8_t *in,
+                                        size_t         in_len,
+                                        uint8_t       *digest,
+                                        size_t         out_length)
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_shake128_hash_iovec(&iovec, 1, digest, out_length);
+}
+
+/**
  * @brief   Initializes a SHA3-XOF context.
  *
  * @details SHAKE256 is a SHA3-XOF (Extendable Output Function
@@ -164,10 +527,52 @@ WARN_UNUSED_RESULT cx_err_t cx_shake256_init_no_throw(cx_sha3_t *hash, size_t ou
  * @deprecated
  * See #cx_shake256_init_no_throw
  */
-DEPRECATED static inline int cx_shake256_init(cx_sha3_t *hash, unsigned int out_size)
+DEPRECATED static inline int cx_shake256_init(cx_sha3_t *hash, unsigned int out_length)
 {
-    CX_THROW(cx_shake256_init_no_throw(hash, out_size));
+    CX_THROW(cx_shake256_init_no_throw(hash, out_length));
     return CX_SHAKE256;
+}
+/**
+ * @brief   Computes a standalone one shot SHAKE256 digest.
+ *
+ * @param[in]  iovec      Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len  Length of the iovec array.
+ *
+ * @param[out] digest     Buffer where to store the digest.
+ *
+ * @param[in]  out_length Length of the output in bytes.
+ *
+ * @return                Error code:
+ *                        - CX_OK on success
+ */
+cx_err_t cx_shake256_hash_iovec(const cx_iovec_t *iovec,
+                                size_t            iovec_len,
+                                uint8_t          *digest,
+                                size_t            out_length);
+
+/**
+ * @brief   Computes a standalone one shot SHAKE256 digest.
+ *
+ * @param[in]  in         Input data.
+ *
+ * @param[in]  len        Length of the input data.
+ *
+ * @param[out] digest     Buffer where to store the digest.
+ *
+ * @param[in]  out_length Length of the output in bytes.
+ *
+ * @return                Error code:
+ *                        - CX_OK on success
+ */
+static inline cx_err_t cx_shake256_hash(const uint8_t *in,
+                                        size_t         in_len,
+                                        uint8_t       *digest,
+                                        size_t         out_length)
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_shake256_hash_iovec(&iovec, 1, digest, out_length);
 }
 
 /**

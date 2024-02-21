@@ -15,6 +15,7 @@ extern "C" {
  *      INCLUDES
  *********************/
 
+#include "nbgl_content.h"
 #ifdef NBGL_PAGE
 #include "nbgl_page.h"
 #else  // NBGL_PAGE
@@ -107,6 +108,13 @@ typedef void (*nbgl_choiceCallback_t)(bool confirm);
  */
 typedef void (*nbgl_actionCallback_t)(uint8_t page);
 
+/**
+ * @brief prototype of pin validation callback function
+ * @param content pin value
+ * @param length pin length
+ */
+typedef void (*nbgl_pinValidCallback_t)(const uint8_t *content, uint8_t page);
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -194,6 +202,16 @@ void nbgl_useCaseAddressConfirmation(const char *address, nbgl_choiceCallback_t 
 void nbgl_useCaseAddressConfirmationExt(const char                      *address,
                                         nbgl_choiceCallback_t            callback,
                                         const nbgl_layoutTagValueList_t *tagValueList);
+#ifdef NBGL_KEYPAD
+void nbgl_useCaseKeypad(const char                *title,
+                        uint8_t                    minDigits,
+                        uint8_t                    maxDigits,
+                        uint8_t                    backToken,
+                        bool                       shuffled,
+                        tune_index_e               tuneId,
+                        nbgl_pinValidCallback_t    validatePinCallback,
+                        nbgl_layoutTouchCallback_t actionCallback);
+#endif
 #else   // HAVE_SE_TOUCH
 void nbgl_useCaseHome(const char                *appName,
                       const nbgl_icon_details_t *appIcon,

@@ -14,7 +14,10 @@ extern "C" {
 #include "nbgl_obj.h"
 #include "nbgl_screen.h"
 #include "nbgl_types.h"
+#include "nbgl_content.h"
+#ifdef HAVE_PIEZO_SOUND
 #include "os_io_seproxyhal.h"
+#endif
 
 /*********************
  *      INCLUDES
@@ -133,7 +136,7 @@ typedef struct nbgl_layoutDescription_s {
         onActionCallback;  ///< the callback to be called on any action on the layout
 #else                      // HAVE_SE_TOUCH
     nbgl_layoutButtonCallback_t
-        onActionCallback;     ///< the callback to be called on any action on the layout
+            onActionCallback;  ///< the callback to be called on any action on the layout
 #endif                     // HAVE_SE_TOUCH
     nbgl_screenTickerConfiguration_t ticker;  // configuration of ticker (timeout)
 } nbgl_layoutDescription_t;
@@ -158,42 +161,15 @@ typedef struct {
 } nbgl_layoutBar_t;
 
 /**
- * @brief This structure contains info to build a switch (on the right) with a description (on the
- * left), with a potential sub-description (in gray)
+ * @brief Deprecated, kept for retro compatibility
  *
  */
-typedef struct {
-    const char *text;  ///< main text for the switch
-    const char
-        *subText;  ///< description under main text (NULL terminated, single line, may be null)
-    nbgl_state_t initState;  ///< initial state of the switch
-    uint8_t      token;      ///< the token that will be used as argument of the callback
-#ifdef HAVE_PIEZO_SOUND
-    tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
-#endif                    // HAVE_PIEZO_SOUND
-} nbgl_layoutSwitch_t;
+typedef nbgl_contentSwitch_t nbgl_layoutSwitch_t;
 
 /**
- * @brief This structure contains a list of names to build a list of radio
- * buttons (on the right part of screen), with for each a description (names array)
- * The chosen item index is provided is the "index" argument of the callback
+ * @brief Deprecated, kept for retro compatibility
  */
-typedef struct {
-    union {
-        const char *const *names;  ///< array of strings giving the choices (nbChoices)
-#if defined(HAVE_LANGUAGE_PACK)
-        UX_LOC_STRINGS_INDEX *nameIds;  ///< array of string Ids giving the choices (nbChoices)
-#endif                                  // HAVE_LANGUAGE_PACK
-    };
-    bool    localized;   ///< if set to true, use nameIds and not names
-    uint8_t nbChoices;   ///< number of choices
-    uint8_t initChoice;  ///< index of the current choice
-    uint8_t token;       ///< the token that will be used as argument of the callback
-#ifdef HAVE_PIEZO_SOUND
-    tune_index_e
-        tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when selecting a radio button)
-#endif           // HAVE_PIEZO_SOUND
-} nbgl_layoutRadioChoice_t;
+typedef nbgl_contentRadioChoice_t nbgl_layoutRadioChoice_t;
 
 /**
  * @brief prototype of menu list item retrieval callback
@@ -213,79 +189,20 @@ typedef struct {
 } nbgl_layoutMenuList_t;
 
 /**
- * @brief This structure contains a [tag,value] pair
+ * @brief Deprecated, kept for retro compatibility
  */
-typedef struct {
-    const char                *item;       ///< string giving the tag name
-    const char                *value;      ///< string giving the value name
-    const nbgl_icon_details_t *valueIcon;  ///< a buffer containing the 32px 1BPP icon for icon on
-                                           ///< right of value (can be NULL)
-} nbgl_layoutTagValue_t;
+typedef nbgl_contentTagValue_t nbgl_layoutTagValue_t;
 
 /**
- * @brief prototype of tag/value pair retrieval callback
- * @param pairIndex index of the tag/value pair to retrieve (from 0 (to nbPairs-1))
- * @return a pointer on a static tag/value pair
+ * @brief Deprecated, kept for retro compatibility
  */
-typedef nbgl_layoutTagValue_t *(*nbgl_tagValueCallback_t)(uint8_t pairIndex);
+typedef nbgl_contentTagValueList_t nbgl_layoutTagValueList_t;
 
 /**
- * @brief This structure contains a list of [tag,value] pairs
- */
-typedef struct {
-    const nbgl_layoutTagValue_t
-        *pairs;  ///< array of [tag,value] pairs (nbPairs items). If NULL, callback is used instead
-    nbgl_tagValueCallback_t callback;  ///< function to call to retrieve a given pair
-    uint8_t nbPairs;  ///< number of pairs in pairs array (or max number of pairs to retrieve with
-                      ///< callback)
-    uint8_t startIndex;          ///< index of the first pair to get with callback
-    uint8_t nbMaxLinesForValue;  ///< if > 0, set the max number of lines for value field. And the
-                                 ///< last line is ended with "..." instead of the 3 last chars
-    uint8_t token;  ///< the token that will be used as argument of the callback if icon in any
-                    ///< tag/value pair is touched (index is the index of the pair in pairs[])
-    bool smallCaseForValue;  ///< if set to true, a 24px font is used for value text, otherwise a
-                             ///< 32px font is used
-    bool wrapping;  ///< if set to true, value text will be wrapped on ' ' to avoid cutting words
-} nbgl_layoutTagValueList_t;
-
-/**
- * @brief possible styles for Centered Info Area
+ * @brief Deprecated, kept for retro compatibility
  *
  */
-typedef enum {
-#ifdef HAVE_SE_TOUCH
-    LARGE_CASE_INFO,  ///< text in BLACK and large case (INTER 32px), subText in black in Inter24px
-    LARGE_CASE_BOLD_INFO,  ///< text in BLACK and large case (INTER 32px), subText in black bold
-                           ///< Inter24px, text3 in black Inter24px
-    NORMAL_INFO,  ///< Icon in black, a potential text in black bold 24px under it, a potential text
-                  ///< in dark gray (24px) under it, a potential text in black (24px) under it
-    PLUGIN_INFO   ///< A potential text in black 32px, a potential text in black (24px) under it, a
-                 ///< small horizontal line under it, a potential icon under it, a potential text in
-                 ///< black (24px) under it
-#else   // HAVE_SE_TOUCH
-    REGULAR_INFO = 0,         ///< both texts regular (but '\\b' can switch to bold)
-    BOLD_TEXT1_INFO           ///< bold is used for text1 (but '\\b' can switch to regular)
-#endif  // HAVE_SE_TOUCH
-} nbgl_centeredInfoStyle_t;
-
-/**
- * @brief This structure contains info to build a centered (vertically and horizontally) area, with
- * a possible Icon, a possible text under it, and a possible sub-text gray under it.
- *
- */
-typedef struct {
-    const char *text1;  ///< first text (can be null)
-    const char *text2;  ///< second text (can be null)
-#ifdef HAVE_SE_TOUCH
-    const char *text3;                 ///< third text (can be null)
-#endif                                 // HAVE_SE_TOUCH
-    const nbgl_icon_details_t *icon;   ///< a buffer containing the 1BPP icon
-    bool                       onTop;  ///< if set to true, align only horizontaly
-    nbgl_centeredInfoStyle_t   style;  ///< style to apply to this info
-#ifdef HAVE_SE_TOUCH
-    int16_t offsetY;  ///< vertical shift to apply to this info (if >0, shift to bottom)
-#endif                // HAVE_SE_TOUCH
-} nbgl_layoutCenteredInfo_t;
+typedef nbgl_contentCenteredInfo_t nbgl_layoutCenteredInfo_t;
 
 /**
  * @brief This structure contains info to build a centered (vertically and horizontally) area, with
@@ -379,8 +296,8 @@ typedef struct {
 #ifdef HAVE_SE_TOUCH
     keyboardCase_t casing;  ///< keyboard casing mode (lower, upper once or upper locked)
 #else                       // HAVE_SE_TOUCH
-    bool    enableBackspace;  ///< if true, Backspace key is enabled
-    bool    enableValidate;   ///< if true, Validate key is enabled
+    bool    enableBackspace;   ///< if true, Backspace key is enabled
+    bool    enableValidate;    ///< if true, Validate key is enabled
     uint8_t selectedCharIndex;
 #endif                      // HAVE_SE_TOUCH
 } nbgl_layoutKbd_t;
@@ -436,10 +353,10 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
                                     tune_index_e   tuneId);
 int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed);
 #else   // HAVE_SE_TOUCH
-int nbgl_layoutAddText(nbgl_layout_t           *layout,
-                       const char              *text,
-                       const char              *subText,
-                       nbgl_centeredInfoStyle_t style);
+int nbgl_layoutAddText(nbgl_layout_t                  *layout,
+                       const char                     *text,
+                       const char                     *subText,
+                       nbgl_contentCenteredInfoStyle_t style);
 int nbgl_layoutAddNavigation(nbgl_layout_t *layout, nbgl_layoutNavigation_t *info);
 int nbgl_layoutAddMenuList(nbgl_layout_t *layout, nbgl_layoutMenuList_t *list);
 #endif  // HAVE_SE_TOUCH

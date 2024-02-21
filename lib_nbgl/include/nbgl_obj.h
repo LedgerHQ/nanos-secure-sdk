@@ -38,6 +38,7 @@ extern "C" {
 // for Keypad
 #ifdef HAVE_SE_TOUCH
 #define KEYPAD_KEY_HEIGHT 104
+#define KEYPAD_MAX_DIGITS 12
 #else  // HAVE_SE_TOUCH
 #define KEYPAD_WIDTH  114
 #define KEYPAD_HEIGHT 18

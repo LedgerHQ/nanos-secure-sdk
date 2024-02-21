@@ -111,7 +111,7 @@ ifneq ($(DISABLE_STANDARD_WEBUSB), 1)
 endif
 
 ifneq ($(DISABLE_STANDARD_BAGL_UX_FLOW), 1)
-ifndef USE_NBGL
+ifeq ($(USE_NBGL),0)
     DEFINES += HAVE_UX_FLOW
 endif
 endif
@@ -122,6 +122,12 @@ endif
 
 ifneq ($(DISABLE_STANDARD_APP_FILES), 1)
 SDK_SOURCE_PATH += lib_standard_app
+endif
+
+ifneq ($(DISABLE_STANDARD_APP_SYNC_RAPDU), 1)
+ifneq ($(TARGET_NAME),TARGET_NANOS)
+DEFINES += STANDARD_APP_SYNC_RAPDU
+endif
 endif
 
 #####################################################################
