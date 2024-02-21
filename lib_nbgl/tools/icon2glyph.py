@@ -40,10 +40,11 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
     if not os.path.exists(file_path):
         sys.stderr.write("Error: {} does not exist!".format(file_path) + "\n")
 
-    # Load Image in mode L
-    im = img.open(file_path)
-    im.load()
-    im = im.convert('L')
+    # Load Image in mode L after conversion in RGBA to replace transparent color by white
+    im = img.open(file_path).convert("RGBA")
+    new_image = img.new("RGBA", im.size, "WHITE")
+    new_image.paste(im, mask=im)
+    im = new_image.convert('L')
 
     # Do not open image with more than 16 colors
     num_colors = len(im.getcolors())
