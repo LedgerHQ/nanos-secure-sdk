@@ -86,6 +86,43 @@ static inline int cx_sha224_init(cx_sha256_t *hash)
 #endif
 
 /**
+ * @brief   Computes a standalone one shot SHA-224 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_sha224_hash_iovec(const cx_iovec_t *iovec,
+                              size_t            iovec_len,
+                              uint8_t           digest[static CX_SHA224_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot SHA-224 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_sha224_hash(const uint8_t *in,
+                                      size_t         in_len,
+                                      uint8_t        digest[static CX_SHA224_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_sha224_hash_iovec(&iovec, 1, digest);
+}
+
+/**
  * @brief   Initializes a SHA-256 context.
  *
  * @param[out] hash Pointer to the context.
@@ -109,6 +146,43 @@ static inline int cx_sha256_init(cx_sha256_t *hash)
 {
     cx_sha256_init_no_throw(hash);
     return CX_SHA256;
+}
+
+/**
+ * @brief   Computes a standalone one shot SHA-256 digest.
+ *
+ * @param[in]  iovec     Input data in the form of an array of cx_iovec_t.
+ *
+ * @param[in]  iovec_len Length of the iovec array.
+ *
+ * @param[out] digest    Buffer where to store the digest.
+ *
+ * @return               Error code:
+ *                       - CX_OK on success
+ */
+cx_err_t cx_sha256_hash_iovec(const cx_iovec_t *iovec,
+                              size_t            iovec_len,
+                              uint8_t           digest[static CX_SHA256_SIZE]);
+
+/**
+ * @brief   Computes a standalone one shot SHA-256 digest.
+ *
+ * @param[in]  in      Input data.
+ *
+ * @param[in]  len     Length of the input data.
+ *
+ * @param[out] digest  Buffer where to store the digest.
+ *
+ * @return             Error code:
+ *                     - CX_OK on success
+ */
+static inline cx_err_t cx_sha256_hash(const uint8_t *in,
+                                      size_t         in_len,
+                                      uint8_t        digest[static CX_SHA256_SIZE])
+{
+    const cx_iovec_t iovec = {.iov_base = in, .iov_len = in_len};
+
+    return cx_sha256_hash_iovec(&iovec, 1, digest);
 }
 
 /**
