@@ -1476,7 +1476,6 @@ int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text)
     textArea->style                = NO_STYLE;
     textArea->obj.alignment        = NO_ALIGNMENT;
     textArea->obj.alignmentMarginX = BORDER_MARGIN;
-    textArea->obj.alignmentMarginY = BORDER_MARGIN;
 #ifdef TARGET_STAX
     // if first object of container, increase the margin from top
     if (layoutInt->container->nbChildren == 0) {
@@ -2862,7 +2861,7 @@ int nbgl_layoutAddHeader(nbgl_layout_t *layout, const nbgl_layoutHeader_t *heade
 #ifdef TARGET_STAX
             button->icon = PIC(&C_leftArrow32px);
 #else   // TARGET_STAX
-            button->icon                                = PIC(&C_leftArrow40px);
+            button->icon                                = PIC(&C_ic_arrowLeft_40);
 #endif  // TARGET_STAX
             button->obj.touchMask = (1 << TOUCHED);
             button->obj.touchId   = BACK_BUTTON_ID;

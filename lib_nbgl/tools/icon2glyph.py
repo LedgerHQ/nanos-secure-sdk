@@ -59,7 +59,8 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
         num_colors = int(pow(2, math.ceil(math.log(num_colors, 2))))
 
     bits_per_pixel = int(math.log(num_colors, 2))
-    if bits_per_pixel == 3:
+    # 2 or 3 BPP are not supported
+    if bits_per_pixel > 1:
         bits_per_pixel = 4
 
     if bits_per_pixel == 0:
