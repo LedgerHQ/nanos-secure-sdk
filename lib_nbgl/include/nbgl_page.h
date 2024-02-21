@@ -99,9 +99,6 @@ typedef struct nbgl_pageNavWithTap_s {
     const char *nextPageText;  ///< this text is used as indication for "Tap to continue", to
                                ///< navigate forward
     const char *quitText;      ///< the text displayed in footer, used to quit
-    const char *skipText;      ///< if not NULL the text displayed in right part of footer, used for
-                               ///< example to skip pages
-    uint8_t skipToken;  ///< if skipText is NULL the token used when right part of footer is touched
 } nbgl_pageNavWithTap_t;
 
 /**
@@ -131,6 +128,9 @@ typedef struct nbgl_pageMultiScreensDescription_s {
     bool progressIndicator;  ///< if set to true, display a progress indicator on top of the page
     tune_index_e
         tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when next or back is pressed
+    const char *skipText;  ///< if not NULL the text displayed in right part of footer, used for
+                           ///< example to skip pages
+    uint8_t skipToken;  ///< if skipText is NULL the token used when right part of footer is touched
     union {
         nbgl_pageNavWithTap_t     navWithTap;      ///< structure used when navigation with "tap"
         nbgl_pageNavWithButtons_t navWithButtons;  ///< structure used when navigation with buttons

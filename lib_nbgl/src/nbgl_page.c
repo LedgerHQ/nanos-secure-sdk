@@ -337,9 +337,12 @@ nbgl_page_t *nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t              onActionC
                             info->tapActionToken,
                             info->tuneId);
     }
-    nbgl_layoutHeader_t headerDesc
-        = {.type = HEADER_EMPTY, .separationLine = false, .emptySpace.height = 40};
-    nbgl_layoutAddHeader(layout, &headerDesc);
+    // add an empty header if a top-right button is used
+    if (info->topRightStyle != NO_BUTTON_STYLE) {
+        nbgl_layoutHeader_t headerDesc
+            = {.type = HEADER_EMPTY, .separationLine = false, .emptySpace.height = 40};
+        nbgl_layoutAddHeader(layout, &headerDesc);
+    }
     nbgl_layoutAddCenteredInfo(layout, &info->centeredInfo);
 
     // if action button but not QUIT_APP_TEXT bottom button, use a small black button
@@ -506,7 +509,7 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
     layout = nbgl_layoutGet(&layoutDescription);
     if (nav != NULL) {
         if (nav->navType == NAV_WITH_TAP) {
-            if (nav->navWithTap.skipText == NULL) {
+            if (nav->skipText == NULL) {
                 availableHeight -= nbgl_layoutAddFooter(
                     layout, nav->navWithTap.quitText, nav->quitToken, nav->tuneId);
             }
@@ -514,8 +517,8 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
                 availableHeight -= nbgl_layoutAddSplitFooter(layout,
                                                              nav->navWithTap.quitText,
                                                              nav->quitToken,
-                                                             nav->navWithTap.skipText,
-                                                             nav->navWithTap.skipToken,
+                                                             nav->skipText,
+                                                             nav->skipToken,
                                                              nav->tuneId);
             }
             if (nav->progressIndicator) {
@@ -530,6 +533,15 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
         }
         else if (nav->navType == NAV_WITH_BUTTONS) {
             nbgl_layoutFooter_t footerDesc;
+            if (nav->skipText != NULL) {
+                nbgl_layoutHeader_t headerDesc = {.type             = HEADER_RIGHT_TEXT,
+                                                  .separationLine   = true,
+                                                  .rightText.text   = nav->skipText,
+                                                  .rightText.token  = nav->skipToken,
+                                                  .rightText.tuneId = nav->tuneId};
+                availableHeight -= nbgl_layoutAddHeader(layout, &headerDesc);
+                headerAdded = true;
+            }
             if (nav->navWithButtons.quitText == NULL) {
                 footerDesc.type                   = FOOTER_NAV;
                 footerDesc.separationLine         = true;

@@ -220,6 +220,8 @@ typedef nbgl_contentTagValueList_t nbgl_layoutTagValueList_t;
  */
 typedef nbgl_contentCenteredInfo_t nbgl_layoutCenteredInfo_t;
 
+#ifdef HAVE_SE_TOUCH
+
 /**
  * @brief This structure contains info to build a centered (vertically and horizontally) area, with
  * a QR Code, a possible text (black, bold) under it, and a possible sub-text (black, regular) under
@@ -410,6 +412,7 @@ typedef struct {
         nbgl_layoutChoiceButtons_t choiceButtons;  ///< if type is @ref FOOTER_SIMPLE_BUTTON
     };
 } nbgl_layoutFooter_t;
+#endif  // HAVE_SE_TOUCH
 
 /**
  * @brief This structure contains info to build a progress bar with info. The progress bar itself is
@@ -496,6 +499,11 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
                                     uint8_t        backToken,
                                     tune_index_e   tuneId);
 int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed);
+int nbgl_layoutAddSwipe(nbgl_layout_t *layout,
+                        uint16_t       swipesMask,
+                        const char    *text,
+                        uint8_t        token,
+                        tune_index_e   tuneId);
 #else   // HAVE_SE_TOUCH
 int nbgl_layoutAddText(nbgl_layout_t                  *layout,
                        const char                     *text,
@@ -564,11 +572,6 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout,
                             bool           enableDigits);
 int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits);
 int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive);
-int nbgl_layoutAddSwipe(nbgl_layout_t *layout,
-                        uint16_t       swipesMask,
-                        const char    *text,
-                        uint8_t        token,
-                        tune_index_e   tuneId);
 
 #else   // HAVE_SE_TOUCH
 /* layout objects for pages with keypad (nanos) */

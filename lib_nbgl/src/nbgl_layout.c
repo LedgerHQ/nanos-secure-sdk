@@ -3295,7 +3295,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
                 button->obj.area.width = AVAILABLE_WIDTH;
             }
             button->obj.touchMask = (1 << TOUCHED);
-            button->obj.touchId   = SINGLE_BUTTON_ID;
+            button->obj.touchId   = button->text ? SINGLE_BUTTON_ID : BOTTOM_BUTTON_ID;
             // add to bottom container
             layoutInt->footerContainer->children[layoutInt->footerContainer->nbChildren]
                 = (nbgl_obj_t *) button;
