@@ -110,8 +110,11 @@ typedef struct nbgl_pageNavWithTap_s {
  */
 typedef struct nbgl_pageNavWithButtons_s {
     bool    quitButton;  ///< if set to true, a quit button (X) is displayed in the nav bar
+    bool    backButton;  ///< if set to true, a back button (<-) is displayed in the nav bar
     uint8_t navToken;    ///< the token used as argument of the actionCallback when the nav buttons
                          ///< are pressed (index param gives the page)
+    const char
+        *quitText;  ///< the text displayed in footer (on the left), used to quit (only on Europa)
 } nbgl_pageNavWithButtons_t;
 
 /**
@@ -181,10 +184,12 @@ typedef struct nbgl_pageInfoDescription_s {
     uint8_t bottomButtonsToken;  ///< the token that will be used as argument of the
                                  ///< onActionCallback if action/bottom button is touched
     const char *footerText;      ///< if not NULL, add a touchable footer
-    uint8_t     footerToken;  ///< the token that will be used as argument of the onActionCallback
-    const char
-        *tapActionText;  ///< if set to true, main area is "tapable", with this text as indication
-    uint8_t tapActionToken;  ///< the token that will be used as argument of the onActionCallback
+    uint8_t     footerToken;    ///< the token that will be used as argument of the onActionCallback
+    const char *tapActionText;  ///< if non NULL, main area is "tapable" or "swipable", with this
+                                ///< text as indication
+    bool    isSwipe;            ///< if true, main area is "swipable"
+    uint8_t tapActionToken;  ///< the token that will be used as argument of the onActionCallback,
+                             ///< when tapped or swiped
     const char
         *actionButtonText;  ///< if not NULL a black "action" button is set under the centered info
     tune_index_e

@@ -133,6 +133,8 @@ static void addContent(nbgl_pageContent_t *content,
                 nbgl_layoutAddHeader(layout, &headerDesc);
             }
             nbgl_layoutAddTagValueList(layout, &content->tagValueConfirm.tagValueList);
+            // on Stax, always display the details button as a normal button (full width),
+            // even if "Confirm" button is on the same page
             if (content->tagValueConfirm.detailsButtonText != NULL) {
                 buttonInfo.fittingContent = true;
                 buttonInfo.icon           = content->tagValueConfirm.detailsButtonIcon;
@@ -142,6 +144,19 @@ static void addContent(nbgl_pageContent_t *content,
                 buttonInfo.tuneId         = content->tagValueConfirm.tuneId;
                 buttonInfo.onBottom       = false;
                 nbgl_layoutAddButton(layout, &buttonInfo);
+            }
+            else if ((content->tagValueConfirm.detailsButtonIcon != NULL)
+                     && (content->tagValueConfirm.confirmationText != NULL)) {
+                // On Europa, a small button with only the icon is displayed on the left
+                // of "Confirm"
+                nbgl_layoutHorizontalButtons_t choice
+                    = {.leftIcon   = content->tagValueConfirm.detailsButtonIcon,
+                       .rightText  = content->tagValueConfirm.confirmationText,
+                       .leftToken  = content->tagValueConfirm.detailsButtonToken,
+                       .rightToken = content->tagValueConfirm.confirmationToken,
+                       .tuneId     = content->tagValueConfirm.tuneId};
+                nbgl_layoutAddHorizontalButtons(layout, &choice);
+                break;
             }
             if (content->tagValueConfirm.confirmationText != NULL) {
                 buttonInfo.fittingContent = false;
@@ -369,6 +384,7 @@ nbgl_page_t *nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t              onActionC
             nbgl_layoutAddChoiceButtons(layout, &buttonsInfo);
         }
         else {
+#ifdef TARGET_STAX
             nbgl_layoutButton_t buttonInfo = {.fittingContent = false,
                                               .icon           = NULL,
                                               .onBottom       = true,
@@ -377,6 +393,9 @@ nbgl_page_t *nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t              onActionC
                                               .token          = info->bottomButtonsToken,
                                               .tuneId         = info->tuneId};
             nbgl_layoutAddButton(layout, &buttonInfo);
+#else   // TARGET_STAX
+            nbgl_layoutAddFooter(layout, "Quit app", info->bottomButtonsToken, info->tuneId);
+#endif  // TARGET_STAX
         }
     }
     else if (info->bottomButtonStyle != NO_BUTTON_STYLE) {
@@ -535,11 +554,14 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
                 footerDesc.textAndNav.navigation.tuneId      = nav->tuneId;
             }
             availableHeight -= nbgl_layoutAddExtendedFooter(layout, &footerDesc);
+
+#ifdef TARGET_STAX
             if (nav->progressIndicator) {
                 availableHeight -= nbgl_layoutAddProgressIndicator(
                     layout, nav->activePage, nav->nbPages, false, 0, nav->tuneId);
                 headerAdded = true;
             }
+#endif  // TARGET_STAX
         }
     }
     addContent(content, layout, availableHeight, headerAdded);

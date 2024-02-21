@@ -2208,6 +2208,83 @@ int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceBu
 }
 
 /**
+ * @brief Creates two buttons to make a choice. Both buttons are mandatory
+ *        The left one contains only an icon and is round, the other contains only
+ *        a text
+ *
+ * @param layout the current layout
+ * @param info structure giving the description of buttons (text, icon, tokens)
+ * @return >= 0 if OK
+ */
+int nbgl_layoutAddHorizontalButtons(nbgl_layout_t                        *layout,
+                                    const nbgl_layoutHorizontalButtons_t *info)
+{
+    layoutObj_t           *obj;
+    nbgl_button_t         *button;
+    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
+
+    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddHorizontalButtons():\n");
+    if (layout == NULL) {
+        return -1;
+    }
+
+    // icon & text cannot be NULL
+    if ((info->leftIcon == NULL) || (info->rightText == NULL)) {
+        return -1;
+    }
+
+    // create left button (in white) at first
+    button = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layoutInt->layer);
+    obj    = addCallbackObj(layoutInt, (nbgl_obj_t *) button, info->leftToken, info->tuneId);
+    if (obj == NULL) {
+        return -1;
+    }
+    // associate with with index 1
+    obj->index                   = 1;
+    button->obj.alignment        = BOTTOM_LEFT;
+    button->obj.alignmentMarginX = BORDER_MARGIN;
+    button->obj.alignmentMarginY = 24;  // 24 pixels from screen bottom
+    button->borderColor          = LIGHT_GRAY;
+    button->innerColor           = WHITE;
+    button->foregroundColor      = BLACK;
+    button->obj.area.width       = BUTTON_DIAMETER;
+    button->obj.area.height      = BUTTON_DIAMETER;
+    button->radius               = BUTTON_RADIUS;
+    button->icon                 = PIC(info->leftIcon);
+    button->fontId               = SMALL_BOLD_FONT;
+    button->obj.touchMask        = (1 << TOUCHED);
+    button->obj.touchId          = CHOICE_2_ID;
+    // set this new button as child of the container
+    addObjectToLayout(layoutInt, (nbgl_obj_t *) button);
+
+    // then black button, on right
+    button = (nbgl_button_t *) nbgl_objPoolGet(BUTTON, layoutInt->layer);
+    obj    = addCallbackObj(layoutInt, (nbgl_obj_t *) button, info->rightToken, info->tuneId);
+    if (obj == NULL) {
+        return -1;
+    }
+    // associate with with index 0
+    obj->index                   = 0;
+    button->obj.alignment        = BOTTOM_RIGHT;
+    button->obj.alignmentMarginX = BORDER_MARGIN;
+    button->obj.alignmentMarginY = 24;  // 24 pixels from screen bottom
+    button->innerColor           = BLACK;
+    button->borderColor          = BLACK;
+    button->foregroundColor      = WHITE;
+    button->obj.area.width       = AVAILABLE_WIDTH - BUTTON_DIAMETER - 16;
+    button->obj.area.height      = BUTTON_DIAMETER;
+    button->radius               = BUTTON_RADIUS;
+    button->text                 = PIC(info->rightText);
+    button->fontId               = SMALL_BOLD_FONT;
+    button->obj.touchMask        = (1 << TOUCHED);
+    button->obj.touchId          = CHOICE_1_ID;
+    // set this new button as child of the container
+    addObjectToLayout(layoutInt, (nbgl_obj_t *) button);
+
+    return 0;
+}
+
+/**
  * @brief Creates a list of [tag,value] pairs
  *
  * @param layout the current layout

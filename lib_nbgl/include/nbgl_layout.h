@@ -249,7 +249,7 @@ typedef enum {
 /**
  * @brief This structure contains info to build a pair of buttons, one on top of the other.
  *
- * @note the pair of button is automatically put on bottom of screen
+ * @note the pair of button is automatically put on bottom of screen, in the footer
  */
 typedef struct {
     const char *topText;     ///< up-button text (index 0)
@@ -260,6 +260,22 @@ typedef struct {
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
 #endif                    // HAVE_PIEZO_SOUND
 } nbgl_layoutChoiceButtons_t;
+
+/**
+ * @brief This structure contains info to build a pair of buttons, the small one, with icon, on the
+ * left  of the other.
+ *
+ * @note the pair of button is automatically put on bottom of main container
+ */
+typedef struct {
+    const nbgl_icon_details_t *leftIcon;    ///< a buffer containing the 1BPP icon for left button
+    const char                *rightText;   ///< right-button text
+    uint8_t                    leftToken;   ///< the token used when left button is pressed
+    uint8_t                    rightToken;  ///< the token used when right button is pressed
+#ifdef HAVE_PIEZO_SOUND
+    tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
+#endif                    // HAVE_PIEZO_SOUND
+} nbgl_layoutHorizontalButtons_t;
 
 /**
  * @brief The different styles for a button
@@ -444,6 +460,8 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
 int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoice_t *choices);
 int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info);
 int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceButtons_t *info);
+int nbgl_layoutAddHorizontalButtons(nbgl_layout_t                        *layout,
+                                    const nbgl_layoutHorizontalButtons_t *info);
 int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueList_t *list);
 int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text);
 int nbgl_layoutAddSeparationLine(nbgl_layout_t *layout);
