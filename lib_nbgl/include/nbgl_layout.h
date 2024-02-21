@@ -290,6 +290,61 @@ typedef struct {
 } nbgl_layoutButton_t;
 
 /**
+ * @brief The different types of extended header
+ *
+ */
+typedef enum {
+    HEADER_EMPTY = 0,      ///< empty space, to have a better vertical centering of centered info
+    HEADER_BACK_AND_TEXT,  ///< back key and optional text
+    HEADER_BACK_AND_PROGRESS,  ///< optional back key and progress indicator (only on Stax)
+    HEADER_TITLE,              ///< simple centered text
+    HEADER_EXTENDED_BACK,      ///< back key, centered text and touchable key on the right
+    HEADER_RIGHT_TEXT,         ///< touchable text on the right, with a vertical separation line
+    NB_HEADER_TYPES
+} nbgl_layoutHeaderType_t;
+
+/**
+ * @brief This structure contains info to build a header.
+ *
+ */
+typedef struct {
+    nbgl_layoutHeaderType_t type;  ///< type of footer
+    bool separationLine;  ///< if true, a separation line is added at the bottom of this control
+    union {
+        struct {
+            uint16_t height;
+        } emptySpace;  ///< if type is @ref HEADER_EMPTY
+        struct {
+            const char  *text;    ///< can be NULL if no text
+            uint8_t      token;   ///< when back key is pressed
+            tune_index_e tuneId;  ///< when back key is pressed
+        } backAndText;            ///< if type is @ref HEADER_BACK_AND_TEXT
+        struct {
+            uint8_t      activePage;
+            uint8_t      nbPages;
+            bool         withBack;
+            uint8_t      token;   ///< when optional back key is pressed
+            tune_index_e tuneId;  ///< when optional back key is pressed
+        } progressAndBack;        ///< if type is @ref HEADER_BACK_AND_PROGRESS
+        struct {
+            const char *text;
+        } title;  ///< if type is @ref HEADER_TITLE
+        struct {
+            const nbgl_icon_details_t *actionIcon;   ///< right button icon
+            const char                *text;         ///< centered text (can be NULL if no text)
+            uint8_t                    backToken;    ///< when back key is pressed
+            uint8_t                    actionToken;  ///< when right key is pressed
+            tune_index_e               tuneId;       ///< when back key is pressed
+        } extendedBack;                              ///< if type is @ref HEADER_EXTENDED_BACK
+        struct {
+            const char  *text;    ///< touchable text on the right
+            uint8_t      token;   ///< when text is pressed
+            tune_index_e tuneId;  ///< when text is pressed
+        } rightText;              ///< if type is @ref HEADER_RIGHT_TEXT
+    };
+} nbgl_layoutHeader_t;
+
+/**
  * @brief The different types of extended footer
  *
  */
@@ -408,6 +463,7 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
                               const char    *rightText,
                               uint8_t        rightToken,
                               tune_index_e   tuneId);
+int nbgl_layoutAddHeader(nbgl_layout_t *layout, const nbgl_layoutHeader_t *headerDesc);
 int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_t *footerDesc);
 int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigationBar_t *info);
 int nbgl_layoutAddBottomButton(nbgl_layout_t             *layout,
