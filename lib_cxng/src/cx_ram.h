@@ -67,6 +67,10 @@ union cx_u {
 #if defined(HAVE_GROESTL)
     cx_xgroestl_t groestl;
 #endif
+
+#if defined(HAVE_RIPEMD160)
+    cx_ripemd160_t ripemd160;
+#endif  // HAVE_RIPEMD160
 #endif
 
 #ifdef HAVE_HMAC
