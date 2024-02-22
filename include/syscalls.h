@@ -199,9 +199,9 @@
 
 #define SYSCALL_os_bolos_endorsement_revoke_ID 0x010001ED
 
-#ifndef HAVE_BOLOS_NO_CUSTOMCA
+#ifdef HAVE_BOLOS_CUSTOMCA
 #define SYSCALL_os_customca_verify_ID 0x03000090
-#endif  // HAVE_BOLOS_NO_CUSTOMCA
+#endif  // HAVE_BOLOS_CUSTOMCA
 
 #ifdef HAVE_AEM_PIN
 #define SYSCALL_os_aem_set_pin_ID             0x02000139

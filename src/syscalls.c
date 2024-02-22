@@ -1661,7 +1661,7 @@ void os_registry_delete_all_apps(void)
     return;
 }
 
-#ifndef HAVE_BOLOS_NO_CUSTOMCA
+#ifdef HAVE_BOLOS_CUSTOMCA
 unsigned int os_customca_verify(unsigned char *hash, unsigned char *sign, unsigned int sign_length)
 {
     unsigned int parameters[3];
@@ -1670,7 +1670,7 @@ unsigned int os_customca_verify(unsigned char *hash, unsigned char *sign, unsign
     parameters[2] = (unsigned int) sign_length;
     return (unsigned int) SVC_Call(SYSCALL_os_customca_verify_ID, parameters);
 }
-#endif  // HAVE_BOLOS_NO_CUSTOMCA
+#endif  // HAVE_BOLOS_CUSTOMCA
 
 void os_sched_exec(unsigned int app_idx)
 {
