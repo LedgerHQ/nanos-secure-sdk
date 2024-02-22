@@ -37,10 +37,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(HAVE_SHA224)
 /** SHA-224 message digest size */
 #define CX_SHA224_SIZE 28
-#endif
 
 /** SHA-256 message digest size */
 #define CX_SHA256_SIZE 32

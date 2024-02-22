@@ -185,9 +185,9 @@ typedef struct nbgl_pageInfoDescription_s {
                                  ///< onActionCallback if action/bottom button is touched
     const char *footerText;      ///< if not NULL, add a touchable footer
     uint8_t     footerToken;    ///< the token that will be used as argument of the onActionCallback
-    const char *tapActionText;  ///< if non NULL, main area is "tapable" or "swipable", with this
+    const char *tapActionText;  ///< if non NULL, main area is "tapable", with this
                                 ///< text as indication
-    bool    isSwipe;            ///< if true, main area is "swipable"
+    bool    isSwipeable;        ///< if true, main area is swipeable
     uint8_t tapActionToken;  ///< the token that will be used as argument of the onActionCallback,
                              ///< when tapped or swiped
     const char
