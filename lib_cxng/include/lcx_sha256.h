@@ -83,7 +83,6 @@ static inline int cx_sha224_init(cx_sha256_t *hash)
     cx_sha224_init_no_throw(hash);
     return CX_SHA224;
 }
-#endif
 
 /**
  * @brief   Computes a standalone one shot SHA-224 digest.
@@ -121,6 +120,7 @@ static inline cx_err_t cx_sha224_hash(const uint8_t *in,
 
     return cx_sha224_hash_iovec(&iovec, 1, digest);
 }
+#endif  // HAVE_SHA224
 
 /**
  * @brief   Initializes a SHA-256 context.
