@@ -227,9 +227,9 @@ static uint8_t const USBD_PRODUCT_FS_STRING[] = {
 };
 #elif defined(TARGET_EUROPA)
 #ifndef HAVE_LEGACY_PID
-#define USBD_PID                      0x6000
+#define USBD_PID                      0x3000
 #else // HAVE_LEGACY_PID
-#define USBD_PID                      0x0006
+#define USBD_PID                      0x0003
 #endif // HAVE_LEGACY_PID
 static uint8_t const USBD_PRODUCT_FS_STRING[] = {
   6*2+2,
