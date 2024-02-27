@@ -1483,6 +1483,64 @@ void nbgl_useCaseSettings(const char                *title,
 }
 
 /**
+ * @brief Draws the settings pages of an app with automatic pagination depending on content
+ *        to be displayed that is passed through settingContents and infosList
+ *
+ * @param appName string to use as title
+ * @param initPage page on which to start, can be != 0 if you want to display a specific page
+ * after a setting confirmation change or something. Then the value should be taken from the
+ * nbgl_contentActionCallback_t callback call.
+ * @param settingContents contents to be displayed
+ * @param infosList infos to be displayed (version, license, developer, ...)
+ * @param quitCallback callback called when quit button (or title) is pressed
+ */
+void nbgl_useCaseGenericSettings(const char                   *appName,
+                                 uint8_t                       initPage,
+                                 const nbgl_genericContents_t *settingContents,
+                                 const nbgl_contentInfoList_t *infosList,
+                                 nbgl_callback_t               quitCallback)
+{
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+    memset(&genericContext, 0, sizeof(genericContext));
+
+    // memorize context
+    onQuit    = quitCallback;
+    pageTitle = appName;
+    navType   = GENERIC_NAV;
+
+    memcpy(&genericContext.genericContents, settingContents, sizeof(nbgl_genericContents_t));
+    if (infosList != NULL) {
+        genericContext.hasFinishingContent = true;
+        memset(&FINISHING_CONTENT, 0, sizeof(nbgl_content_t));
+        FINISHING_CONTENT.type = INFOS_LIST;
+        memcpy(&FINISHING_CONTENT.content, infosList, sizeof(nbgl_content_u));
+    }
+    touchableTitle = false;
+
+    // fill navigation structure
+    navInfo.activePage = initPage;
+
+    navInfo.navType                 = NAV_WITH_BUTTONS;
+    navInfo.navWithButtons.navToken = NAV_TOKEN;
+#ifdef TARGET_STAX
+    navInfo.navWithButtons.quitButton = true;
+#endif
+    navInfo.navWithButtons.backButton = true;
+
+    navInfo.quitToken = QUIT_TOKEN;
+    navInfo.nbPages = nbgl_useCaseGetNbPagesForGenericContents(&genericContext.genericContents, 0);
+    if (infosList != NULL) {
+        navInfo.nbPages += nbgl_useCaseGetNbPagesForContent(&FINISHING_CONTENT, navInfo.nbPages);
+    }
+
+    navInfo.progressIndicator = false;
+    navInfo.tuneId            = TUNE_TAP_CASUAL;
+
+    displayGenericContextPage(navInfo.activePage, true);
+}
+
+/**
  * @brief Draws a transient (3s) status page, either of success or failure, with the given message
  *
  * @param message string to set in middle of page (Upper case for success)

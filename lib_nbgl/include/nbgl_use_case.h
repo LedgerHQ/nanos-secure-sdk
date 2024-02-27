@@ -179,6 +179,11 @@ void nbgl_useCaseSettings(const char                *settingsTitle,
                           nbgl_callback_t            quitCallback,
                           nbgl_navCallback_t         navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback);
+void nbgl_useCaseGenericSettings(const char                   *appName,
+                                 uint8_t                       initPage,
+                                 const nbgl_genericContents_t *settingContents,
+                                 const nbgl_contentInfoList_t *infosList,
+                                 nbgl_callback_t               quitCallback);
 void nbgl_useCaseChoice(const nbgl_icon_details_t *icon,
                         const char                *message,
                         const char                *subMessage,
