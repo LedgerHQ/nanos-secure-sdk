@@ -119,6 +119,24 @@ typedef void (*nbgl_actionCallback_t)(uint8_t page);
  */
 typedef void (*nbgl_pinValidCallback_t)(const uint8_t *content, uint8_t page);
 
+/**
+ * @brief prototype of content navigation callback function
+ * @param contentIndex content index (0->(nbContents-1)) that is needed by the lib
+ * @param content content to fill
+ */
+typedef void (*nbgl_contentCallback_t)(uint8_t contentIndex, nbgl_content_t *content);
+
+typedef struct {
+    bool callback_call_needed;  ///< indicates whether contents should be retrieved using
+                                ///< contentsList or contentGetterCallback
+    union {
+        const nbgl_content_t *contentsList;  ///< array of nbgl_content_t (nbContents items).
+        nbgl_contentCallback_t
+            contentGetterCallback;  ///< function to call to retrieve a given content
+    };
+    uint8_t nbContents;  ///< number of contents
+} nbgl_genericContents_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
