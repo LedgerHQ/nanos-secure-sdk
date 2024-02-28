@@ -1,12 +1,8 @@
-#include <stdint.h>
-#include <stddef.h>
 #include <string.h>
 
 #include "parser.h"
-#include "base58.h"
-#include "bip32.h"
-#include "qrcodegen.h"
-#include "os_io.h"
+
+#define IO_APDU_BUFFER_SIZE (5 + 255)
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
