@@ -110,6 +110,9 @@ extern "C" {
 #define VALIDATE_ICON     C_check32px
 #define RADIO_OFF_ICON    C_radio_inactive_32px
 #define RADIO_ON_ICON     C_radio_active_32px
+#define PUSH_ICON         C_Next32px
+#define LEFT_ARROW_ICON   C_leftArrow32px
+#define RIGHT_ARROW_ICON  C_rightArrow32px
 #else  // TARGET_STAX
 #define SPACE_ICON        C_ic_caps_1_40
 #define BACKSPACE_ICON    C_ic_erase_40
@@ -118,6 +121,9 @@ extern "C" {
 #define VALIDATE_ICON     C_ic_check_40
 #define RADIO_OFF_ICON    C_radio_inactive_40
 #define RADIO_ON_ICON     C_radio_active_40
+#define PUSH_ICON         C_ic_push_40
+#define LEFT_ARROW_ICON   C_ic_arrowLeft_40
+#define RIGHT_ARROW_ICON  C_ic_arrowRight_40
 #endif  // TARGET_STAX
 
 /**********************

@@ -197,7 +197,7 @@ void nbgl_navigationPopulate(nbgl_container_t *navContainer,
         button->obj.area.height = NAV_BUTTON_HEIGHT;
         button->radius          = BUTTON_RADIUS;
 #ifdef TARGET_STAX
-        button->icon = &C_leftArrow32px;
+        button->icon = &LEFT_ARROW_ICON;
         // align either on the right of Exit key, or on the inner left of the container
         if (withExitKey) {
             button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
@@ -232,7 +232,7 @@ void nbgl_navigationPopulate(nbgl_container_t *navContainer,
     button->obj.area.height = NAV_BUTTON_HEIGHT;
     button->radius          = BUTTON_RADIUS;
 #ifdef TARGET_STAX
-    button->icon = &C_rightArrow32px;
+    button->icon = &RIGHT_ARROW_ICON;
     // on Stax, align next button on the right of left one
     button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
     button->obj.alignTo          = navContainer->children[PREVIOUS_PAGE_INDEX];

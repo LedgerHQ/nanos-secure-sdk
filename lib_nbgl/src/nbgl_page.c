@@ -202,12 +202,12 @@ static void addContent(nbgl_pageContent_t *content,
                 nbgl_layoutBar_t bar;
                 bar.text      = content->barsList.barTexts[i];
                 bar.subText   = NULL;
-                bar.iconRight = &C_Next32px;
+                bar.iconRight = &PUSH_ICON;
                 bar.iconLeft  = NULL;
                 bar.token     = content->barsList.tokens[i];
-                bar.centered  = false;
                 bar.tuneId    = content->barsList.tuneId;
-                bar.height    = TOUCHABLE_HEADER_BAR_HEIGHT;
+                bar.large     = false;
+                bar.inactive  = false;
                 availableHeight -= nbgl_layoutAddTouchableBar(layout, &bar);
                 // do not draw a separation line if too low in the container
                 if (availableHeight > 10) {

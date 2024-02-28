@@ -171,10 +171,10 @@ typedef struct {
     const nbgl_icon_details_t *iconRight;  ///< a buffer containing the 1BPP icon for icon 2 (can be
                                            ///< NULL). Dimensions must be the same as iconLeft
     const char *subText;                   ///< sub text (can be NULL)
-    uint16_t    height;                    ///< height of the bar
+    bool        large;                     ///< set to true only for the main level of OS settings
     uint8_t     token;     ///< the token that will be used as argument of the callback
     bool        inactive;  ///< if set to true, the bar is grayed-out and cannot be touched
-    bool        centered;  ///< if set to true, the text is centered horizontaly in the bar
+    bool        centered;  ///< DEPRECATED, not used
 #ifdef HAVE_PIEZO_SOUND
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
 #endif                    // HAVE_PIEZO_SOUND
