@@ -99,9 +99,6 @@ typedef struct nbgl_pageNavWithTap_s {
     const char *nextPageText;  ///< this text is used as indication for "Tap to continue", to
                                ///< navigate forward
     const char *quitText;      ///< the text displayed in footer, used to quit
-    const char *skipText;      ///< if not NULL the text displayed in right part of footer, used for
-                               ///< example to skip pages
-    uint8_t skipToken;  ///< if skipText is NULL the token used when right part of footer is touched
 } nbgl_pageNavWithTap_t;
 
 /**
@@ -110,8 +107,11 @@ typedef struct nbgl_pageNavWithTap_s {
  */
 typedef struct nbgl_pageNavWithButtons_s {
     bool    quitButton;  ///< if set to true, a quit button (X) is displayed in the nav bar
+    bool    backButton;  ///< if set to true, a back button (<-) is displayed in the nav bar
     uint8_t navToken;    ///< the token used as argument of the actionCallback when the nav buttons
                          ///< are pressed (index param gives the page)
+    const char
+        *quitText;  ///< the text displayed in footer (on the left), used to quit (only on Europa)
 } nbgl_pageNavWithButtons_t;
 
 /**
@@ -128,6 +128,9 @@ typedef struct nbgl_pageMultiScreensDescription_s {
     bool progressIndicator;  ///< if set to true, display a progress indicator on top of the page
     tune_index_e
         tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when next or back is pressed
+    const char *skipText;  ///< if not NULL the text displayed in right part of footer, used for
+                           ///< example to skip pages
+    uint8_t skipToken;  ///< if skipText is NULL the token used when right part of footer is touched
     union {
         nbgl_pageNavWithTap_t     navWithTap;      ///< structure used when navigation with "tap"
         nbgl_pageNavWithButtons_t navWithButtons;  ///< structure used when navigation with buttons
@@ -181,10 +184,12 @@ typedef struct nbgl_pageInfoDescription_s {
     uint8_t bottomButtonsToken;  ///< the token that will be used as argument of the
                                  ///< onActionCallback if action/bottom button is touched
     const char *footerText;      ///< if not NULL, add a touchable footer
-    uint8_t     footerToken;  ///< the token that will be used as argument of the onActionCallback
-    const char
-        *tapActionText;  ///< if set to true, main area is "tapable", with this text as indication
-    uint8_t tapActionToken;  ///< the token that will be used as argument of the onActionCallback
+    uint8_t     footerToken;    ///< the token that will be used as argument of the onActionCallback
+    const char *tapActionText;  ///< if non NULL, main area is "tapable", with this
+                                ///< text as indication
+    bool    isSwipeable;        ///< if true, main area is swipeable
+    uint8_t tapActionToken;  ///< the token that will be used as argument of the onActionCallback,
+                             ///< when tapped or swiped
     const char
         *actionButtonText;  ///< if not NULL a black "action" button is set under the centered info
     tune_index_e

@@ -32,7 +32,10 @@ extern "C" {
  * GLOBAL PROTOTYPES
  **********************/
 
-void nbgl_drawIcon(nbgl_area_t *area, nbgl_color_map_t color_map, const nbgl_icon_details_t *icon);
+void nbgl_drawIcon(nbgl_area_t               *area,
+                   nbgl_transformation_t      transformation,
+                   nbgl_color_map_t           color_map,
+                   const nbgl_icon_details_t *icon);
 void nbgl_drawRoundedRect(const nbgl_area_t *area, nbgl_radius_t radius, color_t innerColor);
 void nbgl_drawRoundedBorderedRect(const nbgl_area_t *area,
                                   nbgl_radius_t      radius,

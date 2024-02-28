@@ -17,7 +17,7 @@
 
 # TARGET should be set as an environment variable otherwise it will be read from a `.target`
 # file in the SDK root repository
-TARGETS := nanos nanox nanos2 stax
+TARGETS := nanos nanox nanos2 stax europa
 ifeq ($(TARGET),)
 ifeq ("$(wildcard $(BOLOS_SDK)/.target)","")
 $(error No TARGET specified and no .target file in SDK repository $(BOLOS_SDK))
@@ -33,7 +33,7 @@ endif
 API_LEVEL   := 0
 TARGET_PATH := $(BOLOS_SDK)/target/$(TARGET)
 TARGET_ID   := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
-TARGET_NAME := $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
+TARGET_NAME := $(sort $(shell cat $(TARGET_PATH)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' '))
 SDK_NAME    := "ledger-secure-sdk"
 SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
 SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
@@ -153,7 +153,7 @@ LDFLAGS  += -L$(BOLOS_SDK)/arch/st33/lib/
 AFLAGS   += -mcpu=cortex-m0plus -mtune=cortex-m0plus -mthumb
 endif
 
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_NANOS2))
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA TARGET_NANOS2))
 CFLAGS   += -mno-movt -frwpi --target=armv8m-none-eabi -mcpu=cortex-m35p+nodsp -mthumb -msoft-float -mtune=cortex-m35p+nodsp
 LDFLAGS  += -momit-leaf-frame-pointer
 LDFLAGS  += --target=armv8m-none-eabi
@@ -178,6 +178,22 @@ DEFINES += NBGL_PAGE
 DEFINES += NBGL_USE_CASE
 DEFINES += SCREEN_SIZE_WALLET
 endif # TARGET_STAX
+
+ifeq ($(TARGET_NAME),TARGET_EUROPA)
+# For Europa NBGL must be used
+USE_NBGL = 1
+DEFINES += HAVE_BAGL_FONT_INTER_REGULAR_28PX
+DEFINES += HAVE_BAGL_FONT_INTER_SEMIBOLD_28PX
+DEFINES += HAVE_BAGL_FONT_INTER_MEDIUM_36PX
+DEFINES += HAVE_INAPP_BLE_PAIRING
+DEFINES += HAVE_NBGL
+DEFINES += HAVE_PIEZO_SOUND
+DEFINES += HAVE_SE_TOUCH
+DEFINES += NBGL_PAGE
+DEFINES += NBGL_USE_CASE
+DEFINES += SCREEN_SIZE_WALLET
+DEFINES += HAVE_DISPLAY_FAST_MODE
+endif # TARGET_EUROPA
 
 # For other devices, by default NBGL is not used
 USE_NBGL ?= 0

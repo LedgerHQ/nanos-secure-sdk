@@ -40,17 +40,18 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
     if not os.path.exists(file_path):
         sys.stderr.write("Error: {} does not exist!".format(file_path) + "\n")
 
-    # Load Image in mode L
-    im = img.open(file_path)
-    im.load()
-    im = im.convert('L')
+    # Load Image in mode L after conversion in RGBA to replace transparent color by white
+    im = img.open(file_path).convert("RGBA")
+    new_image = img.new("RGBA", im.size, "WHITE")
+    new_image.paste(im, mask=im)
+    im = new_image.convert('L')
 
     # Do not open image with more than 16 colors
     num_colors = len(im.getcolors())
     if num_colors > 16:
         sys.stderr.write(
-            "Error: input file {} has too many colors".format(file_path) + "\n")
-        return None
+            "Warn: input file {} has too many colors".format(file_path) + "\n")
+        num_colors = 16
 
     # Compute bits_per_pixel
     # Round number of colors to a power of 2
@@ -58,7 +59,8 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
         num_colors = int(pow(2, math.ceil(math.log(num_colors, 2))))
 
     bits_per_pixel = int(math.log(num_colors, 2))
-    if bits_per_pixel == 3:
+    # 2 or 3 BPP are not supported
+    if bits_per_pixel > 1:
         bits_per_pixel = 4
 
     if bits_per_pixel == 0:

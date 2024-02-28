@@ -1,17 +1,35 @@
 # Generate a ledgerimg from any input image file
 #
-# Example:
+# sh tools/generate_ledgerimg.sh <IMAGE_FILE> [<PRODUCT>]
+#
+# where:
+#  - <FILE_TO_COMPRESS> is the path to the input image file
+#  - <PRODUCT> can be --europa (--stax is the default)
+#
+# Example for Stax:
+#
 # ```
 # sh tools/generate_ledgerimg.sh ~/Downloads/cryptopunk.png
 # Write /home/abonnaudet/Downloads/cryptopunk.bmp
 # Write /home/abonnaudet/Downloads/cryptopunk.ledgerimg
 # ```
+# Example for Europa:
+#
+# ```
+# sh tools/generate_ledgerimg.sh ~/Downloads/cryptopunk.png --europa
+# Write /home/abonnaudet/Downloads/cryptopunk.bmp
+# Write /home/abonnaudet/Downloads/cryptopunk.ledgerimg
+# ```
 
-## Configs
-
-# Front screen dimension
-FRONT_SCREEN_WIDTH=400
-FRONT_SCREEN_HEIGHT=672
+## Product detection for screen height & width
+if [ "$2" = "--europa" ]
+then
+	FRONT_SCREEN_WIDTH=480
+	FRONT_SCREEN_HEIGHT=600
+else
+	FRONT_SCREEN_WIDTH=400
+	FRONT_SCREEN_HEIGHT=672
+fi
 
 # Path to bmp2display python script
 BMP2DISPLAY_PY=$BOLOS_NG/public_sdk/lib_nbgl/tools/bmp2display.py

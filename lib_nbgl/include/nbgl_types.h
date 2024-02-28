@@ -28,6 +28,8 @@ extern "C" {
 #ifdef SCREEN_SIZE_WALLET
 #ifdef TARGET_STAX
 #define SCREEN_WIDTH 400
+#else  // TARGET_STAX
+#define SCREEN_WIDTH 480
 #endif  // TARGET_STAX
 #else   // SCREEN_SIZE_WALLET
 #define SCREEN_WIDTH 128
@@ -39,6 +41,8 @@ extern "C" {
 #ifdef SCREEN_SIZE_WALLET
 #ifdef TARGET_STAX
 #define SCREEN_HEIGHT 672
+#else  // TARGET_STAX
+#define SCREEN_HEIGHT 600
 #endif  // TARGET_STAX
 #else   // SCREEN_SIZE_WALLET
 #define SCREEN_HEIGHT 64
@@ -49,22 +53,12 @@ extern "C" {
  *
  */
 #define NO_TRANSFORMATION 0
-/**
- * Horizontal mirroring when rendering bitmap
- *
- */
-#define HORIZONTAL_MIRROR 0x1
+
 /**
  * Vertical mirroring when rendering bitmap
  *
  */
-#define VERTICAL_MIRROR   0x2
-
-/**
- * Both directions mirroring when rendering bitmap
- *
- */
-#define BOTH_MIRRORS (HORIZONTAL_MIRROR | VERTICAL_MIRROR)
+#define VERTICAL_MIRROR 0x2
 
 /**
  * Rotation 90 degrees clockwise when rendering bitmap
@@ -188,22 +182,26 @@ typedef enum nbgl_post_refresh_t {
  *
  */
 typedef enum {
-    RADIUS_3_PIXELS = 0,     ///< 3 pixels (not on Stax)
-    RADIUS_4_PIXELS,         ///< 4 pixels
-    RADIUS_8_PIXELS,         ///< 8 pixels
-    RADIUS_16_PIXELS,        ///< 16 pixels
-    RADIUS_20_PIXELS,        ///< 20 pixels
-    RADIUS_24_PIXELS,        ///< 24 pixels
-    RADIUS_32_PIXELS,        ///< 32 pixels
-    RADIUS_40_PIXELS,        ///< 40 pixels
-    RADIUS_48_PIXELS,        ///< 48 pixels
-    RADIUS_1_PIXEL,          ///< 1 pixel (not on Stax)
+#ifdef SCREEN_SIZE_WALLET
+    RADIUS_32_PIXELS = 0,  ///< 32 pixels
+#ifdef TARGET_STAX
+    RADIUS_40_PIXELS,  ///< 40 pixels
+    RADIUS_MAX = RADIUS_40_PIXELS,
+#else                        // TARGET_STAX
+    RADIUS_44_PIXELS,  ///< 44 pixels
+    RADIUS_MAX = RADIUS_44_PIXELS,
+#endif                       // TARGET_STAX
+#else                        // SCREEN_SIZE_WALLET
+    RADIUS_1_PIXEL = 0,  ///< 1 pixel
+    RADIUS_3_PIXELS,     ///< 3 pixels
+    RADIUS_MAX = RADIUS_3_PIXELS,
+#endif                       // SCREEN_SIZE_WALLET
     RADIUS_0_PIXELS = 0xFF,  ///< no radius (square angle)
 } nbgl_radius_t;
 
 /**
  * @brief Represents the transformation to be applied on the bitmap before rendering
- * This is a bitfield using masks as @ref HORIZONTAL_MIRROR
+ * This is a bitfield using masks as @ref VERTICAL_MIRROR
  */
 typedef uint8_t nbgl_transformation_t;
 

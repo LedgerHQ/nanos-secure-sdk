@@ -334,7 +334,7 @@ class TTF2INC:
                 max_bits = 6
             else:
                 max_bits = 5
-            self.max_y_min_offset = 4 * (pow(2, max_bits) - 1)
+            self.max_y_min_offset = 4 * pow(2, max_bits) - 1
 
         # Some fonts display some characters at y < 0
         # => Be sure we are aware of that and already compensated it
@@ -1175,7 +1175,13 @@ class TTF2INC:
             "BAGL_FONT_INTER_MEDIUM_32px_1bpp": 5,
             "BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp": 8,
             "BAGL_FONT_OPEN_SANS_LIGHT_16px_1bpp": 9,
-            "BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp": 10
+            "BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp": 10,
+            "BAGL_FONT_INTER_REGULAR_28px": 11,
+            "BAGL_FONT_INTER_SEMIBOLD_28px": 12,
+            "BAGL_FONT_INTER_MEDIUM_36px": 13,
+            "BAGL_FONT_INTER_REGULAR_28px_1bpp": 14,
+            "BAGL_FONT_INTER_SEMIBOLD_28px_1bpp": 15,
+            "BAGL_FONT_INTER_MEDIUM_36px_1bpp": 16
         }
         if self.nbgl:
             font_ids = nbgl_font_ids

@@ -28,8 +28,12 @@ extern "C" {
 
 // for Keyboard
 #ifdef HAVE_SE_TOUCH
+#ifdef TARGET_STAX
 #define KEYBOARD_KEY_HEIGHT 60
-#else  // HAVE_SE_TOUCH
+#else  // TARGET_STAX
+#define KEYBOARD_KEY_HEIGHT 72
+#endif  // TARGET_STAX
+#else   // HAVE_SE_TOUCH
 #define KEYBOARD_KEY_WIDTH  14
 #define KEYBOARD_KEY_HEIGHT 14
 #define KEYBOARD_WIDTH      (5 * KEYBOARD_KEY_WIDTH)
@@ -37,7 +41,11 @@ extern "C" {
 
 // for Keypad
 #ifdef HAVE_SE_TOUCH
+#if (SCREEN_HEIGHT == 600)
+#define KEYPAD_KEY_HEIGHT 88
+#else
 #define KEYPAD_KEY_HEIGHT 104
+#endif
 #define KEYPAD_MAX_DIGITS 12
 #else  // HAVE_SE_TOUCH
 #define KEYPAD_WIDTH  114
@@ -50,15 +58,73 @@ extern "C" {
 #define EXIT_PAGE 0xFF
 
 // external margin in pixels
-#define BORDER_MARGIN 24
+#ifdef TARGET_STAX
+#define BORDER_MARGIN        24
+#define BOTTOM_BORDER_MARGIN 24
+#else  // TARGET_STAX
+#define BORDER_MARGIN        32
+#define BOTTOM_BORDER_MARGIN 24
+#endif  // TARGET_STAX
 
 // Back button header height
+#ifdef TARGET_STAX
 #define BACK_BUTTON_HEADER_HEIGHT 88
+#else  // TARGET_STAX
+#define BACK_BUTTON_HEADER_HEIGHT 96
+#endif  // TARGET_STAX
 
 // common dimensions for buttons
+#ifdef TARGET_STAX
 #define BUTTON_RADIUS   RADIUS_40_PIXELS
 #define BUTTON_DIAMETER 80
+#else  // TARGET_STAX
+#define BUTTON_RADIUS   RADIUS_44_PIXELS
+#define BUTTON_DIAMETER 88
+#endif  // TARGET_STAX
 #endif  // HAVE_SE_TOUCH
+
+// width & height for spinner
+#ifdef TARGET_STAX
+#define SPINNER_WIDTH  60
+#define SPINNER_HEIGHT 44
+#else  // TARGET_STAX
+#define SPINNER_WIDTH  64
+#define SPINNER_HEIGHT 48
+#endif  // TARGET_STAX
+
+// width & height for radio button
+#ifdef TARGET_STAX
+#define RADIO_WIDTH  32
+#define RADIO_HEIGHT 32
+#else  // TARGET_STAX
+#define RADIO_WIDTH  40
+#define RADIO_HEIGHT 40
+#endif  // TARGET_STAX
+
+// icons for some objects
+#ifdef TARGET_STAX
+#define SPACE_ICON        C_space32px
+#define BACKSPACE_ICON    C_backspace32px
+#define SHIFT_ICON        C_shift32px
+#define SHIFT_LOCKED_ICON C_shift_lock32px
+#define VALIDATE_ICON     C_check32px
+#define RADIO_OFF_ICON    C_radio_inactive_32px
+#define RADIO_ON_ICON     C_radio_active_32px
+#define PUSH_ICON         C_Next32px
+#define LEFT_ARROW_ICON   C_leftArrow32px
+#define RIGHT_ARROW_ICON  C_rightArrow32px
+#else  // TARGET_STAX
+#define SPACE_ICON        C_ic_caps_1_40
+#define BACKSPACE_ICON    C_ic_erase_40
+#define SHIFT_ICON        C_ic_caps_40
+#define SHIFT_LOCKED_ICON C_ic_caps_lock_40
+#define VALIDATE_ICON     C_ic_check_40
+#define RADIO_OFF_ICON    C_radio_inactive_40
+#define RADIO_ON_ICON     C_radio_active_40
+#define PUSH_ICON         C_ic_push_40
+#define LEFT_ARROW_ICON   C_ic_arrowLeft_40
+#define RIGHT_ARROW_ICON  C_ic_arrowRight_40
+#endif  // TARGET_STAX
 
 /**********************
  *      TYPEDEFS
@@ -130,8 +196,10 @@ typedef enum {
  *
  */
 typedef enum {
-    NO_STYLE,        ///< no border
+    NO_STYLE,  ///< no border
+#ifdef SCREEN_SIZE_NANO
     INVERTED_COLORS  ///< Inverted background and rounded corners, only for @ref TEXT_AREA
+#endif               // SCREEN_SIZE_NANO
 } nbgl_style_t;
 
 /**
@@ -169,8 +237,16 @@ typedef enum {
                      ///< been pressed.
     TOUCH_RELEASED,  ///< corresponding to an object that was touched and where the finger has been
                      ///< released.
-    VALUE_CHANGED    ///< corresponding to a change of state of the object (indirect event)
+    VALUE_CHANGED,   ///< corresponding to a change of state of the object (indirect event)
+    SWIPED_UP,
+    SWIPED_DOWN,
+    SWIPED_RIGHT,
+    SWIPED_LEFT,
+    NB_TOUCH_TYPES
 } nbgl_touchType_t;
+
+#define SWIPE_MASK \
+    ((1 << SWIPED_UP) | (1 << SWIPED_DOWN) | (1 << SWIPED_LEFT) | (1 << SWIPED_RIGHT))
 
 /**
  * @brief The different pressed buttons
@@ -240,9 +316,9 @@ typedef struct PACKED__ nbgl_obj_s {
     int16_t            alignmentMarginX;  ///< horizontal margin when aligning
     int16_t            alignmentMarginY;  ///< vertical margin when aligning
     nbgl_obj_type_t    type;              ///< type of the graphical object, must be explicitly set
-    uint8_t touchMask;  ///< bit mask to tell engine which touch events are handled by this object
-    uint8_t touchId;    ///< a unique identifier (by screen) to be used by external test environment
-                        ///< (TTYT or Screenshots)
+    uint16_t touchMask;  ///< bit mask to tell engine which touch events are handled by this object
+    uint8_t  touchId;  ///< a unique identifier (by screen) to be used by external test environment
+                       ///< (TTYT or Screenshots)
 } nbgl_obj_t;
 
 /**
@@ -289,6 +365,7 @@ typedef struct PACKED__ nbgl_image_s {
     nbgl_obj_t obj;           // common part
     color_t foregroundColor;  ///< color set to '1' bits, for 1PBB images. '0' are set to background
                               ///< color.
+    nbgl_transformation_t      transformation;  ///< usually NO_TRANSFORMATION
     const nbgl_icon_details_t *buffer;     ///< buffer containing bitmap, with exact same size as
                                            ///< object (width*height*bpp/8 bytes)
     onImageDrawCallback_t onDrawCallback;  ///< function called if buffer is NULL, with above token
@@ -351,8 +428,18 @@ typedef struct PACKED__ nbgl_progress_bar_s {
     nbgl_obj_t obj;              // common part
     bool       withBorder;       ///< if set to true, a border in black surround the whole object
     uint8_t    state;            ///< state of the progress, in % (from 0 to 100).
+    uint8_t    previousState;    ///< previous state of the progress, in % (from 0 to 100).
     color_t    foregroundColor;  ///< color of the inner progress bar and border (if applicable)
 } nbgl_progress_bar_t;
+
+/**
+ * @brief Style to apply to @ref nbgl_page_indicator_t
+ *
+ */
+typedef enum {
+    PROGRESSIVE_INDICATOR = 0,  ///< all dashes before active page are black
+    CURRENT_INDICATOR           ///< only current page dash is black
+} nbgl_page_indicator_style_t;
 
 /**
  * @brief  struct to represent a navigation bar (@ref PAGE_INDICATOR type)
@@ -362,9 +449,10 @@ typedef struct PACKED__ nbgl_progress_bar_s {
  * @note height is fixed
  */
 typedef struct PACKED__ nbgl_navigation_bar_s {
-    nbgl_obj_t obj;         ///< common part
-    uint8_t    nbPages;     ///< number of pages.
-    uint8_t    activePage;  ///< index of active page (from 0 to nbPages-1).
+    nbgl_obj_t                  obj;         ///< common part
+    uint8_t                     nbPages;     ///< number of pages.
+    uint8_t                     activePage;  ///< index of active page (from 0 to nbPages-1).
+    nbgl_page_indicator_style_t style;       ///< Style to apply
 } nbgl_page_indicator_t;
 
 /**
@@ -516,6 +604,7 @@ typedef struct PACKED__ nbgl_keypad_s {
     color_t textColor;                   ///< color set to digits.
     color_t borderColor;                 ///< color set to key borders
     bool    enableDigits;                ///< if true, Digit keys are enabled
+    bool    partial;                     ///< if true, means that only some keys have changed
     uint8_t digitIndexes[5];             ///< array of digits indexes, 4 bits per digit
 #else                                    // HAVE_SE_TOUCH
     uint8_t selectedKey;  ///< selected key position
@@ -576,14 +665,17 @@ nbgl_obj_t **nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer);
 uint8_t      nbgl_containerPoolGetNbUsed(uint8_t layer);
 
 #ifdef HAVE_SE_TOUCH
-nbgl_container_t *nbgl_navigationPopulate(uint8_t nbPages,
-                                          uint8_t activePage,
-                                          bool    withExitKey,
-                                          uint8_t layer);
-bool              nbgl_navigationCallback(nbgl_obj_t      *obj,
-                                          nbgl_touchType_t eventType,
-                                          uint8_t          nbPages,
-                                          uint8_t         *activePage);
+void nbgl_navigationPopulate(nbgl_container_t *navContainer,
+                             uint8_t           nbPages,
+                             uint8_t           activePage,
+                             bool              withExitKey,
+                             bool              withBackKey,
+                             bool              withPageIndicator,
+                             uint8_t           layer);
+bool nbgl_navigationCallback(nbgl_obj_t      *obj,
+                             nbgl_touchType_t eventType,
+                             uint8_t          nbPages,
+                             uint8_t         *activePage);
 #endif  // HAVE_SE_TOUCH
 
 // for internal use

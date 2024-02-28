@@ -33,7 +33,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void extendRefreshArea(nbgl_obj_t *obj);
+static void extendRefreshArea(nbgl_area_t *obj);
 
 /**********************
  *  STATIC VARIABLES
@@ -43,6 +43,9 @@ static nbgl_area_t refreshArea;
 
 // boolean used to enable/forbid drawing/refresh
 static bool objDrawingDisabled;
+
+// boolean used to indicate a manual refresh area extension
+static bool objRefreshAreaDone;
 
 /**********************
  *      VARIABLES
@@ -234,10 +237,10 @@ static void compute_relativePosition(nbgl_obj_t *obj, nbgl_obj_t *prevObj)
             }
         }
     }
-#ifdef HAVE_SE_TOUCH
+#ifdef TARGET_STAX
     // align on multiples of 4
     obj->rel_y0 &= ~0x3;
-#endif  // HAVE_SE_TOUCH
+#endif  // TARGET_STAX
 }
 
 static void compute_position(nbgl_obj_t *obj, nbgl_obj_t *prevObj)
@@ -300,10 +303,11 @@ static void draw_container(nbgl_container_t *obj, nbgl_obj_t *prevObj, bool comp
         return;
     }
     LOG_DEBUG(OBJ_LOGGER,
-              "draw_container(), x0 = %d, y0 = %d, width = %d\n",
+              "draw_container(), x0 = %d, y0 = %d, width = %d, height = %d\n",
               obj->obj.area.x0,
               obj->obj.area.y0,
-              obj->obj.area.width);
+              obj->obj.area.width,
+              obj->obj.area.height);
     // inherit background from parent
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
     if (obj->forceClean) {
@@ -340,8 +344,9 @@ static void draw_button(nbgl_button_t *obj, nbgl_obj_t *prevObj, bool computePos
 
     // inherit background from parent
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
-    // draw the rounded corner rectangle
-    if (obj->innerColor == obj->borderColor) {
+    // draw the rounded corner rectangle if necessary
+    if ((obj->innerColor == obj->borderColor)
+        && (obj->innerColor != obj->obj.area.backgroundColor)) {
         nbgl_drawRoundedRect((nbgl_area_t *) obj, obj->radius, obj->innerColor);
     }
     else {
@@ -404,7 +409,7 @@ static void draw_button(nbgl_button_t *obj, nbgl_obj_t *prevObj, bool computePos
         rectArea.height          = obj->icon->height;
         rectArea.bpp             = obj->icon->bpp;
 
-        nbgl_drawIcon(&rectArea, obj->foregroundColor, obj->icon);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->foregroundColor, obj->icon);
     }
 }
 
@@ -510,7 +515,7 @@ static void draw_image(nbgl_image_t *obj, nbgl_obj_t *prevObj, bool computePosit
         colorMap = obj->foregroundColor;
     }
 
-    nbgl_drawIcon((nbgl_area_t *) obj, colorMap, iconDetails);
+    nbgl_drawIcon((nbgl_area_t *) obj, obj->transformation, colorMap, iconDetails);
 }
 
 #ifdef HAVE_SE_TOUCH
@@ -551,8 +556,8 @@ static void draw_radioButton(nbgl_radio_t *obj, nbgl_obj_t *prevObj, bool comput
     nbgl_area_t rectArea;
 
     // force dimensions
-    obj->obj.area.width  = 32;
-    obj->obj.area.height = 32;
+    obj->obj.area.width  = RADIO_WIDTH;
+    obj->obj.area.height = RADIO_HEIGHT;
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
     }
@@ -575,10 +580,10 @@ static void draw_radioButton(nbgl_radio_t *obj, nbgl_obj_t *prevObj, bool comput
     rectArea.backgroundColor = obj->obj.area.backgroundColor;
     rectArea.bpp             = NBGL_BPP_1;
     if (obj->state == OFF_STATE) {
-        nbgl_drawIcon(&rectArea, obj->borderColor, &C_radio_inactive_32px);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->borderColor, &RADIO_OFF_ICON);
     }
     else {
-        nbgl_drawIcon(&rectArea, obj->activeColor, &C_radio_active_32px);
+        nbgl_drawIcon(&rectArea, NO_TRANSFORMATION, obj->activeColor, &RADIO_ON_ICON);
     }
 }
 #endif  // HAVE_SE_TOUCH
@@ -611,24 +616,45 @@ static void draw_progressBar(nbgl_progress_bar_t *obj, nbgl_obj_t *prevObj, bool
     // inherit background from parent
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
 
-    // draw external part if necessary
-    if (obj->withBorder) {
-        nbgl_drawRoundedBorderedRect((nbgl_area_t *) obj,
-                                     RADIUS_0_PIXELS,
-                                     stroke,
-                                     obj->obj.area.backgroundColor,
-                                     obj->foregroundColor);
+    levelWidth = MIN(obj->obj.area.width * obj->state / 100, obj->obj.area.width);
+    // if previous state is not nul, we will just draw the small added part
+    if (obj->previousState == 0) {
+        // draw external part if necessary
+        if (obj->withBorder) {
+            nbgl_drawRoundedBorderedRect((nbgl_area_t *) obj,
+                                         RADIUS_0_PIXELS,
+                                         stroke,
+                                         obj->obj.area.backgroundColor,
+                                         obj->foregroundColor);
+        }
+        else {
+            nbgl_drawRoundedRect(
+                (nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->obj.area.backgroundColor);
+        }
+        // draw level
+        if (levelWidth > 0) {
+            uint16_t tmp_width  = obj->obj.area.width;
+            obj->obj.area.width = levelWidth;
+            nbgl_drawRoundedRect((nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->foregroundColor);
+            obj->obj.area.width = tmp_width;
+        }
     }
     else {
-        nbgl_drawRoundedRect((nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->obj.area.backgroundColor);
-    }
-    // draw level
-    levelWidth = MIN(obj->obj.area.width * obj->state / 100, obj->obj.area.width);
-    if (levelWidth > 0) {
-        uint16_t tmp_width  = obj->obj.area.width;
-        obj->obj.area.width = levelWidth;
-        nbgl_drawRoundedRect((nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->foregroundColor);
-        obj->obj.area.width = tmp_width;
+        uint16_t previousLevelWidth
+            = MIN(obj->obj.area.width * obj->previousState / 100, obj->obj.area.width);
+        nbgl_area_t area;
+        memcpy(&area, &obj->obj.area, sizeof(nbgl_area_t));
+        // draw added level
+        area.width = levelWidth - previousLevelWidth;
+        if (area.width > 0) {
+            area.x0 += previousLevelWidth;
+            nbgl_drawRoundedRect((nbgl_area_t *) &area, RADIUS_0_PIXELS, obj->foregroundColor);
+        }
+        // reset previous state to be sure that in case of full redraw of the screen we redraw the
+        // full bar
+        obj->previousState = 0;
+        extendRefreshArea(&area);
+        objRefreshAreaDone = true;
     }
 #else   // HAVE_SE_TOUCH
     uint8_t  stroke = 1;  // 1 pixels for border
@@ -689,8 +715,13 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
     nbgl_area_t rectArea;
     uint16_t    dashWidth;
 
+    // display nothing if less than two pages
+    if (obj->nbPages < 2) {
+        return;
+    }
+
     if (obj->nbPages <= NB_MAX_PAGES_WITH_DASHES) {
-        uint8_t i;
+        int i;
 #define INTER_DASHES 10  // pixels
         // force height
         obj->obj.area.height = 4;
@@ -719,10 +750,15 @@ static void draw_pageIndicator(nbgl_page_indicator_t *obj,
         rectArea.backgroundColor = obj->obj.area.backgroundColor;
         rectArea.bpp             = NBGL_BPP_1;
         // draw dashes
-        for (i = 0; i <= obj->activePage; i++) {
-            nbgl_frontDrawHorizontalLine(&rectArea, 0xF, BLACK);
+        for (i = 0; i < obj->activePage; i++) {
+            nbgl_frontDrawHorizontalLine(
+                &rectArea, 0xF, (obj->style == PROGRESSIVE_INDICATOR) ? BLACK : LIGHT_GRAY);
             rectArea.x0 += dashWidth + INTER_DASHES;
         }
+        nbgl_frontDrawHorizontalLine(&rectArea, 0xF, BLACK);
+        rectArea.x0 += dashWidth + INTER_DASHES;
+        i++;
+
         for (; i < obj->nbPages; i++) {
             nbgl_frontDrawHorizontalLine(&rectArea, 0xF, LIGHT_GRAY);
             rectArea.x0 += dashWidth + INTER_DASHES;
@@ -817,11 +853,14 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
 
     // draw background to make sure it's clean
+#ifdef SCREEN_SIZE_NANO
     if (obj->style == INVERTED_COLORS) {
         obj->obj.area.backgroundColor = WHITE;
         rectArea.backgroundColor      = BLACK;
     }
-    else {
+    else
+#endif  // SCREEN_SIZE_NANO
+    {
         // inherit background from parent
         obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
         rectArea.backgroundColor      = obj->obj.area.backgroundColor;
@@ -830,10 +869,13 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     rectArea.y0     = obj->obj.area.y0;
     rectArea.width  = obj->obj.area.width;
     rectArea.height = obj->obj.area.height;
+#ifdef SCREEN_SIZE_NANO
     if (obj->style == INVERTED_COLORS) {
         nbgl_drawRoundedRect(&rectArea, RADIUS_1_PIXEL, WHITE);
     }
-    else {
+    else
+#endif  // SCREEN_SIZE_NANO
+    {
         nbgl_frontDrawRect(&rectArea);
     }
 
@@ -877,16 +919,11 @@ static void draw_textArea(nbgl_text_area_t *obj, nbgl_obj_t *prevObj, bool compu
     textHeight = (nbLines - 1) * lineHeight + fontHeight;
 
     midHeight = (obj->obj.area.height - textHeight) / 2;
-    // Be sure midHeight is modulo 4
-#ifdef HAVE_SE_TOUCH
-    if (midHeight % 4) {
-        midHeight -= midHeight % 4;
-    }
-#else   // HAVE_SE_TOUCH
+#ifdef SCREEN_SIZE_NANO
     if (obj->style == INVERTED_COLORS) {
         midHeight--;
     }
-#endif  // HAVE_SE_TOUCH
+#endif  // SCREEN_SIZE_NANO
 
     rectArea.backgroundColor = obj->obj.area.backgroundColor;
     rectArea.height          = fontHeight;
@@ -1045,6 +1082,7 @@ static void draw_keypad(nbgl_keypad_t *obj, nbgl_obj_t *prevObj, bool computePos
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
     }
+    obj->obj.area.y0 &= ~0x3;
     if (objDrawingDisabled) {
         return;
     }
@@ -1070,12 +1108,13 @@ static void draw_spinner(nbgl_spinner_t *obj, nbgl_obj_t *prevObj, bool computeP
     nbgl_area_t rectArea;
     color_t     foreColor;
 
-    obj->obj.area.width  = 60;
-    obj->obj.area.height = 44;
+    obj->obj.area.width  = SPINNER_WIDTH;
+    obj->obj.area.height = SPINNER_HEIGHT;
 
     if (computePosition) {
         compute_position((nbgl_obj_t *) obj, prevObj);
     }
+    obj->obj.area.y0 &= ~0x3;
     if (objDrawingDisabled) {
         return;
     }
@@ -1297,6 +1336,7 @@ static void
 draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
 {
     LOG_DEBUG(OBJ_LOGGER, "draw_object() obj->type = %d, prevObj = %p\n", obj->type, prevObj);
+    objRefreshAreaDone = false;
     switch (obj->type) {
         case SCREEN:
             draw_screen((nbgl_container_t *) obj);
@@ -1370,8 +1410,8 @@ draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
 #ifdef HAVE_SERIALIZED_NBGL
     io_seproxyhal_send_nbgl_serialized(NBGL_DRAW_OBJ, obj);
 #endif
-    if (!objDrawingDisabled) {
-        extendRefreshArea(obj);
+    if ((!objDrawingDisabled) && (!objRefreshAreaDone)) {
+        extendRefreshArea(&obj->area);
     }
 }
 
@@ -1379,29 +1419,29 @@ draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
  * @brief internal function used when an object is drawn, to extend the area to be refresh in
  * display
  *
- * @param obj the object drawn
+ * @param area area to refresh
  */
-static void extendRefreshArea(nbgl_obj_t *obj)
+static void extendRefreshArea(nbgl_area_t *area)
 {
     int16_t x1, y1;  // bottom right corner
     x1 = refreshArea.x0 + refreshArea.width;
     y1 = refreshArea.y0 + refreshArea.height;
 
     // if obj top-left is on left of current top-left corner, move top-left corner
-    if (obj->area.x0 < refreshArea.x0) {
-        refreshArea.x0 = obj->area.x0;
+    if (area->x0 < refreshArea.x0) {
+        refreshArea.x0 = area->x0;
     }
     // if obj bottom-right is on right of current bottom-right corner, move bottom-right corner
-    if (((obj->area.x0 + obj->area.width) > x1) || (refreshArea.width == 0)) {
-        x1 = obj->area.x0 + obj->area.width;
+    if (((area->x0 + area->width) > x1) || (refreshArea.width == 0)) {
+        x1 = area->x0 + area->width;
     }
     // if obj top-left is on top of current top-left corner, move top-left corner
-    if (obj->area.y0 < refreshArea.y0) {
-        refreshArea.y0 = obj->area.y0;
+    if (area->y0 < refreshArea.y0) {
+        refreshArea.y0 = area->y0;
     }
     // if obj bottom-right is on bottom of current bottom-right corner, move bottom-right corner
-    if (((obj->area.y0 + obj->area.height) > y1) || (refreshArea.height == 0)) {
-        y1 = obj->area.y0 + obj->area.height;
+    if (((area->y0 + area->height) > y1) || (refreshArea.height == 0)) {
+        y1 = area->y0 + area->height;
     }
 
     // sanity check
@@ -1426,8 +1466,8 @@ static void extendRefreshArea(nbgl_obj_t *obj)
     refreshArea.height = y1 - refreshArea.y0;
 
     // revaluate area bpp
-    if (obj->area.bpp > refreshArea.bpp) {
-        refreshArea.bpp = obj->area.bpp;
+    if (area->bpp > refreshArea.bpp) {
+        refreshArea.bpp = area->bpp;
     }
 }
 

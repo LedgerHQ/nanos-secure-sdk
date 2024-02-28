@@ -53,6 +53,13 @@ extern const LANGUAGE_PACK *language_pack;
 #include "nbgl_font_inter_regular_24_1bpp.inc"
 #include "nbgl_font_inter_semibold_24_1bpp.inc"
 #include "nbgl_font_inter_medium_32_1bpp.inc"
+#else  // TARGET_STAX
+#include "nbgl_font_inter_regular_28.inc"
+#include "nbgl_font_inter_semibold_28.inc"
+#include "nbgl_font_inter_medium_36.inc"
+#include "nbgl_font_inter_regular_28_1bpp.inc"
+#include "nbgl_font_inter_semibold_28_1bpp.inc"
+#include "nbgl_font_inter_medium_36_1bpp.inc"
 #endif  // TARGET_STAX
 #else   // SCREEN_SIZE_WALLET
 #include "nbgl_font_open_sans_extrabold_11.inc"

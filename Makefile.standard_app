@@ -19,7 +19,7 @@
 #                            BLUETOOTH                              #
 #####################################################################
 ifeq ($(ENABLE_BLUETOOTH), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX TARGET_EUROPA))
     HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
     DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
     DEFINES += BLE_SEGMENT_SIZE=32
@@ -134,20 +134,20 @@ endif
 #                              NBGL                                 #
 #####################################################################
 ifeq ($(ENABLE_NBGL_QRCODE), 1)
-ifeq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
     DEFINES += NBGL_QRCODE
     SDK_SOURCE_PATH += qrcode
 endif
 endif
 
 ifeq ($(ENABLE_NBGL_KEYBOARD), 1)
-ifeq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
     DEFINES += NBGL_KEYBOARD
 endif
 endif
 
 ifeq ($(ENABLE_NBGL_KEYPAD), 1)
-ifeq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
     DEFINES += NBGL_KEYPAD
 endif
 endif
@@ -206,7 +206,7 @@ endif
 ifeq ($(TARGET_NAME), TARGET_NANOS2)
 ICONNAME ?= $(ICON_NANOSP)
 endif
-ifeq ($(TARGET_NAME),TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
 ICONNAME ?= $(ICON_STAX)
 endif
 

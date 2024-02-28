@@ -81,12 +81,6 @@ typedef struct io_touch_info_s {
     uint8_t  h;
 } io_touch_info_t;
 
-typedef enum io_touch_debug_mode_e {
-    TOUCH_DEBUG_END            = 0,
-    TOUCH_DEBUG_READ_RAW_DATA  = 1,
-    TOUCH_DEBUG_READ_DIFF_DATA = 2,
-} io_touch_debug_mode_t;
-
 // bitfield for exclusion borders, for touch_exclude_borders() (if a bit is set, means that pixels
 // on this border are not taken into account)
 #define LEFT_BORDER   1
@@ -95,11 +89,21 @@ typedef enum io_touch_debug_mode_e {
 #define BOTTOM_BORDER 8
 
 #ifdef HAVE_SE_TOUCH
+
+typedef enum io_touch_debug_mode_e {
+    TOUCH_DEBUG_END                = 0,
+    TOUCH_DEBUG_READ_RAW_DATA      = 1,
+    TOUCH_DEBUG_READ_DIFF_DATA     = 2,
+    TOUCH_DEBUG_READ_SENSOR_BUFFER = 3,
+} io_touch_debug_mode_t;
+
 SYSCALL void    touch_get_last_info(io_touch_info_t *info);
 SYSCALL void    touch_set_state(bool enable);
 SYSCALL uint8_t touch_exclude_borders(uint8_t excluded_borders);
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
-SYSCALL uint8_t touch_switch_debug_mode_and_read(io_touch_debug_mode_t mode, uint8_t *read_buffer);
+SYSCALL uint8_t touch_switch_debug_mode_and_read(io_touch_debug_mode_t mode,
+                                                 uint8_t               buffer_type,
+                                                 uint8_t              *read_buffer);
 #endif
 #endif
 #endif  // HAVE_SE_TOUCH

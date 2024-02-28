@@ -510,7 +510,11 @@ void io_seproxyhal_nfc_power(bool forceInit)
     uint8_t power
         = forceInit
               ? 1
+#ifdef HAVE_NFC_ACTIVATED_BY_DEFAULT
+              : !(os_setting_get(OS_SETTING_FEATURES, NULL, 0) & OS_SETTING_FEATURES_NFC_ENABLED);
+#else
               : (os_setting_get(OS_SETTING_FEATURES, NULL, 0) & OS_SETTING_FEATURES_NFC_ENABLED);
+#endif
     buffer[0] = SEPROXYHAL_TAG_NFC_POWER;
     buffer[1] = 0;
     buffer[2] = 1;
@@ -521,6 +525,7 @@ void io_seproxyhal_nfc_power(bool forceInit)
 
 #ifdef HAVE_SE_TOUCH
 #ifdef HAVE_TOUCH_READ_DEBUG_DATA_SYSCALL
+#ifdef HAVE_GT1151_TOUCH
 /**
  * @brief Set touch in read raw data mode and read raw data
  *
@@ -529,7 +534,7 @@ void io_seproxyhal_nfc_power(bool forceInit)
  */
 bolos_bool_t io_seproxyhal_touch_debug_read_sensi(uint8_t *sensi_data)
 {
-    return touch_switch_debug_mode_and_read(TOUCH_DEBUG_READ_RAW_DATA, sensi_data);
+    return touch_switch_debug_mode_and_read(TOUCH_DEBUG_READ_RAW_DATA, 0, sensi_data);
 }
 
 /**
@@ -540,7 +545,7 @@ bolos_bool_t io_seproxyhal_touch_debug_read_sensi(uint8_t *sensi_data)
  */
 bolos_bool_t io_seproxyhal_touch_debug_read_diff_data(uint8_t *diff_data)
 {
-    return touch_switch_debug_mode_and_read(TOUCH_DEBUG_READ_DIFF_DATA, diff_data);
+    return touch_switch_debug_mode_and_read(TOUCH_DEBUG_READ_DIFF_DATA, 0, diff_data);
 }
 
 /**
@@ -551,8 +556,23 @@ bolos_bool_t io_seproxyhal_touch_debug_read_diff_data(uint8_t *diff_data)
  */
 bolos_bool_t io_seproxyhal_touch_debug_end(void)
 {
-    return touch_switch_debug_mode_and_read(TOUCH_DEBUG_END, NULL);
+    return touch_switch_debug_mode_and_read(TOUCH_DEBUG_END, 0, NULL);
 }
+#endif
+#ifdef HAVE_EWD_720_TOUCH
+/**
+ * @brief Read ewd720 touch offset data
+ *
+ * @param diff_data Pointer to the buffer to store diff data
+ * @return BOLOS_TRUE/BOLOS_FALSE
+ */
+bolos_bool_t io_seproxyhal_touch_debug_read_sensor_buffer(uint8_t  buffer_type,
+                                                          uint8_t *sensor_buffer)
+{
+    return touch_switch_debug_mode_and_read(
+        TOUCH_DEBUG_READ_SENSOR_BUFFER, buffer_type, sensor_buffer);
+}
+#endif
 #endif
 #endif
 

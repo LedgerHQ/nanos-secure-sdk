@@ -29,10 +29,29 @@ extern "C" {
 #define NO_MORE_OBJ_ERROR -3
 #define NBGL_NO_TUNE      NB_TUNES
 
-#define NB_MAX_SUGGESTION_BUTTONS 4
-
 #ifdef HAVE_SE_TOUCH
+#define NB_MAX_SUGGESTION_BUTTONS 4
+#ifdef TARGET_STAX
+#define NB_MAX_VISIBLE_SUGGESTION_BUTTONS NB_MAX_SUGGESTION_BUTTONS
+#define TOUCHABLE_HEADER_BAR_HEIGHT       88
+#define TOUCHABLE_MAIN_BAR_HEIGHT         88
+#define TOUCHABLE_BAR_HEIGHT              88
+#define TOUCHABLE_DETAILLED_BAR_HEIGHT    88
+#define SIMPLE_FOOTER_HEIGHT              104
+#define SMALL_CENTERING_HEADER            24
+#else  // TARGET_STAX
+// only 2 buttons are visible at the same time on Europa
+#define NB_MAX_VISIBLE_SUGGESTION_BUTTONS 2
+#define TOUCHABLE_HEADER_BAR_HEIGHT       96
+#define TOUCHABLE_MAIN_BAR_HEIGHT         100
+#define TOUCHABLE_BAR_HEIGHT              92
+#define TOUCHABLE_DETAILLED_BAR_HEIGHT    140
+#define SIMPLE_FOOTER_HEIGHT              96
+#define SMALL_CENTERING_HEADER            40
+#endif  // TARGET_STAX
+
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * BORDER_MARGIN)
+
 #else  // HAVE_SE_TOUCH
 // 7 pixels on each side
 #define AVAILABLE_WIDTH (SCREEN_WIDTH - 2 * 7)
@@ -72,13 +91,13 @@ typedef void (*nbgl_layoutButtonCallback_t)(nbgl_layout_t *layout, nbgl_buttonEv
  *
  */
 typedef struct {
-    uint8_t token;            ///< the token that will be used as argument of the callback
-    uint8_t nbPages;          ///< number of pages. (if 0, no navigation)
-    uint8_t activePage;       ///< index of active page (from 0 to nbPages-1).
-    bool    withExitKey;      ///< if set to true, an exit button is drawn, either on the left of
-                              ///< navigation keys or in the center if no navigation
-    bool withSeparationLine;  ///< if set to true, an horizontal line is drawn on top of bar in
-                              ///< light gray
+    uint8_t token;               ///< the token that will be used as argument of the callback
+    uint8_t nbPages;             ///< number of pages. (if 0, no navigation)
+    uint8_t activePage;          ///< index of active page (from 0 to nbPages-1).
+    bool    withExitKey;         ///< if set to true, an exit button is drawn
+    bool    withBackKey;         ///< if set to true, the "back" key is drawn
+    bool    withSeparationLine;  ///< if set to true, an horizontal line is drawn on top of bar in
+                                 ///< light gray
 #ifdef HAVE_PIEZO_SOUND
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played when pressing keys)
 #endif                    // HAVE_PIEZO_SOUND
@@ -152,9 +171,10 @@ typedef struct {
     const nbgl_icon_details_t *iconRight;  ///< a buffer containing the 1BPP icon for icon 2 (can be
                                            ///< NULL). Dimensions must be the same as iconLeft
     const char *subText;                   ///< sub text (can be NULL)
+    bool        large;                     ///< set to true only for the main level of OS settings
     uint8_t     token;     ///< the token that will be used as argument of the callback
     bool        inactive;  ///< if set to true, the bar is grayed-out and cannot be touched
-    bool        centered;  ///< if set to true, the text is centered horizontaly in the bar
+    bool        centered;  ///< DEPRECATED, not used
 #ifdef HAVE_PIEZO_SOUND
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
 #endif                    // HAVE_PIEZO_SOUND
@@ -204,6 +224,8 @@ typedef nbgl_contentTagValueList_t nbgl_layoutTagValueList_t;
  */
 typedef nbgl_contentCenteredInfo_t nbgl_layoutCenteredInfo_t;
 
+#ifdef HAVE_SE_TOUCH
+
 /**
  * @brief This structure contains info to build a centered (vertically and horizontally) area, with
  * a QR Code, a possible text (black, bold) under it, and a possible sub-text (black, regular) under
@@ -214,6 +236,8 @@ typedef struct {
     const char *url;         ///< URL for QR code
     const char *text1;       ///< first text (can be null)
     const char *text2;       ///< second text (can be null)
+    int16_t     offsetY;     ///< vertical shift to apply to this info (if > 0, shift to bottom)
+    bool        centered;    ///< if set to true, center vertically
     bool        largeText1;  ///< if set to true, use 32px font for text1
 } nbgl_layoutQRCode_t;
 
@@ -231,7 +255,7 @@ typedef enum {
 /**
  * @brief This structure contains info to build a pair of buttons, one on top of the other.
  *
- * @note the pair of button is automatically put on bottom of screen
+ * @note the pair of button is automatically put on bottom of screen, in the footer
  */
 typedef struct {
     const char *topText;     ///< up-button text (index 0)
@@ -242,6 +266,22 @@ typedef struct {
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
 #endif                    // HAVE_PIEZO_SOUND
 } nbgl_layoutChoiceButtons_t;
+
+/**
+ * @brief This structure contains info to build a pair of buttons, the small one, with icon, on the
+ * left  of the other.
+ *
+ * @note the pair of button is automatically put on bottom of main container
+ */
+typedef struct {
+    const nbgl_icon_details_t *leftIcon;    ///< a buffer containing the 1BPP icon for left button
+    const char                *rightText;   ///< right-button text
+    uint8_t                    leftToken;   ///< the token used when left button is pressed
+    uint8_t                    rightToken;  ///< the token used when right button is pressed
+#ifdef HAVE_PIEZO_SOUND
+    tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
+#endif                    // HAVE_PIEZO_SOUND
+} nbgl_layoutHorizontalButtons_t;
 
 /**
  * @brief The different styles for a button
@@ -260,7 +300,7 @@ typedef enum {
  */
 typedef struct {
     const char                *text;   ///< button text
-    const nbgl_icon_details_t *icon;   ///< a buffer containing the 1BPP icon for button1
+    const nbgl_icon_details_t *icon;   ///< a buffer containing the 1BPP icon for button
     uint8_t                    token;  ///< the token that will be used as argument of the callback
     nbgl_layoutButtonStyle_t   style;
     bool fittingContent;  ///< if set to true, fit the width of button to text, otherwise full width
@@ -270,6 +310,113 @@ typedef struct {
     tune_index_e tuneId;  ///< if not @ref NBGL_NO_TUNE, a tune will be played
 #endif                    // HAVE_PIEZO_SOUND
 } nbgl_layoutButton_t;
+
+/**
+ * @brief The different types of extended header
+ *
+ */
+typedef enum {
+    HEADER_EMPTY = 0,      ///< empty space, to have a better vertical centering of centered info
+    HEADER_BACK_AND_TEXT,  ///< back key and optional text
+    HEADER_BACK_AND_PROGRESS,  ///< optional back key and progress indicator (only on Stax)
+    HEADER_TITLE,              ///< simple centered text
+    HEADER_EXTENDED_BACK,      ///< back key, centered text and touchable key on the right
+    HEADER_RIGHT_TEXT,         ///< touchable text on the right, with a vertical separation line
+    NB_HEADER_TYPES
+} nbgl_layoutHeaderType_t;
+
+/**
+ * @brief This structure contains info to build a header.
+ *
+ */
+typedef struct {
+    nbgl_layoutHeaderType_t type;  ///< type of header
+    bool separationLine;  ///< if true, a separation line is added at the bottom of this control
+    union {
+        struct {
+            uint16_t height;
+        } emptySpace;  ///< if type is @ref HEADER_EMPTY
+        struct {
+            const char  *text;    ///< can be NULL if no text
+            uint8_t      token;   ///< when back key is pressed
+            tune_index_e tuneId;  ///< when back key is pressed
+        } backAndText;            ///< if type is @ref HEADER_BACK_AND_TEXT
+        struct {
+            uint8_t      activePage;
+            uint8_t      nbPages;
+            bool         withBack;
+            uint8_t      token;   ///< when optional back key is pressed
+            tune_index_e tuneId;  ///< when optional back key is pressed
+        } progressAndBack;        ///< if type is @ref HEADER_BACK_AND_PROGRESS
+        struct {
+            const char *text;
+        } title;  ///< if type is @ref HEADER_TITLE
+        struct {
+            const nbgl_icon_details_t *actionIcon;   ///< right button icon
+            const char                *text;         ///< centered text (can be NULL if no text)
+            uint8_t                    backToken;    ///< when back key is pressed
+            uint8_t                    actionToken;  ///< when right key is pressed
+            tune_index_e               tuneId;       ///< when back key is pressed
+        } extendedBack;                              ///< if type is @ref HEADER_EXTENDED_BACK
+        struct {
+            const char  *text;    ///< touchable text on the right
+            uint8_t      token;   ///< when text is pressed
+            tune_index_e tuneId;  ///< when text is pressed
+        } rightText;              ///< if type is @ref HEADER_RIGHT_TEXT
+    };
+} nbgl_layoutHeader_t;
+
+/**
+ * @brief The different types of extended footer
+ *
+ */
+typedef enum {
+    FOOTER_EMPTY = 0,    ///< empty space, to have a better vertical centering of centered info
+    FOOTER_SIMPLE_TEXT,  ///< simple touchable text in bold
+    FOOTER_DOUBLE_TEXT,  ///< 2 touchable texts in bold, separated by a vertical line (only on Stax)
+    FOOTER_TEXT_AND_NAV,   ///< touchable text in bold on the left, navigation on the right (only on
+                           ///< Europa)
+    FOOTER_NAV,            ///< navigation bar
+    FOOTER_SIMPLE_BUTTON,  ///< simple black or white button (see @ref nbgl_layoutButtonStyle_t)
+    FOOTER_CHOICE_BUTTONS,  ///< double buttons (see @ref nbgl_layoutChoiceButtonsStyle_t)
+    NB_FOOTER_TYPES
+} nbgl_layoutFooterType_t;
+
+/**
+ * @brief This structure contains info to build an extended footer.
+ *
+ */
+typedef struct {
+    nbgl_layoutFooterType_t type;  ///< type of footer
+    bool separationLine;  ///< if true, a separation line is added at the top of this control
+    union {
+        struct {
+            uint16_t height;
+        } emptySpace;  ///< if type is @ref FOOTER_EMPTY
+        struct {
+            const char  *text;
+            uint8_t      token;
+            tune_index_e tuneId;
+        } simpleText;  ///< if type is @ref FOOTER_SIMPLE_TEXT
+        struct {
+            const char  *leftText;
+            const char  *rightText;
+            uint8_t      leftToken;
+            uint8_t      rightToken;
+            tune_index_e tuneId;
+        } doubleText;  ///< if type is @ref FOOTER_DOUBLE_TEXT
+        struct {
+            nbgl_layoutNavigationBar_t navigation;
+            const char                *text;
+            uint8_t                    token;
+            tune_index_e               tuneId;
+        } textAndNav;                              ///< if type is @ref FOOTER_TEXT_AND_NAV
+        nbgl_layoutNavigationBar_t navigation;     ///< if type is @ref FOOTER_NAV
+        nbgl_layoutButton_t        button;         ///< if type is @ref FOOTER_SIMPLE_BUTTON
+        nbgl_layoutChoiceButtons_t choiceButtons;  ///< if type is @ref FOOTER_SIMPLE_BUTTON
+    };
+} nbgl_layoutFooter_t;
+#endif  // HAVE_SE_TOUCH
 
 /**
  * @brief This structure contains info to build a progress bar with info. The progress bar itself is
@@ -320,6 +467,8 @@ int nbgl_layoutAddText(nbgl_layout_t *layout, const char *text, const char *subT
 int nbgl_layoutAddRadioChoice(nbgl_layout_t *layout, const nbgl_layoutRadioChoice_t *choices);
 int nbgl_layoutAddQRCode(nbgl_layout_t *layout, const nbgl_layoutQRCode_t *info);
 int nbgl_layoutAddChoiceButtons(nbgl_layout_t *layout, const nbgl_layoutChoiceButtons_t *info);
+int nbgl_layoutAddHorizontalButtons(nbgl_layout_t                        *layout,
+                                    const nbgl_layoutHorizontalButtons_t *info);
 int nbgl_layoutAddTagValueList(nbgl_layout_t *layout, const nbgl_layoutTagValueList_t *list);
 int nbgl_layoutAddLargeCaseText(nbgl_layout_t *layout, const char *text);
 int nbgl_layoutAddSeparationLine(nbgl_layout_t *layout);
@@ -339,6 +488,8 @@ int nbgl_layoutAddSplitFooter(nbgl_layout_t *layout,
                               const char    *rightText,
                               uint8_t        rightToken,
                               tune_index_e   tuneId);
+int nbgl_layoutAddHeader(nbgl_layout_t *layout, const nbgl_layoutHeader_t *headerDesc);
+int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_t *footerDesc);
 int nbgl_layoutAddNavigationBar(nbgl_layout_t *layout, const nbgl_layoutNavigationBar_t *info);
 int nbgl_layoutAddBottomButton(nbgl_layout_t             *layout,
                                const nbgl_icon_details_t *icon,
@@ -352,6 +503,11 @@ int nbgl_layoutAddProgressIndicator(nbgl_layout_t *layout,
                                     uint8_t        backToken,
                                     tune_index_e   tuneId);
 int nbgl_layoutAddSpinner(nbgl_layout_t *layout, const char *text, bool fixed);
+int nbgl_layoutAddSwipe(nbgl_layout_t *layout,
+                        uint16_t       swipesMask,
+                        const char    *text,
+                        uint8_t        token,
+                        tune_index_e   tuneId);
 #else   // HAVE_SE_TOUCH
 int nbgl_layoutAddText(nbgl_layout_t                  *layout,
                        const char                     *text,
@@ -420,6 +576,7 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout,
                             bool           enableDigits);
 int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits);
 int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive);
+
 #else   // HAVE_SE_TOUCH
 /* layout objects for pages with keypad (nanos) */
 int nbgl_layoutAddKeypad(nbgl_layout_t     *layout,
