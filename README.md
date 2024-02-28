@@ -49,7 +49,7 @@ In short, to build an app for an OS, you should:
     - `git pull`
     - The last commit should be tagged with the complete version of the SDK (`v<N>.<x>.<y>`)
 - Build the app from your app folder:
-    - `make BOLOS_SDK=<path_to_sdk> TARGET=<target>` where `target` is one of `nanos`, `nanox`, `nanos2`, `stax` (`nanos2` is used for Nano S+ device).
+    - `make BOLOS_SDK=<path_to_sdk> TARGET=<target>` where `target` is one of `nanos`, `nanox`, `nanos2`, `stax`, `europa` (`nanos2` is used for Nano S+ device).
 
 ## About API_LEVEL branches
 
@@ -72,7 +72,9 @@ OS release candidates are only kept in the list when a corresponding OS release 
 | 11      | stax_1.2.0 <br/> stax_1.2.1                                         | :x:
 | 12      | nanox_2.3.0-rc2 <br/> nanos+_1.2.0-rc2                              | :x:
 | 13      | stax_1.3.0                                                          | :x:
-| 14      | stax_1.4.0-rc1                                                      | :heavy_check_mark:
+| 14      | stax_1.4.0-rc1                                                      | :x:
+| 15      | stax_1.4.0-rc2                                                      | :heavy_check_mark:
+| 16      | europa_0.1.0-re1                                                    | :heavy_check_mark:
 
 ### Cherry-picking process:
 
