@@ -422,6 +422,7 @@ typedef struct PACKED__ nbgl_progress_bar_s {
     nbgl_obj_t obj;              // common part
     bool       withBorder;       ///< if set to true, a border in black surround the whole object
     uint8_t    state;            ///< state of the progress, in % (from 0 to 100).
+    uint8_t    previousState;    ///< previous state of the progress, in % (from 0 to 100).
     color_t    foregroundColor;  ///< color of the inner progress bar and border (if applicable)
 } nbgl_progress_bar_t;
 
@@ -597,6 +598,7 @@ typedef struct PACKED__ nbgl_keypad_s {
     color_t textColor;                   ///< color set to digits.
     color_t borderColor;                 ///< color set to key borders
     bool    enableDigits;                ///< if true, Digit keys are enabled
+    bool    partial;                     ///< if true, means that only some keys have changed
     uint8_t digitIndexes[5];             ///< array of digits indexes, 4 bits per digit
 #else                                    // HAVE_SE_TOUCH
     uint8_t selectedKey;  ///< selected key position

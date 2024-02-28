@@ -474,7 +474,8 @@ static void longTouchCallback(nbgl_obj_t            *obj,
 
         // Update progress bar state
         if (new_state != progressBar->state) {
-            progressBar->state = new_state;
+            progressBar->previousState = progressBar->state;
+            progressBar->state         = new_state;
             nbgl_redrawObject((nbgl_obj_t *) progressBar, false, false);
             // Ensure progress bar is fully drawn
             // before calling the callback.
@@ -4364,6 +4365,8 @@ int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout,
     if ((keypad == NULL) || (keypad->obj.type != KEYPAD)) {
         return -1;
     }
+    // partial redraw only if only validate and backspace have changed
+    keypad->partial         = (keypad->enableDigits == enableDigits);
     keypad->enableValidate  = enableValidate;
     keypad->enableBackspace = enableBackspace;
     keypad->enableDigits    = enableDigits;

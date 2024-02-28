@@ -533,6 +533,8 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
         }
         else if (nav->navType == NAV_WITH_BUTTONS) {
             nbgl_layoutFooter_t footerDesc;
+            bool                drawFooter = true;
+
             if (nav->skipText != NULL) {
                 nbgl_layoutHeader_t headerDesc = {.type             = HEADER_RIGHT_TEXT,
                                                   .separationLine   = true,
@@ -566,14 +568,19 @@ nbgl_page_t *nbgl_pageDrawGenericContentExt(nbgl_layoutTouchCallback_t       onA
                     footerDesc.textAndNav.navigation.tuneId      = nav->tuneId;
                 }
             }
-            else {
+            else if (nav->navWithButtons.quitText != NULL) {
                 // simple footer
                 footerDesc.type              = FOOTER_SIMPLE_TEXT;
                 footerDesc.simpleText.text   = nav->navWithButtons.quitText;
                 footerDesc.simpleText.token  = nav->quitToken;
                 footerDesc.simpleText.tuneId = nav->tuneId;
             }
-            availableHeight -= nbgl_layoutAddExtendedFooter(layout, &footerDesc);
+            else {
+                drawFooter = false;
+            }
+            if (drawFooter) {
+                availableHeight -= nbgl_layoutAddExtendedFooter(layout, &footerDesc);
+            }
 
 #ifdef TARGET_STAX
             if (nav->progressIndicator) {

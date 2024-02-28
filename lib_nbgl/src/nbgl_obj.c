@@ -33,7 +33,7 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static void extendRefreshArea(nbgl_obj_t *obj);
+static void extendRefreshArea(nbgl_area_t *obj);
 
 /**********************
  *  STATIC VARIABLES
@@ -43,6 +43,9 @@ static nbgl_area_t refreshArea;
 
 // boolean used to enable/forbid drawing/refresh
 static bool objDrawingDisabled;
+
+// boolean used to indicate a manual refresh area extension
+static bool objRefreshAreaDone;
 
 /**********************
  *      VARIABLES
@@ -613,24 +616,45 @@ static void draw_progressBar(nbgl_progress_bar_t *obj, nbgl_obj_t *prevObj, bool
     // inherit background from parent
     obj->obj.area.backgroundColor = obj->obj.parent->area.backgroundColor;
 
-    // draw external part if necessary
-    if (obj->withBorder) {
-        nbgl_drawRoundedBorderedRect((nbgl_area_t *) obj,
-                                     RADIUS_0_PIXELS,
-                                     stroke,
-                                     obj->obj.area.backgroundColor,
-                                     obj->foregroundColor);
+    levelWidth = MIN(obj->obj.area.width * obj->state / 100, obj->obj.area.width);
+    // if previous state is not nul, we will just draw the small added part
+    if (obj->previousState == 0) {
+        // draw external part if necessary
+        if (obj->withBorder) {
+            nbgl_drawRoundedBorderedRect((nbgl_area_t *) obj,
+                                         RADIUS_0_PIXELS,
+                                         stroke,
+                                         obj->obj.area.backgroundColor,
+                                         obj->foregroundColor);
+        }
+        else {
+            nbgl_drawRoundedRect(
+                (nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->obj.area.backgroundColor);
+        }
+        // draw level
+        if (levelWidth > 0) {
+            uint16_t tmp_width  = obj->obj.area.width;
+            obj->obj.area.width = levelWidth;
+            nbgl_drawRoundedRect((nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->foregroundColor);
+            obj->obj.area.width = tmp_width;
+        }
     }
     else {
-        nbgl_drawRoundedRect((nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->obj.area.backgroundColor);
-    }
-    // draw level
-    levelWidth = MIN(obj->obj.area.width * obj->state / 100, obj->obj.area.width);
-    if (levelWidth > 0) {
-        uint16_t tmp_width  = obj->obj.area.width;
-        obj->obj.area.width = levelWidth;
-        nbgl_drawRoundedRect((nbgl_area_t *) obj, RADIUS_0_PIXELS, obj->foregroundColor);
-        obj->obj.area.width = tmp_width;
+        uint16_t previousLevelWidth
+            = MIN(obj->obj.area.width * obj->previousState / 100, obj->obj.area.width);
+        nbgl_area_t area;
+        memcpy(&area, &obj->obj.area, sizeof(nbgl_area_t));
+        // draw added level
+        area.width = levelWidth - previousLevelWidth;
+        if (area.width > 0) {
+            area.x0 += previousLevelWidth;
+            nbgl_drawRoundedRect((nbgl_area_t *) &area, RADIUS_0_PIXELS, obj->foregroundColor);
+        }
+        // reset previous state to be sure that in case of full redraw of the screen we redraw the
+        // full bar
+        obj->previousState = 0;
+        extendRefreshArea(&area);
+        objRefreshAreaDone = true;
     }
 #else   // HAVE_SE_TOUCH
     uint8_t  stroke = 1;  // 1 pixels for border
@@ -1312,6 +1336,7 @@ static void
 draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
 {
     LOG_DEBUG(OBJ_LOGGER, "draw_object() obj->type = %d, prevObj = %p\n", obj->type, prevObj);
+    objRefreshAreaDone = false;
     switch (obj->type) {
         case SCREEN:
             draw_screen((nbgl_container_t *) obj);
@@ -1385,8 +1410,8 @@ draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
 #ifdef HAVE_SERIALIZED_NBGL
     io_seproxyhal_send_nbgl_serialized(NBGL_DRAW_OBJ, obj);
 #endif
-    if (!objDrawingDisabled) {
-        extendRefreshArea(obj);
+    if ((!objDrawingDisabled) && (!objRefreshAreaDone)) {
+        extendRefreshArea(&obj->area);
     }
 }
 
@@ -1394,29 +1419,29 @@ draw_object(nbgl_obj_t *obj, nbgl_obj_t *prevObj, bool computePosition)
  * @brief internal function used when an object is drawn, to extend the area to be refresh in
  * display
  *
- * @param obj the object drawn
+ * @param area area to refresh
  */
-static void extendRefreshArea(nbgl_obj_t *obj)
+static void extendRefreshArea(nbgl_area_t *area)
 {
     int16_t x1, y1;  // bottom right corner
     x1 = refreshArea.x0 + refreshArea.width;
     y1 = refreshArea.y0 + refreshArea.height;
 
     // if obj top-left is on left of current top-left corner, move top-left corner
-    if (obj->area.x0 < refreshArea.x0) {
-        refreshArea.x0 = obj->area.x0;
+    if (area->x0 < refreshArea.x0) {
+        refreshArea.x0 = area->x0;
     }
     // if obj bottom-right is on right of current bottom-right corner, move bottom-right corner
-    if (((obj->area.x0 + obj->area.width) > x1) || (refreshArea.width == 0)) {
-        x1 = obj->area.x0 + obj->area.width;
+    if (((area->x0 + area->width) > x1) || (refreshArea.width == 0)) {
+        x1 = area->x0 + area->width;
     }
     // if obj top-left is on top of current top-left corner, move top-left corner
-    if (obj->area.y0 < refreshArea.y0) {
-        refreshArea.y0 = obj->area.y0;
+    if (area->y0 < refreshArea.y0) {
+        refreshArea.y0 = area->y0;
     }
     // if obj bottom-right is on bottom of current bottom-right corner, move bottom-right corner
-    if (((obj->area.y0 + obj->area.height) > y1) || (refreshArea.height == 0)) {
-        y1 = obj->area.y0 + obj->area.height;
+    if (((area->y0 + area->height) > y1) || (refreshArea.height == 0)) {
+        y1 = area->y0 + area->height;
     }
 
     // sanity check
@@ -1441,8 +1466,8 @@ static void extendRefreshArea(nbgl_obj_t *obj)
     refreshArea.height = y1 - refreshArea.y0;
 
     // revaluate area bpp
-    if (obj->area.bpp > refreshArea.bpp) {
-        refreshArea.bpp = obj->area.bpp;
+    if (area->bpp > refreshArea.bpp) {
+        refreshArea.bpp = area->bpp;
     }
 }
 

@@ -132,34 +132,37 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
     char        key_value;
 
     rectArea.backgroundColor = keypad->obj.area.backgroundColor;
-    rectArea.y0              = keypad->obj.area.y0 + DIGIT_OFFSET_Y;
+    // only draw digits if not a partial refresh
+    if (!keypad->partial) {
+        rectArea.y0 = keypad->obj.area.y0 + DIGIT_OFFSET_Y;
 
-    // First row of keys: 1 2 3
-    for (i = 0; i < 3; i++) {
-        key_value = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
+        // First row of keys: 1 2 3
+        for (i = 0; i < 3; i++) {
+            key_value = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
 
-        rectArea.x0 = keypad->obj.area.x0 + i * KEY_WIDTH;
-        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
-        nbgl_drawText(
-            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
-    }
-    // Second row: 4 5 6
-    rectArea.y0 += KEYPAD_KEY_HEIGHT;
-    for (; i < 6; i++) {
-        key_value   = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
-        rectArea.x0 = keypad->obj.area.x0 + (i - 3) * KEY_WIDTH;
-        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
-        nbgl_drawText(
-            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
-    }
-    // Third row: 7 8 9
-    rectArea.y0 += KEYPAD_KEY_HEIGHT;
-    for (; i < 9; i++) {
-        key_value   = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
-        rectArea.x0 = keypad->obj.area.x0 + (i - 6) * KEY_WIDTH;
-        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
-        nbgl_drawText(
-            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
+            rectArea.x0 = keypad->obj.area.x0 + i * KEY_WIDTH;
+            rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+            nbgl_drawText(
+                &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
+        }
+        // Second row: 4 5 6
+        rectArea.y0 += KEYPAD_KEY_HEIGHT;
+        for (; i < 6; i++) {
+            key_value   = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
+            rectArea.x0 = keypad->obj.area.x0 + (i - 3) * KEY_WIDTH;
+            rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+            nbgl_drawText(
+                &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
+        }
+        // Third row: 7 8 9
+        rectArea.y0 += KEYPAD_KEY_HEIGHT;
+        for (; i < 9; i++) {
+            key_value   = GET_DIGIT_INDEX(keypad, (i + 1)) + 0x30;
+            rectArea.x0 = keypad->obj.area.x0 + (i - 6) * KEY_WIDTH;
+            rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+            nbgl_drawText(
+                &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
+        }
     }
     // 4th raw, Backspace, 0 and Validate
     // draw backspace
@@ -182,24 +185,40 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
                             keypad->enableBackspace ? BLACK : WHITE);
     }
 
-    // draw 0
-    key_value   = GET_DIGIT_INDEX(keypad, 0) + 0x30;
-    rectArea.x0 = keypad->obj.area.x0 + KEY_WIDTH;
-    rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
-    rectArea.y0 = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3 + DIGIT_OFFSET_Y;
-    nbgl_drawText(
-        &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
+    // only draw '0' if not a partial refresh
+    if (!keypad->partial) {
+        // draw 0
+        key_value   = GET_DIGIT_INDEX(keypad, 0) + 0x30;
+        rectArea.x0 = keypad->obj.area.x0 + KEY_WIDTH;
+        rectArea.x0 += (KEY_WIDTH - nbgl_getCharWidth(LARGE_MEDIUM_FONT, &key_value)) / 2;
+        rectArea.y0 = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3 + DIGIT_OFFSET_Y;
+        nbgl_drawText(
+            &rectArea, &key_value, 1, LARGE_MEDIUM_FONT, keypad->enableDigits ? BLACK : WHITE);
+    }
 
-    // draw validate on gray with white background if not enabled
+    // draw white background if validate not enabled
     if (!keypad->enableValidate) {
-        rectArea.width  = VALIDATE_ICON.width;
-        rectArea.height = VALIDATE_ICON.height;
-        rectArea.bpp    = NBGL_BPP_1;
-        rectArea.x0     = keypad->obj.area.x0 + 2 * KEY_WIDTH + (KEY_WIDTH - rectArea.width) / 2;
-        rectArea.y0     = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3
-                      + (KEYPAD_KEY_HEIGHT - rectArea.height) / 2;
+        rectArea.width           = KEY_WIDTH - 1;
+        rectArea.height          = KEYPAD_KEY_HEIGHT - 4;
+        rectArea.bpp             = NBGL_BPP_1;
+        rectArea.x0              = keypad->obj.area.x0 + 2 * KEY_WIDTH + 1;
+        rectArea.y0              = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3 + 4;
         rectArea.backgroundColor = WHITE;
         nbgl_frontDrawRect(&rectArea);
+        /// draw horizontal line
+        rectArea.backgroundColor = keypad->obj.area.backgroundColor;
+        rectArea.x0              = keypad->obj.area.x0 + 2 * KEY_WIDTH;
+        rectArea.y0              = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3;
+        rectArea.width           = KEY_WIDTH;
+        rectArea.height          = 4;
+        nbgl_frontDrawHorizontalLine(&rectArea, 0x1, keypad->borderColor);  // 1st line (top)
+        /// then draw vertical line
+        rectArea.backgroundColor = keypad->borderColor;
+        rectArea.x0              = keypad->obj.area.x0 + 2 * KEY_WIDTH;
+        rectArea.y0              = keypad->obj.area.y0 + KEYPAD_KEY_HEIGHT * 3;
+        rectArea.width           = 1;
+        rectArea.height          = KEYPAD_KEY_HEIGHT;
+        nbgl_frontDrawRect(&rectArea);  // 1st full line, on the left
     }
     else {
         // if enabled, draw icon in white on a black background
@@ -227,11 +246,14 @@ static void keypadDrawDigits(nbgl_keypad_t *keypad)
 
 static void keypadDraw(nbgl_keypad_t *keypad)
 {
-    // At first, draw grid
-    keypadDrawGrid(keypad);
+    if (!keypad->partial) {
+        // At first, draw grid
+        keypadDrawGrid(keypad);
+    }
 
     // then draw key content
     keypadDrawDigits(keypad);
+    keypad->partial = false;
 }
 
 /**********************

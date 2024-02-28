@@ -330,7 +330,7 @@ typedef enum {
  *
  */
 typedef struct {
-    nbgl_layoutHeaderType_t type;  ///< type of footer
+    nbgl_layoutHeaderType_t type;  ///< type of header
     bool separationLine;  ///< if true, a separation line is added at the bottom of this control
     union {
         struct {

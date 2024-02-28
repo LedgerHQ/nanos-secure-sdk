@@ -389,6 +389,8 @@ static void displayReviewPage(uint8_t page, bool forceFullRefresh)
 #ifdef TARGET_STAX
         navInfo.navWithTap.nextPageText = NULL;
 #else   // TARGET_STAX
+        // for forward only review without known length...
+        // if we don't do that we cannot remove the '>' in the navigation bar at the last page
         navInfo.nbPages                           = navInfo.activePage + 1;
 #endif  // TARGET_STAX
         content.infoLongPress.longPressToken = CONFIRM_TOKEN;
