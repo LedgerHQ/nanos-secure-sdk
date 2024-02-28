@@ -32,7 +32,7 @@ bool bip32_path_read(const uint8_t *in, size_t in_len, uint32_t *out, size_t out
     size_t offset = 0;
 
     for (size_t i = 0; i < out_len; i++) {
-        if (offset > in_len) {
+        if (offset + 4 > in_len) {
             return false;
         }
         out[i] = read_u32_be(in, offset);
@@ -53,7 +53,7 @@ bool bip32_path_format(const uint32_t *bip32_path, size_t bip32_path_len, char *
     for (uint16_t i = 0; i < bip32_path_len; i++) {
         size_t written;
 
-        snprintf(out + offset, out_len - offset, "%d", bip32_path[i] & 0x7FFFFFFFu);
+        snprintf(out + offset, out_len - offset, "%u", bip32_path[i] & 0x7FFFFFFFu);
         written = strlen(out + offset);
         if (written == 0 || written >= out_len - offset) {
             memset(out, 0, out_len);
