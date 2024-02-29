@@ -277,11 +277,22 @@ typedef union {
 } nbgl_content_u;
 
 /**
+ * @brief prototype of function to be called when an action on a content object occurs
+ * @param token integer passed at content object initialization
+ * @param index when the object touched is a list of radio buttons, gives the index of the activated
+ * @param page index of the current page, can be used to restart the use_case directly at the right
+ * page button
+ */
+typedef void (*nbgl_contentActionCallback_t)(int token, uint8_t index, int page);
+
+/**
  * @brief This structure contains data to build a content
  */
 typedef struct {
     nbgl_contentType_t type;  ///< type of page content in the content union
     nbgl_content_u     content;
+    nbgl_contentActionCallback_t
+        contentActionCallback;  ///< callback to be called when an action on an object occurs
 } nbgl_content_t;
 
 #ifdef __cplusplus

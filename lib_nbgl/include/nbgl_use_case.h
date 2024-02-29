@@ -119,6 +119,24 @@ typedef void (*nbgl_actionCallback_t)(uint8_t page);
  */
 typedef void (*nbgl_pinValidCallback_t)(const uint8_t *content, uint8_t page);
 
+/**
+ * @brief prototype of content navigation callback function
+ * @param contentIndex content index (0->(nbContents-1)) that is needed by the lib
+ * @param content content to fill
+ */
+typedef void (*nbgl_contentCallback_t)(uint8_t contentIndex, nbgl_content_t *content);
+
+typedef struct {
+    bool callback_call_needed;  ///< indicates whether contents should be retrieved using
+                                ///< contentsList or contentGetterCallback
+    union {
+        const nbgl_content_t *contentsList;  ///< array of nbgl_content_t (nbContents items).
+        nbgl_contentCallback_t
+            contentGetterCallback;  ///< function to call to retrieve a given content
+    };
+    uint8_t nbContents;  ///< number of contents
+} nbgl_genericContents_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -161,6 +179,11 @@ void nbgl_useCaseSettings(const char                *settingsTitle,
                           nbgl_callback_t            quitCallback,
                           nbgl_navCallback_t         navCallback,
                           nbgl_layoutTouchCallback_t controlsCallback);
+void nbgl_useCaseGenericSettings(const char                   *appName,
+                                 uint8_t                       initPage,
+                                 const nbgl_genericContents_t *settingContents,
+                                 const nbgl_contentInfoList_t *infosList,
+                                 nbgl_callback_t               quitCallback);
 void nbgl_useCaseChoice(const nbgl_icon_details_t *icon,
                         const char                *message,
                         const char                *subMessage,
