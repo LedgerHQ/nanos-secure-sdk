@@ -113,3 +113,75 @@ uint32_t cx_crc32(const void *buf, size_t len)
 {
     return cx_crc32_update(CX_CRC32_INIT, buf, len);
 }
+
+// At some point this could/should be migrated to the OS
+// Meanwhile, it's implemented here
+cx_err_t cx_bn_gf2_n_mul(cx_bn_t       bn_r,
+                         const cx_bn_t bn_a,
+                         const cx_bn_t bn_b,
+                         const cx_bn_t bn_n,
+                         const cx_bn_t bn_h __attribute__((unused)))
+{
+    cx_err_t error = CX_OK;
+    uint32_t degree, nbits_a, nbits_b;
+
+    // Ensure bn_r is distinct from bn_a and bn_b
+    if (bn_r == bn_a || bn_r == bn_b) {
+        error = CX_INVALID_PARAMETER;
+        goto end;
+    }
+
+    // Calculate the degree of the modulus polynomial
+    CX_CHECK(cx_bn_cnt_bits(bn_n, &degree));
+    degree--;
+
+    CX_CHECK(cx_bn_cnt_bits(bn_a, &nbits_a));
+    CX_CHECK(cx_bn_cnt_bits(bn_b, &nbits_b));
+
+    // Ensure both operands are in field
+    if (degree < 1 || nbits_a > degree || nbits_b > degree) {
+        error = CX_INVALID_PARAMETER;
+        goto end;
+    }
+
+    // Preliminaries
+    cx_bn_t  bn_tempa, bn_copy;
+    uint32_t bit_indexb = 0;
+    size_t   nbytes;
+    bool     bit_set = 0;
+
+    CX_CHECK(cx_bn_nbytes(bn_n, &nbytes));
+    CX_CHECK(cx_bn_alloc(&bn_tempa, nbytes));
+    CX_CHECK(cx_bn_alloc(&bn_copy, nbytes));
+
+    CX_CHECK(cx_bn_copy(bn_tempa, bn_a));
+    CX_CHECK(cx_bn_set_u32(bn_r, (uint32_t) 0));
+
+    // Main loop for multiplication
+    if (nbits_a) {
+        while (nbits_b > bit_indexb) {
+            CX_CHECK(cx_bn_tst_bit(bn_b, bit_indexb, &bit_set));
+            if (bit_set) {
+                CX_CHECK(cx_bn_copy(bn_copy, bn_r));
+                CX_CHECK(cx_bn_xor(bn_r, bn_tempa, bn_copy));
+            }
+
+            CX_CHECK(cx_bn_shl(bn_tempa, 1));
+            CX_CHECK(cx_bn_tst_bit(bn_tempa, degree, &bit_set));
+
+            if (bit_set) {
+                CX_CHECK(cx_bn_copy(bn_copy, bn_tempa));
+                CX_CHECK(cx_bn_xor(bn_tempa, bn_n, bn_copy));
+            }
+
+            bit_indexb++;
+        }
+    }
+
+    // Clean up
+    CX_CHECK(cx_bn_destroy(&bn_tempa));
+    CX_CHECK(cx_bn_destroy(&bn_copy));
+
+end:
+    return error;
+}
