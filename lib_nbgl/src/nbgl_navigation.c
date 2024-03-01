@@ -171,10 +171,8 @@ void nbgl_navigationPopulate(nbgl_container_t *navContainer,
         button->obj.area.width  = BUTTON_DIAMETER;
         button->obj.area.height = BUTTON_DIAMETER;
         button->radius          = BUTTON_RADIUS;
-#ifdef TARGET_STAX
-        button->icon = &C_cross32px;
-#else   // TARGET_STAX
-        button->icon                 = &C_cross40px;
+        button->icon            = &CLOSE_ICON;
+#ifndef TARGET_STAX
         button->obj.alignmentMarginX = (nbPages > 1) ? 8 : 0;
 #endif  // TARGET_STAX
 
@@ -208,7 +206,7 @@ void nbgl_navigationPopulate(nbgl_container_t *navContainer,
             button->obj.alignment = MID_LEFT;
         }
 #else   // TARGET_STAX
-        button->icon                 = &C_Back40px;
+        button->icon = &C_Chevron_Back_40px;
         // align on the right of the container, leaving space for "Next" button
         button->obj.alignment        = MID_RIGHT;
         button->obj.alignmentMarginX = NAV_BUTTON_WIDTH;
@@ -237,7 +235,7 @@ void nbgl_navigationPopulate(nbgl_container_t *navContainer,
     button->obj.alignmentMarginX = INTERNAL_SMALL_MARGIN;
     button->obj.alignTo          = navContainer->children[PREVIOUS_PAGE_INDEX];
 #else   // TARGET_STAX
-    button->icon = &C_Next40px;
+    button->icon = &C_Chevron_Next_40px;
 #endif  // TARGET_STAX
     button->obj.alignment                   = MID_RIGHT;
     button->obj.touchMask                   = (1 << TOUCHED);

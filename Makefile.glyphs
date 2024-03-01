@@ -39,10 +39,11 @@ ifneq ($(USE_NBGL),0)
 #
 # search icons (glyphs) in lib_nbgl/glyphs(_nano) folder of the SDK
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
-GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/))))
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/wallet/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/wallet/))))
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/64px/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/64px/))))
 GLYPH_OPT :=
 else # ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
-GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs_nano/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs_nano/))))
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/nano/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/nano/))))
 #inverse B&W for non Stax
 GLYPH_OPT := --reverse
 endif # ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))

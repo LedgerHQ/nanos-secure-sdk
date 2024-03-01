@@ -243,7 +243,7 @@ nbgl_page_t *nbgl_pageDrawLedgerInfo(nbgl_layoutTouchCallback_t              onA
                                               .text2   = NULL,
                                               .text3   = NULL,
                                               .style   = LARGE_CASE_INFO,
-                                              .icon    = &C_round_check_64px,
+                                              .icon    = &C_Check_Circle_64px,
                                               .offsetY = 0};
 
     layoutDescription.modal          = false;
@@ -363,13 +363,13 @@ nbgl_page_t *nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t              onActionC
     if (info->topRightStyle != NO_BUTTON_STYLE) {
         const nbgl_icon_details_t *icon;
         if (info->topRightStyle == SETTINGS_ICON) {
-            icon = &C_wheel32px;
+            icon = &WHEEL_ICON;
         }
         else if (info->topRightStyle == INFO_ICON) {
-            icon = &C_info_i_32px;
+            icon = &INFO_I_ICON;
         }
         else if (info->topRightStyle == QUIT_ICON) {
-            icon = &C_cross32px;
+            icon = &CLOSE_ICON;
         }
         else {
             return NULL;
@@ -404,13 +404,13 @@ nbgl_page_t *nbgl_pageDrawInfo(nbgl_layoutTouchCallback_t              onActionC
     else if (info->bottomButtonStyle != NO_BUTTON_STYLE) {
         const nbgl_icon_details_t *icon;
         if (info->bottomButtonStyle == SETTINGS_ICON) {
-            icon = &C_wheel32px;
+            icon = &WHEEL_ICON;
         }
         else if (info->bottomButtonStyle == INFO_ICON) {
-            icon = &C_info_i_32px;
+            icon = &INFO_I_ICON;
         }
         else if (info->bottomButtonStyle == QUIT_ICON) {
-            icon = &C_cross32px;
+            icon = &CLOSE_ICON;
         }
         else {
             return NULL;
@@ -453,8 +453,7 @@ nbgl_page_t *nbgl_pageDrawConfirmation(nbgl_layoutTouchCallback_t               
                                           .fittingContent = false,
                                           .tuneId         = info->tuneId,
                                           .onBottom       = true};
-        nbgl_layoutAddBottomButton(
-            layout, PIC(&C_cross32px), info->cancelToken, true, info->tuneId);
+        nbgl_layoutAddBottomButton(layout, PIC(&CLOSE_ICON), info->cancelToken, true, info->tuneId);
         nbgl_layoutAddButton(layout, &buttonInfo);
     }
     else {

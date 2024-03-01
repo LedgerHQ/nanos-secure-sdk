@@ -1317,7 +1317,8 @@ static void draw_image_file(nbgl_image_file_t *obj, nbgl_obj_t *prevObj, bool co
 
     LOG_DEBUG(
         OBJ_LOGGER, "draw_image_file(), x0 = %d, y0 = %d\n", obj->obj.area.x0, obj->obj.area.y0);
-    nbgl_frontDrawImageFile((nbgl_area_t *) obj, obj->buffer, 0, ramBuffer);
+    obj->obj.area.backgroundColor = WHITE;
+    nbgl_frontDrawImageFile((nbgl_area_t *) obj, obj->buffer, BLACK, ramBuffer);
 }
 
 /**

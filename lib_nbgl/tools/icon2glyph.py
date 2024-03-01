@@ -49,8 +49,8 @@ def open_image(file_path) -> Optional[Tuple[Image, int]]:
     # Do not open image with more than 16 colors
     num_colors = len(im.getcolors())
     if num_colors > 16:
-        sys.stderr.write(
-            "Warn: input file {} has too many colors".format(file_path) + "\n")
+        #sys.stderr.write(
+        #    "Warn: input file {} has too many colors".format(file_path) + "\n")
         num_colors = 16
 
     # Compute bits_per_pixel
