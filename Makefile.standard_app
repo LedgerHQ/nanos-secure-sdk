@@ -31,10 +31,9 @@ endif
 #                               NFC                                 #
 #####################################################################
 ifeq ($(ENABLE_NFC), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME), TARGET_STAX))
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME), TARGET_STAX, TARGET_EUROPA))
     HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
     DEFINES += HAVE_NFC
-    SDK_SOURCE_PATH += lib_nfc
 endif
 endif
 
