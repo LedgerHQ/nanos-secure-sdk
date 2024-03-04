@@ -2851,13 +2851,9 @@ int nbgl_layoutAddHeader(nbgl_layout_t *layout, const nbgl_layoutHeader_t *heade
             button->obj.area.width  = BACK_KEY_WIDTH;
             button->obj.area.height = TOUCHABLE_HEADER_BAR_HEIGHT;
             button->text            = NULL;
-#ifdef TARGET_STAX
-            button->icon = PIC(&LEFT_ARROW_ICON);
-#else   // TARGET_STAX
-            button->icon                                = PIC(&C_ic_arrowLeft_40);
-#endif  // TARGET_STAX
-            button->obj.touchMask = (1 << TOUCHED);
-            button->obj.touchId   = BACK_BUTTON_ID;
+            button->icon            = PIC(&LEFT_ARROW_ICON);
+            button->obj.touchMask   = (1 << TOUCHED);
+            button->obj.touchId     = BACK_BUTTON_ID;
             layoutInt->headerContainer->children[layoutInt->headerContainer->nbChildren]
                 = (nbgl_obj_t *) button;
             layoutInt->headerContainer->nbChildren++;

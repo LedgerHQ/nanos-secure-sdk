@@ -103,28 +103,43 @@ extern "C" {
 
 // icons for some objects
 #ifdef TARGET_STAX
-#define SPACE_ICON        C_space32px
-#define BACKSPACE_ICON    C_backspace32px
-#define SHIFT_ICON        C_shift32px
-#define SHIFT_LOCKED_ICON C_shift_lock32px
-#define VALIDATE_ICON     C_check32px
+#define SPACE_ICON        C_Space_32px
+#define BACKSPACE_ICON    C_Erase_32px
+#define SHIFT_ICON        C_Maj_32px
+#define SHIFT_LOCKED_ICON C_Maj_Lock_32px
+#define VALIDATE_ICON     C_Check_32px
 #define RADIO_OFF_ICON    C_radio_inactive_32px
 #define RADIO_ON_ICON     C_radio_active_32px
-#define PUSH_ICON         C_Next32px
-#define LEFT_ARROW_ICON   C_leftArrow32px
-#define RIGHT_ARROW_ICON  C_rightArrow32px
+#define PUSH_ICON         C_Chevron_32px
+#define LEFT_ARROW_ICON   C_Back_32px
+#define RIGHT_ARROW_ICON  C_Next_32px
+#define CLOSE_ICON        C_Close_32px
+#define WHEEL_ICON        C_Settings_32px
+#define INFO_I_ICON       C_Info_32px
+#define QRCODE_ICON       C_QRCode_32px
 #else  // TARGET_STAX
-#define SPACE_ICON        C_ic_caps_1_40
-#define BACKSPACE_ICON    C_ic_erase_40
-#define SHIFT_ICON        C_ic_caps_40
-#define SHIFT_LOCKED_ICON C_ic_caps_lock_40
-#define VALIDATE_ICON     C_ic_check_40
+#define SPACE_ICON        C_Space_40px
+#define BACKSPACE_ICON    C_Erase_40px
+#define SHIFT_ICON        C_Maj_40px
+#define SHIFT_LOCKED_ICON C_Maj_Lock_40px
+#define VALIDATE_ICON     C_Check_40px
 #define RADIO_OFF_ICON    C_radio_inactive_40
 #define RADIO_ON_ICON     C_radio_active_40
-#define PUSH_ICON         C_ic_push_40
-#define LEFT_ARROW_ICON   C_ic_arrowLeft_40
-#define RIGHT_ARROW_ICON  C_ic_arrowRight_40
+#define PUSH_ICON         C_Chevron_40px
+#define LEFT_ARROW_ICON   C_Back_40px
+#define RIGHT_ARROW_ICON  C_Next_40px
+#define CLOSE_ICON        C_Close_40px
+#define WHEEL_ICON        C_Settings_40px
+#define INFO_I_ICON       C_Info_40px
+#define QRCODE_ICON       C_QRCode_40px
 #endif  // TARGET_STAX
+
+// For backward compatibility, to be remove later
+#define C_warning64px        C_Warning_64px
+#define C_round_warning_64px C_Important_Circle_64px
+#define C_round_check_64px   C_Check_Circle_64px
+#define C_Message_64px       C_Review_64px
+#define C_leftArrow32px      C_Back_32px
 
 /**********************
  *      TYPEDEFS

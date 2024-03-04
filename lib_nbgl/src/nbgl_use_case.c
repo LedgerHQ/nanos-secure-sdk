@@ -362,7 +362,7 @@ static void pageCallback(int token, uint8_t index)
 
 #ifdef TARGET_STAX
         nbgl_layoutAddBottomButton(
-            addressConfirmationContext.modalLayout, &C_cross32px, 0, true, TUNE_TAP_CASUAL);
+            addressConfirmationContext.modalLayout, &CLOSE_ICON, 0, true, TUNE_TAP_CASUAL);
 #else   // TARGET_STAX
         nbgl_layoutAddFooter(addressConfirmationContext.modalLayout, "Close", 0, TUNE_TAP_CASUAL);
 #endif  // TARGET_STAX
@@ -925,11 +925,7 @@ static void displayAddressPage(uint8_t page, bool forceFullRefresh)
     content.isTouchableTitle = false;
     if (page == 0) {
 #ifdef NBGL_QRCODE
-#ifdef TARGET_STAX
-        content.tagValueConfirm.detailsButtonIcon = &C_QRcode32px;
-#else   // TARGET_STAX
-        content.tagValueConfirm.detailsButtonIcon = &C_ic_qr_40;
-#endif  // TARGET_STAX
+        content.tagValueConfirm.detailsButtonIcon = &QRCODE_ICON;
 #ifndef TARGET_STAX
         // On Europa, only use "Show as QR" when it's not the last page
         if (navInfo.nbPages > 1) {
@@ -1010,13 +1006,9 @@ static void displaySkipWarning(void)
         .centeredInfo.text1 = "Skip message review?",
         .centeredInfo.text2
         = "Skip only if you trust the\nsource. If you skip, you won't\nbe able to review it again.",
-        .centeredInfo.text3 = NULL,
-        .centeredInfo.style = LARGE_CASE_INFO,
-#ifdef TARGET_STAX
-        .centeredInfo.icon = &C_warning64px,
-#else   // TARGET_STAX
-        .centeredInfo.icon = &C_ic_warning_new_64,
-#endif  // TARGET_STAX
+        .centeredInfo.text3   = NULL,
+        .centeredInfo.style   = LARGE_CASE_INFO,
+        .centeredInfo.icon    = &C_Warning_64px,
         .centeredInfo.offsetY = 0,
         .confirmationText     = "Yes, skip",
         .confirmationToken    = SKIP_TOKEN,
@@ -1565,13 +1557,9 @@ void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t qui
         pageContext = nbgl_pageDrawLedgerInfo(&pageCallback, &ticker, message, QUIT_TOKEN);
     }
     else {
-        nbgl_pageInfoDescription_t info = {.bottomButtonStyle = NO_BUTTON_STYLE,
-                                           .footerText        = NULL,
-#ifdef TARGET_STAX
-                                           .centeredInfo.icon = &C_round_cross_64px,
-#else   // TARGET_STAX
-                                           .centeredInfo.icon = &C_ic_denied_64,
-#endif  // TARGET_STAX
+        nbgl_pageInfoDescription_t info = {.bottomButtonStyle    = NO_BUTTON_STYLE,
+                                           .footerText           = NULL,
+                                           .centeredInfo.icon    = &C_Denied_Circle_64px,
                                            .centeredInfo.offsetY = 0,
                                            .centeredInfo.onTop   = false,
                                            .centeredInfo.style   = LARGE_CASE_INFO,
@@ -1584,7 +1572,7 @@ void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t qui
                                            .topRightStyle        = NO_BUTTON_STYLE,
                                            .actionButtonText     = NULL,
                                            .tuneId               = TUNE_TAP_CASUAL};
-        pageContext = nbgl_pageDrawInfo(&pageCallback, &ticker, &info);
+        pageContext                     = nbgl_pageDrawInfo(&pageCallback, &ticker, &info);
     }
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
@@ -1651,23 +1639,19 @@ void nbgl_useCaseConfirm(const char     *message,
 {
     // Don't reset callback or nav context as this is just a modal.
 
-    nbgl_pageConfirmationDescription_t info = {.cancelText         = cancelText,
-                                               .centeredInfo.text1 = message,
-                                               .centeredInfo.text2 = subMessage,
-                                               .centeredInfo.text3 = NULL,
-                                               .centeredInfo.style = LARGE_CASE_INFO,
-#ifdef TARGET_STAX
-                                               .centeredInfo.icon = &C_round_warning_64px,
-#else   // TARGET_STAX
-                                               .centeredInfo.icon = &C_ic_warning_64,
-#endif  // TARGET_STAX
+    nbgl_pageConfirmationDescription_t info = {.cancelText           = cancelText,
+                                               .centeredInfo.text1   = message,
+                                               .centeredInfo.text2   = subMessage,
+                                               .centeredInfo.text3   = NULL,
+                                               .centeredInfo.style   = LARGE_CASE_INFO,
+                                               .centeredInfo.icon    = &C_Important_Circle_64px,
                                                .centeredInfo.offsetY = 0,
                                                .confirmationText     = confirmText,
                                                .confirmationToken    = CHOICE_TOKEN,
                                                .tuneId               = TUNE_TAP_CASUAL,
                                                .modal                = true};
-    onModalConfirm   = callback;
-    modalPageContext = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
+    onModalConfirm                          = callback;
+    modalPageContext                        = nbgl_pageDrawConfirmation(&pageModalCallback, &info);
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
 }
 
@@ -1697,7 +1681,7 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon,
 #ifdef TARGET_STAX
                                        .centeredInfo.text3 = NULL,
 #else   // TARGET_STAX
-                                       .centeredInfo.text3        = "Swipe to review",
+                                       .centeredInfo.text3 = "Swipe to review",
 #endif  // TARGET_STAX
                                        .centeredInfo.style   = LARGE_CASE_GRAY_INFO,
                                        .centeredInfo.offsetY = 0,
@@ -1707,8 +1691,8 @@ void nbgl_useCaseReviewStart(const nbgl_icon_details_t *icon,
                                        .tapActionText = "Tap to continue",
                                        .isSwipeable   = false,
 #else   // TARGET_STAX
-                                       .tapActionText             = NULL,
-                                       .isSwipeable               = true,
+                                       .tapActionText      = NULL,
+                                       .isSwipeable        = true,
 #endif  // TARGET_STAX
                                        .tapActionToken   = CONTINUE_TOKEN,
                                        .topRightStyle    = NO_BUTTON_STYLE,
