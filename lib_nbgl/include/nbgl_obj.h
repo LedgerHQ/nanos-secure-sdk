@@ -134,6 +134,13 @@ extern "C" {
 #define QRCODE_ICON       C_QRCode_40px
 #endif  // TARGET_STAX
 
+// For backward compatibility, to be remove later
+#define C_warning64px        C_Warning_64px
+#define C_round_warning_64px C_Important_Circle_64px
+#define C_round_check_64px   C_Check_Circle_64px
+#define C_Message_64px       C_Review_64px
+#define C_leftArrow32px      C_Back_32px
+
 /**********************
  *      TYPEDEFS
  **********************/

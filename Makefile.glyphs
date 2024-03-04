@@ -41,6 +41,12 @@ ifneq ($(USE_NBGL),0)
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/wallet/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/wallet/))))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/64px/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/64px/))))
+ifeq ($(TARGET_NAME),TARGET_STAX)
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/32px/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/32px/))))
+endif
+ifeq ($(TARGET_NAME),TARGET_EUROPA)
+GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/40px/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/40px/))))
+endif
 GLYPH_OPT :=
 else # ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_EUROPA))
 GLYPH_FILES += $(addprefix $(BOLOS_SDK)/lib_nbgl/glyphs/nano/,$(sort $(notdir $(shell find $(BOLOS_SDK)/lib_nbgl/glyphs/nano/))))
