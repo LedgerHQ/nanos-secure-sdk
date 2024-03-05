@@ -233,15 +233,20 @@ void nbgl_touchHandler(nbgl_touchStatePosition_t *touchStatePosition, uint32_t c
     memcpy(&lastTouchedPosition, touchStatePosition, sizeof(nbgl_touchStatePosition_t));
 
     if (touchStatePosition->state == RELEASED) {
-        nbgl_touchType_t swipe = nbgl_detectSwipe(touchStatePosition, &firstTouchedPosition);
+        nbgl_touchType_t swipe    = nbgl_detectSwipe(touchStatePosition, &firstTouchedPosition);
+        bool             consumed = false;
 
         if (swipe != NB_TOUCH_TYPES) {
             // Swipe detected
-            lastPressedObj = getSwipableObject(nbgl_screenGetTop(), swipe);
-            applytouchStatePosition(lastPressedObj, swipe);
+            nbgl_obj_t *swipedObj = getSwipableObject(nbgl_screenGetTop(), swipe);
+            // if a swipable object has been found
+            if (swipedObj) {
+                applytouchStatePosition(swipedObj, swipe);
+                consumed = true;
+            }
         }
-        else if ((lastPressedObj != NULL)
-                 && ((foundObj == lastPressedObj) || (nbgl_screenContainsObj(lastPressedObj)))) {
+        if (!consumed && (lastPressedObj != NULL)
+            && ((foundObj == lastPressedObj) || (nbgl_screenContainsObj(lastPressedObj)))) {
             // very strange if lastPressedObj != foundObj, let's consider that it's a normal release
             // on lastPressedObj make sure lastPressedObj still belongs to current screen before
             // "releasing" it
