@@ -135,11 +135,13 @@ extern "C" {
 #endif  // TARGET_STAX
 
 // For backward compatibility, to be remove later
-#define C_warning64px        C_Warning_64px
-#define C_round_warning_64px C_Important_Circle_64px
-#define C_round_check_64px   C_Check_Circle_64px
-#define C_Message_64px       C_Review_64px
-#define C_leftArrow32px      C_Back_32px
+#define C_warning64px        _Pragma("GCC warning \"Deprecated constant!\"") C_Warning_64px
+#define C_round_warning_64px _Pragma("GCC warning \"Deprecated constant!\"") C_Important_Circle_64px
+#define C_round_check_64px   _Pragma("GCC warning \"Deprecated constant!\"") C_Check_Circle_64px
+#define C_Message_64px       _Pragma("GCC warning \"Deprecated constant!\"") C_Review_64px
+#define C_leftArrow32px      _Pragma("GCC warning \"Deprecated constant!\"") C_Back_32px
+#define C_Next32px           _Pragma("GCC warning \"Deprecated constant!\"") C_Next_32px
+#define C_round_cross_64px   _Pragma("GCC warning \"Deprecated constant!\"") C_Denied_Circle_64px
 
 /**********************
  *      TYPEDEFS
