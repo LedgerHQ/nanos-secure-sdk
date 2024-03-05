@@ -62,6 +62,7 @@ include_directories(../../target/nanox/include)
 endif()
 include_directories(../../include)
 include_directories(../../lib_nbgl/include)
+include_directories(../../lib_nbgl/include/fonts)
 include_directories(../../lib_ux_nbgl)
 
 add_executable(test_nbgl_fonts test_nbgl_fonts.c)
