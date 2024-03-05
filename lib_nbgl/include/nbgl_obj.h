@@ -140,6 +140,8 @@ extern "C" {
 #define C_round_check_64px   C_Check_Circle_64px
 #define C_Message_64px       C_Review_64px
 #define C_leftArrow32px      C_Back_32px
+#define C_Next32px           C_Next_32px
+#define C_round_cross_64px   C_Denied_Circle_64px
 
 /**********************
  *      TYPEDEFS
