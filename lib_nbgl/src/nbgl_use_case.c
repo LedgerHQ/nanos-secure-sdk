@@ -223,7 +223,7 @@ static void genericContextSetPageInfo(uint8_t pageIdx, uint8_t nbElements, bool 
 }
 
 // Helper to get genericContext page info
-static void genericcontextGetPageInfo(uint8_t pageIdx, uint8_t *nbElements, bool *flag)
+static void genericContextGetPageInfo(uint8_t pageIdx, uint8_t *nbElements, bool *flag)
 {
     uint8_t pageData = genericContextPagesInfo[pageIdx / PAGES_PER_UINT8]
                        >> ((pageIdx % PAGES_PER_UINT8) * PAGE_DATA_BITS);
@@ -564,7 +564,7 @@ static const nbgl_content_t *genericContextComputeNextPageParams(uint8_t        
     uint8_t nbElementsInNextPage;
 
     // Retrieve info on the next page
-    genericcontextGetPageInfo(pageIdx, &nbElementsInNextPage, p_flag);
+    genericContextGetPageInfo(pageIdx, &nbElementsInNextPage, p_flag);
     *p_nbElementsInNextPage = nbElementsInNextPage;
 
     // Handle forward navigation:
@@ -572,7 +572,7 @@ static const nbgl_content_t *genericContextComputeNextPageParams(uint8_t        
     if (pageIdx > navInfo.activePage) {
         uint8_t nbElementsInCurrentPage;
 
-        genericcontextGetPageInfo(navInfo.activePage, &nbElementsInCurrentPage, NULL);
+        genericContextGetPageInfo(navInfo.activePage, &nbElementsInCurrentPage, NULL);
         nextElementIdx += nbElementsInCurrentPage;
 
         // Handle case where the content to be displayed is in the next content
@@ -773,8 +773,29 @@ static void displayGenericContextPage(uint8_t pageIdx, bool forceFullRefresh)
     nbgl_content_t        content;
     uint8_t               nbElementsInPage;
     bool                  flag;
-    const nbgl_content_t *p_content
-        = genericContextComputeNextPageParams(pageIdx, &content, &nbElementsInPage, &flag);
+    const nbgl_content_t *p_content = NULL;
+
+    if (navInfo.activePage == pageIdx) {
+        p_content
+            = genericContextComputeNextPageParams(pageIdx, &content, &nbElementsInPage, &flag);
+    }
+    else if (navInfo.activePage < pageIdx) {
+        // Support going more than one step forward.
+        // It occurs when initializing a navigation on an arbitrary page
+        for (int i = navInfo.activePage + 1; i <= pageIdx; i++) {
+            p_content = genericContextComputeNextPageParams(i, &content, &nbElementsInPage, &flag);
+        }
+    }
+    else {
+        if (pageIdx - navInfo.activePage > 1) {
+            // We don't support going more than one step backward as it doesn't occurs for now?
+            PRINTF("Unsupported navigation\n");
+            return;
+        }
+        p_content
+            = genericContextComputeNextPageParams(pageIdx, &content, &nbElementsInPage, &flag);
+    }
+
     if (p_content == NULL) {
         return;
     }
@@ -1460,7 +1481,6 @@ void nbgl_useCaseSettings(const char                *title,
     navType    = SETTINGS_NAV;
 
     // fill navigation structure
-    navInfo.activePage                = initPage;
     navInfo.navType                   = NAV_WITH_BUTTONS;
     navInfo.navWithButtons.quitText   = NULL;
     navInfo.navWithButtons.navToken   = NAV_TOKEN;
@@ -1471,7 +1491,7 @@ void nbgl_useCaseSettings(const char                *title,
     navInfo.progressIndicator = false;
     navInfo.tuneId            = TUNE_TAP_CASUAL;
 
-    displaySettingsPage(navInfo.activePage, true);
+    displaySettingsPage(initPage, true);
 }
 
 /**
@@ -1511,8 +1531,6 @@ void nbgl_useCaseGenericSettings(const char                   *appName,
     touchableTitle = false;
 
     // fill navigation structure
-    navInfo.activePage = initPage;
-
     navInfo.navType                 = NAV_WITH_BUTTONS;
     navInfo.navWithButtons.navToken = NAV_TOKEN;
 #ifdef TARGET_STAX
@@ -1529,7 +1547,7 @@ void nbgl_useCaseGenericSettings(const char                   *appName,
     navInfo.progressIndicator = false;
     navInfo.tuneId            = TUNE_TAP_CASUAL;
 
-    displayGenericContextPage(navInfo.activePage, true);
+    displayGenericContextPage(initPage, true);
 }
 
 /**
@@ -1935,7 +1953,7 @@ void nbgl_useCaseStaticReview(const nbgl_layoutTagValueList_t *tagValueList,
     navInfo.progressIndicator = true;
     navInfo.tuneId            = TUNE_TAP_CASUAL;
 
-    displayGenericContextPage(navInfo.activePage, true);
+    displayGenericContextPage(0, true);
 }
 
 /**
@@ -1984,8 +2002,7 @@ void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList
 
     // compute number of pages & fill navigation structure
     navInfo.nbPages = nbgl_useCaseGetNbPagesForGenericContents(&genericContext.genericContents, 0);
-    navInfo.activePage               = 0;
-    navInfo.navType                  = NAV_WITH_TAP;
+    navInfo.navType = NAV_WITH_TAP;
     navInfo.quitToken                = REJECT_TOKEN;
     navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
     navInfo.navWithTap.quitText      = rejectText;
@@ -1993,7 +2010,7 @@ void nbgl_useCaseStaticReviewLight(const nbgl_layoutTagValueList_t *tagValueList
     navInfo.progressIndicator        = true;
     navInfo.tuneId                   = TUNE_TAP_CASUAL;
 
-    displayGenericContextPage(navInfo.activePage, true);
+    displayGenericContextPage(0, true);
 }
 
 /**
