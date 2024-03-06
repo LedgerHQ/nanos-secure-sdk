@@ -80,6 +80,13 @@ extern "C" {
 #define MAX_APP_NAME_FOR_SDK_TAGLINE \
     (APP_DESCRIPTION_MAX_LEN - 1 - (sizeof(TAGLINE_PART1) + sizeof(TAGLINE_PART2)))
 
+/**
+ *  @brief Value to pass to nbgl_useCaseHomeAndSettings() initSettingPage parameter
+ *         to initialize the use case on the Home page and not on a specific setting
+ *          page.
+ */
+#define INIT_HOME_PAGE 0xff
+
 /**********************
  *      MACROS
  **********************/
@@ -137,9 +144,26 @@ typedef struct {
     uint8_t nbContents;  ///< number of contents
 } nbgl_genericContents_t;
 
+typedef struct {
+    const char                *text;
+    const nbgl_icon_details_t *icon;
+    nbgl_callback_t            callback;
+} nbgl_homeAction_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
+
+void nbgl_useCaseHomeAndSettings(
+    const char                *appName,
+    const nbgl_icon_details_t *appIcon,
+    const char                *tagline,
+    const uint8_t
+        initSettingPage,  // if not INIT_HOME_PAGE, start directly the corresponding setting page
+    const nbgl_genericContents_t *settingContents,
+    const nbgl_contentInfoList_t *infosList,
+    const nbgl_homeAction_t      *action,  // Set to NULL if no additional action
+    nbgl_callback_t               quitCallback);
 
 #ifdef HAVE_SE_TOUCH
 // utils

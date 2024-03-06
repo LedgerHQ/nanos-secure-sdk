@@ -108,6 +108,21 @@ typedef struct {
     bool                   detailsWrapping;
 } GenericContext_t;
 
+typedef struct {
+    const char                   *appName;
+    const nbgl_icon_details_t    *appIcon;
+    const char                   *tagline;
+    const nbgl_genericContents_t *settingContents;
+    const nbgl_contentInfoList_t *infosList;
+    const char                   *actionText;
+    nbgl_callback_t               actionCallback;
+    nbgl_callback_t               quitCallback;
+} nbgl_homeAndSettingsContext_t;
+
+typedef union {
+    nbgl_homeAndSettingsContext_t homeAndSettings;
+} nbgl_BundleNavContext_t;
+
 /**********************
  *  STATIC VARIABLES
  **********************/
@@ -155,6 +170,9 @@ static GenericContext_t genericContext;
 static nbgl_content_t   localContentsList[2];
 static uint8_t          genericContextPagesInfo[MAX_PAGE_NB / PAGES_PER_UINT8];
 
+// contexts for bundle navigation
+static nbgl_BundleNavContext_t bundleNavContext;
+
 // indexed by nbgl_contentType_t
 static const uint8_t nbMaxElementsPerContentType[] = {
 #ifdef TARGET_STAX
@@ -195,6 +213,10 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index);
 #endif  // NBGL_QRCODE
 static void displayAddressPage(uint8_t page, bool forceFullRefresh);
 static void displaySkipWarning(void);
+
+static void bundleNavStartHome(void);
+static void bundleNavStartSettingsAtPage(uint8_t initSettingPage);
+static void bundleNavStartSettings(void);
 
 static void reset_callbacks(void)
 {
@@ -1173,6 +1195,36 @@ static uint8_t nbgl_useCaseGetNbPagesForGenericContents(
     return nbPages;
 }
 
+static void bundleNavStartHome(void)
+{
+    nbgl_homeAndSettingsContext_t *context = &bundleNavContext.homeAndSettings;
+
+    nbgl_useCaseHomeExt(context->appName,
+                        context->appIcon,
+                        context->tagline,
+                        context->settingContents != NULL ? true : false,
+                        context->actionText,
+                        context->actionCallback,
+                        bundleNavStartSettings,
+                        context->quitCallback);
+}
+
+static void bundleNavStartSettingsAtPage(uint8_t initSettingPage)
+{
+    nbgl_homeAndSettingsContext_t *context = &bundleNavContext.homeAndSettings;
+
+    nbgl_useCaseGenericSettings(context->appName,
+                                initSettingPage,
+                                context->settingContents,
+                                context->infosList,
+                                bundleNavStartHome);
+}
+
+static void bundleNavStartSettings(void)
+{
+    bundleNavStartSettingsAtPage(0);
+}
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -1548,6 +1600,58 @@ void nbgl_useCaseGenericSettings(const char                   *appName,
     navInfo.tuneId            = TUNE_TAP_CASUAL;
 
     displayGenericContextPage(initPage, true);
+}
+
+/**
+ * @brief Draws the extended version of home page of an app (page on which we land when launching it
+ *        from dashboard) with automatic support of setting display.
+ * @note it enables to use an action button (black on Stax, white on Europa)
+ *
+ * @param appName app name
+ * @param appIcon app icon
+ * @param tagline text under app name (if NULL, it will be "This app enables signing transactions on
+ * the <appName> network.")
+ * @param initSettingPage if not INIT_HOME_PAGE, start directly the corresponding setting page
+ * @param settingContents setting contents to be displayed
+ * @param infosList infos to be displayed (version, license, developer, ...)
+ * @param action if not NULL, info used for an action button (on top of "Quit
+ * App" button/footer)
+ * @param quitCallback callback called when quit button is touched
+ */
+void nbgl_useCaseHomeAndSettings(
+    const char                *appName,
+    const nbgl_icon_details_t *appIcon,
+    const char                *tagline,
+    const uint8_t
+        initSettingPage,  // if not INIT_HOME_PAGE, start directly the corresponding setting page
+    const nbgl_genericContents_t *settingContents,
+    const nbgl_contentInfoList_t *infosList,
+    const nbgl_homeAction_t      *action,  // Set to NULL if no additional action
+    nbgl_callback_t               quitCallback)
+{
+    nbgl_homeAndSettingsContext_t *context = &bundleNavContext.homeAndSettings;
+
+    context->appName         = appName;
+    context->appIcon         = appIcon;
+    context->tagline         = tagline;
+    context->settingContents = settingContents;
+    context->infosList       = infosList;
+    if (action != NULL) {
+        context->actionText     = action->text;
+        context->actionCallback = action->callback;
+    }
+    else {
+        context->actionText     = NULL;
+        context->actionCallback = NULL;
+    }
+    context->quitCallback = quitCallback;
+
+    if (initSettingPage != INIT_HOME_PAGE) {
+        bundleNavStartSettingsAtPage(initSettingPage);
+    }
+    else {
+        bundleNavStartHome();
+    }
 }
 
 /**
