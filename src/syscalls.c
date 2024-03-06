@@ -184,6 +184,15 @@ void nbgl_screen_reinit(void)
     SVC_Call(SYSCALL_nbgl_screen_reinit_ID, parameters);
 }
 
+#ifdef HAVE_SE_EINK_DISPLAY
+void nbgl_wait_pipeline(void)
+{
+    unsigned int parameters[1];
+    parameters[0] = 0;
+    SVC_Call(SYSCALL_nbgl_wait_pipeline_ID, parameters);
+}
+#endif  // HAVE_SE_EINK_DISPLAY
+
 #ifdef HAVE_DISPLAY_FAST_MODE
 void nbgl_screen_update_temperature(uint8_t temp_degrees)
 {
