@@ -45,6 +45,7 @@ cx_constant_time_eq
 cx_crc16
 cx_crc16_update
 cx_crc32
+cx_crc32_update
 cx_decode_coord
 cx_ecdh_no_throw
 cx_ecdsa_sign_no_throw

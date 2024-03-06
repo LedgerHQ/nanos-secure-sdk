@@ -21,10 +21,28 @@
 #include "cx_crc.h"
 #include "cx_ram.h"
 
+static uint32_t reverse_32_bits(uint32_t value)
+{
+    uint32_t reverse_val = 0;
+
+    for (uint8_t i = 0; i < 32; i++) {
+        if ((value & (1 << i))) {
+            reverse_val |= 1 << ((32 - 1) - i);
+        }
+    }
+    return reverse_val;
+}
+
 // x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1
 uint32_t cx_crc32(const void *buf, size_t len)
 {
     return cx_crc_hw(CRC_TYPE_CRC32, CX_CRC32_INIT, buf, len);
 }
 
+uint32_t cx_crc32_update(uint32_t crc_state, const void *buf, size_t len)
+{
+    crc_state = reverse_32_bits(crc_state);
+    crc_state ^= 0xFFFFFFFF;
+    return cx_crc_hw(CRC_TYPE_CRC32, crc_state, buf, len);
+}
 #endif  // HAVE_CRC
