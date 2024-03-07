@@ -160,6 +160,21 @@ typedef enum {
     TYPE_OPERATION,  // For other types of operation (generic type)
 } nbgl_operationType_t;
 
+/**
+ * @brief The different types of review status
+ *
+ */
+typedef enum {
+    STATUS_TYPE_TRANSACTION_SIGNED = 0,
+    STATUS_TYPE_TRANSACTION_REJECTED,
+    STATUS_TYPE_MESSAGE_SIGNED,
+    STATUS_TYPE_MESSAGE_REJECTED,
+    STATUS_TYPE_OPERATION_SIGNED,
+    STATUS_TYPE_OPERATION_REJECTED,
+    STATUS_TYPE_ADDRESS_VERIFIED,
+    STATUS_TYPE_ADDRESS_REJECTED,
+} nbgl_reviewStatusType_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -192,6 +207,9 @@ void nbgl_useCaseAddressReview(
     const char                *reviewTitle,
     const char                *reviewSubTitle,
     nbgl_choiceCallback_t      choiceCallback);
+
+void nbgl_useCaseReviewStatus(nbgl_reviewStatusType_t reviewStatusType,
+                              nbgl_callback_t         quitCallback);
 
 #ifdef HAVE_SE_TOUCH
 // utils

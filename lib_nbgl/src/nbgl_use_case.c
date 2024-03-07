@@ -1687,7 +1687,7 @@ void nbgl_useCaseHomeAndSettings(
  *
  * @param message string to set in middle of page (Upper case for success)
  * @param isSuccess if true, message is drawn in a Ledger style (with corners)
- * @param quitCallback callback called when quit timer times out
+ * @param quitCallback callback called when quit timer times out or status is manually dismissed
  */
 void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t quitCallback)
 {
@@ -1725,6 +1725,35 @@ void nbgl_useCaseStatus(const char *message, bool isSuccess, nbgl_callback_t qui
         pageContext                     = nbgl_pageDrawInfo(&pageCallback, &ticker, &info);
     }
     nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
+}
+
+/**
+ * @brief Draws a transient (3s) status page for the reviewStatusType
+ *
+ * @param reviewStatusType type of status to display
+ * @param quitCallback callback called when quit timer times out or status is manually dismissed
+ */
+void nbgl_useCaseReviewStatus(nbgl_reviewStatusType_t reviewStatusType,
+                              nbgl_callback_t         quitCallback)
+{
+    switch (reviewStatusType) {
+        case STATUS_TYPE_OPERATION_SIGNED:
+            return nbgl_useCaseStatus("Operation signed", true, quitCallback);
+        case STATUS_TYPE_OPERATION_REJECTED:
+            return nbgl_useCaseStatus("Operation rejected", false, quitCallback);
+        case STATUS_TYPE_TRANSACTION_SIGNED:
+            return nbgl_useCaseStatus("Transaction signed", true, quitCallback);
+        case STATUS_TYPE_TRANSACTION_REJECTED:
+            return nbgl_useCaseStatus("Transaction rejected", false, quitCallback);
+        case STATUS_TYPE_MESSAGE_SIGNED:
+            return nbgl_useCaseStatus("Message signed", true, quitCallback);
+        case STATUS_TYPE_MESSAGE_REJECTED:
+            return nbgl_useCaseStatus("Message rejected", false, quitCallback);
+        case STATUS_TYPE_ADDRESS_VERIFIED:
+            return nbgl_useCaseStatus("Address verified", true, quitCallback);
+        case STATUS_TYPE_ADDRESS_REJECTED:
+            return nbgl_useCaseStatus("Address verification\ncancelled", false, quitCallback);
+    }
 }
 
 /**
