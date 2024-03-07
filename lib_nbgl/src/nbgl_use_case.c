@@ -52,20 +52,17 @@ enum {
     NAV_TOKEN,
     SKIP_TOKEN,
     CONTINUE_TOKEN,
-    BUTTON_TOKEN,
+    ADDRESS_QRCODE_BUTTON_TOKEN,
     ACTION_BUTTON_TOKEN,
     CHOICE_TOKEN,
     DETAILS_BUTTON_TOKEN,
     CONFIRM_TOKEN,
-    REJECT_TOKEN,
-    ADDR_BACK_TOKEN,
-    ADDR_NEXT_TOKEN
+    REJECT_TOKEN
 };
 
 typedef enum {
     REVIEW_NAV = 0,
     SETTINGS_NAV,
-    ADDRESS_NAV,
     GENERIC_NAV
 } NavType_t;
 
@@ -79,9 +76,8 @@ typedef struct DetailsContext_s {
 } DetailsContext_t;
 
 typedef struct AddressConfirmationContext_s {
-    const char                      *address;
-    nbgl_layout_t                    modalLayout;
-    const nbgl_layoutTagValueList_t *tagValueList;
+    nbgl_layoutTagValue_t tagValuePair;
+    nbgl_layout_t         modalLayout;
 } AddressConfirmationContext_t;
 
 #ifdef NBGL_KEYPAD
@@ -216,9 +212,9 @@ static void displaySettingsPage(uint8_t page, bool forceFullRefresh);
 static void displayGenericContextPage(uint8_t pageIdx, bool forceFullRefresh);
 static void pageCallback(int token, uint8_t index);
 #ifdef NBGL_QRCODE
+static void displayAddressQRCode(void);
 static void addressLayoutTouchCallbackQR(int token, uint8_t index);
 #endif  // NBGL_QRCODE
-static void displayAddressPage(uint8_t page, bool forceFullRefresh);
 static void displaySkipWarning(void);
 
 static void bundleNavStartHome(void);
@@ -371,34 +367,11 @@ static void pageCallback(int token, uint8_t index)
             onQuit();
         }
     }
-    else if (token == BUTTON_TOKEN) {
 #ifdef NBGL_QRCODE
-        // display the address as QR Code
-        nbgl_layoutDescription_t layoutDescription
-            = {.modal            = true,
-               .withLeftBorder   = true,
-               .onActionCallback = &addressLayoutTouchCallbackQR,
-               .tapActionText    = NULL};
-
-        addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
-        nbgl_layoutQRCode_t qrCode
-            = {.url      = addressConfirmationContext.address,
-               .text1    = NULL,
-               .text2    = addressConfirmationContext.address,  // display as gray text
-               .centered = true,
-               .offsetY  = 0};
-        nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
-
-#ifdef TARGET_STAX
-        nbgl_layoutAddBottomButton(
-            addressConfirmationContext.modalLayout, &CLOSE_ICON, 0, false, TUNE_TAP_CASUAL);
-#else   // TARGET_STAX
-        nbgl_layoutAddFooter(addressConfirmationContext.modalLayout, "Close", 0, TUNE_TAP_CASUAL);
-#endif  // TARGET_STAX
-        nbgl_layoutDraw(addressConfirmationContext.modalLayout);
-        nbgl_refresh();
-#endif  // NBGL_QRCODE
+    else if (token == ADDRESS_QRCODE_BUTTON_TOKEN) {
+        displayAddressQRCode();
     }
+#endif  // NBGL_QRCODE
     else if (token == CONFIRM_TOKEN) {
         if (onChoice != NULL) {
             onChoice(true);
@@ -427,9 +400,6 @@ static void pageCallback(int token, uint8_t index)
             else if (navType == REVIEW_NAV) {
                 displayReviewPage(index, false);
             }
-            else if (navType == ADDRESS_NAV) {
-                displayAddressPage(index, true);
-            }
             else {
                 displaySettingsPage(index, false);
             }
@@ -454,12 +424,6 @@ static void pageCallback(int token, uint8_t index)
     else if (token == SKIP_TOKEN) {
         // display a modal warning to confirm skip
         displaySkipWarning();
-    }
-    else if (token == ADDR_BACK_TOKEN) {
-        displayAddressPage(navInfo.activePage - 1, true);
-    }
-    else if (token == ADDR_NEXT_TOKEN) {
-        displayAddressPage(navInfo.activePage + 1, true);
     }
     else {  // probably a control provided by caller
         if (onContentAction != NULL) {
@@ -535,7 +499,7 @@ static void displayReviewPage(uint8_t page, bool forceFullRefresh)
 #else   // TARGET_STAX
         // for forward only review without known length...
         // if we don't do that we cannot remove the '>' in the navigation bar at the last page
-        navInfo.nbPages                           = navInfo.activePage + 1;
+        navInfo.nbPages = navInfo.activePage + 1;
 #endif  // TARGET_STAX
         content.infoLongPress.longPressToken = CONFIRM_TOKEN;
         if (forwardNavOnly) {
@@ -756,6 +720,11 @@ static bool genericContextPreparePageContent(const nbgl_content_t *p_content,
 
             break;
         }
+        case TAG_VALUE_CONFIRM:
+            memcpy(&pageContent->tagValueConfirm,
+                   &p_content->content.tagValueConfirm,
+                   sizeof(pageContent->tagValueConfirm));
+            break;
         case SWITCHES_LIST:
             pageContent->switchesList.nbSwitches = nbElementsInPage;
             pageContent->switchesList.switches
@@ -955,6 +924,33 @@ static void displayDetailsPage(uint8_t detailsPage, bool forceFullRefresh)
 }
 
 #ifdef NBGL_QRCODE
+static void displayAddressQRCode(void)
+{
+    // display the address as QR Code
+    nbgl_layoutDescription_t layoutDescription = {.modal            = true,
+                                                  .withLeftBorder   = true,
+                                                  .onActionCallback = &addressLayoutTouchCallbackQR,
+                                                  .tapActionText    = NULL};
+
+    addressConfirmationContext.modalLayout = nbgl_layoutGet(&layoutDescription);
+    nbgl_layoutQRCode_t qrCode
+        = {.url      = addressConfirmationContext.tagValuePair.value,
+           .text1    = NULL,
+           .text2    = addressConfirmationContext.tagValuePair.value,  // display as gray text
+           .centered = true,
+           .offsetY  = 0};
+    nbgl_layoutAddQRCode(addressConfirmationContext.modalLayout, &qrCode);
+
+#ifdef TARGET_STAX
+    nbgl_layoutAddBottomButton(
+        addressConfirmationContext.modalLayout, &CLOSE_ICON, 0, false, TUNE_TAP_CASUAL);
+#else   // TARGET_STAX
+    nbgl_layoutAddFooter(addressConfirmationContext.modalLayout, "Close", 0, TUNE_TAP_CASUAL);
+#endif  // TARGET_STAX
+    nbgl_layoutDraw(addressConfirmationContext.modalLayout);
+    nbgl_refresh();
+}
+
 // called when quit button is touched on Address verification page
 static void addressLayoutTouchCallbackQR(int token, uint8_t index)
 {
@@ -967,91 +963,6 @@ static void addressLayoutTouchCallbackQR(int token, uint8_t index)
     nbgl_refresh();
 }
 #endif  // NBGL_QRCODE
-
-// called when navigation is touched on Address verification page
-static void displayAddressPage(uint8_t page, bool forceFullRefresh)
-{
-    nbgl_pageContent_t    content;
-    nbgl_layoutTagValue_t tagValuePair
-        = {.item = "Address", .value = addressConfirmationContext.address};
-
-    content.type             = TAG_VALUE_CONFIRM;
-    content.title            = NULL;
-    content.isTouchableTitle = false;
-    if (page == 0) {
-#ifdef NBGL_QRCODE
-        content.tagValueConfirm.detailsButtonIcon = &QRCODE_ICON;
-#ifndef TARGET_STAX
-        // On Europa, only use "Show as QR" when it's not the last page
-        if (navInfo.nbPages > 1) {
-#endif  // TARGET_STAX
-            content.tagValueConfirm.detailsButtonText = "Show as QR";
-#ifndef TARGET_STAX
-        }
-        else {
-            content.tagValueConfirm.detailsButtonText = NULL;
-        }
-#endif  // TARGET_STAX
-        content.tagValueConfirm.detailsButtonToken = BUTTON_TOKEN;
-#else   // NBGL_QRCODE
-        content.tagValueConfirm.detailsButtonText = NULL;
-        content.tagValueConfirm.detailsButtonIcon = NULL;
-#endif  // NBGL_QRCODE
-        content.tagValueConfirm.tuneId                          = TUNE_TAP_CASUAL;
-        content.tagValueConfirm.tagValueList.nbPairs            = 1;
-        content.tagValueConfirm.tagValueList.pairs              = &tagValuePair;
-        content.tagValueConfirm.tagValueList.smallCaseForValue  = false;
-        content.tagValueConfirm.tagValueList.nbMaxLinesForValue = 0;
-        content.tagValueConfirm.tagValueList.wrapping           = false;
-        // if it's an extended address verif, it takes 2 pages, so display a "Tap to continue", and
-        // no confirmation button
-        if (navInfo.nbPages > 1) {
-#ifdef TARGET_STAX
-            navInfo.navWithTap.nextPageText = "Tap to continue";
-#endif  // TARGET_STAX
-            content.tagValueConfirm.confirmationText = NULL;
-        }
-        else {
-            // otherwise no tap to continue but a confirmation button
-            content.tagValueConfirm.confirmationText  = "Confirm";
-            content.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
-        }
-    }
-    else if (page == 1) {
-        // the second page is dedicated to the extended tag/value pairs
-        content.type                              = TAG_VALUE_CONFIRM;
-        content.tagValueConfirm.confirmationText  = "Confirm";
-        content.tagValueConfirm.confirmationToken = CONFIRM_TOKEN;
-        content.tagValueConfirm.detailsButtonText = NULL;
-        content.tagValueConfirm.detailsButtonIcon = NULL;
-        content.tagValueConfirm.tuneId            = TUNE_TAP_CASUAL;
-        content.tagValueConfirm.tagValueList.nbPairs
-            = addressConfirmationContext.tagValueList->nbPairs;
-        content.tagValueConfirm.tagValueList.pairs = addressConfirmationContext.tagValueList->pairs;
-        content.tagValueConfirm.tagValueList.smallCaseForValue
-            = addressConfirmationContext.tagValueList->smallCaseForValue;
-        content.tagValueConfirm.tagValueList.nbMaxLinesForValue
-            = addressConfirmationContext.tagValueList->nbMaxLinesForValue;
-        content.tagValueConfirm.tagValueList.wrapping
-            = addressConfirmationContext.tagValueList->wrapping;
-
-#ifdef TARGET_STAX
-        // no next page
-        navInfo.navWithTap.nextPageText = NULL;
-#endif  // TARGET_STAX
-    }
-    // fill navigation structure
-    navInfo.activePage = page;
-
-    nbgl_pageDrawGenericContent(&pageCallback, &navInfo, &content);
-
-    if (forceFullRefresh) {
-        nbgl_refreshSpecial(FULL_COLOR_CLEAN_REFRESH);
-    }
-    else {
-        nbgl_refreshSpecial(FULL_COLOR_PARTIAL_REFRESH);
-    }
-}
 
 // called when skip button is touched in footer, during forward only review
 static void displaySkipWarning(void)
@@ -1205,6 +1116,74 @@ static uint8_t nbgl_useCaseGetNbPagesForGenericContents(
     }
 
     return nbPages;
+}
+
+static void prepareAddressConfirmationPages(const char                      *address,
+                                            const nbgl_layoutTagValueList_t *tagValueList,
+                                            nbgl_content_t                  *firstPageContent,
+                                            nbgl_content_t                  *secondPageContent)
+{
+    nbgl_contentTagValueConfirm_t *tagValueConfirm;
+
+    addressConfirmationContext.tagValuePair.item  = "Address";
+    addressConfirmationContext.tagValuePair.value = address;
+
+    // First page
+    firstPageContent->type = TAG_VALUE_CONFIRM;
+    tagValueConfirm        = &firstPageContent->content.tagValueConfirm;
+
+#ifdef NBGL_QRCODE
+    tagValueConfirm->detailsButtonIcon = &QRCODE_ICON;
+#ifndef TARGET_STAX
+    // On Europa, only use "Show as QR" when it's not the last page
+    if (tagValueList != NULL) {
+#endif  // TARGET_STAX
+        tagValueConfirm->detailsButtonText = "Show as QR";
+#ifndef TARGET_STAX
+    }
+    else {
+        tagValueConfirm->detailsButtonText = NULL;
+    }
+#endif  // TARGET_STAX
+    tagValueConfirm->detailsButtonToken = ADDRESS_QRCODE_BUTTON_TOKEN;
+#else   // NBGL_QRCODE
+    tagValueConfirm->detailsButtonText = NULL;
+    tagValueConfirm->detailsButtonIcon = NULL;
+#endif  // NBGL_QRCODE
+    tagValueConfirm->tuneId                          = TUNE_TAP_CASUAL;
+    tagValueConfirm->tagValueList.nbPairs            = 1;
+    tagValueConfirm->tagValueList.pairs              = &addressConfirmationContext.tagValuePair;
+    tagValueConfirm->tagValueList.smallCaseForValue  = false;
+    tagValueConfirm->tagValueList.nbMaxLinesForValue = 0;
+    tagValueConfirm->tagValueList.wrapping           = false;
+    // if it's an extended address verif, it takes 2 pages, so display a "Tap to continue", and
+    // no confirmation button
+    if (tagValueList != NULL) {
+        tagValueConfirm->confirmationText = NULL;
+    }
+    else {
+        // otherwise no tap to continue but a confirmation button
+        tagValueConfirm->confirmationText  = "Confirm";
+        tagValueConfirm->confirmationToken = CONFIRM_TOKEN;
+    }
+
+    // Second page if any:
+    if (tagValueList != NULL) {
+        // the second page is dedicated to the extended tag/value pairs
+        secondPageContent->type            = TAG_VALUE_CONFIRM;
+        tagValueConfirm                    = &secondPageContent->content.tagValueConfirm;
+        tagValueConfirm->confirmationText  = "Confirm";
+        tagValueConfirm->confirmationToken = CONFIRM_TOKEN;
+        tagValueConfirm->detailsButtonText = NULL;
+        tagValueConfirm->detailsButtonIcon = NULL;
+        tagValueConfirm->tuneId            = TUNE_TAP_CASUAL;
+        memcpy(&tagValueConfirm->tagValueList, tagValueList, sizeof(nbgl_layoutTagValueList_t));
+
+#ifdef TARGET_STAX
+        // no next page
+        navInfo.navWithTap.nextPageText = NULL;
+#endif  // TARGET_STAX
+    }
 }
 
 static void bundleNavStartHome(void)
@@ -2337,24 +2316,31 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
 {
     reset_callbacks();
     memset(&navInfo, 0, sizeof(navInfo));
+    memset(&genericContext, 0, sizeof(genericContext));
     memset(&addressConfirmationContext, 0, sizeof(addressConfirmationContext));
 
     // save context
-    onChoice                                = callback;
-    addressConfirmationContext.address      = address;
-    addressConfirmationContext.tagValueList = tagValueList;
+    onChoice       = callback;
+    navType        = GENERIC_NAV;
+    touchableTitle = false;
+    pageTitle      = NULL;
+
+    genericContext.genericContents.contentsList = localContentsList;
+    genericContext.genericContents.nbContents   = (tagValueList == NULL) ? 1 : 2;
+    memset(localContentsList, 0, 2 * sizeof(nbgl_content_t));
+    prepareAddressConfirmationPages(
+        address, tagValueList, &localContentsList[0], &localContentsList[1]);
 
     // fill navigation structure, common to all pages
-    navType                   = ADDRESS_NAV;
-    navInfo.nbPages           = (tagValueList == NULL) ? 0 : 2;
+    navInfo.nbPages = nbgl_useCaseGetNbPagesForGenericContents(&genericContext.genericContents, 0);
     navInfo.progressIndicator = true;
     navInfo.tuneId            = TUNE_TAP_CASUAL;
 #ifdef TARGET_STAX
     navInfo.navType                  = NAV_WITH_TAP;
     navInfo.navWithTap.backButton    = (tagValueList != NULL);
-    navInfo.navWithTap.nextPageToken = ADDR_NEXT_TOKEN;
+    navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
     navInfo.navWithTap.quitText      = "Cancel";
-    navInfo.navWithTap.backToken     = ADDR_BACK_TOKEN;
+    navInfo.navWithTap.backToken     = BACK_TOKEN;
 #else   // TARGET_STAX
     navInfo.navType                   = NAV_WITH_BUTTONS;
     navInfo.navWithButtons.quitText   = "Reject";
@@ -2364,7 +2350,7 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
 #endif  // TARGET_STAX
     navInfo.quitToken = REJECT_TOKEN;
 
-    displayAddressPage(0, true);
+    displayGenericContextPage(0, true);
 }
 
 /**
