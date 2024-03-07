@@ -2354,6 +2354,88 @@ void nbgl_useCaseAddressConfirmationExt(const char                      *address
 }
 
 /**
+ * @brief Draws a flow of pages of an extended address verification page.
+ * A back key is available on top-left of the screen,
+ * except in first page It is possible to go to next page thanks to "tap to continue".
+ * @note  All tag/value pairs are provided in the API and the number of pages is automatically
+ * computed, the last page being a long press one
+ *
+ * @param address address to confirm (NULL terminated string)
+ * @param additionalTagValueList list of tag/value pairs (can be NULL) (must fit in a single page,
+ * and be persistent because no copy)
+ * @param callback callback called when button or footer is touched (if true, button, if false
+ * footer)
+ * @param icon icon used on the first review page
+ * @param reviewTitle string used in the first review page
+ * @param reviewSubTitle string to set under reviewTitle (can be NULL)
+ * @param choiceCallback callback called when transaction is accepted (param is true) or rejected
+ * (param is false)
+ */
+void nbgl_useCaseAddressReview(const char                      *address,
+                               const nbgl_layoutTagValueList_t *additionalTagValueList,
+                               const nbgl_icon_details_t       *icon,
+                               const char                      *reviewTitle,
+                               const char                      *reviewSubTitle,
+                               nbgl_choiceCallback_t            choiceCallback)
+{
+    nbgl_contentCenteredInfo_t *centeredInfo;
+
+    reset_callbacks();
+    memset(&navInfo, 0, sizeof(navInfo));
+    memset(&genericContext, 0, sizeof(genericContext));
+    memset(&addressConfirmationContext, 0, sizeof(addressConfirmationContext));
+
+    // save context
+    onChoice       = choiceCallback;
+    navType        = GENERIC_NAV;
+    touchableTitle = false;
+    pageTitle      = NULL;
+
+    genericContext.genericContents.contentsList = localContentsList;
+    genericContext.genericContents.nbContents   = (additionalTagValueList == NULL) ? 2 : 3;
+    memset(localContentsList, 0, 3 * sizeof(nbgl_content_t));
+
+    // First a centered info
+    localContentsList[0].type = CENTERED_INFO;
+    centeredInfo              = &localContentsList[0].content.centeredInfo;
+    centeredInfo->icon        = icon;
+    centeredInfo->text1       = reviewTitle;
+    centeredInfo->text2       = reviewSubTitle;
+#ifdef TARGET_STAX
+    centeredInfo->text3 = NULL;
+#else   // TARGET_STAX
+    centeredInfo->text3               = "Swipe to review";
+#endif  // TARGET_STAX
+    centeredInfo->style   = LARGE_CASE_GRAY_INFO;
+    centeredInfo->offsetY = 0;
+
+    // Then the address confirmation pages
+    prepareAddressConfirmationPages(
+        address, additionalTagValueList, &localContentsList[1], &localContentsList[2]);
+
+    // fill navigation structure, common to all pages
+    navInfo.nbPages = nbgl_useCaseGetNbPagesForGenericContents(&genericContext.genericContents, 0);
+    navInfo.progressIndicator = true;
+    navInfo.tuneId            = TUNE_TAP_CASUAL;
+#ifdef TARGET_STAX
+    navInfo.navType                  = NAV_WITH_TAP;
+    navInfo.navWithTap.backButton    = true;
+    navInfo.navWithTap.nextPageToken = NEXT_TOKEN;
+    navInfo.navWithTap.quitText      = "Cancel";
+    navInfo.navWithTap.backToken     = BACK_TOKEN;
+#else   // TARGET_STAX
+    navInfo.navType                   = NAV_WITH_BUTTONS;
+    navInfo.navWithButtons.quitText   = "Reject";
+    navInfo.navWithButtons.navToken   = NAV_TOKEN;
+    navInfo.navWithButtons.quitButton = false;
+    navInfo.navWithButtons.backButton = true;
+#endif  // TARGET_STAX
+    navInfo.quitToken = REJECT_TOKEN;
+
+    displayGenericContextPage(0, true);
+}
+
+/**
  * @brief draw a spinner page with the given parameters. The spinner will "turn" automatically every
  * 800 ms
  *

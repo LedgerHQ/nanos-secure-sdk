@@ -184,6 +184,15 @@ void nbgl_useCaseReview(nbgl_operationType_t             operationType,
                         const char           *finishTitle, /* unused on Nano */
                         nbgl_choiceCallback_t choiceCallback);
 
+void nbgl_useCaseAddressReview(
+    const char *address,
+    const nbgl_layoutTagValueList_t
+        *additionalTagValueList,  // Set to NULL if there are no additional info to display
+    const nbgl_icon_details_t *icon,
+    const char                *reviewTitle,
+    const char                *reviewSubTitle,
+    nbgl_choiceCallback_t      choiceCallback);
+
 #ifdef HAVE_SE_TOUCH
 // utils
 uint8_t nbgl_useCaseGetNbTagValuesInPage(uint8_t                          nbPairs,
