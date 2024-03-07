@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include "nbgl_debug.h"
 #include "nbgl_front.h"
-#include "nbgl_layout.h"
+#include "nbgl_layout_internal_nanos.h"
 #include "nbgl_obj.h"
 #include "nbgl_draw.h"
 #include "nbgl_screen.h"
@@ -33,30 +33,10 @@
 /**********************
  *      MACROS
  **********************/
-#define ASSERT_ENOUGH_PLACE_FOR_MAIN_PANEL_CHILD(__layout)                    \
-    {                                                                         \
-        if ((__layout)->panel.nbChildren == (NB_MAX_MAIN_PANEL_CHILDREN - 1)) \
-            return NO_MORE_OBJ_ERROR;                                         \
-    }
 
 /**********************
  *      TYPEDEFS
  **********************/
-
-/**
- * @brief Structure containing all information about the current layout.
- * @note It shall not be used externally
- *
- */
-typedef struct nbgl_layoutInternal_s {
-    bool    modal;  ///< if true, means the screen is a modal
-    uint8_t layer;  ///< if >0, puts the layout on top of screen stack (modal). Otherwise puts on
-                    ///< background (for apps)
-    uint8_t      nbChildren;  ///< number of children in above array
-    nbgl_obj_t **children;    ///< children for main screen
-
-    nbgl_layoutButtonCallback_t callback;  // user callback for all controls
-} nbgl_layoutInternal_t;
 
 /**********************
  *      VARIABLES
@@ -124,10 +104,10 @@ static void buttonCallback(nbgl_screen_t *screen, nbgl_buttonEvent_t buttonEvent
  * @param layout
  * @param obj
  */
-static void addObjectToLayout(nbgl_layoutInternal_t *layout, nbgl_obj_t *obj)
+void layoutAddObject(nbgl_layoutInternal_t *layout, nbgl_obj_t *obj)
 {
     if (layout->nbChildren == NB_MAX_SCREEN_CHILDREN) {
-        LOG_FATAL(LAYOUT_LOGGER, "addObjectToLayout(): No more object\n");
+        LOG_FATAL(LAYOUT_LOGGER, "layoutAddObject(): No more object\n");
     }
     layout->children[layout->nbChildren] = obj;
     layout->nbChildren++;
@@ -211,7 +191,7 @@ int nbgl_layoutAddNavigation(nbgl_layout_t *layout, nbgl_layoutNavigation_t *inf
         image->buffer          = (info->direction == HORIZONTAL_NAV) ? &C_icon_left : &C_icon_up;
         image->obj.area.bpp    = NBGL_BPP_1;
         image->obj.alignment   = MID_LEFT;
-        addObjectToLayout(layoutInt, (nbgl_obj_t *) image);
+        layoutAddObject(layoutInt, (nbgl_obj_t *) image);
     }
     if (info->indication & RIGHT_ARROW) {
         image                  = (nbgl_image_t *) nbgl_objPoolGet(IMAGE, layoutInt->layer);
@@ -219,7 +199,7 @@ int nbgl_layoutAddNavigation(nbgl_layout_t *layout, nbgl_layoutNavigation_t *inf
         image->buffer          = (info->direction == HORIZONTAL_NAV) ? &C_icon_right : &C_icon_down;
         image->obj.area.bpp    = NBGL_BPP_1;
         image->obj.alignment   = MID_RIGHT;
-        addObjectToLayout(layoutInt, (nbgl_obj_t *) image);
+        layoutAddObject(layoutInt, (nbgl_obj_t *) image);
     }
     return 0;
 }
@@ -316,7 +296,7 @@ int nbgl_layoutAddText(nbgl_layout_t                  *layout,
     container->layout          = VERTICAL;
     container->obj.alignment   = CENTER;
     // set this new obj as child of main container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
+    layoutAddObject(layoutInt, (nbgl_obj_t *) container);
 
     return 0;
 }
@@ -369,7 +349,7 @@ int nbgl_layoutAddMenuList(nbgl_layout_t *layout, nbgl_layoutMenuList_t *list)
         }
 
         // set this new obj as child of main container
-        addObjectToLayout(layoutInt, (nbgl_obj_t *) textArea);
+        layoutAddObject(layoutInt, (nbgl_obj_t *) textArea);
     }
 
     return 0;
@@ -499,7 +479,7 @@ int nbgl_layoutAddCenteredInfo(nbgl_layout_t *layout, const nbgl_layoutCenteredI
     container->obj.area.width = AVAILABLE_WIDTH;
 
     // set this new container as child of main container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
+    layoutAddObject(layoutInt, (nbgl_obj_t *) container);
 
     return 0;
 }
@@ -535,7 +515,7 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBa
         textArea->obj.alignment        = TOP_MIDDLE;
         textArea->obj.alignmentMarginX = 0;
         textArea->obj.alignmentMarginY = 16;  // 16 px from top
-        addObjectToLayout(layoutInt, (nbgl_obj_t *) textArea);
+        layoutAddObject(layoutInt, (nbgl_obj_t *) textArea);
     }
     progress                       = (nbgl_progress_bar_t *) nbgl_objPoolGet(PROGRESS_BAR,
                                                        ((nbgl_layoutInternal_t *) layout)->layer);
@@ -547,7 +527,7 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBa
     progress->obj.alignment        = TOP_MIDDLE;
     progress->obj.alignmentMarginX = 0;
     progress->obj.alignmentMarginY = 33;  // 33px from top
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) progress);
+    layoutAddObject(layoutInt, (nbgl_obj_t *) progress);
 
     if (barLayout->subText != NULL) {
         nbgl_text_area_t *subTextArea;
@@ -564,380 +544,11 @@ int nbgl_layoutAddProgressBar(nbgl_layout_t *layout, const nbgl_layoutProgressBa
         subTextArea->obj.alignTo     = (nbgl_obj_t *) progress;
         subTextArea->obj.alignmentMarginX = 0;
         subTextArea->obj.alignmentMarginY = 4;
-        addObjectToLayout(layoutInt, (nbgl_obj_t *) subTextArea);
+        layoutAddObject(layoutInt, (nbgl_obj_t *) subTextArea);
     }
 
     return 0;
 }
-
-#ifdef NBGL_KEYBOARD
-/**
- * @brief Creates a keyboard on bottom of the screen, with the given configuration
- *
- * @param layout the current layout
- * @param kbdInfo configuration of the keyboard to draw (including the callback when touched)
- * @return the index of keyboard, to use in @ref nbgl_layoutUpdateKeyboard()
- */
-int nbgl_layoutAddKeyboard(nbgl_layout_t *layout, const nbgl_layoutKbd_t *kbdInfo)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_keyboard_t       *keyboard;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddKeyboard():\n");
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // create keyboard
-    keyboard = (nbgl_keyboard_t *) nbgl_objPoolGet(KEYBOARD, layoutInt->layer);
-    keyboard->obj.alignmentMarginY = 0;
-    keyboard->obj.alignment        = CENTER;
-    keyboard->enableBackspace      = kbdInfo->enableBackspace;
-    keyboard->enableValidate       = kbdInfo->enableValidate;
-    if (kbdInfo->lettersOnly) {
-        keyboard->selectedCharIndex = cx_rng_u32() % 26;
-        keyboard->mode              = MODE_LOWER_LETTERS;
-    }
-    else {
-        keyboard->mode = MODE_NONE;
-    }
-    keyboard->callback    = PIC(kbdInfo->callback);
-    keyboard->lettersOnly = kbdInfo->lettersOnly;
-    keyboard->keyMask     = kbdInfo->keyMask;
-    // set this new keyboard as child of the container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) keyboard);
-
-    // return index of keyboard to be modified later on
-    return (layoutInt->nbChildren - 1);
-}
-
-/**
- * @brief Updates an existing keyboard on bottom of the screen, with the given configuration
- *
- * @param layout the current layout
- * @param index index returned by @ref nbgl_layoutAddKeyboard()
- * @param keyMask mask of keys to activate/deactivate on keyboard
- * @return >=0 if OK
- */
-int nbgl_layoutUpdateKeyboard(nbgl_layout_t *layout, uint8_t index, uint32_t keyMask)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_keyboard_t       *keyboard;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutUpdateKeyboard(): keyMask = 0x%X\n", keyMask);
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // get keyboard at given index
-    keyboard = (nbgl_keyboard_t *) layoutInt->children[index];
-    if ((keyboard == NULL) || (keyboard->obj.type != KEYBOARD)) {
-        return -1;
-    }
-    keyboard->keyMask = keyMask;
-    if (keyboard->lettersOnly) {
-        if (keyMask & (1 << 26)) {
-            keyboard->selectedCharIndex = cx_rng_u32() % 26;
-        }
-        else {
-            keyboard->selectedCharIndex = 0;
-        }
-    }
-
-    nbgl_redrawObject((nbgl_obj_t *) keyboard, NULL, false);
-
-    return 0;
-}
-
-/**
- * @brief Adds a "text entry" area under the previously entered object.
- *        The max number of really displayable characters is 8, even if there are 9 placeholders (_)
- *        If longer than 8 chars, the first ones are replaced by a '..'
- *        The 9th placeholder is never filled
- *
- * @param layout the current layout
- * @param text string to display in the area
- * @param lettersOnly if true, display 8 chars placeholders, otherwise 9
- * @return >= 0 if OK
- */
-int nbgl_layoutAddEnteredText(nbgl_layout_t *layout, const char *text, bool lettersOnly)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_text_entry_t     *textEntry;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddEnteredText():\n");
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // create text area
-    textEntry          = (nbgl_text_entry_t *) nbgl_objPoolGet(TEXT_ENTRY, layoutInt->layer);
-    textEntry->text    = text;
-    textEntry->fontId  = BAGL_FONT_OPEN_SANS_EXTRABOLD_11px_1bpp;
-    textEntry->nbChars = lettersOnly ? 8 : 9;
-    textEntry->obj.alignmentMarginY = 5;
-    textEntry->obj.alignment        = BOTTOM_MIDDLE;
-    textEntry->obj.area.width       = 98;
-    textEntry->obj.area.height      = 16;
-
-    // set this new text area as child of the container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) textEntry);
-
-    // return index of text area to be modified later on
-    return (layoutInt->nbChildren - 1);
-}
-
-/**
- * @brief Updates an existing "text entry" area, created with @ref nbgl_layoutAddEnteredText()
- *
- * @param layout the current layout
- * @param index index of the text (return value of @ref nbgl_layoutAddEnteredText())
- * @param text string to display in the area
- * @return <0 if error, 0 if OK with text fitting the area, 1 of 0K with text
- * not fitting the area
- */
-int nbgl_layoutUpdateEnteredText(nbgl_layout_t *layout, uint8_t index, const char *text)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_text_entry_t     *textEntry;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutUpdateEnteredText():\n");
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // update main text area
-    textEntry = (nbgl_text_entry_t *) layoutInt->children[index];
-    if ((textEntry == NULL) || (textEntry->obj.type != TEXT_ENTRY)) {
-        return -1;
-    }
-    textEntry->text = text;
-    nbgl_redrawObject((nbgl_obj_t *) textEntry, NULL, false);
-
-    return 0;
-}
-#endif  // NBGL_KEYBOARD
-
-#ifdef NBGL_KEYPAD
-/**
- * @brief Adds a keypad on bottom of the screen, with the associated callback
- *
- * @note Validate and Backspace keys are not enabled at start-up
- *
- * @param layout the current layout
- * @param callback function called when any of the key is touched
- * @param text text to use as title for the keypad
- * @param shuffled if set to true, digits are shuffled in keypad
- * @return the index of keypad in layout, to use in @ref nbgl_layoutUpdateKeypad()
- */
-int nbgl_layoutAddKeypad(nbgl_layout_t     *layout,
-                         keyboardCallback_t callback,
-                         const char        *text,
-                         bool               shuffled)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_keypad_t         *keypad;
-    nbgl_text_area_t      *textArea;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddKeypad():\n");
-    if (layout == NULL) {
-        return -1;
-    }
-
-    textArea                  = (nbgl_text_area_t *) nbgl_objPoolGet(TEXT_AREA, layoutInt->layer);
-    textArea->textColor       = WHITE;
-    textArea->text            = PIC(text);
-    textArea->textAlignment   = CENTER;
-    textArea->fontId          = BAGL_FONT_OPEN_SANS_REGULAR_11px_1bpp;
-    textArea->obj.area.width  = AVAILABLE_WIDTH;
-    textArea->obj.area.height = 12;
-    textArea->wrapping        = false;
-    textArea->obj.alignment   = TOP_MIDDLE;
-    textArea->obj.alignmentMarginY = 3;
-    // set this new obj as child of main container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) textArea);
-
-    // create keypad
-    keypad                       = (nbgl_keypad_t *) nbgl_objPoolGet(KEYPAD, layoutInt->layer);
-    keypad->obj.alignment        = BOTTOM_MIDDLE;
-    keypad->obj.alignmentMarginY = 6;
-    keypad->obj.alignTo          = NULL;
-    keypad->callback             = PIC(callback);
-    keypad->enableBackspace      = false;
-    keypad->enableValidate       = false;
-    keypad->selectedKey          = 0xFF;  // to be picked
-    keypad->shuffled             = shuffled;
-    // set this new keypad as child of the container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) keypad);
-
-    // return index of keypad to be modified later on
-    return (layoutInt->nbChildren - 1);
-}
-
-/**
- * @brief Updates an existing keypad on bottom of the screen, with the given configuration
- *
- * @param layout the current layout
- * @param index index returned by @ref nbgl_layoutAddKeypad()
- * @param enableValidate if true, enable Validate key
- * @param enableBackspace if true, enable Backspace key
- * @return >=0 if OK
- */
-int nbgl_layoutUpdateKeypad(nbgl_layout_t *layout,
-                            uint8_t        index,
-                            bool           enableValidate,
-                            bool           enableBackspace)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_keypad_t         *keypad;
-
-    LOG_DEBUG(LAYOUT_LOGGER,
-              "nbgl_layoutUpdateKeypad(): enableValidate = %d, enableBackspace = %d\n",
-              enableValidate,
-              enableBackspace);
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // get existing keypad
-    keypad = (nbgl_keypad_t *) layoutInt->children[index];
-    if ((keypad == NULL) || (keypad->obj.type != KEYPAD)) {
-        LOG_WARN(LAYOUT_LOGGER, "nbgl_layoutUpdateKeypad(): keypad not found\n");
-        return -1;
-    }
-    if (enableValidate && !keypad->enableValidate) {
-        // if validate key is enabled and was not, select it directly
-        keypad->selectedKey = 11;
-    }
-    else {
-        // otherwise let the draw function pick a new selected
-        keypad->selectedKey = 0xFF;
-    }
-    keypad->enableValidate  = enableValidate;
-    keypad->enableBackspace = enableBackspace;
-
-    nbgl_redrawObject((nbgl_obj_t *) keypad, NULL, false);
-
-    return 0;
-}
-
-/**
- * @brief Adds a placeholder for hidden digits on top of a keypad, to represent the entered digits,
- * as full circles
- *
- * @note It must be the last added object, after keypad. Vertical positions of title and hidden
- * digits will be computed here
- *
- * @param layout the current layout
- * @param nbDigits number of digits to be displayed
- * @return the index of digits set, to use in @ref nbgl_layoutUpdateHiddenDigits()
- */
-int nbgl_layoutAddHiddenDigits(nbgl_layout_t *layout, uint8_t nbDigits)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_container_t      *container;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutAddHiddenDigits():\n");
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // create a container, invisible or bordered
-    container             = (nbgl_container_t *) nbgl_objPoolGet(CONTAINER, layoutInt->layer);
-    container->nbChildren = nbDigits;
-    container->children   = nbgl_containerPoolGet(container->nbChildren, layoutInt->layer);
-    // 1 pixel between each icon (knowing that the effective bullets are 8px large)
-    container->obj.area.width  = nbDigits * C_pin_bullet_empty.width + (nbDigits - 1);
-    container->obj.area.height = C_pin_bullet_empty.height;
-    // distance from top to digits is fixed to 24 px
-    container->obj.alignmentMarginY = 24;
-    container->obj.alignTo          = NULL;
-    container->obj.alignment        = TOP_MIDDLE;
-
-    // set this new container as child of the main container
-    addObjectToLayout(layoutInt, (nbgl_obj_t *) container);
-
-    // create children of the container, as images (empty circles)
-    nbgl_objPoolGetArray(IMAGE, nbDigits, layoutInt->layer, (nbgl_obj_t **) container->children);
-    for (int i = 0; i < nbDigits; i++) {
-        nbgl_image_t *image    = (nbgl_image_t *) container->children[i];
-        image->buffer          = &C_pin_bullet_empty;
-        image->foregroundColor = WHITE;
-        if (i > 0) {
-            image->obj.alignment        = MID_RIGHT;
-            image->obj.alignTo          = (nbgl_obj_t *) container->children[i - 1];
-            image->obj.alignmentMarginX = 1;
-        }
-        else {
-            image->obj.alignment = NO_ALIGNMENT;
-        }
-    }
-    // return index of container to be modified later on
-    return (layoutInt->nbChildren - 1);
-}
-
-/**
- * @brief Updates an existing set of hidden digits, with the given configuration
- *
- * @param layout the current layout
- * @param index index returned by @ref nbgl_layoutAddHiddenDigits()
- * @param nbActive number of "active" digits (represented by discs instead of circles)
- * @return >=0 if OK
- */
-int nbgl_layoutUpdateHiddenDigits(nbgl_layout_t *layout, uint8_t index, uint8_t nbActive)
-{
-    nbgl_layoutInternal_t *layoutInt = (nbgl_layoutInternal_t *) layout;
-    nbgl_container_t      *container;
-    nbgl_image_t          *image;
-
-    LOG_DEBUG(LAYOUT_LOGGER, "nbgl_layoutUpdateHiddenDigits(): nbActive = %d\n", nbActive);
-    if (layout == NULL) {
-        return -1;
-    }
-
-    // get container
-    container = (nbgl_container_t *) layoutInt->children[index];
-    // sanity check
-    if ((container == NULL) || (container->obj.type != CONTAINER)) {
-        return -1;
-    }
-    if (nbActive > container->nbChildren) {
-        return -1;
-    }
-    if (nbActive == 0) {
-        // deactivate the first digit
-        image = (nbgl_image_t *) container->children[0];
-        if ((image == NULL) || (image->obj.type != IMAGE)) {
-            return -1;
-        }
-        image->buffer = &C_pin_bullet_empty;
-    }
-    else {
-        image = (nbgl_image_t *) container->children[nbActive - 1];
-        if ((image == NULL) || (image->obj.type != IMAGE)) {
-            return -1;
-        }
-        // if the last "active" is already active, it means that we are decreasing the number of
-        // active otherwise we are increasing it
-        if (image->buffer == &C_pin_bullet_filled) {
-            // all digits are already active
-            if (nbActive == container->nbChildren) {
-                return 0;
-            }
-            // deactivate the next digit
-            image         = (nbgl_image_t *) container->children[nbActive];
-            image->buffer = &C_pin_bullet_empty;
-        }
-        else {
-            image->buffer = &C_pin_bullet_filled;
-        }
-    }
-
-    nbgl_redrawObject((nbgl_obj_t *) image, NULL, false);
-
-    return 0;
-}
-#endif  // NBGL_KEYPAD
 
 /**
  * @brief Applies given layout. The screen will be redrawn
