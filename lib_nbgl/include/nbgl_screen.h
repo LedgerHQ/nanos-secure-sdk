@@ -70,6 +70,7 @@ typedef struct PACKED__ nbgl_screen_s {
  * GLOBAL PROTOTYPES
  **********************/
 void nbgl_screen_reinit(void);
+void nbgl_wait_pipeline(void);
 
 #ifdef HAVE_DISPLAY_FAST_MODE
 void nbgl_screen_update_temperature(uint8_t temp_degrees);

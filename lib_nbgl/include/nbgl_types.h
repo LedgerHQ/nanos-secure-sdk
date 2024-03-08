@@ -165,16 +165,28 @@ typedef enum {
 } nbgl_refresh_mode_t;
 
 /**
- * @brief Available post-refresh power modes
+ * @brief Post refresh modes
  *
- * - Power off after a refresh allows to save power
- * - Keep the screen powered on after a refresh allows to
- *   achieve a faster following refresh.
+ * - POST_REFRESH_FORCE_POWER_OFF
+ *  Screen is powered off after refresh.
+ *  Following refreshes will be slower, but less energy is consumed.
+ *
+ * - POST_REFRESH_FORCE_POWER_ON
+ *   Screen is let powered on after refresh.
+ *   Following refreshes will be faster, at the cost of more energy consumed.
+ *
+ * - POST_REFRESH_FORCE_POWER_ON_WITH_PIPELINE
+ *   Same as POST_REFRESH_FORCE_POWER_ON, but with pipeline enabled.
+ *   When using pipeline, refreshes are faster, but some constraints must be respected: successive
+ *   draws & refreshes areas must not overlap.
+ *   If overlapping is needed, the function @ref nbgl_driver_waitPipeline() must be called, in order
+ *   to wait for pipelined operations to finish.
  */
 typedef enum nbgl_post_refresh_t {
-    POST_REFRESH_FORCE_POWER_OFF,   ///< Force screen power off after refresh
-    POST_REFRESH_FORCE_POWER_ON,    ///< Force screen power on after refresh
-    POST_REFRESH_KEEP_POWER_STATE,  ///< Keep screen power state after refresh
+    POST_REFRESH_FORCE_POWER_OFF,               ///< Force screen power off after refresh
+    POST_REFRESH_FORCE_POWER_ON,                ///< Force screen power on after refresh
+    POST_REFRESH_FORCE_POWER_ON_WITH_PIPELINE,  ///< Force screen power on and enable pipeline
+    POST_REFRESH_KEEP_POWER_STATE,              ///< Keep state after refresh
 } nbgl_post_refresh_t;
 
 /**
