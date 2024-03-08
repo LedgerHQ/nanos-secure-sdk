@@ -65,6 +65,7 @@ unsigned long __attribute((section("._cx_exported_functions"))) cx_exported_func
     [_NR_cx_crc16]                           = (unsigned long) cx_crc16,
     [_NR_cx_crc16_update]                    = (unsigned long) cx_crc16_update,
     [_NR_cx_crc32]                           = (unsigned long) cx_crc32,
+    [_NR_cx_crc32_update]                    = (unsigned long) cx_crc32_update,
     [_NR_cx_decode_coord]                    = (unsigned long) cx_decode_coord,
     [_NR_cx_ecdh_no_throw]                   = (unsigned long) cx_ecdh_no_throw,
     [_NR_cx_ecdsa_sign_no_throw]             = (unsigned long) cx_ecdsa_sign_no_throw,

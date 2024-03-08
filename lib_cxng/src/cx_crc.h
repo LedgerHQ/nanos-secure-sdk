@@ -24,7 +24,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/** CRC32 initial value */
+#define CX_CRC32_INIT 0xFFFFFFFF
+
 uint32_t cx_crc32(const void *buf, size_t len);
+uint32_t cx_crc32_update(uint32_t crc_state, const void *buf, size_t len);
 
 #endif  // HAVE_CRC
 

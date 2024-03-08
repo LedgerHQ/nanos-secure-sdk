@@ -32,6 +32,7 @@
 #include "ox_vss.h"
 #endif  // HAVE_VSS
 #include "os_seed.h"
+#include "ox_crc.h"
 #include <string.h>
 
 unsigned int SVC_Call(unsigned int syscall_id, void *parameters);
@@ -1130,12 +1131,14 @@ cx_err_t cx_vss_verify_commits(cx_vss_commitment_t *commitments,
 }
 #endif  // HAVE_VSS
 
-uint32_t cx_crc32_hw(const void *buf, size_t len)
+uint32_t cx_crc_hw(crc_type_t crc_type, uint32_t crc_state, const void *buf, size_t len)
 {
-    unsigned int parameters[2];
-    parameters[0] = (unsigned int) buf;
-    parameters[1] = (unsigned int) len;
-    return (uint32_t) SVC_cx_call(SYSCALL_cx_crc32_hw_ID, parameters);
+    unsigned int parameters[4];
+    parameters[0] = (unsigned int) crc_type;
+    parameters[1] = (unsigned int) crc_state;
+    parameters[2] = (unsigned int) buf;
+    parameters[3] = (unsigned int) len;
+    return (uint32_t) SVC_cx_call(SYSCALL_cx_crc_hw_ID, parameters);
 }
 
 cx_err_t cx_get_random_bytes(void *buffer, size_t len)

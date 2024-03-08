@@ -106,7 +106,8 @@
 #define SYSCALL_cx_vss_verify_commits_ID  0x05000003
 #endif  // HAVE_VSS
 
-#define SYSCALL_cx_crc32_hw_ID 0x02000102
+#define SYSCALL_cx_crc_hw_ID 0x04000102
+
 #ifdef HAVE_BLS
 #define SYSCALL_ox_bls12381_sign_ID      0x05000103
 #define SYSCALL_cx_hash_to_field_ID      0x06000104
