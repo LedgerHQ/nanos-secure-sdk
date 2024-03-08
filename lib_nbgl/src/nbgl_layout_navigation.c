@@ -13,6 +13,7 @@
 #include "nbgl_debug.h"
 #include "nbgl_draw.h"
 #include "nbgl_obj.h"
+#include "nbgl_layout_internal.h"
 #include "os_print.h"
 #include "os_helpers.h"
 #include "glyphs.h"
@@ -88,10 +89,10 @@ static void configButtons(nbgl_container_t *navContainer, uint8_t navNbPages, ui
  * @param activePage current active page
  * @return true if actually navigated (page change)
  */
-bool nbgl_navigationCallback(nbgl_obj_t      *obj,
-                             nbgl_touchType_t eventType,
-                             uint8_t          nbPages,
-                             uint8_t         *activePage)
+bool layoutNavigationCallback(nbgl_obj_t      *obj,
+                              nbgl_touchType_t eventType,
+                              uint8_t          nbPages,
+                              uint8_t         *activePage)
 {
     // if direct touch of buttons within the navigation bar, the given obj is
     // the touched object
@@ -150,13 +151,13 @@ bool nbgl_navigationCallback(nbgl_obj_t      *obj,
  * @param layer layer (screen) to create the navigation bar in
  *
  */
-void nbgl_navigationPopulate(nbgl_container_t *navContainer,
-                             uint8_t           nbPages,
-                             uint8_t           activePage,
-                             bool              withExitKey,
-                             bool              withBackKey,
-                             bool              withPageIndicator,
-                             uint8_t           layer)
+void layoutNavigationPopulate(nbgl_container_t *navContainer,
+                              uint8_t           nbPages,
+                              uint8_t           activePage,
+                              bool              withExitKey,
+                              bool              withBackKey,
+                              bool              withPageIndicator,
+                              uint8_t           layer)
 {
     nbgl_button_t *button;
 

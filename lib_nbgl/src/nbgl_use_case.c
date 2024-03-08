@@ -362,7 +362,7 @@ static void pageCallback(int token, uint8_t index)
 
 #ifdef TARGET_STAX
         nbgl_layoutAddBottomButton(
-            addressConfirmationContext.modalLayout, &CLOSE_ICON, 0, true, TUNE_TAP_CASUAL);
+            addressConfirmationContext.modalLayout, &CLOSE_ICON, 0, false, TUNE_TAP_CASUAL);
 #else   // TARGET_STAX
         nbgl_layoutAddFooter(addressConfirmationContext.modalLayout, "Close", 0, TUNE_TAP_CASUAL);
 #endif  // TARGET_STAX

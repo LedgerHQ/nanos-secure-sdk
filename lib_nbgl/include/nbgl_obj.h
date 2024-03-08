@@ -53,10 +53,6 @@ extern "C" {
 #endif  // HAVE_SE_TOUCH
 
 #ifdef HAVE_SE_TOUCH
-///< special code used by given callback of @ref nbgl_navigationPopulate to inform when Exit key is
-///< pressed
-#define EXIT_PAGE 0xFF
-
 // external margin in pixels
 #ifdef TARGET_STAX
 #define BORDER_MARGIN        24
@@ -680,20 +676,6 @@ uint8_t      nbgl_objPoolGetNbUsed(uint8_t layer);
 void         nbgl_containerPoolRelease(uint8_t layer);
 nbgl_obj_t **nbgl_containerPoolGet(uint8_t nbObjs, uint8_t layer);
 uint8_t      nbgl_containerPoolGetNbUsed(uint8_t layer);
-
-#ifdef HAVE_SE_TOUCH
-void nbgl_navigationPopulate(nbgl_container_t *navContainer,
-                             uint8_t           nbPages,
-                             uint8_t           activePage,
-                             bool              withExitKey,
-                             bool              withBackKey,
-                             bool              withPageIndicator,
-                             uint8_t           layer);
-bool nbgl_navigationCallback(nbgl_obj_t      *obj,
-                             nbgl_touchType_t eventType,
-                             uint8_t          nbPages,
-                             uint8_t         *activePage);
-#endif  // HAVE_SE_TOUCH
 
 // for internal use
 void nbgl_objDrawKeyboard(nbgl_keyboard_t *kbd);

@@ -26,10 +26,13 @@ extern "C" {
 /*********************
  *      DEFINES
  *********************/
-#define NO_MORE_OBJ_ERROR -3
-#define NBGL_NO_TUNE      NB_TUNES
+#define NBGL_NO_TUNE NB_TUNES
 
 #ifdef HAVE_SE_TOUCH
+///< special code used as index of action callback to inform when Exit key (X) is
+///< pressed in the navigation bar
+#define EXIT_PAGE 0xFF
+
 #define NB_MAX_SUGGESTION_BUTTONS 4
 #ifdef TARGET_STAX
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS NB_MAX_SUGGESTION_BUTTONS
@@ -37,7 +40,7 @@ extern "C" {
 #define TOUCHABLE_MAIN_BAR_HEIGHT         88
 #define TOUCHABLE_BAR_HEIGHT              88
 #define TOUCHABLE_DETAILLED_BAR_HEIGHT    88
-#define SIMPLE_FOOTER_HEIGHT              104
+#define SIMPLE_FOOTER_HEIGHT              128
 #define SMALL_CENTERING_HEADER            24
 #else  // TARGET_STAX
 // only 2 buttons are visible at the same time on Europa
