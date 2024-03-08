@@ -89,6 +89,18 @@ layoutObj_t *layoutAddCallbackObj(nbgl_layoutInternal_t *layout,
                                   nbgl_obj_t            *obj,
                                   uint8_t                token,
                                   tune_index_e           tuneId);
+void         layoutNavigationPopulate(nbgl_container_t *navContainer,
+                                      uint8_t           nbPages,
+                                      uint8_t           activePage,
+                                      bool              withExitKey,
+                                      bool              withBackKey,
+                                      bool              withPageIndicator,
+                                      uint8_t           layer);
+bool         layoutNavigationCallback(nbgl_obj_t      *obj,
+                                      nbgl_touchType_t eventType,
+                                      uint8_t          nbPages,
+                                      uint8_t         *activePage);
+
 /**********************
  *      MACROS
  **********************/

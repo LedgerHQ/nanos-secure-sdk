@@ -29,6 +29,10 @@ extern "C" {
 #define NBGL_NO_TUNE NB_TUNES
 
 #ifdef HAVE_SE_TOUCH
+///< special code used as index of action callback to inform when Exit key (X) is
+///< pressed in the navigation bar
+#define EXIT_PAGE 0xFF
+
 #define NB_MAX_SUGGESTION_BUTTONS 4
 #ifdef TARGET_STAX
 #define NB_MAX_VISIBLE_SUGGESTION_BUTTONS NB_MAX_SUGGESTION_BUTTONS

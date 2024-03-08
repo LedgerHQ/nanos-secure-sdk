@@ -223,7 +223,7 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
                 return;
             }
 
-            if (nbgl_navigationCallback(
+            if (layoutNavigationCallback(
                     (nbgl_obj_t *) navContainer, eventType, layout->nbPages, &layout->activePage)
                 == false) {
                 // navigation was impossible
@@ -239,7 +239,7 @@ static void touchCallback(nbgl_obj_t *obj, nbgl_touchType_t eventType)
         || ((obj->parent->type == CONTAINER)
             && (obj->parent->parent == (nbgl_obj_t *) layout->footerContainer)
             && (layout->footerType == FOOTER_TEXT_AND_NAV))) {
-        if (nbgl_navigationCallback(obj, eventType, layout->nbPages, &layout->activePage)
+        if (layoutNavigationCallback(obj, eventType, layout->nbPages, &layout->activePage)
             == false) {
             // navigation was impossible
             return;
@@ -2511,13 +2511,13 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             navContainer->obj.alignment   = BOTTOM_RIGHT;
             navContainer->obj.area.width  = SCREEN_WIDTH - textArea->obj.area.width;
             navContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
-            nbgl_navigationPopulate(navContainer,
-                                    footerDesc->textAndNav.navigation.nbPages,
-                                    footerDesc->textAndNav.navigation.activePage,
-                                    footerDesc->textAndNav.navigation.withExitKey,
-                                    footerDesc->textAndNav.navigation.withBackKey,
-                                    true,
-                                    layoutInt->layer);
+            layoutNavigationPopulate(navContainer,
+                                     footerDesc->textAndNav.navigation.nbPages,
+                                     footerDesc->textAndNav.navigation.activePage,
+                                     footerDesc->textAndNav.navigation.withExitKey,
+                                     footerDesc->textAndNav.navigation.withBackKey,
+                                     true,
+                                     layoutInt->layer);
             obj = layoutAddCallbackObj(layoutInt,
                                        (nbgl_obj_t *) navContainer,
                                        footerDesc->textAndNav.navigation.token,
@@ -2553,13 +2553,13 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             layoutInt->footerContainer->obj.area.width  = SCREEN_WIDTH;
             layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
 #endif  // TARGET_STAX
-            nbgl_navigationPopulate(layoutInt->footerContainer,
-                                    footerDesc->navigation.nbPages,
-                                    footerDesc->navigation.activePage,
-                                    footerDesc->navigation.withExitKey,
-                                    footerDesc->navigation.withBackKey,
-                                    false,
-                                    layoutInt->layer);
+            layoutNavigationPopulate(layoutInt->footerContainer,
+                                     footerDesc->navigation.nbPages,
+                                     footerDesc->navigation.activePage,
+                                     footerDesc->navigation.withExitKey,
+                                     footerDesc->navigation.withBackKey,
+                                     false,
+                                     layoutInt->layer);
             layoutInt->footerContainer->nbChildren = 4;
             obj                                    = layoutAddCallbackObj(layoutInt,
                                        (nbgl_obj_t *) layoutInt->footerContainer,
