@@ -923,6 +923,7 @@ int nbgl_layoutAddBottomButton(nbgl_layout_t             *layout,
     footerDesc.button.text           = NULL;
     footerDesc.button.token          = token;
     footerDesc.button.tuneId         = tuneId;
+    footerDesc.button.style          = WHITE_BACKGROUND;
     return nbgl_layoutAddExtendedFooter(layout, &footerDesc);
 }
 
@@ -2547,12 +2548,10 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             break;
         }
         case FOOTER_NAV: {
-#ifdef TARGET_STAX
-            layoutInt->footerContainer->obj.area.height = 128;
-#else   // TARGET_STAX
-            layoutInt->footerContainer->obj.area.width  = SCREEN_WIDTH;
-            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
+#ifndef TARGET_STAX
+            layoutInt->footerContainer->obj.area.width = SCREEN_WIDTH;
 #endif  // TARGET_STAX
+            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
             layoutNavigationPopulate(layoutInt->footerContainer,
                                      footerDesc->navigation.nbPages,
                                      footerDesc->navigation.activePage,
@@ -2583,11 +2582,7 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
                 return -1;
             }
 
-#ifdef TARGET_STAX
-            button->obj.alignment = TOP_MIDDLE;
-#else   // TARGET_STAX
-            button->obj.alignment                       = CENTER;
-#endif  // TARGET_STAX
+            button->obj.alignment = CENTER;
             if (footerDesc->button.style == BLACK_BACKGROUND) {
                 button->innerColor      = BLACK;
                 button->foregroundColor = WHITE;
@@ -2613,10 +2608,19 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             button->icon            = PIC(footerDesc->button.icon);
             button->radius          = BUTTON_RADIUS;
             button->obj.area.height = BUTTON_DIAMETER;
+#ifdef TARGET_STAX
+            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
+#else   // TARGET_STAX
+            layoutInt->footerContainer->obj.area.height = 136;
+#endif  // TARGET_STAX
             if (footerDesc->button.text == NULL) {
                 button->obj.area.width = BUTTON_DIAMETER;
             }
             else {
+#ifdef TARGET_STAX
+                button->obj.alignment                       = TOP_MIDDLE;
+                layoutInt->footerContainer->obj.area.height = 104;
+#endif  // TARGET_STAX
                 button->obj.area.width = AVAILABLE_WIDTH;
             }
             button->obj.touchMask = (1 << TOUCHED);
@@ -2625,11 +2629,6 @@ int nbgl_layoutAddExtendedFooter(nbgl_layout_t *layout, const nbgl_layoutFooter_
             layoutInt->footerContainer->children[layoutInt->footerContainer->nbChildren]
                 = (nbgl_obj_t *) button;
             layoutInt->footerContainer->nbChildren++;
-#ifdef TARGET_STAX
-            layoutInt->footerContainer->obj.area.height = SIMPLE_FOOTER_HEIGHT;
-#else   // TARGET_STAX
-            layoutInt->footerContainer->obj.area.height = 136;
-#endif  // TARGET_STAX
             break;
         }
         case FOOTER_CHOICE_BUTTONS: {

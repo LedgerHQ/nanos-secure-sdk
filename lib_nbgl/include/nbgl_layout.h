@@ -40,7 +40,7 @@ extern "C" {
 #define TOUCHABLE_MAIN_BAR_HEIGHT         88
 #define TOUCHABLE_BAR_HEIGHT              88
 #define TOUCHABLE_DETAILLED_BAR_HEIGHT    88
-#define SIMPLE_FOOTER_HEIGHT              104
+#define SIMPLE_FOOTER_HEIGHT              128
 #define SMALL_CENTERING_HEADER            24
 #else  // TARGET_STAX
 // only 2 buttons are visible at the same time on Europa
