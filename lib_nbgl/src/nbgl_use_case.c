@@ -290,7 +290,7 @@ static const nbgl_content_t *getContentAtIdx(const nbgl_genericContents_t *gener
         return NULL;
     }
 
-    if (genericContents->callback_call_needed) {
+    if (genericContents->callbackCallNeeded) {
         // Retrieve content through callback, but first memset the content.
         memset(content, 0, sizeof(nbgl_content_t));
         genericContents->contentGetterCallback(contentIdx, content);

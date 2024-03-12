@@ -134,8 +134,8 @@ typedef void (*nbgl_pinValidCallback_t)(const uint8_t *content, uint8_t page);
 typedef void (*nbgl_contentCallback_t)(uint8_t contentIndex, nbgl_content_t *content);
 
 typedef struct {
-    bool callback_call_needed;  ///< indicates whether contents should be retrieved using
-                                ///< contentsList or contentGetterCallback
+    bool callbackCallNeeded;  ///< indicates whether contents should be retrieved using
+                              ///< contentsList or contentGetterCallback
     union {
         const nbgl_content_t *contentsList;  ///< array of nbgl_content_t (nbContents items).
         nbgl_contentCallback_t
