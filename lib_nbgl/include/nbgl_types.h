@@ -109,6 +109,134 @@ typedef enum {
 #endif
 
 /**
+ * @brief All types of graphical objects.
+ *
+ */
+typedef enum {
+    SCREEN,          ///< Main screen
+    CONTAINER,       ///< Empty container
+    IMAGE,           ///< Bitmap (y and height must be multiple of 4 on Stax)
+    LINE,            ///< Vertical or Horizontal line
+    TEXT_AREA,       ///< Area to contain text line(s)
+    BUTTON,          ///< Rounded rectangle button with icon and/or text
+    SWITCH,          ///< Switch to turn on/off something
+    PAGE_INDICATOR,  ///< horizontal bar to indicate position within pages
+    PROGRESS_BAR,    ///< horizontal bar to indicate progression of something (between 0% and 100%)
+    RADIO_BUTTON,    ///< Indicator to inform whether something is on or off
+    QR_CODE,         ///< QR Code
+    KEYBOARD,        ///< Keyboard
+    KEYPAD,          ///< Keypad
+    SPINNER,         ///< Spinner
+    IMAGE_FILE,      ///< Image file (with Ledger compression)
+    TEXT_ENTRY       ///< area for entered text, only for Nanos
+} nbgl_obj_type_t;
+
+/**
+ * @brief All types of alignments.
+ *
+ */
+typedef enum {
+    NO_ALIGNMENT,  ///< used when parent container layout is used
+    TOP_LEFT,
+    TOP_MIDDLE,
+    TOP_RIGHT,
+    MID_LEFT,
+    CENTER,
+    MID_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_MIDDLE,
+    BOTTOM_RIGHT,
+    LEFT_TOP,      ///< on outside left
+    LEFT_BOTTOM,   ///< on outside left
+    RIGHT_TOP,     ///< on outside right
+    RIGHT_BOTTOM,  ///< on outside right
+} nbgl_aligment_t;
+
+/**
+ * @brief to represent a boolean state.
+ */
+typedef enum {
+    OFF_STATE,
+    ON_STATE
+} nbgl_state_t;
+
+/**
+ * @brief Directions for layout or lines
+ *
+ */
+typedef enum {
+    VERTICAL,   ///< from top to bottom
+    HORIZONTAL  ///< from left to right
+} nbgl_direction_t;
+
+/**
+ * @brief possible styles for text area border
+ *
+ */
+typedef enum {
+    NO_STYLE,  ///< no border
+#ifdef SCREEN_SIZE_NANO
+    INVERTED_COLORS  ///< Inverted background and rounded corners, only for @ref TEXT_AREA
+#endif               // SCREEN_SIZE_NANO
+} nbgl_style_t;
+
+/**
+ * @brief possible modes for QR Code
+ * @note if text len <= 114 chars, V4 can be used, otherwise use V10
+ *
+ */
+typedef enum {
+    QRCODE_V4 = 0,  ///< QRCode V4, can encode text len up to 114 chars
+    QRCODE_V10      ///< QRCode V10, can encode text len up to 1500 chars
+} nbgl_qrcode_version_t;
+
+/**
+ * @brief the 2 possible states of a finger on the Touchscreen
+ *
+ */
+typedef enum {
+    RELEASED,  ///< the finger has been released from the screen
+    PRESSED,   ///< the finger is currently pressing the screen
+} nbgl_touchState_t;
+
+#ifdef HAVE_HW_TOUCH_SWIPE
+/**
+ * @brief Hardware powered detected swipe states
+ */
+typedef enum {
+    HARDWARE_SWIPE_UP,
+    HARDWARE_SWIPE_DOWN,
+    HARDWARE_SWIPE_RIGHT,
+    HARDWARE_SWIPE_LEFT,
+    NO_HARDWARE_SWIPE,
+} nbgl_hardwareSwipe_t;
+#endif  // HAVE_HW_TOUCH_SWIPE
+
+/**
+ * @brief The different types of Touchscreen events
+ *
+ */
+typedef enum {
+    TOUCHED,  ///< corresponding to an object touched and released at least SHORT_TOUCH_DURATION ms
+              ///< later but less than LONG_TOUCH_DURATION ms
+    LONG_TOUCHED,  ///< corresponding to an object touched and released at least LONG_TOUCH_DURATION
+                   ///< ms later.
+    TOUCHING,      ///< corresponding to an object that is currently touched
+    OUT_OF_TOUCH,  ///< corresponding to an object that was touched but that has lost the focus (the
+                   ///< finger has moved)
+    TOUCH_PRESSED,   ///< corresponding to an object that was not touched and where the finger has
+                     ///< been pressed.
+    TOUCH_RELEASED,  ///< corresponding to an object that was touched and where the finger has been
+                     ///< released.
+    VALUE_CHANGED,   ///< corresponding to a change of state of the object (indirect event)
+    SWIPED_UP,
+    SWIPED_DOWN,
+    SWIPED_RIGHT,
+    SWIPED_LEFT,
+    NB_TOUCH_TYPES
+} nbgl_touchType_t;
+
+/**
  * @brief Enum to represent the number of bits per pixel (BPP)
  *
  */

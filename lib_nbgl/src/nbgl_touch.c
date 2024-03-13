@@ -157,12 +157,32 @@ static nbgl_obj_t *getSwipableObject(nbgl_obj_t *obj, nbgl_touchType_t detectedS
 
 // Swipe detection
 
+#ifndef HAVE_HW_TOUCH_SWIPE
 #define SWIPE_THRESHOLD_X 50
 #define SWIPE_THRESHOLD_Y 200
+#else
+// Mapping between nbgl_hardwareSwipe_t and nbgl_touchEvent_t
+const nbgl_touchType_t SWIPE_GESTURES[] = {[HARDWARE_SWIPE_UP]    = SWIPED_UP,
+                                           [HARDWARE_SWIPE_DOWN]  = SWIPED_DOWN,
+                                           [HARDWARE_SWIPE_LEFT]  = SWIPED_LEFT,
+                                           [HARDWARE_SWIPE_RIGHT] = SWIPED_RIGHT};
+#endif  // HAVE_HW_TOUCH_SWIPE
 
 static nbgl_touchType_t nbgl_detectSwipe(nbgl_touchStatePosition_t *last,
                                          nbgl_touchStatePosition_t *first)
 {
+#ifdef HAVE_HW_TOUCH_SWIPE
+    // Swipe is detected by hardware
+    (void) first;
+
+    if (last->swipe >= NO_HARDWARE_SWIPE) {
+        return NB_TOUCH_TYPES;
+    }
+
+    return SWIPE_GESTURES[last->swipe];
+
+#else
+    // Swipe is detected by software
     nbgl_touchType_t detected_swipe = NB_TOUCH_TYPES;
     if ((last->y - first->y) >= SWIPE_THRESHOLD_Y) {
         detected_swipe = SWIPED_DOWN;
@@ -178,6 +198,7 @@ static nbgl_touchType_t nbgl_detectSwipe(nbgl_touchStatePosition_t *last,
     }
 
     return detected_swipe;
+#endif  // HAVE_HW_TOUCH_SWIPE
 }
 
 /**********************
