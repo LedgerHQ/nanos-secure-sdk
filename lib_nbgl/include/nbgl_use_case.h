@@ -80,6 +80,13 @@ extern "C" {
 #define MAX_APP_NAME_FOR_SDK_TAGLINE \
     (APP_DESCRIPTION_MAX_LEN - 1 - (sizeof(TAGLINE_PART1) + sizeof(TAGLINE_PART2)))
 
+/**
+ *  @brief Value to pass to nbgl_useCaseHomeAndSettings() initSettingPage parameter
+ *         to initialize the use case on the Home page and not on a specific setting
+ *          page.
+ */
+#define INIT_HOME_PAGE 0xff
+
 /**********************
  *      MACROS
  **********************/
@@ -127,8 +134,8 @@ typedef void (*nbgl_pinValidCallback_t)(const uint8_t *content, uint8_t page);
 typedef void (*nbgl_contentCallback_t)(uint8_t contentIndex, nbgl_content_t *content);
 
 typedef struct {
-    bool callback_call_needed;  ///< indicates whether contents should be retrieved using
-                                ///< contentsList or contentGetterCallback
+    bool callbackCallNeeded;  ///< indicates whether contents should be retrieved using
+                              ///< contentsList or contentGetterCallback
     union {
         const nbgl_content_t *contentsList;  ///< array of nbgl_content_t (nbContents items).
         nbgl_contentCallback_t
@@ -137,9 +144,72 @@ typedef struct {
     uint8_t nbContents;  ///< number of contents
 } nbgl_genericContents_t;
 
+typedef struct {
+    const char                *text;
+    const nbgl_icon_details_t *icon;
+    nbgl_callback_t            callback;
+} nbgl_homeAction_t;
+
+/**
+ * @brief The different types of operation to review
+ *
+ */
+typedef enum {
+    TYPE_TRANSACTION = 0,  // For operations transferring a coin or taken from an account to another
+    TYPE_MESSAGE,  // For operations signing a message that will not be broadcast on the blockchain
+    TYPE_OPERATION,  // For other types of operation (generic type)
+} nbgl_operationType_t;
+
+/**
+ * @brief The different types of review status
+ *
+ */
+typedef enum {
+    STATUS_TYPE_TRANSACTION_SIGNED = 0,
+    STATUS_TYPE_TRANSACTION_REJECTED,
+    STATUS_TYPE_MESSAGE_SIGNED,
+    STATUS_TYPE_MESSAGE_REJECTED,
+    STATUS_TYPE_OPERATION_SIGNED,
+    STATUS_TYPE_OPERATION_REJECTED,
+    STATUS_TYPE_ADDRESS_VERIFIED,
+    STATUS_TYPE_ADDRESS_REJECTED,
+} nbgl_reviewStatusType_t;
+
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
+
+void nbgl_useCaseHomeAndSettings(
+    const char                *appName,
+    const nbgl_icon_details_t *appIcon,
+    const char                *tagline,
+    const uint8_t
+        initSettingPage,  // if not INIT_HOME_PAGE, start directly the corresponding setting page
+    const nbgl_genericContents_t *settingContents,
+    const nbgl_contentInfoList_t *infosList,
+    const nbgl_homeAction_t      *action,  // Set to NULL if no additional action
+    nbgl_callback_t               quitCallback);
+
+void nbgl_useCaseReview(nbgl_operationType_t             operationType,
+                        const nbgl_layoutTagValueList_t *tagValueList,
+                        const nbgl_icon_details_t       *icon,
+                        const char                      *reviewTitle,
+                        const char *reviewSubTitle, /* Most often this is empty, but sometimes
+                                                       indicates a path / index */
+                        const char           *finishTitle, /* unused on Nano */
+                        nbgl_choiceCallback_t choiceCallback);
+
+void nbgl_useCaseAddressReview(
+    const char *address,
+    const nbgl_layoutTagValueList_t
+        *additionalTagValueList,  // Set to NULL if there are no additional info to display
+    const nbgl_icon_details_t *icon,
+    const char                *reviewTitle,
+    const char                *reviewSubTitle,
+    nbgl_choiceCallback_t      choiceCallback);
+
+void nbgl_useCaseReviewStatus(nbgl_reviewStatusType_t reviewStatusType,
+                              nbgl_callback_t         quitCallback);
 
 #ifdef HAVE_SE_TOUCH
 // utils

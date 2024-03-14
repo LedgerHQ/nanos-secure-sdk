@@ -135,7 +135,7 @@ void __attribute__((noreturn)) assert_display_exit(void)
 
 #ifdef HAVE_NBGL
     nbgl_useCaseChoice(
-        &C_round_warning_64px, "App error", assert_buffer, "Exit app", "Exit app", assert_exit);
+        &C_Important_Circle_64px, "App error", assert_buffer, "Exit app", "Exit app", assert_exit);
 #endif
 
     // Block until the user approve and the app is quit
