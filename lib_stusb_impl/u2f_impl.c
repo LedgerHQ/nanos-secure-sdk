@@ -332,7 +332,7 @@ void u2f_handle_cmd_msg(u2f_service_t *service, uint8_t *buffer, uint16_t length
     uint8_t p2  = buffer[OFFSET_P2];
 #endif  // U2F_PROXY_MAGIC
 
-    uint32_t dataLength = u2f_get_cmd_msg_data_length(buffer, length);
+    int dataLength = u2f_get_cmd_msg_data_length(buffer, length);
     if (dataLength < 0) {
         // invalid size
         u2f_message_reply(
