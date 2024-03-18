@@ -105,7 +105,7 @@ APP_LOAD_PARAMS += --apiLevel $(API_LEVEL)
 APP_LOAD_PARAMS += --fileName bin/app.hex
 APP_LOAD_PARAMS += --appName $(APPNAME)
 ifneq ($(APP_FLAGS_APP_LOAD_PARAMS),)
-	APP_LOAD_PARAMS += --appFlags $(APP_FLAGS_APP_LOAD_PARAMS)
+	APP_LOAD_PARAMS += --appFlags $(lastword $(APP_FLAGS_APP_LOAD_PARAMS))
 endif
 APP_LOAD_PARAMS += --delete
 APP_LOAD_PARAMS += --tlv
