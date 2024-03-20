@@ -350,7 +350,7 @@ static void keyboardDrawLetters(nbgl_keyboard_t *keyboard)
         nbgl_drawIcon(
             &rectArea,
             (keyboard->casing != LOWER_CASE) ? WHITE : BLACK,
-            (keyboard->casing != LOCKED_UPPER_CASE) ? (&C_shift_lock32px) : (&C_shift32px));
+            (keyboard->casing == LOCKED_UPPER_CASE) ? (&C_shift_lock32px) : (&C_shift32px));
         rectArea.backgroundColor = WHITE;
         offsetX                  = keyboard->obj.area.x0 + SHIFT_KEY_WIDTH;
     }
