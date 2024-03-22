@@ -121,16 +121,7 @@ def parse_str(data: bytes) -> str:
 
     Returns the string
     """
-    size = 0
-    for b in data:
-        size += 1
-        if b == 0:
-            break
-
-    if size > 0:
-        return data[:size-1].decode()
-
-    return ""
+    return data.split(b'\x00')[0].decode()
 
 
 class NbglGenericJsonSerializable(ABC):
