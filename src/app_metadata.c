@@ -72,6 +72,14 @@ CREATE_METADATA_STRING_ITEM(SDK_VERSION, sdk_version)
 CREATE_METADATA_STRING_ITEM(SDK_HASH, sdk_hash)
 #endif
 
+#if defined(HAVE_BAGL)
+CREATE_METADATA_STRING_ITEM("bagl", sdk_graphics)
+#endif
+
+#if defined(HAVE_NBGL)
+CREATE_METADATA_STRING_ITEM("nbgl", sdk_graphics)
+#endif
+
 #ifdef APP_INSTALL_PARAMS_DATA
 __attribute__((section(".install_parameters"))) const uint8_t install_parameters[]
     = {APP_INSTALL_PARAMS_DATA};
