@@ -113,3 +113,92 @@ uint32_t cx_crc32(const void *buf, size_t len)
 {
     return cx_crc32_update(CX_CRC32_INIT, buf, len);
 }
+
+// At some point this could/should be migrated to the OS
+// Meanwhile, it's implemented here
+cx_err_t cx_bn_gf2_n_mul(cx_bn_t bn_r,
+                         const cx_bn_t bn_a,
+                         const cx_bn_t bn_b,
+                         const cx_bn_t bn_n,
+                         const cx_bn_t bn_h __attribute__((unused))) {
+    cx_err_t error = CX_OK;
+    cx_bn_t bn_x, bn_y, bn_temp;
+    int cmp_x, cmp_y;
+    uint32_t degree = 0;
+    size_t nbytes;
+    bool bit_set = 0;
+
+    // Preliminaries
+    CX_CHECK(cx_bn_nbytes(bn_n, &nbytes));
+    CX_CHECK(cx_bn_alloc(&bn_x, nbytes));
+    CX_CHECK(cx_bn_alloc(&bn_y, nbytes));
+    CX_CHECK(cx_bn_alloc(&bn_temp, nbytes));
+    CX_CHECK(cx_bn_copy(bn_x, bn_a));
+    CX_CHECK(cx_bn_copy(bn_y, bn_b));
+
+   // Calculate the degree of the modulus polynomial
+    CX_CHECK(cx_bn_copy(bn_temp, bn_n));
+    do {
+        CX_CHECK(cx_bn_cmp_u32(bn_temp, (uint32_t) 0, &cmp_x));
+        CX_CHECK(cx_bn_shr(bn_temp, 1));
+    } while (cmp_x != 0 && ++degree);
+
+    // After loop degree is offset by 1
+    degree--;
+    if (degree < 1) {
+        error = CX_INVALID_PARAMETER;
+        goto end;
+    }
+
+    // Ensure both operands are in field
+    CX_CHECK(cx_bn_shr(bn_x, degree));
+    CX_CHECK(cx_bn_shr(bn_y, degree));
+    // Maybe change cx_bn_cmp_u32 to cx_bn_cnt_bits
+    CX_CHECK(cx_bn_cmp_u32(bn_x, (uint32_t) 0, &cmp_x));
+    CX_CHECK(cx_bn_cmp_u32(bn_y, (uint32_t) 0, &cmp_y));
+
+    if (cmp_x != 0 || cmp_y != 0) {
+        error = CX_INVALID_PARAMETER;
+        goto end;
+    }
+
+    // Check if both operands are non-zero
+    CX_CHECK(cx_bn_copy(bn_x, bn_a));
+    CX_CHECK(cx_bn_copy(bn_y, bn_b));
+    // Maybe cx_bn_cmp_u32 change to cx_bn_cnt_bits
+    CX_CHECK(cx_bn_cmp_u32(bn_x, (uint32_t) 0, &cmp_x));
+    CX_CHECK(cx_bn_cmp_u32(bn_y, (uint32_t) 0, &cmp_y));
+
+    CX_CHECK(cx_bn_set_u32(bn_r, (uint32_t) 0));
+
+    // Main loop for multiplication
+    while (cmp_x != 0 && cmp_y != 0) {
+        CX_CHECK(cx_bn_tst_bit(bn_y, 0, &bit_set));
+        if (bit_set) {
+            CX_CHECK(cx_bn_copy(bn_temp, bn_r));
+            CX_CHECK(cx_bn_xor(bn_r, bn_x, bn_temp));
+        }
+
+        CX_CHECK(cx_bn_shl(bn_x, 1));
+        CX_CHECK(cx_bn_tst_bit(bn_x, degree, &bit_set));
+
+        if (bit_set) {
+            CX_CHECK(cx_bn_copy(bn_temp, bn_x));
+            CX_CHECK(cx_bn_xor(bn_x, bn_n, bn_temp));
+        }
+
+        CX_CHECK(cx_bn_shr(bn_y, 1));
+
+        // Maybe change cx_bn_cmp_u32 to cx_bn_cnt_bits
+        CX_CHECK(cx_bn_cmp_u32(bn_x, (uint32_t) 0, &cmp_x));
+        CX_CHECK(cx_bn_cmp_u32(bn_y, (uint32_t) 0, &cmp_y));
+    }
+
+    // Clean up
+    CX_CHECK(cx_bn_destroy(&bn_x));
+    CX_CHECK(cx_bn_destroy(&bn_y));
+    CX_CHECK(cx_bn_destroy(&bn_temp));
+
+end:
+    return error;
+}
