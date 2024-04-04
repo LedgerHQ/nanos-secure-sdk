@@ -21,10 +21,7 @@
 
 #ifdef HAVE_CRC
 
-#include <stddef.h>
-#include <stdint.h>
-
-uint32_t cx_crc32(const void *buf, size_t len);
+#include "lcx_crc.h"
 
 #endif  // HAVE_CRC
 
