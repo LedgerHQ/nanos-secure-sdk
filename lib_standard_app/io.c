@@ -220,3 +220,20 @@ WEAK int io_send_response_buffers(const buffer_t *rdatalist, size_t count, uint1
 
     return ret;
 }
+
+#ifdef STANDARD_APP_SYNC_RAPDU
+WEAK bool io_recv_and_process_event(void)
+{
+    int apdu_state = G_io_app.apdu_state;
+
+    os_io_seph_recv_and_process(0);
+
+    // If an APDU was received in previous os_io_seph_recv_and_process call and
+    // is waiting to be processed, return true
+    if (apdu_state == APDU_IDLE && G_io_app.apdu_state != APDU_IDLE) {
+        return true;
+    }
+
+    return false;
+}
+#endif
