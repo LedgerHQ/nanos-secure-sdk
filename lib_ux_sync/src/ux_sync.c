@@ -124,6 +124,40 @@ ux_sync_ret_t ux_sync_review(nbgl_operationType_t             operationType,
 }
 
 /**
+ * @brief Draws a flow of pages of a light review. A back key is available on top-left of the
+ * screen,except in first page It is possible to go to next page thanks to "tap to continue".
+ * @note  All tag/value pairs are provided in the API and the number of pages is automatically
+ * computed, the last page being a short press one
+ *
+ * @param operationType type of operation (Operation, Transaction, Message)
+ * @param tagValueList list of tag/value pairs
+ * @param icon icon used on first and last review page
+ * @param reviewTitle string used in the first review page
+ * @param reviewSubTitle string to set under reviewTitle (can be NULL)
+ * @param finishTitle string used in the last review page
+ *
+ * @return ret code:
+ *         - UX_SYNC_RET_APPROVED
+ *         - UX_SYNC_RET_REJECTED
+ */
+ux_sync_ret_t ux_sync_reviewLight(nbgl_operationType_t             operationType,
+                                  const nbgl_layoutTagValueList_t *tagValueList,
+                                  const nbgl_icon_details_t       *icon,
+                                  const char                      *reviewTitle,
+                                  const char                      *reviewSubTitle,
+                                  const char                      *finishTitle)
+{
+    ux_sync_init();
+    nbgl_useCaseReviewLight(operationType,
+                            tagValueList,
+                            icon,
+                            reviewTitle,
+                            reviewSubTitle,
+                            finishTitle,
+                            choice_callback);
+    return ux_sync_wait(false);
+}
+/**
  * @brief Draws a flow of pages of an extended address verification page.
  * A back key is available on top-left of the screen,
  * except in first page It is possible to go to next page thanks to "tap to continue".

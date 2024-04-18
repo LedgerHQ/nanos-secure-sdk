@@ -25,6 +25,13 @@ ux_sync_ret_t ux_sync_review(nbgl_operationType_t             operationType,
                              const char                      *reviewSubTitle,
                              const char                      *finishTitle);
 
+ux_sync_ret_t ux_sync_reviewLight(nbgl_operationType_t             operationType,
+                                  const nbgl_layoutTagValueList_t *tagValueList,
+                                  const nbgl_icon_details_t       *icon,
+                                  const char                      *reviewTitle,
+                                  const char                      *reviewSubTitle,
+                                  const char                      *finishTitle);
+
 ux_sync_ret_t ux_sync_addressReview(const char                      *address,
                                     const nbgl_layoutTagValueList_t *additionalTagValueList,
                                     const nbgl_icon_details_t       *icon,
