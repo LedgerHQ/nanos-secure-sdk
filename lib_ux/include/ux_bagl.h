@@ -708,8 +708,8 @@ void io_seproxyhal_backlight(unsigned int flags, unsigned int backlight_percenta
  * Helper function to send the given bitmap splitting into multiple DISPLAY_RAW packet as the bitmap
  * is not meant to fit in a single SEPROXYHAL packet.
  */
-void io_seproxyhal_display_icon(bagl_component_t    *icon_component,
-                                bagl_icon_details_t *icon_details);
+void io_seproxyhal_display_icon(const bagl_component_t    *icon_component,
+                                const bagl_icon_details_t *icon_details);
 
 /**
  * Helper method on the Blue to output icon header to the MCU and allow for bitmap transformation

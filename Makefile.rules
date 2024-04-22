@@ -16,8 +16,10 @@
 #*******************************************************************************
 
 # temporary redef, to ensure wider compliance of the SDK with pre-1.6 apps
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
+ifeq ($(USE_NBGL),0)
     SDK_SOURCE_PATH += lib_bagl lib_ux
+else
+    SDK_SOURCE_PATH += lib_nbgl lib_ux_nbgl lib_ux_sync
 endif
 
 define uniq =

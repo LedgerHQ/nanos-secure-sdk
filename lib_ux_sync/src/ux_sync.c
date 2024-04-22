@@ -23,12 +23,6 @@ static void quit_callback(void)
     g_ended = true;
 }
 
-static void rejected_callback(void)
-{
-    g_ret   = UX_SYNC_RET_REJECTED;
-    g_ended = true;
-}
-
 static void ux_sync_init(void)
 {
     g_ended = false;
@@ -282,48 +276,6 @@ ux_sync_ret_t ux_sync_reviewStreamingFinish(const char *finishTitle)
     ux_sync_init();
     nbgl_useCaseReviewStreamingFinish(finishTitle, choice_callback);
     return ux_sync_wait(false);
-}
-
-/**
- * @brief Draws a flow of pages of a review with automatic pagination depending on content
- *        to be displayed that is passed through contents.
- *
- * @param contents contents to be displayed
- * @param rejectText text to use in footer
- *
- * @return ret code:
- *         - UX_SYNC_RET_REJECTED
- */
-ux_sync_ret_t ux_sync_genericReview(const nbgl_genericContents_t *contents, const char *rejectText)
-
-{
-    ux_sync_init();
-    nbgl_useCaseGenericReview(contents, rejectText, rejected_callback);
-    return ux_sync_wait(false);
-}
-
-/**
- * @brief Draws a set of pages with automatic pagination depending on content
- *        to be displayed that is passed through contents.
- *
- * @param title string to use as title
- * @param initPage page on which to start, can be != 0 if you want to display a specific page
- * after a confirmation change or something. Then the value should be taken from the
- * nbgl_contentActionCallback_t callback call.
- * @param contents contents to be displayed
- *
- * @return ret code:
- *         - UX_SYNC_RET_QUITTED
- *         - UX_SYNC_RET_APDU_RECEIVED
- */
-ux_sync_ret_t ux_sync_genericConfiguration(const char                   *title,
-                                           uint8_t                       initPage,
-                                           const nbgl_genericContents_t *contents)
-
-{
-    ux_sync_init();
-    nbgl_useCaseGenericConfiguration(title, initPage, contents, quit_callback);
-    return ux_sync_wait(true);
 }
 
 #endif

@@ -134,8 +134,14 @@ void __attribute__((noreturn)) assert_display_exit(void)
 #endif
 
 #ifdef HAVE_NBGL
+#if defined(TARGET_NANOS) || defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#define ICON_APP_WARNING C_icon_warning
+#elif defined(TARGET_STAX) || defined(TARGET_FLEX)
+#define ICON_APP_WARNING C_round_warning_64px
+#endif
+
     nbgl_useCaseChoice(
-        &C_round_warning_64px, "App error", assert_buffer, "Exit app", "Exit app", assert_exit);
+        &ICON_APP_WARNING, "App error", assert_buffer, "Exit app", "Exit app", assert_exit);
 #endif
 
     // Block until the user approve and the app is quit

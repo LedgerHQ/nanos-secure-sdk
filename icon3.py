@@ -206,20 +206,20 @@ def main():
                         print("};")
 
             if args.glyphcheader:
-                print("""#ifdef HAVE_BAGL
+                print("""#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
         #include \"bagl.h\"
         extern const bagl_icon_details_t C_{0};
         #endif // GLYPH_{0}_BPP
-        #endif // HAVE_BAGL""".format(image_name))
+        #endif // HAVE_BAGL || HAVE_NBGL""".format(image_name))
             elif args.glyphcfile:
                 color_ref = image_name
                 if args.factorize:
                     if color_array_serialized in colors_array:
                         color_ref = colors_array[color_array_serialized]
-                print("""#ifdef HAVE_BAGL
+                print("""#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
         #include \"bagl.h\"
         const bagl_icon_details_t C_{0} = {{ GLYPH_{0}_WIDTH, GLYPH_{0}_HEIGHT, {1}, C_{2}_colors, C_{0}_bitmap }};
-        #endif // HAVE_BAGL""".format(image_name, int(math.log(num_colors, 2)), color_ref))
+        #endif // HAVE_BAGL || HAVE_NBGL""".format(image_name, int(math.log(num_colors, 2)), color_ref))
             else:
                 # Origin 0,0 is left top for blue, instead of left bottom for all image encodings
                 print("{{ {0:d}, {1:d}, {2:d}, C_{3}_colors, C_{3}_bitmap }},".format(

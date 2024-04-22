@@ -51,12 +51,6 @@ ux_sync_ret_t ux_sync_reviewStreamingContinue(const nbgl_contentTagValueList_t *
 
 ux_sync_ret_t ux_sync_reviewStreamingFinish(const char *finishTitle);
 
-ux_sync_ret_t ux_sync_genericReview(const nbgl_genericContents_t *contents, const char *rejectText);
-
-ux_sync_ret_t ux_sync_genericConfiguration(const char                   *title,
-                                           uint8_t                       initPage,
-                                           const nbgl_genericContents_t *contents);
-
 /*
  * This function must be implemented by the caller.
  * It must wait for the next seph event and process it except for APDU events.

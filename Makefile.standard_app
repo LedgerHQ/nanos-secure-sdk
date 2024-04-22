@@ -80,6 +80,38 @@ ifneq ($(DISABLE_DEFAULT_IO_SEPROXY_BUFFER_SIZE), 1)
 endif
 
 #####################################################################
+#                              NBGL                                 #
+#####################################################################
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOS TARGET_NANOX TARGET_NANOS2))
+ifeq ($(ENABLE_NBGL_FOR_NANO_DEVICES), 1)
+USE_NBGL = 1
+else
+USE_NBGL = 0
+endif
+else
+USE_NBGL = 1
+endif
+
+ifeq ($(ENABLE_NBGL_QRCODE), 1)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+    DEFINES += NBGL_QRCODE
+    SDK_SOURCE_PATH += qrcode
+endif
+endif
+
+ifeq ($(ENABLE_NBGL_KEYBOARD), 1)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+    DEFINES += NBGL_KEYBOARD
+endif
+endif
+
+ifeq ($(ENABLE_NBGL_KEYPAD), 1)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
+    DEFINES += NBGL_KEYPAD
+endif
+endif
+
+#####################################################################
 #                          STANDARD DEFINES                         #
 #####################################################################
 DEFINES += $(DEFINES_LIB)
@@ -112,7 +144,7 @@ ifneq ($(DISABLE_STANDARD_WEBUSB), 1)
 endif
 
 ifneq ($(DISABLE_STANDARD_BAGL_UX_FLOW), 1)
-ifeq ($(USE_NBGL),0)
+ifneq ($(USE_NBGL), 1)
     DEFINES += HAVE_UX_FLOW
 endif
 endif
@@ -126,30 +158,14 @@ SDK_SOURCE_PATH += lib_standard_app
 endif
 
 ifneq ($(DISABLE_STANDARD_APP_SYNC_RAPDU), 1)
+# On LNS only activate it by default if using NBGL.
+# This impact stack usage and shouldn't be activated on all apps silently
 ifneq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += STANDARD_APP_SYNC_RAPDU
+else
+ifeq ($(ENABLE_NBGL_FOR_NANO_DEVICES), 1)
+DEFINES += STANDARD_APP_SYNC_RAPDU
 endif
-endif
-
-#####################################################################
-#                              NBGL                                 #
-#####################################################################
-ifeq ($(ENABLE_NBGL_QRCODE), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
-    DEFINES += NBGL_QRCODE
-    SDK_SOURCE_PATH += qrcode
-endif
-endif
-
-ifeq ($(ENABLE_NBGL_KEYBOARD), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
-    DEFINES += NBGL_KEYBOARD
-endif
-endif
-
-ifeq ($(ENABLE_NBGL_KEYPAD), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
-    DEFINES += NBGL_KEYPAD
 endif
 endif
 
@@ -219,13 +235,13 @@ include $(BOLOS_SDK)/Makefile.defines
 include $(BOLOS_SDK)/Makefile.glyphs
 
 load: all
-    python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
 load-offline: all
-    python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
 
 delete:
-    python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
+	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
 include $(BOLOS_SDK)/Makefile.rules
 
@@ -242,4 +258,4 @@ include $(BOLOS_SDK)/Makefile.rules
 # available variants and then call `make -j <VARIANT_PARAM>=<VALUE>` for each
 # <VALUE> in <VARIANT_VALUES>.
 listvariants:
-    @echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)
+	@echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)

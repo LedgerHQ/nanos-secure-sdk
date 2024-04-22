@@ -109,7 +109,7 @@ unsigned int os_io_seph_recv_and_process(unsigned int dont_process_ux_events);
 io_seph_app_t G_io_app;
 #endif  // ! HAVE_BOLOS
 
-#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
+#if defined(HAVE_BAGL)
 ux_seph_os_and_app_t G_ux_os;
 #endif
 
@@ -377,8 +377,10 @@ void io_seproxyhal_init(void)
     io_usb_hid_init();
 #endif  // HAVE_USB_APDU
 
+#ifdef HAVE_BAGL
     io_seproxyhal_init_ux();
     io_seproxyhal_init_button();
+#endif  // HAVE_BAGL
 
 #if !defined(HAVE_BOLOS) && defined(HAVE_PENDING_REVIEW_SCREEN)
     check_audited_app();
@@ -451,8 +453,12 @@ void io_seproxyhal_display_bitmap(int            x,
         */
     }
 }
+#endif  // HAVE_BAGL
 
-void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_details_t *icon_det)
+#if defined(HAVE_BAGL) || defined(HAVE_NBGL)
+
+void io_seproxyhal_display_icon(const bagl_component_t    *icon_component,
+                                const bagl_icon_details_t *icon_det)
 {
     bagl_component_t           icon_component_mod;
     const bagl_icon_details_t *icon_details = (bagl_icon_details_t *) PIC(icon_det);
@@ -532,7 +538,9 @@ void io_seproxyhal_display_default(const bagl_element_t *element)
         }
     }
 }
+#endif  // HAVE_BAGL || HAVE_NBGL
 
+#ifdef HAVE_BAGL
 unsigned int bagl_label_roundtrip_duration_ms(const bagl_element_t *e,
                                               unsigned int          average_char_width)
 {

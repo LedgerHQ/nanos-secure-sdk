@@ -110,9 +110,18 @@ else
 LDFLAGS  += -nostartfiles
 endif
 
+# For LNS devices, by default NBGL is not used
+USE_NBGL ?= 0
+
 ifeq ($(TARGET_NAME),TARGET_NANOS)
-DEFINES += HAVE_BAGL
 DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=32
+
+ifeq ($(USE_NBGL),0)
+DEFINES += HAVE_BAGL
+else
+DEFINES += HAVE_NBGL
+DEFINES += NBGL_USE_CASE
+endif # USE_NBGL
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
