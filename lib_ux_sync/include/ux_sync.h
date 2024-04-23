@@ -18,25 +18,25 @@ ux_sync_ret_t ux_sync_homeAndSettings(const char                   *appName,
                                       const nbgl_contentInfoList_t *infosList,
                                       const nbgl_homeAction_t      *action);
 
-ux_sync_ret_t ux_sync_review(nbgl_operationType_t             operationType,
-                             const nbgl_layoutTagValueList_t *tagValueList,
-                             const nbgl_icon_details_t       *icon,
-                             const char                      *reviewTitle,
-                             const char                      *reviewSubTitle,
-                             const char                      *finishTitle);
+ux_sync_ret_t ux_sync_review(nbgl_operationType_t              operationType,
+                             const nbgl_contentTagValueList_t *tagValueList,
+                             const nbgl_icon_details_t        *icon,
+                             const char                       *reviewTitle,
+                             const char                       *reviewSubTitle,
+                             const char                       *finishTitle);
 
-ux_sync_ret_t ux_sync_reviewLight(nbgl_operationType_t             operationType,
-                                  const nbgl_layoutTagValueList_t *tagValueList,
-                                  const nbgl_icon_details_t       *icon,
-                                  const char                      *reviewTitle,
-                                  const char                      *reviewSubTitle,
-                                  const char                      *finishTitle);
+ux_sync_ret_t ux_sync_reviewLight(nbgl_operationType_t              operationType,
+                                  const nbgl_contentTagValueList_t *tagValueList,
+                                  const nbgl_icon_details_t        *icon,
+                                  const char                       *reviewTitle,
+                                  const char                       *reviewSubTitle,
+                                  const char                       *finishTitle);
 
-ux_sync_ret_t ux_sync_addressReview(const char                      *address,
-                                    const nbgl_layoutTagValueList_t *additionalTagValueList,
-                                    const nbgl_icon_details_t       *icon,
-                                    const char                      *reviewTitle,
-                                    const char                      *reviewSubTitle);
+ux_sync_ret_t ux_sync_addressReview(const char                       *address,
+                                    const nbgl_contentTagValueList_t *additionalTagValueList,
+                                    const nbgl_icon_details_t        *icon,
+                                    const char                       *reviewTitle,
+                                    const char                       *reviewSubTitle);
 
 ux_sync_ret_t ux_sync_reviewStatus(nbgl_reviewStatusType_t reviewStatusType);
 
@@ -47,7 +47,7 @@ ux_sync_ret_t ux_sync_reviewStreamingStart(nbgl_operationType_t       operationT
                                            const char                *reviewTitle,
                                            const char                *reviewSubTitle);
 
-ux_sync_ret_t ux_sync_reviewStreamingContinue(const nbgl_layoutTagValueList_t *tagValueList);
+ux_sync_ret_t ux_sync_reviewStreamingContinue(const nbgl_contentTagValueList_t *tagValueList);
 
 ux_sync_ret_t ux_sync_reviewStreamingFinish(const char *finishTitle);
 
