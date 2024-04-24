@@ -42,7 +42,6 @@
         LEDGER_ASSERT(!_assert_err, "err 0x%X <%s>", _assert_err, #call); \
     } while (0)
 
-
 /** Success. */
 #define CX_OK 0x00000000
 
