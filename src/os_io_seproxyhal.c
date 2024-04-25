@@ -464,10 +464,6 @@ void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_deta
         icon_component_mod.height = icon_details->height;
         icon_component            = &icon_component_mod;
 
-#ifdef HAVE_SE_SCREEN
-        bagl_draw_glyph(&icon_component_mod, icon_details);
-#endif  // HAVE_SE_SCREEN
-#if !defined(HAVE_SE_SCREEN) || (defined(HAVE_SE_SCREEN) && defined(HAVE_PRINTF))
         if (io_seproxyhal_spi_is_status_sent()) {
             return;
         }
@@ -481,9 +477,6 @@ void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_deta
                                 + h                          /* color index */
                                 + w;                         /* image bitmap size */
         G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SCREEN_DISPLAY_STATUS;
-#if defined(HAVE_SE_SCREEN) && defined(HAVE_PRINTF)
-        G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_DBG_SCREEN_DISPLAY_STATUS;
-#endif  // HAVE_SE_SCREEN && HAVE_PRINTF
         G_io_seproxyhal_spi_buffer[1] = length >> 8;
         G_io_seproxyhal_spi_buffer[2] = length;
         io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
@@ -492,7 +485,6 @@ void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_deta
         io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 1);
         io_seproxyhal_spi_send((unsigned char *) PIC(icon_details->colors), h);
         io_seproxyhal_spi_send((unsigned char *) PIC(icon_details->bitmap), w);
-#endif  // !HAVE_SE_SCREEN || (HAVE_SE_SCREEN && HAVE_PRINTF)
     }
 }
 
@@ -515,44 +507,28 @@ void io_seproxyhal_display_default(const bagl_element_t *element)
                                            (bagl_icon_details_t *) txt);
             }
             else {
-#ifdef HAVE_SE_SCREEN
-                bagl_draw_with_context(&el->component, txt, strlen(txt), BAGL_ENCODING_LATIN1);
-#endif  // HAVE_SE_SCREEN
-#if !defined(HAVE_SE_SCREEN) || (defined(HAVE_SE_SCREEN) && defined(HAVE_PRINTF))
                 if (io_seproxyhal_spi_is_status_sent()) {
                     return;
                 }
                 unsigned short length = sizeof(bagl_component_t) + strlen((const char *) txt);
                 G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SCREEN_DISPLAY_STATUS;
-#if defined(HAVE_SE_SCREEN) && defined(HAVE_PRINTF)
-                G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_DBG_SCREEN_DISPLAY_STATUS;
-#endif  // HAVE_SE_SCREEN && HAVE_PRINTF
                 G_io_seproxyhal_spi_buffer[1] = length >> 8;
                 G_io_seproxyhal_spi_buffer[2] = length;
                 io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
                 io_seproxyhal_spi_send((unsigned char *) &el->component, sizeof(bagl_component_t));
                 io_seproxyhal_spi_send((unsigned char *) txt, length - sizeof(bagl_component_t));
-#endif  // !HAVE_SE_SCREEN || (HAVE_SE_SCREEN && HAVE_PRINTF)
             }
         }
         else {
-#ifdef HAVE_SE_SCREEN
-            bagl_draw_with_context(&el->component, NULL, 0, 0);
-#endif  // HAVE_SE_SCREEN
-#if !defined(HAVE_SE_SCREEN) || (defined(HAVE_SE_SCREEN) && defined(HAVE_PRINTF))
             if (io_seproxyhal_spi_is_status_sent()) {
                 return;
             }
             unsigned short length         = sizeof(bagl_component_t);
             G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SCREEN_DISPLAY_STATUS;
-#if defined(HAVE_SE_SCREEN) && defined(HAVE_PRINTF)
-            G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_DBG_SCREEN_DISPLAY_STATUS;
-#endif  // HAVE_SE_SCREEN && HAVE_PRINTF
             G_io_seproxyhal_spi_buffer[1] = length >> 8;
             G_io_seproxyhal_spi_buffer[2] = length;
             io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 3);
             io_seproxyhal_spi_send((unsigned char *) &el->component, sizeof(bagl_component_t));
-#endif  // !HAVE_SE_SCREEN || (HAVE_SE_SCREEN && HAVE_PRINTF)
         }
     }
 }
