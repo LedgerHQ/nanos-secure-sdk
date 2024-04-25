@@ -452,75 +452,6 @@ void io_seproxyhal_display_bitmap(int            x,
     }
 }
 
-#ifdef SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
-unsigned int io_seproxyhal_display_icon_header_and_colors(bagl_component_t    *icon_component,
-                                                          bagl_icon_details_t *icon_details,
-                                                          unsigned int        *icon_len)
-{
-    unsigned int len;
-
-    struct display_raw_s {
-        struct {
-            struct {
-                unsigned char tag;
-                unsigned char len[2];
-            } seph;
-            unsigned char type;
-        } header;
-        union {
-            short val;
-            char  b[2];
-        } x;
-        union {
-            short val;
-            char  b[2];
-        } y;
-        union {
-            unsigned short val;
-            char           b[2];
-        } w;
-        union {
-            unsigned short val;
-            char           b[2];
-        } h;
-        unsigned char bpp;
-    } __attribute__((packed)) raw;
-
-    raw.header.seph.tag = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS;
-    raw.header.type     = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_START;
-    raw.x.val           = icon_component->x;
-    raw.y.val           = icon_component->y;
-    raw.w.val           = icon_component->width;
-    raw.h.val           = icon_component->height;
-    raw.bpp             = icon_details->bpp;
-
-    *icon_len
-        = raw.w.val * raw.h.val * raw.bpp / 8 + (((raw.w.val * raw.h.val * raw.bpp) % 8) ? 1 : 0);
-
-    // optional, don't send too much on a single packet for MCU to receive it. when stream mode will
-    // be on, this will be useless min of remaining space in the packet vs. total icon size + color
-    // index size
-    len = MIN(sizeof(G_io_seproxyhal_spi_buffer) - sizeof(raw), *icon_len + (1 << raw.bpp) * 4);
-
-    // sizeof packet
-    raw.header.seph.len[0] = (len + sizeof(raw) - sizeof(raw.header.seph)) >> 8;
-    raw.header.seph.len[1] = (len + sizeof(raw) - sizeof(raw.header.seph));
-
-    // swap endianess of coordinates (make it big endian)
-    SWAP(raw.x.b[0], raw.x.b[1]);
-    SWAP(raw.y.b[0], raw.y.b[1]);
-    SWAP(raw.w.b[0], raw.w.b[1]);
-    SWAP(raw.h.b[0], raw.h.b[1]);
-
-    io_seproxyhal_spi_send((unsigned char *) &raw, sizeof(raw));
-    io_seproxyhal_spi_send((unsigned char *) (PIC(icon_details->colors)), (1 << raw.bpp) * 4);
-    len -= (1 << raw.bpp) * 4;
-
-    // remaining length of bitmap bits to be displayed
-    return len;
-}
-#endif  // SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
-
 void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_details_t *icon_det)
 {
     bagl_component_t           icon_component_mod;
@@ -533,37 +464,6 @@ void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_deta
         icon_component_mod.height = icon_details->height;
         icon_component            = &icon_component_mod;
 
-#ifdef SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
-        unsigned int len;
-        unsigned int icon_len;
-        unsigned int icon_off = 0;
-
-        len = io_seproxyhal_display_icon_header_and_colors(
-            icon_component, (bagl_icon_details_t *) icon_details, &icon_len);
-        io_seproxyhal_spi_send(PIC(icon_details->bitmap), len);
-        // advance in the bitmap to be transmitted
-        icon_len -= len;
-        icon_off += len;
-
-        // still some bitmap data to transmit
-        while (icon_len) {
-            // wait displayed event
-            io_seproxyhal_spi_recv(
-                G_io_seproxyhal_spi_buffer, sizeof(G_io_seproxyhal_spi_buffer), 0);
-
-            G_io_seproxyhal_spi_buffer[0] = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS;
-            G_io_seproxyhal_spi_buffer[3] = SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS_CONT;
-
-            len                           = MIN((sizeof(G_io_seproxyhal_spi_buffer) - 4), icon_len);
-            G_io_seproxyhal_spi_buffer[1] = (len + 1) >> 8;
-            G_io_seproxyhal_spi_buffer[2] = (len + 1);
-            io_seproxyhal_spi_send(G_io_seproxyhal_spi_buffer, 4);
-            io_seproxyhal_spi_send(PIC(icon_details->bitmap) + icon_off, len);
-
-            icon_len -= len;
-            icon_off += len;
-        }
-#else  // !SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
 #ifdef HAVE_SE_SCREEN
         bagl_draw_glyph(&icon_component_mod, icon_details);
 #endif  // HAVE_SE_SCREEN
@@ -593,7 +493,6 @@ void io_seproxyhal_display_icon(bagl_component_t *icon_component, bagl_icon_deta
         io_seproxyhal_spi_send((unsigned char *) PIC(icon_details->colors), h);
         io_seproxyhal_spi_send((unsigned char *) PIC(icon_details->bitmap), w);
 #endif  // !HAVE_SE_SCREEN || (HAVE_SE_SCREEN && HAVE_PRINTF)
-#endif  // !SEPROXYHAL_TAG_SCREEN_DISPLAY_RAW_STATUS
     }
 }
 
