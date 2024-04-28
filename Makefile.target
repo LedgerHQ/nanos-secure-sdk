@@ -1,0 +1,52 @@
+#*******************************************************************************
+#   Ledger SDK
+#   (c) 2024 Ledger
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#*******************************************************************************
+
+ifeq ($(__MAKEFILE_TARGET__),)
+__MAKEFILE_TARGET__ := 1
+
+#extract TARGET_NAME/TARGET_ID from the SDK to allow for makefile choices
+TARGET := nanos
+TARGET_ID:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
+TARGET_NAME:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
+TARGET_VERSION:=$(shell cat $(BOLOS_SDK)/include/bolos_version.h | grep define | cut -f2 -d'"')
+SDK_NAME    := "nanos-secure-sdk"
+SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
+SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
+ifeq ($(SDK_VERSION),)
+SDK_VERSION := "None"
+endif
+ifeq ($(SDK_HASH),)
+SDK_HASH := "None"
+endif
+
+$(info TARGET_NAME=$(TARGET_NAME) TARGET_ID=$(TARGET_ID) TARGET_VERSION=$(TARGET_VERSION))
+
+BUILD_DIR := build
+TARGET_BUILD_DIR := $(BUILD_DIR)/$(TARGET)
+BIN_DIR := $(TARGET_BUILD_DIR)/bin
+OBJ_DIR := $(TARGET_BUILD_DIR)/obj
+DBG_DIR := $(TARGET_BUILD_DIR)/dbg
+DEP_DIR := $(TARGET_BUILD_DIR)/dep
+GEN_SRC_DIR := $(TARGET_BUILD_DIR)/gen_src
+
+# Debug mode disabled by default
+DEBUG:=0
+
+# define the default makefile target (high in include to avoid glyph.h or what not specific target to be the default one when no target passed on the make command line)
+all: default
+
+endif

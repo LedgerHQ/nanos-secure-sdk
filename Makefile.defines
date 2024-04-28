@@ -1,6 +1,6 @@
 #*******************************************************************************
 #   Ledger SDK
-#   (c) 2017 Ledger
+#   (c) 2024 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,22 +15,10 @@
 #  limitations under the License.
 #*******************************************************************************
 
-#extract TARGET_NAME/TARGET_ID from the SDK to allow for makefile choices
-TARGET := nanos
-TARGET_ID:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ID | cut -f3 -d' ')
-TARGET_NAME:=$(shell cat $(BOLOS_SDK)/include/bolos_target.h | grep TARGET_ | grep -v TARGET_ID | cut -f2 -d' ')
-TARGET_VERSION:=$(shell cat $(BOLOS_SDK)/include/bolos_version.h | grep define | cut -f2 -d'"')
-SDK_NAME    := "nanos-secure-sdk"
-SDK_VERSION := $(shell git -C $(BOLOS_SDK) describe --tags --exact-match  --match "v[0-9]*" --dirty)
-SDK_HASH    := $(shell git -C $(BOLOS_SDK) describe --always --dirty --exclude '*' --abbrev=40)
-ifeq ($(SDK_VERSION),)
-SDK_VERSION := "None"
-endif
-ifeq ($(SDK_HASH),)
-SDK_HASH := "None"
-endif
+ifeq ($(__MAKEFILE_DEFINES__),)
+__MAKEFILE_DEFINES__ := 1
 
-$(info TARGET_NAME=$(TARGET_NAME) TARGET_ID=$(TARGET_ID) TARGET_VERSION=$(TARGET_VERSION))
+include $(BOLOS_SDK)/Makefile.target
 
 # APPNAME exposed to the app as a CFLAG because it might contain spaces
 CFLAGS += -DAPPNAME=\"$(APPNAME)\"
@@ -41,22 +29,11 @@ APP_METADATA_LIST := TARGET TARGET_NAME APPVERSION SDK_NAME SDK_VERSION SDK_HASH
 DEFINES += $(foreach item,$(APP_METADATA_LIST), $(item)=\"$($(item))\")
 DEFINES += TARGET_VERSION=$(TARGET_VERSION)
 
-BUILD_DIR := build
-TARGET_BUILD_DIR := $(BUILD_DIR)/$(TARGET)
-BIN_DIR := $(TARGET_BUILD_DIR)/bin
-OBJ_DIR := $(TARGET_BUILD_DIR)/obj
-DBG_DIR := $(TARGET_BUILD_DIR)/dbg
-DEP_DIR := $(TARGET_BUILD_DIR)/dep
-GEN_SRC_DIR := $(TARGET_BUILD_DIR)/gen_src
-
 ### platform definitions
 DEFINES += gcc __IO=volatile
 
 # no assert by default
 DEFINES += NDEBUG
-
-# Debug mode disabled by default
-DEBUG:=0
 
 # default is not to display make commands
 log = $(if $(strip $(VERBOSE)),$1,@$1) # kept for retrocompat
@@ -170,3 +147,5 @@ endif
 
 # define the default makefile target (high in include to avoid glyph.h or what not specific target to be the default one when no target passed on the make command line)
 all: default
+
+endif
