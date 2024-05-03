@@ -21,7 +21,7 @@ include $(BOLOS_SDK)/Makefile.target
 #                            BLUETOOTH                              #
 #####################################################################
 ifeq ($(ENABLE_BLUETOOTH), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX TARGET_FLEX))
     HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
     DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
     DEFINES += BLE_SEGMENT_SIZE=32
@@ -33,10 +33,9 @@ endif
 #                               NFC                                 #
 #####################################################################
 ifeq ($(ENABLE_NFC), 1)
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME), TARGET_STAX))
-    STANDARD_APP_FLAGS = 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME), TARGET_STAX TARGET_FLEX))
+    HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
     DEFINES += HAVE_NFC
-    SDK_SOURCE_PATH += lib_nfc
 endif
 endif
 
@@ -113,7 +112,7 @@ ifneq ($(DISABLE_STANDARD_WEBUSB), 1)
 endif
 
 ifneq ($(DISABLE_STANDARD_BAGL_UX_FLOW), 1)
-ifneq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(USE_NBGL),0)
     DEFINES += HAVE_UX_FLOW
 endif
 endif
@@ -136,20 +135,20 @@ endif
 #                              NBGL                                 #
 #####################################################################
 ifeq ($(ENABLE_NBGL_QRCODE), 1)
-ifeq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
     DEFINES += NBGL_QRCODE
     SDK_SOURCE_PATH += qrcode
 endif
 endif
 
 ifeq ($(ENABLE_NBGL_KEYBOARD), 1)
-ifeq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
     DEFINES += NBGL_KEYBOARD
 endif
 endif
 
 ifeq ($(ENABLE_NBGL_KEYPAD), 1)
-ifeq ($(TARGET_NAME), TARGET_STAX)
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX))
     DEFINES += NBGL_KEYPAD
 endif
 endif
@@ -208,8 +207,11 @@ endif
 ifeq ($(TARGET_NAME), TARGET_NANOS2)
 ICONNAME ?= $(ICON_NANOSP)
 endif
-ifeq ($(TARGET_NAME),TARGET_STAX)
+ifeq ($(TARGET_NAME), TARGET_STAX)
 ICONNAME ?= $(ICON_STAX)
+endif
+ifeq ($(TARGET_NAME), TARGET_FLEX)
+ICONNAME ?= $(ICON_FLEX)
 endif
 
 include $(BOLOS_SDK)/Makefile.defines
@@ -217,13 +219,13 @@ include $(BOLOS_SDK)/Makefile.defines
 include $(BOLOS_SDK)/Makefile.glyphs
 
 load: all
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+    python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
 load-offline: all
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
+    python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
 
 delete:
-	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
+    python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
 
 include $(BOLOS_SDK)/Makefile.rules
 
@@ -240,4 +242,4 @@ include $(BOLOS_SDK)/Makefile.rules
 # available variants and then call `make -j <VARIANT_PARAM>=<VALUE>` for each
 # <VALUE> in <VARIANT_VALUES>.
 listvariants:
-	@echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)
+    @echo VARIANTS $(VARIANT_PARAM) $(VARIANT_VALUES)
