@@ -1,3 +1,7 @@
+**This repository has been replaced by https://github.com/LedgerHQ/ledger-secure-sdk/.**
+
+**Please read the new repository README for more information. **
+
 # Nano S Secure SDK
 
 This directory contains the SDK for ST31 applications development   
