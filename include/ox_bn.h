@@ -1075,4 +1075,32 @@ SYSCALL cx_err_t cx_bn_next_prime(cx_bn_t n);
  */
 SYSCALL cx_err_t cx_bn_rng(cx_bn_t r, const cx_bn_t n);
 
+/**
+ * @brief Performs a multiplication over GF(2^n).
+ *
+ * @details *bn_r* must be distinct from *bn_a* and *bn_b*.
+ *
+ * @param[out] bn_r BN index for the result.
+ *
+ * @param[in]  bn_a BN index of the first operand.
+ *
+ * @param[in]  bn_b BN index of the second operand.
+ *
+ * @param[in]  bn_n BN index of the modulus.
+ *                  The modulus must be an irreducible polynomial over GF(2)
+ *                  of degree n.
+ *
+ * @param[in]  bn_h BN index of the second montgomery constant.
+ *
+ * @return          Error code:
+ *                  - CX_OK on success
+ *                  - CX_NOT_LOCKED
+ *                  - CX_INVALID_PARAMETER
+ *                  - CX_MEMORY_FULL
+ */
+WARN_UNUSED_RESULT cx_err_t cx_bn_gf2_n_mul(cx_bn_t       bn_r,
+                                            const cx_bn_t bn_a,
+                                            const cx_bn_t bn_b,
+                                            const cx_bn_t bn_n,
+                                            const cx_bn_t bn_h);
 #endif /* CX_BN_H */
